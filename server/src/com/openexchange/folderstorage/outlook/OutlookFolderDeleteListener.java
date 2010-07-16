@@ -77,7 +77,7 @@ public final class OutlookFolderDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             final int contextId = event.getContext().getContextId();
-            final int userId = event.getSession().getUserId();
+            final int userId = event.getId();
             // Drop user's subscriptions
             stmt = writeCon.prepareStatement("DELETE FROM virtualSubscription WHERE cid = ? AND user = ?");
             int pos = 1;
