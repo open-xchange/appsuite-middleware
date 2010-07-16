@@ -2074,27 +2074,24 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#removeUserParticipant(com.openexchange.calendar.CalendarDataObject, int)
-     */
     public void removeUserParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
-                final Participant check[] = cdao.getParticipants();
-                if (check != null && check.length > 0) {
-                    final Participant ret[] = new Participant[check.length-1];
-                    int x = 0;
-                    for (int a = 0; a < check.length; a++)  {
-                        if (check[a].getIdentifier() != uid) {
-                            if (x < ret.length) {
-                                ret[x++] = check[a];
-                            } else {
-                                throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT, uid);
-                            }
-                        }
-                        cdao.setParticipants(ret);
+        final Participant check[] = cdao.getParticipants();
+        if (check != null && check.length > 0) {
+            final Participant ret[] = new Participant[check.length-1];
+            int x = 0;
+            for (int a = 0; a < check.length; a++)  {
+                if (check[a].getIdentifier() != uid) {
+                    if (x < ret.length) {
+                        ret[x++] = check[a];
+                    } else {
+                        throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT, uid);
                     }
-                } else {
-                    throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT_2);
                 }
+                cdao.setParticipants(ret);
+            }
+        } else {
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT_2);
+        }
     }        
     
     /* (non-Javadoc)
