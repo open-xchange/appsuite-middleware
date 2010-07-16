@@ -79,10 +79,10 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * {@link FolderObject} - Represents a folder.
@@ -672,8 +672,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
         if (this.permissions == null) {
             this.permissions = new ArrayList<OCLPermission>(4);
-            b_permissions = true;
         }
+        b_permissions = true;
         this.permissions.add(permission.deepClone());
     }
 
