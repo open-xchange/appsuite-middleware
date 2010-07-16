@@ -135,7 +135,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
             }
 
             // Register services
-            serviceRegistrations = new ArrayList<ServiceRegistration>(4);
+            serviceRegistrations = new ArrayList<ServiceRegistration>(2);
             // DeleteListener was added statically
             //serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new OutlookFolderDeleteListener(), null));
 
