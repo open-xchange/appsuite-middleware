@@ -61,23 +61,16 @@ import com.openexchange.session.Session;
 
 /**
  * {@link IMipStatusChangeAppointmentTest}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class IMipStatusChangeAppointmentTest extends IMipTest {
 
-    /**
-     * 
-     */
     private String external = "externalparticipant@example.com";
     private String organizer = "123@example.invalid";
 
     private Session so2;
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.notify.imip.IMipTest#setUp()
-     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -89,36 +82,27 @@ public class IMipStatusChangeAppointmentTest extends IMipTest {
         appointment.setParticipants(participants);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.notify.ParticipantNotifyTest#tearDown()
-     */
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
-
     }
-    
+
     public void testStatusChange() throws Exception {
         mailForOrganizer(CalendarObject.ACCEPT);
         mailForOrganizer(CalendarObject.DECLINE);
         mailForOrganizer(CalendarObject.TENTATIVE);
     }
-    
+
     public void mailForOrganizer(int status) throws Exception {
-        
         for (UserParticipant u : appointment.getUsers()) {
             if (u.getIdentifier() == secondUserId) {
                 u.setConfirm(status);
                 u.setConfirmMessage("Message");
             }
         }
-        
         notify.appointmentAccepted(appointment, so2);
         List<Message> messages = notify.getMessages();
-        
         boolean organizerMsg = false, ownerMsg = false, senderMsg = false, otherParticipantMsg = false, externalMsg = false;
-        
         for (Message message : messages) {
             if (message.addresses.contains(organizer)) {
                 checkState(message.message, ITipMethod.REPLY);
@@ -129,11 +113,10 @@ public class IMipStatusChangeAppointmentTest extends IMipTest {
                 senderMsg = true;
             } else if (message.addresses.contains(thirdUserMail)) {
                 otherParticipantMsg = true;
-             } else if (message.addresses.contains(external)) {
-                 externalMsg = true;
-             }
+            } else if (message.addresses.contains(external)) {
+                externalMsg = true;
+            }
         }
-        
         assertTrue("Owner (not organizer) should get a mail", ownerMsg);
         assertFalse("Sender should not get a mail", senderMsg);
         assertTrue("Other participants should get mails.", otherParticipantMsg);
