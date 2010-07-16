@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -443,7 +444,7 @@ public abstract class MailMessage extends MailPart {
             b_from = true;
             return;
         } else if (null == from) {
-            from = new HashSet<InternetAddress>();
+            from = new LinkedHashSet<InternetAddress>();
             b_from = true;
         }
         from.add(addr);
@@ -459,7 +460,7 @@ public abstract class MailMessage extends MailPart {
             b_from = true;
             return;
         } else if (null == from) {
-            from = new HashSet<InternetAddress>();
+            from = new LinkedHashSet<InternetAddress>();
             b_from = true;
         }
         from.addAll(Arrays.asList(addrs));
@@ -510,7 +511,7 @@ public abstract class MailMessage extends MailPart {
             b_to = true;
             return;
         } else if (null == to) {
-            to = new HashSet<InternetAddress>();
+            to = new LinkedHashSet<InternetAddress>();
             b_to = true;
         }
         to.add(addr);
@@ -526,7 +527,7 @@ public abstract class MailMessage extends MailPart {
             b_to = true;
             return;
         } else if (null == to) {
-            to = new HashSet<InternetAddress>();
+            to = new LinkedHashSet<InternetAddress>();
             b_to = true;
         }
         to.addAll(Arrays.asList(addrs));
@@ -577,7 +578,7 @@ public abstract class MailMessage extends MailPart {
             b_cc = true;
             return;
         } else if (null == cc) {
-            cc = new HashSet<InternetAddress>();
+            cc = new LinkedHashSet<InternetAddress>();
             b_cc = true;
         }
         cc.add(addr);
@@ -593,7 +594,7 @@ public abstract class MailMessage extends MailPart {
             b_cc = true;
             return;
         } else if (null == cc) {
-            cc = new HashSet<InternetAddress>();
+            cc = new LinkedHashSet<InternetAddress>();
             b_cc = true;
         }
         cc.addAll(Arrays.asList(addrs));
@@ -644,7 +645,7 @@ public abstract class MailMessage extends MailPart {
             b_bcc = true;
             return;
         } else if (null == bcc) {
-            bcc = new HashSet<InternetAddress>();
+            bcc = new LinkedHashSet<InternetAddress>();
             b_bcc = true;
         }
         bcc.add(addr);
@@ -660,7 +661,7 @@ public abstract class MailMessage extends MailPart {
             b_bcc = true;
             return;
         } else if (null == bcc) {
-            bcc = new HashSet<InternetAddress>();
+            bcc = new LinkedHashSet<InternetAddress>();
             b_bcc = true;
         }
         bcc.addAll(Arrays.asList(addrs));
@@ -1355,16 +1356,16 @@ public abstract class MailMessage extends MailPart {
     public Object clone() {
         final MailMessage clone = (MailMessage) super.clone();
         if (from != null) {
-            clone.from = new HashSet<InternetAddress>(from);
+            clone.from = new LinkedHashSet<InternetAddress>(from);
         }
         if (to != null) {
-            clone.to = new HashSet<InternetAddress>(to);
+            clone.to = new LinkedHashSet<InternetAddress>(to);
         }
         if (cc != null) {
-            clone.cc = new HashSet<InternetAddress>(cc);
+            clone.cc = new LinkedHashSet<InternetAddress>(cc);
         }
         if (bcc != null) {
-            clone.bcc = new HashSet<InternetAddress>(bcc);
+            clone.bcc = new LinkedHashSet<InternetAddress>(bcc);
         }
         if (receivedDate != null) {
             clone.receivedDate = new Date(receivedDate.getTime());
