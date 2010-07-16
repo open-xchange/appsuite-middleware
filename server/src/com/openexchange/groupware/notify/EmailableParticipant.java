@@ -190,7 +190,7 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
 
     @Override
     public String toString() {
-        return new StringBuilder(super.toString()).append(" displayName=").append(displayName).append(" email=")
+        return new StringBuilder("EmailableParticipant").append(" displayName=").append(displayName).append(" email=")
                 .append(email).append(" locale=").append(locale).append(" timeZone=").append(timeZone.getID()).toString();
     }
 
