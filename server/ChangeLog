@@ -6,6 +6,8 @@
 
  - Bugfix #16168: Requesting folder including permission information from database
  - Bugfix #16514: Keeping order of address headers (From, To, Cc, Bcc, ...)
+ - Bugfix #16148: Improved nearly all folder database queries to include permission information and thus avoiding to request them
+                  separately for each folder
 
 * 2010-07-15 - thorben.betten@open-xchange.com
 

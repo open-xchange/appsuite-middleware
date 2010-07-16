@@ -297,6 +297,12 @@ public final class OXFolderIteratorSQL {
          * 1. cid
          * 2. user
          */
+        if (fields.indexOf("op") >= 0) {
+            /*
+             * Only append JOIN if fields contain permission fields
+             */
+            sb.append(" JOIN ").append(permissionTable).append(" AS op ON ot.fuid = op.fuid AND ot.cid = op.cid");
+        }
         sb.append(" WHERE ot.cid = ? AND (ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(
             " AND ot.created_from = ?)");
         appendix(sb, accessibleModules, additionalCondition);
@@ -405,6 +411,8 @@ public final class OXFolderIteratorSQL {
 
     private final static String STR_OT = "ot";
 
+    private final static String STR_OP = "op";
+
     private final static String STR_ORDER_BY = "ORDER BY ";
 
     private final static String STR_FUID = "fuid";
@@ -482,7 +490,7 @@ public final class OXFolderIteratorSQL {
         }
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
-                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP),
                 StringCollection.getSqlInString(userId, memberInGroups),
                 StringCollection.getSqlInString(userConfig.getAccessibleModules()),
                 condBuilder.toString(),
@@ -520,7 +528,7 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, readCon, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, true, ctx, readCon, true);
+        return new FolderObjectIterator(rs, stmt, true, true, ctx, readCon, true);
     }
 
     /**
@@ -567,7 +575,7 @@ public final class OXFolderIteratorSQL {
         }
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
-                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP),
                 StringCollection.getSqlInString(userId, groups),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
@@ -605,7 +613,7 @@ public final class OXFolderIteratorSQL {
             /*
              * Ensure ordering of private default folder follows: calendar, contacts, tasks
              */
-            final List<FolderObject> list = new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon).asList();
+            final List<FolderObject> list = new FolderObjectIterator(rs, stmt, false, true, ctx, readCon, closeCon).asList();
             if (list.size() >= 3 && (list.get(0).getModule() != FolderObject.CALENDAR || list.get(1).getModule() != FolderObject.CONTACT || list.get(
                 2).getModule() != FolderObject.TASK)) {
                 final FolderObject[] defaultFolders = new FolderObject[] { list.remove(0), list.remove(0), list.remove(0) };
@@ -652,7 +660,7 @@ public final class OXFolderIteratorSQL {
      */
     private static SearchIterator<FolderObject> getVisiblePublicFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
         final SQLStuff sqlStuff = getVisiblePublicFolders0(userId, groups, accessibleModules, ctx, since, con);
-        return new FolderObjectIterator(sqlStuff.rs, sqlStuff.stmt, false, ctx, sqlStuff.readCon, sqlStuff.closeCon);
+        return new FolderObjectIterator(sqlStuff.rs, sqlStuff.stmt, false, true, ctx, sqlStuff.readCon, sqlStuff.closeCon);
     }
 
     /**
@@ -667,7 +675,7 @@ public final class OXFolderIteratorSQL {
         }
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
-                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP),
                 StringCollection.getSqlInString(userId, groups),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
@@ -736,7 +744,7 @@ public final class OXFolderIteratorSQL {
         }
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
-                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP),
                 StringCollection.getSqlInString(userId, memberInGroups),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
@@ -778,7 +786,7 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon);
+        return new FolderObjectIterator(rs, stmt, false, true, ctx, readCon, closeCon);
     }
 
     /**
@@ -786,7 +794,7 @@ public final class OXFolderIteratorSQL {
      */
     public static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
         final SQLStuff stuff = getVisibleSharedFolders0(userId, memberInGroups, accessibleModules, owner, ctx, since, con);
-        return new FolderObjectIterator(stuff.rs, stuff.stmt, false, ctx, stuff.readCon, stuff.closeCon);
+        return new FolderObjectIterator(stuff.rs, stuff.stmt, false, true, ctx, stuff.readCon, stuff.closeCon);
     }
 
     private static SQLStuff getVisibleSharedFolders0(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException {
@@ -801,7 +809,7 @@ public final class OXFolderIteratorSQL {
         }
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
-                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP),
                 StringCollection.getSqlInString(userId, memberInGroups),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
@@ -921,7 +929,7 @@ public final class OXFolderIteratorSQL {
                 }
                 final String sqlSelectStr =
                     getSQLUserVisibleFolders(
-                        FolderObjectIterator.getFieldsForSQL(STR_OT),
+                        FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP),
                         StringCollection.getSqlInString(userId, groups),
                         StringCollection.getSqlInString(userConfig.getAccessibleModules()),
                         condBuilder.toString(),
@@ -945,7 +953,7 @@ public final class OXFolderIteratorSQL {
             /*
              * asQueue() already closes all resources
              */
-            final Queue<FolderObject> q = new FolderObjectIterator(rs, stmt, false, ctx, rc, closeReadCon).asQueue();
+            final Queue<FolderObject> q = new FolderObjectIterator(rs, stmt, false, true, ctx, rc, closeReadCon).asQueue();
             final int size = q.size();
             if (size == 0) {
                 /*
@@ -1227,7 +1235,7 @@ public final class OXFolderIteratorSQL {
             readCon = DBPool.pickup(ctx);
             stmt =
                 readCon.prepareStatement(getSQLUserVisibleFolders(
-                    FolderObjectIterator.getFieldsForSQL(STR_OT),
+                    FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP),
                     StringCollection.getSqlInString(userId, memberInGroups),
                     StringCollection.getSqlInString(accessibleModules),
                     condBuilder.toString(),
@@ -1257,7 +1265,7 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, readCon, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
+        return new FolderObjectIterator(rs, stmt, false, true, ctx, readCon, true);
     }
 
     /**
@@ -1273,7 +1281,7 @@ public final class OXFolderIteratorSQL {
     public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection readConArg) throws OXException, SearchIteratorException {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
-                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP),
                 StringCollection.getSqlInString(userId, memberInGroups),
                 StringCollection.getSqlInString(accessibleModules),
                 new StringBuilder("AND (ot.module = ").append(module).append(')').toString(),
@@ -1316,7 +1324,7 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
+        return new FolderObjectIterator(rs, stmt, false, true, ctx, readCon, closeReadCon);
     }
 
     /**
@@ -1418,7 +1426,7 @@ public final class OXFolderIteratorSQL {
         }
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
-                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP),
                 StringCollection.getSqlInString(userId, memberInGroups),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
@@ -1455,14 +1463,14 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, readCon, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
+        return new FolderObjectIterator(rs, stmt, false, true, ctx, readCon, true);
     }
 
     private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(256).append(STR_SELECT).append(
         FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot").append(" WHERE (ot.cid = ?) ").toString();
 
     private static final String SQL_SELECT_FOLDERS_PERMISSIONS_START = new StringBuilder(256).append(STR_SELECT).append(
-        FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, "op")).append(" FROM oxfolder_tree AS ot").append(
+        FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, STR_OP)).append(" FROM oxfolder_tree AS ot").append(
         " JOIN oxfolder_permissions AS op ON ot.cid = op.cid AND ot.fuid = op.fuid WHERE (ot.cid = ? AND op.cid = ?) ").toString();
 
     /**
