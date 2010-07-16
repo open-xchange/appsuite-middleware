@@ -594,7 +594,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     }
                 } else {
                     sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
-                    sendMail = sendMail && !EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType());
+                    sendMail = sendMail && (!EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType()) || p.email.equals(newObj.getOrganizer()));
                     if (p.timeZone != null) {
                         tz = p.timeZone;
                     }
