@@ -503,11 +503,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (isInsert) {
                 recColl.checkAndFillIfUserIsParticipant(cdao, up);
             } else {
-                if (!cdao.containsUserParticipants() && !recColl.checkIfUserIsParticipant(edao, up)) {
-                    cdao.setUsers(edao.getUsers());
+                if (!recColl.checkIfUserIsParticipant(edao, up)) {
                     if (edao.getFolderType() == FolderObject.PRIVATE) {
+                        recColl.removeUserParticipant(cdao, uid);
                         recColl.removeParticipant(cdao, uid);
                     }
+                    recColl.checkAndFillIfUserIsUser(cdao, up);
                     recColl.checkAndFillIfUserIsParticipant(cdao, up);
                 }
             }
