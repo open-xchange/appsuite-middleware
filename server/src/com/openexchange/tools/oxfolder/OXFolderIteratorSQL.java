@@ -426,7 +426,7 @@ public final class OXFolderIteratorSQL {
     }
 
     private static String getSubfolderOrderBy(final String tableAlias) {
-        return getOrderBy(tableAlias, STR_DEFAULTFLAG_DESC, STR_FNAME);
+        return getOrderBy(tableAlias, STR_DEFAULTFLAG_DESC, STR_FNAME, STR_FUID);
     }
 
     private static String getOrderBy(final String tableAlias, final String... strings) {
@@ -933,7 +933,7 @@ public final class OXFolderIteratorSQL {
                         StringCollection.getSqlInString(userId, groups),
                         StringCollection.getSqlInString(userConfig.getAccessibleModules()),
                         condBuilder.toString(),
-                        getOrderBy(STR_OT, "module", "fname"));
+                        getOrderBy(STR_OT, "module", "fname", "fuid"));
                 stmt = rc.prepareStatement(sqlSelectStr);
             }
             stmt.setInt(pos++, contextId);
