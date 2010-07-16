@@ -1458,9 +1458,12 @@ public final class OXFolderIteratorSQL {
         return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
     }
 
-    private static final String SQL_SELECT_FOLDERS_START =
-        new StringBuilder(200).append(STR_SELECT).append(FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot").append(
-            " WHERE (cid = ?) ").toString();
+    private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(256).append(STR_SELECT).append(
+        FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot").append(" WHERE (ot.cid = ?) ").toString();
+
+    private static final String SQL_SELECT_FOLDERS_PERMISSIONS_START = new StringBuilder(256).append(STR_SELECT).append(
+        FolderObjectIterator.getFieldsForSQLWithPermissions(STR_OT, "op")).append(" FROM oxfolder_tree AS ot").append(
+        " JOIN oxfolder_permissions AS op ON ot.cid = op.cid AND ot.fuid = op.fuid WHERE (ot.cid = ? AND op.cid = ?) ").toString();
 
     /**
      * Gets <b>all</b> modified folders since given time stamp.
@@ -1507,9 +1510,8 @@ public final class OXFolderIteratorSQL {
      */
     public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
         final String sqlSelectStr =
-            new StringBuilder(256).append(SQL_SELECT_FOLDERS_START).append("AND (changing_date > ?) AND (module IN ").append(
-                FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL).append(") ").append(
-                OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(" ORDER by ot.fuid").toString();
+            new StringBuilder(256).append(SQL_SELECT_FOLDERS_PERMISSIONS_START).append("AND (ot.changing_date > ?) AND (ot.module IN ").append(
+                FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL).append(") ").append(" ORDER by ot.fuid").toString();
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -1527,6 +1529,7 @@ public final class OXFolderIteratorSQL {
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
             stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
             stmt.setLong(pos, since.getTime());
             rs = stmt.executeQuery();
         } catch (final SQLException e) {
@@ -1536,7 +1539,7 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon);
+        return new FolderObjectIterator(rs, stmt, false, true, ctx, readCon, closeCon);
     }
 
     private static final class SQLStuff {

@@ -1,3 +1,7 @@
+* 2010-07-16 - thorben.betten@open-xchange.com
+
+ - Bugfix #16168: Requesting folder including permission information from database
+
 * 2010-07-15 - thorben.betten@open-xchange.com
 
  - Bugfix #16422: Changed log level to WARN if collecting an invalid address fails
