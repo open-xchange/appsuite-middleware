@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.mail;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
@@ -69,8 +72,6 @@ public class Bug16141Test extends AbstractAJAXSession {
 
     private String folder;
 
-    private String address;
-
     private UserValues values;
     
     private String[][] ids = null;
@@ -85,65 +86,68 @@ public class Bug16141Test extends AbstractAJAXSession {
         client = getClient();
         values = client.getValues();
         folder = values.getInboxFolder();
-        address = values.getSendAddress();
     }
     
     public void testMailImport() throws Exception {
         InputStream[] is = createABunchOfMails();
+        
         final ImportMailRequest importReq = new ImportMailRequest(folder, MailFlag.SEEN.getValue(), is);
         final ImportMailResponse importResp = client.execute(importReq);
-        ids = importResp.getIds();
+        JSONArray json = (JSONArray) importResp.getData();
         
-        assertTrue("Did not import all mails with correct headers.", ids.length == 3);
+        int err = 0;
+        for (int i = 0; i < json.length(); i++) {
+            JSONObject jo = json.getJSONObject(i);
+            if (jo.has("Error")) {
+                err++;
+            }
+        }
+        
+        if (err != 1) {
+            fail("Number of corrupt mails is wrong");
+        }
+        
+        if (json.length() - err != 3) {
+            fail("Import did not run til end.");
+        }
     }
     
     private InputStream[] createABunchOfMails() {        
-        final String workingMail_1 = 
-            "From: " + address + "\n" + 
-            "To: " + address + "\n" + 
-            "Subject: BugTest 16141 - working mail 1\n" + 
-            "Mime-Version: 1.0\n" + 
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" + 
-            "Content-Transfer-Encoding: 8bit\n" + 
-            "\n" +
-            "I'm just some mail content...";
+        String msg = "";
         
-        final String workingMail_2 = 
-            "From: " + address + "\n" + 
-            "To: " + address + "\n" + 
-            "Subject: BugTest 16141 - working mail 2\n" + 
-            "Mime-Version: 1.0\n" + 
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" + 
-            "Content-Transfer-Encoding: 8bit\n" + 
-            "\n" +
-            "I'm just some mail content...";
+        InputStream is1 = null;
+        try {
+            is1 = new FileInputStream("../open-xchange-test/testData/bug16141_1.eml");
+        } catch (FileNotFoundException e) {
+            msg += e.getMessage() + "\n";
+        }
         
-        final String workingMail_3 = 
-            "From: " + address + "\n" + 
-            "To: " + address + "\n" + 
-            "Subject: BugTest 16141 - working mail 3\n" + 
-            "Mime-Version: 1.0\n" + 
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" + 
-            "Content-Transfer-Encoding: 8bit\n" + 
-            "\n" +
-            "I'm just some mail content...";
+        InputStream is2 = null;
+        try {
+            is2 = new FileInputStream("../open-xchange-test/testData/bug16141_2.eml");
+        } catch (FileNotFoundException e) {
+            msg += e.getMessage() + "\n";
+        }
         
-        final String brokenMail_1 = 
-            "From: " + address + "\n" + 
-            "Date: Thu, 11 Mar 20082 25:13:13\n" +
-            "To: " + address + "\n" + 
-            "Subject: BugTest 16141 - broken mail 1\n" + 
-            "Mime-Version: habichnicht\n" + 
-            "Content-Type: blahblubb; charset=\"UTF-8\"\n" + 
-            "Content-Transfer-Encoding: 8bit\n" + 
-            "\n" +
-            "I'm just some mail content...";
-
-        final ByteArrayInputStream mail[] = {new ByteArrayInputStream(workingMail_1.toString().getBytes()), 
-            new ByteArrayInputStream(workingMail_2.toString().getBytes()), 
-            new ByteArrayInputStream(brokenMail_1.toString().getBytes()), 
-            new ByteArrayInputStream(workingMail_3.toString().getBytes())};
+        InputStream is3 = null;
+        try {
+            is3 = new FileInputStream("../open-xchange-test/testData/bug16141_3.eml");
+        } catch (FileNotFoundException e) {
+            msg += e.getMessage() + "\n";
+        }
         
+        InputStream is4 = null;
+        try {
+            is4 = new FileInputStream("../open-xchange-test/testData/bug16141_4.eml");
+        } catch (FileNotFoundException e) {
+            msg += e.getMessage() + "\n";
+        }
+        
+        if (is1 == null || is2 == null || is3 == null || is4 == null) {
+            fail("Testmails konnten nicht geladen werden. Fehler: " + msg);
+        }
+        
+        final InputStream mail[] = {is1, is2, is3, is4};
         return mail;
     }
     
