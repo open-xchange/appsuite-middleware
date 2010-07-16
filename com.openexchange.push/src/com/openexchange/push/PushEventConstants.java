@@ -69,6 +69,11 @@ public final class PushEventConstants {
     public static final String TOPIC = "com/openexchange/push";
 
     /**
+     * The topic of push events for changed attributes of a folder's entry.
+     */
+    public static final String TOPIC_ATTR = "com/openexchange/push/attributes";
+
+    /**
      * Whether the content or the folder itself has changed. Default is <code>true</code>; meaning if not present the folder content has
      * changed, but not the folder itself. Property value is of type <code>java.lang.Boolean</code>.
      */
