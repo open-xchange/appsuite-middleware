@@ -50,15 +50,15 @@
 package com.openexchange.mobile.configuration.generator.configuration;
 
 public enum Property implements PropertyInterface {
-    iPhoneRegex(String.class, Required.TRUE, "com.openexchange.mobileconfig.iPhoneRegex"),
-    WinMobRegex(String.class, Required.TRUE, "com.openexchange.mobileconfig.WinMobRegex"),
-    OnlySecureConnect(Boolean.class, Required.TRUE, "com.openexchange.mobileconfig.OnlySecureConnect"),
+    iPhoneRegex(String.class, Required.TRUE, "com.openexchange.mobile.configuration.generator.iPhoneRegex"),
+    WinMobRegex(String.class, Required.TRUE, "com.openexchange.mobile.configuration.generator.WinMobRegex"),
+    OnlySecureConnect(Boolean.class, Required.TRUE, "com.openexchange.mobile.configuration.generator.OnlySecureConnect"),
     DomainUser(String.class, Required.TRUE, "com.openexchange.usm.eas.login_pattern.domain_user"),
     SignConfig(Boolean.class, Required.TRUE, "com.openexchange.mobileconfig.SignConfig"),
-    OpensslBinary(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobileconfig.OpensslBinary"),
-    OpensslTimeout(Integer.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobileconfig.OpensslTimeout"),
-    CertFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobileconfig.CertFile"),
-    KeyFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobileconfig.KeyFile");
+    OpensslBinary(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.OpensslBinary"),
+    OpensslTimeout(Integer.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.OpensslTimeout"),
+    CertFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.CertFile"),
+    KeyFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.KeyFile");
     
     
     private final Class<?> clazz;
