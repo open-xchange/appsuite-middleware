@@ -59,9 +59,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.outlook.OutlookFolderDeleteListener;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
-import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -138,7 +136,8 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
 
             // Register services
             serviceRegistrations = new ArrayList<ServiceRegistration>(4);
-            serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new OutlookFolderDeleteListener(), null));
+            // DeleteListener was added statically
+            //serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new OutlookFolderDeleteListener(), null));
 
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("tree", OutlookFolderStorage.OUTLOOK_TREE_ID);
