@@ -49,10 +49,14 @@
 
 package com.openexchange.subscribe.crawler;
 
+import java.util.List;
+import org.ho.yaml.Yaml;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.crawler.internal.Step;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
+ * This Class holds all information that defines a crawler and is the starting point to create one.
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CrawlerDescription {
@@ -61,17 +65,28 @@ public class CrawlerDescription {
     
     private int priority = 0;
     
+    // set the default API Version to 614 as all crawlers that do not need new functionality should work with 614
     private int crawlerApiVersion = 614;
     
-    // set the default module to CONTACT to be compatible with API-Version 614
+    // set the default module to CONTACT to be compatible with API-Version 614 where CONTACT is the only option
     private int module = FolderObject.CONTACT;
     
     private boolean javascriptEnabled = false;
+    
+    private boolean mobileUserAgentEnabled = false;
 
     public CrawlerDescription() {
 
     }
 
+    public void finishUp (List<Step> steps){
+        Workflow workflow = new Workflow(steps);
+        if (mobileUserAgentEnabled) workflow.setMobileUserAgent(true);  
+        if (javascriptEnabled) workflow.setEnableJavascript(true);
+        this.setWorkflowString(Yaml.dump(workflow));
+    }
+    
+    
     public String getDisplayName() {
         return displayName;
     }
@@ -137,5 +152,14 @@ public class CrawlerDescription {
     }
 
     
+    public boolean isMobileUserAgentEnabled() {
+        return mobileUserAgentEnabled;
+    }
+
+    
+    public void setMobileUserAgentEnabled(boolean mobileUserAgentEnabled) {
+        this.mobileUserAgentEnabled = mobileUserAgentEnabled;
+    }
+
     
 }

@@ -97,13 +97,12 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
             }
             
             if (output != null) {
-                executedSuccessfully = true;                   
+                executedSuccessfully = true;                 
             } else {
-                LOG.error("The expected link was not on this page");
+                LOG.error("The expected link was not on this page. Expectation was something matching this: "+ linkRegex);
                 for (final HtmlAnchor link : input.getAnchors()) {
-                    LOG.info("Available Link : " + link.getHrefAttribute());
-                }
-                LOG.info("Page : " + input.getWebResponse().getContentAsString());                
+                    LOG.debug("Available Link : " + link.getHrefAttribute());
+                }               
             }
             
         } catch (final FailingHttpStatusCodeException e) {

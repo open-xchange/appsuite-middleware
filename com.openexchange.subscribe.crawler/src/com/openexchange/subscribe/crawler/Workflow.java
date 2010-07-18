@@ -96,6 +96,8 @@ public class Workflow {
     private boolean enableJavascript;
     
     private boolean debuggingEnabled = false;
+    
+    private boolean mobileUserAgent = false;
 
     public Workflow() {
 
@@ -126,8 +128,13 @@ public class Workflow {
 
     public Object[] execute() throws SubscriptionException {
 
-        // emulate a known client, hopefully keeping our profile low
-        final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_3);
+        // emulate a specific browser
+        // final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_3);
+        BrowserVersion browser = BrowserVersion.FIREFOX_3;
+        if (mobileUserAgent){
+            browser.setUserAgent("Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16");
+        }    
+        final WebClient webClient = new WebClient(browser);
         
         // use a custom CookiePolicy to be more lenient and thereby work with more websites
         CrawlerWebConnection crawlerConnection = new CrawlerWebConnection(webClient);
@@ -232,6 +239,16 @@ public class Workflow {
     
     public void setDebuggingEnabled(boolean debuggingEnabled) {
         this.debuggingEnabled = debuggingEnabled;
+    }
+
+    
+    public boolean isMobileUserAgent() {
+        return mobileUserAgent;
+    }
+
+    
+    public void setMobileUserAgent(boolean mobileUserAgent) {
+        this.mobileUserAgent = mobileUserAgent;
     }
 
     
