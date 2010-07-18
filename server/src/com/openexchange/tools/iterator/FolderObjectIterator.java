@@ -244,6 +244,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      * Initializes a new {@link FolderObjectIterator}
      */
     FolderObjectIterator() {
+        super();
         closeCon = false;
         resideInCache = false;
         containsPermissions = false;
@@ -261,6 +262,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      * @throws SearchIteratorException If an unsupported collection is specified
      */
     public FolderObjectIterator(final Collection<FolderObject> col, final boolean resideInCache) throws SearchIteratorException {
+        super();
         folderIds = null;
         warnings = new ArrayList<AbstractOXException>(2);
         rs = null;
@@ -306,6 +308,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      * @throws SearchIteratorException If instantiation fails.
      */
     public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean resideInCache, final boolean containsPermissions, final Context ctx, final Connection readCon, final boolean closeCon) throws SearchIteratorException {
+        super();
         if (OXFolderProperties.isEnableDBGrouping()) {
             folderIds = null;
         } else {
@@ -485,7 +488,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         while ((hasNext = rs.next()) && folderId == rs.getInt(1)) {
             addNewPermission();
         }
-        FolderObject ret = currentFolder;
+        final FolderObject ret = currentFolder;
         if (hasNext) {
             currentFolder = createNewFolderObject(rs.getInt(1));
             /*
