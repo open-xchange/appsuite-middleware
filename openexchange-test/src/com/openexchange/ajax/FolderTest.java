@@ -741,7 +741,7 @@ public class FolderTest extends AbstractAJAXTest {
         final WebResponse resp = getWebConversation().getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
         assertTrue(respObj.has("error") && respObj.getString("error").indexOf(
-            "Action \"unknown\" NOT supported via GET on /ajax/folders") != -1);
+            "Unknown") != -1);
     }
 
     public void testGetUserId() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException {
