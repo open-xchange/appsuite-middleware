@@ -47,58 +47,35 @@
  *
  */
 
-package com.openexchange.publish.database;
+package com.openexchange.subscribe.database;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.groupware.update.SimpleColumnCreationTask;
+
 
 /**
- * Creates tables necessary to run the publish part of PubSub.
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link EnabledColumn}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CreatePublicationTables extends AbstractCreateTableImpl {
-
-    public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT = 
-        "CREATE TABLE publication_users (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "name VARCHAR(255) NOT NULL," +
-        	"password VARCHAR(255) NOT NULL," +
-        	"PRIMARY KEY (cid,id,name)," +
-        	"FOREIGN KEY (cid,id) REFERENCES publications(cid,id)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+public class EnabledColumn extends SimpleColumnCreationTask {
 
     @Override
-    public String[] getCreateStatements() {
-        return new String[] { 
-            "CREATE TABLE publications (" 
-            + "id INT4 UNSIGNED NOT NULL," 
-            + "cid INT4 UNSIGNED NOT NULL," 
-            + "user_id INT4 UNSIGNED NOT NULL,"
-            + "entity INT4 UNSIGNED NOT NULL," 
-            + "module VARCHAR(255) NOT NULL," 
-            + "configuration_id INT4 UNSIGNED NOT NULL," 
-            + "target_id VARCHAR(255) NOT NULL,"
-            + "enabled TINYINT(1) DEFAULT 1 NOT NULL,"
-            + "PRIMARY KEY (cid,id)," 
-            + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-
-            "CREATE TABLE sequence_publications (" 
-            + "cid INT4 UNSIGNED NOT NULL," 
-            + "id INT4 UNSIGNED NOT NULL," 
-            + "PRIMARY KEY (cid))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-            
-            CREATE_USER_AND_PASSWORD_CREATE_STATEMENT
-        };
+    public String getColumnDefinition() {
+        return "enabled TINYINT(1) DEFAULT 1 NOT NULL";
     }
 
-    public String[] requiredTables() {
-        return new String[] { "user" };
+    @Override
+    public String getColumnName() {
+        return "enabled";
     }
 
-    public String[] tablesToCreate() {
-        return new String[] { "publications", "sequence_publications", "publication_users" };
+    @Override
+    public String getTableName() {
+        return "subscriptions";
     }
+
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.groupware.update.tasks.CreateSubscribeTableTask" };
+    }
+
 }

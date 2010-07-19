@@ -47,58 +47,68 @@
  *
  */
 
-package com.openexchange.publish.database;
+package com.openexchange.groupware.update;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.MessageFormat;
+import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
+
 
 /**
- * Creates tables necessary to run the publish part of PubSub.
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link SimpleColumnCreationTask}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CreatePublicationTables extends AbstractCreateTableImpl {
+public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter{
 
-    public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT = 
-        "CREATE TABLE publication_users (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "name VARCHAR(255) NOT NULL," +
-        	"password VARCHAR(255) NOT NULL," +
-        	"PRIMARY KEY (cid,id,name)," +
-        	"FOREIGN KEY (cid,id) REFERENCES publications(cid,id)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private static final String ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1}";
 
-    @Override
-    public String[] getCreateStatements() {
-        return new String[] { 
-            "CREATE TABLE publications (" 
-            + "id INT4 UNSIGNED NOT NULL," 
-            + "cid INT4 UNSIGNED NOT NULL," 
-            + "user_id INT4 UNSIGNED NOT NULL,"
-            + "entity INT4 UNSIGNED NOT NULL," 
-            + "module VARCHAR(255) NOT NULL," 
-            + "configuration_id INT4 UNSIGNED NOT NULL," 
-            + "target_id VARCHAR(255) NOT NULL,"
-            + "enabled TINYINT(1) DEFAULT 1 NOT NULL,"
-            + "PRIMARY KEY (cid,id)," 
-            + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-
-            "CREATE TABLE sequence_publications (" 
-            + "cid INT4 UNSIGNED NOT NULL," 
-            + "id INT4 UNSIGNED NOT NULL," 
-            + "PRIMARY KEY (cid))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int contextId = params.getContextId();
+        final Connection con = Database.getNoTimeout(contextId, true);
+        try {
+            con.setAutoCommit(false);
+            if(columnExists(con)) {
+                return;
+            }
             
-            CREATE_USER_AND_PASSWORD_CREATE_STATEMENT
-        };
+            Statement stmt = null;
+            try {
+                stmt = con.createStatement();
+                stmt.execute(getStatement());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            Database.backNoTimeout(contextId, true, con);
+        }
+    }
+    
+    private String getStatement() {
+        return MessageFormat.format(ADD_COLUMN, getTableName(), getColumnDefinition());
     }
 
-    public String[] requiredTables() {
-        return new String[] { "user" };
+    public boolean columnExists(Connection con) throws SQLException {
+        return Tools.columnExists(con, getTableName(), getColumnName());
     }
+    
+    public abstract String getTableName();
+    public abstract String getColumnName();
+    public abstract String getColumnDefinition();
+    
+    
 
-    public String[] tablesToCreate() {
-        return new String[] { "publications", "sequence_publications", "publication_users" };
-    }
 }

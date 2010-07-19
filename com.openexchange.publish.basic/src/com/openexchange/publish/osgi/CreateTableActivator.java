@@ -57,7 +57,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.publish.database.CreatePublicationTables;
+import com.openexchange.publish.database.EnabledColumn;
 import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTask;
 
 /**
@@ -73,8 +75,8 @@ public class CreateTableActivator implements BundleActivator {
         registrations.push(context.registerService(CreateTableService.class.getName(), new CreatePublicationTables(), null));
         
         registrations.push(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-            public Collection<PublicationWithUsernameAndPasswordUpdateTask> getUpdateTasks() {
-                return Arrays.asList((new PublicationWithUsernameAndPasswordUpdateTask()));
+            public Collection<UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList((UpdateTaskV2) new PublicationWithUsernameAndPasswordUpdateTask(), (UpdateTaskV2) new EnabledColumn() );
             }
         }, null));
     }
