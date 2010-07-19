@@ -51,7 +51,6 @@ package com.openexchange.publish.database;
 
 import com.openexchange.groupware.update.SimpleColumnCreationTask;
 
-
 /**
  * {@link EnabledColumn}
  *
@@ -61,7 +60,7 @@ public class EnabledColumn extends SimpleColumnCreationTask{
 
     @Override
     public String getColumnDefinition() {
-        return "enabled TINYINT(1) DEFAULT 1 NOT NULL";
+        return "enabled BOOLEAN DEFAULT true NOT NULL";
     }
 
     @Override

@@ -51,7 +51,6 @@ package com.openexchange.subscribe.database;
 
 import com.openexchange.database.AbstractCreateTableImpl;
 
-
 /**
  * Creates the tables needed for the subscription part of PubSub
  * 
@@ -70,7 +69,7 @@ public class CreateSubscriptionTables extends AbstractCreateTableImpl {
             "source_id VARCHAR(255) NOT NULL," +
             "folder_id VARCHAR(255) NOT NULL," +
             "last_update INT8 UNSIGNED NOT NULL," +
-            "enabled TINYINT(1) DEFAULT 1 NOT NULL," +
+            "enabled BOOLEAN DEFAULT true NOT NULL," +
             "PRIMARY KEY (id, cid)," +
             "FOREIGN KEY(cid, user_id) REFERENCES user(cid, id))" +
             "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",

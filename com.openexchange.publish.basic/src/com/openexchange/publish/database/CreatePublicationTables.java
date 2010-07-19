@@ -79,7 +79,7 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
             + "module VARCHAR(255) NOT NULL," 
             + "configuration_id INT4 UNSIGNED NOT NULL," 
             + "target_id VARCHAR(255) NOT NULL,"
-            + "enabled TINYINT(1) DEFAULT 1 NOT NULL,"
+            + "enabled BOOLEAN DEFAULT true NOT NULL,"
             + "PRIMARY KEY (cid,id)," 
             + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id))" 
             + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
