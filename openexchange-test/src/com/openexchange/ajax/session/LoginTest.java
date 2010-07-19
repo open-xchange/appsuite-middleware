@@ -87,16 +87,6 @@ public class LoginTest extends AbstractLoginTest {
         assertResponseContains("random");
     }
   
-    //TODO: Necessary ? 
-/*    public void testSuccessfulLoginReturnsLanguage() throws Exception {
-        assertResponseContains("lang");
-    }
-    
-    public void testSuccessfulLoginReturnsUserID() throws Exception {
-        assertResponseContains("id");
-    }
-*/
-    
     public void testSuccessfulLoginSetsSecretCookie() throws Exception {
         rawLogin(USER1);
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
@@ -109,6 +99,21 @@ public class LoginTest extends AbstractLoginTest {
         }
         
         assertTrue("Missing secret cookie: "+cookieNames.toString(), found);
+    }
+    
+    public void testSuccessfulLoginDoesNotSetSessionCookie() throws Exception {
+        // Note: This will fail a while, until UI uses new store action and we can get rid of the session cookie after login
+        rawLogin(USER1);
+        Cookie[] cookies = currentClient.getClient().getState().getCookies();
+        boolean found = false;
+        List<String> cookieNames = new ArrayList<String>(cookies.length);
+        for (Cookie cookie : cookies) {
+            String name = cookie.getName();
+            cookieNames.add(name);
+            found = found || name.startsWith("open-xchange-session");
+        }
+        
+        assertFalse("Found session cookie, but shouldn't have: "+cookieNames.toString(), found);
     }
     
     public void testSecretCookiesDifferPerClientID() throws Exception {
