@@ -170,8 +170,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
 
     public static ParticipantNotify messageSender = new ParticipantNotify();
-    
-    private static final String debug = "Magic debug: ";
 
     /**
      * Initializes a new {@link ParticipantNotify}
@@ -228,10 +226,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         mail.setSubject(msg.title);
         
         if (Multipart.class.isInstance(msg.message)) {
-            LOG.warn(debug + "Multipart mail for: " + Arrays.asList(mail.getToAddrs()));
             mail.setContentType("multipart/alternative");
         } else {
-            LOG.warn(debug + "plain mail for: " + Arrays.asList(mail.getToAddrs()));
             mail.setContentType("text/plain; charset=UTF-8");
         }
 
@@ -650,10 +646,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                          */
                         MailMessage message = null;
                         if (Participant.USER == p.type) {
-                            LOG.warn(debug + "Create user message for " + p.email);
                             message = createUserMessage(session, newObj, p, (userCanReadObject(p, newObj, session)), title, actionRepl, state, locale, renderMap, isUpdate, b);
                         } else {
-                            LOG.warn(debug + "Create participant message for " + p.email);
                             message = createParticipantMessage(session, newObj, p, title, actionRepl, state, locale, renderMap, isUpdate, b);
                         }
                         messages.add(message);
@@ -771,7 +765,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         msg.title = b.append(actionRepl.getReplacement()).append(": ").append(title).toString();
         b.setLength(0);
         if (isUpdate) {
-            LOG.warn(debug + "Create update message for " + p.email);
             if (EmailableParticipant.STATE_REMOVED == p.state) {
                 /*
                  * Current participant is removed by caught update event
@@ -840,9 +833,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
             }
         } else {
-            LOG.warn(debug + "Create new message for " + p.email);
             if (State.Type.NEW.equals(state.getType())) {
-                LOG.warn(debug + "Create new (new) message for " + p.email);
                 String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
                     final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CREATE_MAIL_EXT : Notifications.TASK_CREATE_MAIL_EXT);
@@ -854,14 +845,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
                 }
                 if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
-                    LOG.warn(debug + "No imip for internal user: " + p.email);
                     msg.message = textMessage;
                 } else {
-                    LOG.warn(debug + "Imip for internal/external user: " + p.email);
                     msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
                 }
             } else if (EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType())) {
-                LOG.warn(debug + "Create new (confirm) message for " + p.email);
                 String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
                     final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CONFIRMATION_MAIL_EXT : Notifications.TASK_CONFIRMATION_MAIL_EXT);
@@ -876,14 +864,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     msg.message = textMessage;
                 }
             } else  if (state.getType() == State.Type.DELETED) {
-                LOG.warn(debug + "Create new (delete) message for " + p.email);
                 if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
                     msg.message = createTemplate.render(p.getLocale(), renderMap);
                 } else {
                     msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL, p, strings, b);
                 }
             } else {
-                LOG.warn(debug + "Create new (other) message for " + p.email);
                 msg.message = createTemplate.render(p.getLocale(), renderMap);
             }
         }
@@ -920,7 +906,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      */
     private static Object generateMessageMultipart(ServerSession session, CalendarObject cal, String text, int module, State.Type type, ITipMethod method, EmailableParticipant p, final StringHelper strings, final StringBuilder b) {
         if (module == Types.TASK) {
-            LOG.warn(debug + "No task imip for user: " + p.email);
             return text;
         }
         /*
@@ -989,7 +974,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
              * Add the parts to parental multipart & return
              */
             mp.addBodyPart(textPart);
-            LOG.warn(debug + "Adding imip for user: " + p.email);
             mp.addBodyPart(iCalPart);
             return mp;
         } catch (final MessagingException e) {
@@ -1004,7 +988,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         /*
          * Failed to create multipart
          */
-        LOG.warn(debug + "Failed to create multipart for user: " + p.email);
         return text;
     }
 
