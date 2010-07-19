@@ -105,6 +105,9 @@ public class LoginTest extends AbstractAJAXTest {
     public static JSONObject login(final WebConversation conversation,
         final String hostname, final String login, final String password)
         throws IOException, SAXException, JSONException {
+        
+        checkNotLoggedIn(conversation.getCookieNames());
+        
         LOG.trace("Logging in.");
         final WebRequest req = new PostMethodWebRequest(PROTOCOL
             + hostname + LOGIN_URL);
@@ -127,6 +130,14 @@ public class LoginTest extends AbstractAJAXTest {
             Login.PARAMETER_SESSION));
         assertTrue("Random is missing: " + body, json.has(LoginFields.PARAM_RANDOM));
         return json;
+    }
+
+    private static void checkNotLoggedIn(String[] cookieNames) {
+        for (String string : cookieNames) {
+            if(string.startsWith("open-xchange")) {
+                throw new IllegalStateException("This webconversation was used to log in. You must use a different web conversation, when you want to open another session.");
+            }
+        }
     }
 
     /**
