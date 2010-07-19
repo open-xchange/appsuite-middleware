@@ -1,10 +1,10 @@
 
 # norootforbuild
 
-Name:           open-xchange-mobile-configuration-generator
-BuildArch:	    noarch
-#!BuildIgnore:  post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-templating >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@
+Name:           open-xchange-mobile-configuration-json-action-email
+BuildArch:	noarch
+#!BuildIgnore: post-build-checks
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-mobile-configuration-json >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -38,17 +38,19 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        This bundle provides methods to configure mobile devices for Active Sync
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange >= @OXVERSION@ open-xchange-templating >= @OXVERSION@ open-xchange-usm >= @OXVERSION@
+Summary:        Mobility Configuration eMail transport.
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-mobile-configuration-json >= @OXVERSION@
+#
+
 %description
-This bundle provides methods to configure mobile devices for Active Sync
+Mobility Configuration eMail transport.
 
 Authors:
 --------
@@ -62,23 +64,26 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
+
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
-
 %post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
-%dir /opt/open-xchange/templates/
+%dir /opt/open-xchange/etc/groupware/osgi/bundle.d
+%dir /opt/open-xchange/bundles
+/opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-/opt/open-xchange/bundles/com.openexchange.mobile.configuration.generator.jar
-%config(noreplace) /opt/open-xchange/etc/groupware/mobileconfig.properties
-%config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
-* Wed May 09 2010 - dennis.sieben@open-xchange.com
- - Initial version
+* Fri Jun 25 2010 - benjamin.otterbach@open-xchange.com
+  - Initial import
