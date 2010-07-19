@@ -231,7 +231,7 @@ public class Login extends AJAXServlet {
                 return;
             }
             writeSecretCookie(resp, session, req.isSecure());
-            writeSessionCookie(resp, session, req.isSecure());
+            writeSessionCookie(resp, session, req.isSecure()); 
             // Removed document fragment for session identifier because session identifier is contained in cookie.
             // If cookies get splitted into session and secret cookie session identifier must be added as URL parameter.
             String usedUIWebPath = req.getParameter(PARAM_UI_WEB_PATH);
@@ -240,6 +240,7 @@ public class Login extends AJAXServlet {
             }
             // Prevent HTTP response splitting.
             usedUIWebPath = usedUIWebPath.replaceAll("[\n\r]", "");
+            usedUIWebPath += "#id="+session.getSessionID();
             resp.sendRedirect(usedUIWebPath);
         } else if (ACTION_AUTOLOGIN.equals(action)) {
             final Cookie[] cookies = req.getCookies();
