@@ -236,34 +236,31 @@ public class SessionWrapper {
         final String username = req.getParameter(USERNAME_PARAMETER);
         final String sessionId = req.getParameter(AJAXServlet.PARAMETER_SESSION);
         final Cookie[] cookies = req.getCookies();
-        for (final Cookie cookie : cookies) {
-            if (null != username && cookie.getName().startsWith("JSESSION")) {
-                // admin mode
-                this.httpSession = req.getSession(false);
-                if (null != this.httpSession) {
-                    this.httpSession.setAttribute(USERNAME_SESSION, username);
+
+        if (sessionId != null) {
+            // groupware mode
+
+            final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            if (null == service) {
+                throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
+            }
+            this.session = service.getSession(sessionId);
+            if (null != this.session) {
+                String secret = SessionServlet.extractSecret(session.getHash(), cookies);
+                if (session.getSecret().equals(secret)) {
                     return;
                 }
-            } else if (null == username && null != sessionId && new StringBuilder(Login.COOKIE_PREFIX).append(sessionId).toString().equals(
-                cookie.getName())) {
-                // groupware mode
-
-                final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-                if (null == service) {
-                    throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
-                }
-                this.session = service.getSession(sessionId);
-                if (null != this.session) {
-                    String secret = SessionServlet.extractSecret(session.getHash(), cookies);
-                    if (session.getSecret().equals(secret)) {
-                        return;
-                    }
-                }
-                LOG.warn("Found cookie but not matching session. " + cookie.getName() + ':' + cookie.getValue());
-            } else if (cookie.getName().startsWith(Login.COOKIE_PREFIX)) {
-                LOG.warn("Found cookie with matching prefix but invalid secret. " + cookie.getName() + ':' + cookie.getValue());
             }
+        } else {
+            // admin mode
+            this.httpSession = req.getSession(false);
+            if (null != this.httpSession) {
+                this.httpSession.setAttribute(USERNAME_SESSION, username);
+                return;
+            }
+                    
         }
+
         throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
     }
 
