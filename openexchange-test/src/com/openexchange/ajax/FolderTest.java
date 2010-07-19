@@ -1141,11 +1141,11 @@ public class FolderTest extends AbstractAJAXTest {
         /*
          * Connect with second user and verify that folder is visible beneath system shared folder
          */
-        anotherSessionId = LoginTest.getSessionId(getWebConversation(), getHostName(), getSeconduser(), getPassword());
+        anotherSessionId = LoginTest.getSessionId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
         boolean found01 = false;
         boolean found02 = false;
         final List<FolderObject> l = getSubfolders(
-            getWebConversation(),
+            getSecondWebConversation(),
             getHostName(),
             anotherSessionId,
             "" + FolderObject.SYSTEM_SHARED_FOLDER_ID,
@@ -1154,7 +1154,7 @@ public class FolderTest extends AbstractAJAXTest {
         Next: for (final Iterator iter = l.iterator(); iter.hasNext();) {
             final FolderObject virtualFO = (FolderObject) iter.next();
             final List<FolderObject> subList = getSubfolders(
-                getWebConversation(),
+                getSecondWebConversation(),
                 getHostName(),
                 anotherSessionId,
                 virtualFO.getFullName(),
@@ -1177,7 +1177,7 @@ public class FolderTest extends AbstractAJAXTest {
         }
         assertTrue(found01);
         assertTrue(found02);
-        final String sesID = LoginTest.getSessionId(getWebConversation(), getHostName(), getLogin(), getPassword());
+        final String sesID = getSessionId();
 
         deleteFolders(getWebConversation(), getHostName(), sesID, new int[] { fuid01, fuid02 }, System.currentTimeMillis(), false);
         // deleteTestFolders(getWebConversation(), getHostName(), sesID, new
