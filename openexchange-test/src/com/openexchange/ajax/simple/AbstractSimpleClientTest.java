@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.simple;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -184,14 +186,14 @@ public class AbstractSimpleClientTest extends TestCase {
     }
 
     private Properties load(String testPropFile) throws FileNotFoundException, IOException {
-        FileReader reader = null;
+        InputStream is = null;
         try {
             Properties properties = new Properties();
-            properties.load(reader = new FileReader(testPropFile));
+            properties.load(is = new FileInputStream(testPropFile));
             return properties;
         } finally {
-            if (reader != null) {
-                reader.close();
+            if (is != null) {
+                is.close();
             }
         }
     }
