@@ -136,8 +136,9 @@ public class FolderTest extends AbstractAJAXTest {
      */
     @Deprecated
     public static final int getUserId(final WebConversation conversation, final String hostname, final String entityArg, final String password) throws IOException, SAXException, JSONException, AjaxException, ConfigurationException {
-        final String sessionId = LoginTest.getSessionId(conversation, hostname, entityArg, password);
-        return ConfigTools.getUserId(conversation, hostname, sessionId);
+        WebConversation conversation2 = new WebConversation(); // Can't reuse conversations for different sessions!
+        final String sessionId = LoginTest.getSessionId(conversation2, hostname, entityArg, password);
+        return ConfigTools.getUserId(conversation2, hostname, sessionId);
     }
 
     public static List<FolderObject> getRootFolders(final WebConversation conversation, final String hostname, final String sessionId, final boolean printOutput) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
@@ -729,6 +730,8 @@ public class FolderTest extends AbstractAJAXTest {
     @Override
     public void tearDown() throws Exception {
         logout();
+        super.tearDown();
+        
     }
 
     public void testUnknownAction() throws IOException, SAXException, JSONException {
