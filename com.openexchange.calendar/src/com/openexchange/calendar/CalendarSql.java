@@ -1098,7 +1098,8 @@ public class CalendarSql implements AppointmentSQLInterface {
             final int[] groups;
             final UserConfiguration uc;
             final OXFolderAccess folderAccess = new OXFolderAccess(readcon, ctx);
-            if (searchobject.getFolder() > 0 && folderAccess.isFolderShared(searchobject.getFolder(), session.getUserId())) {
+            boolean isShared = false;
+            if (isShared = (searchobject.getFolder() > 0 && folderAccess.isFolderShared(searchobject.getFolder(), session.getUserId()))) {
                 userId = folderAccess.getFolderOwner(searchobject.getFolder());
                 groups = UserStorage.getStorageUser(userId, ctx).getGroups();
                 uc = UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
@@ -1107,7 +1108,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 groups = user.getGroups();
                 uc = userConfig;
             }
-            prep = cimp.getSearchQuery(StringCollection.getSelect(cols, DATES_TABLE_NAME), userId, groups, uc, orderBy, orderDir, searchobject, ctx, readcon, cfo);
+            prep = cimp.getSearchQuery(StringCollection.getSelect(cols, DATES_TABLE_NAME), userId, groups, uc, orderBy, orderDir, searchobject, ctx, readcon, cfo, isShared);
             rs = cimp.getResultSet(prep);
             co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
             close_connection = false;

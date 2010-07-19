@@ -1,6 +1,7 @@
 * 2010-07-19 - martin.herfurth@open-xchange.com
 
  - Bugfux #16441: Delete Exceptions for series where the start date differs from the first occurrence.
+ - Bugfux #16476: No more private appointments in search result.
 
 * 2010-07-16 - steffen.templin@open-xchange.com
 
