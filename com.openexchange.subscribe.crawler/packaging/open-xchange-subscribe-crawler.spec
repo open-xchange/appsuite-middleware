@@ -84,6 +84,17 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
 if [ ${1:-0} -eq 2 ]; then
    . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-335
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/crawler.properties
+   if ! ox_exists_property com.openexchange.subscribe.crawler.msn.de $pfile; then
+      ox_set_property com.openexchange.subscribe.crawler.msn.de "true" $pfile
+   fi
+
    ox_update_permissions "/opt/open-xchange/etc/groupware/crawlers" open-xchange:open-xchange 755
    for file in /opt/open-xchange/etc/groupware/crawlers/*; do
        ox_update_permissions "$file" open-xchange:open-xchange 644

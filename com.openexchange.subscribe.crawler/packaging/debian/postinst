@@ -30,6 +30,13 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-335
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/crawler.properties
+  if ! ox_exists_property com.openexchange.subscribe.crawler.msn.de $pfile; then
+      ox_set_property com.openexchange.subscribe.crawler.msn.de "true" $pfile
+  fi
+
 }
 
 case "$1" in
