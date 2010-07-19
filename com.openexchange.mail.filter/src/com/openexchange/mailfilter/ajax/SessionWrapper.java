@@ -54,9 +54,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.server.ServiceException;
@@ -65,9 +65,8 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
- * This class is used to deal with the fact that the mailfilter takes requests
- * from the admin-gui and the groupware gui. So it has to deal with different
- * session and session type. To handle this unique this class is introduced
+ * This class is used to deal with the fact that the mailfilter takes requests from the admin-gui and the groupware gui. So it has to deal
+ * with different session and session type. To handle this unique this class is introduced
  * 
  * @author d7
  */
@@ -82,21 +81,20 @@ public class SessionWrapper {
     public static final String PASSWORD = "password";
 
     /**
-     * The name where the username is stored in the session object, must be
-     * different because "username" is already used in admin session
+     * The name where the username is stored in the session object, must be different because "username" is already used in admin session
      */
     public static final String USERNAME_SESSION = "username_auth";
 
     public class Credentials {
-        
+
         private String username;
-        
+
         private String authname;
-        
+
         private String password;
-        
+
         private int userid;
-        
+
         private final int contextid;
 
         private final boolean b_contextid;
@@ -205,23 +203,23 @@ public class SessionWrapper {
             }
             return String.valueOf(contextid);
         }
-        
-        /* (non-Javadoc)
+
+        /*
+         * (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         @Override
         public String toString() {
             return "Username: " + this.username;
         }
-        
-        
+
     }
-    
+
     /**
      * Takes the httpSession from the admin
      */
     private HttpSession httpSession;
-    
+
     /**
      * Takes the session from the groupware
      */
@@ -229,8 +227,8 @@ public class SessionWrapper {
 
     /**
      * @param req
-     * @throws SessiondException 
-     * @throws OXMailfilterException 
+     * @throws SessiondException
+     * @throws OXMailfilterException
      */
     public SessionWrapper(final HttpServletRequest req) throws SessiondException, OXMailfilterException {
         super();
@@ -246,15 +244,20 @@ public class SessionWrapper {
                     this.httpSession.setAttribute(USERNAME_SESSION, username);
                     return;
                 }
-            } else if (null == username && null != sessionId && new StringBuilder(Login.COOKIE_PREFIX).append(sessionId).toString().equals(cookie.getName())) {
+            } else if (null == username && null != sessionId && new StringBuilder(Login.COOKIE_PREFIX).append(sessionId).toString().equals(
+                cookie.getName())) {
                 // groupware mode
+
                 final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
                 if (null == service) {
                     throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
                 }
                 this.session = service.getSession(sessionId);
-                if (null != this.session && session.getSecret().equals(cookie.getValue())) {
-                    return;
+                if (null != this.session) {
+                    String secret = SessionServlet.extractSecret(session.getHash(), cookies);
+                    if (session.getSecret().equals(secret)) {
+                        return;
+                    }
                 }
                 LOG.warn("Found cookie but not matching session. " + cookie.getName() + ':' + cookie.getValue());
             } else if (cookie.getName().startsWith(Login.COOKIE_PREFIX)) {
@@ -281,7 +284,7 @@ public class SessionWrapper {
         }
         return null;
     }
-    
+
     public void setParameter(final String name, final Object obj) {
         if (null != this.httpSession) {
             // Admin mode
@@ -291,7 +294,7 @@ public class SessionWrapper {
             this.session.setParameter(name, obj);
         }
     }
-    
+
     public Object getParameter(final String name) {
         if (null != this.httpSession) {
             // Admin mode
