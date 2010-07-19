@@ -71,4 +71,6 @@ public interface AddSessionParameter {
     String getClientIP();
 
     String getAuthId();
+    
+    String getHash();
 }

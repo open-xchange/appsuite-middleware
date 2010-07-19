@@ -157,6 +157,9 @@ public final class LoginPerformer {
                 public String getAuthId() {
                     return request.getAuthId();
                 }
+                public String getHash() {
+                    return request.getHash();
+                }
             });
             retval.setSession(sessiondService.getSession(sessionId));
             // Trigger registered login handlers
@@ -212,7 +215,7 @@ public final class LoginPerformer {
      * @param sessionId The session ID
      * @throws LoginException If logout fails
      */
-    public void doLogout(final String sessionId) throws LoginException {
+    public Session doLogout(final String sessionId) throws LoginException {
         // Drop the session
         final SessiondService sessiondService;
         try {
@@ -225,7 +228,7 @@ public final class LoginPerformer {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("No session found for ID: " + sessionId);
             }
-            return;
+            return null;
         }
         // Get context
         final ContextStorage contextStor = ContextStorage.getInstance();
@@ -252,6 +255,7 @@ public final class LoginPerformer {
         logLogout(logout);
         // Trigger registered logout handlers
         triggerLogoutHandlers(logout);
+        return session;
     }
 
     private static void triggerLoginHandlers(final LoginResult login) {

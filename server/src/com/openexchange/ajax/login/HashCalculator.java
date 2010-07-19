@@ -47,108 +47,69 @@
  *
  */
 
-package com.openexchange.session;
+package com.openexchange.ajax.login;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.encoding.Base64;
+
 
 /**
- * {@link SimSession}
+ * {@link HashCalculator}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SimSession implements Session {
+public class HashCalculator {
+    private static final Log LOG = LogFactory.getLog(HashCalculator.class);
+    
+    public static String getHash(HttpServletRequest req) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(getUserAgent(req).getBytes("UTF-8"));
+            md.update(getClient(req).getBytes("UTF-8"));
+            String fieldList = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
+                "com.openexchange.sessiond.hash.fields",
+                "");
+            String[] fields = fieldList.split("\\s*,\\s*");
+            for (String field : fields) {
+                String header = req.getHeader(field);
+                if (header != null) {
+                    md.update(header.getBytes("UTF-8"));
+                }
+            }
 
-    private String loginName;
-    private String randomToken;
-    private String sessionId;
+            byte[] digest = md.digest();
 
-    public SimSession() {
-        super();
+            return Base64.encode(digest).replaceAll("\\W", "");
+        } catch (NoSuchAlgorithmException e) {
+            LOG.fatal(e.getMessage(), e);
+        } catch (UnsupportedEncodingException e) {
+            LOG.fatal(e.getMessage(), e);
+        }
+        return "";
     }
 
-    public boolean containsParameter(String name) {
-        return false;
+    private static String getClient(HttpServletRequest req) {
+        String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
+        if(parameter == null) {
+            return "default";
+        }
+        return parameter;
     }
 
-    public String getAuthId() {
-        return null;
-    }
-
-    public int getContextId() {
-        return 0;
-    }
-
-    public String getLocalIp() {
-        return null;
-    }
-
-    public String getLogin() {
-        return null;
-    }
-
-    public String getLoginName() {
-        return loginName;
-    }
-
-    public void setLoginName(String loginName) {
-        this.loginName = loginName;
-    }
-
-    public Object getParameter(String name) {
-        return null;
-    }
-
-    public String getPassword() {
-        return null;
-    }
-
-    public String getRandomToken() {
-        return randomToken;
-    }
-
-    public void setRandomToken(String randomToken) {
-        this.randomToken = randomToken;
-    }
-
-    public void removeRandomToken() {
-        randomToken = null;
-    }
-
-    public String getSecret() {
-        return null;
-    }
-
-    public String getSessionID() {
-        return sessionId;
-    }
-
-    public void setSessionID(String sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    public int getUserId() {
-        return 0;
-    }
-
-    public String getUserlogin() {
-        return null;
-    }
-
-    public void setParameter(String name, Object value) {
-        // not used by any test
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#getHash()
-     */
-    public String getHash() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
-     */
-    public void setLocalIp(String ip) {
-        // TODO Auto-generated method stub
-        
+    private static String getUserAgent(HttpServletRequest req) {
+        String header = req.getHeader(Header.USER_AGENT);
+        if(header == null) {
+            return "";
+        }
+        return header;
     }
 }

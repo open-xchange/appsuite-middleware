@@ -160,6 +160,10 @@ public class ServerSessionAdapter implements ServerSession {
     public String getLocalIp() {
         return session().getLocalIp();
     }
+    
+    public void setLocalIp(String ip) {
+        session().setLocalIp(ip);
+    }
 
     public String getLoginName() {
         return session().getLoginName();
@@ -218,6 +222,10 @@ public class ServerSessionAdapter implements ServerSession {
 
     public String getLogin() {
         return session().getLogin();
+    }
+    
+    public String getHash() {
+        return session().getHash();
     }
 
     public User getUser() {

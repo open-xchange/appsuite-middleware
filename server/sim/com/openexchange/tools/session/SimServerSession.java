@@ -157,4 +157,22 @@ public class SimServerSession implements ServerSession {
     public String getAuthId() {
         throw new UnsupportedOperationException();
     }
+
+
+    /* (non-Javadoc)
+     * @see com.openexchange.session.Session#getHash()
+     */
+    public String getHash() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+    /* (non-Javadoc)
+     * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
+     */
+    public void setLocalIp(String ip) {
+        // TODO Auto-generated method stub
+        
+    }
 }

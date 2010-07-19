@@ -157,8 +157,13 @@ public class AjaxException extends AbstractOXException {
         /**
          * Action "%1$s" on request path "%2$s" is not permitted via a non-secure connection.
          */
-        NonSecureDenied("Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure connection.", Category.CODE_ERROR, 14);
-
+        NonSecureDenied("Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure connection.", Category.CODE_ERROR, 14),
+        /**
+         * The Action "%1$s" is disabled due to the server configuration
+         */
+        DisabledAction("The Action \"%1$s\" is disabled due to the server configuration", Category.PERMISSION, 15),
+        ;
+        
         /**
          * Message of the exception.
          */

@@ -295,6 +295,9 @@ public abstract class OXServlet extends WebDavServlet {
             public String getVersion() {
                 return null;
             }
+            public String getHash() {
+                return null;
+            }
         };
     }
 

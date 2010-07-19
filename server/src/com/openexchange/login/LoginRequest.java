@@ -69,6 +69,8 @@ public interface LoginRequest {
     String getClient();
 
     String getVersion();
+    
+    String getHash();
 
     Interface getInterface();
 }

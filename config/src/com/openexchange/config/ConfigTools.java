@@ -47,103 +47,78 @@
  *
  */
 
-package com.openexchange.publish.tools;
+package com.openexchange.config;
 
-import com.openexchange.publish.Publication;
-import com.openexchange.session.Session;
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
- * {@link PublicationSession}
- * 
+ * {@link ConfigTools} collect common parsing operations for configuration options.
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PublicationSession implements Session {
-
-    private final Publication publication;
-
+public class ConfigTools {
+    private static final Map<String, Long> UNITS = new HashMap<String, Long>() {{
+        put("MS", 1l);
+        put("S", 1000l);
+        put("M", 1000*60l);
+        put("H", 1000*60*60l);
+        put("D", 1000*60*60*24l);
+        put("W", 1000*60*60*24*7l);
+    }};
+    
     /**
-     * Initializes a new {@link PublicationSession}.
+     * A timespan specification consists of a number and a unit of measurement. Units are:
+     * ms for miliseconds
+     * s for seconds
+     * m for minutes
+     * h for hours
+     * D for days
+     * W for weeks
      * 
-     * @param publication
+     * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds  
+     * @param span
+     * @return
      */
-    public PublicationSession(final Publication publication) {
-        super();
-        this.publication = publication;
-    }
-
-    public int getContextId() {
-        return publication.getContext().getContextId();
-    }
-
-    public String getLocalIp() {
-        return null;
-    }
-
-    public String getLogin() {
-        return null;
-    }
-
-    public String getLoginName() {
-        return null;
-    }
-
-    public boolean containsParameter(final String name) {
-        return false;
-    }
-
-    public Object getParameter(final String name) {
-        return null;
-    }
-
-    public String getPassword() {
-        return null;
-    }
-
-    public String getRandomToken() {
-        return null;
-    }
-
-    public String getSecret() {
-        return null;
-    }
-
-    public String getSessionID() {
-        return null;
-    }
-
-    public int getUserId() {
-        return publication.getUserId();
-    }
-
-    public String getUserlogin() {
-        return null;
-    }
-
-    public void removeRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setParameter(final String name, final Object value) {
-        // Nothing to remember.
-    }
-
-    public String getAuthId() {
-        throw new UnsupportedOperationException();
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#getHash()
-     */
-    public String getHash() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
-     */
-    public void setLocalIp(String ip) {
-        // TODO Auto-generated method stub
+    public static long parseTimespan(String span) {
+        StringBuilder numberBuilder = new StringBuilder();
+        StringBuilder unitBuilder = new StringBuilder();
+        int mode = 0;
+        long tally = 0;
         
+        for(char c : span.toCharArray()) {
+            if(Character.isDigit(c)) {
+                if(mode == 0) {
+                    numberBuilder.append(c);
+                } else {
+                    String unit = unitBuilder.toString().toUpperCase();
+                    Long factor = UNITS.get(unit);
+                    if(factor == null) {
+                        throw new IllegalArgumentException("I don't know unit "+unit);
+                    }
+                    tally += Long.parseLong(numberBuilder.toString()) * factor;
+                    numberBuilder.setLength(0);
+                    unitBuilder.setLength(0);
+                    mode = 0;
+                    numberBuilder.append(c);
+                }
+            } else if(Character.isLetter(c)){
+                mode = 1;
+                unitBuilder.append(c);
+            } else {
+                // IGNORE
+            }
+        }
+        if(numberBuilder.length() != 0) {
+            String unit = unitBuilder.toString().toUpperCase();
+            Long factor = UNITS.get(unit);
+            if(factor == null) {
+                throw new IllegalArgumentException("I don't know unit "+unit);
+            }
+            tally += Long.parseLong(numberBuilder.toString()) * factor;
+        }
+        return tally;
     }
+
 }

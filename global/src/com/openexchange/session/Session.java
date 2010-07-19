@@ -69,6 +69,12 @@ public interface Session {
     public String getLocalIp();
 
     /**
+     * Updates the local IP address.
+     * @param ip the new IP address associated with this session
+     */
+    public void setLocalIp(String ip);
+    
+    /**
      * Gets the login name
      * 
      * @return The login name
@@ -162,4 +168,10 @@ public interface Session {
      * @return the authentication identifier that is used to trace the login request across different systems.
      */
     String getAuthId();
+
+    /**
+     * @return The HashCode distinguishing this session from others in the same store.
+     */
+    public String getHash();
+
 }

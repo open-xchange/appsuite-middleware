@@ -87,6 +87,8 @@ public final class CachedSession implements Serializable {
     private final String login;
 
     private final String authId;
+    
+    private final String hash;
 
     private final Map<String, Serializable> parameters;
 
@@ -106,7 +108,7 @@ public final class CachedSession implements Serializable {
      * @param login The full login; e.g. <code>test@foo</code>
      * @param parameters The session's parameters
      */
-    public CachedSession(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, String authId, final Map<String, Object> parameters) {
+    public CachedSession(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, String authId, final String hash, final Map<String, Object> parameters) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -118,6 +120,7 @@ public final class CachedSession implements Serializable {
         this.contextId = contextId;
         this.login = login;
         this.authId = authId;
+        this.hash = hash;
         final Map<String, Serializable> tmpparameters = new HashMap<String, Serializable>(parameters.size(), 1);
         /*
          * Only fill with serializable objects
@@ -231,6 +234,11 @@ public final class CachedSession implements Serializable {
     public String getAuthId() {
         return authId;
     }
+    
+    public String getHash() {
+        return hash;
+    }
+
 
     /**
      * Gets the parameters.
@@ -273,5 +281,7 @@ public final class CachedSession implements Serializable {
     public void setMarkedAsRemoved(final boolean markedAsRemoved) {
         this.markedAsRemoved = markedAsRemoved;
     }
+    
+    
 
 }

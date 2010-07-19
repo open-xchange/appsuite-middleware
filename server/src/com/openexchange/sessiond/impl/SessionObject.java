@@ -98,6 +98,8 @@ public class SessionObject implements com.openexchange.session.Session {
     private String login;
 
     private String authId;
+    
+    private String hash;
 
     private final Map<String, Object> parameters;
 
@@ -268,5 +270,14 @@ public class SessionObject implements com.openexchange.session.Session {
 
     public void setAuthId(String authId) {
         this.authId = authId;
+    }
+    
+    
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+    
+    public String getHash() {
+        return hash;
     }
 }

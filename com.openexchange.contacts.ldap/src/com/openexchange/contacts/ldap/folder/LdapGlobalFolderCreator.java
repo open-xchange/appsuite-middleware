@@ -255,6 +255,15 @@ public class LdapGlobalFolderCreator {
             public String getAuthId() {
                 throw new UnsupportedOperationException();
             }
+
+            public String getHash() {
+                return null;
+            }
+
+            public void setLocalIp(String ip) {
+                // TODO Auto-generated method stub
+                
+            }
         };
     }
 

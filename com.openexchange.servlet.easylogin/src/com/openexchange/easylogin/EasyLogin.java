@@ -278,6 +278,9 @@ public class EasyLogin extends HttpServlet {
                 public String getVersion() {
                     return null;
                 }
+                public String getHash() {
+                    return null;
+                }
             });
         } catch (LoginException e) {
             LOG.error("IP: " + req.getRemoteAddr() + ", Login: " + login + ", AuthID: " + authID + ", Login failed.", e);
