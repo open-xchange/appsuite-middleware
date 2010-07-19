@@ -51,6 +51,8 @@ package com.openexchange.groupware.calendar;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.Date;
 import java.text.ParseException;
@@ -146,6 +148,7 @@ public final class TimeTools {
     public static Date D(final String date) {
         return D(date, TimeZone.getTimeZone("UTC"));
     }
+    
 
     private static Date applyTimeZone(final TimeZone timeZone, final Date date) {
         final SimpleDateFormat sdf = new SimpleDateFormat();

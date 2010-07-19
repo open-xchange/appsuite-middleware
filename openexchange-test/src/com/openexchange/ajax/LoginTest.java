@@ -135,7 +135,7 @@ public class LoginTest extends AbstractAJAXTest {
      * @param hostname hostname of the server running the server.
      * @param sessionId Session identifier of the user.
      * @throws IOException if the communication with the server fails.
-     * @throws SAXException if a SAX error occurs.
+     * @throws SAXException if a SAX error occurs. 
      */
     public static void logout(final WebConversation conversation,
         final String hostname, final String sessionId)

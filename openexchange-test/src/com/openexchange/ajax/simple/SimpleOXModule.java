@@ -47,35 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.simple;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 /**
+ * {@link SimpleOXModule}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class SessionTestSuite {
+public class SimpleOXModule {
 
-    /**
-     * Prevent instantiation.
-     */
-    private SessionTestSuite() {
+    private SimpleOXClient client;
+    private String moduleName;
+
+    public SimpleOXModule(SimpleOXClient client, String moduleName) {
         super();
+        this.client = client;
+        this.moduleName = moduleName;
+    }
+    
+    public SimpleResponse call(String action, Object...parameters) throws JSONException, IOException {
+        return client.call(moduleName, action, parameters);
     }
 
-    /**
-     * Generates the session tests suite.
-     * @return the session tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(LoginTest.class);
-        tests.addTestSuite(StoreTest.class);
-        tests.addTestSuite(RedirectTest.class);
-        tests.addTestSuite(Bug12437Test.class);
-        tests.addTestSuite(DuplicateAuthIdTest.class);
-        return tests;
+    public JSONObject raw(String action, Object...parameters) throws JSONException, IOException {
+        return client.raw(moduleName, action, parameters);
     }
+    
+    
 }

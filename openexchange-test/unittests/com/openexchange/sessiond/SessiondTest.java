@@ -171,6 +171,10 @@ public class SessiondTest extends TestCase {
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+            public String getHash() {
+                return "123";
+            }
+            
         });
     }
     
@@ -201,6 +205,9 @@ public class SessiondTest extends TestCase {
             }
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
+            }
+            public String getHash() {
+                return "123";
             }
         });
         sessiondCon.refreshSession(sessionId);
@@ -234,6 +241,9 @@ public class SessiondTest extends TestCase {
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+            public String getHash() {
+                return "123";
+            }
         });
         sessiondCon.removeSession(sessionId);
     }
@@ -265,6 +275,9 @@ public class SessiondTest extends TestCase {
             }
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
+            }
+            public String getHash() {
+                return "123";
             }
         });
         sessiondCon.refreshSession(sessionId);

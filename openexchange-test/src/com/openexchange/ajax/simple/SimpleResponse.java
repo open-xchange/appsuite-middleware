@@ -47,35 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.simple;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.tools.JSONCoercion;
+
 
 /**
+ * {@link SimpleResponse}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class SessionTestSuite {
-
-    /**
-     * Prevent instantiation.
-     */
-    private SessionTestSuite() {
-        super();
+public class SimpleResponse {
+    private Object data;
+    private JSONObject response;
+    
+    private String error;
+    
+    public SimpleResponse(JSONObject response) throws JSONException {
+        this.response = response;
+        if(response.has("error")) {
+            this.error = response.toString();
+        } else if(response.has("data")){
+            this.data = JSONCoercion.coerceToNative(response.get("data"));
+        }
     }
-
-    /**
-     * Generates the session tests suite.
-     * @return the session tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(LoginTest.class);
-        tests.addTestSuite(StoreTest.class);
-        tests.addTestSuite(RedirectTest.class);
-        tests.addTestSuite(Bug12437Test.class);
-        tests.addTestSuite(DuplicateAuthIdTest.class);
-        return tests;
+    
+    public boolean hasError() {
+        return error != null;
+    }
+    
+    public String getError() {
+        return error;
+    }
+    
+    public Object getData() {
+        return data;
+    }
+    
+    public Map<String, Object> getObjectData() {
+        return (Map<String, Object>) data;
+    }
+    
+    public List<List<Object>> getListData() {
+        return (List<List<Object>>) data;
     }
 }

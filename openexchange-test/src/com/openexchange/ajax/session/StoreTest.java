@@ -49,33 +49,84 @@
 
 package com.openexchange.ajax.session;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Date;
+import org.apache.commons.httpclient.Cookie;
+import com.openexchange.ajax.Login;
+import com.openexchange.ajax.simple.AbstractSimpleClientTest;
+import com.openexchange.groupware.calendar.TimeTools;
+
 
 /**
+ * {@link StoreTest}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class SessionTestSuite {
+public class StoreTest extends AbstractSimpleClientTest{
 
-    /**
-     * Prevent instantiation.
-     */
-    private SessionTestSuite() {
-        super();
+    public StoreTest(String name) {
+        super(name);
     }
-
-    /**
-     * Generates the session tests suite.
-     * @return the session tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(LoginTest.class);
-        tests.addTestSuite(StoreTest.class);
-        tests.addTestSuite(RedirectTest.class);
-        tests.addTestSuite(Bug12437Test.class);
-        tests.addTestSuite(DuplicateAuthIdTest.class);
-        return tests;
+    
+    public void testStoreStoresSessionInCookie() throws Exception {
+        as(USER1);
+        inModule("login");
+        call("store");
+        
+        String sessionID = currentClient.getSessionID();
+        
+        Cookie[] cookies = currentClient.getClient().getState().getCookies();
+        
+        boolean found = false;
+        for (Cookie cookie : cookies) {
+            found = found || ( cookie.getName().startsWith(Login.COOKIE_PREFIX) && cookie.getValue().equals(sessionID) );
+        }
+        assertTrue(found);
     }
+    
+    public void testCookieLifetimeIsLongerThanADay() throws Exception {
+        as(USER1);
+        inModule("login");
+        call("store");
+        
+        String sessionID = currentClient.getSessionID();
+        
+        Cookie[] cookies = currentClient.getClient().getState().getCookies();
+        
+        Cookie sessionCookie = null;
+        for (Cookie cookie : cookies) {
+            if ( cookie.getName().startsWith(Login.COOKIE_PREFIX) && cookie.getValue().equals(sessionID) ) {
+                sessionCookie = cookie;
+                break;
+            }
+        }
+        
+        assertNotNull(sessionCookie);
+        
+        assertNotNull(sessionCookie.getExpiryDate());
+        Date tomorrow = TimeTools.D("tomorrow");
+        assertTrue(sessionCookie.getExpiryDate().after(tomorrow));
+    }
+    
+    // Error Cases
+    
+    public void testNonExistingSessionID() throws Exception {
+        as(USER1);
+        inModule("login");
+        call("store", "session", "1233456");
+    
+        assertError();
+    }
+    
+    public void testExistingButDifferentSessionID() throws Exception {
+        as(USER1);
+        String sessionID = currentClient.getSessionID();
+        
+        as(USER2);
+        inModule("login");
+        call("store", "session", sessionID);
+    
+        assertError();
+    }
+    
+    
 }

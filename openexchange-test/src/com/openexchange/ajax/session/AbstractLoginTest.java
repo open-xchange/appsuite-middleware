@@ -49,33 +49,30 @@
 
 package com.openexchange.ajax.session;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.commons.httpclient.Cookie;
+import com.openexchange.ajax.Login;
+import com.openexchange.ajax.simple.AbstractSimpleClientTest;
+
 
 /**
+ * {@link AbstractLoginTest}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class SessionTestSuite {
+public class AbstractLoginTest extends AbstractSimpleClientTest {
 
-    /**
-     * Prevent instantiation.
-     */
-    private SessionTestSuite() {
-        super();
+    public AbstractLoginTest(String name) {
+        super(name);
+    }
+    
+    protected void assertNoOXCookies() {
+        Cookie[] cookies2 = currentClient.getClient().getState().getCookies();
+        for (Cookie cookie : cookies2) {
+            if (cookie.getName().startsWith(Login.COOKIE_PREFIX) || cookie.getName().startsWith(Login.SECRET_PREFIX)) {
+                fail("Found cookie that should have been deleted: " + cookie.getName());
+            }
+        }
     }
 
-    /**
-     * Generates the session tests suite.
-     * @return the session tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(LoginTest.class);
-        tests.addTestSuite(StoreTest.class);
-        tests.addTestSuite(RedirectTest.class);
-        tests.addTestSuite(Bug12437Test.class);
-        tests.addTestSuite(DuplicateAuthIdTest.class);
-        return tests;
-    }
+
 }
