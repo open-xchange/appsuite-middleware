@@ -94,11 +94,11 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
 
     /**
      * Default constructor.
-     * @param appointmentObj appointment to insert.
+     * @param appointment appointment to insert.
      * @param timeZone time zone of the user.
      */
-    public InsertRequest(final Appointment appointmentObj, final TimeZone timeZone) {
-        this(appointmentObj, timeZone, true);
+    public InsertRequest(final Appointment appointment, final TimeZone timeZone) {
+        this(appointment, timeZone, true);
     }
     
     /**

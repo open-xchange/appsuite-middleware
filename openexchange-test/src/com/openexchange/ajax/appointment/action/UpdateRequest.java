@@ -74,11 +74,11 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
     /**
      * Default constructor.
      * 
-     * @param appointmentObj Appointment object with updated attributes. This appointment must contain the attributes parent folder
+     * @param appointment Appointment object with updated attributes. This appointment must contain the attributes parent folder
      *            identifier, object identifier and last modification timestamp.
      */
-    public UpdateRequest(final Appointment appointmentObj, final TimeZone timeZone) {
-        this(appointmentObj, timeZone, true);
+    public UpdateRequest(final Appointment appointment, final TimeZone timeZone) {
+        this(appointment, timeZone, true);
     }
 
     public UpdateRequest(final Appointment appointment, final TimeZone timezone, final boolean failOnError) {
