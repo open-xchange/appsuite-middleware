@@ -109,7 +109,9 @@ public final class CacheException extends AbstractOXException {
         /**
          * Missing default auxiliary defined by property: jcs.default=<aux-name>
          */
-        MISSING_DEFAULT_AUX("Missing default auxiliary defined by property: jcs.default=<aux-name>", Category.SETUP_ERROR, 11);
+        MISSING_DEFAULT_AUX("Missing default auxiliary defined by property: jcs.default=<aux-name>", Category.SETUP_ERROR, 11),
+        /** Invalid cache region name \"%1$s\". */
+        INVALID_CACHE_REGION_NAME("Invalid cache region name \"%1$s\".", Category.CODE_ERROR, 12);
 
         private final String message;
 
