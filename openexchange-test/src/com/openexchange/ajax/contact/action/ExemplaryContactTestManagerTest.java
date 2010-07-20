@@ -145,12 +145,21 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		boolean found1 = false;
 		boolean found2 = false;
 		// folderId "-1" means searching in all folders
-		Contact [] allContacts = contactManager.searchAction("Herbert", -1);
-		for (int i=0; i<allContacts.length; i++) {
-			Contact co = allContacts[i];
-			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
-			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
+		Contact[] contacts_1 = contactManager.searchAction(contactObject1.getDisplayName(), -1);
+		Contact[] contacts_2 = contactManager.searchAction(contactObject2.getDisplayName(), -1);
+		
+		for (int i = 0; i < contacts_1.length; i++) {
+		    if (contacts_1[i].getObjectID() == contactObject1.getObjectID()) {
+		        found1 = true;
+		    }
 		}
+		
+		for (int i = 0; i < contacts_1.length; i++) {
+            if (contacts_2[i].getObjectID() == contactObject2.getObjectID()) {
+                found2 = true;
+            }
+        }
+		
 		assertTrue("First contact was not found.", found1);
 		assertTrue("Second contact was not found.", found2);
 	}
