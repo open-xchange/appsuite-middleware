@@ -50,13 +50,14 @@
 package com.openexchange.groupware.attach;
 
 public interface AttachmentListener {
-	/**
-	 * @return The timestamp of the modified object or -1 if this listener doesn't modify objects
-	 */
-	public long attached(AttachmentEvent e) throws Exception ;
 
-	/**
-	 * @return The timestamp of the modified object or -1 if this listener doesn't modify objects
-	 */
-	public long detached(AttachmentEvent e) throws Exception ;
+    /**
+     * @return The timestamp of the modified object or -1 if this listener doesn't modify objects
+     */
+    public long attached(AttachmentEvent e) throws Exception;
+
+    /**
+     * @return The timestamp of the modified object or -1 if this listener doesn't modify objects
+     */
+    public long detached(AttachmentEvent e) throws Exception;
 }
