@@ -220,7 +220,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             fromAddr = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail();
         }   
         
-        mail.setFromAddr(fromAddr);
+        User sender = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+        
+        if (sender != null) {
+            mail.setFromAddr("\"" + sender.getDisplayName() + "\"" + " <" + fromAddr + ">");
+        } else {
+            mail.setFromAddr(fromAddr);
+        }
+
         mail.setToAddrs(msg.addresses.toArray(new String[msg.addresses.size()]));
         mail.setText(msg.message);
         mail.setSubject(msg.title);
