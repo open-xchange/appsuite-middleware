@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -78,6 +83,8 @@ public class Bug16141Test extends AbstractAJAXSession {
     private String[][] ids = null;
     
     private String testMailDir;
+
+    private String address;
     
     public Bug16141Test(String name) {
         super(name);
@@ -89,6 +96,7 @@ public class Bug16141Test extends AbstractAJAXSession {
         client = getClient();
         values = client.getValues();
         folder = values.getInboxFolder();
+        address = client.getValues().getSendAddress();
         testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
     }
     
@@ -116,45 +124,29 @@ public class Bug16141Test extends AbstractAJAXSession {
         }
     }
     
-    private InputStream[] createABunchOfMails() {        
-        String msg = "";
-        
-        InputStream is1 = null;
-        try {
-            is1 = new FileInputStream(testMailDir + "/bug16141_1.eml");
-        } catch (FileNotFoundException e) {
-            msg += e.getMessage() + "\n";
+    private InputStream[] createABunchOfMails() {
+        List<InputStream> retval = new ArrayList<InputStream>(4);
+        for (String fileName : new String[] { "bug16141_1.eml", "bug16141_2.eml", "bug16141_3.eml", "bug16141_4.eml" }) {
+            try {
+                retval.add(getMailAndReplaceAddress(fileName));
+            } catch (IOException e) {
+                fail(e.getMessage());
+            }
         }
-        
-        InputStream is2 = null;
-        try {
-            is2 = new FileInputStream(testMailDir + "/bug16141_2.eml");
-        } catch (FileNotFoundException e) {
-            msg += e.getMessage() + "\n";
-        }
-        
-        InputStream is3 = null;
-        try {
-            is3 = new FileInputStream(testMailDir + "/bug16141_3.eml");
-        } catch (FileNotFoundException e) {
-            msg += e.getMessage() + "\n";
-        }
-        
-        InputStream is4 = null;
-        try {
-            is4 = new FileInputStream(testMailDir + "/bug16141_4.eml");
-        } catch (FileNotFoundException e) {
-            msg += e.getMessage() + "\n";
-        }
-        
-        if (is1 == null || is2 == null || is3 == null || is4 == null) {
-            fail("Testmails konnten nicht geladen werden. Fehler: " + msg);
-        }
-        
-        final InputStream mail[] = {is1, is2, is3, is4};
-        return mail;
+        return retval.toArray(new InputStream[retval.size()]);
     }
-    
+
+    private InputStream getMailAndReplaceAddress(String fileName) throws IOException {
+        InputStreamReader isr = new InputStreamReader(new FileInputStream(testMailDir + File.separatorChar + fileName), "UTF-8");
+        char[] buf = new char[512];
+        int length;
+        StringBuilder sb = new StringBuilder();
+        while ((length = isr.read(buf)) != -1) {
+            sb.append(buf, 0, length);
+        }
+        return new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), address).getBytes("UTF-8"));
+    }
+
     @Override
     public void tearDown() throws Exception {
         if (ids != null) {
