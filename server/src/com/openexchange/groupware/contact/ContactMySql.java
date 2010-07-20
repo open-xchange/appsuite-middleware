@@ -1111,8 +1111,7 @@ public class ContactMySql implements ContactSql {
             " AND cid = ").append(cid).toString();
     }
 
-    private static final String PREFIXED_FIELDS =
-        "co.fid,co.cid,co.created_from,co.creating_date," + "co.changed_from,co.changing_date, co.intfield01";
+    private static final String PREFIXED_FIELDS = "co.fid,co.cid,co.created_from,co.creating_date,co.changed_from,co.changing_date,co.intfield01";
 
     public StringBuilder iFgetColsStringFromDeleteTable(final int[] cols) {
         final String fields = buildContactSelectString(cols);
@@ -1956,12 +1955,12 @@ public class ContactMySql implements ContactSql {
 
                     final String field = Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName();
 
-                    String value = StringCollection.prepareForSearch(cso.getDisplayName(), false);
+                    String value = StringCollection.prepareForSearch(cso.getDisplayName());
 
                     if (STR_PERCENT.equals(value)) {
                         sb.append(' ');
                     } else {
-                        sb.append('(').append("co.").append(field).append(" = ?) ");
+                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
                         if (isSingleSelect) {
                             sb.append(searchHabit).append(' ');
                             injectors.add(new StringSQLInjector(value));

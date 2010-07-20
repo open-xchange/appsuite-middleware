@@ -1154,13 +1154,17 @@ public final class Contacts {
                 cso.setDisplayName(contact.getDisplayName());
                 cso.setIgnoreOwn(contact.getObjectID());
                 csql.setContactSearchObject(cso);
-                csql.setSelect(csql.iFgetColsString(new int[] { 1, 20, }).toString());
+                int[] cols = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME };
+                csql.setSelect(csql.iFgetColsString(cols).toString());
                 csql.setSearchHabit(" AND ");
                 try {
                     stmt = csql.getSqlStatement(readcon);
                     rs = ((PreparedStatement) stmt).executeQuery();
-                    if (rs.next()) {
-                        throw EXCEPTIONS.create(67, I(ctx.getContextId()), I(contact.getObjectID()));
+                    while (rs.next()) {
+                        String displayName = rs.getString(10); // ContactMySql.PREFIXED_FIELDS (7) + cols[3]
+                        if (contact.getDisplayName().equalsIgnoreCase(displayName)) {
+                            throw EXCEPTIONS.create(67, I(ctx.getContextId()), I(contact.getObjectID()));
+                        }
                     }
                 } catch (final SQLException sq) {
                     throw EXCEPTIONS.create(66, sq, I(ctx.getContextId()), I(contact.getObjectID()));
