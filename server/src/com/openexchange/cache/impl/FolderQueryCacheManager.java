@@ -49,15 +49,13 @@
 
 package com.openexchange.cache.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.api2.OXException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
@@ -75,29 +73,17 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public final class FolderQueryCacheManager {
 
-    private static final ConcurrentMap<Integer, ReadWriteLock> contextLocks = new ConcurrentHashMap<Integer, ReadWriteLock>();
-
     private static final String REGION_NAME = "OXFolderQueryCache";
 
     private static volatile FolderQueryCacheManager instance;
 
     private Cache folderQueryCache;
 
-    private static ReadWriteLock getContextLock(final int cid) {
-        final Integer key = Integer.valueOf(cid);
-        ReadWriteLock l = contextLocks.get(key);
-        if (l == null) {
-            final ReadWriteLock tmp = new ReentrantReadWriteLock();
-            l = contextLocks.putIfAbsent(key, tmp);
-            if (null == l) {
-                l = tmp;
-            }
-        }
-        return l;
-    }
+    private Lock cacheLock;
 
     private FolderQueryCacheManager() throws OXException {
         super();
+        cacheLock = new ReentrantLock(true);
         initCache();
     }
 
@@ -199,24 +185,27 @@ public final class FolderQueryCacheManager {
      * 
      * @return query result if present, otherwise <code>null</code>
      */
-    @SuppressWarnings("unchecked")
     public LinkedList<Integer> getFolderQuery(final int queryNum, final int userId, final int cid) {
         if (null == folderQueryCache) {
             return null;
         }
-        final Lock ctxReadLock = getContextLock(cid).readLock();
-        ctxReadLock.lock();
+        cacheLock.lock();
         try {
-            final Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache.getFromGroup(
-                createUserKey(userId),
-                createContextKey(cid));
-            final LinkedList<Integer> q;
-            if (map == null || (q = map.get(createQueryKey(queryNum))) == null) {
+            Object tmp = folderQueryCache.getFromGroup(createUserKey(userId), createContextKey(cid));
+            if (null == tmp) {
                 return null;
             }
-            return (LinkedList<Integer>) q.clone();
+            @SuppressWarnings("unchecked")
+            final Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) tmp;
+            final LinkedList<Integer> q = map.get(createQueryKey(queryNum));
+            if (null == q) {
+                return null;
+            }
+            @SuppressWarnings("unchecked")
+            LinkedList<Integer> retval = (LinkedList<Integer>) q.clone();
+            return retval;
         } finally {
-            ctxReadLock.unlock();
+            cacheLock.unlock();
         }
     }
 
@@ -254,30 +243,31 @@ public final class FolderQueryCacheManager {
      * 
      * @throws OXException If a caching error occurs
      */
-    @SuppressWarnings("unchecked")
     public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid, final boolean append) throws OXException {
         if (null == folderQueryCache) {
             return;
         } else if (q == null) {
             return;
         }
-        final Lock ctxWriteLock = getContextLock(cid).writeLock();
-        ctxWriteLock.lock();
+        final CacheKey queryKey = createQueryKey(queryNum);
+        cacheLock.lock();
         try {
             boolean insertMap = false;
-            Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache.getFromGroup(
-                createUserKey(userId),
-                createContextKey(cid));
+            @SuppressWarnings("unchecked")
+            Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache.getFromGroup(createUserKey(userId), createContextKey(cid));
             if (map == null) {
                 map = new HashMap<CacheKey, LinkedList<Integer>>();
                 insertMap = true;
             }
-            final CacheKey queryKey = createQueryKey(queryNum);
             final LinkedList<Integer> tmp = map.get(queryKey);
             if (tmp == null || !append) {
-                map.put(queryKey, (LinkedList<Integer>) q.clone());
+                @SuppressWarnings("unchecked")
+                LinkedList<Integer> clone = (LinkedList<Integer>) q.clone();
+                map.put(queryKey, clone);
             } else {
-                tmp.addAll((LinkedList<Integer>) q.clone());
+                @SuppressWarnings("unchecked")
+                LinkedList<Integer> clone = (LinkedList<Integer>) q.clone();
+                tmp.addAll(clone);
             }
             if (insertMap) {
                 folderQueryCache.putInGroup(createUserKey(userId), createContextKey(cid), (Serializable) map);
@@ -285,7 +275,7 @@ public final class FolderQueryCacheManager {
         } catch (final CacheException e) {
             throw new OXException(e);
         } finally {
-            ctxWriteLock.unlock();
+            cacheLock.unlock();
         }
     }
 
@@ -303,12 +293,11 @@ public final class FolderQueryCacheManager {
         if (null == folderQueryCache) {
             return;
         }
-        final Lock ctxWriteLock = getContextLock(cid).writeLock();
-        ctxWriteLock.lock();
+        cacheLock.lock();
         try {
             folderQueryCache.invalidateGroup(createContextKey(cid));
         } finally {
-            ctxWriteLock.unlock();
+            cacheLock.unlock();
         }
     }
 
@@ -319,11 +308,11 @@ public final class FolderQueryCacheManager {
     }
 
     private static Integer createUserKey(final int userId) {
-        return Integer.valueOf(userId);
+        return I(userId);
     }
 
     private static String createContextKey(final int cid) {
-        return String.valueOf(cid);
+        return Integer.toString(cid);
     }
 
 }

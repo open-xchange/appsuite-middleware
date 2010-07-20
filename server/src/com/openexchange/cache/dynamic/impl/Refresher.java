@@ -122,10 +122,6 @@ public abstract class Refresher<T extends Serializable> {
     }
 
     public static <T extends Serializable> T refresh(String regionName, Cache cache, OXObjectFactory<T> factory) throws AbstractOXException {
-        return refresh(regionName, cache, factory, true, false);
-    }
-
-    public static <T extends Serializable> T refresh(String regionName, Cache cache, OXObjectFactory<T> factory, boolean fromCache, boolean removeBeforePut) throws AbstractOXException {
         if (null == cache) {
             return factory.load();
         }
@@ -135,10 +131,7 @@ public abstract class Refresher<T extends Serializable> {
         Condition cond = null;
         lock.lock();
         try {
-            Object tmp = null;
-            if (fromCache) {
-                tmp = cache.get(key);
-            }
+            Object tmp = cache.get(key);
             if (null == tmp) {
                 // I am the thread to load the object. Put temporary condition
                 // into cache.
@@ -181,9 +174,6 @@ public abstract class Refresher<T extends Serializable> {
             }
             lock.lock();
             try {
-                if (removeBeforePut) {
-                    cache.remove(key);
-                }
                 cache.put(key, retval);
                 cond.signalAll();
             } catch (final CacheException e) {
