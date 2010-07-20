@@ -119,7 +119,7 @@ public class Login extends AJAXServlet {
 
     private static final String PARAM_UI_WEB_PATH = "uiWebPath";
 
-    public static final String COOKIE_PREFIX = "open-xchange-session-";
+    public static final String SESSSION_PREFIX = "open-xchange-session-";
 
     public static final String SECRET_PREFIX = "open-xchange-secret-";
 
@@ -231,23 +231,26 @@ public class Login extends AJAXServlet {
                 return;
             }
             writeSecretCookie(resp, session, req.isSecure());
-            writeSessionCookie(resp, session, req.isSecure()); 
-            // Removed document fragment for session identifier because session identifier is contained in cookie.
-            // If cookies get splitted into session and secret cookie session identifier must be added as URL parameter.
+            writeSessionCookie(resp, session, req.isSecure()); // FIXME
+
             String usedUIWebPath = req.getParameter(PARAM_UI_WEB_PATH);
             if (null == usedUIWebPath) {
                 usedUIWebPath = uiWebPath;
             }
             // Prevent HTTP response splitting.
             usedUIWebPath = usedUIWebPath.replaceAll("[\n\r]", "");
-            usedUIWebPath += "#id="+session.getSessionID();
+            usedUIWebPath = addFragmentParameter(usedUIWebPath, PARAMETER_SESSION, session.getSessionID());
             resp.sendRedirect(usedUIWebPath);
         } else if (ACTION_AUTOLOGIN.equals(action)) {
-            final Cookie[] cookies = req.getCookies();
-            String hash = HashCalculator.getHash(req);
-
             final Response response = new Response();
             try {
+                if (!isAutologinEnabled()) {
+                    throw new AjaxException(AjaxException.Code.DisabledAction, "autologin");
+                }
+
+                final Cookie[] cookies = req.getCookies();
+                String hash = HashCalculator.getHash(req);
+
                 if (cookies == null) {
                     throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
                 }
@@ -256,7 +259,7 @@ public class Login extends AJAXServlet {
                 Session session = null;
                 String secret = null;
 
-                String sessionCookieName = COOKIE_PREFIX + hash;
+                String sessionCookieName = SESSSION_PREFIX + hash;
                 String secretCookieName = SECRET_PREFIX + hash;
 
                 for (final Cookie cookie : cookies) {
@@ -291,7 +294,9 @@ public class Login extends AJAXServlet {
                     SessionServlet.removeOXCookies(hash, req, resp);
                     throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
                 }
-
+            } catch (final AjaxException e) {
+                LOG.debug(e.getMessage(), e);
+                response.setException(e);
             } catch (final OXJSONException e) {
                 LOG.debug(e.getMessage(), e);
                 response.setException(e);
@@ -330,6 +335,26 @@ public class Login extends AJAXServlet {
         } else {
             logAndSendException(resp, new AjaxException(AjaxException.Code.UnknownAction, action));
         }
+    }
+
+    protected String addFragmentParameter(String usedUIWebPath, String param, String value) {
+        int fragIndex = usedUIWebPath.indexOf('#');
+        
+        // First get rid of the query String, so we can reappend it later
+        int questionMarkIndex = usedUIWebPath.indexOf('?', fragIndex);
+        String query = "";
+        if(questionMarkIndex > 0) {
+            query = usedUIWebPath.substring(questionMarkIndex);
+            usedUIWebPath = usedUIWebPath.substring(0, questionMarkIndex);
+        }
+        // Now let's see, if this url already contains a fragment
+        if(!usedUIWebPath.contains("#")) {
+            // Apparently it didn't, so we can append our own
+            return usedUIWebPath+"#"+param+"="+value+query;
+        }
+        // Alright, we already have a fragment, let's append a new parameer
+        
+        return usedUIWebPath+"&"+param+"="+value+query;
     }
 
     private void doStore(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
@@ -387,7 +412,7 @@ public class Login extends AJAXServlet {
     }
 
     protected static void writeSessionCookie(final HttpServletResponse resp, final Session session, boolean secure) {
-        final Cookie cookie = new Cookie(COOKIE_PREFIX + session.getHash(), session.getSessionID());
+        final Cookie cookie = new Cookie(SESSSION_PREFIX + session.getHash(), session.getSessionID());
         configureCookie(cookie, secure);
         resp.addCookie(cookie);
     }
