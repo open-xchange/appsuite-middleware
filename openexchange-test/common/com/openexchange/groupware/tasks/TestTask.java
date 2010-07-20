@@ -352,7 +352,7 @@ public class TestTask extends Task {
     }
 
     private int cal2OXDay(int calDayOfWeek) {
-        return 2 << (calDayOfWeek - 1);
+        return 1 << (calDayOfWeek - 1);
     }
 
     private int ox2CalDay(int oxDayOfWeek) {
