@@ -60,6 +60,7 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
+import com.openexchange.configuration.MailConfig;
 
 /**
  * 
@@ -76,6 +77,8 @@ public class Bug16141Test extends AbstractAJAXSession {
     
     private String[][] ids = null;
     
+    private String testMailDir;
+    
     public Bug16141Test(String name) {
         super(name);
     }
@@ -86,6 +89,7 @@ public class Bug16141Test extends AbstractAJAXSession {
         client = getClient();
         values = client.getValues();
         folder = values.getInboxFolder();
+        testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
     }
     
     public void testMailImport() throws Exception {
@@ -117,28 +121,28 @@ public class Bug16141Test extends AbstractAJAXSession {
         
         InputStream is1 = null;
         try {
-            is1 = new FileInputStream("../open-xchange-test/testData/bug16141_1.eml");
+            is1 = new FileInputStream(testMailDir + "/bug16141_1.eml");
         } catch (FileNotFoundException e) {
             msg += e.getMessage() + "\n";
         }
         
         InputStream is2 = null;
         try {
-            is2 = new FileInputStream("../open-xchange-test/testData/bug16141_2.eml");
+            is2 = new FileInputStream(testMailDir + "/bug16141_2.eml");
         } catch (FileNotFoundException e) {
             msg += e.getMessage() + "\n";
         }
         
         InputStream is3 = null;
         try {
-            is3 = new FileInputStream("../open-xchange-test/testData/bug16141_3.eml");
+            is3 = new FileInputStream(testMailDir + "/bug16141_3.eml");
         } catch (FileNotFoundException e) {
             msg += e.getMessage() + "\n";
         }
         
         InputStream is4 = null;
         try {
-            is4 = new FileInputStream("../open-xchange-test/testData/bug16141_4.eml");
+            is4 = new FileInputStream(testMailDir + "/bug16141_4.eml");
         } catch (FileNotFoundException e) {
             msg += e.getMessage() + "\n";
         }
