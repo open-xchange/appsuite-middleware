@@ -1,3 +1,7 @@
+* 2010-07-20 - martin.herfurth@open-xchange.com
+
+ - Bugfux #16481: Extend field for participant confirmation comment.
+
 * 2010-07-20
 
  - Bugfix 16508: Users display name will be sent within notification mails.

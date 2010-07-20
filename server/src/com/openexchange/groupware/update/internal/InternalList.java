@@ -336,7 +336,10 @@ public final class InternalList {
 
         // Currently users contacts are created with the display name attribute filed. Outlook primarily uses the fileAs attribute. This
         // task copies the display name to fileAs if that is empty.
-        new com.openexchange.groupware.update.tasks.AddFileAsForUserContacts()
+        new com.openexchange.groupware.update.tasks.AddFileAsForUserContacts(),
+        
+        // Extend field "reason" for participants.
+        new com.openexchange.groupware.update.tasks.ParticipantCommentFieldLength()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure
