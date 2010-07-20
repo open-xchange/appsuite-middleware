@@ -49,34 +49,35 @@
 
 package com.openexchange.ajax.session;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
+ * {@link RedeemTest}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class SessionTestSuite {
+public class RedeemTest extends AbstractLoginTest {
 
-    /**
-     * Prevent instantiation.
-     */
-    private SessionTestSuite() {
-        super();
+    public RedeemTest(String name) {
+        super(name);
     }
-
-    /**
-     * Generates the session tests suite.
-     * @return the session tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(LoginTest.class);
-        tests.addTestSuite(StoreTest.class);
-        tests.addTestSuite(RedirectTest.class);
-        tests.addTestSuite(Bug12437Test.class);
-        tests.addTestSuite(DuplicateAuthIdTest.class);
-        tests.addTestSuite(RedeemTest.class);
-        return tests;
+    
+    public void testRedeemRandom() throws Exception {
+        createClient();
+        String[] credentials = credentials(USER1);
+        
+        inModule("login");
+        
+        raw("login", "name", credentials[0], "password", credentials[1]);
+        
+        String random = rawResponse.getString("random");
+        String session = rawResponse.getString("session");
+        
+        createClient();
+        
+        raw("redeem", "random", random);
+        
+        assertFalse(rawResponse.has("error"));
+        assertEquals(session, rawResponse.get("session"));
+        
     }
 }
