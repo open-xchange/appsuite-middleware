@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -152,7 +153,16 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             final String folderId = request.getString("folder");
             List<Subscription> allSubscriptions = null;
             allSubscriptions = getSubscriptionsInFolder(context, folderId, session.getPassword());
-            
+            Collections.sort(allSubscriptions, new Comparator<Subscription>() {
+
+                public int compare(Subscription o1, Subscription o2) {
+                    if(o1.getLastUpdate() == o2.getLastUpdate()) {
+                        return o2.getId() - o1.getId();
+                    }
+                    return (int) (o2.getLastUpdate() - o1.getLastUpdate());
+                }
+                
+            });
             for (Subscription subscription : allSubscriptions) {
                 ids.add(subscription.getId());
                 subscriptionsToRefresh.add(subscription);
