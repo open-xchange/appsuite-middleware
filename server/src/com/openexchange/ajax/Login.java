@@ -119,7 +119,7 @@ public class Login extends AJAXServlet {
 
     private static final String PARAM_UI_WEB_PATH = "uiWebPath";
 
-    public static final String SESSSION_PREFIX = "open-xchange-session-";
+    public static final String SESSION_PREFIX = "open-xchange-session-";
 
     public static final String SECRET_PREFIX = "open-xchange-secret-";
 
@@ -274,7 +274,7 @@ public class Login extends AJAXServlet {
                 Session session = null;
                 String secret = null;
 
-                String sessionCookieName = SESSSION_PREFIX + hash;
+                String sessionCookieName = SESSION_PREFIX + hash;
                 String secretCookieName = SECRET_PREFIX + hash;
 
                 for (final Cookie cookie : cookies) {
@@ -427,7 +427,7 @@ public class Login extends AJAXServlet {
     }
 
     protected static void writeSessionCookie(final HttpServletResponse resp, final Session session, boolean secure) {
-        final Cookie cookie = new Cookie(SESSSION_PREFIX + session.getHash(), session.getSessionID());
+        final Cookie cookie = new Cookie(SESSION_PREFIX + session.getHash(), session.getSessionID());
         configureCookie(cookie, secure);
         resp.addCookie(cookie);
     }
