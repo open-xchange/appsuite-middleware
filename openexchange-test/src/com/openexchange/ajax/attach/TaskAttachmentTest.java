@@ -63,10 +63,10 @@ import com.openexchange.groupware.tasks.Task;
 public class TaskAttachmentTest extends AbstractAttachmentTest {
 
     public TaskAttachmentTest(final String name) {
-		super(name);
-	}
+        super(name);
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     @Override
