@@ -199,44 +199,4 @@ public final class SearchTermParser {
             }
         }
     }
-
-    /*-
-     * 
-     * For testing purpose
-     * 
-    public static void main(final String[] args) {
-        try {
-            final JSONObject equals = new JSONObject(
-                "{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"" + ContactFields.FIRST_NAME + "\"},\"Herbert\"]}");
-
-            final SearchTerm<?> term = SearchTermParser.parse(equals);
-            System.out.println(term);
-
-            final JSONObject lt = new JSONObject(
-                "{\"operation\":\"lt\",\"operands\":[{\"type\":\"column\",\"value\":\"" + ContactFields.COLORLABEL + "\"},5]}");
-            final SearchTerm<?> term2 = SearchTermParser.parse(lt);
-            System.out.println(term2);
-
-            final JSONObject or = new JSONObject("{\"operation\":\"or\", \"operands\":[" + equals + "," + lt + "]}");
-            final SearchTerm<?> term3 = SearchTermParser.parse(or);
-            System.out.println(term3);
-
-            final ContactObject co = new ContactObject();
-            co.setGivenName("Herbert");
-            co.setObjectID(112233);
-            co.setLabel(3);
-
-            final SearchService ss = new SearchServiceImpl();
-
-            final long s = System.currentTimeMillis();
-            final boolean matches = ss.matches(co, term3, ContactAttributeFetcher.getInstance());
-            final long d = System.currentTimeMillis() - s;
-
-            System.out.println("Matches: " + matches + " | Duration: " + d + "msec");
-            
-        } catch (final Exception e) {
-            e.printStackTrace();
-        }
-    }*/
-
 }
