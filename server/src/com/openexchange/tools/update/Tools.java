@@ -484,6 +484,24 @@ public final class Tools {
         return type;
     }
 
+    public static final String getColumnTypeName(final Connection con, final String table, final String column) throws SQLException {
+        if (!columnExists(con, table, column)) {
+            return null;
+        }
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        String typeName = null;
+        try {
+            rs = metaData.getColumns(null, null, table, column);
+            while (rs.next()) {
+                typeName = rs.getString(6);
+            }
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return typeName;
+    }
+
     public static final boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;

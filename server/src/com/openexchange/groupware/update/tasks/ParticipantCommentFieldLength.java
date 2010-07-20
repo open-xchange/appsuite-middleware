@@ -53,12 +53,14 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
  * {@link ParticipantCommentFieldLength}
@@ -78,8 +80,12 @@ public class ParticipantCommentFieldLength extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {
             con.setAutoCommit(false);
-            con.prepareStatement(UPDATE_DATE_EXTERNAL).execute();
-            con.prepareStatement(UPDATE_PRG_DATES_MEMBERS).execute();
+            if (!"TEXT".equals(Tools.getColumnTypeName(con, "dateExternal", "reason"))) {
+                executeAlter(con, UPDATE_DATE_EXTERNAL);
+            }
+            if (!"TEXT".equals(Tools.getColumnTypeName(con, "prg_dates_members", "reason"))) {
+                executeAlter(con, UPDATE_PRG_DATES_MEMBERS);
+            }
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -90,4 +96,13 @@ public class ParticipantCommentFieldLength extends UpdateTaskAdapter {
         }
     }
 
+    private static void executeAlter(Connection con, String sql) throws SQLException {
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
 }
