@@ -50,9 +50,7 @@
 package com.openexchange.ajax.appointment.action;
 
 import java.util.Iterator;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonAllParser;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -61,7 +59,8 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- *
+ * TODO: This is buggy when given FolderObject.ALL_COLUMNS
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AllParser extends CommonAllParser {
@@ -85,28 +84,25 @@ public class AllParser extends CommonAllParser {
      * {@inheritDoc}
      */
     @Override
-    protected CommonAllResponse createResponse(final Response response)
-        throws JSONException {
+    protected CommonAllResponse createResponse(final Response response) throws JSONException {
         final CommonAllResponse retval = super.createResponse(response);
         final Iterator<Object[]> iter = retval.iterator();
         final ListIDs list = new ListIDs();
         final int folderPos = retval.getColumnPos(Appointment.FOLDER_ID);
-        final int identifierPos = retval.getColumnPos(Appointment
-            .OBJECT_ID);
+        final int identifierPos = retval.getColumnPos(Appointment.OBJECT_ID);
         while (iter.hasNext()) {
             final Object[] row = iter.next();
-            list.add(new ListIDInt(toInt(row[folderPos]),
-                toInt(row[identifierPos])));
+            list.add(new ListIDInt(toInt(row[folderPos]), toInt(row[identifierPos])));
         }
         retval.setListIDs(list);
         return retval;
     }
 
     private int toInt(Object thingie) {
-        if(Long.class.isInstance(thingie)) {
-            return ((Long)thingie).intValue();
+        if (Long.class.isInstance(thingie)) {
+            return ((Long) thingie).intValue();
         } else if (Integer.class.isInstance(thingie)) {
-            return ((Integer)thingie).intValue();
+            return ((Integer) thingie).intValue();
         } else {
             return Integer.parseInt(thingie.toString());
         }
