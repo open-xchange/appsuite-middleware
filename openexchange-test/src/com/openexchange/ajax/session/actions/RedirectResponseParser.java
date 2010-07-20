@@ -39,7 +39,7 @@ public class RedirectResponseParser extends AbstractAJAXParser<RedirectResponse>
         final String[] newCookies = resp.getNewCookieNames();
         boolean oxCookieFound = false;
         for (final String newCookie : newCookies) {
-            if (newCookie.startsWith(Login.SESSSION_PREFIX)) {
+            if (newCookie.startsWith(Login.SESSION_PREFIX)) {
                 oxCookieFound = true;
                 break;
             }

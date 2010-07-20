@@ -59,7 +59,7 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
         if (isFailOnError()) {
             boolean oxCookieFound = false;
             for (final String newCookie : newCookies) {
-                if (newCookie.startsWith(Login.SESSSION_PREFIX)) {
+                if (newCookie.startsWith(Login.SESSION_PREFIX)) {
                     oxCookieFound = true;
                     break;
                 }

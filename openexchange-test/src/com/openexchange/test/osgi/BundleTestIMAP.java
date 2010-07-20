@@ -129,7 +129,7 @@ public final class BundleTestIMAP extends AbstractBundleTest {
              * Set cookie cause a request has already been fired before with the same session id.
              */
             final CookieJar cookieJar = new CookieJar();
-            cookieJar.putCookie(Login.SESSSION_PREFIX + sessionId, sessionId);
+            cookieJar.putCookie(Login.SESSION_PREFIX + sessionId, sessionId);
         }
         getReq.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         getReq.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
