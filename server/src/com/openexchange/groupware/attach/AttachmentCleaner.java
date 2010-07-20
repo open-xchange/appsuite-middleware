@@ -72,135 +72,135 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface,
-		ContactEventInterface {
-	
-	private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission check.
+        ContactEventInterface {
+    
+    private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission check.
 
-	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentCleaner.class);
-	
-	public final void appointmentDeleted(final Appointment appointmentObj,
-			final Session sessionObj) {
-		deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj );
-	}
-	
-	public final void taskDeleted(final Task taskObj, final Session sessionObj) {
-	
-		deleteAttachments(taskObj.getParentFolderID(), taskObj.getObjectID(), Types.TASK, sessionObj);
-	}
-	
-	public final void contactDeleted(final Contact contactObj,
-			final Session sessionObj) {
-		deleteAttachments(contactObj.getParentFolderID(), contactObj.getObjectID(), Types.CONTACT, sessionObj);
-		
-	}
+    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentCleaner.class);
+    
+    public final void appointmentDeleted(final Appointment appointmentObj,
+            final Session sessionObj) {
+        deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj );
+    }
+    
+    public final void taskDeleted(final Task taskObj, final Session sessionObj) {
+    
+        deleteAttachments(taskObj.getParentFolderID(), taskObj.getObjectID(), Types.TASK, sessionObj);
+    }
+    
+    public final void contactDeleted(final Contact contactObj,
+            final Session sessionObj) {
+        deleteAttachments(contactObj.getParentFolderID(), contactObj.getObjectID(), Types.CONTACT, sessionObj);
+        
+    }
 
-	public final void appointmentCreated(final Appointment appointmentObj,
-			final Session sessionObj) {
-		// TODO Auto-generated method stub
+    public final void appointmentCreated(final Appointment appointmentObj,
+            final Session sessionObj) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	public final void appointmentModified(final Appointment appointmentObj,
-			final Session sessionObj) {
-		// TODO Auto-generated method stub
+    public final void appointmentModified(final Appointment appointmentObj,
+            final Session sessionObj) {
+        // TODO Auto-generated method stub
 
-	}	
+    }    
 
-	public final void taskCreated(final Task taskObj, final Session sessionObj) {
-		// TODO Auto-generated method stub
+    public final void taskCreated(final Task taskObj, final Session sessionObj) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	public final void taskModified(final Task taskObj, final Session sessionObj) {
-		// TODO Auto-generated method stub
+    public final void taskModified(final Task taskObj, final Session sessionObj) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	public final void contactCreated(final Contact contactObj,
-			final Session sessionObj) {
-		// TODO Auto-generated method stub
+    public final void contactCreated(final Contact contactObj,
+            final Session sessionObj) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	public final void contactModified(final Contact contactObj,
-			final Session sessionObj) {
-		// TODO Auto-generated method stub
+    public final void contactModified(final Contact contactObj,
+            final Session sessionObj) {
+        // TODO Auto-generated method stub
 
-	}
-	
-	private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session session) {
-		SearchIterator iter = null;
-		try {
+    }
+    
+    private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session session) {
+        SearchIterator iter = null;
+        try {
             final ServerSession sessionObj = new ServerSessionAdapter(session);
             ATTACHMENT_BASE.startTransaction();
-			final TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), null, null);
-			final TIntArrayList ids = new TIntArrayList();
-			iter = rs.results();
-			if(!iter.hasNext()) {
-				return; // Shortcut
-			}
-			while(iter.hasNext()){
-				ids.add(((AttachmentMetadata)iter.next()).getId());
-			}
-			
-			ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, ids.toNativeArray(), sessionObj.getContext(), null, null);
-			ATTACHMENT_BASE.commit();
-		
-		} catch (final TransactionException e) {
-			rollback(e);
-		} catch (final OXException e) {
-			rollback(e);
-		} catch (final SearchIteratorException e) {
-			rollback(e);
-		} catch (final ContextException e) {
+            final TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), null, null);
+            final TIntArrayList ids = new TIntArrayList();
+            iter = rs.results();
+            if(!iter.hasNext()) {
+                return; // Shortcut
+            }
+            while(iter.hasNext()){
+                ids.add(((AttachmentMetadata)iter.next()).getId());
+            }
+            
+            ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, ids.toNativeArray(), sessionObj.getContext(), null, null);
+            ATTACHMENT_BASE.commit();
+        
+        } catch (final TransactionException e) {
+            rollback(e);
+        } catch (final OXException e) {
+            rollback(e);
+        } catch (final SearchIteratorException e) {
+            rollback(e);
+        } catch (final ContextException e) {
             LL.log(e);
         } finally {
-			if(iter != null) {
-				try {
-					iter.close();
-				} catch (final SearchIteratorException e) {
-					LL.log(e);
-				}
-			}
-			try {
-				ATTACHMENT_BASE.finish();
-			} catch (final TransactionException e) {
-				LL.log(e);
-			}
-		}
-	}
+            if(iter != null) {
+                try {
+                    iter.close();
+                } catch (final SearchIteratorException e) {
+                    LL.log(e);
+                }
+            }
+            try {
+                ATTACHMENT_BASE.finish();
+            } catch (final TransactionException e) {
+                LL.log(e);
+            }
+        }
+    }
 
-	private void rollback(final AbstractOXException x) {
-		try {
-			ATTACHMENT_BASE.rollback();
-		} catch (final TransactionException e) {
-			LL.log(e);
-		}
-		LL.log(x);
-	}
+    private void rollback(final AbstractOXException x) {
+        try {
+            ATTACHMENT_BASE.rollback();
+        } catch (final TransactionException e) {
+            LL.log(e);
+        }
+        LL.log(x);
+    }
 
-	public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {
-		// Nothing to do
-	}
+    public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {
+        // Nothing to do
+    }
 
-	public void appointmentDeclined(final Appointment appointmentObj, final Session sessionObj) {
-		// Nothing to do
-	}
+    public void appointmentDeclined(final Appointment appointmentObj, final Session sessionObj) {
+        // Nothing to do
+    }
 
-	public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session sessionObj) {
-		// Nothing to do
-	}
+    public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session sessionObj) {
+        // Nothing to do
+    }
 
-	public void taskAccepted(final Task taskObj, final Session sessionObj) {
-		// Nothing to do
-	}
+    public void taskAccepted(final Task taskObj, final Session sessionObj) {
+        // Nothing to do
+    }
 
-	public void taskDeclined(final Task taskObj, final Session sessionObj) {
-		// Nothing to do
-	}
+    public void taskDeclined(final Task taskObj, final Session sessionObj) {
+        // Nothing to do
+    }
 
-	public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
-		// Nothing to do
-	}
+    public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
+        // Nothing to do
+    }
 
 }

@@ -78,236 +78,236 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  */
 public class LinksEventHandler implements NoDelayEventInterface, AppointmentEventInterface, TaskEventInterface, ContactEventInterface,
-		InfostoreEventInterface {
+        InfostoreEventInterface {
 
-	private static final Log LOG = LogFactory.getLog(LinksEventHandler.class);
+    private static final Log LOG = LogFactory.getLog(LinksEventHandler.class);
 
-	public LinksEventHandler() {
-		super();
-	}
+    public LinksEventHandler() {
+        super();
+    }
 
-	public void appointmentCreated(final Appointment appointmentObj, final Session sessionObj) {
-		// nix
-	}
+    public void appointmentCreated(final Appointment appointmentObj, final Session sessionObj) {
+        // nix
+    }
 
-	public void appointmentModified(final Appointment appointmentObj, final Session sessionObj) {
-		updateLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
-	}
+    public void appointmentModified(final Appointment appointmentObj, final Session sessionObj) {
+        updateLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
+    }
 
-	public void appointmentDeleted(final Appointment appointmentObj, final Session sessionObj) {
-		deleteLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
-	}
+    public void appointmentDeleted(final Appointment appointmentObj, final Session sessionObj) {
+        deleteLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
+    }
 
-	public void taskCreated(final Task taskObj, final Session sessionObj) {
-		// nix
-	}
+    public void taskCreated(final Task taskObj, final Session sessionObj) {
+        // nix
+    }
 
-	public void taskModified(final Task taskObj, final Session sessionObj) {
-		updateLink(taskObj.getObjectID(), Types.TASK, taskObj.getParentFolderID(), sessionObj);
-	}
+    public void taskModified(final Task taskObj, final Session sessionObj) {
+        updateLink(taskObj.getObjectID(), Types.TASK, taskObj.getParentFolderID(), sessionObj);
+    }
 
-	public void taskDeleted(final Task taskObj, final Session sessionObj) {
-		deleteLink(taskObj.getObjectID(), Types.TASK, taskObj.getParentFolderID(), sessionObj);
-	}
+    public void taskDeleted(final Task taskObj, final Session sessionObj) {
+        deleteLink(taskObj.getObjectID(), Types.TASK, taskObj.getParentFolderID(), sessionObj);
+    }
 
-	public void contactCreated(final Contact contactObj, final Session sessionObj) {
-		// nix
-	}
+    public void contactCreated(final Contact contactObj, final Session sessionObj) {
+        // nix
+    }
 
-	public void contactModified(final Contact contactObj, final Session sessionObj) {
-		updateLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
-	}
+    public void contactModified(final Contact contactObj, final Session sessionObj) {
+        updateLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
+    }
 
-	public void contactDeleted(final Contact contactObj, final Session sessionObj) {
-		deleteLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
-	}
+    public void contactDeleted(final Contact contactObj, final Session sessionObj) {
+        deleteLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
+    }
 
-	public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
-		// nix
-	}
+    public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
+        // nix
+    }
 
-	public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
-		// BOESE TODO
-		final int x = (int) metadata.getFolderId();
-		updateLink(metadata.getId(), Types.INFOSTORE, x, sessionObject);
-	}
+    public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
+        // BOESE TODO
+        final int x = (int) metadata.getFolderId();
+        updateLink(metadata.getId(), Types.INFOSTORE, x, sessionObject);
+    }
 
-	public void infoitemDeleted(final DocumentMetadata metadata, final Session sessionObject) {
-		// BOESE TODO
-		final int x = (int) metadata.getFolderId();
-		deleteLink(metadata.getId(), Types.INFOSTORE, x, sessionObject);
-	}
+    public void infoitemDeleted(final DocumentMetadata metadata, final Session sessionObject) {
+        // BOESE TODO
+        final int x = (int) metadata.getFolderId();
+        deleteLink(metadata.getId(), Types.INFOSTORE, x, sessionObject);
+    }
 
-	private static final String SQL_DEL = "DELETE from prg_links WHERE (firstid = ? AND firstmodule = ? AND firstfolder = ?)"
-			+ " OR (secondid = ? AND secondmodule = ? AND secondfolder = ?) AND cid = ?";
+    private static final String SQL_DEL = "DELETE from prg_links WHERE (firstid = ? AND firstmodule = ? AND firstfolder = ?)"
+            + " OR (secondid = ? AND secondmodule = ? AND secondfolder = ?) AND cid = ?";
 
-	public void deleteLink(final int id, final int type, final int fid, final Session so) {
-		Connection writecon = null;
-		PreparedStatement del = null;
+    public void deleteLink(final int id, final int type, final int fid, final Session so) {
+        Connection writecon = null;
+        PreparedStatement del = null;
 
-		Context ct = null;
-		try {
-			ct = ContextStorage.getStorageContext(so.getContextId());
-		} catch (final ContextException e) {
-			LOG.error("ERROR: Unable to Delete Links from Object! cid=" + so.getContextId() + " oid=" + id + " fid="
-					+ fid, e);
-			return;
-		}
+        Context ct = null;
+        try {
+            ct = ContextStorage.getStorageContext(so.getContextId());
+        } catch (final ContextException e) {
+            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + so.getContextId() + " oid=" + id + " fid="
+                    + fid, e);
+            return;
+        }
 
-		try {
-			writecon = DBPool.pickupWriteable(ct);
-			writecon.setAutoCommit(false);
+        try {
+            writecon = DBPool.pickupWriteable(ct);
+            writecon.setAutoCommit(false);
 
-			del = writecon.prepareStatement(SQL_DEL);
-			int pos = 1;
-			del.setInt(pos++, id);
-			del.setInt(pos++, type);
-			del.setInt(pos++, fid);
-			del.setInt(pos++, id);
-			del.setInt(pos++, type);
-			del.setInt(pos++, fid);
-			del.setInt(pos++, so.getContextId());
-			del.executeUpdate();
+            del = writecon.prepareStatement(SQL_DEL);
+            int pos = 1;
+            del.setInt(pos++, id);
+            del.setInt(pos++, type);
+            del.setInt(pos++, fid);
+            del.setInt(pos++, id);
+            del.setInt(pos++, type);
+            del.setInt(pos++, fid);
+            del.setInt(pos++, so.getContextId());
+            del.executeUpdate();
 
-			writecon.commit();
-		} catch (final Exception se) {
-			try {
-				writecon.rollback();
-			} catch (final SQLException see) {
-				LOG.error("Uable to rollback Link Delete", see);
-			}
-			LOG.error("ERROR: Unable to Delete Links from Object! cid=" + so.getContextId() + " oid=" + id + " fid="
-					+ fid, se);
-		} finally {
-			try {
-				writecon.setAutoCommit(true);
-			} catch (final SQLException see) {
-				LOG.error("Unable to restore auto-commit", see);
-			}
-			DBUtils.closeResources(null, del, writecon, false, ct);
-		}
+            writecon.commit();
+        } catch (final Exception se) {
+            try {
+                writecon.rollback();
+            } catch (final SQLException see) {
+                LOG.error("Uable to rollback Link Delete", see);
+            }
+            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + so.getContextId() + " oid=" + id + " fid="
+                    + fid, se);
+        } finally {
+            try {
+                writecon.setAutoCommit(true);
+            } catch (final SQLException see) {
+                LOG.error("Unable to restore auto-commit", see);
+            }
+            DBUtils.closeResources(null, del, writecon, false, ct);
+        }
 
-	}
+    }
 
-	private static final String SQL_LOAD = "SELECT firstid, firstfolder, secondid, secondfolder FROM prg_links"
-			+ " WHERE ((firstid = ? AND firstmodule = ?) OR (secondid = ? AND secondmodule = ?)) AND cid = ? LIMIT 1";
+    private static final String SQL_LOAD = "SELECT firstid, firstfolder, secondid, secondfolder FROM prg_links"
+            + " WHERE ((firstid = ? AND firstmodule = ?) OR (secondid = ? AND secondmodule = ?)) AND cid = ? LIMIT 1";
 
-	private static final String SQL_UP1 = "UPDATE prg_links SET firstfolder = ? WHERE firstid = ? AND firstmodule = ? AND cid = ?";
+    private static final String SQL_UP1 = "UPDATE prg_links SET firstfolder = ? WHERE firstid = ? AND firstmodule = ? AND cid = ?";
 
-	private static final String SQL_UP2 = "UPDATE prg_links SET secondfolder = ? WHERE secondid = ? AND secondmodule = ? AND cid = ?";
+    private static final String SQL_UP2 = "UPDATE prg_links SET secondfolder = ? WHERE secondid = ? AND secondmodule = ? AND cid = ?";
 
-	public void updateLink(final int id, final int type, final int fid, final Session so) {
-		Connection writecon = null;
-		PreparedStatement smt = null;
-		ResultSet rs = null;
-		boolean updater = false;
+    public void updateLink(final int id, final int type, final int fid, final Session so) {
+        Connection writecon = null;
+        PreparedStatement smt = null;
+        ResultSet rs = null;
+        boolean updater = false;
 
-		Context ct = null;
-		try {
-			ct = ContextStorage.getStorageContext(so.getContextId());
-		} catch (final ContextException e) {
-			LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
-					+ type + " fid=" + fid + ')', e);
-			return;
-		}
+        Context ct = null;
+        try {
+            ct = ContextStorage.getStorageContext(so.getContextId());
+        } catch (final ContextException e) {
+            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
+                    + type + " fid=" + fid + ')', e);
+            return;
+        }
 
-		try {
-			writecon = DBPool.pickupWriteable(ct);
+        try {
+            writecon = DBPool.pickupWriteable(ct);
 
-			smt = writecon.prepareStatement(SQL_LOAD);
-			int pos = 1;
-			smt.setInt(pos++, id);
-			smt.setInt(pos++, type);
-			smt.setInt(pos++, id);
-			smt.setInt(pos++, type);
-			smt.setInt(pos++, so.getContextId());
-			rs = smt.executeQuery();
+            smt = writecon.prepareStatement(SQL_LOAD);
+            int pos = 1;
+            smt.setInt(pos++, id);
+            smt.setInt(pos++, type);
+            smt.setInt(pos++, id);
+            smt.setInt(pos++, type);
+            smt.setInt(pos++, so.getContextId());
+            rs = smt.executeQuery();
 
-			if (rs.next()) {
-				int tp = rs.getInt(1);
-				int fp = rs.getInt(2);
-				if (tp != id) {
-					tp = rs.getInt(3);
-					fp = rs.getInt(4);
-				}
-				if (fid != fp) {
-					updater = true;
-				}
-			}
-		} catch (final Exception e) {
-			LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
-					+ type + " fid=" + fid + ')', e);
-		} finally {
-			DBUtils.closeResources(rs, smt, writecon, false, ct);
-			rs = null;
-			smt = null;
-		}
+            if (rs.next()) {
+                int tp = rs.getInt(1);
+                int fp = rs.getInt(2);
+                if (tp != id) {
+                    tp = rs.getInt(3);
+                    fp = rs.getInt(4);
+                }
+                if (fid != fp) {
+                    updater = true;
+                }
+            }
+        } catch (final Exception e) {
+            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
+                    + type + " fid=" + fid + ')', e);
+        } finally {
+            DBUtils.closeResources(rs, smt, writecon, false, ct);
+            rs = null;
+            smt = null;
+        }
 
-		PreparedStatement upd = null;
-		if (updater) {
-			try {
-				writecon = DBPool.pickupWriteable(ct);
-				writecon.setAutoCommit(false);
+        PreparedStatement upd = null;
+        if (updater) {
+            try {
+                writecon = DBPool.pickupWriteable(ct);
+                writecon.setAutoCommit(false);
 
-				upd = writecon.prepareStatement(SQL_UP1);
-				int pos = 1;
-				upd.setInt(pos++, fid);
-				upd.setInt(pos++, id);
-				upd.setInt(pos++, type);
-				upd.setInt(pos++, so.getContextId());
-				upd.executeUpdate();
-				upd.close();
+                upd = writecon.prepareStatement(SQL_UP1);
+                int pos = 1;
+                upd.setInt(pos++, fid);
+                upd.setInt(pos++, id);
+                upd.setInt(pos++, type);
+                upd.setInt(pos++, so.getContextId());
+                upd.executeUpdate();
+                upd.close();
 
-				upd = writecon.prepareStatement(SQL_UP2);
-				pos = 1;
-				upd.setInt(pos++, fid);
-				upd.setInt(pos++, id);
-				upd.setInt(pos++, type);
-				upd.setInt(pos++, so.getContextId());
-				upd.executeUpdate();
+                upd = writecon.prepareStatement(SQL_UP2);
+                pos = 1;
+                upd.setInt(pos++, fid);
+                upd.setInt(pos++, id);
+                upd.setInt(pos++, type);
+                upd.setInt(pos++, so.getContextId());
+                upd.executeUpdate();
 
-				writecon.commit();
-			} catch (final Exception se) {
-				try {
-					writecon.rollback();
-				} catch (final SQLException see) {
-					LOG.error("Uable to rollback Link Update", see);
-				}
-				LOG.error("ERROR: Unable to Update Links for Object! cid=" + so.getContextId() + " oid=" + id + " fid="
-						+ fid, se);
-			} finally {
-				try {
-					writecon.setAutoCommit(true);
-				} catch (final SQLException see) {
-					LOG.error("Unable to restore auto-commit", see);
-				}
-				DBUtils.closeResources(null, upd, writecon, false, ct);
-			}
-		}
-	}
+                writecon.commit();
+            } catch (final Exception se) {
+                try {
+                    writecon.rollback();
+                } catch (final SQLException see) {
+                    LOG.error("Uable to rollback Link Update", see);
+                }
+                LOG.error("ERROR: Unable to Update Links for Object! cid=" + so.getContextId() + " oid=" + id + " fid="
+                        + fid, se);
+            } finally {
+                try {
+                    writecon.setAutoCommit(true);
+                } catch (final SQLException see) {
+                    LOG.error("Unable to restore auto-commit", see);
+                }
+                DBUtils.closeResources(null, upd, writecon, false, ct);
+            }
+        }
+    }
 
-	public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {
-		// nothing to do
-	}
+    public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {
+        // nothing to do
+    }
 
-	public void appointmentDeclined(final Appointment appointmentObj, final Session sessionObj) {
-		// nothing to do
-	}
+    public void appointmentDeclined(final Appointment appointmentObj, final Session sessionObj) {
+        // nothing to do
+    }
 
-	public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session sessionObj) {
-		// nothing to do
-	}
+    public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session sessionObj) {
+        // nothing to do
+    }
 
-	public void taskAccepted(final Task taskObj, final Session sessionObj) {
-		// nothing to do
-	}
+    public void taskAccepted(final Task taskObj, final Session sessionObj) {
+        // nothing to do
+    }
 
-	public void taskDeclined(final Task taskObj, final Session sessionObj) {
-		// nothing to do
-	}
+    public void taskDeclined(final Task taskObj, final Session sessionObj) {
+        // nothing to do
+    }
 
-	public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
-		// nothing to do
-	}
+    public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
+        // nothing to do
+    }
 
 }
