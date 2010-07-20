@@ -1282,7 +1282,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @see java.lang.Object#clone()
      */
     @Override
-    public Object clone() {
+    public FolderObject clone() {
         try {
             final FolderObject clone = (FolderObject) super.clone();
             if (b_created_by) {
