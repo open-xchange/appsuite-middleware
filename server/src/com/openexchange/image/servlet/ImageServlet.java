@@ -271,8 +271,8 @@ public final class ImageServlet extends HttpServlet {
         final List<Session> sessions = new ArrayList<Session>(4);
         for (final Cookie cookie : cookies) {
             final String name = cookie.getName();
-            if (name != null && name.startsWith(Login.COOKIE_PREFIX, 0)) {
-                final Session session = sessiondService.getSession(name.substring(Login.COOKIE_PREFIX.length())); // By session ID
+            if (name != null && name.startsWith(Login.SESSSION_PREFIX, 0)) {
+                final Session session = sessiondService.getSession(name.substring(Login.SESSSION_PREFIX.length())); // By session ID
                 if (null != session && cookie.getValue().equals(session.getSecret())) { // Ensure not null and secret equality
                     final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                     if (ctx.isEnabled() && UserStorage.getInstance().getUser(session.getUserId(), ctx).isMailEnabled()) {

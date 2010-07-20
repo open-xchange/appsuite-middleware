@@ -187,7 +187,7 @@ public class Login extends AJAXServlet {
             } catch (final LoginException e) {
                 LOG.error("Logout failed", e);
             }
-        } else if (ACTION_REDIRECT.equals(action)) {
+        } else if (ACTION_REDIRECT.equals(action) || ACTION_REDEEM.equals(action)) {
             // The magic spell to disable caching
             Tools.disableCaching(resp);
             final String randomToken = req.getParameter(LoginFields.PARAM_RANDOM);
@@ -240,7 +240,22 @@ public class Login extends AJAXServlet {
             // Prevent HTTP response splitting.
             usedUIWebPath = usedUIWebPath.replaceAll("[\n\r]", "");
             usedUIWebPath = addFragmentParameter(usedUIWebPath, PARAMETER_SESSION, session.getSessionID());
-            resp.sendRedirect(usedUIWebPath);
+            String shouldStore = req.getParameter("store");
+            if(shouldStore != null) {
+                usedUIWebPath = addFragmentParameter(usedUIWebPath, "store", shouldStore);
+            }
+            if(ACTION_REDIRECT.equals(action)) {
+                resp.sendRedirect(usedUIWebPath);
+            } else {
+                try {
+                    JSONObject json = new JSONObject();
+                    new LoginWriter().writeLogin(session, json);
+                    json.write(resp.getWriter());
+                } catch (JSONException e) {
+                    log(RESPONSE_ERROR, e);
+                    sendError(resp);
+                }
+            }
         } else if (ACTION_AUTOLOGIN.equals(action)) {
             final Response response = new Response();
             try {
