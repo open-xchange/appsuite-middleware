@@ -91,7 +91,7 @@ CREATE TABLE del_dates_members (
     object_id INT4,
     member_uid INT4,    
     confirm INT4 UNSIGNED NOT NULL,
-    reason VARCHAR(255),
+    reason TEXT,
     pfid INT4,
     reminder INT4 UNSIGNED,
     cid INT4 UNSIGNED NOT NULL,
@@ -103,7 +103,7 @@ CREATE TABLE prg_dates_members (
     object_id INT4,
     member_uid INT4,
     confirm INT4 UNSIGNED NOT NULL,
-    reason VARCHAR(255),
+    reason TEXT,
     pfid INT4,
     reminder INT4 UNSIGNED,
     cid INT4 UNSIGNED NOT NULL,
@@ -117,7 +117,7 @@ CREATE TABLE dateExternal (
 	mailAddress VARCHAR(255) NOT NULL,
 	displayName VARCHAR(255),
 	confirm INT4 UNSIGNED NOT NULL,
-	reason VARCHAR(255),
+	reason TEXT,
 	PRIMARY KEY (cid,objectId,mailAddress),
 	FOREIGN KEY (cid,objectId) REFERENCES prg_dates(cid,intfield01)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -128,7 +128,7 @@ CREATE TABLE delDateExternal (
 	mailAddress VARCHAR(255) NOT NULL,
 	displayName VARCHAR(255),
 	confirm INT4 UNSIGNED NOT NULL,
-	reason VARCHAR(255),
+	reason TEXT,
 	PRIMARY KEY (cid,objectId,mailAddress),
 	FOREIGN KEY (cid,objectId) REFERENCES del_dates(cid,intfield01)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
