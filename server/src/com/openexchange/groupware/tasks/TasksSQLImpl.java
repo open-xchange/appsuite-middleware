@@ -203,6 +203,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
     public void insertTaskObject(final Task task) throws OXException {
         final Context ctx;
         final Set<TaskParticipant> parts;
+        final FolderObject folder;
         try {
             ctx = Tools.getContext(session.getContextId());
             final int userId = session.getUserId();
@@ -212,7 +213,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             TaskLogic.checkNewTask(task, userId, userConfig, parts);
             // Check access rights
             final int folderId = task.getParentFolderID();
-            final FolderObject folder = Tools.getFolder(ctx, folderId);
+            folder = Tools.getFolder(ctx, folderId);
             Permission.checkCreate(ctx, user, userConfig, folder);
             if (task.getPrivateFlag() && (Tools.isFolderPublic(folder)
                 || Tools.isFolderShared(folder, user))) {
@@ -245,10 +246,8 @@ public class TasksSQLImpl implements TasksSQLInterface {
         // Prepare for event
         task.setUsers(TaskLogic.createUserParticipants(parts));
         try {
-            new EventClient(session).create(task);
+            new EventClient(session).create(task, folder);
         } catch (final EventException e) {
-            throw Tools.convert(new TaskException(Code.EVENT, e));
-        } catch (final ContextException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
         }
     }

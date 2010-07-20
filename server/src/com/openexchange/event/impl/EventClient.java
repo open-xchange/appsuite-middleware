@@ -251,17 +251,6 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void create(final Task taskObj) throws EventException, OXException, ContextException {
-        final Context ctx = ContextStorage.getInstance().getContext(contextId);
-
-
-        final int folderId = taskObj.getParentFolderID();
-        if (folderId > 0) {
-            final FolderObject folderObj = getFolder(folderId, ctx);
-            create(taskObj, folderObj);
-        }
-    }
-
     public void create(final Task taskObj, final FolderObject folderObj) throws EventException {
         final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.TASK, taskObj, null, folderObj, null, session);
 

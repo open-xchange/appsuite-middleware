@@ -72,7 +72,6 @@ import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
@@ -828,7 +827,7 @@ class UpdateData {
             }
 
             if (!duplicateExists && next) {
-                insertNextRecurrence(session, ctx, getUserId(), userConfig, getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
+                insertNextRecurrence(session, ctx, getUserId(), userConfig, folder, getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
             }
         }
     }
@@ -842,15 +841,13 @@ class UpdateData {
      * @throws TaskException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserConfiguration userConfig, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws TaskException, OXException {
+    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserConfiguration userConfig, FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws TaskException, OXException {
         // TODO create insert class
         TaskLogic.checkNewTask(task, userId, userConfig, parts);
         TaskLogic.insertTask(ctx, task, parts, folders);
         try {
-            new EventClient(session).create(task);
+            new EventClient(session).create(task, folder);
         } catch (final EventException e) {
-            throw Tools.convert(new TaskException(Code.EVENT, e));
-        } catch (final ContextException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
         }
     }
