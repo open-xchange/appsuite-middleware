@@ -51,16 +51,15 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.tools.update.Column;
 
 /**
  * {@link ParticipantCommentFieldLength}
@@ -68,9 +67,6 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ParticipantCommentFieldLength extends UpdateTaskAdapter {
-
-    private static final String UPDATE_DATE_EXTERNAL = "ALTER TABLE dateExternal CHANGE COLUMN reason reason TEXT";
-    private static final String UPDATE_PRG_DATES_MEMBERS = "ALTER TABLE prg_dates_members CHANGE COLUMN reason reason TEXT";
 
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask" };
@@ -80,12 +76,10 @@ public class ParticipantCommentFieldLength extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {
             con.setAutoCommit(false);
-            if (!"TEXT".equals(Tools.getColumnTypeName(con, "dateExternal", "reason"))) {
-                executeAlter(con, UPDATE_DATE_EXTERNAL);
-            }
-            if (!"TEXT".equals(Tools.getColumnTypeName(con, "prg_dates_members", "reason"))) {
-                executeAlter(con, UPDATE_PRG_DATES_MEMBERS);
-            }
+            checkAndModifyColumns(con, "prg_dates_members", new Column("reason", "TEXT"));
+            checkAndModifyColumns(con, "del_dates_members", new Column("reason", "TEXT"));
+            checkAndModifyColumns(con, "dateExternal", new Column("reason", "TEXT"));
+            checkAndModifyColumns(con, "delDateExternal", new Column("reason", "TEXT"));
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -93,16 +87,6 @@ public class ParticipantCommentFieldLength extends UpdateTaskAdapter {
         } finally {
             autocommit(con);
             Database.backNoTimeout(params.getContextId(), true, con);
-        }
-    }
-
-    private static void executeAlter(Connection con, String sql) throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            stmt.execute(sql);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
         }
     }
 }

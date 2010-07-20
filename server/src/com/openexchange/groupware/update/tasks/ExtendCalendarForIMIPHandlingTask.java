@@ -125,7 +125,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
         SQLException toThrow = null;
         for (String tableName : TABLES) {
             try {
-                Tools.addColumns(con, tableName, COLUMNS);
+                Tools.checkAndAddColumns(con, tableName, COLUMNS);
             } catch (SQLException e) {
                 LOG.error(e.getMessage(), e);
                 if (null == toThrow) {

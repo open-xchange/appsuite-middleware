@@ -634,4 +634,41 @@ public final class Tools {
             addColumns(con, tableName, notExisting.toArray(new Column[notExisting.size()]));
         }
     }
+
+    public static void modifyColumns(Connection con, String tableName, Column... cols) throws SQLException {
+        StringBuffer sql = new StringBuffer("ALTER TABLE ");
+        sql.append(tableName);
+        for (Column column : cols) {
+            sql.append(" MODIFY COLUMN ");
+            sql.append(column.getName());
+            sql.append(' ');
+            sql.append(column.getDefinition());
+            sql.append(',');
+        }
+        if (sql.charAt(sql.length() - 1) == ',') {
+            sql.setLength(sql.length() - 1);
+        }
+        if (sql.length() == 12 + tableName.length()) {
+            return;
+        }
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql.toString());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    public static void checkAndModifyColumns(Connection con, String tableName, Column... cols) throws SQLException {
+        List<Column> toDo = new ArrayList<Column>();
+        for (Column col : cols) {
+            if (!col.getDefinition().contains(getColumnTypeName(con, tableName, col.getName()))) {
+                toDo.add(col);
+            }
+        }
+        if (!toDo.isEmpty()) {
+            modifyColumns(con, tableName, toDo.toArray(new Column[toDo.size()]));
+        }
+    }
 }
