@@ -114,7 +114,7 @@ public class AutologinTest extends AbstractLoginTest {
         Cookie[] cookies = state.getCookies();
         boolean replaced = false;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().startsWith(Login.COOKIE_PREFIX)) {
+            if (cookie.getName().startsWith(Login.SESSSION_PREFIX)) {
                 cookie.setValue("1234567");
                 state.addCookie(cookie);
                 replaced = true;
@@ -143,7 +143,7 @@ public class AutologinTest extends AbstractLoginTest {
         Cookie[] cookies = state.getCookies();
         boolean replaced = false;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().startsWith(Login.COOKIE_PREFIX)) {
+            if (cookie.getName().startsWith(Login.SESSSION_PREFIX)) {
                 cookie.setValue(sessionID); // The session of user 1
                 state.addCookie(cookie);
                 replaced = true;

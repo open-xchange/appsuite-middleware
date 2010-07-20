@@ -68,7 +68,7 @@ public class AbstractLoginTest extends AbstractSimpleClientTest {
     protected void assertNoOXCookies() {
         Cookie[] cookies2 = currentClient.getClient().getState().getCookies();
         for (Cookie cookie : cookies2) {
-            if (cookie.getName().startsWith(Login.COOKIE_PREFIX) || cookie.getName().startsWith(Login.SECRET_PREFIX)) {
+            if (cookie.getName().startsWith(Login.SESSSION_PREFIX) || cookie.getName().startsWith(Login.SECRET_PREFIX)) {
                 fail("Found cookie that should have been deleted: " + cookie.getName());
             }
         }

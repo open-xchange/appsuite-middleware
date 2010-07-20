@@ -148,7 +148,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 			 * Add cookie
 			 */
 			final CookieJar cookieJar = new CookieJar();
-			cookieJar.putCookie(Login.COOKIE_PREFIX + sessionId, sessionId);
+			cookieJar.putCookie(Login.SESSSION_PREFIX + sessionId, sessionId);
 		}
 
 		final PostMethodWebRequest postReq = new PostMethodWebRequest(hostname + URL + parameter.getURLParameters(), true);

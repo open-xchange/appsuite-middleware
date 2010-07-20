@@ -78,7 +78,7 @@ public class StoreTest extends AbstractSimpleClientTest{
         
         boolean found = false;
         for (Cookie cookie : cookies) {
-            found = found || ( cookie.getName().startsWith(Login.COOKIE_PREFIX) && cookie.getValue().equals(sessionID) );
+            found = found || ( cookie.getName().startsWith(Login.SESSSION_PREFIX) && cookie.getValue().equals(sessionID) );
         }
         assertTrue(found);
     }
@@ -94,7 +94,7 @@ public class StoreTest extends AbstractSimpleClientTest{
         
         Cookie sessionCookie = null;
         for (Cookie cookie : cookies) {
-            if ( cookie.getName().startsWith(Login.COOKIE_PREFIX) && cookie.getValue().equals(sessionID) ) {
+            if ( cookie.getName().startsWith(Login.SESSSION_PREFIX) && cookie.getValue().equals(sessionID) ) {
                 sessionCookie = cookie;
                 break;
             }
