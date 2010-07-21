@@ -50,7 +50,9 @@
 package com.openexchange.ajax.appointment.action;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
@@ -82,6 +84,9 @@ public class AllRequest extends CommonAllRequest {
 
     private String timeZoneId;
 
+    private boolean showPrivates;
+
+    
     public AllRequest(final int folderId, final int[] columns, final Date start,
         final Date end, final TimeZone tz) {
         this(folderId, columns, start, end, tz, true);
@@ -90,14 +95,17 @@ public class AllRequest extends CommonAllRequest {
     /**
      * Default constructor.
      */
-    public AllRequest(final int folderId, final int[] columns, final Date start,
-        final Date end, final TimeZone tz, final boolean recurrenceMaster) {
+    public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster) {
+        this(folderId, columns, start, end, tz, recurrenceMaster, false);
+    }
+    public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster, final boolean showPrivates) {
         super(AbstractAppointmentRequest.URL, folderId, addGUIColumns(columns),
             0, null, true);
         // Add time zone's offset to simulate local time as passed by requests from GUI
         this.start = addTimeZone2Date(start, tz);
         this.end = addTimeZone2Date(end, tz);
         this.recurrenceMaster = recurrenceMaster;
+        this.showPrivates = showPrivates;
     }
 
     /**
@@ -150,24 +158,17 @@ public class AllRequest extends CommonAllRequest {
      */
     @Override
     public Parameter[] getParameters() {
-        final Parameter[] params = super.getParameters();
-        if (null == timeZoneId) {
-            final Parameter[] retval = new Parameter[params.length + 3];
-            System.arraycopy(params, 0, retval, 0, params.length);
-            retval[retval.length - 3] = new Parameter(AJAXServlet.PARAMETER_START, start);
-            retval[retval.length - 2] = new Parameter(AJAXServlet.PARAMETER_END, end);
-            retval[retval.length - 1] = new Parameter(AppointmentRequest.RECURRENCE_MASTER,
-                recurrenceMaster);
-            return retval;
-        }
-        final Parameter[] retval = new Parameter[params.length + 4];
-        System.arraycopy(params, 0, retval, 0, params.length);
-        retval[retval.length - 4] = new Parameter(AJAXServlet.PARAMETER_START, start);
-        retval[retval.length - 3] = new Parameter(AJAXServlet.PARAMETER_END, end);
-        retval[retval.length - 2] = new Parameter(AppointmentRequest.RECURRENCE_MASTER,
-            recurrenceMaster);
-        retval[retval.length - 1] = new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timeZoneId);
-        return retval;
+        List<Parameter> params = new LinkedList<Parameter>( Arrays.asList(super.getParameters()));
+        
+        if (null != timeZoneId)
+            params.add(new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timeZoneId));
+
+        params.add(new Parameter(AJAXServlet.PARAMETER_START, start));
+        params.add(new Parameter(AJAXServlet.PARAMETER_END, end));
+        params.add( new Parameter(AppointmentRequest.RECURRENCE_MASTER,recurrenceMaster));
+        params.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
+
+        return params.toArray(new Parameter[]{});
     }
 
     /**

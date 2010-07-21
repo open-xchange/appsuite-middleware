@@ -49,14 +49,27 @@
 
 package com.openexchange.ajax.appointment.action;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Appointment;
 import com.openexchange.ajax.framework.CommonListRequest;
 import com.openexchange.ajax.framework.ListIDs;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (additional param)
  */
 public class ListRequest extends CommonListRequest {
+
+    private boolean includePrivateAppointmentsInSharedFolders = false;
+    
+    public ListRequest(ListIDs identifier, int[] columns, boolean failOnError, boolean include) {
+        this(identifier, columns, failOnError);
+        this.includePrivateAppointmentsInSharedFolders = include;
+    }
 
     public ListRequest(ListIDs identifier, int[] columns, boolean failOnError) {
         super(AbstractAppointmentRequest.URL, identifier, columns, failOnError);
@@ -65,4 +78,13 @@ public class ListRequest extends CommonListRequest {
     public ListRequest(final ListIDs identifier, final int[] columns) {
         this(identifier, columns, true);
     }
+
+    @Override
+    public Parameter[] getParameters() {
+        List<Parameter> params = new LinkedList<Parameter>(Arrays.asList(super.getParameters()));
+        params.add( new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, includePrivateAppointmentsInSharedFolders) );
+        return params.toArray(new Parameter[]{});
+    }
+    
+    
 }
