@@ -54,7 +54,7 @@ public enum Property implements PropertyInterface {
     WinMobRegex(String.class, Required.TRUE, "com.openexchange.mobile.configuration.generator.WinMobRegex"),
     OnlySecureConnect(Boolean.class, Required.TRUE, "com.openexchange.mobile.configuration.generator.OnlySecureConnect"),
     DomainUser(String.class, Required.TRUE, "com.openexchange.usm.eas.login_pattern.domain_user"),
-    SignConfig(Boolean.class, Required.TRUE, "com.openexchange.mobileconfig.SignConfig"),
+    SignConfig(Boolean.class, Required.TRUE, "com.openexchange.mobile.configuration.generator.SignConfig"),
     OpensslBinary(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.OpensslBinary"),
     OpensslTimeout(Integer.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.OpensslTimeout"),
     CertFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.CertFile"),
