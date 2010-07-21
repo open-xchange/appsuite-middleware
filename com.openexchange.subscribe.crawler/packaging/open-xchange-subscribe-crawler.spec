@@ -96,8 +96,8 @@ if [ ${1:-0} -eq 2 ]; then
    fi
 
    ox_update_permissions "/opt/open-xchange/etc/groupware/crawlers" open-xchange:open-xchange 755
-   for file in /opt/open-xchange/etc/groupware/crawlers/*; do
-       ox_update_permissions "$file" open-xchange:open-xchange 644
+   for i in $(find /opt/open-xchange/etc/groupware/crawlers -name "*.yml"); do
+       ox_update_permissions "$i" open-xchange:open-xchange 644
    done
 fi
 

@@ -1,3 +1,7 @@
+* 2010-07-21 - choeger@open-xchange.com
+
+ - Bugfix #16529: Errors when updating OX Packages on RHEL5
+ 
 * 2010-07-20 - marcus.klein@open-xchange.com
 
  - Bugfix #16379: Not using context specific locks anymore filling a map until all memory is eaten up.
