@@ -338,7 +338,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     
     public static final String PARAMETER_UID = "uid";
     
-    public static final String PARAMETER_SHOW_PRIVATE_APPOINTMENTS = "private";
+    public static final String PARAMETER_SHOW_PRIVATE_APPOINTMENTS = "showPrivate";
 
 
     /**
