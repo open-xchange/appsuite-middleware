@@ -89,9 +89,20 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      */
     public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask, final Locale locale,
             final TimeZone timeZone) {
-        super(endDate, !fulltime, isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE, locale,
+        super(correctDayOfMonth(endDate, fulltime), !fulltime, isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE, locale,
                 timeZone);
         fallback = isTask ? Notifications.NO_DUE_DATE : Notifications.NO_END_DATE;
+    }
+
+    /*
+     * This is worth some discussion. Appointments lasting the entire day end at midnight (00:00 o'Clock) of *the following day*. 
+     * For example a fulltime appointment from the 3rd of August up until the 4th of August ends midnight on the *5th* of August.
+     * This is all nice and useful for calendar calculation, but not so much for date printing. That is why, for the end date, we have
+     * to move (when printing) the appointment into the previous day, if only by some milliseconds, so that the appointment ends
+     * shortly before midnight the next day, in our example on the 4th of August. 
+     */
+    private static Date correctDayOfMonth(final Date endDate, final boolean fulltime) {
+        return fulltime ? new Date(endDate.getTime()-23) : endDate;
     }
 
     public TemplateToken getToken() {

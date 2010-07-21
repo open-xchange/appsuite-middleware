@@ -97,9 +97,12 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
      * @param locale The locale
      * @param timeZone The time zone; may be <code>null</code>
      */
-    protected AbstractDateReplacement(final Date date, final boolean withTime, final Locale locale, final TimeZone timeZone) {
+    protected AbstractDateReplacement(final Date date, final boolean withTime, final Locale locale, TimeZone timeZone) {
         super();
         this.withTime = withTime;
+        if(!withTime) {
+            timeZone = TimeZone.getTimeZone("UTC"); // No need to start calculating TZ offset with dates only. Assume UTC.
+        }
         this.date = date;
         this.dateFormat = getDateFormat(withTime, locale, timeZone);
         this.timeZone = timeZone;
@@ -195,7 +198,9 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
     }
 
     private void applyTimeZone(final TimeZone timeZone) {
-        if (timeZone == null || timeZone.equals(this.timeZone)) {
+        // No need to do anything if no timezone is specified or if the timezone hasn't changed or if we're only dealing
+        // with days anyway.
+        if (timeZone == null || timeZone.equals(this.timeZone) || !withTime) { 
             return;
         }
         if (withTime && this.timeZone == null && dateFormat instanceof SimpleDateFormat) {

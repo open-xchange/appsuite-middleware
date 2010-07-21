@@ -1,3 +1,7 @@
+* 2010-07-21 - francisco.laguna@open-xchange.com
+
+ - Bugfix #16507: Ignore timezones when writing notification mails about appointments lasting the whole day. Artificially move the end date of an appointment to the previous day, if it is a whole day appointment. 
+ 
 * 2010-07-21 - tobias.prinz@open-xchange.com
 
  - US1601 - serverside: ALL and LIST requests for appointments now have a new parameter called "showPrivate" (default: false). If it is set to true, private appointments in shared folders are also returned, but only as anonymized appointments (lacking all information except start and end date).  
