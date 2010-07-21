@@ -46,33 +46,29 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.storage.sqlStorage;
 
-import java.sql.Connection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
-
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 
 /**
- * This class implements the global storage interface and creates a layer
- * between the abstract storage definition and a storage in a SQL accessible
- * database
- * 
+ * This class implements the global storage interface and creates a layer between the abstract storage definition and a storage in a SQL
+ * accessible database
+ *
  * @author d7
  * @author cutmasta
- * 
  */
 public abstract class OXUserSQLStorage extends OXUserStorageInterface {
 
-    // This class provides a mapper which maps the name of the field in the user
-    // object to the name of the field in the database and the other way around
+    /**
+     * This class provides a mapper which maps the name of the field in the user object to the name of the field in the database and the
+     * other way around
+     */
     protected static class Mapper {
+
         public final static String PASSWORD_EXPIRED = "Password_expired";
 
         public final static Hashtable<String, String> method2field = new Hashtable<String, String>(99);
@@ -95,7 +91,6 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             notallowed.add(PASSWORD_EXPIRED);
             notallowed.add("Language");
 
-            
             // For the user table
             method2field.put("Id", "id");
             method2field.put("PrimaryEmail", "mail");
@@ -203,7 +198,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             // For the user table
             final Enumeration<String> keys = method2field.keys();
             final Enumeration<String> values = method2field.elements();
-            
+
             while (keys.hasMoreElements()) {
                 final String key = keys.nextElement();
                 final String value = values.nextElement();
@@ -211,61 +206,4 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             }
         }
     }
-
-    /**
-     * @throws StorageException
-     * 
-     */
-    abstract public void changeLastModified(final int user_id, final Context ctx, final Connection write_ox_con) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public void change(final Context ctx, final User usrdata) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id,final int uid_number) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public void createRecoveryData(final Context ctx, final int user_id, final Connection write_ox_con) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public void deleteRecoveryData(final Context ctx, final int user_id, final Connection con) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public int[] getAll(final Context ctx) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public User[] getData(final Context ctx, User[] users) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public UserModuleAccess getModuleAccess(final Context ctx, final int user_id) throws StorageException;
-
 }
