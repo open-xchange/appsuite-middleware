@@ -100,9 +100,8 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
     }
 
-    public final void appointmentModified(final Appointment appointmentObj,
-            final Session sessionObj) {
-        // TODO Auto-generated method stub
+    public final void appointmentModified(Appointment appointment, Session session) {
+        // Nothing to do.
 
     }    
 
@@ -122,10 +121,8 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
     }
 
-    public final void contactModified(final Contact contactObj,
-            final Session sessionObj) {
-        // TODO Auto-generated method stub
-
+    public final void contactModified(Contact contact, Session session) {
+        // Nothing to do.
     }
     
     private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session session) {
