@@ -1,6 +1,6 @@
 * 2010-07-21 - tobias.prinz@open-xchange.com
 
- - US1601 - serverside: ALL and LIST requests for appointments now have a new parameter called "private" (default: false). If it is set, private appointments in shared folders are also returned, but only as anonymized appointments (lacking all information except start and end date).  
+ - US1601 - serverside: ALL and LIST requests for appointments now have a new parameter called "showPrivate" (default: false). If it is set to true, private appointments in shared folders are also returned, but only as anonymized appointments (lacking all information except start and end date).  
 
 * 2010-07-21 - steffen.templin@open-xchange.com
 
