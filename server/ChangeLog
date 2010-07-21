@@ -1,3 +1,7 @@
+* 2010-07-21 - tobias.prinz@open-xchange.com
+
+ - US1601 - serverside: ALL and LIST requests for appointments now have a new parameter called "private" (default: false). If it is set, private appointments in shared folders are also returned, but only as anonymized appointments (lacking all information except start and end date).  
+
 * 2010-07-21 - steffen.templin@open-xchange.com
 
  - Bugfix #16492 - Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now for insert appointments.
@@ -16,7 +20,7 @@
 
 * 2010-07-20 - martin.herfurth@open-xchange.com
 
- - Bugfux #16481: Extend field for participant confirmation comment.
+ - Bugfix #16481: Extend field for participant confirmation comment.
 
 * 2010-07-20 - steffen.templin@open-xchange.com
 
@@ -24,8 +28,8 @@
 
 * 2010-07-19 - martin.herfurth@open-xchange.com
 
- - Bugfux #16441: Delete Exceptions for series where the start date differs from the first occurrence.
- - Bugfux #16476: No more private appointments in search result.
+ - Bugfix #16441: Delete Exceptions for series where the start date differs from the first occurrence.
+ - Bugfix #16476: No more private appointments in search result.
 
 * 2010-07-16 - steffen.templin@open-xchange.com
 
