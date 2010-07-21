@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        This bundle provides methods to configure mobile devices for Active Sync
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange >= @OXVERSION@ open-xchange-templating >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange >= @OXVERSION@ open-xchange-templating >= @OXVERSION@ open-xchange-eas >= @OXVERSION@
 %description
 This bundle provides methods to configure mobile devices for Active Sync
 
