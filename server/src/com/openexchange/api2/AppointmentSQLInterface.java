@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -67,6 +66,17 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public interface AppointmentSQLInterface {
 
+    /**
+     * @param include TRUE if you want to include other people's private appointments when returning data, FALSE otherwise (default case)
+     * @return
+     */
+    void setIncludePrivateAppointments(boolean include);
+    
+    /**
+     * @return TRUE if relevant methods will include other people's private appointments when returning data, FALSE otherwise (default case)
+     */
+    boolean getIncludePrivateAppointments();
+    
     /**
      * Lists all appointment that match the given search.
      * 
