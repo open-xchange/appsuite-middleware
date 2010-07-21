@@ -178,7 +178,6 @@ public class AppointmentRequest {
         if (!session.getUserConfiguration().hasCalendar()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "calendar");
         }
-
         if (AJAXServlet.ACTION_CONFIRM.equalsIgnoreCase(action)) {
             return actionConfirm(jsonObject);
         } else if (AJAXServlet.ACTION_NEW.equalsIgnoreCase(action)) {
@@ -530,7 +529,8 @@ public class AppointmentRequest {
         }
 
         final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
-
+        final boolean includePrivates = DataParser.parseBoolean(jsonObj, AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS);
+        
         final TIntIntHashMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {
             final JSONObject jObject = jData.getJSONObject(a);
@@ -574,7 +574,8 @@ public class AppointmentRequest {
 
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);
+        appointmentsql.setIncludePrivateAppointments(includePrivates);
+        it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields); 
         try {
             int counter = 0;
             final JSONArray jsonResponseArray = new JSONArray();
@@ -696,6 +697,7 @@ public class AppointmentRequest {
         final int folderId = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+        final boolean showPrivateAppointments = DataParser.parseBoolean(jsonObj, AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS);
         final boolean listOrder;
         if (orderBy == CalendarObject.START_DATE || orderBy == CalendarObject.END_DATE) {
             listOrder = true;
@@ -731,7 +733,10 @@ public class AppointmentRequest {
             if (showAppointmentInAllFolders) {
                 it = appointmentsql.getAppointmentsBetween(user.getId(), start, end, _appointmentFields, orderBy, orderDir);
             } else {
+                boolean old = appointmentsql.getIncludePrivateAppointments();
+                appointmentsql.setIncludePrivateAppointments(showPrivateAppointments);
                 it = appointmentsql.getAppointmentsBetweenInFolder(folderId, _appointmentFields, start, end, orderBy, orderDir);
+                appointmentsql.setIncludePrivateAppointments(old);
             }
             Date lastModified = new Date(0);
             while (it.hasNext()) {

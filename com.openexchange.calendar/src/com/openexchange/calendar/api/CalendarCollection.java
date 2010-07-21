@@ -1637,10 +1637,12 @@ public final class CalendarCollection implements CalendarCollectionService {
         return -1;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkPermissions(com.openexchange.calendar.CalendarDataObject, com.openexchange.session.Session, com.openexchange.groupware.contexts.Context, java.sql.Connection, int, int)
-     */
     public boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Context ctx, final Connection readcon, final int action, final int inFolder) throws OXException {
+        return checkPermissions(cdao, so, ctx, readcon, action, inFolder, false);
+    }
+
+
+    public boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Context ctx, final Connection readcon, final int action, final int inFolder, final boolean includePrivateAppointmentsOfSharedFolderOwner) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
             cdao.setFolderType(access.getFolderType(inFolder, so.getUserId()));
@@ -1662,7 +1664,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
                     //cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), readcon));
                     if (cdao.getPrivateFlag()) {
-                        return false;
+                        return includePrivateAppointmentsOfSharedFolderOwner;
                     }
                     EffectivePermission oclp = null;
                     oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));

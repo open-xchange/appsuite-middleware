@@ -58,7 +58,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -152,6 +151,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     public static final char PERCENT = '%';
 
     private int oids[][];
+    private boolean includePrivateAppointmentsOfSharedFolderOwner= false;;
     
     private static CalendarCollection recColl = new CalendarCollection();
 
@@ -830,7 +830,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
                 cdao.setActionFolder(check_folder_id);
 
-                if (!recColl.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
+                if (!recColl.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id, getIncludePrivateAppointmentsOfSharedFolderOwner())) {
                     if (DEBUG) {
                         final StringBuilder colss = new StringBuilder(cols.length << 3);
                         for (int a = 0; a < cols.length; a++) {
@@ -853,6 +853,15 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         has_next = false;
         return null;
+    }
+
+
+    public boolean getIncludePrivateAppointmentsOfSharedFolderOwner() {
+        return this.includePrivateAppointmentsOfSharedFolderOwner;
+    }
+
+    public void setIncludePrivateAppointmentsOfSharedFolderOwner(boolean include) {
+        this.includePrivateAppointmentsOfSharedFolderOwner = include;
     }
 
     /**
