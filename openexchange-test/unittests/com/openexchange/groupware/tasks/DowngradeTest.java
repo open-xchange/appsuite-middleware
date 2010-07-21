@@ -121,28 +121,20 @@ public class DowngradeTest extends TestCase {
 
         user = UserToolkit.getUser(getUsername(userName), ctx);
 
-        final String secondUserName = AJAXConfig.getProperty(AJAXConfig.Property
-            .SECONDUSER);
+        final String secondUserName = AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER);
         secondUser = UserToolkit.getUser(getUsername(secondUserName), ctx);
 
-        session = SessionObjectWrapper.createSessionObject(user.getId(), ctx,
-            "DowngradeTest");
+        session = SessionObjectWrapper.createSessionObject(user.getId(), ctx, "DowngradeTest");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void tearDown() throws Exception {
         Init.stopServer();
         super.tearDown();
     }
 
-    public void testRemovePrivateParticipants() throws OXException,
-        DBPoolingException, DowngradeFailedException,
-        TaskException {
-        final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(),
-            ctx);
+    public void testRemovePrivateParticipants() throws Throwable {
+        final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(), ctx);
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
         task.setParticipants(new Participant[] {
             new UserParticipant(user.getId()),
@@ -154,13 +146,11 @@ public class DowngradeTest extends TestCase {
             downgradeDelegate();
             assertNoParticipants(folderId, task.getObjectID());
         } finally {
-            TaskLogic.deleteTask(session, ctx, user.getId(), task, task
-                .getLastModified());
+            TaskLogic.deleteTask(session, ctx, user.getId(), task, task.getLastModified());
         }
     }
 
-    public void testRemovePublicParticipants() throws DBPoolingException,
-        OXException, DowngradeFailedException, TaskException {
+    public void testRemovePublicParticipants() throws Throwable {
         final FolderObject folder = createPublicFolder();
         final int folderId = folder.getObjectID();
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
@@ -219,29 +209,26 @@ public class DowngradeTest extends TestCase {
 
     /* ----------------- Test help methods ---------------------*/
     
-    private void downgradeDelegate() throws DBPoolingException,
-        DowngradeFailedException {
-        final UserConfiguration userConfig = new UserConfiguration(
-            Integer.MAX_VALUE ^ (1 << 17), user.getId(), user.getGroups(), ctx);
+    private void downgradeDelegate() throws DBPoolingException, DowngradeFailedException {
+        final UserConfiguration userConfig = new UserConfiguration(Integer.MAX_VALUE ^ UserConfiguration.DELEGATE_TASKS, user.getId(), user.getGroups(), ctx);
         final Connection con = Database.get(ctx, true);
         try {
-            final DowngradeEvent event = new DowngradeEvent(userConfig, con,
-                ctx);
+            final DowngradeEvent event = new DowngradeEvent(userConfig, con, ctx);
             new TasksDowngrade().downgradePerformed(event);
         } finally {
             Database.back(ctx, true, con);
         }
     }
-    
-    private void downgradeNoTasks() throws DBPoolingException,
-        DowngradeFailedException {
+
+    private void downgradeNoTasks() throws DBPoolingException, DowngradeFailedException {
         final UserConfiguration userConfig = new UserConfiguration(
-            Integer.MAX_VALUE ^ ((1 << 17) + (1 << 3)), user.getId(),
-            user.getGroups(), ctx);
+            Integer.MAX_VALUE ^ UserConfiguration.DELEGATE_TASKS ^ UserConfiguration.TASKS,
+            user.getId(),
+            user.getGroups(),
+            ctx);
         final Connection con = Database.get(ctx, true);
         try {
-            final DowngradeEvent event = new DowngradeEvent(userConfig, con,
-                ctx);
+            final DowngradeEvent event = new DowngradeEvent(userConfig, con, ctx);
             new TasksDowngrade().downgradePerformed(event);
         } finally {
             Database.back(ctx, true, con);
@@ -250,8 +237,7 @@ public class DowngradeTest extends TestCase {
 
     private void assertNoParticipants(final int folderId, final int objectId) {
         try {
-            final Task task = GetTask.load(ctx, folderId, objectId, StorageType
-                .ACTIVE);
+            final Task task = GetTask.load(ctx, folderId, objectId, StorageType.ACTIVE);
             final Participant[] parts = task.getParticipants();
             if (null != parts && parts.length > 0) {
                 throw new AssertionFailedError("Task has participants.");
@@ -263,8 +249,7 @@ public class DowngradeTest extends TestCase {
 
     private void assertParticipants(final int folderId, final int objectId) {
         try {
-            final Task task = GetTask.load(ctx, folderId, objectId, StorageType
-                .ACTIVE);
+            final Task task = GetTask.load(ctx, folderId, objectId, StorageType.ACTIVE);
             final Participant[] parts = task.getParticipants();
             if (null == parts || parts.length == 0) {
                 throw new AssertionFailedError("Task has no participants.");
