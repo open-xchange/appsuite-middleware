@@ -18,7 +18,7 @@
 	<classpathentry kind="lib" path="lib/axis2-jaxws.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-jibx.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-json.jar"/>
-	<classpathentry kind="lib" path="lib/axis2-kernel.jar" sourcepath="source/axis2-1.4-src.zip"/>
+	<classpathentry kind="lib" path="lib/axis2-kernel.jar" sourcepath="source/axis2-1.5.1-src.zip"/>
 	<classpathentry kind="lib" path="lib/axis2-metadata.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-mtompolicy.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-saaj.jar"/>
