@@ -1588,14 +1588,46 @@ public class CalendarMySQL implements CalendarSqlImp {
                         } else {
                             stmt.setNull(5, java.sql.Types.VARCHAR);
                         }
+
                         if (user.getAlarmMinutes() >= 0) {
-                            stmt.setInt(6, user.getAlarmMinutes());
-                        } else {
-                            stmt.setNull(6, java.sql.Types.INTEGER);
-                        }
-                        if (user.getAlarmMinutes() >= 0 && user.getIdentifier() == uid) {
+                            boolean isCreator = user.getIdentifier() == uid;
                             final long la = user.getAlarmMinutes() * 60000L;
-                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new java.util.Date(cdao.getStartDate().getTime() - la), CalendarOperation.INSERT, false);
+                            Date reminder = null;
+                            if (cdao.isSequence() && collection.isInThePast(cdao.getStartDate())) {
+                                if (collection.isInThePast(cdao.getEndDate())) {
+                                    stmt.setNull(6, java.sql.Types.INTEGER);
+                                } else {
+                                    
+                                    stmt.setInt(6, user.getAlarmMinutes());
+                                 
+                                    if (isCreator) {
+                                        RecurringResultsInterface recurringResults = collection.calculateRecurring(
+                                            cdao,
+                                            cdao.getStartDate().getTime(),
+                                            cdao.getEndDate().getTime(),
+                                            0);
+                                        for (int i = 0; i < recurringResults.size(); i++) {
+                                            final RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
+                                            if (recurringResult.getStart() > new Date().getTime()) {
+                                                reminder = new java.util.Date(recurringResult.getStart() - la);
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if (reminder == null) {
+                                            reminder = new java.util.Date(cdao.getStartDate().getTime() - la);
+                                        }
+
+                                        changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), reminder, CalendarOperation.INSERT, false, writecon);
+                                    }                                    
+                                }
+                            } else {
+                                if (collection.isInThePast(cdao.getEndDate())) {
+                                    stmt.setNull(6, java.sql.Types.INTEGER);
+                                } else {
+                                    stmt.setInt(6, user.getAlarmMinutes());
+                                }                                
+                            }       
                         }
                         stmt.setInt(7, cdao.getContextID());
                         collection.checkUserParticipantObject(user, folderType);
@@ -2826,7 +2858,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 end_date = edao.getEndDate();
                             }
                             final boolean isSequence = cdao.isSequence(true);
-                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), isSequence, end_date, new java.util.Date(calc_date.getTime() - la), CalendarOperation.INSERT, (isSequence ? checkRecurrenceChange(cdao, edao) : false));
+                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), isSequence, end_date, new java.util.Date(calc_date.getTime() - la), CalendarOperation.INSERT, (isSequence ? checkRecurrenceChange(cdao, edao) : false), writecon);
                         } else {
                             pi.setNull(6, java.sql.Types.INTEGER);
                         }
@@ -3027,7 +3059,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         final boolean isSequence = cdao.isSequence(true);
 
-                        changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), isSequence, end_date, reminder, CalendarOperation.UPDATE, isSequence ? checkRecurrenceChange(cdao, edao) : false);
+                        changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), isSequence, end_date, reminder, CalendarOperation.UPDATE, isSequence ? checkRecurrenceChange(cdao, edao) : false, writecon);
                         
                     } else {
                         pu.setNull(4, java.sql.Types.INTEGER);
@@ -3898,15 +3930,28 @@ public class CalendarMySQL implements CalendarSqlImp {
                          */
                         if (rsql.loadReminder(oid, uid, Types.APPOINTMENT).getDate().getTime() < reminder_date
                                 .getTime()) {
-                            rsql.updateReminder(ro);
+                            if (con != null) {
+                                rsql.updateReminder(ro, con);
+                            } else {
+                                rsql.updateReminder(ro);
+                            }
+                            
                         } else if (LOG.isDebugEnabled()) {
                             LOG.debug("No recurrence change! Leave corresponding reminder unchanged");
                         }
                     } else {
-                        rsql.updateReminder(ro);
+                        if (con != null) {
+                            rsql.updateReminder(ro, con);
+                        } else {
+                            rsql.updateReminder(ro);
+                        }
                     }
                 } else {
-                    rsql.insertReminder(ro);
+                    if (con != null) {
+                        rsql.insertReminder(ro, con);
+                    } else {
+                        rsql.insertReminder(ro);
+                    }
                 }
             }
         }

@@ -1,3 +1,7 @@
+* 2010-07-21 - steffen.templin@open-xchange.com
+
+ - Bugfix #16492 - Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now for insert appointments.
+
 * 2010-07-21 - choeger@open-xchange.com
 
  - Bugfix #16529: Errors when updating OX Packages on RHEL5
