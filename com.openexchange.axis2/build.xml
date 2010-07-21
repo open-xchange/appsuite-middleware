@@ -59,18 +59,17 @@
         <pathelement location="lib/axis2-java2wsdl.jar"/>
         <pathelement location="lib/axis2-jaxbri.jar"/>
         <pathelement location="lib/axis2-jaxws.jar"/>
-        <pathelement location="lib/axis2-jaxws-api.jar"/>
         <pathelement location="lib/axis2-jibx.jar"/>
         <pathelement location="lib/axis2-json.jar"/>
-        <pathelement location="lib/axis2-jws-api.jar"/>
         <pathelement location="lib/axis2-kernel.jar"/>
         <pathelement location="lib/axis2-metadata.jar"/>
         <pathelement location="lib/axis2-mtompolicy.jar"/>
         <pathelement location="lib/axis2-saaj.jar"/>
-        <pathelement location="lib/axis2-saaj-api.jar"/>
         <pathelement location="lib/axis2-spring.jar"/>
+        <pathelement location="lib/axis2-transport-http.jar"/>
+        <pathelement location="lib/axis2-transport-local.jar"/>
         <pathelement location="lib/axis2-xmlbeans.jar"/>
-    </path>
+   </path>
 
 	<fileset dir="lib" id="jarfiles" followsymlinks="false">
         <include name="*"/>
