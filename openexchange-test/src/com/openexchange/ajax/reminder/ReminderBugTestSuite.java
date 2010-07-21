@@ -70,6 +70,7 @@ public class ReminderBugTestSuite {
         tests.addTestSuite(Bug15740Test.class);
         tests.addTestSuite(Bug14111Test.class);
         tests.addTestSuite(Bug15776Test.class);
+        tests.addTestSuite(Bug16492Test.class);
         return tests;
     }
 }
