@@ -143,6 +143,8 @@ public interface CalendarSqlImp {
 
     PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir) throws SQLException;
 
+    PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir, boolean includePrivateAppointments) throws SQLException;
+    
     PreparedStatement getSharedFolderModifiedSinceSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date since, String select, boolean readall, Connection readcon, Date d1, Date d2, boolean includePrivateFlag) throws SQLException;
 
     PreparedStatement getSharedFolderDeletedSinceSQL(Context c, int uid, int shared_folder_owner, int fid, Date d1, String select, Connection readcon) throws SQLException;
