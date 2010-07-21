@@ -60,7 +60,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -188,7 +187,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final Log LOG = LogFactory.getLog(CalendarMySQL.class);
 
     private static CalendarCollection collection = new CalendarCollection();
-
+    
     private static interface StatementFiller {
         void fillStatement(PreparedStatement stmt, int pos, CalendarDataObject cdao) throws OXCalendarException,
                 SQLException;
@@ -778,6 +777,10 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     public final PreparedStatement getSharedFolderRangeSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final String orderDir) throws SQLException {
+        return getSharedFolderRangeSQL(c, uid, shared_folder_owner, groups, fid, d1, d2, select, readall, readcon, orderBy, orderDir, false);
+    }
+    
+    public final PreparedStatement getSharedFolderRangeSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final String orderDir, final boolean includePrivateAppointments) throws SQLException {
         final StringBuilder sb = new StringBuilder(32);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
@@ -787,7 +790,8 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(WHERE);
         getRange(sb);
         sb.append(PD_FID_IS_NULL);
-        sb.append(" AND pd.pflag = 0 ");
+        if(! includePrivateAppointments)
+            sb.append(" AND pd.pflag = 0 ");
         sb.append(PDM_PFID_IS);
         sb.append(fid);
         sb.append(PDM_MEMBER_UID_IS);
@@ -1628,6 +1632,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     stmt.setInt(6, user.getAlarmMinutes());
                                 }                                
                             }       
+                        } else {
+                            stmt.setNull(6, java.sql.Types.INTEGER);
                         }
                         stmt.setInt(7, cdao.getContextID());
                         collection.checkUserParticipantObject(user, folderType);
