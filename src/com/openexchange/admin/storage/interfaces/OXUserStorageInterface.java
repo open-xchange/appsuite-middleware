@@ -150,12 +150,12 @@ public abstract class OXUserStorageInterface {
     /**
      * Manipulate user module access within the given context.    
      * @param ctx Context object.
-     * @param user_id int[] containing the user id.
+     * @param userId int[] containing the user id.
      * @param moduleAccess UserModuleAccess containing module access.     
      *
      * @throws StorageException
      */
-    public abstract void changeModuleAccess(final Context ctx,final int user_id,final UserModuleAccess moduleAccess) throws StorageException;
+    public abstract void changeModuleAccess(Context ctx, int userId, UserModuleAccess moduleAccess) throws StorageException;
     
     /**
      * Manipulate users module access within the given context.    
