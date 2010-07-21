@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.LdapException;
@@ -89,14 +88,14 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    protected void startInternal() throws AbstractOXException {
+    protected void startInternal() {
         /*
          * Nothing to start
          */
     }
 
     @Override
-    protected void stopInternal() throws AbstractOXException {
+    protected void stopInternal() {
         /*
          * Nothing to stop
          */
@@ -130,7 +129,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void clearStorage() throws UserConfigurationException {
+    public void clearStorage() {
         /*
          * Since this storage implementation directly fetches data from database
          * this method has no effect
@@ -138,7 +137,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
+    public void removeUserConfiguration(final int userId, final Context ctx) {
         /*
          * Since this storage implementation directly fetches data from database
          * this method has no effect
@@ -167,10 +166,8 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      * @throws DBPoolingException - if a writable connection could not be
      *             obtained from database
      */
-    public static void saveUserConfiguration(final UserConfiguration userConfig, final boolean insert,
-            final Connection writeCon) throws SQLException, DBPoolingException {
-        saveUserConfiguration(userConfig.getPermissionBits(), userConfig.getUserId(), insert, userConfig.getContext(),
-                writeCon);
+    public static void saveUserConfiguration(UserConfiguration userConfig, boolean insert, Connection writeCon) throws SQLException, DBPoolingException {
+        saveUserConfiguration(userConfig.getPermissionBits(), userConfig.getUserId(), insert, userConfig.getContext(), writeCon);
     }
 
     private static final String SQL_SELECT = "SELECT user FROM user_configuration WHERE cid = ? AND user = ?";
