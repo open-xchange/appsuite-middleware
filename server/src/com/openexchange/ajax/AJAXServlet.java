@@ -337,6 +337,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_TEMPLATE = "template";
     
     public static final String PARAMETER_UID = "uid";
+    
+    public static final String PARAMETER_SHOW_PRIVATE_APPOINTMENTS = "private";
+
 
     /**
      * The content type if the response body contains javascript data. Set it with
@@ -673,6 +676,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     private static final Set<String> UPLOAD_ACTIONS =
         new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY));
+
 
     /**
      * (Statically) Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
