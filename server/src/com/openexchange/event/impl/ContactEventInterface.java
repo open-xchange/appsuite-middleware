@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.event.impl;
 
 import com.openexchange.groupware.container.Contact;
@@ -59,18 +57,12 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
 public interface ContactEventInterface {
-	
-    public void contactCreated(Contact contactObj, Session sessionObj);
-	
-    public void contactModified(Contact contactObj, Session sessionObj);
-		
-    public void contactDeleted(Contact contactObj, Session sessionObj);
-	
+
+    void contactCreated(Contact contact, Session session);
+
+    void contactModified(Contact contact, Session session);
+
+    void contactDeleted(Contact contact, Session session);
+
 }
-
-
-
-
-
