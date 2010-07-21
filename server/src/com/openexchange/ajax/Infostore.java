@@ -105,7 +105,6 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.tools.UnsynchronizedStringWriter;
-import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -199,7 +198,7 @@ public class Infostore extends PermissionServlet {
 
             final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
 
-            document(res, req.getHeader("user-agent"), isIE(req), isIE7(req), id, version, contentType, ctx, user, userConfig);
+            document(res, req.getHeader("user-agent"), id, version, contentType, ctx, user, userConfig);
 
             return;
         }
@@ -342,9 +341,9 @@ public class Infostore extends PermissionServlet {
             resp.setException(new AbstractOXException(x.getMessage())); // FIXME
             try {
                 res.setContentType("text/html; charset=UTF-8");
-				throw new UploadServletException(res, substituteJS(
-						ResponseWriter.getJSON(resp).toString(), action),
-						x.getMessage(), x);
+                throw new UploadServletException(res, substituteJS(
+                        ResponseWriter.getJSON(resp).toString(), action),
+                        x.getMessage(), x);
             } catch (final JSONException e) {
                 LOG.error("Giving up", e);
             }
@@ -353,9 +352,9 @@ public class Infostore extends PermissionServlet {
             resp.setException(new AbstractOXException(t.getMessage())); // FIXME
             try {
                 res.setContentType("text/html; charset=UTF-8");
-				throw new UploadServletException(res, substituteJS(
-						ResponseWriter.getJSON(resp).toString(), action),
-						t.getMessage(), t);
+                throw new UploadServletException(res, substituteJS(
+                        ResponseWriter.getJSON(resp).toString(), action),
+                        t.getMessage(), t);
             } catch (final JSONException e) {
                 LOG.error("Giving up", e);
             }
@@ -435,7 +434,7 @@ public class Infostore extends PermissionServlet {
             w = res.getWriter();
             final JSONObject obj = new JSONObject();
             obj.put(ResponseFields.DATA, newDocument.getId());
-			w.print(substituteJS(obj.toString(), ACTION_NEW));
+            w.print(substituteJS(obj.toString(), ACTION_NEW));
 
             w.flush();
         } catch (final IOException e) {
@@ -502,7 +501,7 @@ public class Infostore extends PermissionServlet {
         PrintWriter w = null;
         try {
             w = res.getWriter();
-			w.write(substituteJS("{}", ACTION_UPDATE));
+            w.write(substituteJS("{}", ACTION_UPDATE));
             close(w);
         } catch (final IOException e) {
             LOG.warn(e);
@@ -573,7 +572,7 @@ public class Infostore extends PermissionServlet {
             w = res.getWriter();
             final JSONObject obj = new JSONObject();
             obj.put(ResponseFields.DATA, metadata.getId());
-			w.print(substituteJS(obj.toString(), ACTION_NEW));
+            w.print(substituteJS(obj.toString(), ACTION_NEW));
             w.flush();
         } catch (final IOException e) {
             LOG.debug("", e);
@@ -584,7 +583,7 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    protected void document(final HttpServletResponse res, final String userAgent, final boolean ie, final boolean ie7, final int id, final int version, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) throws IOException {
+    protected void document(final HttpServletResponse res, final String userAgent, final int id, final int version, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) throws IOException {
         final InfostoreFacade infostore = getInfostore();
         OutputStream os = null;
         InputStream documentData = null;
@@ -596,10 +595,7 @@ public class Infostore extends PermissionServlet {
 
             res.setContentLength((int) metadata.getFileSize());
             if (SAVE_AS_TYPE.equals(contentType)) {
-                res.setHeader("Content-Disposition", "attachment; filename=\"" + Helper.escape(Helper.encodeFilename(
-                    metadata.getFileName(),
-                    "UTF-8",
-                    ie)) + "\"");
+                Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());
                 res.setContentType(contentType);
             } else {
                 final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
@@ -671,9 +667,9 @@ public class Infostore extends PermissionServlet {
                 writer = res.getWriter();
             }
             ResponseWriter.write(resp, writer);
-			if (post) {
-				res.getWriter().write(substituteJS(writer.toString(), action));
-			}
+            if (post) {
+                res.getWriter().write(substituteJS(writer.toString(), action));
+            }
         } catch (final JSONException e1) {
             LOG.error("", t);
         } catch (final IOException e1) {

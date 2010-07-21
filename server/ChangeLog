@@ -1,3 +1,7 @@
+* 2010-07-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #16348: filename parameter in Content-disposition: attachment header confuses Safari5. Omitting this header with this browser.
+
 * 2010-07-21 - francisco.laguna@open-xchange.com
 
  - Bugfix #16507: Ignore timezones when writing notification mails about appointments lasting the whole day. Artificially move the end date of an appointment to the previous day, if it is a whole day appointment. 
@@ -8,7 +12,7 @@
 
 * 2010-07-21 - steffen.templin@open-xchange.com
 
- - Bugfix #16492 - Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now for insert appointments.
+ - Bugfix #16492: Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now for insert appointments.
 
 * 2010-07-21 - choeger@open-xchange.com
 

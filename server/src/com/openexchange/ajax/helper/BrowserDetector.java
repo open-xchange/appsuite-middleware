@@ -130,6 +130,8 @@ public final class BrowserDetector {
      */
     private boolean fileUploadOK;
 
+    private boolean safari5;
+
     /**
      * Initializes a new {@link BrowserDetector}.
      * 
@@ -215,6 +217,9 @@ public final class BrowserDetector {
         return MSIE.equals(getBrowserName());
     }
 
+    public boolean isSafari5() {
+        return safari5;
+    }
     /**
      * Checks if user-agent indicates Windows platform.
      * 
@@ -358,6 +363,9 @@ public final class BrowserDetector {
                 }
                 if (browserVersion >= 4.0F) {
                     cssOK = true;
+                }
+                if (browserVersion >= 5.0F) {
+                    safari5 = true;
                 }
             } else if (browserName.equals(MSIE)) {
                 if (browserVersion >= 4.0F) {

@@ -50,6 +50,7 @@
 package com.openexchange.tools.servlet.http;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -59,7 +60,10 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.tools.encoding.Charsets;
+import com.openexchange.tools.encoding.Helper;
 
 /**
  * Convenience methods for servlets.
@@ -253,6 +257,20 @@ public final class Tools {
         }
     }
 
+    public static void setHeaderForFileDownload(String userAgent, HttpServletResponse resp, String fileName) throws UnsupportedEncodingException {
+        BrowserDetector detector = new BrowserDetector(userAgent);
+        if (detector.isMSIE()) {
+            resp.setHeader("Content-Disposition", "attachment; filename=\"" + Helper.encodeFilenameForIE(fileName, Charsets.UTF_8) + "\"");
+        } else if (detector.isSafari5()) {
+            // URL encoded name in link is sufficient.
+            resp.setHeader("Content-Disposition", "attachment");
+        } else {
+            resp.setHeader(
+                "Content-Disposition",
+                "attachment; filename=\"" + Helper.escape(Helper.encodeFilename(fileName, "UTF-8")) + "\"");
+        }
+    }
+
     static {
         /*
          * Pattern for the HTTP header date format.
@@ -270,6 +288,6 @@ public final class Tools {
          * @param cookieName The cookie name to check
          * @return <code>true</code> if specified cookie name matches; otherwise <code>false</code>
          */
-        public boolean matches(final String cookieName);
+        boolean matches(String cookieName);
     }
 }
