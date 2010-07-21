@@ -32,3 +32,9 @@ axis2-jaxws-api.jar
 axis2-spring.jar
 axis2-jws-api.jar
 axis2-kernel.jar
+httpcore.jar
+axis2-transport-http.jar
+axis2-transport-local.jar
+axiom-dom.jar
+jaxen.jar
+geronimo-ws-metadata_2.0_spec.jar
