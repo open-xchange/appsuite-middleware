@@ -510,6 +510,33 @@ public class FolderTestManager implements TestManager{
         folder.setPermissions(allPermissions);
         return folder;
     }
+    
+    public FolderObject generateSharedFolder(String name, int moduleID, int parentID, int... userIDs){
+        //create a folder
+        FolderObject folder = new FolderObject();
+        folder.setFolderName(name);
+        folder.setType(FolderObject.SHARED);
+        folder.setParentFolderID(parentID);
+        folder.setModule(moduleID);
+        // create permissions
+        ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
+        boolean firstUser = true;
+        for(int userID: userIDs){
+            final OCLPermission permissions = new OCLPermission();
+            permissions.setEntity(userID);
+            permissions.setGroupPermission(false);
+            permissions.setFolderAdmin(firstUser);
+            permissions.setAllPermission(
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION);
+            allPermissions.add(permissions);
+            firstUser = false;
+        }
+        folder.setPermissions(allPermissions);
+        return folder;
+    }
 
     public boolean doesFailOnError() {
         return getFailOnError();
