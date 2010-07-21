@@ -1114,9 +1114,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 // add the module access rights to the db
-                final int[] all_groups = getGroupsForUser(ctx, userId, con);
+                final int[] groupsForUser = getGroupsForUser(ctx, userId, con);
 
-                myChangeInsertModuleAccess(ctx, userId, moduleAccess, true, con, con, all_groups);
+                myChangeInsertModuleAccess(ctx, userId, moduleAccess, true, con, groupsForUser);
 
                 // add users standard mail settings
                 final StringBuffer sb = new StringBuffer("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,send_addr,bits,confirmed_spam,confirmed_ham,");
@@ -2005,78 +2005,45 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void changeModuleAccess(final Context ctx, final int[] user_ids, final UserModuleAccess moduleAccess) throws StorageException {
-        Connection read_ox_con = null;
-        Connection write_ox_con = null;
-
+    public void changeModuleAccess(Context ctx, int[] userIds, UserModuleAccess moduleAccess) throws StorageException {
+        final Connection con;
         try {
-
-            read_ox_con = cache.getConnectionForContext(ctx.getId());
-            write_ox_con = cache.getConnectionForContext(ctx.getId());
-            write_ox_con.setAutoCommit(false);
-
-            // LOOP through the int[] and change the module access rights for
-            // each user
-            for (final int user_id : user_ids) {
+            con = cache.getConnectionForContext(i(ctx.getId()));
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        try {
+            con.setAutoCommit(false);
+            // Loop through the int[] and change the module access rights for each user
+            for (int userId : userIds) {
                 // first get all groups the user is in
-                final int[] all_groups = getGroupsForUser(ctx, user_id, read_ox_con);
+                int[] groupsForUser = getGroupsForUser(ctx, userId, con);
                 // update last modified column
-                changeLastModified(user_id, ctx, write_ox_con);
-                myChangeInsertModuleAccess(ctx, user_id, moduleAccess, false, read_ox_con, write_ox_con, all_groups);
+                changeLastModified(userId, ctx, con);
+                myChangeInsertModuleAccess(ctx, userId, moduleAccess, false, con, groupsForUser);
             }
-            write_ox_con.commit();
-        } catch (final SQLException sqle) {
-            log.error("SQL Error", sqle);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException ex) {
-                log.error("Error rollback ox db write connection", ex);
-            }
-            throw new StorageException(sqle.toString());
-        } catch (final PoolException pole) {
-            log.error("Pool Error", pole);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException ex) {
-                log.error("Error rollback ox db write connection", ex);
-            }
-            throw new StorageException(pole);
-        } catch (final RuntimeException e) {
+            con.commit();
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            rollback(con);
+            throw new StorageException(e.toString());
+        } catch (RuntimeException e) {
             log.error(e.getMessage(), e);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                }
-            } catch (final SQLException ex) {
-                log.error("Error rollback ox db write connection", ex);
-            }
+            rollback(con);
             throw e;
         } finally {
             try {
-                if (read_ox_con != null) {
-                    cache.pushConnectionForContext(ctx.getId(), read_ox_con);
-                }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox read connection to pool!", exp);
-            }
-            try {
-                if (write_ox_con != null) {
-                    cache.pushConnectionForContext(ctx.getId(), write_ox_con);
-                }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox write connection to pool!", exp);
+                cache.pushConnectionForContext(i(ctx.getId()), con);
+            } catch (PoolException e) {
+                log.error("Pool Error pushing ox write connection to pool!", e);
             }
         }
     }
 
     @Override
-    public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess) throws StorageException {
-        final int[] ids = { user_id };
-        changeModuleAccess(ctx, ids, moduleAccess);
+    public void changeModuleAccess(Context ctx, int userId, UserModuleAccess moduleAccess) throws StorageException {
+        changeModuleAccess(ctx, new int[] { userId }, moduleAccess);
     }
 
     @Override
@@ -2408,9 +2375,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void myChangeInsertModuleAccess(final Context ctx, final int user_id, final UserModuleAccess access, final boolean insert_or_update, final Connection read_ox_con, final Connection write_ox_con, final int[] groups) throws StorageException {
+    private void myChangeInsertModuleAccess(Context ctx, int userId, UserModuleAccess access, boolean insert, Connection writeCon, int[] groups) throws StorageException {
+        checkForIllegalCombination(access);
         try {
-            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, groups, ctx.getId().intValue(), read_ox_con);
+            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(userId, groups, ctx.getId().intValue(), writeCon);
             user.setCalendar(access.getCalendar());
             user.setContact(access.getContacts());
             user.setForum(access.getForum());
@@ -2440,33 +2408,47 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setUSM(access.isUSM());
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
-            adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), user_id, access.isGlobalAddressBookDisabled(), write_ox_con);
-            adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), user_id, write_ox_con);
+            adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
+            adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
 
-            RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
-            if (!insert_or_update) {
-                final com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId().intValue());
-                final UserConfigurationStorage uConfStor = UserConfigurationStorage.getInstance();
-                uConfStor.removeUserConfiguration(user.getUserId(), tmp);
+            RdbUserConfigurationStorage.saveUserConfiguration(user, insert, writeCon);
+            if (!insert) {
+                com.openexchange.groupware.contexts.Context gwCtx = ContextStorage.getInstance().getContext(ctx.getId().intValue());
+                UserConfigurationStorage.getInstance().removeUserConfiguration(user.getUserId(), gwCtx);
             }
-        } catch (final DBPoolingException e) {
+        } catch (DBPoolingException e) {
             log.error("DBPooling Error", e);
             throw new StorageException(e.toString());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final ContextException e) {
+        } catch (ContextException e) {
             log.error("Context Error", e);
             throw new StorageException(e.toString());
-        } catch (final UserConfigurationException e) {
+        } catch (UserConfigurationException e) {
             log.error("UserConfiguration Error", e);
             throw new StorageException(e.toString());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log.error("UserConfiguration Error", e);
             throw new StorageException(e.toString());
-        } catch (final AbstractOXException e) {
-            log.error("Error", e);
-            throw new StorageException(e.toString());
+        }
+    }
+
+    private void checkForIllegalCombination(UserModuleAccess access) throws StorageException {
+        if (access.isGlobalAddressBookDisabled()) {
+            // At least Outlook does not work if global address book is not available. All other groupware functionality gets useless.
+            if (access.getEditPublicFolders()) {
+                throw new StorageException("Global address book can not be disabled for non-PIM users.");
+            }
+            if (access.getReadCreateSharedFolders()) {
+                throw new StorageException("Global address book can not be disabled for non-PIM users.");
+            }
+            if (access.getWebdavXml()) {
+                throw new StorageException("Global address book can not be disabled for non-PIM users.");
+            }
+            if (access.getDelegateTask()) {
+                throw new StorageException("Global address book can not be disabled for non-PIM users.");
+            }
         }
     }
 

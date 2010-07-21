@@ -1,3 +1,7 @@
+* 2010-07-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #15999: Checking if for the user are some features enabled conflicting with a disabled global address book.
+
 * 2010-07-09 - marcus.klein@open-xchange.com
 
  - Bugfix #16112: Administration daemon now writes the users display name into the fileAs attribute used by some clients.
