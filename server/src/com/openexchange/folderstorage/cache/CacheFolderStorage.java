@@ -203,7 +203,7 @@ public final class CacheFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            removeFolder(folderId, treeId, storageParameters);
+            removeFromCache(folderId, treeId, storageParameters.getUserId(), storageParameters.getContextId());
         }
     }
 
@@ -245,7 +245,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Refresh parent
          */
-        removeFolder(folder.getParentID(), treeId, storageParameters);
+        removeFromCache(folder.getParentID(), treeId, storageParameters.getUserId(), storageParameters.getContextId());
         final Folder parentFolder = loadFolder(treeId, folder.getParentID(), StorageType.WORKING, storageParameters);
         if (parentFolder.isCacheable()) {
             putFolder(parentFolder, treeId, storageParameters);
@@ -269,10 +269,6 @@ public final class CacheFolderStorage implements FolderStorage {
         } catch (final CacheException e) {
             throw new FolderException(e);
         }
-    }
-
-    private void removeFolder(final String id, final String treeId, final StorageParameters storageParameters) throws FolderException {
-        removeFromCache(id, treeId, storageParameters.getUserId(), storageParameters.getContextId());
     }
 
     /**
@@ -387,11 +383,11 @@ public final class CacheFolderStorage implements FolderStorage {
          * Refresh parent
          */
         if (null != realParentId && !FolderStorage.ROOT_ID.equals(realParentId)) {
-            removeFolder(realParentId, treeId, storageParameters);
-            removeFolder(realParentId, FolderStorage.REAL_TREE_ID, storageParameters);
+            removeFromCache(realParentId, treeId, storageParameters.getUserId(), storageParameters.getContextId());
+            removeFromCache(realParentId, FolderStorage.REAL_TREE_ID, storageParameters.getUserId(), storageParameters.getContextId());
         }
         if (!FolderStorage.ROOT_ID.equals(parentId)) {
-            removeFolder(parentId, treeId, storageParameters);
+            removeFromCache(parentId, treeId, storageParameters.getUserId(), storageParameters.getContextId());
             final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, storageParameters);
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, treeId, storageParameters);
@@ -506,8 +502,8 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Invalidate cache entry
          */
-        removeFolder(folderId, treeId, storageParameters);
-        removeFolder(folderId, REAL_TREE_ID, storageParameters);
+        removeFromCache(folderId, treeId, storageParameters.getUserId(), storageParameters.getContextId());
+        removeFromCache(folderId, REAL_TREE_ID, storageParameters.getUserId(), storageParameters.getContextId());
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
@@ -698,15 +694,15 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Refresh/Invalidate folder
          */
-        removeFolder(folderId, treeId, storageParameters);
+        removeFromCache(folderId, treeId, storageParameters.getUserId(), storageParameters.getContextId());
         /*
          * Refresh/invalidate parent(s)
          */
         if (!FolderStorage.ROOT_ID.equals(parentID)) {
-            removeFolder(parentID, treeId, storageParameters);
+            removeFromCache(parentID, treeId, storageParameters.getUserId(), storageParameters.getContextId());
         }
         if (null != oldParentId && !FolderStorage.ROOT_ID.equals(oldParentId)) {
-            removeFolder(oldParentId, treeId, storageParameters);
+            removeFromCache(oldParentId, treeId, storageParameters.getUserId(), storageParameters.getContextId());
         }
     }
 
