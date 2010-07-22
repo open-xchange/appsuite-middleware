@@ -416,7 +416,10 @@ public enum Tree {
     
     /** Define if search via Sidebar is available or not .*/
     CharacterSearch("/modules/contacts/characterSearch"),
-    
+
+    /** true if an auto complete search may omit the folder identifier array and search in all readable folders. */
+    AllFolderForAutoComplete("/modules/contacts/allFoldersForAutoComplete"),
+
     /** */
     TasksEnabled("/modules/tasks/module"),
 
@@ -457,8 +460,7 @@ public enum Tree {
     
     OXUpdater("/modules/com.openexchange.oxupdater"),
     
-    ActiveSync("/modules/com.openexchange.usm.eas/module"),
-    ;
+    ActiveSync("/modules/com.openexchange.usm.eas/module");
 
     private final String path;
 

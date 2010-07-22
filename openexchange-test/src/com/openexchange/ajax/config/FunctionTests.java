@@ -230,6 +230,11 @@ public class FunctionTests extends AbstractAJAXSession {
         LOG.info("User is only allowed to search via character side bar in contacts: " + response.getBoolean());
     }
 
+    public void testAllFolderForAutoComplete() throws Throwable {
+        final GetResponse response = client.execute(new GetRequest(Tree.AllFolderForAutoComplete));
+        LOG.info("User is allowed to search via auto complete in all folders: " + response.getBoolean());
+    }
+
     public void testFolderTree() throws Throwable {
         final int defaultValue = client.execute(new GetRequest(Tree.FolderTree)).getInteger();
         client.execute(new SetRequest(Tree.FolderTree, I(0)));
