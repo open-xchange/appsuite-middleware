@@ -275,7 +275,7 @@ public class ContactRequest {
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
-                contactWriter.writeArray(contactObj, columns, jsonContactArray);
+                contactWriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
                 if (timestamp.before(contactObj.getLastModified())) {
@@ -371,7 +371,7 @@ public class ContactRequest {
                     while (it.hasNext()) {
                         final Contact contactObj = it.next();
                         final JSONArray jsonContactArray = new JSONArray();
-                        contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                        contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                         jsonResponseArray.put(jsonContactArray);
 
                         if (timestamp.before(contactObj.getLastModified())) {
@@ -393,7 +393,7 @@ public class ContactRequest {
                         while (it.hasNext()) {
                             final Contact contactObj = it.next();
                             final JSONArray jsonContactArray = new JSONArray();
-                            contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                            contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                             jsonResponseArray.put(jsonContactArray);
 
                             lastModified = contactObj.getLastModified();
@@ -446,7 +446,7 @@ public class ContactRequest {
             for (int a = 0; a < userIdArray.length; a++) {
                 final Contact contactObj = contactInterface.getUserById(userIdArray[a]);
                 final JSONArray jsonContactArray = new JSONArray();
-                contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
                 if (timestamp.before(contactObj.getLastModified())) {
@@ -498,7 +498,7 @@ public class ContactRequest {
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
-                contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
                 if (timestamp.before(contactObj.getLastModified())) {
@@ -543,7 +543,7 @@ public class ContactRequest {
         final ContactWriter contactwriter = new ContactWriter(timeZone);
 
         final JSONObject jsonResponseObject = new JSONObject();
-        contactwriter.writeContact(contactObj, jsonResponseObject);
+        contactwriter.writeContact(contactObj, jsonResponseObject, session);
 
         timestamp = contactObj.getLastModified();
 
@@ -569,7 +569,7 @@ public class ContactRequest {
         final ContactWriter contactwriter = new ContactWriter(timeZone);
 
         final JSONObject jsonResponseObject = new JSONObject();
-        contactwriter.writeContact(contactObj, jsonResponseObject);
+        contactwriter.writeContact(contactObj, jsonResponseObject, session);
 
         timestamp = contactObj.getLastModified();
 
@@ -651,7 +651,7 @@ public class ContactRequest {
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
                 final JSONArray jsonContactArray = new JSONArray();
-                contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
                 if (timestamp.before(contactObj.getLastModified())) {

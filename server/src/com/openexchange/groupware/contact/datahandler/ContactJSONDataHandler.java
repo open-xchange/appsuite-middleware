@@ -155,7 +155,7 @@ public final class ContactJSONDataHandler implements DataHandler {
 					 * Store contact object in JSON array
 					 */
 					final JSONObject jsonContact = new JSONObject();
-					writer.writeContact(contact, jsonContact);
+					writer.writeContact(contact, jsonContact, session);
 					jsonArray.put(jsonContact);
                 }
             }

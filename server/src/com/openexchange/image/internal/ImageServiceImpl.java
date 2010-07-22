@@ -72,20 +72,8 @@ public final class ImageServiceImpl implements ImageService {
         return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments, timeToLive);
     }
 
-    public ImageData addImageData(final int contextId, final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
-        return ImageRegistry.getInstance().addImageData(contextId, imageSource, imageArguments, timeToLive);
-    }
-
     public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments) {
         return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments);
-    }
-
-    public ImageData addImageData(final int contextId, final ImageDataSource imageSource, final DataArguments imageArguments) {
-        return ImageRegistry.getInstance().addImageData(contextId, imageSource, imageArguments);
-    }
-
-    public void addImageData(final int contextId, final ImageData imageData) {
-        ImageRegistry.getInstance().addImageData(contextId, imageData);
     }
 
     public void addImageData(final Session session, final ImageData imageData) {
@@ -100,36 +88,24 @@ public final class ImageServiceImpl implements ImageService {
         return ImageRegistry.getInstance().containsImageData(session, uniqueId);
     }
 
-    public boolean containsImageData(final int contextId, final String uniqueId) {
-        return ImageRegistry.getInstance().containsImageData(contextId, uniqueId);
-    }
-
     public ImageData[] getImageData(final Session session) {
         return ImageRegistry.getInstance().getImageData(session);
-    }
-
-    public ImageData[] getImageData(final int contextId) {
-        return ImageRegistry.getInstance().getImageData(contextId);
     }
 
     public ImageData getImageData(final Session session, final String uniqueId) {
         return ImageRegistry.getInstance().getImageData(session, uniqueId);
     }
 
-    public ImageData getImageData(final int contextId, final String uniqueId) {
-        return ImageRegistry.getInstance().getImageData(contextId, uniqueId);
+    public String getSessionForUID(final String uniqueId) {
+        return ImageRegistry.getInstance().getSessionForUID(uniqueId);
+    }
+
+    public ImageData getSessionBoundImageData(final String uniqueID) {
+        return ImageRegistry.getInstance().getSessionBoundImageData(uniqueID);
     }
 
     public void removeImageData(final Session session) {
         ImageRegistry.getInstance().removeImageData(session);
-    }
-
-    public void removeImageData(final int contextId) {
-        ImageRegistry.getInstance().removeImageData(contextId);
-    }
-
-    public boolean removeImageData(final int contextId, final String uniqueId) {
-        return ImageRegistry.getInstance().removeImageData(contextId, uniqueId);
     }
 
 }

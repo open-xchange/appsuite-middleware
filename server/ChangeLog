@@ -1,3 +1,7 @@
+* 2010-07-22 - francisco.laguna@open-xchange.com
+
+ - Bugfix #16547: Get rid of context based methods in ImageService (and underlying implementation), bind session to image uids
+
 * 2010-07-22 - marcus.klein@open-xchange.com
 
  - Bugfix #16545: Revoking optimization for loading folder permissions along with finding the folder.

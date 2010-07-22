@@ -61,6 +61,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.helper.CombinedInputStream;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataException;
@@ -129,34 +130,23 @@ public final class ImageServlet extends HttpServlet {
             if (uid == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing URL parameter " + PARAMETER_UID);
             }
-            final List<Session> sessions = getSessions(req, sessiondService);
-            if (sessions.isEmpty()) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
-            }
             final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class, true);
-            for (final Session session : sessions) {
-                ImageData imageData = imageService.getImageData(session, uid);
-                if (imageData == null) {
-                    imageData = imageService.getImageData(session.getContextId(), uid);
-                }
-                if (imageData != null) {
-                    /*
-                     * Output to client
-                     */
-                    outputImageData(imageData, session, resp);
-                    return;
+            String sessionId = imageService.getSessionForUID(uid);
+            if(sessionId != null) {
+                Session session = sessiondService.getSession(sessionId);
+                String secret = SessionServlet.extractSecret(session.getHash(), req.getCookies());
+          
+                if(session.getSecret().equals(secret)) {
+                    ImageData imageData = imageService.getImageData(session, uid);
+                    if(imageData != null) {
+                        outputImageData(imageData, session, resp);
+                    }
                 }
             }
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
         } catch (final SessiondException e) {
             org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-        } catch (final ContextException e) {
-            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        } catch (final LdapException e) {
-            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } catch (final DataException e) {
             org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -262,29 +252,4 @@ public final class ImageServlet extends HttpServlet {
             org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
         }
     }
-
-    private static List<Session> getSessions(final HttpServletRequest req, final SessiondService sessiondService) throws ContextException, LdapException {
-        final Cookie[] cookies = req.getCookies();
-        if (cookies == null) {
-            return Collections.emptyList();
-        }
-        final List<Session> sessions = new ArrayList<Session>(4);
-        for (final Cookie cookie : cookies) {
-            final String name = cookie.getName();
-            if (name != null && name.startsWith(Login.SESSION_PREFIX, 0)) {
-                final Session session = sessiondService.getSession(name.substring(Login.SESSION_PREFIX.length())); // By session ID
-                if (null != session && cookie.getValue().equals(session.getSecret())) { // Ensure not null and secret equality
-                    final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-                    if (ctx.isEnabled() && UserStorage.getInstance().getUser(session.getUserId(), ctx).isMailEnabled()) {
-                        /*
-                         * Both context and user are activated
-                         */
-                        sessions.add(session);
-                    }
-                }
-            }
-        }
-        return sessions;
-    }
-
 }

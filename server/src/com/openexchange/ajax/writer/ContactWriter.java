@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.image.ImageService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -87,13 +88,13 @@ public class ContactWriter extends CommonWriter {
         utc = TimeZoneUtils.getTimeZone("utc");
     }
 
-    public void writeArray(final Contact contactobject, final int cols[], final JSONArray jsonArray) throws JSONException {
+    public void writeArray(final Contact contactobject, final int cols[], final JSONArray jsonArray, Session session) throws JSONException {
         for (int a = 0; a < cols.length; a++) {
-            write(cols[a], contactobject, jsonArray);
+            write(cols[a], contactobject, jsonArray, session);
         }
     }
 
-    public void writeContact(final Contact contact, final JSONObject json) throws JSONException {
+    public void writeContact(final Contact contact, final JSONObject json, Session session) throws JSONException {
         writeCommonFields(contact, json);
 
         writeParameter(ContactFields.LAST_NAME, contact.getSurName(), json);
@@ -137,7 +138,7 @@ public class ContactWriter extends CommonWriter {
                         args.put(argsNames[1], String.valueOf(contact.getObjectID()));
                         imageURL =
                             ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
-                                contact.getContextId(),
+                                session,
                                 imgSource,
                                 args).getImageURL();
                     }
@@ -272,10 +273,10 @@ public class ContactWriter extends CommonWriter {
         return jsonArray;
     }
 
-    public void write(final int field, final Contact contactobject, final JSONArray jsonArray) throws JSONException {
+    public void write(final int field, final Contact contactobject, final JSONArray jsonArray, Session session) throws JSONException {
         final ContactFieldWriter writer = WRITER_MAP.get(field);
         if (writer != null) {
-            writer.write(contactobject, jsonArray);
+            writer.write(contactobject, jsonArray, session);
             return;
         }
         /*
@@ -303,9 +304,10 @@ public class ContactWriter extends CommonWriter {
          * 
          * @param contactObject The contact object
          * @param jsonArray The JSON array
+         * @param session TODO
          * @throws JSONException If writing to JSON array fails
          */
-        public void write(Contact contactObject, JSONArray jsonArray) throws JSONException;
+        public void write(Contact contactObject, JSONArray jsonArray, Session session) throws JSONException;
     }
 
     /*-
@@ -321,252 +323,252 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.OBJECT_ID, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getObjectID(), jsonArray, contactObject.containsObjectID());
             }
         });
 
         m.put(Contact.CREATED_BY, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCreatedBy(), jsonArray, contactObject.containsCreatedBy());
             }
         });
 
         m.put(Contact.MODIFIED_BY, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getModifiedBy(), jsonArray, contactObject.containsModifiedBy());
             }
         });
 
         m.put(Contact.FOLDER_ID, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getParentFolderID(), jsonArray, contactObject.containsParentFolderID());
             }
         });
 
         m.put(Contact.PRIVATE_FLAG, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getPrivateFlag(), jsonArray, contactObject.containsPrivateFlag());
             }
         });
 
         m.put(Contact.SUR_NAME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getSurName(), jsonArray);
             }
         });
 
         m.put(Contact.GIVEN_NAME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getGivenName(), jsonArray);
             }
         });
 
         m.put(Contact.ANNIVERSARY, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getAnniversary(), jsonArray);
             }
         });
 
         m.put(Contact.ASSISTANT_NAME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getAssistantName(), jsonArray);
             }
         });
 
         m.put(Contact.BIRTHDAY, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getBirthday(), jsonArray);
             }
         });
 
         m.put(Contact.BRANCHES, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getBranches(), jsonArray);
             }
         });
 
         m.put(Contact.BUSINESS_CATEGORY, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getBusinessCategory(), jsonArray);
             }
         });
 
         m.put(Contact.CATEGORIES, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCategories(), jsonArray);
             }
         });
 
         m.put(Contact.CELLULAR_TELEPHONE1, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCellularTelephone1(), jsonArray);
             }
         });
 
         m.put(Contact.CELLULAR_TELEPHONE2, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCellularTelephone2(), jsonArray);
             }
         });
 
         m.put(Contact.CITY_HOME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCityHome(), jsonArray);
             }
         });
 
         m.put(Contact.CITY_BUSINESS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCityBusiness(), jsonArray);
             }
         });
 
         m.put(Contact.CITY_OTHER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCityOther(), jsonArray);
             }
         });
 
         m.put(Contact.COLOR_LABEL, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getLabel(), jsonArray, contactObject.containsLabel());
             }
         });
 
         m.put(Contact.COMMERCIAL_REGISTER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCommercialRegister(), jsonArray);
             }
         });
 
         m.put(Contact.COMPANY, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCompany(), jsonArray);
             }
         });
 
         m.put(Contact.COUNTRY_HOME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCountryHome(), jsonArray);
             }
         });
 
         m.put(Contact.COUNTRY_BUSINESS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCountryBusiness(), jsonArray);
             }
         });
 
         m.put(Contact.COUNTRY_OTHER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getCountryOther(), jsonArray);
             }
         });
 
         m.put(Contact.DEFAULT_ADDRESS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getDefaultAddress(), jsonArray, contactObject.containsDefaultAddress());
             }
         });
 
         m.put(Contact.DEPARTMENT, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getDepartment(), jsonArray);
             }
         });
 
         m.put(Contact.DISPLAY_NAME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getDisplayName(), jsonArray);
             }
         });
 
         m.put(Contact.MARK_AS_DISTRIBUTIONLIST, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getMarkAsDistribtuionlist(), jsonArray, contactObject.containsMarkAsDistributionlist());
             }
         });
 
         m.put(Contact.EMAIL1, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getEmail1(), jsonArray);
             }
         });
 
         m.put(Contact.EMAIL2, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getEmail2(), jsonArray);
             }
         });
 
         m.put(Contact.EMAIL3, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getEmail3(), jsonArray);
             }
         });
 
         m.put(Contact.EMPLOYEE_TYPE, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getEmployeeType(), jsonArray);
             }
         });
 
         m.put(Contact.FAX_BUSINESS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getFaxBusiness(), jsonArray);
             }
         });
 
         m.put(Contact.FAX_HOME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getFaxHome(), jsonArray);
             }
         });
 
         m.put(Contact.FAX_OTHER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getFaxOther(), jsonArray);
             }
         });
 
         m.put(Contact.IMAGE1, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 final byte[] imageData = contactObject.getImage1();
                 if (imageData == null) {
                     writeValueNull(jsonArray);
@@ -578,7 +580,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.IMAGE1_URL, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 if (contactObject.containsContextId()) {
                     final byte[] imageData2 = contactObject.getImage1();
                     if (imageData2 == null) {
@@ -593,7 +595,7 @@ public class ContactWriter extends CommonWriter {
                             args.put(argsNames[1], String.valueOf(contactObject.getObjectID()));
                             imageURL =
                                 ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
-                                    contactObject.getContextId(),
+                                    session,
                                     imgSource,
                                     args).getImageURL();
                         }
@@ -605,480 +607,480 @@ public class ContactWriter extends CommonWriter {
             }
         });
         m.put(Contact.NUMBER_OF_IMAGES, new ContactFieldWriter() {
-            public void write(Contact contact, JSONArray json) {
+            public void write(Contact contact, JSONArray json, Session session) {
                 writeValue(contact.getNumberOfImages(), json);
             }
         });
         m.put(Contact.INFO, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getInfo(), jsonArray);
             }
         });
 
         m.put(Contact.INSTANT_MESSENGER1, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getInstantMessenger1(), jsonArray);
             }
         });
 
         m.put(Contact.INSTANT_MESSENGER2, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getInstantMessenger2(), jsonArray);
             }
         });
 
         m.put(Contact.INTERNAL_USERID, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getInternalUserId(), jsonArray, contactObject.containsInternalUserId());
             }
         });
 
         m.put(Contact.MANAGER_NAME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getManagerName(), jsonArray);
             }
         });
 
         m.put(Contact.MARITAL_STATUS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getMaritalStatus(), jsonArray);
             }
         });
 
         m.put(Contact.MIDDLE_NAME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getMiddleName(), jsonArray);
             }
         });
 
         m.put(Contact.NICKNAME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getNickname(), jsonArray);
             }
         });
 
         m.put(Contact.NOTE, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getNote(), jsonArray);
             }
         });
 
         m.put(Contact.NUMBER_OF_CHILDREN, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getNumberOfChildren(), jsonArray);
             }
         });
 
         m.put(Contact.NUMBER_OF_EMPLOYEE, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getNumberOfEmployee(), jsonArray);
             }
         });
 
         m.put(Contact.POSITION, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getPosition(), jsonArray);
             }
         });
 
         m.put(Contact.POSTAL_CODE_HOME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getPostalCodeHome(), jsonArray);
             }
         });
 
         m.put(Contact.POSTAL_CODE_BUSINESS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getPostalCodeBusiness(), jsonArray);
             }
         });
 
         m.put(Contact.POSTAL_CODE_OTHER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getPostalCodeOther(), jsonArray);
             }
         });
 
         m.put(Contact.PROFESSION, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getProfession(), jsonArray);
             }
         });
 
         m.put(Contact.ROOM_NUMBER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getRoomNumber(), jsonArray);
             }
         });
 
         m.put(Contact.SALES_VOLUME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getSalesVolume(), jsonArray);
             }
         });
 
         m.put(Contact.SPOUSE_NAME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getSpouseName(), jsonArray);
             }
         });
 
         m.put(Contact.STATE_HOME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getStateHome(), jsonArray);
             }
         });
 
         m.put(Contact.STATE_BUSINESS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getStateBusiness(), jsonArray);
             }
         });
 
         m.put(Contact.STATE_OTHER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getStateOther(), jsonArray);
             }
         });
 
         m.put(Contact.STREET_HOME, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getStreetHome(), jsonArray);
             }
         });
 
         m.put(Contact.STREET_BUSINESS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getStreetBusiness(), jsonArray);
             }
         });
 
         m.put(Contact.STREET_OTHER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getStreetOther(), jsonArray);
             }
         });
 
         m.put(Contact.SUFFIX, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getSuffix(), jsonArray);
             }
         });
 
         m.put(Contact.TAX_ID, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTaxID(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_ASSISTANT, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneAssistant(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_BUSINESS1, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneBusiness1(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_BUSINESS2, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneBusiness2(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_CALLBACK, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneCallback(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_CAR, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneCar(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_COMPANY, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneCompany(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_HOME1, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneHome1(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_HOME2, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneHome2(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_IP, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneIP(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_ISDN, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneISDN(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_OTHER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneOther(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_PAGER, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephonePager(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_PRIMARY, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephonePrimary(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_RADIO, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneRadio(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_TELEX, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneTelex(), jsonArray);
             }
         });
 
         m.put(Contact.TELEPHONE_TTYTDD, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTelephoneTTYTTD(), jsonArray);
             }
         });
 
         m.put(Contact.TITLE, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getTitle(), jsonArray);
             }
         });
 
         m.put(Contact.URL, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getURL(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD01, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField01(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD02, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField02(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD03, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField03(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD04, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField04(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD05, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField05(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD06, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField06(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD07, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField07(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD08, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField08(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD09, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField09(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD10, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField10(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD11, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField11(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD12, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField12(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD13, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField13(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD14, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField14(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD15, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField15(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD16, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField16(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD17, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField17(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD18, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField18(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD19, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField19(), jsonArray);
             }
         });
 
         m.put(Contact.USERFIELD20, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUserField20(), jsonArray);
             }
         });
 
         m.put(Contact.NUMBER_OF_ATTACHMENTS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getNumberOfAttachments(), jsonArray, contactObject.containsNumberOfAttachments());
             }
         });
         m.put(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new ContactFieldWriter() {
-            public void write(final Contact contact, final JSONArray json) {
+            public void write(final Contact contact, final JSONArray json, Session session) {
                 writeValue(contact.getLastModifiedOfNewestAttachment(), json, contact.containsLastModifiedOfNewestAttachment());
             }
         });
         {
             final ContactFieldWriter fieldWriter = new ContactFieldWriter() {
 
-                public void write(final Contact contactObject, final JSONArray jsonArray) {
+                public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                     writeValue(contactObject.getNumberOfLinks(), jsonArray, contactObject.containsNumberOfLinks());
                 }
             };
@@ -1089,39 +1091,39 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.NUMBER_OF_DISTRIBUTIONLIST, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getNumberOfDistributionLists(), jsonArray, contactObject.containsNumberOfDistributionLists());
             }
         });
 
         m.put(Contact.IMAGE_LAST_MODIFIED, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getImageLastModified(), jsonArray);
             }
         });
         m.put(Contact.FILE_AS, new ContactFieldWriter() {
-            public void write(Contact contact, JSONArray json) {
+            public void write(Contact contact, JSONArray json, Session session) {
                 writeValue(contact.getFileAs(), json, contact.containsFileAs());
             }
         });
         m.put(Contact.IMAGE1_CONTENT_TYPE, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getImageContentType(), jsonArray);
             }
         });
 
         m.put(Contact.USE_COUNT, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) {
                 writeValue(contactObject.getUseCount(), jsonArray);
             }
         });
 
         m.put(Contact.LINKS, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) throws JSONException {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) throws JSONException {
                 final JSONArray jsonLinksArray = getLinksAsJSONArray(contactObject);
                 if (jsonLinksArray == null) {
                     jsonArray.put(JSONObject.NULL);
@@ -1133,7 +1135,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.DISTRIBUTIONLIST, new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) throws JSONException {
+            public void write(final Contact contactObject, final JSONArray jsonArray, Session session) throws JSONException {
                 final JSONArray jsonDistributionListArray = getDistributionListAsJSONArray(contactObject);
                 if (jsonDistributionListArray == null) {
                     jsonArray.put(JSONObject.NULL);

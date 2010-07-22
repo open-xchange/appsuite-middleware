@@ -66,7 +66,6 @@ import com.openexchange.groupware.filestore.FileStorageRemover;
 import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.tasks.TasksDelete;
 import com.openexchange.groupware.userconfiguration.UserConfigurationDeleteListener;
-import com.openexchange.image.internal.ImageRegistryDeleteListener;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
@@ -163,10 +162,6 @@ public final class DeleteRegistry {
      */
     private DeleteListener[] getStaticListeners() {
         return new DeleteListener[] {
-            /*
-             * Remove stored images
-             */
-            new ImageRegistryDeleteListener(),
             /*
              * Insert module delete listener
              */

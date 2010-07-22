@@ -371,7 +371,7 @@ public final class MIMEMessageUtility {
         final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
         ImageData imageData = imageService.getImageData(session, uid);
         if (imageData == null) {
-            imageData = imageService.getImageData(session.getContextId(), uid);
+            imageData = imageService.getImageData(session, uid);
         }
         if (imageData != null) {
             imageData.touch();

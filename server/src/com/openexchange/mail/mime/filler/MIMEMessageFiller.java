@@ -1316,7 +1316,7 @@ public class MIMEMessageFiller {
                 } else {
                     ImageData imageData = imageService.getImageData(session, id);
                     if (imageData == null) {
-                        imageData = imageService.getImageData(session.getContextId(), id);
+                        imageData = imageService.getImageData(session, id);
                     }
                     if (imageData == null) {
                         if (LOG.isWarnEnabled()) {
