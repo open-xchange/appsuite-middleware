@@ -815,22 +815,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         LOG.error("Error while checking special permissions", e);
                     }
                 }
-                /*
-                if (check_folder_id == 0) { // TODO: Remove this debug information
-                    System.out.println("\n\nGOT A zero folder_id :"+cdao.toString());
-                    for (int a = 0; a < oids.length; a++) {
-                        System.out.print(oids[a][0]+","+oids[a][1]+":");
-                    }
-                    System.out.println("\n\n");
-                }
-                 */
+
                 if (check_folder_id != cdao.getParentFolderID()) {
                     LOG.error("Object Not Found: " + "Object not found : uid:oid:fid:InFolder "+so.getUserId() + ':'+ cdao.getObjectID() + ':' + cdao.getParentFolderID() + ':' + check_folder_id, new Throwable());
                     throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, APPOINTMENT, "");
                 }
                 cdao.setActionFolder(check_folder_id);
 
-                if (!recColl.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id, getIncludePrivateAppointmentsOfSharedFolderOwner())) {
+                if (!recColl.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
                     if (DEBUG) {
                         final StringBuilder colss = new StringBuilder(cols.length << 3);
                         for (int a = 0; a < cols.length; a++) {
