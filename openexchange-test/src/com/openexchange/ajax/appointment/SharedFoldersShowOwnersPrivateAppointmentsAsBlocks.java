@@ -50,8 +50,11 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
@@ -64,6 +67,8 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.CalendarTestManager;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -141,11 +146,10 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         
         assertTrue("One of the two should be the public one", app1[namePos].equals(publicAppointmentTitle) || app2[namePos].equals(publicAppointmentTitle));
         assertFalse("None of the two should be the private title", app1[namePos].equals(privateAppointmentTitle) || app2[namePos].equals(privateAppointmentTitle));
-        //TODO ListRequest, too
     }
 
     public void testShouldFindABlockForAPrivateAppointmentViaList() throws Exception{
-        CommonListResponse response = client2.execute(new ListRequest(ListIDs.l(new int[]{sharedFolder.getObjectID(),publicAppointmentID},new int[]{sharedFolder.getObjectID(),privateAppointmentID}), COLUMNS, true, true ));
+        CommonListResponse response = client2.execute(new ListRequest(ListIDs.l(new int[]{sharedFolder.getObjectID(),publicAppointmentID},new int[]{sharedFolder.getObjectID(),privateAppointmentID}), COLUMNS, true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();
         assertEquals("Should find two elements, a private and a public one", 2, objects.length);
@@ -155,13 +159,20 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         
         assertTrue("One of the two should be the public one", app1[namePos].equals(publicAppointmentTitle) || app2[namePos].equals(publicAppointmentTitle));
         assertFalse("None of the two should be the private title", app1[namePos].equals(privateAppointmentTitle) || app2[namePos].equals(privateAppointmentTitle));
-        //TODO ListRequest, too
     }
 
-    
-    public void testShouldFindABlockForASeveralAppointmentsFollowingClosely() throws Exception{
+    public void testShouldNotAnonymizeOwnPrivateAppointments() throws AjaxException, IOException, SAXException, JSONException{
+        CommonListResponse response = client1.execute(new ListRequest(ListIDs.l(new int[]{sharedFolder.getObjectID(),publicAppointmentID},new int[]{sharedFolder.getObjectID(),privateAppointmentID}), COLUMNS, true));
+        int namePos = response.getColumnPos(Appointment.TITLE);
+        Object[][] objects = response.getArray();
+        assertEquals("Should find two elements, a private and a public one", 2, objects.length);
+        
+        Object[] app1 = objects[0];
+        Object[] app2 = objects[1];
+        
+        assertTrue("One of the two should be the public one", app1[namePos].equals(publicAppointmentTitle) || app2[namePos].equals(publicAppointmentTitle));
+        assertTrue("One should be the _unchanged_ private one", app1[namePos].equals(privateAppointmentTitle) || app2[namePos].equals(privateAppointmentTitle));         
     }
-
     public void testShouldShowRecurrences() throws Exception{
     }
 
