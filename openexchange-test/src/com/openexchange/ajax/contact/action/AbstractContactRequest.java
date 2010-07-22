@@ -88,7 +88,7 @@ public abstract class AbstractContactRequest<T extends AbstractAJAXResponse> imp
         throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
         final ContactWriter contactWriter = new ContactWriter(TimeZone.getTimeZone("UTC"));
-		contactWriter.writeContact(contactObj, jsonObj);
+		contactWriter.writeContact(contactObj, jsonObj, null);
         return jsonObj;
     }
 }

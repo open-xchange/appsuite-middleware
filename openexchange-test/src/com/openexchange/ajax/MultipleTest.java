@@ -40,7 +40,7 @@ public class MultipleTest extends AbstractAJAXTest {
 		
 		JSONObject jsonDataObj = new JSONObject();
 		ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
-		contactWriter.writeContact(contactObj, jsonDataObj);
+		contactWriter.writeContact(contactObj, jsonDataObj, null);
 		
 		jsonObj.put("data", jsonDataObj);
 		jsonArray.put(jsonObj);
@@ -55,7 +55,7 @@ public class MultipleTest extends AbstractAJAXTest {
 		
 		jsonDataObj = new JSONObject();
 		contactWriter = new ContactWriter(TimeZone.getDefault());
-		contactWriter.writeContact(contactObj, jsonDataObj);
+		contactWriter.writeContact(contactObj, jsonDataObj, null);
 		
 		jsonObj.put("data", jsonDataObj);
 		jsonArray.put(jsonObj);

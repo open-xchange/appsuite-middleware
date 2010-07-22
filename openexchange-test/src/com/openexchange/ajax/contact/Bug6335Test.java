@@ -102,7 +102,7 @@ public class Bug6335Test extends ContactTest {
 		final StringWriter stringWriter = new StringWriter();		
 		final JSONObject jsonObj = new JSONObject();
 		final ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
-		contactWriter.writeContact(contactObj, jsonObj);
+		contactWriter.writeContact(contactObj, jsonObj, null);
 		
 		stringWriter.write(jsonObj.toString());
 		stringWriter.flush();
