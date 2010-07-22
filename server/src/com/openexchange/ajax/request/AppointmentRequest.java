@@ -529,7 +529,6 @@ public class AppointmentRequest {
         }
 
         final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
-        final boolean includePrivates = DataParser.parseBoolean(jsonObj, AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS);
         
         final TIntIntHashMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {
@@ -574,7 +573,6 @@ public class AppointmentRequest {
 
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        appointmentsql.setIncludePrivateAppointments(includePrivates);
         it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields); 
         try {
             int counter = 0;

@@ -56,17 +56,20 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
- * Goes through the results of another SearchIterator and anonymizes every appointment that is private.
+ * Goes through the results of another SearchIterator and anonymizes every appointment that is private,
+ * unless it belongs to the user given.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AnonymizingIterator implements SearchIterator<CalendarDataObject> {
 
     private SearchIterator<CalendarDataObject> delegate;
+    private int userID;
 
-    public AnonymizingIterator(SearchIterator<CalendarDataObject> delegate) {
+    public AnonymizingIterator(SearchIterator<CalendarDataObject> delegate, int userID) {
         super();
         this.delegate = delegate;
+        this.userID = userID;
     }
 
     public void addWarning(AbstractOXException warning) {
@@ -96,6 +99,8 @@ public class AnonymizingIterator implements SearchIterator<CalendarDataObject> {
     public CalendarDataObject next() throws SearchIteratorException, OXException {
         CalendarDataObject app = delegate.next();
         if (!app.getPrivateFlag())
+            return app;
+        if(app.getPrivateFlag() && app.getCreatedBy() == userID)
             return app;
 
         CalendarDataObject anonymized = app.clone();
