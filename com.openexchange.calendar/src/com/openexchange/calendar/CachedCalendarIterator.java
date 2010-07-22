@@ -98,10 +98,10 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
     private int counter;
     private boolean closed;
     private final Context c;
-    private final int uid;
     private int[][] oids;
     private int cc;
     private boolean oxonfe;
+    protected final int uid;
 
     public static boolean CACHED_ITERATOR_FAST_FETCH = true;
     public static int MAX_PRE_FETCH = 20;

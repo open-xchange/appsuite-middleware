@@ -199,7 +199,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             co.setRequestedFolder(fid);
             co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session, ctx);
             close_connection = false;
-            return new AppointmentIteratorAdapter(new AnonymizingIterator(new CachedCalendarIterator(co, ctx, session.getUserId()), session.getUserId()));
+            return new AppointmentIteratorAdapter(new AnonymizingIterator(co, ctx, session.getUserId()));
             
         } catch (final IndexOutOfBoundsException ioobe) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ioobe, Integer.valueOf(19));
@@ -989,7 +989,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 co.setOIDS(true, oids);
                 co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                 close_connection = false;
-                return new AppointmentIteratorAdapter(new AnonymizingIterator(new CachedCalendarIterator(co, ctx, session.getUserId(), oids), session.getUserId()));
+                return new AppointmentIteratorAdapter(new AnonymizingIterator(co, ctx, session.getUserId(), oids));
             } catch(final SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
             } catch(final DBPoolingException dbpe) {

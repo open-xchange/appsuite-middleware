@@ -49,9 +49,14 @@
 
 package com.openexchange.calendar;
 
+import java.util.ArrayList;
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -61,46 +66,23 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class AnonymizingIterator implements SearchIterator<CalendarDataObject> {
+public class AnonymizingIterator extends CachedCalendarIterator {
 
-    private SearchIterator<CalendarDataObject> delegate;
-    private int userID;
+    public AnonymizingIterator(SearchIterator<CalendarDataObject> non_cached_iterator, Context c, int uid) throws SearchIteratorException, OXException {
+        super(non_cached_iterator, c, uid);
+    }
+    
 
-    public AnonymizingIterator(SearchIterator<CalendarDataObject> delegate, int userID) {
-        super();
-        this.delegate = delegate;
-        this.userID = userID;
+    public AnonymizingIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws SearchIteratorException, OXException{
+        super(non_cached_iterator, c, uid, oids);
     }
 
-    public void addWarning(AbstractOXException warning) {
-        delegate.addWarning(warning);
-    }
-
-    public void close() throws SearchIteratorException {
-        delegate.close();
-    }
-
-    public AbstractOXException[] getWarnings() {
-        return delegate.getWarnings();
-    }
-
-    public boolean hasNext() {
-        return delegate.hasNext();
-    }
-
-    public boolean hasSize() {
-        return delegate.hasSize();
-    }
-
-    public boolean hasWarnings() {
-        return delegate.hasWarnings();
-    }
-
+    @Override
     public CalendarDataObject next() throws SearchIteratorException, OXException {
-        CalendarDataObject app = delegate.next();
+        CalendarDataObject app = super.next();
         if (!app.getPrivateFlag())
             return app;
-        if(app.getPrivateFlag() && app.getCreatedBy() == userID)
+        if(app.getPrivateFlag() && app.getCreatedBy() == uid)
             return app;
 
         CalendarDataObject anonymized = app.clone();
@@ -117,9 +99,5 @@ public class AnonymizingIterator implements SearchIterator<CalendarDataObject> {
         anonymized.removeShownAs();
         anonymized.removeUsers();
         return anonymized;
-    }
-
-    public int size() {
-        return delegate.size();
     }
 }
