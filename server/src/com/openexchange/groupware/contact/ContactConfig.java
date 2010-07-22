@@ -165,6 +165,15 @@ public class ContactConfig {
          */
         CHARACTER_SEARCH("com.openexchange.contacts.characterSearch", Boolean.TRUE.toString()),
         /**
+         * The auto complete search for email addresses may be triggered easily and quite often if a new email is written and a part of a
+         * recipients address is written. This can lead to high load on the database system if a context has a lot of users and a lot of
+         * contacts. Therefore the scope if this search can be configured. Set this parameter to true and the auto complete search looks in
+         * every readable contact folder for contacts with emails addresses matching the already typed letters. If this parameter is
+         * configured to false, only three folders are considered for the search: the users private default contact folder, his contact
+         * folder for collected contacts and the global address book if that is enabled for the user.
+         */
+        ALL_FOLDERS_FOR_AUTOCOMPLETE("com.openexchange.contacts.allFoldersForAutoComplete", Boolean.TRUE.toString()),
+        /**
          * Maximum size in bytes of an image that may be stored.
          */
         MAX_IMAGE_SIZE("max_image_size", "33750000");

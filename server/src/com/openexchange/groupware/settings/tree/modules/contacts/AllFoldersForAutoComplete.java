@@ -61,29 +61,30 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link AllFoldersForAutoComplete}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class CharacterSearch implements PreferencesItemService {
+public class AllFoldersForAutoComplete implements PreferencesItemService {
 
-    public CharacterSearch() {
+    public AllFoldersForAutoComplete() {
         super();
     }
 
     public String[] getPath() {
-        return new String[] { "modules", "contacts", "characterSearch" };
+        return new String[] { "modules", "contacts", "allFoldersForAutoComplete" };
     }
 
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
             public boolean isAvailable(UserConfiguration userConfig) {
-                return userConfig.hasContact();
+                return true;
             }
 
-            public void getValue(final Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
-                setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.CHARACTER_SEARCH));
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
+                setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE));
             }
         };
     }
-
 }

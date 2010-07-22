@@ -252,6 +252,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.calendar.NotifyNewModifiedDeleted.class,
             com.openexchange.groupware.settings.tree.modules.calendar.DefaultStatusPrivate.class,
             com.openexchange.groupware.settings.tree.modules.calendar.DefaultStatusPublic.class,
+            com.openexchange.groupware.settings.tree.modules.contacts.AllFoldersForAutoComplete.class,
             com.openexchange.groupware.settings.tree.modules.contacts.GUI.class,
             com.openexchange.groupware.settings.tree.modules.contacts.MailAddressAutoSearch.class,
             com.openexchange.groupware.settings.tree.modules.contacts.Module.class,
