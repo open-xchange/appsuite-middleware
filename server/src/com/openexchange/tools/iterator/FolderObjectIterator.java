@@ -57,6 +57,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -156,9 +158,11 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private final boolean containsPermissions;
 
-    private FolderObject currentFolder;
+    private final HashMap<Integer, FolderObject> folders;
 
     private final List<AbstractOXException> warnings;
+
+    private FolderObject future;
 
     private static final String[] selectFields = {
         "fuid", "parent", "fname", "module", "type", "creating_date", "created_from", "changing_date", "changed_from", "permission_flag",
@@ -251,6 +255,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         ctx = null;
         prefetchQueue = null;
         folderIds = null;
+        folders = null;
         warnings = new ArrayList<AbstractOXException>(2);
     }
 
@@ -264,6 +269,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     public FolderObjectIterator(final Collection<FolderObject> col, final boolean resideInCache) throws SearchIteratorException {
         super();
         folderIds = null;
+        folders = null;
         warnings = new ArrayList<AbstractOXException>(2);
         rs = null;
         stmt = null;
@@ -314,6 +320,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         } else {
             folderIds = new TIntHashSet();
         }
+        folders = containsPermissions ? new LinkedHashMap<Integer, FolderObject>(32) : null;
         warnings = new ArrayList<AbstractOXException>(2);
         this.rs = rs;
         this.stmt = stmt;
@@ -345,15 +352,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 while (this.rs.next()) {
                     FolderObject fo = createFolderObjectFromSelectedEntry();
-                    while ((fo == null) && this.rs.next()) {
+                    while ((fo == null) && rs.next()) {
                         fo = createFolderObjectFromSelectedEntry();
                     }
-                    if (fo != null) {
-                        prefetchQueue.offer(fo);
-                    }
+                    prefetchQueue.offer(fo);
                 }
-                if (null != currentFolder) {
-                    prefetchQueue.offer(currentFolder);
+                if (future != null) {
+                    prefetchQueue.offer(future);
+                    future = null;
                 }
             } catch (final SQLException e) {
                 throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
@@ -388,16 +394,16 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             /*
              * No cache look-up in this mode to not being confused with result set state
              */
-            if (null == currentFolder) {
-                currentFolder = createNewFolderObject(folderId);
-                fo = addPermissions(folderId);
-            } else if (currentFolder.getObjectID() != folderId) { // Tricky
-                fo = currentFolder;
-                currentFolder = createNewFolderObject(folderId);
-                addNewPermission();
+            final Integer key = Integer.valueOf(folderId);
+            FolderObject current = folders.get(key);
+            if (null == current) {
+                current = createNewFolderObject(folderId);
+                folders.put(key, current);
+                addPermissions(folderId, current);
             } else {
-                fo = addPermissions(folderId);
+                addPermissions(folderId, current);
             }
+            fo = current;
         } else {
             if (!OXFolderProperties.isEnableDBGrouping()) {
                 if (folderIds.contains(folderId)) {
@@ -479,36 +485,33 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return fo;
     }
 
-    private FolderObject addPermissions(final int folderId) throws SQLException {
-        addNewPermission();
+    private void addPermissions(final int folderId, final FolderObject current) throws SQLException {
+        addNewPermission(current);
         /*
          * Read all available permissions for current folder
          */
         boolean hasNext;
         while ((hasNext = rs.next()) && folderId == rs.getInt(1)) {
-            addNewPermission();
+            addNewPermission(current);
         }
-        final FolderObject ret = currentFolder;
         if (hasNext) {
-            currentFolder = createNewFolderObject(rs.getInt(1));
+            future = createNewFolderObject(rs.getInt(1));
+            folders.put(Integer.valueOf(rs.getInt(1)), future);
             /*
              * Add first available permission from current row
              */
-            addNewPermission();
-        } else {
-            currentFolder = null;
+            addNewPermission(future);
         }
-        return ret;
     }
 
-    private void addNewPermission() throws SQLException {
+    private void addNewPermission(final FolderObject current) throws SQLException {
         final OCLPermission p = new OCLPermission();
         p.setEntity(rs.getInt(13)); // Entity
         p.setAllPermission(rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17)); // fp, orp, owp, and odp
         p.setFolderAdmin(rs.getInt(18) > 0 ? true : false); // admin_flag
         p.setGroupPermission(rs.getInt(19) > 0 ? true : false); // group_flag
         p.setSystem(rs.getInt(20)); // system
-        currentFolder.addPermission(p);
+        current.addPermission(p);
     }
 
     private final void closeResources() throws SearchIteratorException {
@@ -600,7 +603,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                         close();
                     }
                 } else {
-                    next = currentFolder;
+                    next = future;
                     close();
                 }
             }
