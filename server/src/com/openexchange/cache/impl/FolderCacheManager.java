@@ -247,7 +247,7 @@ public final class FolderCacheManager {
         };
         try {
             if (!fromCache) {
-                return factory.load();
+                removeFolderObject(objectId, ctx);
             }
             return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, factory).clone();
         } catch (AbstractOXException e) {
