@@ -62,12 +62,12 @@ public class SearchParser extends AbstractSearchParser<SearchResponse> {
      * @param failOnError <code>true</code> and this parser checks the server
      *                    response for containing error messages and lets the test fail.
      */
-    protected SearchParser(final boolean failOnError, final int[] columns) {
+    protected SearchParser(boolean failOnError, int[] columns) {
         super(failOnError, columns);
     }
 
     @Override
-	protected SearchResponse instanciateResponse(final Response response) {
+    protected SearchResponse instanciateResponse(Response response) {
         return new SearchResponse(response);
     }
 }
