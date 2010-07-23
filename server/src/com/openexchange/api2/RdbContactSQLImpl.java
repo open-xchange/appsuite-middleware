@@ -50,6 +50,7 @@
 package com.openexchange.api2;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.TIntArrayList;
@@ -63,7 +64,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.swing.text.DefaultEditorKit.InsertContentAction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
@@ -81,6 +81,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.Classes;
+import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -89,6 +90,7 @@ import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
+import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
@@ -133,13 +135,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
 
     private final UserConfiguration userConfiguration;
 
-    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(RdbContactSQLImpl.class);
+    static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(RdbContactSQLImpl.class);
 
     private static final Log LOG = LogFactory.getLog(RdbContactSQLImpl.class);
 
     public RdbContactSQLImpl(final Session session) throws ContextException {
-        final Context ctx = ContextStorage.getStorageContext(session);
-        this.ctx = ctx;
+        super();
+        this.ctx = ContextStorage.getStorageContext(session);
         this.userId = session.getUserId();
         this.memberInGroups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
         this.session = session;
@@ -147,9 +149,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
     }
 
     public RdbContactSQLImpl(final Session session, final Context ctx) {
+        super();
+        this.ctx = ctx;
         this.userId = session.getUserId();
         this.memberInGroups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
-        this.ctx = ctx;
         this.session = session;
         userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
     }
@@ -413,24 +416,23 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         final OXFolderAccess oxfs = new OXFolderAccess(ctx);
         final ContactSql cs = new ContactMySql(session, ctx);
         boolean considerUsersAliases = false;
-        if (searchobject.getEmailAutoComplete()) {
-            searchobject.addFolder(oxfs.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID());
-            try {
-                final Integer contactCollectFolder = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), userId);
-                if (null != contactCollectFolder && oxfs.exists(contactCollectFolder.intValue())) {
-                    searchobject.addFolder(contactCollectFolder.intValue());
+        if (searchobject.isEmailAutoComplete()) {
+            boolean allFolders = b(ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE));
+            if (!searchobject.hasFolders() && !allFolders) {
+                searchobject.addFolder(oxfs.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID());
+                try {
+                    final Integer contactCollectFolder = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), userId);
+                    if (null != contactCollectFolder && oxfs.exists(contactCollectFolder.intValue())) {
+                        searchobject.addFolder(contactCollectFolder.intValue());
+                    }
+                } catch (final SettingException e) {
+                    LOG.error(e.getMessage(), e);
                 }
-            } catch (final SettingException e) {
-                LOG.error(e.getMessage(), e);
-            }
-            /*
-             * Append GAB only if enabled for requesting user
-             */
-            final int gabID = FolderObject.SYSTEM_LDAP_FOLDER_ID;
-            final EffectivePermission oclPerm = oxfs.getFolderPermission(gabID, userId, userConfiguration);
-            if (oclPerm.isFolderVisible() && oclPerm.canReadAllObjects()) {
-                searchobject.addFolder(gabID);
-                considerUsersAliases = true;
+                final EffectivePermission oclPerm = oxfs.getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, userConfiguration);
+                if (oclPerm.isFolderVisible() && oclPerm.canReadAllObjects()) {
+                    searchobject.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                    considerUsersAliases = true;
+                }
             }
         }
         if (searchobject.hasFolders()) {
@@ -1412,7 +1414,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
 
         @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "56", "57" }, exceptionId = { 56, 57 }, msg = {
             "Unable to get next Object. Context %1$d User %2$d", "Unable to get next Object. Context %1$d User %2$d" })
-        public Contact next() throws OXException, SearchIteratorException {
+        public Contact next() throws OXException {
             try {
                 if (rs.next()) {
                     try {
@@ -1465,18 +1467,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
     }
 
     public int getFolderId() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     public LdapServer getLdapServer() {
-        // TODO Auto-generated method stub
         return null;
     }
-
-    public void setSession(final Session s) {
-        // TODO Auto-generated method stub
-
-    }
-
 }

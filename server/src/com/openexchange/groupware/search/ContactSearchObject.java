@@ -297,7 +297,7 @@ public class ContactSearchObject extends SearchObject {
         this.emailAutoComplete = status;
     }
 
-    public boolean getEmailAutoComplete(){
+    public boolean isEmailAutoComplete(){
         return emailAutoComplete;
     }
 

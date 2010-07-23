@@ -339,7 +339,7 @@ public class ContactMySql implements ContactSql {
              * With search object
              */
 
-            if (cso.getEmailAutoComplete() || cso.isOrSearch()) {
+            if (cso.isEmailAutoComplete() || cso.isOrSearch()) {
                 search_habit = " OR ";
             }
 
@@ -783,7 +783,7 @@ public class ContactMySql implements ContactSql {
         }
         if (union) {
             // Special condition for email auto complete
-            if (cso.getEmailAutoComplete() && Arrays.binarySearch(AUTOCOMPLETE_FIELDS, field) >= 0) {
+            if (cso.isEmailAutoComplete() && Arrays.binarySearch(AUTOCOMPLETE_FIELDS, field) >= 0) {
                 sb.append('(');
                 sb.append(Contacts.mapping[field].getDBFieldName());
                 sb.append(" is not null OR ");
@@ -792,7 +792,7 @@ public class ContactMySql implements ContactSql {
             }
         } else {
             // Special condition for email auto complete
-            if (cso.getEmailAutoComplete()) {
+            if (cso.isEmailAutoComplete()) {
                 sb.append('(');
                 sb.append(Contacts.mapping[Contact.EMAIL1].getDBFieldName());
                 sb.append(" is not null OR ");
