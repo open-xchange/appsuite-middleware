@@ -78,6 +78,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -1264,11 +1265,21 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     @Override
-    public <T> Future<T> submit(final Callable<T> task) {
-        if (null == task) {
+    public <T> Future<T> submit(final Callable<T> callable) {
+        if (null == callable) {
             throw new NullPointerException();
         }
-        final CustomFutureTask<T> ftask = new CustomFutureTask<T>((Task<T>) task);
+        final Task<T> task;
+        if (callable instanceof Task<?>) {
+            task = (Task<T>) callable;
+        } else {
+            task = new AbstractTask<T>() {
+                public T call() throws Exception {
+                    return callable.call();
+                }
+            };
+        }
+        final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task);
         execute(ftask);
         return ftask;
     }
