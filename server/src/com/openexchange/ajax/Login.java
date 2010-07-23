@@ -481,7 +481,6 @@ public class Login extends AJAXServlet {
                 // Store associated session
                 SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
                 writeSecretCookie(resp, session, req.isSecure());
-                writeSessionCookie(resp, session, req.isSecure()); // FIXME: Once UI implements new autologin handling, remove this line.
                 
                 // Login response is unfortunately not conform to default responses.
                 ((JSONObject) response.getData()).write(resp.getWriter());
