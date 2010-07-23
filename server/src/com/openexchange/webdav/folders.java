@@ -259,13 +259,11 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                 switch (action) {
                 case DataParser.SAVE:
                     if (folderObject.getModule() == FolderObject.UNBOUND) {
-                        writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, USER_INPUT_EXCEPTION, clientId,
-                                os, xo);
+                        writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, USER_INPUT_EXCEPTION, clientId, os, xo);
                         return;
                     }
 
-                    /* folderObject = */
-                    final Date currentLastModified = lastModifiedCache.getLastModified(folderObject.getObjectID(), lastModified);
+                    Date currentLastModified = lastModifiedCache.getLastModified(folderObject.getObjectID(), lastModified);
                     lastModifiedCache.update(folderObject.getObjectID(), 0, lastModified);
                     foldersSQL.saveFolderObject(folderObject, currentLastModified);
                     lastModifiedCache.update(folderObject.getObjectID(), 0, folderObject.getLastModified());
