@@ -61,23 +61,28 @@ import com.openexchange.session.Session;
 public interface LoginResult {
 
     /**
+     * Remembers the according {@link LoginRequest login request}
+     */
+    LoginRequest getRequest();
+
+    /**
      * Gets the {@link Session session} associated with this login.
      * 
      * @return The session associated with this login.
      */
-    public Session getSession();
+    Session getSession();
 
     /**
      * Gets the resolved {@link Context context}.
      * 
      * @return The resolved context.
      */
-    public Context getContext();
+    Context getContext();
 
     /**
      * Gets the resolved {@link User user}.
      * 
      * @return The resolved user.
      */
-    public User getUser();
+    User getUser();
 }

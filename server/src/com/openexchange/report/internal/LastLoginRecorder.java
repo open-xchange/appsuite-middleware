@@ -47,66 +47,66 @@
  *
  */
 
-package com.openexchange.login.internal;
+package com.openexchange.report.internal;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
-import com.openexchange.session.Session;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.UserService;
 
 /**
- * {@link LoginResultImpl} - The {@link LoginResult} implementation.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link LastLoginRecorder} records the last login of a user in its user attributes.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-final class LoginResultImpl implements LoginResult {
+public class LastLoginRecorder implements LoginHandlerService {
 
-    private LoginRequest request;
-    private Context context;
-    private User user;
-    private Session session;
-
-    LoginResultImpl() {
+    public LastLoginRecorder() {
         super();
     }
 
-    public LoginResultImpl(Session session, Context context, User user) {
-        super();
-        this.session = session;
-        this.context = context;
-        this.user = user;
+    public void handleLogin(LoginResult login) throws LoginException {
+        LoginRequest request = login.getRequest();
+        final String key;
+        if (null != request.getClient()) {
+            key = request.getClient();
+        } else if (null != request.getInterface()) {
+            key = request.getInterface().toString();
+        } else {
+            return;
+        }
+        Context ctx = login.getContext();
+        User origUser = login.getUser();
+        Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+        attributes.putAll(origUser.getAttributes());
+        Set<String> value = new HashSet<String>();
+        value.add(Long.toString(System.currentTimeMillis()));
+        attributes.put(key, value);
+        UserImpl newUser = new UserImpl(origUser);
+        newUser.setAttributes(attributes);
+        UserService service;
+        try {
+            service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+            service.updateUser(newUser, ctx);
+        } catch (ServiceException e) {
+            throw new LoginException(e);
+        } catch (UserException e) {
+            throw new LoginException(e);
+        }
     }
 
-    public LoginRequest getRequest() {
-        return request;
-    }
-
-    void setRequest(LoginRequest request) {
-        this.request = request;
-    }
-
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
+    public void handleLogout(LoginResult logout) {
+        // Nothing to to.
     }
 }

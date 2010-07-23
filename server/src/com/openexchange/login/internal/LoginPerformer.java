@@ -111,6 +111,7 @@ public final class LoginPerformer {
      */
     public LoginResult doLogin(final LoginRequest request) throws LoginException {
         final LoginResultImpl retval = new LoginResultImpl();
+        retval.setRequest(request);
         try {
             final Authenticated authed = Authentication.login(request.getLogin(), request.getPassword());
             final Context ctx = findContext(authed.getContextInfo());

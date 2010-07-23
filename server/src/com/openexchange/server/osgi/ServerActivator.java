@@ -156,6 +156,7 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.search.SearchException;
@@ -501,6 +502,7 @@ public final class ServerActivator extends DeferredActivator {
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new MailLoginHandler(), null));
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new TransportLoginHandler(), null));
+        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new LastLoginRecorder(), null));
         // Register table creation for mail account storage.
         registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateMailAccountTables(), null));
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle

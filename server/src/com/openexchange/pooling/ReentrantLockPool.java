@@ -254,7 +254,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         PoolingException warn = new PoolingException("Thread " + threadName
                             + " is sent to sleep until an object in the pool is available. " + data.numActive()
                             + " objects are already in use.");
-                        LOG.warn(warn.getMessage(), warn);
+                        LOG.debug(warn.getMessage(), warn);
                         final long sleepStartTime = System.currentTimeMillis();
                         boolean timedOut = false;
                         try {
@@ -268,7 +268,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         }
                         warn = new PoolingException("Thread " + threadName + " slept for " + (System.currentTimeMillis() - sleepStartTime)
                             + "ms.");
-                        LOG.warn(warn.getMessage(), warn);
+                        LOG.debug(warn.getMessage(), warn);
                         if (timedOut) {
                             idleAvailable.signal();
                             throw new PoolingException("Wait time exceeded. Active: " + data.numActive() + ", Idle: " + data.numIdle()
