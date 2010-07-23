@@ -54,8 +54,8 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.servlet.AjaxException;
@@ -66,9 +66,6 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public final class Create {
 
-    /**
-     * Prevent instantiation
-     */
     private Create() {
         super();
     }
@@ -126,7 +123,7 @@ public final class Create {
         final FolderObject folder = setupPublicFolder(name, module, client.getValues().getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         final InsertRequest request = new InsertRequest(API.OX_OLD, folder);
-        final CommonInsertResponse response = client.execute(request);
+        final InsertResponse response = client.execute(request);
         response.fillObject(folder);
         return folder;
     }

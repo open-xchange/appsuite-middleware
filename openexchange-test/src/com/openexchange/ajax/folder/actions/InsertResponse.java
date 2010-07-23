@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.Date;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.DataObject;
@@ -86,16 +87,22 @@ public class InsertResponse extends CommonInsertResponse {
     }
 
     /**
-     * Puts the data of this insert response into the object. This are especially the identifier and the modified time stamp.
+     * {@inheritDoc}
+     * New folder API has a drawback: It does not fill the timestamp value of the response. Therefore a new Date() must be inserted there.
      */
     @Override
     public void fillObject(final DataObject obj) {
         if (!isMailFolder()) {
             obj.setObjectID(getId());
         }
-        obj.setLastModified(getTimestamp());
-        if (!obj.containsCreationDate())
-            obj.setCreationDate(obj.getLastModified());
+        Date timestamp = getTimestamp();
+        if (null == timestamp) {
+            timestamp = new Date();
+        }
+        obj.setLastModified(timestamp);
+        if (!obj.containsCreationDate()) {
+            obj.setCreationDate(timestamp);
+        }
     }
 
     private boolean isMailFolder() {

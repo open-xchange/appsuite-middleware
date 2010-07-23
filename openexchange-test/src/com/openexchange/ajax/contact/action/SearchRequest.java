@@ -55,10 +55,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -99,12 +101,25 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
     }
 
     public SearchRequest(final ContactSearchObject cso, final int[] columns, boolean failOnError) {
+        this(cso, columns, -1, null, failOnError);
+    }
+
+    public SearchRequest(ContactSearchObject cso, int[] columns, int orderBy, Order order) {
+        this(cso, columns, orderBy, order, true);
+    }
+
+    public SearchRequest(ContactSearchObject cso, int[] columns, int orderBy, Order order, boolean failOnError) {
         searchParser = new SearchParser(failOnError, columns);
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
         param(AJAXServlet.PARAMETER_COLUMNS, join(columns));
+        if (orderBy != -1) {
+            param(AJAXServlet.PARAMETER_SORT, Integer.toString(orderBy));
+        }
+        if (null != order) {
+            param(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order));
+        }
         try {
-
             body.put(ContactFields.LAST_NAME, cso.getSurname());
             body.put(ContactFields.FIRST_NAME, cso.getGivenName());
             body.put(ContactFields.DISPLAY_NAME, cso.getDisplayName());
@@ -117,10 +132,10 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
                 body.put("emailAutoComplete", "true");
                 // parameter.setParameter("emailAutoComplete","true");
             }
-            if(cso.isOrSearch()) {
+            if (cso.isOrSearch()) {
                 body.put("orSearch", "true");
             }
-            
+
             @SuppressWarnings("deprecation")
             int singleFolderId = cso.getFolder();
             if (singleFolderId != -1) {

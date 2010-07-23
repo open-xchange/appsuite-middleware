@@ -60,6 +60,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
 * This test creates one folder and two users (one user in the new folder and one user in the private contacts folder). Then a search is performed for their common first name.
@@ -67,13 +68,12 @@ import com.openexchange.groupware.container.FolderObject;
 * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
 */
 public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
-    
-    Contact contactObject1;
-    Contact contactObject2;
-    FolderObject newFolderObject;
-    int privateFolderId;
-    int newFolderId;
-    
+
+    private AJAXClient client;
+    private Contact contact1;
+    private Contact contact2;
+    private FolderObject newFolder;
+
     public SearchInAllContactFoldersTest(final String name) {
         super(name);
     }
@@ -81,59 +81,77 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        final AJAXClient myClient = getClient();
-        //get the id of the private contacts-folder
-        privateFolderId = myClient.getValues().getPrivateContactFolder();
+        client = getClient();
         //create a new folder
-        newFolderObject = Create.createPublicFolder(myClient, "Testfolder2", FolderObject.CONTACT);
-        newFolderId = newFolderObject.getObjectID();
+        newFolder = Create.createPublicFolder(client, "Testfolder2", FolderObject.CONTACT);
         //create a contact in the private folder
-        contactObject1 = new Contact();
-        contactObject1.setDisplayName("Herbert Meier");
-        contactObject1.setEmail1("herbert.meier@example.com");
-        contactObject1.setParentFolderID(privateFolderId);
-        InsertRequest insertContact1 = new InsertRequest(contactObject1);
-        InsertResponse insertResponse = myClient.execute(insertContact1);
-        insertResponse.fillObject(contactObject1);
+        contact1 = new Contact();
+        contact1.setDisplayName("Herbert Meier");
+        contact1.setEmail1("herbert.meier@example.com");
+        contact1.setParentFolderID(client.getValues().getPrivateContactFolder());
+        InsertRequest insertContact1 = new InsertRequest(contact1);
+        InsertResponse insertResponse = client.execute(insertContact1);
+        insertResponse.fillObject(contact1);
         //create a contact in the new folder
-        contactObject2 = new Contact();
-        contactObject2.setDisplayName("Herbert M\u00fcller");
-        contactObject2.setEmail1("herbert.mueller@example.com");
-        contactObject2.setParentFolderID(newFolderId);
-        InsertRequest insertContact2 = new InsertRequest(contactObject2);
-        insertResponse = myClient.execute(insertContact2);
-        insertResponse.fillObject(contactObject2);
+        contact2 = new Contact();
+        contact2.setDisplayName("Herbert M\u00fcller");
+        contact2.setEmail1("herbert.mueller@example.com");
+        contact2.setParentFolderID(newFolder.getObjectID());
+        InsertRequest insertContact2 = new InsertRequest(contact2);
+        insertResponse = client.execute(insertContact2);
+        insertResponse.fillObject(contact2);
     }
-    
+
     @Override
     public void tearDown() throws Exception {
-        final AJAXClient myClient = getClient();
         //delete the two contacts
-        DeleteRequest contactDeleteRequest = new DeleteRequest(contactObject1);
-        myClient.execute(contactDeleteRequest);
-        contactDeleteRequest = new DeleteRequest(contactObject2);
-        myClient.execute(contactDeleteRequest);
+        DeleteRequest contactDeleteRequest = new DeleteRequest(contact1);
+        client.execute(contactDeleteRequest);
+        contactDeleteRequest = new DeleteRequest(contact2);
+        client.execute(contactDeleteRequest);
         //delete the new folder
-        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, newFolderObject);
-        myClient.execute(folderDeleteRequest);
+        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, newFolder);
+        client.execute(folderDeleteRequest);
         super.tearDown();
     }
 
     public void testAllContactFoldersSearch() throws Throwable {
-        final AJAXClient myClient = getClient();
         //execute a search over first name and last name in all folders (folder id -1) that matches both contacts
         int [] columns = new int [] {Contact.OBJECT_ID};
         SearchRequest searchRequest = new SearchRequest("Herbert", -1, columns, true);
-        
-        SearchResponse searchResponse = myClient.execute(searchRequest);
+
+        SearchResponse searchResponse = client.execute(searchRequest);
+        assertFoundContacts(searchResponse);
+    }
+
+    public void testAutoCompleteSearchForAllFolders() throws Throwable {
+        int[] columns = {
+            Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.INTERNAL_USERID, Contact.EMAIL1, Contact.EMAIL2,
+            Contact.EMAIL3, Contact.DISTRIBUTIONLIST, Contact.MARK_AS_DISTRIBUTIONLIST };
+        ContactSearchObject cso = new ContactSearchObject();
+        cso.setDisplayName("herb*");
+        cso.setEmail1("herb*");
+        cso.setEmail2("herb*");
+        cso.setEmail3("herb*");
+        cso.setDisplayName("herb*");
+        cso.setDisplayName("herb*");
+        cso.setEmailAutoComplete(true);
+        cso.setOrSearch(true);
+        SearchRequest request = new SearchRequest(cso, columns, Contact.USE_COUNT_GLOBAL_FIRST, null);
+        SearchResponse response = client.execute(request);
+
+        assertFoundContacts(response);
+    }
+
+    private void assertFoundContacts(SearchResponse response) {
         boolean foundFirst = false;
         boolean foundSecond = false;
-        final int idPos = searchResponse.getColumnPos(Contact.OBJECT_ID);
-        for (Object[] obj : searchResponse) {
-            if (contactObject1.getObjectID() == ((Integer) obj[idPos]).intValue()) {
+        final int idPos = response.getColumnPos(Contact.OBJECT_ID);
+        for (Object[] obj : response) {
+            if (contact1.getObjectID() == ((Integer) obj[idPos]).intValue()) {
                 foundFirst = true;
             }
-            if (contactObject2.getObjectID() == ((Integer) obj[idPos]).intValue()) {
+            if (contact2.getObjectID() == ((Integer) obj[idPos]).intValue()) {
                 foundSecond = true;
             }
         }

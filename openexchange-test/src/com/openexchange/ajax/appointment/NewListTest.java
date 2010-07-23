@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -65,7 +64,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -89,21 +87,19 @@ public class NewListTest extends AbstractAJAXSession {
         super(name);
     }
 
-
     /**
-     * This method tests the new handling of not more available objects for LIST
-     * requests.
+     * This method tests the new handling of not more available objects for LIST requests.
      */
     public void testRemovedObjectHandling() throws Throwable {
         final AJAXClient clientA = getClient();
         final TimeZone tzA = clientA.getValues().getTimeZone();
         final int folderA = clientA.getValues().getPrivateAppointmentFolder();
 
-        // Create some tasks.
-        final Date appStart = new Date(TimeTools.getHour(0));
-        final Date appEnd = new Date(TimeTools.getHour(1));
-        final Date listStart = new Date(TimeTools.getHour(-1));
-        final Date listEnd = new Date(TimeTools.getHour(2));
+        // Create some appointments.
+        final Date appStart = new Date(TimeTools.getHour(0, tzA));
+        final Date appEnd = new Date(TimeTools.getHour(1, tzA));
+        final Date listStart = new Date(TimeTools.getHour(-1, tzA));
+        final Date listEnd = new Date(TimeTools.getHour(2, tzA));
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
             final Appointment app = new Appointment();
@@ -115,8 +111,7 @@ public class NewListTest extends AbstractAJAXSession {
             app.addParticipant(new UserParticipant(clientA.getValues().getUserId()));
             inserts[i] = new InsertRequest(app, tzA);
         }
-        final MultipleResponse<AppointmentInsertResponse> mInsert = Executor.execute(
-            getClient(), MultipleRequest.create(inserts));
+        final MultipleResponse<AppointmentInsertResponse> mInsert = clientA.execute(MultipleRequest.create(inserts));
         final List<CommonInsertResponse> toDelete = new ArrayList<CommonInsertResponse>(NUMBER);
         final Iterator<AppointmentInsertResponse> iter = mInsert.iterator();
         while (iter.hasNext()) {
@@ -124,10 +119,8 @@ public class NewListTest extends AbstractAJAXSession {
         }
 
         // A now gets all of the folder.
-        final int[] columns = new int[] { Appointment.TITLE, Appointment
-            .OBJECT_ID, Appointment.FOLDER_ID };
-        final CommonAllResponse allR = clientA.execute(new AllRequest(folderA,
-            columns, listStart, listEnd, tzA));
+        final int[] columns = new int[] { Appointment.TITLE, Appointment.OBJECT_ID, Appointment.FOLDER_ID };
+        final CommonAllResponse allR = clientA.execute(new AllRequest(folderA, columns, listStart, listEnd, tzA));
         
         // TODO This delete of B does not remove the appointments but only the
         // participant.
@@ -135,15 +128,13 @@ public class NewListTest extends AbstractAJAXSession {
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
             final CommonInsertResponse insertR = toDelete.remove((NUMBER - DELETES)/2 + i); 
-            deletes1[i] = new DeleteRequest(insertR.getId(), folderA, allR
-                .getTimestamp());
+            deletes1[i] = new DeleteRequest(insertR.getId(), folderA, allR.getTimestamp());
         }
-        Executor.execute(clientA, MultipleRequest.create(deletes1));
+        clientA.execute(MultipleRequest.create(deletes1));
 
         // List request of A must now not contain the deleted objects and give
         // no error.
-        final CommonListResponse listR = Executor.execute(
-            clientA, new ListRequest(allR.getListIDs(), columns, true));
+        final CommonListResponse listR = clientA.execute(new ListRequest(allR.getListIDs(), columns, true));
         
         final DeleteRequest[] deletes2 = new DeleteRequest[toDelete.size()];
         for (int i = 0; i < deletes2.length; i++) {
@@ -151,6 +142,6 @@ public class NewListTest extends AbstractAJAXSession {
             deletes2[i] = new DeleteRequest(insertR.getId(), folderA,
             listR.getTimestamp());
         }
-        Executor.execute(getClient(), MultipleRequest.create(deletes2)); 
+        clientA.execute(MultipleRequest.create(deletes2)); 
     }
 }

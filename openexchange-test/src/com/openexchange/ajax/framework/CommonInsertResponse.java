@@ -91,7 +91,7 @@ public class CommonInsertResponse extends AbstractAJAXResponse {
         obj.setObjectID(getId());
         obj.setLastModified(getTimestamp());
         if (!obj.containsCreationDate()) {
-            obj.setCreationDate( obj.getLastModified());
+            obj.setCreationDate(obj.getLastModified());
         }
     }
 }
