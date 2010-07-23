@@ -139,11 +139,10 @@ public class FolderTest extends AbstractWebdavXMLTest {
         }
     }
 
-    public static FolderObject createFolderObject(final int entity, final String title, final int module, final boolean isPublic) throws Exception {
+    public static FolderObject createFolderObject(int entity, String title, int module, boolean isPublic) {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName(title + System.currentTimeMillis());
         folderObj.setModule(module);
-
         if (isPublic) {
             folderObj.setType(FolderObject.PUBLIC);
             folderObj.setParentFolderID(2);
@@ -151,17 +150,15 @@ public class FolderTest extends AbstractWebdavXMLTest {
             folderObj.setType(FolderObject.PRIVATE);
             folderObj.setParentFolderID(1);
         }
-
         folderObj.setPermissionsAsArray(new OCLPermission[] { createPermission( entity, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) } );
-
         return folderObj;
     }
 
-    public static OCLPermission createPermission(final int entity, final boolean isGroup, final int fp, final int orp, final int owp, final int odp) throws Exception {
+    public static OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp) {
         return createPermission(entity, isGroup, fp, orp, owp, odp, true);
     }
 
-    public static OCLPermission createPermission(final int entity, final boolean isGroup, final int fp, final int orp, final int owp, final int odp, final boolean isAdmin) throws Exception {
+    public static OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp, boolean isAdmin) {
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(entity);
         oclp.setGroupPermission(isGroup);
@@ -170,7 +167,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
         oclp.setReadObjectPermission(orp);
         oclp.setWriteObjectPermission(owp);
         oclp.setDeleteObjectPermission(odp);
-
         return oclp;
     }
 
