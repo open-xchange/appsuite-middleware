@@ -64,9 +64,9 @@ public class SearchIteratorException extends AbstractOXException {
     public static enum SearchIteratorCode {
 
         /**
-         * An SQL error occurred: %1$s
+         * A SQL error occurred: %1$s
          */
-        SQL_ERROR("An SQL error occurred: %1$s", Category.CODE_ERROR, 1),
+        SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 1),
         /**
          * A DBPool error occurred: %1$s
          */
@@ -91,7 +91,11 @@ public class SearchIteratorException extends AbstractOXException {
         /**
          * No such element.
          */
-        NO_SUCH_ELEMENT("No such element.", Category.CODE_ERROR, 7);
+        NO_SUCH_ELEMENT("No such element.", Category.CODE_ERROR, 7),
+        /**
+         * An unexpected error occurred: %1$s
+         */
+        UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CODE_ERROR, 8);
 
         private final String message;
 
