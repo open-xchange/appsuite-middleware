@@ -86,7 +86,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
+import com.openexchange.tools.iterator.SearchIteratorException.Code;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
@@ -366,9 +366,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 closeResources();
             }
         } catch (final SQLException e) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
         if (prefetchEnabled) {
             prefetchQueue = new LinkedList<FolderObject>();
@@ -388,9 +388,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     future = null;
                 }
             } catch (final SQLException e) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } catch (final DBPoolingException e) {
-                throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } finally {
                 closeResources();
             }
@@ -540,7 +540,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 if (LOG.isErrorEnabled()) {
                     LOG.error(e.getMessage(), e);
                 }
-                error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                error = new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             }
             rs = null;
         }
@@ -555,7 +555,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     LOG.error(e.getMessage(), e);
                 }
                 if (error == null) {
-                    error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                    error = new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
                 }
             }
             stmt = null;
@@ -589,7 +589,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      */
     public FolderObject next() throws SearchIteratorException {
         if (isClosed) {
-            throw new SearchIteratorException(SearchIteratorCode.CLOSED, EnumComponent.FOLDER);
+            throw new SearchIteratorException(Code.CLOSED, EnumComponent.FOLDER);
         }
         try {
             final FolderObject retval = next;
@@ -642,9 +642,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
             return retval;
         } catch (final SQLException e) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
     }
 
@@ -740,9 +740,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
             return retval;
         } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final SQLException e) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } finally {
             next = null;
             try {
@@ -782,7 +782,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     try {
                         return FolderObject.getFolderPermissions(folderId, myCtx, readCon);
                     } catch (final SQLException e) {
-                        throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                        throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
                     } finally {
                         DBPool.closeReaderSilent(myCtx, readCon);
                     }
@@ -798,7 +798,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 return f.get();
             } catch (final InterruptedException e) {
-                throw new SearchIteratorException(SearchIteratorCode.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                throw new SearchIteratorException(Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } catch (final ExecutionException e) {
                 throw new SearchIteratorException(ThreadPools.launderThrowable(e, AbstractOXException.class));
             }

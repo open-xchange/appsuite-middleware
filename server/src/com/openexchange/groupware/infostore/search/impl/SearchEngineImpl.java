@@ -89,7 +89,7 @@ import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
+import com.openexchange.tools.iterator.SearchIteratorException.Code;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.sql.SearchStrings;
 
@@ -406,7 +406,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                     close();
                 }
             } catch (final Exception e) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,e,EnumComponent.INFOSTORE);
+                throw new SearchIteratorException(Code.SQL_ERROR,e,EnumComponent.INFOSTORE);
             }
         }
         
@@ -435,7 +435,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                 }
                 return retval;
             } catch (final Exception exc) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,exc,EnumComponent.INFOSTORE);
+                throw new SearchIteratorException(Code.SQL_ERROR,exc,EnumComponent.INFOSTORE);
             }
         }
 

@@ -61,7 +61,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
+import com.openexchange.tools.iterator.SearchIteratorException.Code;
 
 class ReminderSearchIterator implements SearchIterator<ReminderObject> {
 
@@ -89,7 +89,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         } catch (final ReminderException exc) {
             next = null;
         } catch (final SQLException exc) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.REMINDER);
+            throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.REMINDER);
         }
     }
 
@@ -104,7 +104,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         } catch (final ReminderException exc) {
             next = null;
         } catch (final SQLException exc) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.REMINDER);
+            throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.REMINDER);
         }
         return reminderObj;
     }
@@ -121,7 +121,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
 
             DBPool.closeReaderSilent(ctx,readCon);
         } catch (final SQLException exc) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.REMINDER);
+            throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.REMINDER);
         }
     }
 

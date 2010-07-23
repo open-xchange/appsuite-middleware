@@ -243,7 +243,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
                 if (null != sie) {
                     throw sie;
                 }
-                throw new SearchIteratorException(SearchIteratorException.SearchIteratorCode.NO_SUCH_ELEMENT, EnumComponent.APPOINTMENT);
+                throw new SearchIteratorException(SearchIteratorException.Code.NO_SUCH_ELEMENT, EnumComponent.APPOINTMENT);
             }
             return data.poll();
         }

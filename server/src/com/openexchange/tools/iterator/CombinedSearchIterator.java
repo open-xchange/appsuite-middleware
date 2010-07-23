@@ -55,7 +55,7 @@ import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
+import com.openexchange.tools.iterator.SearchIteratorException.Code;
 
 /**
  * {@link CombinedSearchIterator} - Combines one or more instances of {@link SearchIterator}
@@ -101,7 +101,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
 
     public T next() throws SearchIteratorException, OXException {
         if (iterators.length == 0 || !next) {
-            throw new SearchIteratorException(SearchIteratorCode.NO_SUCH_ELEMENT, EnumComponent.NONE);
+            throw new SearchIteratorException(Code.NO_SUCH_ELEMENT, EnumComponent.NONE);
         }
         return iterators[i].next();
     }

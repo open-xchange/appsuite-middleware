@@ -61,7 +61,7 @@ public class SearchIteratorException extends AbstractOXException {
 
     private static final long serialVersionUID = -4303608920163984898L;
 
-    public static enum SearchIteratorCode {
+    public static enum Code {
 
         /**
          * A SQL error occurred: %1$s
@@ -103,7 +103,7 @@ public class SearchIteratorException extends AbstractOXException {
 
         private final Category category;
 
-        private SearchIteratorCode(final String message, final Category category, final int detailNumber) {
+        private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.category = category;
             this.detailNumber = detailNumber;
@@ -123,12 +123,12 @@ public class SearchIteratorException extends AbstractOXException {
 
     }
 
-    public SearchIteratorException(final SearchIteratorCode code, final EnumComponent component, final Object... messageArgs) {
+    public SearchIteratorException(final Code code, final EnumComponent component, final Object... messageArgs) {
         this(code, null, component, messageArgs);
     }
 
-    public SearchIteratorException(final SearchIteratorCode code, final Throwable cause, final EnumComponent component, final Object... messageArgs) {
-        super(component, code.category, code.detailNumber, code.message, cause);
+    public SearchIteratorException(final Code code, final Throwable cause, final EnumComponent component, final Object... messageArgs) {
+        super(component, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
         super.setMessageArgs(messageArgs);
     }
 

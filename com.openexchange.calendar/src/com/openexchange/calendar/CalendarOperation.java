@@ -783,7 +783,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                             }
                         } else {
                             throw new SearchIteratorException(
-                                SearchIteratorException.SearchIteratorCode.NOT_IMPLEMENTED,
+                                SearchIteratorException.Code.NOT_IMPLEMENTED,
                                 APPOINTMENT,
                                 I(cols[a]));
                         }

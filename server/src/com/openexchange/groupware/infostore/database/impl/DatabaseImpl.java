@@ -110,7 +110,7 @@ import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
+import com.openexchange.tools.iterator.SearchIteratorException.Code;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -2043,7 +2043,7 @@ public class DatabaseImpl extends DBService {
                     close();
                 }
             } catch (final SQLException e) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.INFOSTORE);
+                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.INFOSTORE);
             }
         }
 
@@ -2087,7 +2087,7 @@ public class DatabaseImpl extends DBService {
                 }
                 return retval;
             } catch (final SQLException exc) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.INFOSTORE);
+                throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.INFOSTORE);
             }
         }
 
@@ -2103,7 +2103,7 @@ public class DatabaseImpl extends DBService {
                 rs = null;
                 stmt = null;
             } catch (final SQLException e) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.INFOSTORE);
+                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.INFOSTORE);
             } finally {
                 if (readCon != null) {
                     d.releaseReadConnection(ctx, readCon);
