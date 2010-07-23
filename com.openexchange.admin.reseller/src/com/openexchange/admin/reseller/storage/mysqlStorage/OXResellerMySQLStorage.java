@@ -348,13 +348,14 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             final ArrayList<ResellerAdmin> ret = new ArrayList<ResellerAdmin>();
             while (rs.next()) {
-                final ResellerAdmin adm = new ResellerAdmin();
+                ResellerAdmin adm = new ResellerAdmin();
                 adm.setId(rs.getInt("sid"));
                 adm.setName(rs.getString(DATABASE_COLUMN_NAME));
                 adm.setDisplayname(rs.getString("displayName"));
                 adm.setPassword(rs.getString("password"));
                 adm.setPasswordMech(rs.getString("passwordMech"));
                 adm.setParentId(rs.getInt("pid"));
+                adm = getRestrictionDataForAdmin(adm, con);
                 ret.add(adm);
             }
             return ret.toArray(new ResellerAdmin[ret.size()]);
@@ -369,6 +370,27 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
 
+    private ResellerAdmin getRestrictionDataForAdmin(final ResellerAdmin admin, Connection con) throws SQLException {
+        final PreparedStatement prep = con.prepareStatement("SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?");
+        prep.setInt(1, admin.getId());
+        final ResultSet rs = prep.executeQuery();
+
+        final HashSet<Restriction> res = new HashSet<Restriction>();
+        while (rs.next()) {
+            final Restriction r = new Restriction();
+            r.setId(rs.getInt(DATABASE_COLUMN_ID));
+            r.setName(rs.getString(DATABASE_COLUMN_NAME));
+            r.setValue(rs.getString(DATABASE_COLUMN_VALUE));
+            res.add(r);
+        }
+        if (res.size() > 0) {
+            admin.setRestrictions(res);
+        }
+        rs.close();
+        prep.close();
+        return admin;
+    }
+    
     @Override
     public ResellerAdmin[] getData(final ResellerAdmin[] admins) throws StorageException {
         Connection con = null;
@@ -378,7 +400,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             final ArrayList<ResellerAdmin> ret = new ArrayList<ResellerAdmin>();
             con = cache.getConnectionForConfigDB();
             for (final ResellerAdmin adm : admins) {
-                final ResellerAdmin newadm = (ResellerAdmin) adm.clone();
+                ResellerAdmin newadm = (ResellerAdmin) adm.clone();
                 String query = "SELECT * FROM subadmin WHERE ";
                 boolean hasId = false;
                 if (adm.getId() != null) {
@@ -410,24 +432,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 rs.close();
                 prep.close();
 
-                prep = con.prepareStatement("SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?");
-                prep.setInt(1, newadm.getId());
-                rs = prep.executeQuery();
-
-                final HashSet<Restriction> res = new HashSet<Restriction>();
-                while (rs.next()) {
-                    final Restriction r = new Restriction();
-                    r.setId(rs.getInt(DATABASE_COLUMN_ID));
-                    r.setName(rs.getString(DATABASE_COLUMN_NAME));
-                    r.setValue(rs.getString(DATABASE_COLUMN_VALUE));
-                    res.add(r);
-                }
-                if (res.size() > 0) {
-                    newadm.setRestrictions(res);
-                }
+                newadm = getRestrictionDataForAdmin(newadm, con);
+                
                 ret.add(newadm);
-                rs.close();
-                prep.close();
             }
             return ret.toArray(new ResellerAdmin[ret.size()]);
         } catch (final PoolException e) {

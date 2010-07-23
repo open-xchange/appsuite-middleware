@@ -57,7 +57,6 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -103,15 +102,6 @@ public class List extends ResellerAbstraction {
             final OXResellerInterface rsi = getResellerInterface();
 
             adms = rsi.list("*", auth);
-            if (adms.length > 0) {
-                adms = rsi.getMultipleData(adms, auth);
-                // for(final ResellerAdmin adm : adms ) {
-                // System.out.println(adm);
-                // }
-            }
-        } catch (final OXResellerException e) {
-            printServerException(e, parser);
-            sysexit(1);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);

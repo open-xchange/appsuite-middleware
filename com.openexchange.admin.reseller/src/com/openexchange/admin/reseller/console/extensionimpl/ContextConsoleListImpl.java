@@ -53,6 +53,7 @@ import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleListInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
+import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -88,9 +89,12 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
         return columnnames;
     }
 
-    public ArrayList<String> getCSVData(final Context ctx) {
+    public ArrayList<String> getCSVData(final Context ctx) throws PluginException {
         final ArrayList<String> retval = new ArrayList<String>();
         final OXContextExtensionImpl extension = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
+        if( extension == null ) {
+            throw new PluginException("No extension data found in server reply.");
+        }
         final String customid = extension.getCustomid();
         if(extension.isCustomidset() && null != customid) {
             retval.add(customid);
@@ -113,9 +117,12 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
         return retval;
     }
 
-    public ArrayList<String> getHumanReadableData(final Context ctx) {
+    public ArrayList<String> getHumanReadableData(final Context ctx) throws PluginException {
         final ArrayList<String> retval = new ArrayList<String>();
         final OXContextExtensionImpl extension = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
+        if( extension == null ) {
+            throw new PluginException("No extension data found in server reply.");
+        }
         final String customid = extension.getCustomid();
         if(extension.isCustomidset() && null != customid) {
             retval.add(customid);

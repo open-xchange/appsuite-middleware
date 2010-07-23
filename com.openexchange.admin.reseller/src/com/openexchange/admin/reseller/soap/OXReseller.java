@@ -63,13 +63,15 @@ public class OXReseller extends OXSOAPRMIMapper implements OXResellerInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#delete(com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public void delete(ResellerAdmin adm, Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
+    public void delete(ResellerAdmin adm, Credentials creds) throws RemoteException, StorageException, OXResellerException, InvalidCredentialsException {
         reconnect();
         try {
             ((OXResellerInterface)rmistub).delete(adm, creds);
             return;
         } catch (ConnectException e) {
             reconnect(true);
+        } catch (InvalidDataException e) {
+            throw new RemoteException(e.toString());
         }
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
