@@ -495,8 +495,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             addNewPermission(current);
         }
         if (hasNext) {
-            future = createNewFolderObject(rs.getInt(1));
-            folders.put(Integer.valueOf(rs.getInt(1)), future);
+            final int fuid = rs.getInt(1);
+            future = createNewFolderObject(fuid);
+            folders.put(Integer.valueOf(fuid), future);
             /*
              * Add first available permission from current row
              */
