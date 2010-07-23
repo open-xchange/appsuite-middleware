@@ -49,21 +49,15 @@
 
 package com.openexchange.calendar;
 
-import java.util.ArrayList;
 import com.openexchange.api2.OXException;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
- * Goes through the results of another SearchIterator and anonymizes every appointment that is private,
- * unless it belongs to the user given.
- * 
+ * Goes through the results of another SearchIterator and anonymizes every appointment that is private, unless it belongs to the user given.
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AnonymizingIterator extends CachedCalendarIterator {
@@ -71,7 +65,6 @@ public class AnonymizingIterator extends CachedCalendarIterator {
     public AnonymizingIterator(SearchIterator<CalendarDataObject> non_cached_iterator, Context c, int uid) throws SearchIteratorException, OXException {
         super(non_cached_iterator, c, uid);
     }
-    
 
     public AnonymizingIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws SearchIteratorException, OXException{
         super(non_cached_iterator, c, uid, oids);
@@ -80,11 +73,15 @@ public class AnonymizingIterator extends CachedCalendarIterator {
     @Override
     public CalendarDataObject next() throws SearchIteratorException, OXException {
         CalendarDataObject app = super.next();
-        if (!app.getPrivateFlag())
+        if (null == app) {
+            return null;
+        }
+        if (!app.getPrivateFlag()) {
             return app;
-        if(app.getPrivateFlag() && app.getCreatedBy() == uid)
+        }
+        if (app.getPrivateFlag() && app.getCreatedBy() == uid) {
             return app;
-
+        }
         CalendarDataObject anonymized = app.clone();
         anonymized.setTitle("Private");
         anonymized.removeAlarm();
