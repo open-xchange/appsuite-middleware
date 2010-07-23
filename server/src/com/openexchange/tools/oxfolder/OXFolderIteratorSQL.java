@@ -70,6 +70,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
@@ -786,7 +787,15 @@ public final class OXFolderIteratorSQL {
      */
     public static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
         final SQLStuff stuff = getVisibleSharedFolders0(userId, memberInGroups, accessibleModules, owner, ctx, since, con);
-        return new FolderObjectIterator(stuff.rs, stuff.stmt, false, ctx, stuff.readCon, stuff.closeCon);
+        try {
+            return new FolderObjectIterator(stuff.rs, stuff.stmt, false, ctx, stuff.readCon, stuff.closeCon);
+        } catch (SearchIteratorException e) {
+            closeResources(stuff.rs, stuff.stmt, stuff.closeCon ? stuff.readCon : null, true, ctx);
+            throw e;
+        } catch (Exception e) {
+            closeResources(stuff.rs, stuff.stmt, stuff.closeCon ? stuff.readCon : null, true, ctx);
+            throw new SearchIteratorException(SearchIteratorException.Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+        }
     }
 
     private static SQLStuff getVisibleSharedFolders0(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException {
