@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.JDOMException;
-import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.java.util.UUIDs;
