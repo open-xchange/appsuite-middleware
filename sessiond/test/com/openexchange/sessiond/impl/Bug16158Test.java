@@ -67,7 +67,7 @@ public class Bug16158Test extends TestCase {
     SimSession session;
     private SessionFinder[] finders = new SessionFinder[2];
     private Thread[] finderThreads = new Thread[finders.length];
-    private SessionRotator[] rotators = new SessionRotator[2];
+    private SessionRotator[] rotators = new SessionRotator[1];
     private Thread[] rotatorThreads = new Thread[rotators.length];
     private SimThreadPoolService threadPoolService;
 
@@ -78,7 +78,7 @@ public class Bug16158Test extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        sessionData = new SessionData(10, 1);
+        sessionData = new SessionData(100, 1);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
         SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
