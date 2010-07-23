@@ -49,9 +49,7 @@
 package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Hashtable;
-
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
@@ -93,39 +91,12 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     }
 
     /**
-     * 
-     * @deprecated 
-     */
-    public ArrayList<OXCommonExtension> getAllExtensions() {
-        return new ArrayList<OXCommonExtension>(this.extensions.values());
-    }
-
-    /**
      * Returns a {@link Hashtable} of all extensions with the name of the extensions as key
      * 
      * @return A {@link Hashtable}
      */
     public Hashtable<String, OXCommonExtension> getAllExtensionsAsHash() {
         return this.extensions;
-    }
-    
-    /**
-     * This method is used to get the extensions through the name of the
-     * extension. An Array with all extensions where the name fits will be returned, 
-     * or an empty array if no fitting extension was found.
-     * 
-     * @param extname a String for the extension
-     * @return the ArrayList of {@link OXCommonExtension} with extname
-     * @deprecated 
-     */
-    public ArrayList<OXCommonExtension> getExtensionsbyName(final String extname) {
-        final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>();
-        for (final OXCommonExtension ext : this.extensions.values()) {
-            if (extname.equals(ext.getClass().getName())) {
-                retval.add(ext);
-            }
-        }
-        return retval;
     }
     
     /**
@@ -175,15 +146,6 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
         }
     }
 
-    /**
-     * @param index
-     * @return
-     * @deprecated
-     */
-    public OXCommonExtension removeOneExtensionByIndex(final int index) {
-        return extensions.remove(index);
-    }
-    
     public final void setExtensionsok(boolean extensionsok) {
         this.extensionsok = extensionsok;
     }
