@@ -566,10 +566,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
+            final Context[] ctxs;
             if( null == retval ) {
-                return oxcox.listContext(search_pattern);
+                ctxs = oxcox.listContext(search_pattern);
             } else {
-                return oxcox.listContext(search_pattern, retval.getTablename(), retval.getQuerypart());
+                ctxs = oxcox.listContext(search_pattern, retval.getTablename(), retval.getQuerypart());
+            }
+            final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(oxcox.getData(ctxs)), auth, oxcox);
+            if (null != callGetDataPlugins) {
+                return callGetDataPlugins.toArray(new Context[callGetDataPlugins.size()]);
+            } else {
+                return ctxs;
             }
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
@@ -1044,9 +1051,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    /**
+     * @param ctxs
+     * @param auth
+     * @param oxcox
+     * @return null if no extensions available, contexts filled with extensions otherwise
+     * @throws StorageException
+     */
     private List<Context> callGetDataPlugins(final List<Context> ctxs, final Credentials auth, final OXContextStorageInterface oxcox) throws StorageException {
         List<OXCommonExtension> retval = null;
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        boolean extensionsFound = false;
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -1055,6 +1070,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     for (final ServiceReference servicereference : servicereferences) {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
+                            extensionsFound = true;
                             final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
                             if (log.isDebugEnabled()) {
                                 log.debug("Calling getData for plugin: " + bundlename);
@@ -1071,7 +1087,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
         }
-        return ctxs;
+        return extensionsFound ? ctxs : null;
     }
 
     private void addExtensionToContext(List<Context> ctxs, List<OXCommonExtension> retval, String bundlename) throws PluginException {

@@ -743,7 +743,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (ServiceException e) {
             throw new StorageException(e.getMessage(), e);
         }
-        ContextSearcher[] searchers = { new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern), new ContextSearcher(cache, "SELECT cid FROM context WHERE cid LIKE ?", sqlPattern), new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern) };
+        ContextSearcher[] searchers = null;
+        if( additionaltable != null && sqlconjunction != null ) {
+            searchers = new ContextSearcher[]{
+                new ContextSearcher(cache, "SELECT context.cid FROM context, " + additionaltable + " WHERE name LIKE ? " + sqlconjunction, sqlPattern),
+                new ContextSearcher(cache, "SELECT context.cid FROM context, " + additionaltable + " WHERE context.cid LIKE ? " + sqlconjunction, sqlPattern),
+                new ContextSearcher(cache, "SELECT context.cid FROM context, login2context, " + additionaltable + " WHERE login_info LIKE ? " + sqlconjunction, sqlPattern) };
+        } else {
+            searchers = new ContextSearcher[]{
+                new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern),
+                new ContextSearcher(cache, "SELECT cid FROM context WHERE cid LIKE ?", sqlPattern),
+                new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern) };
+        }
         CompletionFuture<Collection<Integer>> completion = threadPoolS.invoke(searchers);
         Set<Integer> cids = new HashSet<Integer>();
         try {
