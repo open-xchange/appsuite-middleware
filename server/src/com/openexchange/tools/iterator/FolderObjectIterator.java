@@ -486,6 +486,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     }
 
     private void addPermissions(final int folderId, final FolderObject current) throws SQLException {
+        future = null;
         addNewPermission(current);
         /*
          * Read all available permissions for current folder
