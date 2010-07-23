@@ -2,6 +2,7 @@
 package com.openexchange.admin.console.context.extensioninterfaces;
 
 import java.util.ArrayList;
+import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 
 
@@ -37,15 +38,17 @@ public interface ContextConsoleListInterface extends ContextConsoleCommonInterfa
      * Note: If the data is empty null must be inserted in the array at that point.
      * 
      * @return
+     * @throws PluginException 
      */
-    public ArrayList<String> getHumanReadableData(final Context ctx);
+    public ArrayList<String> getHumanReadableData(final Context ctx) throws PluginException;
     
     /**
      * This method can be implemented to set the data in the CSV output.
      * Note: If the data is empty null must be inserted in the array at that point.
      * 
      * @return
+     * @throws PluginException 
      */
-    public ArrayList<String> getCSVData(final Context ctx);
+    public ArrayList<String> getCSVData(final Context ctx) throws PluginException;
 
 }
