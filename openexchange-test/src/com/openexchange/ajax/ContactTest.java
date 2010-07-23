@@ -778,7 +778,7 @@ public class ContactTest extends AbstractAJAXTest {
         jsonObj.put(ContactFields.EMAIL3 ,cso.getEmail3());
 
 
-        if (cso.getEmailAutoComplete()){
+        if (cso.isEmailAutoComplete()){
             jsonObj.put("emailAutoComplete","true");
             //parameter.setParameter("emailAutoComplete","true");
         }

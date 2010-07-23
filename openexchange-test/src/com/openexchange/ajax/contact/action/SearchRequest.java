@@ -128,7 +128,7 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
             body.put(ContactFields.EMAIL3, cso.getEmail3());
             // TODO add missing fields
 
-            if (cso.getEmailAutoComplete()) {
+            if (cso.isEmailAutoComplete()) {
                 body.put("emailAutoComplete", "true");
                 // parameter.setParameter("emailAutoComplete","true");
             }
