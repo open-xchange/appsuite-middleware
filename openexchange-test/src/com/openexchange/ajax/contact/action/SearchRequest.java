@@ -121,8 +121,10 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
                 body.put("orSearch", "true");
             }
             
-            if (cso.getFolder() != -1) {
-                body.put(AJAXServlet.PARAMETER_INFOLDER, cso.getFolder());
+            @SuppressWarnings("deprecation")
+            int singleFolderId = cso.getFolder();
+            if (singleFolderId != -1) {
+                body.put(AJAXServlet.PARAMETER_INFOLDER, singleFolderId);
             }
             if (cso.getPattern() != null) {
                 body.put(SearchFields.PATTERN, cso.getPattern());
@@ -151,7 +153,7 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
         return searchParser;
     }
 
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return body;
     }
 
