@@ -438,11 +438,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
          */
         if (FolderCacheManager.isInitialized()) {
             try {
-                if (resideInCache) {
-                    FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, getEternalAttributes());
-                } else {
-                    FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, null);
-                }
+                FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, resideInCache ? getEternalAttributes() : null);
             } catch (final FolderCacheNotEnabledException e) {
                 LOG.error(e.getMessage(), e);
             } catch (final OXException e) {
