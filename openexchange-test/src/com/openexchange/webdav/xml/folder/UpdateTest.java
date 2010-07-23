@@ -62,18 +62,17 @@ public class UpdateTest extends FolderTest {
         super(name);
     }
 
-    public void testRenameFolder() throws Exception {
+    public void testRenameFolder() throws Throwable {
         FolderObject folderObj = createFolderObject(userId, "testInsertRenameFolder", FolderObject.TASK, true);
-        final int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 
         folderObj = new FolderObject();
         folderObj.setFolderName("testRenameFolder" + System.currentTimeMillis());
         folderObj.setObjectID(objectId);
         folderObj.setParentFolderID(2);
-
         updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 
-        final FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
+        FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
         compareFolder(folderObj, loadFolder);
     }
 
