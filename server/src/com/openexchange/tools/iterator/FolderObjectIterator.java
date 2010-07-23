@@ -62,6 +62,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
@@ -74,8 +80,12 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
@@ -99,12 +109,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         @Override
-        public FolderObject next() throws SearchIteratorException {
+        public FolderObject next() {
             return null;
         }
 
         @Override
-        public void close() throws SearchIteratorException {
+        public void close() {
             // Nothing to close
         }
 
@@ -164,6 +174,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private FolderObject future;
 
+    private final PermissionLoader permissionLoader;
+
     private static final String[] selectFields = {
         "fuid", "parent", "fname", "module", "type", "creating_date", "created_from", "changing_date", "changed_from", "permission_flag",
         "subfolder_flag", "default_flag" };
@@ -200,8 +212,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i> statement needed to create instances of
      * {@link FolderObject} with permissions applied.
      * 
-     * @param folderAlias The table alias for folder used throughout corresponding SQL <i>SELECT</i> statement or <code>null</code> if no alias used.
-     * @param permAlias The table alias for permissions used throughout corresponding SQL <i>SELECT</i> statement or <code>null</code> if no alias used.
+     * @param folderAlias The table alias for folder used throughout corresponding SQL <i>SELECT</i> statement or <code>null</code> if no
+     *            alias used.
+     * @param permAlias The table alias for permissions used throughout corresponding SQL <i>SELECT</i> statement or <code>null</code> if no
+     *            alias used.
      * @return All necessary fields in right order to be used in an SQL <i>SELECT</i> statement
      */
     public static final String getFieldsForSQLWithPermissions(final String folderAlias, final String permAlias) {
@@ -257,6 +271,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         folderIds = null;
         folders = null;
         warnings = new ArrayList<AbstractOXException>(2);
+        permissionLoader = null;
     }
 
     /**
@@ -264,9 +279,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      * 
      * @param col The collection containing instances of {@link FolderObject}
      * @param resideInCache If objects shall reside in cache permanently or shall be removed according to cache policy
-     * @throws SearchIteratorException If an unsupported collection is specified
      */
-    public FolderObjectIterator(final Collection<FolderObject> col, final boolean resideInCache) throws SearchIteratorException {
+    public FolderObjectIterator(final Collection<FolderObject> col, final boolean resideInCache) {
         super();
         folderIds = null;
         folders = null;
@@ -284,6 +298,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             prefetchQueue = new LinkedList<FolderObject>(col);
             next = prefetchQueue.poll();
         }
+        permissionLoader = null;
     }
 
     /**
@@ -329,6 +344,17 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         this.closeCon = closeCon;
         this.resideInCache = resideInCache;
         this.containsPermissions = containsPermissions;
+        if (containsPermissions) {
+            permissionLoader = null;
+        } else {
+            PermissionLoader tmp;
+            try {
+                tmp = new PermissionLoader(ctx);
+            } catch (final SearchIteratorException e) {
+                tmp = null;
+            }
+            permissionLoader = tmp;
+        }
         /*
          * Set next to first result set entry
          */
@@ -431,20 +457,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             /*
              * Read & set permissions
              */
-            fo.setPermissionsAsArray(FolderObject.getFolderPermissions(folderId, ctx, readCon));
-        }
-        /*
-         * Determine if folder object should be put into cache or not
-         */
-        if (FolderCacheManager.isInitialized()) {
-            try {
-                FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, resideInCache ? getEternalAttributes() : null);
-            } catch (final FolderCacheNotEnabledException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final CacheException e) {
-                LOG.error(e.getMessage(), e);
+            if (null == permissionLoader) {
+                fo.setPermissionsAsArray(FolderObject.getFolderPermissions(folderId, ctx, readCon));
+            } else {
+                permissionLoader.submitPermissionsFor(folderId);
             }
         }
         return fo;
@@ -577,6 +593,25 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
         try {
             final FolderObject retval = next;
+            if (retval.containsPermissions() && null != permissionLoader) {
+                final int folderId = retval.getObjectID();
+                final OCLPermission[] permissions = permissionLoader.getPermissionsFor(folderId);
+                retval.setPermissionsAsArray(null == permissions ? FolderObject.getFolderPermissions(folderId, ctx, readCon) : permissions);
+            }
+            /*
+             * Determine if folder object should be put into cache or not
+             */
+            if (FolderCacheManager.isInitialized()) {
+                try {
+                    FolderCacheManager.getInstance().putFolderObject(retval, ctx, false, resideInCache ? getEternalAttributes() : null);
+                } catch (final FolderCacheNotEnabledException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (final CacheException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
             next = null;
             if (prefetchQueue != null) {
                 /*
@@ -613,11 +648,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#close()
-     */
-    public void close() throws SearchIteratorException {
+    public void close() {
         if (isClosed) {
             return;
         }
@@ -722,4 +753,57 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             isClosed = true;
         }
     }
+
+    private static final class PermissionLoader {
+
+        private final Context ctx;
+
+        private final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap;
+
+        private final ExecutorService executorService;
+
+        public PermissionLoader(final Context ctx) throws SearchIteratorException {
+            super();
+            this.ctx = ctx;
+            permsMap = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
+            try {
+                executorService = (ExecutorService) ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true).getExecutor();
+            } catch (final ServiceException e) {
+                throw new SearchIteratorException(e);
+            }
+        }
+
+        public void submitPermissionsFor(final int folderId) {
+            final Context myCtx = this.ctx;
+            permsMap.put(Integer.valueOf(folderId), executorService.submit(new Callable<OCLPermission[]>() {
+
+                public OCLPermission[] call() throws AbstractOXException {
+                    final Connection readCon = DBPool.pickup(myCtx);
+                    try {
+                        return FolderObject.getFolderPermissions(folderId, myCtx, readCon);
+                    } catch (final SQLException e) {
+                        throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                    } finally {
+                        DBPool.closeReaderSilent(myCtx, readCon);
+                    }
+                }
+            }));
+        }
+
+        public OCLPermission[] getPermissionsFor(final int folderId) throws SearchIteratorException {
+            final Future<OCLPermission[]> f = permsMap.get(Integer.valueOf(folderId));
+            if (null == f) {
+                return null;
+            }
+            try {
+                return f.get();
+            } catch (final InterruptedException e) {
+                throw new SearchIteratorException(SearchIteratorCode.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            } catch (final ExecutionException e) {
+                throw new SearchIteratorException(ThreadPools.launderThrowable(e, AbstractOXException.class));
+            }
+        }
+
+    }
+
 }
