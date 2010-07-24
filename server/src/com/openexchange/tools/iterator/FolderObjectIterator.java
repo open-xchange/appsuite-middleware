@@ -68,6 +68,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
@@ -572,10 +574,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#hasNext()
-     */
     public boolean hasNext() {
         if (isClosed) {
             return false;
@@ -583,19 +581,18 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return next != null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#next()
-     */
     public FolderObject next() throws SearchIteratorException {
         if (isClosed) {
             throw new SearchIteratorException(Code.CLOSED, EnumComponent.FOLDER);
         }
         try {
             final FolderObject retval = next;
-            if (retval.containsPermissions() && null != permissionLoader) {
-                final int folderId = retval.getObjectID();
-                final OCLPermission[] permissions = permissionLoader.getPermissionsFor(folderId);
+            final int folderId = retval.getObjectID();
+            if (!retval.containsPermissions()) {
+                /*
+                 * No permissions set, yet
+                 */
+                final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissionsFor(folderId, 2000L);
                 retval.setPermissionsAsArray(null == permissions ? FolderObject.getFolderPermissions(folderId, ctx, readCon) : permissions);
             }
             /*
@@ -603,7 +600,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
              */
             if (FolderCacheManager.isInitialized()) {
                 try {
-                    FolderCacheManager.getInstance().putFolderObject(retval, ctx, false, resideInCache ? getEternalAttributes() : null);
+                    final FolderCacheManager manager = FolderCacheManager.getInstance();
+                    if (null == manager.getFolderObject(folderId, ctx)) {
+                        manager.putFolderObject(retval, ctx, false, resideInCache ? getEternalAttributes() : null);
+                    }
                 } catch (final FolderCacheNotEnabledException e) {
                     LOG.error(e.getMessage(), e);
                 } catch (final OXException e) {
@@ -613,17 +613,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 }
             }
             next = null;
-            if (prefetchQueue != null) {
-                /*
-                 * Select next from queue
-                 */
-                if (!prefetchQueue.isEmpty()) {
-                    next = prefetchQueue.poll();
-                    while ((next == null) && !prefetchQueue.isEmpty()) {
-                        next = prefetchQueue.poll();
-                    }
-                }
-            } else {
+            if (prefetchQueue == null) {
                 /*
                  * Select next from underlying ResultSet
                  */
@@ -638,6 +628,16 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 } else {
                     next = future;
                     close();
+                }
+            } else {
+                /*
+                 * Select next from queue
+                 */
+                if (!prefetchQueue.isEmpty()) {
+                    next = prefetchQueue.poll();
+                    while ((next == null) && !prefetchQueue.isEmpty()) {
+                        next = prefetchQueue.poll();
+                    }
                 }
             }
             return retval;
@@ -661,10 +661,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         isClosed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#size()
-     */
     public int size() {
         if (prefetchQueue != null) {
             return prefetchQueue.size() + (next == null ? 0 : 1);
@@ -672,10 +668,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         throw new UnsupportedOperationException("Method size() not implemented");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#hasSize()
-     */
     public boolean hasSize() {
         /*
          * Size can be predicted if prefetch queue is not null
@@ -774,17 +766,17 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void submitPermissionsFor(final int folderId) {
-            final Context myCtx = this.ctx;
+            final Context ctx = this.ctx;
             permsMap.put(Integer.valueOf(folderId), executorService.submit(new Callable<OCLPermission[]>() {
 
                 public OCLPermission[] call() throws AbstractOXException {
-                    final Connection readCon = DBPool.pickup(myCtx);
+                    final Connection readCon = DBPool.pickup(ctx);
                     try {
-                        return FolderObject.getFolderPermissions(folderId, myCtx, readCon);
+                        return FolderObject.getFolderPermissions(folderId, ctx, readCon);
                     } catch (final SQLException e) {
                         throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
                     } finally {
-                        DBPool.closeReaderSilent(myCtx, readCon);
+                        DBPool.closeReaderSilent(ctx, readCon);
                     }
                 }
             }));
@@ -804,6 +796,25 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
         }
 
-    }
+        public OCLPermission[] pollPermissionsFor(final int folderId, final long timeoutMsec) throws SearchIteratorException {
+            final Future<OCLPermission[]> f = permsMap.get(Integer.valueOf(folderId));
+            if (null == f) {
+                return null;
+            }
+            try {
+                return f.get(timeoutMsec, TimeUnit.MILLISECONDS);
+            } catch (final InterruptedException e) {
+                throw new SearchIteratorException(Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            } catch (final ExecutionException e) {
+                throw new SearchIteratorException(ThreadPools.launderThrowable(e, AbstractOXException.class));
+            } catch (final TimeoutException e) {
+                /*
+                 * Wait timed out
+                 */
+                return null;
+            }
+        }
+
+    } // End of PermissionLoader
 
 }
