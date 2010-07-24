@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -570,6 +571,21 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             DBPool.push(ctx, readCon);
             readCon = null;
         }
+        /*
+         * Close other stuff
+         */
+        if (null != prefetchQueue) {
+            prefetchQueue.clear();
+        }
+        if (null != folderIds) {
+            folderIds.clear();
+        }
+        if (null != folders) {
+            folders.clear();
+        }
+        if (null != permissionLoader) {
+            permissionLoader.close();
+        }
         if (error != null) {
             throw error;
         }
@@ -587,32 +603,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             throw new SearchIteratorException(Code.CLOSED, EnumComponent.FOLDER);
         }
         try {
-            final FolderObject retval = next;
-            final int folderId = retval.getObjectID();
-            if (!retval.containsPermissions()) {
-                /*
-                 * No permissions set, yet
-                 */
-                final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissionsFor(folderId, 2000L);
-                retval.setPermissionsAsArray(null == permissions ? FolderObject.getFolderPermissions(folderId, ctx, readCon) : permissions);
-            }
-            /*
-             * Determine if folder object should be put into cache or not
-             */
-            if (FolderCacheManager.isInitialized()) {
-                try {
-                    final FolderCacheManager manager = FolderCacheManager.getInstance();
-                    if (null == manager.getFolderObject(folderId, ctx)) {
-                        manager.putFolderObject(retval, ctx, false, resideInCache ? getEternalAttributes() : null);
-                    }
-                } catch (final FolderCacheNotEnabledException e) {
-                    LOG.error(e.getMessage(), e);
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                } catch (final CacheException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            final FolderObject retval = prepareFolderObject(next);
             next = null;
             if (prefetchQueue == null) {
                 /*
@@ -647,6 +638,44 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         } catch (final DBPoolingException e) {
             throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
+    }
+
+    private FolderObject prepareFolderObject(final FolderObject fo) throws SearchIteratorException {
+        if (null == fo) {
+            return null;
+        }
+        final int folderId = fo.getObjectID();
+        if (!fo.containsPermissions()) {
+            /*
+             * No permissions set, yet
+             */
+            final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissionsFor(folderId, 2000L);
+            try {
+                fo.setPermissionsAsArray(null == permissions ? FolderObject.getFolderPermissions(folderId, ctx, readCon) : permissions);
+            } catch (final DBPoolingException e) {
+                throw new SearchIteratorException(e);
+            } catch (final SQLException e) {
+                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            }
+        }
+        /*
+         * Determine if folder object should be put into cache or not
+         */
+        if (FolderCacheManager.isInitialized()) {
+            try {
+                FolderCacheManager.getInstance().putIfAbsent(fo, ctx, resideInCache ? getEternalAttributes() : null);
+            } catch (final FolderCacheNotEnabledException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final CacheException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        /*
+         * Return prepared folder object
+         */
+        return fo;
     }
 
     public void close() {
@@ -717,9 +746,11 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             if (next == null) {
                 return retval;
             }
-            retval.add(next);
+            retval.add(prepareFolderObject(next));
             if (prefetchQueue != null) {
-                retval.addAll(prefetchQueue);
+                while (!prefetchQueue.isEmpty()) {
+                    retval.add(prepareFolderObject(prefetchQueue.poll()));
+                }
                 return retval;
             }
             while (rs.next()) {
@@ -728,7 +759,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     fo = createFolderObjectFromSelectedEntry();
                 }
                 if (fo != null) {
-                    retval.offer(fo);
+                    retval.offer(prepareFolderObject(fo));
                 }
             }
             return retval;
@@ -764,6 +795,16 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             } catch (final ServiceException e) {
                 throw new SearchIteratorException(e);
             }
+        }
+
+        public void close() {
+            for (final Iterator<Future<OCLPermission[]>> iterator = permsMap.values().iterator(); iterator.hasNext();) {
+                final Future<OCLPermission[]> f = iterator.next();
+                if (null != f && !f.isDone()) {
+                    f.cancel(false);
+                }
+            }
+            permsMap.clear();
         }
 
         public void submitPermissionsFor(final int folderId) {
