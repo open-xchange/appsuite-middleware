@@ -352,10 +352,11 @@ public final class FolderCacheManager {
      * 
      * @param folderObj The folder object
      * @param ctx The context
+     * @param elemAttribs The element's attributes (<b>optional</b>), pass <code>null</code> to use the default attributes
      * @return The previous folder object available in cache, or <tt>null</tt> if there was none
      * @throws OXException If put-if-absent operation fails
      */
-    public FolderObject putIfAbsent(final FolderObject folderObj, final Context ctx) throws OXException {
+    public FolderObject putIfAbsent(final FolderObject folderObj, final Context ctx, final ElementAttributes elemAttribs) throws OXException {
         if (null == folderCache) {
             throw new FolderCacheNotEnabledException();
         }
@@ -376,10 +377,14 @@ public final class FolderCacheManager {
              * Remove to distribute PUT as REMOVE
              */
             folderCache.remove(cacheKey);
-            /*
-             * Put with default attributes
-             */
-            folderCache.put(cacheKey, folderObj.clone());
+            if (elemAttribs == null) {
+                /*
+                 * Put with default attributes
+                 */
+                folderCache.put(cacheKey, folderObj.clone());
+            } else {
+                folderCache.put(cacheKey, folderObj.clone(), elemAttribs);
+            }
             /*
              * Return null to indicate successful insertion
              */
