@@ -78,6 +78,7 @@ import com.openexchange.caching.ElementAttributes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
@@ -770,13 +771,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             permsMap.put(Integer.valueOf(folderId), executorService.submit(new Callable<OCLPermission[]>() {
 
                 public OCLPermission[] call() throws AbstractOXException {
-                    final Connection readCon = DBPool.pickup(ctx);
+                    final Connection readCon = Database.get(ctx, false);
                     try {
                         return FolderObject.getFolderPermissions(folderId, ctx, readCon);
                     } catch (final SQLException e) {
                         throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
                     } finally {
-                        DBPool.closeReaderSilent(ctx, readCon);
+                        Database.back(ctx, false, readCon);
                     }
                 }
             }));
