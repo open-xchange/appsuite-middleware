@@ -102,7 +102,9 @@ public class Bug15740Test extends AbstractAJAXSession {
     }
 
     public void testBug15740() throws Exception {
-        final RangeRequest request = new RangeRequest(appointment.getEndDate());
+        calendar.setTime(appointment.getEndDate());
+        calendar.add(Calendar.DATE, 1);
+        final RangeRequest request = new RangeRequest(calendar.getTime());
         final RangeResponse response = client.execute(request);
         
         ReminderObject actual = null;
@@ -115,10 +117,13 @@ public class Bug15740Test extends AbstractAJAXSession {
         assertNotNull("No reminder found for created appointment.", actual);
 
         final ReminderObject expected = new ReminderObject();
-        expected.setObjectId(actual.getObjectId());
+        @SuppressWarnings("null")
+        int reminder = actual.getObjectId();
+        expected.setObjectId(reminder);
         expected.setFolder(folderId);
         expected.setTargetId(appointment.getObjectID());
         calendar.setTime(appointment.getStartDate());
+        calendar.add(Calendar.DATE, 1);
         calendar.add(Calendar.MINUTE, -alarmMinutes);
         expected.setDate(calendar.getTime());
         ReminderTest.compareReminder(expected, actual);
@@ -130,6 +135,8 @@ public class Bug15740Test extends AbstractAJAXSession {
         
         //long startDate = System.currentTimeMillis()-86400000;
         calendar.add(Calendar.DAY_OF_MONTH, -1);
+        // Second occurrence must be in the future.
+        calendar.add(Calendar.HOUR, 1);
         Calendar endCal = (Calendar) calendar.clone();
         appointmentObj.setStartDate(calendar.getTime());
         endCal.add(Calendar.HOUR, 1);

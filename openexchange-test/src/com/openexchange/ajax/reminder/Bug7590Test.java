@@ -115,7 +115,9 @@ public class Bug7590Test extends AbstractAJAXSession {
         assertNotNull("No reminder found for created appointment.", actual);
 
         final ReminderObject expected = new ReminderObject();
-        expected.setObjectId(actual.getObjectId());
+        @SuppressWarnings("null")
+        int reminderId = actual.getObjectId();
+        expected.setObjectId(reminderId);
         expected.setFolder(folderId);
         expected.setTargetId(appointment.getObjectID());
         calendar.setTime(appointment.getStartDate());
@@ -128,6 +130,8 @@ public class Bug7590Test extends AbstractAJAXSession {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testBug7590");
 
+        // Start date must be in the future
+        calendar.add(Calendar.HOUR, 1);
         appointmentObj.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR, 1);
         appointmentObj.setEndDate(calendar.getTime());
