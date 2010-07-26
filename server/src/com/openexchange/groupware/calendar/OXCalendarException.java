@@ -283,7 +283,9 @@ public class OXCalendarException extends OXException {
         /**
          * Unable to find a participant for a specified object.
          */
-        COULD_NOT_FIND_PARTICIPANT("Could not find participant for this object.", 103, Category.USER_INPUT);
+        COULD_NOT_FIND_PARTICIPANT("Could not find participant for this object.", 103, Category.USER_INPUT),
+        /** Was not able to calculate next upcoming reminder for series appointment %2$d in context %1$d. */
+        NEXT_REMINDER_FAILED("Was not able to calculate next upcoming reminder for series appointment %2$d in context %1$d.", 104, Category.CODE_ERROR);
 
         /**
          * Message of the exception.

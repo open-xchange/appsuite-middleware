@@ -304,8 +304,6 @@ public interface CalendarCollectionService {
 
     public void purgeExceptionFieldsFromObject(final CalendarDataObject cdao);
 
-    public boolean isInThePast(final java.sql.Date check);
-
     public boolean isInThePast(final java.util.Date check);
 
     /**

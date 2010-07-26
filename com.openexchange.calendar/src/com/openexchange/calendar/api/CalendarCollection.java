@@ -2705,13 +2705,6 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
     
     /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#isInThePast(java.sql.Date)
-     */
-    public boolean isInThePast(final java.sql.Date check) {
-        return checkMillisInThePast(check.getTime());
-    }
-    
-    /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#isInThePast(java.util.Date)
      */
     public boolean isInThePast(final java.util.Date check) {
