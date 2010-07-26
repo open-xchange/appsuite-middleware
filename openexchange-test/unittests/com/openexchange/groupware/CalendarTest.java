@@ -795,7 +795,7 @@ public class CalendarTest extends TestCase {
             
             deleteAllAppointments();
                         
-            SearchIterator<Appointment> si = csql.getModifiedAppointmentsInFolder(public_folder_id, cols, new Date(0), true);
+            SearchIterator<Appointment> si = csql.getModifiedAppointmentsInFolder(public_folder_id, cols, new Date(0));
             boolean found = false;
             while (si.hasNext()) {
                 final Appointment tdao = si.next();
@@ -1188,7 +1188,7 @@ public class CalendarTest extends TestCase {
             final int object_id = cdao.getObjectID();    
             
             final CalendarSql csql2 = new CalendarSql(so2);
-            SearchIterator<Appointment> si = csql2.getModifiedAppointmentsInFolder(shared_folder_id, cols, new Date(0), true);
+            SearchIterator<Appointment> si = csql2.getModifiedAppointmentsInFolder(shared_folder_id, cols, new Date(0));
             boolean found = false;
             while (si.hasNext()) {
                 final Appointment tdao = si.next();
@@ -1815,7 +1815,7 @@ public class CalendarTest extends TestCase {
         
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
         
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()), true);
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()));
         boolean found = false;
         while (si.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si.next();
@@ -1827,7 +1827,7 @@ public class CalendarTest extends TestCase {
         }
         assertTrue("Found our object (userA)", found);        
         
-        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()), true);
+        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()));
         found = false;
         while (si2.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si2.next();
@@ -1853,7 +1853,7 @@ public class CalendarTest extends TestCase {
         csql.updateAppointmentObject(update_with_time_change, fid, testobject.getLastModified());        
         
         
-        si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()), true);
+        si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()));
         found = false;
         while (si.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si.next();
@@ -1865,7 +1865,7 @@ public class CalendarTest extends TestCase {
         }
         assertTrue("Found our object (userA)", found);        
         
-        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()), true);
+        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()));
         found = false;
         while (si2.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si2.next();

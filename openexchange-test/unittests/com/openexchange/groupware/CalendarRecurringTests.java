@@ -722,7 +722,7 @@ public class CalendarRecurringTests extends TestCase {
 
         final int cols[] = new int[] { Appointment.TITLE,  Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS };
 
-        SearchIterator<Appointment> si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
+        SearchIterator<Appointment> si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
 
         boolean found_exception = false;
         while (si.hasNext()) {
@@ -751,7 +751,7 @@ public class CalendarRecurringTests extends TestCase {
         delete_all.setObjectID(object_id);
         csql.deleteAppointmentObject(delete_all, folder_id, new Date());
 
-        si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
+        si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
         while (si.hasNext()) {
             final Appointment tcdao = si.next();
             assertFalse("Object should not exists anymore ", tcdao.getRecurrenceID() == object_id);
@@ -971,7 +971,7 @@ public class CalendarRecurringTests extends TestCase {
 
 
         final int cols[] = new int[] { Appointment.TITLE,  Appointment.START_DATE, Appointment.END_DATE, Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS };
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
 
         boolean found_exception = false;
         while (si.hasNext()) {
@@ -1098,7 +1098,7 @@ public class CalendarRecurringTests extends TestCase {
 
 
         final int cols[] = new int[] { Appointment.TITLE,  Appointment.START_DATE, Appointment.END_DATE, Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS };
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
 
         boolean found_exception = false;
         while (si.hasNext()) {
