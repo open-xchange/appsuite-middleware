@@ -864,6 +864,9 @@ public class AppointmentRequest {
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         try {
             final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
+            if(appointmentobject.getPrivateFlag() && session.getUserId() != appointmentobject.getCreatedBy())
+                anonymize(appointmentobject);
+                
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
 
             final JSONObject jsonResponseObj = new JSONObject();
@@ -1411,5 +1414,21 @@ public class AppointmentRequest {
      */
     private Date applyTimeZone2Date(final long utcTime) {
         return new Date(utcTime - timeZone.getOffset(utcTime));
+    }
+    
+    private void anonymize(Appointment anonymized){
+        //TODO: Solve dependency problem and use AnonymizingIterator#anonymize instead
+        anonymized.setTitle("Private");
+        anonymized.removeAlarm();
+        anonymized.removeCategories();
+        anonymized.removeConfirm();
+        anonymized.removeConfirmMessage();
+        anonymized.removeLabel();
+        anonymized.removeLocation();
+        anonymized.removeNote();
+        anonymized.removeNotification();
+        anonymized.removeParticipants();
+        anonymized.removeShownAs();
+        anonymized.removeUsers();
     }
 }
