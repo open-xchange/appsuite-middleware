@@ -92,11 +92,11 @@ public class CabUtilTest extends CabUtil {
         Assert.assertTrue("Date value should be 0x6C71 but is " + Integer.toHexString(littleEndian), (short)0x6C71 == (short)littleEndian);
     }
     
-    @Test
-    public void testFileGeneration() throws FileNotFoundException, IOException, ConfigurationException, TemplateException {
-        final DataOutputStream pw = new DataOutputStream(new FileOutputStream("test.cab"));
-        writeCabFile(pw, MobileConfigServlet.write(null, "ox6-dev.open-xchange.com", "tara", "user.name"));
-        pw.close();
+//    @Test
+//    public void testFileGeneration() throws FileNotFoundException, IOException, ConfigurationException, TemplateException {
+//        final DataOutputStream pw = new DataOutputStream(new FileOutputStream("test.cab"));
+//        writeCabFile(pw, MobileConfigServlet.write(null, "ox6-dev.open-xchange.com", "tara", "user.name"));
+//        pw.close();
         
 //        final BufferedInputStream bis1 = new BufferedInputStream(new FileInputStream("test.cab"));
 //        final BufferedInputStream bis2 = new BufferedInputStream(new FileInputStream("testdata/test.cab"));
@@ -112,5 +112,5 @@ public class CabUtilTest extends CabUtil {
 //        if (-1 != bis2.read(bytes2)) {
 //            Assert.fail("Second stream is longer than the first one");
 //        }
-    }
+//    }
 }
