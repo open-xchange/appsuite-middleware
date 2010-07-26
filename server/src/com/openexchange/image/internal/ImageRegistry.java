@@ -131,7 +131,7 @@ public final class ImageRegistry {
          */
         final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
         if (null != timer) {
-            tasks = new ScheduledTimerTask[2];
+            tasks = new ScheduledTimerTask[1];
             tasks[0] = timer.scheduleWithFixedDelay(new SessionBoundImagesCleaner(sessionBoundImagesMap, sessionIDMap), INITIAL_DELAY, DELAY);
         }
     }

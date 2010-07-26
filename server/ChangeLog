@@ -1,3 +1,7 @@
+* 2010-07-26 - francisco.laguna@open-xchange.com
+
+ - Bugfix #16553: Correct timer arrays length to avoid NPE.
+
 * 2010-07-22 - francisco.laguna@open-xchange.com
 
  - Bugfix #16547: Get rid of context based methods in ImageService (and underlying implementation), bind session to image uids
