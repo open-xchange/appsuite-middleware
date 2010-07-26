@@ -168,7 +168,7 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (bModified || bDeleted) {
             try {
-                it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, lastsync, false);
+                it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, lastsync);
                 final Queue<Appointment> modifiedQueue = new LinkedList<Appointment>();
                 while (it.hasNext()) {
                     /*
@@ -236,7 +236,7 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (bList) {
             try {
-                it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, new Date(0), true);
+                it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, new Date(0));
                 writeList(it, xo, os);
             } finally {
                 if (it != null) {

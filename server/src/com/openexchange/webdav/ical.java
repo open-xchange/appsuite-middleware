@@ -212,7 +212,7 @@ public final class ical extends PermissionServlet {
             SearchIterator<Appointment> iter = null;
             try {
                 final TIntObjectHashMap<SeriesUIDPatcher> patchers = new TIntObjectHashMap<SeriesUIDPatcher>();
-                iter = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0), true);
+                iter = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0));
                 while (iter.hasNext()) {
                     final Appointment appointment = iter.next();
                     if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {

@@ -268,7 +268,7 @@ public class ICalExporter implements Exporter {
                 
                 final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessObj);
                 CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-                final SearchIterator<Appointment> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
+                final SearchIterator<Appointment> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
                 final List<Appointment> appointments = new LinkedList<Appointment>();
                 try {
                     while (searchIterator.hasNext()) {
