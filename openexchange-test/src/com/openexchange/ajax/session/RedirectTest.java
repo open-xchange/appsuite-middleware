@@ -89,17 +89,26 @@ public class RedirectTest extends AbstractAJAXSession {
     public void testRedirect() throws Throwable {
         final AJAXSession session = new AJAXSession();
         final AJAXClient myClient = new AJAXClient(session);
-        // Create session.
-        LoginResponse lResponse = myClient.execute(new LoginRequest(login, password, LoginTools.generateAuthId(), RedirectTest.class.getName(), "6.15.0"));
-
-        // Remove cookies and that stuff.
-        session.getConversation().clearContents();
-        session.getConversation().getClientProperties().setAutoRedirect(false);
-        // Test redirect
-        final RedirectResponse rResponse = myClient.execute(new RedirectRequest(lResponse.getJvmRoute(), lResponse.getRandom()));
-        assertNotNull("Redirect location is missing.", rResponse.getLocation());
-        session.getConversation().getClientProperties().setAutoRedirect(true);
-        // To get logout with tearDown() working.
-        session.setId(lResponse.getSessionId());
+        try {
+            // Create session.
+            LoginResponse lResponse = myClient.execute(new LoginRequest(
+                login,
+                password,
+                LoginTools.generateAuthId(),
+                RedirectTest.class.getName(),
+                "6.17.0"));
+    
+            // Remove cookies and that stuff.
+            session.getConversation().clearContents();
+            session.getConversation().getClientProperties().setAutoRedirect(false);
+            // Test redirect
+            final RedirectResponse rResponse = myClient.execute(new RedirectRequest(lResponse.getJvmRoute(), lResponse.getRandom()));
+            assertNotNull("Redirect location is missing.", rResponse.getLocation());
+            session.getConversation().getClientProperties().setAutoRedirect(true);
+            // To get logout with tearDown() working.
+            session.setId(lResponse.getSessionId());
+        } finally {
+            myClient.logout();
+        }
     }
 }
