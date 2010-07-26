@@ -380,7 +380,7 @@ public class Login extends AJAXServlet {
 
     private boolean isAutologinEnabled() {
         ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        return configurationService.getBoolProperty("com.openexchange.sessiond.autologin", true);
+        return configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false);
     }
 
     private void logAndSendException(final HttpServletResponse resp, final AbstractOXException e) throws IOException {
@@ -417,7 +417,7 @@ public class Login extends AJAXServlet {
     private static void configureCookie(Cookie cookie, boolean secure) {
         cookie.setPath("/");
         ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        boolean autologin = configurationService.getBoolProperty("com.openexchange.sessiond.autologin", true);
+        boolean autologin = configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false);
         if (!autologin) {
             return;
         }
