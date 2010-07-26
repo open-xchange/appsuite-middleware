@@ -58,6 +58,11 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
 
+/**
+ * 
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * 
+ */
 public class ActionServiceListener implements ServiceTrackerCustomizer {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ActionServiceListener.class);

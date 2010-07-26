@@ -57,9 +57,10 @@ import com.openexchange.mobile.configuration.json.action.ActionTypes;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
-* {@link MobilityProvisioningServiceRegistry} - A registry for services 
-* 
-*/
+ * 
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * 
+ */
 public final class MobilityProvisioningServiceRegistry extends ServiceRegistry {
 	
 	private final static MobilityProvisioningServiceRegistry instance = new MobilityProvisioningServiceRegistry();

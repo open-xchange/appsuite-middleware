@@ -49,7 +49,6 @@
 
 package com.openexchange.mobile.configuration.json.container;
 
-
 /**
  * 
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>

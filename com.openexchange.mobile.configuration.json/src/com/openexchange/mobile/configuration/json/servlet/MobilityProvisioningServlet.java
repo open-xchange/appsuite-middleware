@@ -86,9 +86,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MobilityProvisioningServlet extends PermissionServlet {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 8555223354984992000L;
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
