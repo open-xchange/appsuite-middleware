@@ -51,13 +51,7 @@ package com.openexchange.ajax;
 
 import static com.openexchange.login.Interface.HTTP_JSON;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TimerTask;
 import java.util.UUID;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -75,7 +69,6 @@ import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigTools;
@@ -97,8 +90,6 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.exception.SessiondException;
-import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -125,8 +116,6 @@ public class Login extends AJAXServlet {
 
     private static final Log LOG = LogFactory.getLog(Login.class);
 
-    private boolean checkIP;
-
     private String uiWebPath;
 
     public Login() {
@@ -136,12 +125,6 @@ public class Login extends AJAXServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        String value = config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName());
-        if (null == value || value.trim().length() == 0) {
-            checkIP = true;
-        } else {
-            checkIP = Boolean.parseBoolean(value.trim());
-        }
         uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
     }
 
@@ -231,7 +214,6 @@ public class Login extends AJAXServlet {
                 return;
             }
             writeSecretCookie(resp, session, req.isSecure());
-            writeSessionCookie(resp, session, req.isSecure()); // FIXME
 
             String usedUIWebPath = req.getParameter(PARAM_UI_WEB_PATH);
             if (null == usedUIWebPath) {
