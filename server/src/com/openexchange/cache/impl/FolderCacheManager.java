@@ -363,9 +363,9 @@ public final class FolderCacheManager {
         if (!folderObj.containsObjectID()) {
             throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
         }
+        final CacheKey cacheKey = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
         cacheLock.lock();
         try {
-            final CacheKey cacheKey = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
             final FolderObject retval = (FolderObject) folderCache.get(cacheKey);
             if (null != retval) {
                 /*
