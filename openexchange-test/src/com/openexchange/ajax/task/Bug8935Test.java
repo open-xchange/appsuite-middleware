@@ -102,7 +102,7 @@ public class Bug8935Test extends AbstractTaskTest {
             new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
-        TaskTools.delete(client, new DeleteRequest(reload));
+        client.execute(new DeleteRequest(reload));
     }
 
     public void testRealNull() throws Throwable {
@@ -114,7 +114,7 @@ public class Bug8935Test extends AbstractTaskTest {
             new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
-        TaskTools.delete(client, new DeleteRequest(reload));
+        client.execute(new DeleteRequest(reload));
     }
 
     private class SpecialInsertRequest extends InsertRequest {
@@ -146,6 +146,6 @@ public class Bug8935Test extends AbstractTaskTest {
             new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
-        TaskTools.delete(client, new DeleteRequest(reload));
+        client.execute(new DeleteRequest(reload));
     }
 }

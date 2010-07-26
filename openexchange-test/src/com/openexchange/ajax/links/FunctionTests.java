@@ -194,10 +194,8 @@ public final class FunctionTests extends AbstractAJAXSession {
             assertTrue("Too few links found.", links.length >= 1);
             LinkTools.delete(client, new DeleteRequest(link));
         } finally {
-            TaskTools.delete(client, new com.openexchange.ajax.task.actions
-                .DeleteRequest(task));
-            Executor.execute(client, new com.openexchange.ajax.contact.action
-                .DeleteRequest(contact));
+            client.execute(new com.openexchange.ajax.task.actions.DeleteRequest(task));
+            client.execute(new com.openexchange.ajax.contact.action.DeleteRequest(contact));
         }
     }
 }

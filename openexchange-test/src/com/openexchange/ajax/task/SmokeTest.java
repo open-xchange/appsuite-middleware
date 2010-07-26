@@ -116,6 +116,6 @@ public class SmokeTest extends AbstractTaskTest {
         assertTrue("All request on folder does not found created object.",
             foundObject);
         // TODO Use list an check if list contains the entered attributes.
-        TaskTools.delete(client, new DeleteRequest(reload));
+        client.execute(new DeleteRequest(reload));
     }
 }

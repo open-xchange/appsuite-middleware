@@ -112,7 +112,7 @@ public final class Bug11619Test extends AbstractTaskTest {
             final GetRequest request = new GetRequest(insertR);
             final GetResponse response = client.execute(request);
             task = response.getTask(tz);
-            TaskTools.delete(client, new DeleteRequest(task));
+            client.execute(new DeleteRequest(task));
         }
     }
 }

@@ -122,7 +122,7 @@ public final class Bug11195Test extends AbstractTaskTest {
             }
         } finally {
             if (null != task.getLastModified()) {
-                TaskTools.delete(client, new DeleteRequest(task));
+                client.execute(new DeleteRequest(task));
             }
             if (null != moveTo.getLastModified()) {
                 client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, moveTo.getObjectID(), moveTo.getLastModified()));

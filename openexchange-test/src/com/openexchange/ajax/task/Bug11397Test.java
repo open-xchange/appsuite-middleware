@@ -98,7 +98,7 @@ public final class Bug11397Test extends AbstractTaskTest {
             final JSONObject partJSON = partArray.getJSONObject(0);
             assertFalse("External participant contains identifier.", partJSON.has(ParticipantsFields.ID));
         } finally {
-            TaskTools.delete(client, new DeleteRequest(insertR));
+            client.execute(new DeleteRequest(insertR));
         }
     }
 }

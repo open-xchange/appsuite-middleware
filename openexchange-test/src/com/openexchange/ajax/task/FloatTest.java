@@ -92,6 +92,6 @@ public class FloatTest extends AbstractTaskTest {
         assertEquals("Target costs differs.", Float.valueOf(task.getTargetCosts()),
             Float.valueOf(reload.getTargetCosts()));
 
-        TaskTools.delete(getClient(), new DeleteRequest(reload));
+        getClient().execute(new DeleteRequest(reload));
     }
 }

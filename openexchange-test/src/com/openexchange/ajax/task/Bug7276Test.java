@@ -142,6 +142,6 @@ public class Bug7276Test extends AbstractTaskTest {
             assertEquals("Wrong exception message.", code.getNumber(), exc.getDetailNumber());
         }
         // Clean up
-        TaskTools.delete(client1, new DeleteRequest(task));
+        client1.execute(new DeleteRequest(task));
     }
 }

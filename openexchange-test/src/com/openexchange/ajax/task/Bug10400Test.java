@@ -107,8 +107,7 @@ public class Bug10400Test extends AbstractTaskTest {
             assertFalse("Berta was not able to remove herself and add Anton as "
                 + "task participant.", update.hasError());
         } finally {
-            TaskTools.delete(anton, new DeleteRequest(antonFID, task
-                .getObjectID(), task.getLastModified()));
+            anton.execute(new DeleteRequest(antonFID, task.getObjectID(), task.getLastModified()));
         }
     }
 
@@ -143,8 +142,7 @@ public class Bug10400Test extends AbstractTaskTest {
             assertFalse("Task disappeared due to deleted folder mapping.",
                 get.hasError());
         } finally {
-            TaskTools.delete(anton, new DeleteRequest(antonFID, task
-                .getObjectID(), task.getLastModified()));
+            anton.execute(new DeleteRequest(antonFID, task.getObjectID(), task.getLastModified()));
         }
     }
 
@@ -170,8 +168,7 @@ public class Bug10400Test extends AbstractTaskTest {
             assertFalse("Berta was not able to remove herself.",
                 update.hasError());
         } finally {
-            TaskTools.delete(anton, new DeleteRequest(antonFID, task
-                .getObjectID(), task.getLastModified()));
+            anton.execute(new DeleteRequest(antonFID, task.getObjectID(), task.getLastModified()));
         }
     }
 }

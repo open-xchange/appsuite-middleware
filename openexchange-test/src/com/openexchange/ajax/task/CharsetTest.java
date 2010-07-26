@@ -58,14 +58,11 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ * Verifies that the charset handling is correct. 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CharsetTest extends AbstractTaskTest {
 
-    /**
-     * @param name
-     */
     public CharsetTest(final String name) {
         super(name);
     }
@@ -75,23 +72,22 @@ public class CharsetTest extends AbstractTaskTest {
      * @throws Throwable if an error occurs.
      */
     public void testCharset() throws Throwable {
-        final AJAXClient client = getClient();
-        final Task task = new Task();
+        AJAXClient client = getClient();
+        Task task = new Task();
         task.setTitle("\u00E4\u00F6\u00FC\u00DF\u00C4\u00D6\u00DC");
         task.setNote("\uC11C\uC601\uC9C4");
-        final int folderId = getPrivateFolder();
+        int folderId = getPrivateFolder();
 
         task.setParentFolderID(folderId);
-        final InsertResponse insertR = client.execute(new InsertRequest(task, getTimeZone()));
+        InsertResponse insertR = client.execute(new InsertRequest(task, getTimeZone()));
 
-        final GetResponse getR = TaskTools.get(client, new GetRequest(
-            insertR));
-        final Task reload = getR.getTask(getTimeZone());
+        GetResponse getR = client.execute(new GetRequest(insertR));
+        Task reload = getR.getTask(getTimeZone());
         try {
             assertEquals("Title differs.", task.getTitle(), reload.getTitle());
             assertEquals("Description differs.", task.getNote(), reload.getNote());
         } finally {
-            TaskTools.delete(client, new DeleteRequest(reload));
+            client.execute(new DeleteRequest(reload));
         }
     }
 }

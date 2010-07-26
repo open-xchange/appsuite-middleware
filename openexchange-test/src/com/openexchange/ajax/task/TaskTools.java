@@ -74,7 +74,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
@@ -84,7 +83,6 @@ import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.ajax.task.actions.SearchRequest;
 import com.openexchange.ajax.task.actions.SearchResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
@@ -219,7 +217,11 @@ public final class TaskTools extends Assert {
         return response;
     }
 
-    public static GetResponse get(final AJAXClient client, final GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
+    /**
+     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}.
+     */
+    @Deprecated
+    public static GetResponse get(AJAXClient client, GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
         return client.execute(request);
     }
 
@@ -242,25 +244,19 @@ public final class TaskTools extends Assert {
         final DeleteRequest request = new DeleteRequest(folder, task,
             lastUpdate);
         try {
-            TaskTools.delete(client, request);
+            client.execute(request);
         } catch (final AjaxException e) {
             throw new JSONException(e);
         }
     }
 
-    public static CommonDeleteResponse delete(final AJAXClient client,
-        final DeleteRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(client, request);
-    }
-
     public static CommonDeleteResponse delete(final WebConversation conversation, 
-		final String hostName, final String sessionId, final String protocol, 
+        final String hostName, final String sessionId, final String protocol, 
         final DeleteRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-    	return Executor.execute(new AJAXSession(conversation, 
-    		sessionId), request, protocol, hostName);
-	}
+        return Executor.execute(new AJAXSession(conversation, 
+            sessionId), request, protocol, hostName);
+    }
     
     /**
      * @deprecated use {@link #all(AJAXSession, AllRequest)}.
@@ -305,12 +301,12 @@ public final class TaskTools extends Assert {
     }
 
     public static CommonAllResponse all(final WebConversation conversation, 
-		final String hostName, final String sessionId, final String protocol, 
+        final String hostName, final String sessionId, final String protocol, 
         final AllRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-    	return Executor.execute(new AJAXSession(conversation, 
-    		sessionId), request, protocol, hostName);
-	}
+        return Executor.execute(new AJAXSession(conversation, 
+            sessionId), request, protocol, hostName);
+    }
 
     public static void confirmTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,

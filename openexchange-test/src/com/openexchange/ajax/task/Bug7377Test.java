@@ -134,8 +134,7 @@ public class Bug7377Test extends AbstractTaskTest {
         } finally {
             final Date lastModified = task.containsLastModified() ? task
                 .getLastModified() : new Date();
-            TaskTools.delete(client1, new DeleteRequest(folderId, task
-                .getObjectID(), lastModified));
+            client1.execute(new DeleteRequest(folderId, task.getObjectID(), lastModified));
         }
     }
 
@@ -222,7 +221,7 @@ public class Bug7377Test extends AbstractTaskTest {
         }
         } finally {
             if (null != task.getLastModified()) {
-                TaskTools.delete(client1, new DeleteRequest(task));
+                client1.execute(new DeleteRequest(task));
             }
             if (null != folder) {
                 client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));

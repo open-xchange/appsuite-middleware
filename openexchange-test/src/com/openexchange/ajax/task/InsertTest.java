@@ -89,7 +89,7 @@ public class InsertTest extends AbstractTaskTest {
         final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);
-        TaskTools.delete(client, new DeleteRequest(reload));
+        client.execute(new DeleteRequest(reload));
     }
 
     /**

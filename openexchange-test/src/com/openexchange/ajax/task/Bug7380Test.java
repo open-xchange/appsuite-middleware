@@ -102,6 +102,6 @@ public class Bug7380Test extends AbstractTaskTest {
         final UpdateResponse uResponse = TaskTools.update(client,
             new UpdateRequest(task, client.getValues().getTimeZone()));
         task.setLastModified(uResponse.getTimestamp());
-        TaskTools.delete(client, new DeleteRequest(task));
+        client.execute(new DeleteRequest(task));
     }
 }
