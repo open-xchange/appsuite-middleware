@@ -661,7 +661,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         /*
          * Determine if folder object should be put into cache or not
          */
-        if (FolderCacheManager.isInitialized()) {
+        if (FolderCacheManager.isInitialized() && resideInCache) {
             try {
                 FolderCacheManager.getInstance().putIfAbsent(fo, ctx, resideInCache ? getEternalAttributes() : null);
             } catch (final FolderCacheNotEnabledException e) {
@@ -808,34 +808,20 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void submitPermissionsFor(final int folderId) {
-            final Context ctx = this.ctx;
+            final Context myCtx = this.ctx;
             permsMap.put(Integer.valueOf(folderId), executorService.submit(new Callable<OCLPermission[]>() {
 
                 public OCLPermission[] call() throws AbstractOXException {
-                    final Connection readCon = Database.get(ctx, false);
+                    final Connection readCon = Database.get(myCtx, false);
                     try {
-                        return FolderObject.getFolderPermissions(folderId, ctx, readCon);
+                        return FolderObject.getFolderPermissions(folderId, myCtx, readCon);
                     } catch (final SQLException e) {
                         throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
                     } finally {
-                        Database.back(ctx, false, readCon);
+                        Database.back(myCtx, false, readCon);
                     }
                 }
             }));
-        }
-
-        public OCLPermission[] getPermissionsFor(final int folderId) throws SearchIteratorException {
-            final Future<OCLPermission[]> f = permsMap.get(Integer.valueOf(folderId));
-            if (null == f) {
-                return null;
-            }
-            try {
-                return f.get();
-            } catch (final InterruptedException e) {
-                throw new SearchIteratorException(Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
-            } catch (final ExecutionException e) {
-                throw new SearchIteratorException(ThreadPools.launderThrowable(e, AbstractOXException.class));
-            }
         }
 
         public OCLPermission[] pollPermissionsFor(final int folderId, final long timeoutMsec) throws SearchIteratorException {
@@ -858,5 +844,4 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
     } // End of PermissionLoader
-
 }

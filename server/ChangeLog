@@ -1,3 +1,8 @@
+* 2010-07-26 - marcus.klein@open-xchange.com
+
+ - Bugfix #16558: Fixed a NullPointerException in FolderCacheManager when putting loaded folders through an FolderObjectIterator into the 
+   cache.
+
 * 2010-07-26 - francisco.laguna@open-xchange.com
 
  - Bugfix #16553: Correct timer arrays length to avoid NPE.
@@ -16,15 +21,19 @@
 
 * 2010-07-21 - francisco.laguna@open-xchange.com
 
- - Bugfix #16507: Ignore timezones when writing notification mails about appointments lasting the whole day. Artificially move the end date of an appointment to the previous day, if it is a whole day appointment. 
+ - Bugfix #16507: Ignore timezones when writing notification mails about appointments lasting the whole day. Artificially move the end date
+   of an appointment to the previous day, if it is a whole day appointment. 
  
 * 2010-07-21 - tobias.prinz@open-xchange.com
 
- - US1601 - serverside: ALL and LIST requests for appointments now have a new parameter called "showPrivate" (default: false). If it is set to true, private appointments in shared folders are also returned, but only as anonymized appointments (lacking all information except start and end date).  
+ - US1601 - serverside: ALL and LIST requests for appointments now have a new parameter called "showPrivate" (default: false). If it is set
+   to true, private appointments in shared folders are also returned, but only as anonymized appointments (lacking all information except
+   start and end date).  
 
 * 2010-07-21 - steffen.templin@open-xchange.com
 
- - Bugfix #16492: Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now for insert appointments.
+ - Bugfix #16492: Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now for insert
+   appointments.
 
 * 2010-07-21 - choeger@open-xchange.com
 
@@ -69,7 +78,8 @@
 
 * 2010-07-14 - tobias.prinz@open-xchange.com
 
- - Bugfix #16107: Changing a series that stretches more than one week/month/year from "full time" to normal does not break the view in the second week/month/year
+ - Bugfix #16107: Changing a series that stretches more than one week/month/year from "full time" to normal does not break the view in the
+   second week/month/year
  
 * 2010-07-14 - marcus.klein@open-xchange.com
 
@@ -81,7 +91,8 @@
 
 * 2010-07-13 - steffen.templin@open-xchange.com
 
- - Bugfix #16089: Confirmation status of automatically added UserParticipant in public appointments without participants is set to user settings default.
+ - Bugfix #16089: Confirmation status of automatically added UserParticipant in public appointments without participants is set to user
+   settings default.
 
 * 2010-07-13 - thorben.betten@open-xchange.com
 
@@ -185,7 +196,8 @@
 
 * 2010-06-22 - tobias.prinz@open-xchange.com
 
- - US4303: IMiP invitations to primary mail addresses of an of user now work again. They failed since 06-22 in case they were sorted before alias e-mail addresses on the server side.
+ - US4303: IMiP invitations to primary mail addresses of an of user now work again. They failed since 06-22 in case they were sorted before
+   alias e-mail addresses on the server side.
 
 * 2010-06-22 - thorben.betten@open-xchange.com
 
@@ -361,7 +373,8 @@
 
 * 2010-05-21 - steffen.templin@open-xchange.com
 
-- Bugfix #13173: If you switch several times between done and undone of a recurring task no duplicates for the next occurrence will be created.
+- Bugfix #13173: If you switch several times between done and undone of a recurring task no duplicates for the next occurrence will be
+  created.
 
 * 2010-05-20 - marcus.klein@open-xchange.com
 
@@ -554,7 +567,8 @@
 
 * 2010-03-24 - tobias.prinz@open-xchange.com
 
- - RFC 2447: IMIP behaviour: Party crashers (people not invited, e.g. responding from another e-mail address) can now be accepted as participants by the organizer of the event  
+ - RFC 2447: IMIP behaviour: Party crashers (people not invited, e.g. responding from another e-mail address) can now be accepted as
+   participants by the organizer of the event  
 
 * 2010-03-24 - thorben.betten@open-xchange.com
 
@@ -613,7 +627,8 @@
 
 * 2010-03-03 - tobias.prinz@open-xchange.com
 
- - Related to bug #15231: Outlook imports for different languages can now be easily extended by creating .properties files with mapping for them. 
+ - Related to bug #15231: Outlook imports for different languages can now be easily extended by creating .properties files with mapping for
+   them. 
 
 * 2010-03-03 - thorben.betten@open-xchange.com
 
@@ -1182,7 +1197,8 @@
 
 * 2009-09-02 - tobias.prinz@open-xchange.com
 
- - Bugfix #14350: Removed special handling of empty cells in parser, these are now treated as null. That made it possible to remove workaround for bug 7248, too.
+ - Bugfix #14350: Removed special handling of empty cells in parser, these are now treated as null. That made it possible to remove
+   workaround for bug 7248, too.
  - Bugfix #14349: VCard 3.0 allows for a list of nicknames. That led to the brackets around the nickname.
  
 * 2009-09-01 - marcus.klein@open-xchange.com
@@ -1374,7 +1390,8 @@
 * 2009-07-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #14134: WebDAV Infostore disregards uploadfilesizelimitperfile.
- - Bugfix #14107: Clients may specify the ID of the task to confirm in either the request body or the parameters. If both are sent, body wins.
+ - Bugfix #14107: Clients may specify the ID of the task to confirm in either the request body or the parameters. If both are sent, body
+   wins.
  - Bugfix #14134: Infostore and Object Attachments disregard user specific file upload quotas.
  
 * 2009-07-09 - martin.herfurth@open-xchange.com
@@ -1488,7 +1505,8 @@
 
 * 2009-06-25 - francisco.laguna@open-xchange.com
 
- - Bugfix #12380: When during iCal import a series master is found to be outside the recurrence, create an additional appointment at the masters date.
+ - Bugfix #12380: When during iCal import a series master is found to be outside the recurrence, create an additional appointment at the
+   masters date.
  - Bugfix #13963: Default to editors language in notification mails for resource admins.
 
 * 2009-06-25 - martin.herfurth@open-xchange.com
