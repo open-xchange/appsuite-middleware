@@ -210,17 +210,13 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 												
 			    		provisioningResponse = service.handleAction(provisioningInformation);
 			    	} catch (ActionException e) {
-						// TODO Auto-generated catch block
-			    		e.printStackTrace();
+			    		LOG.error(e.getLocalizedMessage(), e);
 			    	} catch (ContextException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+			    		LOG.error(e.getLocalizedMessage(), e);
 					} catch (LdapException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LOG.error(e.getLocalizedMessage(), e);
 					} catch (ServiceException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LOG.error(e.getLocalizedMessage(), e);
 					}
 			    } else {
 			    	provisioningResponse = new ProvisioningResponse(false, "Service " + action + " provisioning is not available.");
