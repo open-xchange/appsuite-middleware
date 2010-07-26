@@ -14,6 +14,8 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -37,19 +39,29 @@ import com.openexchange.tools.servlet.http.Tools;
 public class MobileConfigServlet extends HttpServlet {
 
     
+    private static final String PARAMETER_MAIL = "m";
+
+    private static final String PARAMETER_LOGIN = "l";
+
     private enum Device {
         iPhone,
         winMob;
     }
 
-    private static class ErrorMessage {
+    private static enum ErrorMessage {
+        MSG_INTERNAL_ERROR("Ein interner Fehler ist aufgetreten, bitte versuchen Sie es später noch einmal.", "An internal error occurred. Please try again later."),
+        MSG_NO_SUPPORTED_DEVICE_FOUND("Ihr Gerät wird nicht unterstützt", "Your device is not supported."),
+        MSG_PARAMETER_LOGIN_IS_MISSING("Der Parameter \"l\" fehlt", "The \"l\" parameter is missing"),
+        MSG_UNSECURE_ACCESS("Unsicherer Zugriff mit http ist nicht erlaubt. Bitte https benutzen.", "Unsecured http access is not allowed. Use https instead."),
+        MSG_INVALID_ERROR_PARAMETER("Der übergebene \"error\"-Parameter ist ungültig.", "Invalid \"error\" parameter.");
         
         private final String english;
         
         private final String german;
+        
+        private static Map<Integer, ErrorMessage> members = new ConcurrentHashMap<Integer, ErrorMessage>();
 
-        public ErrorMessage(String german, String english) {
-            super();
+        private ErrorMessage(final String german, final String english) {
             this.german = german;
             this.english = english;
         }
@@ -64,18 +76,19 @@ public class MobileConfigServlet extends HttpServlet {
             return german;
         }
         
+        static {
+            for (final ErrorMessage errmsg : ErrorMessage.values()) {
+                members.put(errmsg.ordinal(), errmsg);
+            }
+        }
+        
+        public static ErrorMessage getErrorMessageByNumber(int value) {
+            return members.get(Integer.valueOf(value));
+        }
         
     }
 
     private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
-
-    private static final ErrorMessage MSG_INTERNAL_ERROR = new ErrorMessage("Ein interner Fehler ist aufgetreten, bitte versuchen Sie es später noch einmal.", "An internal error occurred. Please try again later.");
-
-    private static final ErrorMessage MSG_NO_SUPPORTED_DEVICE_FOUND = new ErrorMessage("Ihr Gerät wird nicht unterstützt", "Your device is not supported.");
-
-    private static final ErrorMessage MSG_PARAMETER_LOGIN_IS_MISSING = new ErrorMessage("Der Parameter \"l\" fehlt", "The \"l\" parameter is missing");
-    
-    private static final ErrorMessage MSG_UNSECURE_ACCESS = new ErrorMessage("Unsicherer Zugriff mit http ist nicht erlaubt. Bitte https benutzen.", "Unsecured http access is not allowed. Use https instead.");
 
     /**
      * 
@@ -136,7 +149,7 @@ public class MobileConfigServlet extends HttpServlet {
         final ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (null == service) {
             LOG.error("A configuration exception occurred, which should not happen: No configuration service found");
-            printError(req, resp, MSG_INTERNAL_ERROR);
+            printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
             return;
         }
 
@@ -154,25 +167,25 @@ public class MobileConfigServlet extends HttpServlet {
             final Boolean secureConnect = MobileConfigProperties.getProperty(service, Property.OnlySecureConnect);
             if (secureConnect) {
                 if (!req.isSecure()) {
-                    printError(req, resp, MSG_UNSECURE_ACCESS);
+                    printError(req, resp, ErrorMessage.MSG_UNSECURE_ACCESS);
                     return;
                 }
             }
         } catch (final ConfigurationException e) {
             LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
-            printError(req, resp, MSG_INTERNAL_ERROR);
+            printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
             return;
         }
         
         final Device device = detectDevice(req);
-        final String login = req.getParameter("l");
+        final String login = req.getParameter(PARAMETER_LOGIN);
         if (null == device) {
             if (null == login) {
-                printError(req, resp, MSG_PARAMETER_LOGIN_IS_MISSING);
+                printError(req, resp, ErrorMessage.MSG_PARAMETER_LOGIN_IS_MISSING);
                 return;
             }
             String mailpart = "";
-            final String mail = req.getParameter("m");
+            final String mail = req.getParameter(PARAMETER_MAIL);
             if (null != mail) {
                 mailpart = "&m=" + URLEncoder.encode(mail, "UTF-8");
             }
@@ -188,7 +201,7 @@ public class MobileConfigServlet extends HttpServlet {
                     resp.sendRedirect(Activator.ALIAS + "/ms.cab?l=" + URLEncoder.encode(login,"UTF-8") + mailpart);
                     return;
                 } else {
-                    printError(req, resp, MSG_NO_SUPPORTED_DEVICE_FOUND);
+                    printError(req, resp, ErrorMessage.MSG_NO_SUPPORTED_DEVICE_FOUND);
                     LOG.info("Unsupported device header: \"" + header + "\"");
                     return;
                 }
@@ -198,15 +211,15 @@ public class MobileConfigServlet extends HttpServlet {
                 generateConfig(req, resp, login, device);
             } catch (final ConfigurationException e) {
                 LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
-                printError(req, resp, MSG_INTERNAL_ERROR);
+                printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
             } catch (final TemplateException e) {
                 LOG.error("A template exception occurred, which should not happen: " + e.getMessage(), e);
-                printError(req, resp, MSG_INTERNAL_ERROR);
+                printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
             } catch (final IOException e) {
                 LOG.error("A template exception occurred, which should not happen: " + e.getMessage(), e);
-                printError(req, resp, MSG_INTERNAL_ERROR);
+                printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
             }
         }
@@ -242,6 +255,13 @@ public class MobileConfigServlet extends HttpServlet {
     }
 
     private void errorOutput(final HttpServletRequest req, final HttpServletResponse resp, final String string) {
+        Locale locale = detectLanguage(req);
+        ErrorMessage msg = null;
+        try {
+            msg = ErrorMessage.getErrorMessageByNumber(Integer.parseInt(string));
+        } catch (final NumberFormatException e1) {
+            msg = ErrorMessage.MSG_INVALID_ERROR_PARAMETER;
+        }
         resp.setContentType("text/html; charset=UTF-8");
         PrintWriter writer;
         try {
@@ -250,29 +270,62 @@ public class MobileConfigServlet extends HttpServlet {
             LOG.error("Unable to get output stream to write error message: " + e.getMessage(), e);
             return;
         }
-        writer.println("<html><head>");
-        writer.println("<meta name=\"viewport\" content=\"width=320\" />");
-        writer.println("<meta name=\"mobileoptimized\" content=\"0\" />");
-        writer.println("<title>Error</title>");
-        writer.println("<style type=\"text/css\">");
-        writer.println("table { height: 100%; width:100% }");
-        writer.println("td { text-align:center; vertical-align:middle; }");
-        writer.println("</style>");
-        writer.println("</head>");
-        writer.println("<body>");
-        writer.println("<table>");
-        writer.println("<tr>");
-        writer.println("<td><h1>" + string + "</h1></td>");
-        writer.println("</tr>");
-        writer.println("</table>");
-        writer.println("</body></html>");
-        writer.close();
+        if (ErrorMessage.MSG_PARAMETER_LOGIN_IS_MISSING.equals(msg)) {
+            writer.println("<html><head>");
+            writer.println("<meta name=\"viewport\" content=\"width=320\" />");
+            writer.println("<meta name=\"mobileoptimized\" content=\"0\" />");
+            writer.println("<title>Error</title>");
+            writer.println("<style type=\"text/css\">");
+            writer.println("table { height: 100%; width:100% }");
+            writer.println("td { text-align:center; vertical-align:middle; }");
+            writer.println("</style>");
+            writer.println("</head>");
+            writer.println("<body>");
+            writer.println("<form action=\"" + Activator.ALIAS + "\" method=\"get\" enctype=\"application/x-www-form-urlencoded; charset=UTF-8\" accept-charset=\"UTF-8\">");
+            writer.println("<table>");
+            writer.println("<tr><td>");
+            if (Locale.ENGLISH.equals(locale)) {
+                writer.println("<h1>" + "Enter your username for auto-configuring your device." + "</h1>");
+            } else if (Locale.GERMAN.equals(locale)) {
+                writer.println("<h1>" + "Geben Sie für die automatische Konfiguration Ihres Gerätes Ihren Benutzernamen ein." + "</h1>");
+            }
+            writer.println("<input name=\"" + PARAMETER_LOGIN +"\" type=\"text\" size=\"30\" maxlength=\"30\">");
+            writer.println("<input type=\"submit\" value=\" Absenden \">");
+            writer.println("</td>");
+            writer.println("</tr>");
+            writer.println("</table>");
+            writer.println("</form>");
+            writer.println("</body></html>");
+            writer.close();
+        } else {
+            writer.println("<html><head>");
+            writer.println("<meta name=\"viewport\" content=\"width=320\" />");
+            writer.println("<meta name=\"mobileoptimized\" content=\"0\" />");
+            writer.println("<title>Error</title>");
+            writer.println("<style type=\"text/css\">");
+            writer.println("table { height: 100%; width:100% }");
+            writer.println("td { text-align:center; vertical-align:middle; }");
+            writer.println("</style>");
+            writer.println("</head>");
+            writer.println("<body>");
+            writer.println("<table>");
+            writer.println("<tr>");
+            if (Locale.ENGLISH.equals(locale)) {
+                writer.println("<td><h1>" + String.valueOf(msg.getGerman()) + "</h1></td>");
+            } else if (Locale.GERMAN.equals(locale)) {
+                writer.println("<td><h1>" + String.valueOf(msg.getEnglish()) + "</h1></td>");
+            }
+            writer.println("</tr>");
+            writer.println("</table>");
+            writer.println("</body></html>");
+            writer.close();
+        }
         
     }
 
     private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws IOException, ConfigurationException, TemplateException {
         String mail = login;
-        final String parameter = req.getParameter("m");
+        final String parameter = req.getParameter(PARAMETER_MAIL);
         if (null != parameter) {
             mail = parameter;
         }
@@ -308,12 +361,7 @@ public class MobileConfigServlet extends HttpServlet {
     }
 
     private void printError(HttpServletRequest req, final HttpServletResponse resp, final ErrorMessage string) throws IOException {
-        Locale locale = detectLanguage(req);
-        if (Locale.ENGLISH.equals(locale)) {
-            resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(string.getEnglish(),"UTF-8"));
-        } else if (Locale.GERMAN.equals(locale)) {
-            resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(string.getGerman(),"UTF-8"));
-        }
+        resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(String.valueOf(string.ordinal()),"UTF-8"));
     }
 
     private void writeMobileConfig(final PrintWriter printWriter, OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, TemplateException, ConfigurationException {
