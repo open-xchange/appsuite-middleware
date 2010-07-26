@@ -65,12 +65,17 @@ public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> 
     private int[] columns;
     private Date timestamp;
     private boolean recurrenceMaster;
+    private boolean showPrivates;
 
     public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
+        this(folderId,columns,timestamp,recurrenceMaster,false);
+    }
+    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates) {
         this.folderId = folderId;
         this.columns = columns;
         this.timestamp = timestamp;
         this.recurrenceMaster = recurrenceMaster;
+        this.showPrivates = showPrivates;
     }
     
     public Object getBody() {
@@ -89,6 +94,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> 
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, timestamp));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "deleted"));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER, recurrenceMaster));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
