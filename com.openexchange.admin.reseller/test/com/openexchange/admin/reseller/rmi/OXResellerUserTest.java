@@ -238,6 +238,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         access.setVcard(true);
         access.setWebdav(true);
         access.setWebdavXml(true);
+        access.setGlobalAddressBookDisabled(false);
         
         createUser(ctx, access, ctxadmcreds);
         createUser(ctx, access, ctxadmcreds);

@@ -147,6 +147,7 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         oxadmin.setGiven_name("oxadmin");
         oxadmin.setSur_name("oxadmin");
         oxadmin.setPrimaryEmail("oxadmin@example.com");
+        oxadmin.setEmail1("oxadmin@example.com");
         oxadmin.setPassword("secret");
         return oxadmin;
     }
