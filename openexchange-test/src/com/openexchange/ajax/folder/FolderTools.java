@@ -92,10 +92,7 @@ public final class FolderTools {
         return Executor.execute(client, request);
     }
 
-    public static List<FolderObject> getSubFolders(final AJAXClient client,
-        final String parent, final boolean ignoreMailFolder)
-        throws AjaxException, IOException, SAXException, JSONException,
-        OXException {
+    public static List<FolderObject> getSubFolders(AJAXClient client, String parent, boolean ignoreMailFolder) throws AjaxException, IOException, SAXException, JSONException, OXException {
         final ListRequest request = new ListRequest(API.OX_OLD, parent, ignoreMailFolder);
         final ListResponse response = client.execute(request);
         final List<FolderObject> retval = new ArrayList<FolderObject>();
