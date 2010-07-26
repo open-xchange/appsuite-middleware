@@ -571,21 +571,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             DBPool.push(ctx, readCon);
             readCon = null;
         }
-        /*
-         * Close other stuff
-         */
-        if (null != prefetchQueue) {
-            prefetchQueue.clear();
-        }
-        if (null != folderIds) {
-            folderIds.clear();
-        }
-        if (null != folders) {
-            folders.clear();
-        }
-        if (null != permissionLoader) {
-            permissionLoader.close();
-        }
         if (error != null) {
             throw error;
         }
@@ -687,6 +672,21 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             closeResources();
         } catch (final SearchIteratorException e) {
             LOG.error(e.getMessage(), e);
+        }
+        /*
+         * Close other stuff
+         */
+        if (null != prefetchQueue) {
+            prefetchQueue.clear();
+        }
+        if (null != folderIds) {
+            folderIds.clear();
+        }
+        if (null != folders) {
+            folders.clear();
+        }
+        if (null != permissionLoader) {
+            permissionLoader.close();
         }
         isClosed = true;
     }

@@ -2,6 +2,7 @@
 
  - Bugfix #16558: Fixed a NullPointerException in FolderCacheManager when putting loaded folders through an FolderObjectIterator into the 
    cache.
+ - Bugfix #16561: Fixed a cleared prefetch structure in FolderObjectIterator when it should not be cleared because it is needed afterwards.
 
 * 2010-07-26 - francisco.laguna@open-xchange.com
 
