@@ -56,6 +56,8 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
 import com.openexchange.ajax.appointment.action.UpdatesResponse;
@@ -189,6 +191,20 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         assertTrue("One of the two should be the public one", app1[namePos].equals(publicAppointmentTitle) || app2[namePos].equals(publicAppointmentTitle));
         assertTrue("One should be the _unchanged_ private one", app1[namePos].equals(privateAppointmentTitle) || app2[namePos].equals(privateAppointmentTitle));         
     }
+    
+    
+    public void testShouldNotAllowToGetFullPrivateAppointmentsForNonOwner() throws Exception, Exception, Exception, Exception{ //this is actually a bug that has been around for some time
+        GetResponse response = client2.execute(new GetRequest(privateAppointment));
+        Appointment expected = response.getAppointment(timeZone);
+        assertFalse("Title should be anonymized" , privateAppointmentTitle.equals(expected.getTitle()));        
+    }
+    
+    public void testShouldStillAllowToGetFullPrivateAppointmentsForOwner() throws Exception, Exception, Exception, Exception{ //this is actually a bug that has been around for some time
+        GetResponse response = client1.execute(new GetRequest(privateAppointment));
+        Appointment expected = response.getAppointment(timeZone);
+        assertTrue("Title should not be anonymized" , privateAppointmentTitle.equals(expected.getTitle()));
+    }
+
     
     public void testShouldShowRecurrences() throws Exception{
     }
