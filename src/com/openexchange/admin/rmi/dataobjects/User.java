@@ -4609,7 +4609,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      */
     @Override
     public final String[] getMandatoryMembersCreate() {
-        return new String[]{ "name", "display_name", "password", "given_name", "sur_name", "primaryEmail" };
+        return new String[]{ "name", "display_name", "password", "given_name", "sur_name", "primaryEmail", "email1" };
     }
     
     /**
