@@ -79,9 +79,11 @@ fi
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/etc/groupware/settings
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 %dir /opt/open-xchange/etc/groupware
 %dir /opt/open-xchange/bundles
+%config(noreplace) /opt/open-xchange/etc/groupware/settings/open-xchange-mobile-configuration-gui.properties
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/*
