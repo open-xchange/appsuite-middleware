@@ -347,6 +347,10 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final String orderDir) throws OXException, SQLException {
+        return getAllAppointmentsForUser(c, uid, groups, uc, d1, d2, select, readcon, since, orderBy, orderDir, false);
+    }
+
+    public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final String orderDir, final boolean showPrivates) throws OXException, SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
@@ -362,8 +366,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         sb.append(PDM_MEMBER_UID_IS);
         sb.append(uid);
-        // sb.append(" AND pdm.confirm != ");
-        // sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
 
         collection.getVisibleFolderSQLInString(sb, uid, groups, c, uc, readcon);
 

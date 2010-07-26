@@ -231,7 +231,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return includePrivateAppointments;
     }
 
-    public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since, final boolean includePrivateFlag) throws OXException {
+    public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -257,11 +257,13 @@ public class CalendarSql implements AppointmentSQLInterface {
             else if (folderType == FolderObject.PUBLIC) 
                 prep = cimp.getPublicFolderModifiedSinceSQL(ctx, session.getUserId(), user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
             else
-                prep = cimp.getSharedFolderModifiedSinceSQL(ctx, session.getUserId(), shared_folder_owner, user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end, includePrivateFlag);
+                prep = cimp.getSharedFolderModifiedSinceSQL(ctx, session.getUserId(), shared_folder_owner, user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end, !this.includePrivateAppointments);
             rs = cimp.getResultSet(prep);
             co.setRequestedFolder(fid);
             co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
             close_connection = false;
+            if(includePrivateAppointments)
+                return new AppointmentIteratorAdapter(new AnonymizingIterator(co, ctx, session.getUserId()));
             return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
         } catch (final IndexOutOfBoundsException ioobe) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ioobe, I(21));
@@ -292,8 +294,8 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since, final boolean includePrivateFlag) throws OXException {
-        return getModifiedAppointmentsInFolder(fid, null, null, cols, since, includePrivateFlag);
+    public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since) throws OXException {
+        return getModifiedAppointmentsInFolder(fid, null, null, cols, since);
     }
 
     public SearchIterator<Appointment> getDeletedAppointmentsInFolder(final int fid, int cols[], final Date since) throws OXException {

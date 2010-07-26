@@ -323,7 +323,7 @@ public class AppointmentRequest {
         final String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
 
         final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
-
+        final boolean showPrivates = DataParser.parseBoolean(jsonObj, AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS);
         final int folderId = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 
         boolean showAppointmentInAllFolders = false;
@@ -356,6 +356,7 @@ public class AppointmentRequest {
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         SearchIterator<Appointment> it = null;
         Date lastModified = null;
+        appointmentsql.setIncludePrivateAppointments(showPrivates);
         try {
             if (!bIgnoreModified) {
                 if (showAppointmentInAllFolders) {
@@ -369,15 +370,14 @@ public class AppointmentRequest {
                         null);
                 } else {
                     if (start == null || end == null) {
-                        it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp, true);
+                        it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
                     } else {
                         it = appointmentsql.getModifiedAppointmentsInFolder(
                             folderId,
                             start,
                             end,
                             _appointmentFields,
-                            requestedTimestamp,
-                            true);
+                            requestedTimestamp);
                     }
                 }
 
