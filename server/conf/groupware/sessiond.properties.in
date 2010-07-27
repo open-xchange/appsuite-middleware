@@ -58,3 +58,10 @@ com.openexchange.sessiond.certFile:
 
 # Key File
 com.openexchange.sessiond.keyFile:
+
+#Whether autologin is allowed or not
+com.openexchange.sessiond.autologin:false
+
+#Session and secret cookie TTL, relevant only if autologin is enabled as well.
+# Can contain units of measurement: D (=days) W(=weeks) h(=hours).
+com.openexchange.sessiond.cookie.ttl:1W
