@@ -1,3 +1,8 @@
+* 2010-07-27 - marcus.klein@open-xchange.com
+
+ - Bugfix #16166: Updating the last modified timestamp of all users added or removed to a group or being member of a created or deleted
+   group.
+
 * 2010-07-27 - dennis.sieben@open-xchange.com
 
  - Bugfix #16542: Timezone setting available twice in the command line help for createuser and changeuser
