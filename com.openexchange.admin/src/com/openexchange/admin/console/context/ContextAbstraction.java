@@ -52,7 +52,9 @@ package com.openexchange.admin.console.context;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ServiceLoader;
@@ -62,6 +64,8 @@ import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.console.user.UserAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public abstract class ContextAbstraction extends UserAbstraction {   
@@ -70,6 +74,78 @@ public abstract class ContextAbstraction extends UserAbstraction {
         public ArrayList<String> getData(final Context ctx);
     }
 
+    protected static int CONTEXT_INITIAL_CONSTANTS_VALUE = Constants.values().length + AccessCombinations.values().length;
+    
+    protected enum ContextConstants {
+        contextname(CONTEXT_INITIAL_CONSTANTS_VALUE, OPT_NAME_CONTEXT_NAME_LONG, false),
+        quota(CONTEXT_INITIAL_CONSTANTS_VALUE + 1, OPT_QUOTA_LONG, true),
+        lmapping(CONTEXT_INITIAL_CONSTANTS_VALUE + 2, OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG, false);
+        
+        private final static Map<String, ContextConstants> CONSTANT_MAP = new HashMap<String, ContextConstants>(3);
+        
+        static {
+            for (final ContextConstants value : ContextConstants.values()) {
+                CONSTANT_MAP.put(value.getString(), value);
+            }
+        }
+        
+        private final String string;
+        
+        private final int index;
+        
+        private final boolean required;
+        
+        private ContextConstants(final int index, final String string, final boolean required) {
+            this.index = index;
+            this.string = string;
+            this.required = required;
+        }
+
+        public String getString() {
+            return string;
+        }
+
+        
+        public int getIndex() {
+            return index;
+        }
+
+        public boolean isRequired() {
+            return required;
+        }
+
+        public static ContextConstants getConstantFromString(final String string) {
+            return CONSTANT_MAP.get(string);
+        }
+
+    }
+    
+    private final static char OPT_NAME_DATABASE_ID_SHORT = 'd';
+    private final static String OPT_NAME_DATABASE_ID_LONG = "database";
+
+    private final static char OPT_NAME_DBNAME_SHORT = 'n';
+    private final static String OPT_NAME_DBNAME_LONG = "name";
+
+
+    public final static char OPT_CONTEXT_ADD_LOGIN_MAPPINGS_SHORT = 'L';
+    public final static String OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG = "addmapping";
+    
+    public final static char OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_SHORT = 'R';
+    public final static String OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_LONG = "removemapping";
+    static final char OPT_FILESTORE_SHORT = 'f';
+    static final String OPT_FILESTORE_LONG = "filestore";
+    
+    private CLIOption databaseIdOption = null;
+    private CLIOption databaseNameOption = null;
+    
+    protected Integer dbid = null;
+    protected String dbname = null;
+    
+    protected Integer filestoreid = null;
+    
+    protected CLIOption targetFilestoreIDOption = null;
+
+    
     private static final String OPT_NAME_CONTEXT_QUOTA_DESCRIPTION = "Context wide filestore quota in MB.";
     private final static char OPT_QUOTA_SHORT = 'q';
 
@@ -218,6 +294,139 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
     
         doCSVOutput(columns, data);
+    }
+
+    protected void setDatabaseIDOption(final AdminParser parser) {
+        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database.",true, NeededQuadState.eitheror);
+    }
+
+    protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required){
+        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required); 
+    }
+    
+    protected final void displayDisabledMessage(final String id, final Integer ctxid, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, "disabled", parser);
+    }
+
+    protected final void displayEnabledMessage(final String id, final Integer ctxid, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, "enabled", parser);
+    }
+
+    protected final void displayDowngradedMessage(final String id, final Integer ctxid, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, "invisible data deleted", parser);
+    }
+
+    protected final void displayMovedMessage(final String id, final Integer ctxid, final String text, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, text, parser);
+    }
+    
+    /**
+     * The disable, enable and move* command line tools are extended from this class so we can override
+     * this method in order to create proper error messages.
+     */
+    @Override
+    protected void printFirstPartOfErrorText(final String id, final Integer ctxid, final AdminParser parser) {
+        if (getClass().getName().matches("^.*\\.\\w*(?i)enable\\w*$")) {
+            createMessageForStderr(id, ctxid, "could not be enabled: ", parser);
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)disable\\w*$")) {
+            createMessageForStderr(id, ctxid, "could not be disabled: ", parser);
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)move\\wdatabase\\w*$")) {
+            final StringBuilder sb = new StringBuilder(getObjectName());
+            if (null != id) {
+                sb.append(" ");
+                sb.append(id);
+            }
+            if (null != ctxid) {
+                sb.append(" to database ");
+                sb.append(ctxid);
+            }
+            sb.append(" could not be scheduled: ");
+            System.err.println(sb.toString());
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)move\\wfilestore\\w*$")) {
+            final StringBuilder sb = new StringBuilder(getObjectName());
+            if (null != id) {
+                sb.append(" ");
+                sb.append(id);
+            }
+            if (null != ctxid) {
+                sb.append(" to filestore ");
+                sb.append(ctxid);
+            }
+            sb.append(" could not be scheduled: ");
+            System.err.println(sb.toString());
+        } else {
+            super.printFirstPartOfErrorText(id, ctxid, parser);
+        }
+    }
+
+    protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
+        final String optionvalue = (String) parser.getOptionValue(this.databaseIdOption);
+        if (null != optionvalue) {
+            dbid = Integer.parseInt(optionvalue);
+            db.setId(dbid);
+        }
+    }
+
+    protected void parseAndSetDatabasename(final AdminParser parser, final Database db) {
+        dbname = (String) parser.getOptionValue(this.databaseNameOption);
+        if (null != dbname) {
+            db.setName(dbname);
+        }
+    }
+    
+    protected void setFilestoreIdOption(final AdminParser parser) {
+        this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededQuadState.needed);
+    }
+
+    protected Filestore parseAndSetFilestoreId(final AdminParser parser) {
+        filestoreid = Integer.parseInt((String) parser.getOptionValue(this.targetFilestoreIDOption));
+        final Filestore fs = new Filestore(filestoreid);
+        return fs;
+    }
+
+    protected static Context getContext(final String[] nextLine, final int[] idarray) {
+        final Context context = new Context();
+        {
+            final int i = idarray[Constants.CONTEXTID.getIndex()];
+            if (-1 != i) {
+                if (nextLine[i].length() > 0) {
+                    context.setId(Integer.parseInt(nextLine[i]));
+                }
+            }
+        }
+        {
+            final int i = idarray[ContextConstants.contextname.getIndex()];
+            if (-1 != i) {
+                if (nextLine[i].length() > 0) {
+                    context.setName(nextLine[i]);
+                }
+            }
+        }
+        {
+            final int i = idarray[ContextConstants.lmapping.getIndex()];
+            if (-1 != i) {
+                if (nextLine[i].length() > 0) {
+                    context.addLoginMapping(nextLine[i]);
+                }
+            }
+        }
+        {
+            final int i = idarray[ContextConstants.quota.getIndex()];
+            if (-1 != i) {
+                if (nextLine[i].length() > 0) {
+                    context.setMaxQuota(Long.valueOf(nextLine[i]));
+                }
+            }
+        }
+        
+        return context;
+    }
+
+    /**
+     * @return the filestoreid
+     */
+    public final Integer getFilestoreid() {
+        return filestoreid;
     }
 
     protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(final AdminParser parser) {
