@@ -59,6 +59,7 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Date;
+import java.util.TimeZone;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -69,6 +70,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -76,8 +78,10 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Tools;
 
 public class ICalImportTest extends AbstractICalImportTest {
 
@@ -268,7 +272,7 @@ public class ICalImportTest extends AbstractICalImportTest {
     // testMailAddress.equals(participants[1].getEmailAddress()) );
     // assertTrue("One user is the user doing the import", participants[0].getIdentifier() == userId || participants[1].getIdentifier() ==
     // userId );
-    //		
+    //
     // }
     /*
      * Imported appointment loses reminder
@@ -276,7 +280,30 @@ public class ICalImportTest extends AbstractICalImportTest {
     @Test
     public void test7473() throws SQLException, UnsupportedEncodingException, OXObjectNotFoundException, OXException, LdapException {
         final int alarm = 180;
-        final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\n" + "BEGIN:VEVENT\n" + "CLASS:PRIVATE\n" + "DTSTART:20070614T150000Z\n" + "DTEND:20070614T163000Z\n" + "LOCATION:Olpe\n" + "SUMMARY:Simple iCal Appointment\n" + "DESCRIPTION:Notes here...\n" + "BEGIN:VALARM\nTRIGGER:-PT" + alarm + "M\n" + "ACTION:DISPLAY\n" + "DESCRIPTION:Reminder\n" + "END:VALARM\nEND:VEVENT\n" + "END:VCALENDAR";
+        Calendar c = TimeTools.createCalendar(TimeZone.getTimeZone(sessObj.getUser().getTimeZone()));
+        // Must be in the future to have the alarm not to be rejected.
+        c.add(Calendar.DATE, 1);
+        c.set(Calendar.HOUR_OF_DAY, 15);
+        String start = Tools.formatForICal(c.getTime());
+        c.add(Calendar.HOUR, 1);
+        c.add(Calendar.MINUTE, 30);
+        String end = Tools.formatForICal(c.getTime());
+        final String ical =
+            "BEGIN:VCALENDAR\n" +
+            "VERSION:2.0\n" +
+            "PRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\n" +
+            "BEGIN:VEVENT\n" +
+            "CLASS:PRIVATE\n" +
+            "DTSTART:" + start + "\n" +
+            "DTEND:" + end + "\n" +
+            "LOCATION:Olpe\n" +
+            "SUMMARY:Simple iCal Appointment\n" +
+            "DESCRIPTION:Notes here...\n" +
+            "BEGIN:VALARM\nTRIGGER:-PT" + alarm + "M\n" +
+            "ACTION:DISPLAY\n" +
+            "DESCRIPTION:Reminder\n" +
+            "END:VALARM\nEND:VEVENT\n" +
+            "END:VCALENDAR";
 
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7473", ctx, false);
 

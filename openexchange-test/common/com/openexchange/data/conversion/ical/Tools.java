@@ -49,39 +49,27 @@
 
 package com.openexchange.data.conversion.ical;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
+ * {@link Tools}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Assert extends junit.framework.Assert {
+public class Tools {
 
-    /**
-     * Prevent instantiation.
-     */
-    private Assert() {
+    private Tools() {
         super();
     }
 
-    public static void assertStandardAppFields(final ICalFile ical, final Date start, final Date end) {
-        assertProperty(ical, "DTSTART", Tools.formatForICal(start));
-        assertProperty(ical, "DTEND", Tools.formatForICal(end));               
+    private static SimpleDateFormat utc = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+    static {
+        utc.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public static void assertProperty(final ICalFile ical, final String name, final String value) {
-        assertTrue(name+" missing in: \n"+ical.toString(), ical.containsPair(name, value));
-    }
-
-    public static void assertProperty(ICalFile ical, String name, String parameter, String value) {
-        assertTrue(name+" missing in: \n"+ical.toString(), ical.containsEntry(name, parameter, value));
-    }
-
-    public static void assertNoProperty(final ICalFile ical, final String name) {
-        assertFalse("Didn't expect to find "+name+" in: \n"+ical.toString(), ical.containsKey(name));
-    }
-
-    public static void assertLine(final ICalFile ical, final String line) {
-        assertTrue(line+" missing in: \n"+ical.toString(), ical.containsLine(line));
+    public static String formatForICal(Date date) {
+        return utc.format(date);
     }
 }
