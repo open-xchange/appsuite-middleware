@@ -87,6 +87,8 @@ public class AdminParser extends CLIParser {
     
     private String appname = null;
     
+    private CLIOption csvImportOption = null;
+    
     final private CLIOption helpoption;
     
     final private CLIOption envoption;
@@ -359,6 +361,10 @@ public class AdminParser extends CLIParser {
         return false;
     }
 
+    public CLIOption getCsvImportOption() {
+        return csvImportOption;
+    }
+
     // As parse is declared final in CmdLineParser we cannot override it so we use another
     // function name here
     public final void ownparse(String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException {
@@ -383,20 +389,22 @@ public class AdminParser extends CLIParser {
             printUsageExtended();
             System.exit(0);
         }
-        final StringBuilder sb = new StringBuilder();
-        for (final OptionInfo optInfo : this.optinfolist) {
-            if (optInfo.needed == NeededQuadState.needed) {
-                if (null == getOptionValue(optInfo.option)) {
-                    sb.append(optInfo.longForm);
-                    sb.append(",");
+        if (null == this.csvImportOption || null == getOptionValue(this.csvImportOption)) {
+            final StringBuilder sb = new StringBuilder();
+            for (final OptionInfo optInfo : this.optinfolist) {
+                if (optInfo.needed == NeededQuadState.needed) {
+                    if (null == getOptionValue(optInfo.option)) {
+                        sb.append(optInfo.longForm);
+                        sb.append(",");
+                    }
                 }
             }
-        }
-
-        // show all missing opts
-        if (sb.toString().length() > 0) {
-            sb.deleteCharAt(sb.length() - 1);
-            throw new MissingOptionException("Option(s) \"" + sb.toString() + "\" missing");
+            
+            // show all missing opts
+            if (sb.toString().length() > 0) {
+                sb.deleteCharAt(sb.length() - 1);
+                throw new MissingOptionException("Option(s) \"" + sb.toString() + "\" missing");
+            }
         }
     }
 
@@ -456,6 +464,9 @@ public class AdminParser extends CLIParser {
         return arg.startsWith("--");
     }
 
+    public void setCsvImportOption(CLIOption csvImportOption) {
+        this.csvImportOption = csvImportOption;
+    }
 
     public final void setExtendedOptions() {
         this.extendedoption = addOption(OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
