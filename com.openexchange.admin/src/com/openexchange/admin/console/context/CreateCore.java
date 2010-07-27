@@ -181,6 +181,9 @@ public abstract class CreateCore extends ContextAbstraction {
         } else {
             throw new InvalidDataException("no columnnames found");
         }
+        
+        checkContextRequired(idarray);
+        
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
             final Context context = getContext(nextLine, idarray);
@@ -222,4 +225,17 @@ public abstract class CreateCore extends ContextAbstraction {
     protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
         
     protected abstract void setFurtherOptions(final AdminParser parser);
+
+    private static void checkContextRequired(final int[] idarray) throws InvalidDataException {
+        checkUserRequired(idarray);
+        for (final ContextConstants value : ContextConstants.values()) {
+            if (value.isRequired()) {
+                if (-1 == idarray[value.getIndex()]) {
+                    throw new InvalidDataException("The required column \"" + value.getString() + "\" is missing");
+                }
+            }
+        }
+
+    }
+    
 }
