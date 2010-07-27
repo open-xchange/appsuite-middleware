@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 12
+%define		ox_release 13
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -354,6 +354,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Jul 21 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15999: Checking if for the user are some features enabled conflicting with a disabled global address book.
 * Fri Jul 09 2010 - marcus.klein@open-xchange.com
  - Bugfix #16112: Administration daemon now writes the users display name into the fileAs attribute used by some clients.
 * Thu Jul 08 2010 - karsten.will@open-xchange.com
