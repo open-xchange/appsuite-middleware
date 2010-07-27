@@ -48,15 +48,22 @@
  */
 package com.openexchange.admin.console.context;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.text.ParseException;
+import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
+import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -66,6 +73,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class CreateCore extends ContextAbstraction {
 
     protected void setOptions(final AdminParser parser) {
+        setCsvImport(parser);
         setDefaultCommandLineOptions(parser);
         setContextNameOption(parser, NeededQuadState.notneeded);
         setMandatoryOptions(parser);
@@ -118,7 +126,13 @@ public abstract class CreateCore extends ContextAbstraction {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
-            ctxid = maincall(parser, ctx, usr, auth).getId();
+            final String filename = (String) parser.getOptionValue(parser.getCsvImportOption());
+
+            if (null != filename) {
+                csvparsing(filename, auth);
+            } else {
+                ctxid = maincall(parser, ctx, usr, auth).getId();
+            }
         } catch (final Exception e) {
             printErrors((null != ctxid) ? String.valueOf(ctxid) : null, null, e, parser);
         }
@@ -132,6 +146,79 @@ public abstract class CreateCore extends ContextAbstraction {
         sysexit(0);
     }
 
+    protected void csvparsing(final String filename, final Credentials auth) throws NotBoundException, IOException, InvalidDataException, ParseException, StorageException, InvalidCredentialsException {
+        // First check if we can login with the given credentials. Otherwise there's no need to continue
+        final OXLoginInterface oxlgn = (OXLoginInterface) Naming.lookup(RMI_HOSTNAME +OXLoginInterface.RMI_NAME);
+        oxlgn.login(auth);
+        
+        final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
+        String [] nextLine;
+        // Will stored the
+        final int[] idarray = new int[CONTEXT_INITIAL_CONSTANTS_VALUE + ContextConstants.values().length];
+        for (int i = 0; i < idarray.length; i++) {
+            idarray[i] = -1;
+        }
+        // First read the columnnames, we will use them later on like the parameter names for the clts
+        if (null != (nextLine = reader.readNext())) {
+//            System.out.println("Columnnames");
+            for (int i = 0; i < nextLine.length; i++) {
+                final Constants constantFromString = Constants.getConstantFromString(nextLine[i]);
+                if (null != constantFromString) {
+                    idarray[constantFromString.getIndex()] = i;
+                } else {
+                    final ContextConstants constantFromString2 = ContextConstants.getConstantFromString(nextLine[i]);
+                    if (null != constantFromString2) {
+                        idarray[constantFromString2.getIndex()] = i;
+                    } else {
+                        final AccessCombinations constantFromString3 = AccessCombinations.getConstantFromString(nextLine[i]);
+                        if (null != constantFromString3) {
+                            idarray[constantFromString3.getIndex()] = i;
+                        }
+                    }
+                }
+            }
+//            System.out.print("\r\n");
+        } else {
+            throw new InvalidDataException("no columnnames found");
+        }
+        while ((nextLine = reader.readNext()) != null) {
+            // nextLine[] is an array of values from the line
+            final Context context = getContext(nextLine, idarray);
+            final User adminuser = getUser(nextLine, idarray);
+            final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
+            try {
+                if (-1 != i) {
+                    // create call
+                    simpleMainCall(context, adminuser, nextLine[i], auth);
+                } else {
+                    final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
+                    if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
+                        // with module access
+                        simpleMainCall(context, adminuser, moduleacess, auth);
+                    } else {
+                        // without module access
+                        simpleMainCall(context, adminuser, auth);
+                    }
+                    
+                }
+                System.out.println("Context " + context.getId() + " successfully created");
+            } catch (final StorageException e) {
+                System.err.println("Failed to create context " + context.getId() + ": " + e);
+            } catch (final InvalidCredentialsException e) {
+                System.err.println("Failed to create context " + context.getId() + ": " + e);
+            } catch (final ContextExistsException e) {
+                System.err.println("Failed to create context " + context.getId() + ": " + e);
+            }
+        }
+
+    }
+
+    protected abstract void simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    
+    protected abstract void simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    
+    protected abstract void simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    
     protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
         
     protected abstract void setFurtherOptions(final AdminParser parser);

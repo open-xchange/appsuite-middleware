@@ -59,6 +59,7 @@
     <property name="junit"              value="junit-4.1.jar"/>
     <property name="mysql-connector"    value="mysql-connector-java-3.1.13-bin.jar"/>
     <property name="jdom"               value="jdom-1.1.1.jar"/>
+    <property name="csv"               value="opencsv-2.0.jar"/>
 
 
     <path id="project.classpath">
@@ -80,6 +81,7 @@
         <pathelement location="${bundlesdir}/${cachingBundle}/${cachebundle}"/>
         <pathelement location="${bundlesdir}/${configbundle}"/>
         <pathelement location="${bundlesdir}/${serverbundle}"/>
+        <pathelement location="lib/${csv}"/>
     </path>
 
     <filterset id="pathsubst">
@@ -392,6 +394,7 @@
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
         <copy file="jar/${cli.jar}" todir="${destdir}/${prefix}/lib"/>
+        <copy file="lib/${csv}" tofile="${destdir}/${prefix}/lib/ox_admin_${csv}"/>
         <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
             <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
         </copy>
