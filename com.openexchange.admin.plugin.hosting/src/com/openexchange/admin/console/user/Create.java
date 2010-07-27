@@ -65,8 +65,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Create extends CreateCore {
 	
-    private final UserHostingAbstraction usrabs = new UserHostingAbstraction();
-    
     public static void main(final String[] args) {
         new Create(args);
     }
@@ -81,7 +79,7 @@ public class Create extends CreateCore {
     @Override
     protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         
-    	final String accesscombinationname = usrabs.parseAndSetAccessCombinationName(parser);
+    	final String accesscombinationname = parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Create user with access rights combination name
         	final Integer id = oxusr.create(ctx, usr,accesscombinationname, auth).getId();
@@ -103,6 +101,6 @@ public class Create extends CreateCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        usrabs.setAddAccessRightCombinationNameOption(parser, false);
+        setAddAccessRightCombinationNameOption(parser, false);
     }
 }

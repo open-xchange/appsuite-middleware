@@ -54,7 +54,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.user.UserHostingAbstraction;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -98,7 +97,7 @@ public class Change extends ChangeCore {
         UserModuleAccess changed_access = oxctx.getModuleAccess(ctx, auth);
         final boolean wantsChange = setModuleAccessOptions(parser, changed_access);
         
-        final String accessCombinationName = ctxabs.parseAndSetAccessCombinationName(parser);
+        final String accessCombinationName = parseAndSetAccessCombinationName(parser);
 
         if( wantsChange && accessCombinationName == null) {
             // user wants to change individual perms
@@ -106,7 +105,7 @@ public class Change extends ChangeCore {
         } else if (accessCombinationName != null && !wantsChange) {
             oxctx.changeModuleAccess(ctx, accessCombinationName, auth);
         } else if ( accessCombinationName != null && wantsChange ) {
-            throw new InvalidDataException(UserHostingAbstraction.ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);        	
+            throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);        	
         }
         
     }
@@ -116,7 +115,7 @@ public class Change extends ChangeCore {
     	parser.setExtendedOptions();
         ctxabs.setAddMappingOption(parser, false);        
         ctxabs.setRemoveMappingOption(parser, false);
-        ctxabs.setAddAccessRightCombinationNameOption(parser, false);
+        setAddAccessRightCombinationNameOption(parser, false);
         setModuleAccessOptions(parser);
     }
 }

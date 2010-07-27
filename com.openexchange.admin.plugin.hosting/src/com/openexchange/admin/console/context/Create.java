@@ -52,9 +52,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.user.UserHostingAbstraction;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -85,7 +83,7 @@ public class Create extends CreateCore {
     protected void setFurtherOptions(final AdminParser parser) {
     	 parser.setExtendedOptions();
     	 ctxabs.setAddMappingOption(parser, false);
-    	 ctxabs.setAddAccessRightCombinationNameOption(parser, false);
+    	 setAddAccessRightCombinationNameOption(parser, false);
     	 setModuleAccessOptions(parser);
     	 
     }
@@ -114,11 +112,11 @@ public class Create extends CreateCore {
         // parse access options
         setModuleAccessOptions(parser, parsed_access);
         
-        String accessCombinationName = ctxabs.parseAndSetAccessCombinationName(parser);
+        String accessCombinationName = parseAndSetAccessCombinationName(parser);
         
         if(!parsed_access.equals(NO_RIGHTS_ACCESS) && null != accessCombinationName){
         	// BOTH WAYS TO SPECIFY ACCESS RIGHTS ARE INVALID!
-        	throw new InvalidDataException(UserHostingAbstraction.ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);        	
+        	throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);
         }
         
         if (null != accessCombinationName ) {
@@ -134,4 +132,24 @@ public class Create extends CreateCore {
         // TODO: We have to add a cleanup here. If creation of mappings fails the context should be deleted
         return createdctx;
     }
+
+    @Override
+    protected void simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+        oxctx.create(ctx, usr, accessCombiName, auth);
+    }
+
+    @Override
+    protected void simpleMainCall(Context ctx, User usr, UserModuleAccess access, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+        oxctx.create(ctx, usr, access, auth);
+        
+    }
+
+    @Override
+    protected void simpleMainCall(Context ctx, User usr, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+        oxctx.create(ctx, usr, auth);
+    }
+
 }

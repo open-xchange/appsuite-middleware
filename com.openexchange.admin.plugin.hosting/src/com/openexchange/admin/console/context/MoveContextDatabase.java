@@ -59,8 +59,6 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 
 public class MoveContextDatabase extends ContextAbstraction {
     
-    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
-    
     public MoveContextDatabase(final String[] args2) {
 
         final AdminParser parser = new AdminParser("movecontextdatabase");
@@ -80,15 +78,15 @@ public class MoveContextDatabase extends ContextAbstraction {
             // get rmi ref
             final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
-            ctxabs.parseAndSetDatabaseID(parser, db);
-            ctxabs.parseAndSetDatabasename(parser, db);
+            parseAndSetDatabaseID(parser, db);
+            parseAndSetDatabasename(parser, db);
 
             /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
 
             oxres.moveContextDatabase(ctx, db, mr, auth);*/
             final int jobId = oxres.moveContextDatabase(ctx, db, auth);
 
-            ctxabs.displayMovedMessage(successcontext, null, "to database " + db.getId() + " scheduled as job " + jobId, parser);
+            displayMovedMessage(successcontext, null, "to database " + db.getId() + " scheduled as job " + jobId, parser);
             sysexit(0);
         } catch (final Exception e) {
             // In this special case the second parameter is not the context id but the database id
@@ -108,8 +106,8 @@ public class MoveContextDatabase extends ContextAbstraction {
         setContextNameOption(parser, NeededQuadState.eitheror);
         //setMaintenanceReasodIDOption(parser, true);
 
-        ctxabs.setDatabaseIDOption(parser);
-        ctxabs.setDatabaseNameOption(parser, NeededQuadState.eitheror);
+        setDatabaseIDOption(parser);
+        setDatabaseNameOption(parser, NeededQuadState.eitheror);
     }
 
     @Override

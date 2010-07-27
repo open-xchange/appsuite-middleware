@@ -59,8 +59,6 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 
 public class MoveContextFilestore extends ContextAbstraction {
 
-    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
-    
     public MoveContextFilestore(final String[] args2) {
 
         final AdminParser parser = new AdminParser("movecontextfilestore");
@@ -79,20 +77,20 @@ public class MoveContextFilestore extends ContextAbstraction {
             // get rmi ref
             final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
-            final Filestore fs = ctxabs.parseAndSetFilestoreId(parser);
+            final Filestore fs = parseAndSetFilestoreId(parser);
             
             /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
 
             oxres.moveContextFilestore(ctx, fs, mr, auth);*/
             final int jobId = oxres.moveContextFilestore(ctx, fs, auth);
 
-            ctxabs.displayMovedMessage(successtext, null, "to filestore " + ctxabs.getFilestoreid() + " scheduled as job " + jobId, parser);
+            displayMovedMessage(successtext, null, "to filestore " + getFilestoreid() + " scheduled as job " + jobId, parser);
             sysexit(0);
         } catch (final Exception e) {
             // In this special case the second parameter is not the context id but the filestore id
             // this also applies to all following error outputting methods
             // see com.openexchange.admin.console.context.ContextHostingAbstraction.printFirstPartOfErrorText(Integer, Integer)
-            printErrors(successtext, ctxabs.getFilestoreid(), e, parser);
+            printErrors(successtext, getFilestoreid(), e, parser);
         }
     }
 
@@ -105,6 +103,6 @@ public class MoveContextFilestore extends ContextAbstraction {
         setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
         //setMaintenanceReasodIDOption(parser, true);
-        ctxabs.setFilestoreIdOption(parser);
+        setFilestoreIdOption(parser);
     }
 }

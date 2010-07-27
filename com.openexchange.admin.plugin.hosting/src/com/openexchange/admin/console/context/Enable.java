@@ -58,8 +58,6 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class Enable extends ContextAbstraction {
     
-    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
-
     public Enable(final String[] args2) {
 
         final AdminParser parser = new AdminParser("enablecontext");
@@ -82,7 +80,7 @@ public class Enable extends ContextAbstraction {
 
             oxres.enable(ctx, auth);
 
-            ctxabs.displayEnabledMessage(successtext, null, parser);
+            displayEnabledMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);

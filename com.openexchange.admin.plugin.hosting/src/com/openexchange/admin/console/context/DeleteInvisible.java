@@ -58,8 +58,6 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class DeleteInvisible extends ContextAbstraction {
 
-    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
-    
     public DeleteInvisible(final String[] args2) {
 
         final AdminParser parser = new AdminParser("downgradecontext");
@@ -85,7 +83,7 @@ public class DeleteInvisible extends ContextAbstraction {
             oxres.disable(ctx, mr, auth); */
             oxres.downgrade(ctx, auth);
 
-            ctxabs.displayDowngradedMessage(successtext, null, parser);
+            displayDowngradedMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);

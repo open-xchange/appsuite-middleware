@@ -58,11 +58,9 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 
 public class ListContextByFilestore extends ContextAbstraction {
 
-    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
-    
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        ctxabs.setFilestoreIdOption(parser);
+        setFilestoreIdOption(parser);
         
         setCSVOutputOption(parser);
     }
@@ -76,7 +74,7 @@ public class ListContextByFilestore extends ContextAbstraction {
         try {
             parser.ownparse(args2);
 
-            final Filestore fs = ctxabs.parseAndSetFilestoreId(parser);
+            final Filestore fs = parseAndSetFilestoreId(parser);
 
             final Credentials auth = credentialsparsing(parser);
 
@@ -91,10 +89,10 @@ public class ListContextByFilestore extends ContextAbstraction {
 
             sysexit(0);
         } catch (final Exception e) {
-            if (null == ctxabs.getFilestoreid()) {
+            if (null == getFilestoreid()) {
                 printErrors(null, null, e, parser);
             } else {
-                printErrors(String.valueOf(ctxabs.getFilestoreid()), null, e, parser);
+                printErrors(String.valueOf(getFilestoreid()), null, e, parser);
             }
         }
     }

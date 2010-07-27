@@ -54,7 +54,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
-public class DisableAll extends ContextHostingAbstraction {
+public class DisableAll extends ContextAbstraction {
 
     public DisableAll(final String[] args2) {
 

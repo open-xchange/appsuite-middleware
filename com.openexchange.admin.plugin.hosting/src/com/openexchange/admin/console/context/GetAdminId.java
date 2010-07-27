@@ -55,7 +55,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleDeleteInterface;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;

@@ -59,12 +59,10 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 
 public class ListContextByDatabase extends ContextAbstraction {
 
-    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
-    
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        ctxabs.setDatabaseIDOption(parser);
-        ctxabs.setDatabaseNameOption(parser, NeededQuadState.eitheror);
+        setDatabaseIDOption(parser);
+        setDatabaseNameOption(parser, NeededQuadState.eitheror);
         
         setCSVOutputOption(parser);
     }
@@ -81,8 +79,8 @@ public class ListContextByDatabase extends ContextAbstraction {
 
             final Database db = new Database();
 
-            ctxabs.parseAndSetDatabaseID(parser, db);
-            ctxabs.parseAndSetDatabasename(parser, db);
+            parseAndSetDatabaseID(parser, db);
+            parseAndSetDatabasename(parser, db);
 
             successtext = nameOrIdSetInt(db.getId(), db.getName(), "database");
 

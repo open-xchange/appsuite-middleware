@@ -66,8 +66,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Change extends ChangeCore {
 
-    private final UserHostingAbstraction usrabs = new UserHostingAbstraction();
-	
     public static void main(final String[] args) {
         new Change(args);
     }
@@ -85,7 +83,7 @@ public class Change extends ChangeCore {
         
         // Change module access IF an access combination name was supplied!
         // The normal change of access rights is done in the "commonfunctions"
-        final String accesscombinationname = usrabs.parseAndSetAccessCombinationName(parser);
+        final String accesscombinationname = parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Change user with access rights combination name
         	oxusr.changeModuleAccess(ctx, usr, accesscombinationname, auth);        	
@@ -95,7 +93,7 @@ public class Change extends ChangeCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        usrabs.setAddAccessRightCombinationNameOption(parser, false);
+        setAddAccessRightCombinationNameOption(parser, false);
     }
 
 }
