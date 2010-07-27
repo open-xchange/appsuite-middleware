@@ -54,6 +54,7 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
@@ -278,8 +279,12 @@ public final class FolderCacheManager {
         }
         cacheLock.lock();
         try {
-            final FolderObject retval = (FolderObject) folderCache.get(getCacheKey(ctx.getContextId(), objectId));
-            return retval == null ? null : (FolderObject) retval.clone();
+            Object tmp = folderCache.get(getCacheKey(ctx.getContextId(), objectId));
+            // Refresher uses Condition objects to prevent multiple threads loading same folder.
+            if (tmp != null && tmp instanceof FolderObject) {
+                return ((FolderObject) tmp).clone();
+            }
+            return null;
         } finally {
             cacheLock.unlock();
         }
@@ -309,9 +314,13 @@ public final class FolderCacheManager {
                 return loadFolderObjectInternal(folderId, ctx, readCon);
             }
         };
+        CacheKey key = getCacheKey(ctx.getContextId(), folderId);
         cacheLock.lock();
         try {
-            folderCache.remove(factory.getKey());
+            Object tmp = folderCache.get(key);
+            if (tmp instanceof FolderObject) {
+                folderCache.remove(key);
+            }
         } catch (final CacheException e) {
             throw new OXException(e);
         } finally {
@@ -363,27 +372,31 @@ public final class FolderCacheManager {
         if (!folderObj.containsObjectID()) {
             throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
         }
-        final CacheKey cacheKey = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
+        final CacheKey key = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
         cacheLock.lock();
         try {
-            final FolderObject retval = (FolderObject) folderCache.get(cacheKey);
-            if (null != retval) {
-                /*
-                 * Already in cache
-                 */
-                return retval.clone();
+            Object tmp = folderCache.get(key);
+            if (tmp instanceof FolderObject) {
+                // Already in cache
+                return ((FolderObject) tmp).clone();
             }
-            /*
-             * Remove to distribute PUT as REMOVE
-             */
-            folderCache.remove(cacheKey);
+            Condition cond = null;
+            if (tmp instanceof Condition) {
+                cond = (Condition) tmp;
+            } else {
+                // Remove to distribute PUT as REMOVE
+                folderCache.remove(key);
+            }
             if (elemAttribs == null) {
                 /*
                  * Put with default attributes
                  */
-                folderCache.put(cacheKey, folderObj.clone());
+                folderCache.put(key, folderObj.clone());
             } else {
-                folderCache.put(cacheKey, folderObj.clone(), elemAttribs);
+                folderCache.put(key, folderObj.clone(), elemAttribs);
+            }
+            if (null != cond) {
+                cond.signalAll();
             }
             /*
              * Return null to indicate successful insertion
@@ -443,32 +456,35 @@ public final class FolderCacheManager {
          * Put clone of new object into cache.
          */
         final FolderObject clone = folderObj.clone();
-        final CacheKey cacheKey = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
+        final CacheKey key = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
         cacheLock.lock();
         try {
-            /*
-             * If there is currently an object associated with this key in the region it is replaced.
-             */
+            Object tmp = folderCache.get(key);
+            // If there is currently an object associated with this key in the region it is replaced.
+            Condition cond = null;
             if (overwrite) {
-                /*
-                 * Remove to distribute PUT as REMOVE
-                 */
-                folderCache.remove(cacheKey);
+                if (tmp instanceof FolderObject) {
+                    // Remove to distribute PUT as REMOVE
+                    folderCache.remove(key);
+                } else if (tmp instanceof Condition) {
+                    cond = (Condition) tmp;
+                }
             } else {
-                if (folderCache.get(cacheKey) != null) {
-                    /*
-                     * Another thread made a PUT in the meantime. Return cause we may not overwrite.
-                     */
+                // Another thread made a PUT in the meantime. Return cause we may not overwrite.
+                if (tmp instanceof FolderObject) {
                     return;
+                } else if (tmp instanceof Condition) {
+                    cond = (Condition) tmp;
                 }
             }
             if (elemAttribs == null) {
-                /*
-                 * Put with default attributes
-                 */
-                folderCache.put(cacheKey, clone);
+                // Put with default attributes
+                folderCache.put(key, clone);
             } else {
-                folderCache.put(cacheKey, clone, elemAttribs);
+                folderCache.put(key, clone, elemAttribs);
+            }
+            if (null != cond) {
+                cond.signalAll();
             }
         } catch (final CacheException e) {
             throw new OXException(e);
@@ -488,14 +504,15 @@ public final class FolderCacheManager {
         if (null == folderCache) {
             return;
         }
-        /*
-         * Remove object from cache if exist
-         */
+        // Remove object from cache if exist
         if (key > 0) {
             final CacheKey cacheKey = getCacheKey(ctx.getContextId(), key);
             cacheLock.lock();
             try {
-                folderCache.remove(cacheKey);
+                Object tmp = folderCache.get(cacheKey);
+                if (!(tmp instanceof Condition)) {
+                    folderCache.remove(cacheKey);
+                }
             } catch (final CacheException e) {
                 throw new OXException(e);
             } finally {
@@ -529,7 +546,10 @@ public final class FolderCacheManager {
         cacheLock.lock();
         try {
             for (final CacheKey cacheKey : cacheKeys) {
-                folderCache.remove(cacheKey);
+                Object tmp = folderCache.get(cacheKey);
+                if (!(tmp instanceof Condition)) {
+                    folderCache.remove(cacheKey);
+                }
             }
         } catch (final CacheException e) {
             throw new OXException(e);
@@ -569,5 +589,4 @@ public final class FolderCacheManager {
          */
         return folderCache.getDefaultElementAttributes();
     }
-
 }

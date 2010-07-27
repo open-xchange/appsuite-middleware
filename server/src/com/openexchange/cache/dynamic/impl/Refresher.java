@@ -170,7 +170,7 @@ public abstract class Refresher<T extends Serializable> {
                     final Object tmp2 = cache.get(key);
                     if (null != tmp2 && !(tmp2 instanceof Condition)) {
                         @SuppressWarnings("unchecked")
-                        T tmp3 = (T) tmp;
+                        T tmp3 = (T) tmp2;
                         retval = tmp3;
                         cond = null;
                     }
