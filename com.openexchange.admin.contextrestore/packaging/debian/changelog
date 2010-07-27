@@ -1,3 +1,9 @@
+open-xchange-admin-plugin-contextrestore (6.17.0.0-14) unstable; urgency=low
+
+  * first build for 6.17-rev14
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 27 Jul 2010 16:41:20 +0200
+
 open-xchange-admin-plugin-contextrestore (6.17.0.0-13) unstable; urgency=low
 
   * first build for 6.17-rev13

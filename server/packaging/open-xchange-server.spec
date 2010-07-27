@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 13
+%define		ox_release 14
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -554,6 +554,9 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jul 27 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16577: Fixed ClassCastException in FolderCache due to newly introduced conditional loading of folder objects.
+ - Bugfix #16582: Fixed a NullPointerException if a task notification should be sent and the task does not have an end date.
 * Mon Jul 26 2010 - francisco.laguna@open-xchange.com
  - Bugfix #16553: Correct timer arrays length to avoid NPE.
 * Mon Jul 26 2010 - marcus.klein@open-xchange.com
