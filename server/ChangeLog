@@ -1,6 +1,7 @@
 * 2010-07-27 - marcus.klein@open-xchange.com
 
  - Bugfix #16577: Fixed ClassCastException in FolderCache due to newly introduced conditional loading of folder objects.
+ - Bugfix #16582: Fixed a NullPointerException if a task notification should be sent and the task does not have an end date.
 
 * 2010-07-26 - marcus.klein@open-xchange.com
 

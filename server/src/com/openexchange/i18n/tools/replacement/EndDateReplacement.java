@@ -59,7 +59,6 @@ import com.openexchange.i18n.tools.TemplateToken;
  * {@link EndDateReplacement} - End date replacement
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class EndDateReplacement extends AbstractFormatDateReplacement {
 
@@ -67,10 +66,8 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      * Initializes a new {@link EndDateReplacement}
      * 
      * @param endDate The end date
-     * @param fulltime <code>true</code> if given end date denotes a full-time
-     *            end date; otherwise <code>false</code>
-     * @param isTask <code>true</code> if this end date denotes a task's end
-     *            date; otherwise <code>false</code>
+     * @param fulltime <code>true</code> if given end date denotes a full-time end date; otherwise <code>false</code>
+     * @param isTask <code>true</code> if this end date denotes a task's end date; otherwise <code>false</code>
      */
     public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask) {
         this(endDate, fulltime, isTask, null, null);
@@ -80,17 +77,18 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      * Initializes a new {@link EndDateReplacement}
      * 
      * @param endDate The end date The end date
-     * @param fulltime <code>true</code> if given end date denotes a full-time
-     *            end date; otherwise <code>false</code>
-     * @param isTask <code>true</code> if this end date denotes a task's end
-     *            date; otherwise <code>false</code>
+     * @param fulltime <code>true</code> if given end date denotes a full-time end date; otherwise <code>false</code>
+     * @param isTask <code>true</code> if this end date denotes a task's end date; otherwise <code>false</code>
      * @param locale The locale
      * @param timeZone The time zone
      */
-    public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask, final Locale locale,
-            final TimeZone timeZone) {
-        super(correctDayOfMonth(endDate, fulltime), !fulltime, isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE, locale,
-                timeZone);
+    public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask, final Locale locale, final TimeZone timeZone) {
+        super(
+            correctDayOfMonth(endDate, fulltime),
+            !fulltime,
+            isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE,
+            locale,
+            timeZone);
         fallback = isTask ? Notifications.NO_DUE_DATE : Notifications.NO_END_DATE;
     }
 
@@ -102,11 +100,10 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      * shortly before midnight the next day, in our example on the 4th of August. 
      */
     private static Date correctDayOfMonth(final Date endDate, final boolean fulltime) {
-        return fulltime ? new Date(endDate.getTime()-23) : endDate;
+        return fulltime && null != endDate ? new Date(endDate.getTime()-1) : endDate;
     }
 
     public TemplateToken getToken() {
         return TemplateToken.END;
     }
-
 }
