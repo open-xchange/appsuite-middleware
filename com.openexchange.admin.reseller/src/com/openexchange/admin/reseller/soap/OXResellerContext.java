@@ -5,7 +5,6 @@ package com.openexchange.admin.reseller.soap;
 
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.reseller.soap.dataobjects.ResellerContext;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -39,7 +38,7 @@ public class OXResellerContext extends OXSOAPRMIMapper {
     }
 
     private void changeWrapper(ResellerContext ctx, UserModuleAccess access, String access_combination_name, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DuplicateExtensionException {
-        Context cin = resellerContext2Context(ctx);
+        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         if( access == null && access_combination_name == null ) {
             ((OXContextInterface)rmistub).change(cin, auth);
         } else if( access != null ) {
@@ -117,7 +116,7 @@ public class OXResellerContext extends OXSOAPRMIMapper {
     }
 
     private ResellerContext createWrapper(ResellerContext ctx, User admin_user, UserModuleAccess access, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, DuplicateExtensionException {
-        Context cin = resellerContext2Context(ctx);
+        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         Context res = null;
         if( access == null && access_combination_name == null ) {
             res = ((OXContextInterface)rmistub).create(cin, admin_user, auth);
@@ -203,7 +202,7 @@ public class OXResellerContext extends OXSOAPRMIMapper {
     }
 
     private void deleteWrapper(ResellerContext ctx, Credentials auth) throws DuplicateExtensionException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
-        Context cin = resellerContext2Context(ctx);
+        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         ((OXContextInterface)rmistub).delete(cin, auth);
     }
     /**
@@ -231,7 +230,7 @@ public class OXResellerContext extends OXSOAPRMIMapper {
 
     private void disableWrapper(ResellerContext ctx, Credentials auth) throws DuplicateExtensionException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
         if( ctx != null ) {
-            Context cin = resellerContext2Context(ctx);
+            Context cin = ResellerContextUtil.resellerContext2Context(ctx);
             ((OXContextInterface)rmistub).disable(cin, auth);       
         } else {
             ((OXContextInterface)rmistub).disableAll(auth);       
@@ -285,7 +284,7 @@ public class OXResellerContext extends OXSOAPRMIMapper {
     }
 
     private void downgradeWrapper(ResellerContext ctx, Credentials auth) throws DuplicateExtensionException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
-        Context cin = resellerContext2Context(ctx);
+        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         ((OXContextInterface)rmistub).downgrade(cin, auth);
     }
     /**
@@ -313,7 +312,7 @@ public class OXResellerContext extends OXSOAPRMIMapper {
 
     private void enableWrapper(ResellerContext ctx, Credentials auth) throws DuplicateExtensionException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         if( ctx != null ) {
-            Context cin = resellerContext2Context(ctx);
+            Context cin = ResellerContextUtil.resellerContext2Context(ctx);
             ((OXContextInterface)rmistub).enable(cin, auth);       
         } else {
             ((OXContextInterface)rmistub).enableAll(auth);       
@@ -363,7 +362,7 @@ public class OXResellerContext extends OXSOAPRMIMapper {
     }
 
     private String getAccessCombinationNameWrapper(ResellerContext ctx, Credentials auth) throws DuplicateExtensionException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-        Context cin = resellerContext2Context(ctx);
+        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         return ((OXContextInterface)rmistub).getAccessCombinationName(cin, auth);
     }
     /**
@@ -390,7 +389,7 @@ public class OXResellerContext extends OXSOAPRMIMapper {
     }
 
     private ResellerContext getDataWrapper(ResellerContext ctx, Credentials auth) throws DuplicateExtensionException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-        Context cin = resellerContext2Context(ctx);
+        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         Context res = ((OXContextInterface)rmistub).getData(cin, auth);
         return new ResellerContext(res);
     }
@@ -418,7 +417,7 @@ public class OXResellerContext extends OXSOAPRMIMapper {
     }
 
     private UserModuleAccess getModuleAccessWrapper(ResellerContext ctx, Credentials auth) throws DuplicateExtensionException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-        Context cin = resellerContext2Context(ctx);
+        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         return ((OXContextInterface)rmistub).getModuleAccess(cin, auth);
     }
     /**
@@ -551,104 +550,6 @@ public class OXResellerContext extends OXSOAPRMIMapper {
             reconnect(true);
             return listByFilestoreWrapper(fs, auth);
         }
-    }
-
-    /**
-     * Same as {@link OXContextInterface#moveContextDatabase(Context, Database, Credentials)}
-     * 
-     * @param ctx
-     * @param dst_database_id
-     * @param auth
-     * @return
-     * @throws RemoteException
-     * @throws InvalidCredentialsException
-     * @throws NoSuchContextException
-     * @throws StorageException
-     * @throws InvalidDataException
-     * @throws DatabaseUpdateException
-     * @throws OXContextException
-     */
-    public int moveContextDatabase(ResellerContext ctx, Database dst_database_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
-        reconnect();
-        try {
-            return ((OXContextInterface)rmistub).moveContextDatabase(ctx, dst_database_id, auth);
-        } catch( ConnectException e) {
-            reconnect(true);
-            return ((OXContextInterface)rmistub).moveContextDatabase(ctx, dst_database_id, auth);
-        }
-    }
-
-    /**
-     * Same as {@link OXContextInterface#moveContextFilestore(Context, Filestore, Credentials)}
-     * 
-     * @param ctx
-     * @param dst_filestore_id
-     * @param auth
-     * @return
-     * @throws RemoteException
-     * @throws InvalidCredentialsException
-     * @throws NoSuchContextException
-     * @throws StorageException
-     * @throws InvalidDataException
-     * @throws NoSuchFilestoreException
-     * @throws NoSuchReasonException
-     * @throws OXContextException
-     */
-    public int moveContextFilestore(ResellerContext ctx, Filestore dst_filestore_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
-        reconnect();
-        try {
-            return ((OXContextInterface)rmistub).moveContextFilestore(ctx, dst_filestore_id, auth);
-        } catch( ConnectException e) {
-            reconnect(true);
-            return ((OXContextInterface)rmistub).moveContextFilestore(ctx, dst_filestore_id, auth);
-        }
-    }
-
-    /**
-     * Same as {@link OXContextInterface#getAdminId(Context, Credentials)}
-     * 
-     * @param ctx
-     * @param auth
-     * @return
-     * @throws RemoteException
-     * @throws InvalidCredentialsException
-     * @throws StorageException
-     */
-    public int getAdminId(ResellerContext ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException {
-        reconnect();
-        try {
-            return ((OXContextInterface)rmistub).getAdminId(ctx, auth);
-        } catch( ConnectException e) {
-            reconnect(true);
-            return ((OXContextInterface)rmistub).getAdminId(ctx, auth);
-        }
-    }
-
-    /**
-     * @param ctx
-     * @return
-     * @throws DuplicateExtensionException
-     */
-    private Context resellerContext2Context(ResellerContext ctx) throws DuplicateExtensionException {
-        Context ret = new Context();
-        ret.setAverage_size(ctx.getAverage_size());
-        ret.setEnabled(ctx.getEnabled());
-        ret.setFilestore_name(ctx.getFilestore_name());
-        ret.setFilestoreId(ctx.getFilestoreId());
-        ret.setLoginMappings(ctx.getLoginMappings());
-        ret.setMaintenanceReason(ctx.getMaintenanceReason());
-        ret.setMaxQuota(ctx.getMaxQuota());
-        ret.setName(ctx.getName());
-        ret.setReadDatabase(ctx.getReadDatabase());
-        ret.setUsedQuota(ctx.getUsedQuota());
-        ret.setWriteDatabase(ctx.getWriteDatabase());
-        OXContextExtensionImpl ctxext = new OXContextExtensionImpl();
-        ctxext.setCustomid(ctx.getCustomid());
-        ctxext.setOwner(ctx.getOwner());
-        ctxext.setRestriction(ctx.getRestriction());
-        ctxext.setSid(ctx.getSid());
-        ret.addExtension(ctxext);
-        return ret;
     }
 
 
