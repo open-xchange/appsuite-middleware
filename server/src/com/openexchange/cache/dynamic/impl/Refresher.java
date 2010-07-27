@@ -103,10 +103,7 @@ public abstract class Refresher<T extends Serializable> {
     }
 
     protected void cache(T obj) throws CacheException {
-        final Cache cache = getCache();
-        if (null != cache) {
-            cache.put(factory.getKey(), obj);
-        }
+        cache(obj, getCache(), factory);
     }
 
     /**
@@ -115,6 +112,30 @@ public abstract class Refresher<T extends Serializable> {
      */
     protected T refresh() throws AbstractOXException {
         return refresh(regionName, factory);
+    }
+
+    public static <T extends Serializable> T cache(T obj, Cache cache, OXObjectFactory<T> factory) throws CacheException {
+        T retval = null;
+        final Lock lock = factory.getCacheLock();
+        final Serializable key = factory.getKey(); 
+        lock.lock();
+        try {
+            Object tmp = cache.get(key);
+            if (null == tmp) {
+                cache.put(key, obj);
+            } else if (tmp instanceof Condition) {
+                cache.put(key, obj);
+                ((Condition) tmp).signalAll();
+            } else {
+                // If object is already in cache, return it instead of putting new object into cache.
+                @SuppressWarnings("unchecked")
+                T tmp2 = (T) tmp;
+                retval = tmp2;
+            }
+        } finally {
+            lock.unlock();
+        }
+        return retval;
     }
 
     public static <T extends Serializable> T refresh(String regionName, OXObjectFactory<T> factory) throws AbstractOXException {
@@ -148,7 +169,9 @@ public abstract class Refresher<T extends Serializable> {
                     // Other thread finished loading the object.
                     final Object tmp2 = cache.get(key);
                     if (null != tmp2 && !(tmp2 instanceof Condition)) {
-                        retval = (T) tmp2;
+                        @SuppressWarnings("unchecked")
+                        T tmp3 = (T) tmp;
+                        retval = tmp3;
                         cond = null;
                     }
                 } else {
@@ -156,9 +179,10 @@ public abstract class Refresher<T extends Serializable> {
                     LOG.warn("Found 2 threads loading object \"" + String.valueOf(key) + "\" after 1 second into Cache \"" + regionName + "\"");
                 }
             } else {
-                // Only other option is that the cache contains the delegate
-                // object.
-                retval = (T) tmp;
+                // Only other option is that the cache contains the delegate object.
+                @SuppressWarnings("unchecked")
+                T tmp2 = (T) tmp;
+                retval = tmp2;
             }
         } catch (final InterruptedException e) {
             LOG.error(e.getMessage(), e);
