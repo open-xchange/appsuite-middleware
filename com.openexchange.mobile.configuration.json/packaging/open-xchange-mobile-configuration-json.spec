@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -89,5 +89,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/groupware/*
 
 %changelog
+* Mon Jul 26 2010 - benjamin.otterbach@open-xchange.com
+  - Added UI activator file for server
+  - Disabled configurations for optional mobile device descriptions (S60, BB)
 * Fri May 28 2010 - benjamin.otterbach@open-xchange.com
   - Initial import

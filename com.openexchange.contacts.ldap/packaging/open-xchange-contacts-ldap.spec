@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 12
+%define		ox_release 13
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -117,6 +117,11 @@ fi
 %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/contacts-ldap/*/*.example
 
 %changelog
+* Wed Jul 14 2010 - dennis.sieben@open-xchange.com
+ - Bugfix #16049 - [L3] Distribution list not available after update
+   - Added fallback to creation date if modified date is not available
+   - Added missing mapping for creation date in ADS
+   - Added two more properties: pooltimeout and derefAliases
 * Tue Apr 20 2010 - dennis.sieben@open-xchange.com
  - Bugfix #15899 - Global addressbook doesn't return results via EAS once contacts-ldap is installed
    - Add new check for null values

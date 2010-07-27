@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 12
+%define		ox_release 13
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -544,14 +544,63 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Jul 26 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #16553: Correct timer arrays length to avoid NPE.
+* Mon Jul 26 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16558: Fixed a NullPointerException in FolderCacheManager when putting loaded folders through an FolderObjectIterator into the 
+   cache.
+ - Bugfix #16561: Fixed a cleared prefetch structure in FolderObjectIterator when it should not be cleared because it is needed afterwards.
+* Thu Jul 22 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16545: Revoking optimization for loading folder permissions along with finding the folder.
+* Thu Jul 22 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #16547: Get rid of context based methods in ImageService (and underlying implementation), bind session to image uids
+* Wed Jul 21 2010 - choeger@open-xchange.com
+ - Bugfix #16529: Errors when updating OX Packages on RHEL5
+* Wed Jul 21 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16492: Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now for insert
+   appointments.
+* Wed Jul 21 2010 - tobias.prinz@open-xchange.com
+ - US1601 - serverside: ALL and LIST requests for appointments now have a new parameter called "showPrivate" (default: false). If it is set
+   to true, private appointments in shared folders are also returned, but only as anonymized appointments (lacking all information except
+   start and end date).  
+* Wed Jul 21 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #16507: Ignore timezones when writing notification mails about appointments lasting the whole day. Artificially move the end date
+   of an appointment to the previous day, if it is a whole day appointment. 
+* Wed Jul 21 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16348: filename parameter in Content-disposition: attachment header confuses Safari5. Omitting this header with this browser.
+* Tue Jul 20 2010 - steffen.templin@open-xchange.com
+ - Bugfix 16508: Users display name will be sent within notification mails.
+* Tue Jul 20 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16481: Extend field for participant confirmation comment.
+* Tue Jul 20 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15669: A display name now can be part of another display, it just is not allowed to be the same. 
+* Tue Jul 20 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16379: Not using context specific locks anymore filling a map until all memory is eaten up.
+* Mon Jul 19 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16441: Delete Exceptions for series where the start date differs from the first occurrence.
+ - Bugfix #16476: No more private appointments in search result.
+* Fri Jul 16 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16168: Requesting folder including permission information from database
+ - Bugfix #16514: Keeping order of address headers (From, To, Cc, Bcc, ...)
+ - Bugfix #16148: Improved nearly all folder database queries to include permission information and thus avoiding to request them
+                  separately for each folder
+* Fri Jul 16 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16141: On importing mails the whole import stops if one mail is corrupt.
+* Thu Jul 15 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16422: Changed log level to WARN if collecting an invalid address fails
+ - Bugfix #16483: Removed unknown import
 * Wed Jul 14 2010 - thorben.betten@open-xchange.com
  - Bugfix #16496: Proper folder information on relogin through removal from folder cache
 * Wed Jul 14 2010 - marcus.klein@open-xchange.com
  - Bugfix #16484: A loaded contact object now always contains the private flag.
+* Wed Jul 14 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #16107: Changing a series that stretches more than one week/month/year from "full time" to normal does not break the view in the
+   second week/month/year
 * Tue Jul 13 2010 - thorben.betten@open-xchange.com
  - Bugfix #16384: Fixed order of folders below user's private folder
 * Tue Jul 13 2010 - steffen.templin@open-xchange.com
- - Bugfix #16089: Confirmation status of automatically added UserParticipant in public appointments without participants is set to user settings default.
+ - Bugfix #16089: Confirmation status of automatically added UserParticipant in public appointments without participants is set to user
+   settings default.
 * Mon Jul 12 2010 - thorben.betten@open-xchange.com
  - Bugfix #16472: Keeping other attributes when replacing "src" attribute in HTML "img" tags
  - Bugfix #16461: Show every RFC822 part as a nested mail regardless of Content-Disposition header
@@ -579,8 +628,6 @@ fi
  - Bugfix #16105: Writing a warn message to the log file is some thread has to wait for a database connection because all are exhausted.
 * Fri Jul 02 2010 - thorben.betten@open-xchange.com
  - Bugfix #16407: Added warning if parsing of multipart mail failed on mail display
-* Fri Jul 02 2010 - tobias.prinz@open-xchange.com
- - Bugfix #15662: A display name now can be part of another display, it just is not allowed to be the same. 
 * Wed Jun 30 2010 - tobias.prinz@open-xchange.com
  - Bugfix #16287: Error message made easier to understand.
 * Wed Jun 30 2010 - thorben.betten@open-xchange.com
@@ -619,7 +666,8 @@ fi
 * Tue Jun 22 2010 - thorben.betten@open-xchange.com
  - Possible fix for bug #16273: Replaced ByteBuffer with ByteArrayInputStream to avoid an infinite blocking read() attempt
 * Tue Jun 22 2010 - tobias.prinz@open-xchange.com
- - US4303: IMiP invitations to primary mail addresses of an of user now work again. They failed since 06-22 in case they were sorted before alias e-mail addresses on the server side.
+ - US4303: IMiP invitations to primary mail addresses of an of user now work again. They failed since 06-22 in case they were sorted before
+   alias e-mail addresses on the server side.
 * Mon Jun 21 2010 - choeger@open-xchange.com
  - Bugfix #16359: java-1.5.0-sun package obsoleted on rhel5
  - Bugfix #16364: Got message about not proper configured cache ports although
@@ -712,7 +760,8 @@ fi
 * Tue May 25 2010 - marcus.klein@open-xchange.com
  - Bugfix #16117: Corrected identifier check for move to public infostore folder.
 * Fri May 21 2010 - steffen.templin@open-xchange.com
-- Bugfix #13173: If you switch several times between done and undone of a recurring task no duplicates for the next occurrence will be created.
+- Bugfix #13173: If you switch several times between done and undone of a recurring task no duplicates for the next occurrence will be
+  created.
 * Fri May 21 2010 - marcus.klein@open-xchange.com
  - Bugfix #16163: Path requests return now correct path for shared private folders.
  - Bugfix #16102: Implemented RSS messaging folder on the new folder tree.
@@ -826,7 +875,8 @@ fi
 * Wed Mar 24 2010 - thorben.betten@open-xchange.com
  - Bugfix #15655: Ignoring error when creating a default folder for an external account
 * Wed Mar 24 2010 - tobias.prinz@open-xchange.com
- - RFC 2447: IMIP behaviour: Party crashers (people not invited, e.g. responding from another e-mail address) can now be accepted as participants by the organizer of the event  
+ - RFC 2447: IMIP behaviour: Party crashers (people not invited, e.g. responding from another e-mail address) can now be accepted as
+   participants by the organizer of the event  
 * Tue Mar 23 2010 - tobias.prinz@open-xchange.com
  - Bugfix #15640: Full contact publication template now uses right keys for phone numbers
 * Thu Mar 11 2010 - marcus.klein@open-xchange.com
@@ -855,7 +905,8 @@ fi
 * Wed Mar 03 2010 - thorben.betten@open-xchange.com
  - Bugfix #15539: Allowing registration of HttpServlets without a default constructor
 * Wed Mar 03 2010 - tobias.prinz@open-xchange.com
- - Related to bug #15231: Outlook imports for different languages can now be easily extended by creating .properties files with mapping for them. 
+ - Related to bug #15231: Outlook imports for different languages can now be easily extended by creating .properties files with mapping for
+   them. 
 * Tue Mar 02 2010 - francisco.laguna@open-xchange.com
  - Bugfix #15468: Stop topward iteration when hitting parentId null
 * Tue Mar 02 2010 - thorben.betten@open-xchange.com
@@ -1168,7 +1219,8 @@ fi
 * Thu Sep 03 2009 - marcus.klein@open-xchange.com
  - Bugfix #14389: Administration daemon is now more resistant on context deletion if the context information is not complete.
 * Wed Sep 02 2009 - tobias.prinz@open-xchange.com
- - Bugfix #14350: Removed special handling of empty cells in parser, these are now treated as null. That made it possible to remove workaround for bug 7248, too.
+ - Bugfix #14350: Removed special handling of empty cells in parser, these are now treated as null. That made it possible to remove
+   workaround for bug 7248, too.
  - Bugfix #14349: VCard 3.0 allows for a list of nicknames. That led to the brackets around the nickname.
 * Tue Sep 01 2009 - francisco.laguna@open-xchange.com
  - Bugfix 14428: Don't overwrite existing secrets.
@@ -1281,7 +1333,8 @@ fi
  - New Config parameter for limiting the search range for series conflicts.
 * Thu Jul 09 2009 - francisco.laguna@open-xchange.com
  - Bugfix #14134: WebDAV Infostore disregards uploadfilesizelimitperfile.
- - Bugfix #14107: Clients may specify the ID of the task to confirm in either the request body or the parameters. If both are sent, body wins.
+ - Bugfix #14107: Clients may specify the ID of the task to confirm in either the request body or the parameters. If both are sent, body
+   wins.
  - Bugfix #14134: Infostore and Object Attachments disregard user specific file upload quotas.
 * Tue Jul 07 2009 - francisco.laguna@open-xchange.com
  - Bugfix #14082: Make webdav.version conform to new version numbering scheme.
@@ -1346,7 +1399,8 @@ fi
 * Thu Jun 25 2009 - martin.herfurth@open-xchange.com
  - Bugfix #13625: Search for Tags in appointments.
 * Thu Jun 25 2009 - francisco.laguna@open-xchange.com
- - Bugfix #12380: When during iCal import a series master is found to be outside the recurrence, create an additional appointment at the masters date.
+ - Bugfix #12380: When during iCal import a series master is found to be outside the recurrence, create an additional appointment at the
+   masters date.
  - Bugfix #13963: Default to editors language in notification mails for resource admins.
 * Thu Jun 25 2009 - marcus.klein@open-xchange.com
  - Bugfix #13360: Display, first and sure name are mandatory attributes for editing user contacts.
