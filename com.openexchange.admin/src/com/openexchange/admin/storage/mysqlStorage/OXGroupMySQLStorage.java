@@ -46,18 +46,22 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -76,96 +80,66 @@ import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
  * @author d7
- * 
+ *
  */
 public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDefaultValues {
 
     private final static Log log = LogFactory.getLog(OXGroupMySQLStorage.class);
 
-    private void changeLastModifiedOnGroup(final int context_id, final int group_id, final Connection write_ox_con) throws SQLException {
-        PreparedStatement prep_edit_group = null;
+    private void changeLastModifiedOnGroup(int ctxId, int groupId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
         try {
-            prep_edit_group = write_ox_con.prepareStatement("UPDATE groups SET lastModified=? WHERE cid=? AND id=?;");
-            prep_edit_group.setLong(1, System.currentTimeMillis());
-            prep_edit_group.setInt(2, context_id);
-            prep_edit_group.setInt(3, group_id);
-            prep_edit_group.executeUpdate();
+            stmt = con.prepareStatement("UPDATE groups SET lastModified=? WHERE cid=? AND id=?;");
+            stmt.setLong(1, System.currentTimeMillis());
+            stmt.setInt(2, ctxId);
+            stmt.setInt(3, groupId);
+            stmt.executeUpdate();
         } finally {
-            closePreparedStatement(prep_edit_group);
+            closeSQLStuff(stmt);
         }
     }
 
-    private void closePreparedStatement(final PreparedStatement prep_edit_group) {
+    private void createRecoveryData(int ctxId, Connection con, int groupId) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
-            if (prep_edit_group != null) {
-                prep_edit_group.close();
-            }
-        } catch (final SQLException ee) {
-            log.error("SQL Error", ee);
-        }
-    }
-
-    private void closeResultSet(final ResultSet rs) {
-        try {
-            if (null != rs) {
-                rs.close();
-            }
-        } catch (final SQLException ex) {
-            log.error("Error closing Resultset!", ex);
-        }
-    }
-
-    private void createRecoveryData(final int group_id, final int context_id, final Connection write_ox_con) throws SQLException {
-        PreparedStatement del_st = null;
-        ResultSet rs = null;
-        try {
-            del_st = write_ox_con.prepareStatement("SELECT identifier,displayName,gidNumber FROM groups WHERE id = ? AND cid = ?");
-            del_st.setInt(1, group_id);
-            del_st.setInt(2, context_id);
-            rs = del_st.executeQuery();
+            stmt = con.prepareStatement("SELECT identifier,displayName,gidNumber FROM groups WHERE id=? AND cid=?");
+            stmt.setInt(1, groupId);
+            stmt.setInt(2, ctxId);
+            result = stmt.executeQuery();
             String ident = null;
             String disp = null;
             int gidNumber = -1;
-            
-            if (rs.next()) {
-                ident = rs.getString("identifier");
-                disp = rs.getString("displayName");
-                gidNumber = rs.getInt("gidNumber");
-            }
-            del_st.close();
-           
-            del_st = write_ox_con.prepareStatement("INSERT into del_groups (id,cid,lastModified,identifier,displayName,gidNumber) VALUES (?,?,?,?,?,?)");
-            del_st.setInt(1, group_id);
-            del_st.setInt(2, context_id);
-            del_st.setLong(3, System.currentTimeMillis());
-            del_st.setString(4, ident);
-            del_st.setString(5, disp);
-            del_st.setInt(6, gidNumber);
-            del_st.executeUpdate();
-        } finally {
-            closeResultSet(rs);
-            closePreparedStatement(del_st);
-        }
-    }
 
-    private void doRollback(final Connection con) {
-        try {
-            if (con != null) {
-                con.rollback();
+            if (result.next()) {
+                ident = result.getString("identifier");
+                disp = result.getString("displayName");
+                gidNumber = result.getInt("gidNumber");
             }
-        } catch (final SQLException ecp) {
-            log.error("Error processing rollback of connection!", ecp);
+            stmt.close();
+
+            stmt = con.prepareStatement("INSERT into del_groups (id,cid,lastModified,identifier,displayName,gidNumber) VALUES (?,?,?,?,?,?)");
+            stmt.setInt(1, groupId);
+            stmt.setInt(2, ctxId);
+            stmt.setLong(3, System.currentTimeMillis());
+            stmt.setString(4, ident);
+            stmt.setString(5, disp);
+            stmt.setInt(6, gidNumber);
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(result);
+            closeSQLStuff(stmt);
         }
     }
 
     private Group get(final Context ctx, final Group grp, final Connection con) throws StorageException {
         PreparedStatement prep_list = null;
         ResultSet rs = null;
-        final int context_ID = ctx.getId();
+        final int context_ID = i(ctx.getId());
         try {
             prep_list = con.prepareStatement("SELECT cid,identifier,displayName FROM groups WHERE groups.cid = ? AND groups.id = ?");
             prep_list.setInt(1, context_ID);
-            prep_list.setInt(2, grp.getId());
+            prep_list.setInt(2, i(grp.getId()));
             rs = prep_list.executeQuery();
 
             while (rs.next()) {
@@ -174,502 +148,486 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 grp.setName(ident);
                 grp.setDisplayname(disp);
             }
-            final Integer []members = getMembers(ctx, grp.getId(), con);
+            final Integer []members = getMembers(ctx, i(grp.getId()), con);
             if (members != null) {
                 grp.setMembers(members);
             }
         } catch (final SQLException sql) {
-            log.error("SQL Error", sql);            
-            throw new StorageException(sql.toString());       
+            log.error("SQL Error", sql);
+            throw new StorageException(sql.toString());
         } finally {
-            closeResultSet(rs);
-            closePreparedStatement(prep_list);
+            closeSQLStuff(rs);
+            closeSQLStuff(prep_list);
         }
         return grp;
     }
 
-    private Integer[] getMembers(final Context ctx, final int grp_id, final Connection con) throws StorageException {        
-        PreparedStatement prep_list = null;
-        final int context_id = ctx.getId();
+    private Integer[] getMembers(Context ctx, int groupId, Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        final int ctxId = i(ctx.getId());
         try {
-            prep_list = con.prepareStatement("SELECT member FROM groups_member WHERE groups_member.cid = ? AND groups_member.id = ?;");
-            prep_list.setInt(1, context_id);
-            prep_list.setInt(2, grp_id);
-            final ResultSet rs = prep_list.executeQuery();
-            final ArrayList<Integer> ids = new ArrayList<Integer>();
-            while (rs.next()) {
-                ids.add(rs.getInt("member"));
+            stmt = con.prepareStatement("SELECT member FROM groups_member WHERE cid=? AND id=?");
+            stmt.setInt(1, ctxId);
+            stmt.setInt(2, groupId);
+            ResultSet result = stmt.executeQuery();
+            List<Integer> retval = new ArrayList<Integer>();
+            while (result.next()) {
+                retval.add(I(result.getInt("member")));
             }
-            return ids.toArray(new Integer[ids.size()]);        
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);            
+            return retval.toArray(new Integer[retval.size()]);
+        } catch (SQLException sql) {
+            log.error("SQL Error", sql);
             throw new StorageException(sql.toString());
         } finally {
-            closePreparedStatement(prep_list);
+            closeSQLStuff(stmt);
         }
     }
 
-    private void pushConnectionforContext(final Connection con, final int context_id) {
+    private void pushConnectionforContext(Connection con, int ctxId) {
         try {
             if (null != con) {
-                cache.pushConnectionForContext(context_id, con);
+                cache.pushConnectionForContext(ctxId, con);
             }
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Error pushing ox connection to pool!", e);
         }
     }
 
     @Override
-    public void addMember(final Context ctx, final int grp_id, final User[] members) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_add_member = null;
-        final int context_id = ctx.getId().intValue();
+    public void addMember(Context ctx, int groupId, User[] members) throws StorageException {
+        final int ctxId = i(ctx.getId());
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(context_id);
-            con.setAutoCommit(false);
-
-            for (final User member : members) {
-                prep_add_member = con.prepareStatement("INSERT INTO groups_member VALUES (?,?,?);");
-                prep_add_member.setInt(1, context_id);
-                prep_add_member.setInt(2, grp_id);
-                prep_add_member.setInt(3, member.getId());
-                prep_add_member.executeUpdate();
-                prep_add_member.close();
-            }
-
-            // set last modified on group
-            changeLastModifiedOnGroup(context_id, grp_id, con);
-            final OXUserMySQLStorage oxu = new OXUserMySQLStorage();
-            for (final User member : members) {
-                oxu.changeLastModified(member.getId(), ctx, con);
-            }
-            
-            // let the groupware api know that the group has changed
-            OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
-            
-            con.commit();
-        } catch (final DataTruncation dt) {
-            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            doRollback(con);
-            throw new StorageException(sql.toString());
-        } catch (final PoolException e) {
+            con = cache.getConnectionForContext(ctxId);
+        } catch (PoolException e) {
             log.error("Pool Error", e);
-            doRollback(con);
             throw new StorageException(e);
+        }
+        PreparedStatement stmt = null;
+        try {
+            con.setAutoCommit(false);
+            stmt = con.prepareStatement("INSERT INTO groups_member VALUES (?,?,?);");
+            stmt.setInt(1, ctxId);
+            stmt.setInt(2, groupId);
+            for (final User member : members) {
+                stmt.setInt(3, i(member.getId()));
+                stmt.addBatch();
+            }
+            stmt.executeUpdate();
+            // set last modified on group
+            changeLastModifiedOnGroup(ctxId, groupId, con);
+            Integer[] memberIds = new Integer[members.length];
+            for (int i = 0; i < members.length; i++) {
+                memberIds[i] = members[i].getId();
+            }
+            changeLastModifiedOfGroupMembers(ctx, con, memberIds);
+            // let the groupware api know that the group has changed
+            OXFolderAdminHelper.propagateGroupModification(groupId, con, con, ctxId);
+            con.commit();
+        } catch (DataTruncation dt) {
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            rollback(con);
+            throw AdminCache.parseDataTruncation(dt);
+        } catch (SQLException sql) {
+            log.error("SQL Error", sql);
+            rollback(con);
+            throw new StorageException(sql.toString());
         } finally {
-            closePreparedStatement(prep_add_member);
-            pushConnectionforContext(con, context_id);
+            closeSQLStuff(stmt);
+            pushConnectionforContext(con, ctxId);
         }
     }
-    
+
     @Override
     public void change(final Context ctx, final Group grp) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_edit_group = null;
-        final int context_id = ctx.getId();
+        final int ctxId = i(ctx.getId());
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(context_id);
+            con = cache.getConnectionForContext(ctxId);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        PreparedStatement stmt = null;
+        try {
             con.setAutoCommit(false);
-            final int group_id = grp.getId();
+            final int groupId = i(grp.getId());
             final String identifier = grp.getName();
             if (null != identifier) {
-                prep_edit_group = con.prepareStatement("UPDATE groups SET identifier=? WHERE cid=? AND id = ?");
-                prep_edit_group.setString(1, identifier);
-                prep_edit_group.setInt(2, context_id);
-                prep_edit_group.setInt(3, group_id);
-                prep_edit_group.executeUpdate();
-                prep_edit_group.close();
+                stmt = con.prepareStatement("UPDATE groups SET identifier=? WHERE cid=? AND id=?");
+                stmt.setString(1, identifier);
+                stmt.setInt(2, ctxId);
+                stmt.setInt(3, groupId);
+                stmt.executeUpdate();
+                stmt.close();
             }
-
             final String displayName = grp.getDisplayname();
             if (null != displayName) {
-                prep_edit_group = con.prepareStatement("UPDATE groups SET displayName=? WHERE cid=? AND id = ?");
-                prep_edit_group.setString(1, displayName);
-                prep_edit_group.setInt(2, context_id);
-                prep_edit_group.setInt(3, group_id);
-                prep_edit_group.executeUpdate();
-                prep_edit_group.close();
+                stmt = con.prepareStatement("UPDATE groups SET displayName=? WHERE cid=? AND id=?");
+                stmt.setString(1, displayName);
+                stmt.setInt(2, ctxId);
+                stmt.setInt(3, groupId);
+                stmt.executeUpdate();
+                stmt.close();
             }
             // check for members and add them after deleting old ones, cause we overwrite the members in this method (change)
-            final Integer[] members = grp.getMembers();
-            if (members != null) {
+            final Integer[] memberIds = grp.getMembers();
+            if (memberIds != null) {
                 // first delete all old members
-                prep_edit_group = con.prepareStatement("DELETE FROM groups_member WHERE cid = ? AND id = ?");
-                prep_edit_group.setInt(1, context_id);
-                prep_edit_group.setInt(2, group_id);
-                prep_edit_group.executeUpdate();
-                prep_edit_group.close();
-
-                final Integer[] as = members;
-                for (final Integer member_id : as) {
-                    prep_edit_group = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
-                    prep_edit_group.setInt(1, context_id);
-                    prep_edit_group.setInt(2, group_id);
-                    prep_edit_group.setInt(3, member_id);
-                    prep_edit_group.executeUpdate();
-                    prep_edit_group.close();
-                }                
-            } else if (null == members && grp.isMembersset()) {
-                prep_edit_group = con.prepareStatement("DELETE FROM groups_member WHERE cid = ? AND id = ?");
-                prep_edit_group.setInt(1, context_id);
-                prep_edit_group.setInt(2, group_id);
-                prep_edit_group.executeUpdate();
-                prep_edit_group.close();
+                stmt = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=?");
+                stmt.setInt(1, ctxId);
+                stmt.setInt(2, groupId);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
+                for (final Integer memberId : memberIds) {
+                    stmt.setInt(1, ctxId);
+                    stmt.setInt(2, groupId);
+                    stmt.setInt(3, i(memberId));
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                stmt.close();
+                changeLastModifiedOfGroupMembers(ctx, con, memberIds);
+            } else if (grp.isMembersset()) {
+                changeLastModifiedOfGroupMembers(ctx, con, getMembers(ctx, groupId, con));
+                stmt = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=?");
+                stmt.setInt(1, ctxId);
+                stmt.setInt(2, groupId);
+                stmt.executeUpdate();
+                stmt.close();
             }
-
             // set last modified
-            changeLastModifiedOnGroup(context_id, group_id, con);
-
+            changeLastModifiedOnGroup(ctxId, groupId, con);
             con.commit();
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            rollback(con);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException e) {
-           log.error("SQL Error", e);
-            doRollback(con);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            rollback(con);
             throw new StorageException(e.toString());
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            doRollback(con);
-            throw new StorageException(e);
         } finally {
-            closePreparedStatement(prep_edit_group);
-            pushConnectionforContext(con, context_id);
+            closeSQLStuff(stmt);
+            pushConnectionforContext(con, ctxId);
+        }
+    }
+
+    private void changeLastModifiedOfGroupMembers(Context ctx, Connection con, Integer[] memberIds) throws StorageException {
+        final OXUserMySQLStorage oxu = new OXUserMySQLStorage();
+        for (Integer memberId : memberIds) {
+            oxu.changeLastModified(i(memberId), ctx, con);
         }
     }
 
     @Override
-    public int create(final Context ctx, final Group grp) throws StorageException {
-        int retval = -1;
-        Connection con = null;
-        PreparedStatement prep_insert = null;
-        final int context_id = ctx.getId().intValue();
+    public int create(Context ctx, Group group) throws StorageException {
+        final int ctxId = i(ctx.getId());
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(context_id);
+            con = cache.getConnectionForContext(ctxId);
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        PreparedStatement stmt = null;
+        final int groupId;
+        try {
             con.setAutoCommit(false);
-            final String identifier = grp.getName();
-
-            final String displayName = grp.getDisplayname();
-            final int groupID = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, con);
+            final String identifier = group.getName();
+            final String displayName = group.getDisplayname();
+            groupId = IDGenerator.getId(ctxId, com.openexchange.groupware.Types.PRINCIPAL, con);
             con.commit();
-            
-            int gid_number = -1;
-            if(Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"))>0){
-                gid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.GID_NUMBER, con);
+            int gidNumber = -1;
+            if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1")) > 0) {
+                gidNumber = IDGenerator.getId(ctxId, com.openexchange.groupware.Types.GID_NUMBER, con);
                 con.commit();
             }
-            
-            prep_insert = con.prepareStatement("INSERT INTO groups (cid,id,identifier,displayName,lastModified,gidnumber) VALUES (?,?,?,?,?,?);");
-            prep_insert.setInt(1, context_id);
-            prep_insert.setInt(2, groupID);
-            prep_insert.setString(3, identifier);
-            prep_insert.setString(4, displayName);
-            prep_insert.setLong(5, System.currentTimeMillis());
-            if (-1 != gid_number) {
-                prep_insert.setInt(6, gid_number);
+            stmt = con.prepareStatement("INSERT INTO groups (cid,id,identifier,displayName,lastModified,gidnumber) VALUES (?,?,?,?,?,?)");
+            stmt.setInt(1, ctxId);
+            stmt.setInt(2, groupId);
+            stmt.setString(3, identifier);
+            stmt.setString(4, displayName);
+            stmt.setLong(5, System.currentTimeMillis());
+            if (-1 != gidNumber) {
+                stmt.setInt(6, gidNumber);
             } else {
-                prep_insert.setInt(6, NOGROUP);
+                stmt.setInt(6, NOGROUP);
             }
-            prep_insert.executeUpdate();
-            prep_insert.close();
-            
+            stmt.executeUpdate();
+            stmt.close();
             // check for members and add them
-            if (grp.getMembers() != null && grp.getMembers().length > 0) {
-                final Integer[] as = grp.getMembers();
-                for (final Integer member_id : as) {
-                    prep_insert = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
-                    prep_insert.setInt(1, context_id);
-                    prep_insert.setInt(2, groupID);
-                    prep_insert.setInt(3, member_id);
-                    prep_insert.executeUpdate();
-                    prep_insert.close();
-                }                
+            if (group.getMembers() != null && group.getMembers().length > 0) {
+                stmt = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
+                stmt.setInt(1, ctxId);
+                stmt.setInt(2, groupId);
+                for (Integer memberId : group.getMembers()) {
+                    stmt.setInt(3, i(memberId));
+                    stmt.addBatch();
+                }
+                stmt.executeUpdate();
+                stmt.close();
+                changeLastModifiedOfGroupMembers(ctx, con, group.getMembers());
             }
-            
             con.commit();
-            
-            retval = groupID;
             if (log.isInfoEnabled()) {
-                log.info("Group " + groupID + " created!");
+                log.info("Group " + groupId + " created!");
             }
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            rollback(con);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException sql) {
+        } catch (SQLException sql) {
             log.error("SQL Error", sql);
-            doRollback(con);
+            rollback(con);
             throw new StorageException(sql.toString());
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            doRollback(con);
-            throw new StorageException(e);
         } finally {
-            closePreparedStatement(prep_insert);
-            pushConnectionforContext(con, context_id);
+            closeSQLStuff(stmt);
+            pushConnectionforContext(con, ctxId);
         }
-
-        return retval;
+        return groupId;
     }
 
     @Override
-	public void delete(final Context ctx, final Group[] grps) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_del_members = null;
-        PreparedStatement prep_del_group = null;
-        final int context_id = ctx.getId();
+    public void delete(Context ctx, Group[] groups) throws StorageException {
+        final int ctxId = i(ctx.getId());
+        final Connection con;
+        try {
+            con = cache.getConnectionForContext(ctxId);
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        PreparedStatement stmt1 = null;
+        PreparedStatement stmt2 = null;
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            
-            tool.existsGroup(ctx, grps);
-
-            con = cache.getConnectionForContext(context_id);
+            tool.existsGroup(ctx, groups);
             con.setAutoCommit(false);
-            for (final Group grp : grps) {
-                final int grp_id = grp.getId();
-//              let the groupware api know that the group will be deleted
-                OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
-                
-                final DeleteEvent delev = new DeleteEvent(this, grp_id, DeleteEvent.TYPE_GROUP, context_id);
-                DeleteRegistry.getInstance().fireDeleteEvent(delev, con, con);
+            for (Group group : groups) {
+                int groupId = i(group.getId());
+                // let the groupware api know that the group will be deleted
+                OXFolderAdminHelper.propagateGroupModification(groupId, con, con, ctxId);
+                DeleteRegistry.getInstance().fireDeleteEvent(new DeleteEvent(this, groupId, DeleteEvent.TYPE_GROUP, ctxId), con, con);
 
-                prep_del_members = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=?");
-                prep_del_members.setInt(1, context_id);
-                prep_del_members.setInt(2, grp_id);
-                prep_del_members.executeUpdate();
-                prep_del_members.close();
+                changeLastModifiedOfGroupMembers(ctx, con, getMembers(ctx, groupId, con));
+                stmt1 = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=?");
+                stmt1.setInt(1, ctxId);
+                stmt1.setInt(2, groupId);
+                stmt1.executeUpdate();
+                stmt1.close();
 
-                createRecoveryData(grp_id, context_id, con);
+                createRecoveryData(ctxId, con, groupId);
 
-                prep_del_group = con.prepareStatement("DELETE FROM groups WHERE cid=? AND id=?");
-                prep_del_group.setInt(1, context_id);
-                prep_del_group.setInt(2, grp_id);
-                prep_del_group.executeUpdate();
-                prep_del_group.close();
+                stmt2 = con.prepareStatement("DELETE FROM groups WHERE cid=? AND id=?");
+                stmt2.setInt(1, ctxId);
+                stmt2.setInt(2, groupId);
+                stmt2.executeUpdate();
+                stmt2.close();
             }
-            
             con.commit();
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            doRollback(con);
-            throw new StorageException(sql.toString());
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            doRollback(con);
-            throw new StorageException(e);
-        } catch (final DeleteFailedException e) {
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            rollback(con);
+            throw new StorageException(e.toString());
+        } catch (DeleteFailedException e) {
             log.error("Delete Error", e);
-            doRollback(con);
+            rollback(con);
             throw new StorageException(e.toString());
-        } catch (final ContextException e) {
+        } catch (ContextException e) {
             log.error("Context Error", e);
-            doRollback(con);
+            rollback(con);
             throw new StorageException(e.toString());
         } finally {
-            closePreparedStatement(prep_del_members);
-            closePreparedStatement(prep_del_group);
-            pushConnectionforContext(con, context_id);
+            closeSQLStuff(stmt1);
+            closeSQLStuff(stmt2);
+            pushConnectionforContext(con, ctxId);
         }
     }
 
     @Override
-    public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
-        // delete from del_groups table
-        PreparedStatement del_st = null;
-        final int context_id = ctx.getId();
+    public void deleteAllRecoveryData(Context ctx, Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        final int ctxId = i(ctx.getId());
         try {
-            del_st = con.prepareStatement("DELETE from del_groups WHERE cid = ?");
-            del_st.setInt(1, context_id);
-            del_st.executeUpdate();
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            doRollback(con);
-            throw new StorageException(sql.toString());
+            stmt = con.prepareStatement("DELETE FROM del_groups WHERE cid=?");
+            stmt.setInt(1, ctxId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            rollback(con);
+            throw new StorageException(e.toString());
         } finally {
-            closePreparedStatement(del_st);
+            closeSQLStuff(stmt);
         }
     }
 
     @Override
-    public void deleteRecoveryData(final Context ctx, final int group_id, final Connection con) throws StorageException {
-        // delete from del_groups table
-        PreparedStatement del_st = null;
-        final int context_id = ctx.getId();
+    public void deleteRecoveryData(Context ctx, int groupId, Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        final int ctxId = i(ctx.getId());
         try {
-            del_st = con.prepareStatement("DELETE from del_groups WHERE id = ? AND cid = ?");
-            del_st.setInt(1, group_id);
-            del_st.setInt(2, context_id);
-            del_st.executeUpdate();
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            doRollback(con);
-            throw new StorageException(sql.toString());
+            stmt = con.prepareStatement("DELETE FROM del_groups WHERE id=? AND cid=?");
+            stmt.setInt(1, groupId);
+            stmt.setInt(2, ctxId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            rollback(con);
+            throw new StorageException(e.toString());
         } finally {
-            closePreparedStatement(del_st);
+            closeSQLStuff(stmt);
         }
     }
 
     @Override
-    public Group get(final Context ctx, final Group grp) throws StorageException {
-        Connection con = null;
+    public Group get(Context ctx, Group group) throws StorageException {
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(ctx.getId().intValue());
-
-            return get(ctx, grp, con);        
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);            
-            throw new StorageException(e);
-        } finally {
-            pushConnectionforContext(con, ctx.getId().intValue());
-        }
-    }
-
-    @Override
-    public Group[] getGroupsForUser(final Context ctx, final User usr) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_list = null;
-        try {
-            con = cache.getConnectionForContext(ctx.getId().intValue());
-            // fetch all group ids the user is member of
-            prep_list = con.prepareStatement("SELECT id FROM groups_member WHERE cid = ? AND member = ?");
-            prep_list.setInt(1, ctx.getId().intValue());
-            prep_list.setInt(2, usr.getId().intValue());
-
-            final ResultSet rs = prep_list.executeQuery();
-            final ArrayList<Group> grplist = new ArrayList<Group>();
-            while (rs.next()) {
-                grplist.add(get(ctx, new Group(rs.getInt("id")), con));
-            }
-            return grplist.toArray(new Group[grplist.size()]);
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            throw new StorageException(sql.toString());
-        } catch (final PoolException e) {
+            con = cache.getConnectionForContext(i(ctx.getId()));
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
+        }
+        try {
+            return get(ctx, group, con);
         } finally {
-            closePreparedStatement(prep_list);
-            pushConnectionforContext(con, ctx.getId().intValue());
+            pushConnectionforContext(con, i(ctx.getId()));
         }
     }
 
     @Override
-    public User[] getMembers(final Context ctx, final int grp_id) throws StorageException {
-        Connection con = null;
-        final int context_id = ctx.getId();
+    public Group[] getGroupsForUser(Context ctx, User user) throws StorageException {
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(context_id);
-            
-            final Integer[] as =  getMembers(ctx, grp_id,con);
-            final User[] ret = new User[as.length];
-            for (int i = 0; i < as.length; i++) {
-                final User u = new User(as[i]);
-                ret[i] = u;
-            }
-            return ret;
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);            
+            con = cache.getConnectionForContext(i(ctx.getId()));
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
             throw new StorageException(e);
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("SELECT id FROM groups_member WHERE cid=? AND member=?");
+            stmt.setInt(1, i(ctx.getId()));
+            stmt.setInt(2, i(user.getId()));
+            ResultSet result = stmt.executeQuery();
+            List<Group> groups = new ArrayList<Group>();
+            while (result.next()) {
+                groups.add(get(ctx, new Group(I(result.getInt(1))), con));
+            }
+            return groups.toArray(new Group[groups.size()]);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
         } finally {
-            pushConnectionforContext(con, context_id);
+            closeSQLStuff(stmt);
+            pushConnectionforContext(con, i(ctx.getId()));
         }
     }
 
     @Override
-    public Group[] list(final Context ctx, final String pattern) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_list = null;
-        ResultSet rs = null;
-        final int context_id = ctx.getId();
+    public User[] getMembers(Context ctx, int groupId) throws StorageException {
+        final int ctxId = i(ctx.getId());
+        final Connection con;
         try {
-            String pattern_temp = null;
-            if (pattern != null) {
-                pattern_temp = pattern.replace('*', '%');
+            con = cache.getConnectionForContext(ctxId);
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        try {
+            final Integer[] memberIds = getMembers(ctx, groupId, con);
+            User[] members = new User[memberIds.length];
+            for (int i = 0; i < memberIds.length; i++) {
+                members[i] = new User(i(memberIds[i]));
             }
+            return members;
+        } finally {
+            pushConnectionforContext(con, ctxId);
+        }
+    }
 
-            con = cache.getConnectionForContext(context_id);
-
-            prep_list = con.prepareStatement("SELECT cid,id,identifier,displayName FROM groups WHERE groups.cid = ? AND (identifier like ? OR displayName like ?)");
-            prep_list.setInt(1, context_id);
-            prep_list.setString(2, pattern_temp);
-            prep_list.setString(3, pattern_temp);
-            rs = prep_list.executeQuery();
-
-            final ArrayList<Group> list = new ArrayList<Group>();
-            while (rs.next()) {
-                // int cid = rs.getInt("cid");
-                final int id = rs.getInt("id");
-                final String ident = rs.getString("identifier");
-                final String disp = rs.getString("displayName");
-                // data.put(I_OXGroup.CID,cid);
-                final Group retgrp = new Group(id, ident, disp);
-                final Integer []members = getMembers(ctx, id, con);
-                if (members != null) {
-                    retgrp.setMembers(members);
+    @Override
+    public Group[] list(Context ctx, String pattern) throws StorageException {
+        String sqlPattern = null;
+        if (pattern != null) {
+            sqlPattern = pattern.replace('*', '%');
+        }
+        final int ctxId = i(ctx.getId());
+        final Connection con;
+        try {
+            con = cache.getConnectionForContext(ctxId);
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid,id,identifier,displayName FROM groups WHERE cid=? AND (identifier LIKE ? OR displayName LIKE ?)");
+            stmt.setInt(1, ctxId);
+            stmt.setString(2, sqlPattern);
+            stmt.setString(3, sqlPattern);
+            result = stmt.executeQuery();
+            List<Group> groups = new ArrayList<Group>();
+            while (result.next()) {
+                Group group = new Group(I(result.getInt(2)), result.getString(3), result.getString(4));
+                Integer[] memberIds = getMembers(ctx, i(group.getId()), con);
+                if (memberIds != null) {
+                    group.setMembers(memberIds);
                 }
-                list.add(retgrp);
+                groups.add(group);
             }
-            return list.toArray(new Group[list.size()]);
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);            
-            throw new StorageException(sql.toString());
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);            
-            throw new StorageException(e);
+            return groups.toArray(new Group[groups.size()]);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
         } finally {
-            closeResultSet(rs);
-            closePreparedStatement(prep_list);
-            pushConnectionforContext(con, context_id);
+            closeSQLStuff(result);
+            closeSQLStuff(stmt);
+            pushConnectionforContext(con, ctxId);
         }
     }
 
     @Override
-    public void removeMember(final Context ctx, final int grp_id, final User[] members) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_del_member = null;
-        final int context_id = ctx.getId().intValue();
+    public void removeMember(Context ctx, int groupId, User[] members) throws StorageException {
+        final int ctxId = i(ctx.getId());
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(context_id);
+            con = cache.getConnectionForContext(ctxId);
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        PreparedStatement stmt = null;
+        try {
             con.setAutoCommit(false);
-
-            for (final User member : members) {
-                prep_del_member = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=? AND member=?;");
-                prep_del_member.setInt(1, context_id);
-                prep_del_member.setInt(2, grp_id);
-                prep_del_member.setInt(3, member.getId());
-                prep_del_member.executeUpdate();
-                prep_del_member.close();
+            stmt = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=? AND member=?");
+            stmt.setInt(1, ctxId);
+            stmt.setInt(2, groupId);
+            for (User member : members) {
+                stmt.setInt(3, i(member.getId()));
+                stmt.addBatch();
             }
-
+            stmt.executeUpdate();
             // set last modified
-            changeLastModifiedOnGroup(context_id, grp_id, con);
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            final OXUserMySQLStorage oxu = new OXUserMySQLStorage();
-            for (final User member : members) {
-                if (tool.existsUser(ctx, member.getId())) {
-                    // update last modified on user
-                    oxu.changeLastModified(member.getId(), ctx, con);
-                }
+            changeLastModifiedOnGroup(ctxId, groupId, con);
+            Integer[] memberIds = new Integer[members.length];
+            for (int i = 0; i < members.length; i++) {
+                memberIds[i] = members[i].getId();
             }
-            
+            changeLastModifiedOfGroupMembers(ctx, con, memberIds);
             // let the groupware api know that the group has changed
-            OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
-            
+            OXFolderAdminHelper.propagateGroupModification(groupId, con, con, ctxId);
             con.commit();
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            doRollback(con);
-            throw new StorageException(sql.toString());
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            doRollback(con);
-            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            rollback(con);
+            throw new StorageException(e.toString());
         } finally {
-            closePreparedStatement(prep_del_member);
-            pushConnectionforContext(con, context_id);
+            closeSQLStuff(stmt);
+            pushConnectionforContext(con, ctxId);
         }
     }
-
 }
