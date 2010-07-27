@@ -106,5 +106,4 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
     public TemplateToken getToken() {
         return TemplateToken.END;
     }
-
 }
