@@ -141,7 +141,7 @@ public abstract class CreateCore extends UserAbstraction {
 
     protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException, MalformedURLException, NotBoundException, ConnectException;
     
-    private void csvparsing(final String filename, final OXUserInterface oxuser) throws FileNotFoundException, IOException, InvalidDataException, ParseException {
+    private void csvparsing(final String filename, final OXUserInterface oxuser) throws FileNotFoundException, IOException, InvalidDataException {
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
         String [] nextLine;
         final int[] idarray = new int[Constants.values().length + INITIAL_CONSTANTS_VALUE];
@@ -168,60 +168,47 @@ public abstract class CreateCore extends UserAbstraction {
             throw new InvalidDataException("No columnnames found");
         }
         
-        checkRequired(idarray);
+        checkUserRequired(idarray);
         
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
             final Context context = getContext(nextLine, idarray);
-            final User adminuser = getUser(nextLine, idarray);
-            final Credentials auth = getCreds(nextLine, idarray);
-            final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
+            final User adminuser;
             try {
-                if (-1 != i) {
-                    // create call
-                    final User create = oxuser.create(context, adminuser, nextLine[i], auth);
-                    System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
-                } else {
-                    final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
-                    if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
-                        // with module access
-                        final User create = oxuser.create(context, adminuser, moduleacess, auth);
+                adminuser = getUser(nextLine, idarray);
+                final Credentials auth = getCreds(nextLine, idarray);
+                final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
+                try {
+                    if (-1 != i) {
+                        // create call
+                        final User create = oxuser.create(context, adminuser, nextLine[i], auth);
                         System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
                     } else {
-                        // without module access
-                        final User create = oxuser.create(context, adminuser, auth);
-                        System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
+                        final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
+                        if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
+                            // with module access
+                            final User create = oxuser.create(context, adminuser, moduleacess, auth);
+                            System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
+                        } else {
+                            // without module access
+                            final User create = oxuser.create(context, adminuser, auth);
+                            System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
+                        }
                     }
+                } catch (final StorageException e) {
+                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                } catch (final InvalidCredentialsException e) {
+                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                } catch (final NoSuchContextException e) {
+                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                } catch (final InvalidDataException e) {
+                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                } catch (final DatabaseUpdateException e) {
+                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
                 }
-            } catch (final StorageException e) {
-                System.err.println("Failed to create user in context " + context.getId() + ": " + e);
-            } catch (final InvalidCredentialsException e) {
-                System.err.println("Failed to create user in context " + context.getId() + ": " + e);
-            } catch (final NoSuchContextException e) {
-                System.err.println("Failed to create user in context " + context.getId() + ": " + e);
-            } catch (final InvalidDataException e) {
-                System.err.println("Failed to create user in context " + context.getId() + ": " + e);
-            } catch (final DatabaseUpdateException e) {
-                System.err.println("Failed to create user in context " + context.getId() + ": " + e);
-            }
-
-        }
-    }
-
-    /**
-     * Checks if required columns are set
-     * 
-     * @param idarray
-     * @throws InvalidDataException 
-     */
-    private void checkRequired(int[] idarray) throws InvalidDataException {
-        for (final Constants value : Constants.values()) {
-            if (value.isRequired()) {
-                if (-1 == idarray[value.getIndex()]) {
-                    throw new InvalidDataException("The required column \"" + value.getString() + "\" is missing");
-                }
+            } catch (final ParseException e1) {
+                System.err.println("Failed to create user in context " + context.getId() + ": " + e1);
             }
         }
-        
     }
 }
