@@ -1000,6 +1000,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if (-1 != j2) {
             if (nextLine[j2].length() > 0) {
                 user.setPrimaryEmail(nextLine[j2]);
+                user.setEmail1(nextLine[j2]);
             }
         }
         final int k = idarray[Constants.DISPLAYNAME.getIndex()];
