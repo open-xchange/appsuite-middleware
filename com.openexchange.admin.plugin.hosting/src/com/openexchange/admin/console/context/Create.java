@@ -134,22 +134,21 @@ public class Create extends CreateCore {
     }
 
     @Override
-    protected void simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    protected Context simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-        oxctx.create(ctx, usr, accessCombiName, auth);
+        return oxctx.create(ctx, usr, accessCombiName, auth);
     }
 
     @Override
-    protected void simpleMainCall(Context ctx, User usr, UserModuleAccess access, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    protected Context simpleMainCall(Context ctx, User usr, UserModuleAccess access, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-        oxctx.create(ctx, usr, access, auth);
-        
+        return oxctx.create(ctx, usr, access, auth);
     }
 
     @Override
-    protected void simpleMainCall(Context ctx, User usr, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    protected Context simpleMainCall(Context ctx, User usr, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-        oxctx.create(ctx, usr, auth);
+        return oxctx.create(ctx, usr, auth);
     }
 
 }
