@@ -49,38 +49,63 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import org.osgi.service.event.Event;
 import com.openexchange.api2.OXException;
+import com.openexchange.event.CommonEvent;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.events.TestEventAdmin;
 
-public class Bug11453Test extends CalendarSqlTest {
+/**
+ * {@link Bug16540Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class Bug16540Test extends CalendarSqlTest {
 
-    public void testShoulSupplyChangeExceptionInEventIfOneIsCreated() throws OXException {
-        CalendarDataObject appointment = appointments.buildBasicAppointment(D("04/06/2007 10:00"), D("04/06/2007 12:00"));
-        appointment.setRecurrenceType(CalendarDataObject.DAILY);
-        appointment.setInterval(1);
-        appointment.setIgnoreConflicts(true);
-        appointment.setOccurrence(7);
-        appointment.setRecurrenceCount(7); // *sighs*
+    public Bug16540Test() {
+        super();
+    }
+
+    public void testShouldTriggerEventOnUpdateToAlarmFlag() throws OXException {
+        Calendar c = TimeTools.createCalendar(TimeZones.UTC);
+        c.add(Calendar.DATE, 1); // Must be in the future for the reminder to not be rejected.
+        c.set(Calendar.HOUR, 10);
+        final Date start = c.getTime();
+        c.add(Calendar.HOUR, 2);
+        final Date end = c.getTime();
+
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointment.setAlarm(15);
+        appointment.setAlarmFlag(true);
+
         appointments.save(appointment);
         clean.add(appointment);
 
-        CalendarDataObject exception = appointments.createIdentifyingCopy(appointment);
-
-        exception.setRecurrencePosition(3);
-        exception.setStartDate(D("06/06/2007 15:00"));
-        exception.setEndDate(D("06/06/2007 17:00"));
+        final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setAlarmFlag(false);
+        update.setAlarm(-1);
 
         final TestEventAdmin eventAdmin = TestEventAdmin.getInstance();
         eventAdmin.clearEvents();
+        appointments.save(update);
 
-        appointments.save(exception);
-
-        CalendarDataObject appointmentFromEvent = (CalendarDataObject) eventAdmin.getNewest().getActionObj();
-
-        assertEquals(exception.getStartDate(), appointmentFromEvent.getStartDate());
-        assertEquals(exception.getEndDate(), appointmentFromEvent.getEndDate());
-
+        List<Event> events = eventAdmin.getEvents();
+        Event event = events.get(0);
+        assertEquals("Wrong topic", "com/openexchange/groupware/appointment/update", event.getTopic());
+        CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+        assertEquals("Wrong action", CommonEvent.UPDATE, commonEvent.getAction());
+        assertEquals("Wrong object identifier", appointment.getObjectID(), ((DataObject) commonEvent.getActionObj()).getObjectID());
+        assertEquals("Wrong context", appointments.getSession().getContextId(), commonEvent.getContextId());
+        assertEquals("Wrong module", Types.APPOINTMENT, commonEvent.getModule());
+        assertEquals("Wrong folder", appointments.getPrivateFolder(), ((FolderObject) commonEvent.getSourceFolder()).getObjectID());
+        assertEquals("Wrong user", appointments.getSession().getUserId(), commonEvent.getUserId());
     }
 }
