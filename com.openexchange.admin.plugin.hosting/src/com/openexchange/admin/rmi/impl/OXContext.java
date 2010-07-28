@@ -494,11 +494,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         retval.addAll(Arrays.asList(ctxs));
                     }
                 } else {
-                    final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(oxcox.getData(ctxs)), auth, oxcox);
+                    final Context[] ret = oxcox.getData(ctxs);
+                    final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ret), auth, oxcox);
                     if (null != callGetDataPlugins) {
                         retval.addAll(callGetDataPlugins);
                     } else {
-                        retval.addAll(Arrays.asList(ctxs));
+                        retval.addAll(Arrays.asList(ret));
                     }
                 }
             } catch (final StorageException e) {
