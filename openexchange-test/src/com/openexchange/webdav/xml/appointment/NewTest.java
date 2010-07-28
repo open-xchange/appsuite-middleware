@@ -375,6 +375,7 @@ public class NewTest extends AppointmentTest {
 
     public void testDailyRecurrenceWithDeletingFirstOccurrence() throws Exception {
         final Calendar c = Calendar.getInstance();
+        c.setTime(startTime);
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
