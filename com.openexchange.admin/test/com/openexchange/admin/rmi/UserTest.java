@@ -820,6 +820,8 @@ public class UserTest extends AbstractTest {
                     String oldvalue = (String)map_obj.getGetter().invoke(srv_loaded); 
                     if( map_obj.getMethodName().equals("setLanguage") ) {
                         map_obj.getSetter().invoke(tmp_usr, "fr_FR");
+                    } else if(map_obj.getMethodName().toLowerCase().contains("mail")) {
+                        getChangedEmailAddress(oldvalue, "_singlechange");
                     } else {
                         map_obj.getSetter().invoke(tmp_usr, oldvalue+"_singlechange");
                     }
@@ -1591,8 +1593,8 @@ public class UserTest extends AbstractTest {
         // retval.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
         //retval.setEmail1(usr.getEmail1()+change_suffix);
         //retval.setDefaultSenderAddress(usr.getPrimaryEmail()+change_suffix);
-        retval.setEmail2(usr.getEmail2()+change_suffix);
-        retval.setEmail3(usr.getEmail3()+change_suffix);
+        retval.setEmail2(getChangedEmailAddress(usr.getEmail2(), change_suffix));
+        retval.setEmail3(getChangedEmailAddress(usr.getEmail3(), change_suffix));
         
         retval.setDisplay_name(usr.getDisplay_name()+change_suffix);
         retval.setGiven_name(usr.getGiven_name()+change_suffix);
@@ -1600,10 +1602,10 @@ public class UserTest extends AbstractTest {
         retval.setLanguage("en_US");
         // new for testing
         
-        final HashSet<String> aliase = usr.getAliases();
+        final HashSet<String> aliases = usr.getAliases();
         final HashSet<String> lAliases = new HashSet<String>();
-        for (final String element : aliase) {
-            lAliases.add(element + "_" + change_suffix);            
+        for (final String element : aliases) {
+            lAliases.add(getChangedEmailAddress(element, change_suffix));            
         }
         lAliases.add(usr.getPrimaryEmail());
         
