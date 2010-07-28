@@ -99,6 +99,11 @@ public abstract class AbstractTest {
         return ctx;
     }
 
+    public static String getChangedEmailAddress(String address, String changed) {
+        address.replaceFirst("@", changed+"@");
+        return address;
+    }
+
     /*private int addContext(final Context ctx, final String host, final Credentials cred) throws Exception {
         return 1;
     }*/
