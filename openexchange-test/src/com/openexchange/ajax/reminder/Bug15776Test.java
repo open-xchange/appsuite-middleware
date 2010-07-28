@@ -72,6 +72,11 @@ import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
+ * This test checks the correctness of reminders that are set to appointment series after they are created.
+ * The series starts in the past and ends in the future. Another series even ends in the past.
+ * If a series has occurrences in the future a reminder should be set for the next occurring appointment.
+ * If a series even ends in the past it should not be possible to set an reminder. 
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Bug15776Test extends AbstractAJAXSession {
@@ -96,16 +101,6 @@ public class Bug15776Test extends AbstractAJAXSession {
     }
     
     public void testReminder() throws Exception {
-        
-//        ,"recurrence_position":0,
-//        "categories":"","sequence":0,
-//        ,"notification":true,
-//        "location":"""uid":"cafe3d1c-ab01-4e2f-aaf2-4a7fb2d877c9",
-//        "note":null,"modified_by":84,"recurrence_id":56274,"recurrence_start":"578620800000",
-//        "number_of_attachments":0,
-//       "timezone":"Europe/Berlin","users":[{"confirmation":1,"id":84}],"color_label":0,
-//        "created_by":84
-
         // Set the reminder
         Appointment toUpdate = appointment.clone();
         toUpdate.setAlarm(15);
@@ -134,12 +129,8 @@ public class Bug15776Test extends AbstractAJAXSession {
         rangeReq = new RangeRequest(cal.getTime());
         rangeResp = client.execute(rangeReq);
         reminder = ReminderTools.searchByTarget(rangeResp.getReminder(timezone), appointment.getObjectID());
-        
-        // Request Alarm for 
-        
-        assertNotNull("No reminder was found.", reminder);
-        
-        
+            
+        assertNotNull("No reminder was found.", reminder);        
     }
     
     public void testAlarmForReminderInThePast() throws Exception {
@@ -160,77 +151,85 @@ public class Bug15776Test extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         Appointment toDelete = client.execute(new GetRequest(appointment, false)).getAppointment(timezone);
         client.execute(new DeleteRequest(toDelete, false));
+        toDelete = client.execute(new GetRequest(pastAppointment, false)).getAppointment(timezone);
+        client.execute(new DeleteRequest(toDelete, false));
         super.tearDown();
     }
     
     private Appointment createSeriesInThePast() throws Exception {
+        // This yearly series starts 5 years ago.
+        // The last occurrence was 1 year ago.
         Calendar cal = TimeTools.createCalendar(timezone);
-        final Appointment appointmentObj = new Appointment();
+        final Appointment appointment = new Appointment();
 
-        appointmentObj.setTitle("testBug15776SeriesInThePast");
+        appointment.setTitle("testBug15776SeriesInThePast");
         cal.add(Calendar.YEAR, -5);
         cal.add(Calendar.MINUTE, 10);
-        appointmentObj.setStartDate(cal.getTime());
+        appointment.setStartDate(cal.getTime());
         cal.add(Calendar.HOUR, 1);
-        appointmentObj.setEndDate(cal.getTime());
+        appointment.setEndDate(cal.getTime());
 
-        appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        appointmentObj.setIgnoreConflicts(true);
-        appointmentObj.setNote("");
-        appointmentObj.setNotification(true);
-        appointmentObj.setPrivateFlag(false);
-        appointmentObj.setFullTime(false);
-        appointmentObj.setRecurrenceType(Appointment.YEARLY);
-        appointmentObj.setMonth(cal.get(Calendar.MONTH));
-        appointmentObj.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
+        appointment.setShownAs(Appointment.ABSENT);
+        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setIgnoreConflicts(true);
+        appointment.setNote("");
+        appointment.setNotification(true);
+        appointment.setPrivateFlag(false);
+        appointment.setFullTime(false);
+        appointment.setRecurrenceType(Appointment.YEARLY);
+        appointment.setMonth(cal.get(Calendar.MONTH));
+        appointment.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
         
-        appointmentObj.setInterval(1);
-        appointmentObj.setOccurrence(4);
+        appointment.setInterval(1);
+        appointment.setOccurrence(4);
 
         final UserParticipant newParticipant = new UserParticipant(client.getValues().getUserId());
-        appointmentObj.addParticipant(newParticipant);
+        appointment.addParticipant(newParticipant);
 
-        final InsertRequest insReq = new InsertRequest(appointmentObj, timezone, true);
+        final InsertRequest insReq = new InsertRequest(appointment, timezone, true);
         final AppointmentInsertResponse insResp = client.execute(insReq);
-        insResp.fillAppointment(appointmentObj);
+        insResp.fillAppointment(appointment);
 
-        return appointmentObj;
+        return appointment;
     }
     
     private Appointment createAppointment() throws AjaxException, IOException, SAXException, JSONException {
         Calendar cal = TimeTools.createCalendar(timezone);
+        
+        // This yearly series starts 5 years ago.
+        // The next occurrence will be in 2 hours and will last for one hour.
+        // The last occurrence will be in 15 years and 2 hours.
         cal.add(Calendar.YEAR, -5);
         cal.add(Calendar.HOUR_OF_DAY, 2);
-        final Appointment appointmentObj = new Appointment();
+        final Appointment appointment = new Appointment();
 
-        appointmentObj.setTitle("testBug15776");
-        appointmentObj.setStartDate(cal.getTime());
+        appointment.setTitle("testBug15776");
+        appointment.setStartDate(cal.getTime());
         cal.add(Calendar.HOUR, 1);
-        appointmentObj.setEndDate(cal.getTime());
+        appointment.setEndDate(cal.getTime());
 
-        appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        appointmentObj.setIgnoreConflicts(true);
-        appointmentObj.setNote("");
-        appointmentObj.setNotification(true);
-        appointmentObj.setPrivateFlag(false);
-        appointmentObj.setFullTime(false);
-        appointmentObj.setRecurrenceType(Appointment.YEARLY);
-        appointmentObj.setMonth(cal.get(Calendar.MONTH));
-        appointmentObj.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
+        appointment.setShownAs(Appointment.ABSENT);
+        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setIgnoreConflicts(true);
+        appointment.setNote("");
+        appointment.setNotification(true);
+        appointment.setPrivateFlag(false);
+        appointment.setFullTime(false);
+        appointment.setRecurrenceType(Appointment.YEARLY);
+        appointment.setMonth(cal.get(Calendar.MONTH));
+        appointment.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
         
-        appointmentObj.setInterval(1);
-        appointmentObj.setOccurrence(25);
+        appointment.setInterval(1);
+        appointment.setOccurrence(25);
 
         final UserParticipant newParticipant = new UserParticipant(client.getValues().getUserId());
-        appointmentObj.addParticipant(newParticipant);
+        appointment.addParticipant(newParticipant);
 
-        final InsertRequest insReq = new InsertRequest(appointmentObj, timezone, true);
+        final InsertRequest insReq = new InsertRequest(appointment, timezone, true);
         final AppointmentInsertResponse insResp = client.execute(insReq);
-        insResp.fillAppointment(appointmentObj);
+        insResp.fillAppointment(appointment);
 
-        return appointmentObj;
+        return appointment;
     }
     
     
