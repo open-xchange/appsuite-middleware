@@ -56,8 +56,8 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.server.impl.DBPool;
 
-
 public class Bug13358Test extends CalendarSqlTest {
+
     /**
      * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13358">bug #13358</a>
      */
@@ -67,13 +67,13 @@ public class Bug13358Test extends CalendarSqlTest {
         appointments.save(appointment);
         final int objectId = appointment.getObjectID();
         clean.add(appointment);
-        
+
         final DeleteEvent deleteEvent = new DeleteEvent(this, groupId, DeleteEvent.TYPE_GROUP, ctx);
         final Connection readcon = DBPool.pickup(ctx);
         final Connection writecon = DBPool.pickupWriteable(ctx);
         final CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(deleteEvent, readcon, writecon);
-        
+
         final CalendarDataObject loadApp = appointments.load(objectId, folders.getStandardFolder(userId, ctx));
         Participant[] participants = loadApp.getParticipants();
         boolean foundGroup = false;
@@ -85,9 +85,21 @@ public class Bug13358Test extends CalendarSqlTest {
                 foundMember = true;
             }
         }
-        
-        assertFalse("Group should not be in the participants.", foundGroup);
-        assertTrue("Member should be in the participants.", foundMember);
 
+        assertFalse("Group should not be in the participants: " + toString(participants), foundGroup);
+        assertTrue("Member should be in the participants.", foundMember);
+    }
+
+    private static String toString(Participant[] participants) {
+        StringBuilder sb = new StringBuilder();
+        for (Participant participant : participants) {
+            sb.append(participant.toString());
+            sb.append(':');
+            sb.append(participant.getIdentifier());
+            sb.append(',');
+            sb.append(participant.getType());
+            sb.append(';');
+        }
+        return sb.toString();
     }
 }
