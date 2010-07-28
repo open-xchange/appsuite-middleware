@@ -1,3 +1,7 @@
+* 2010-07-28 - marcus.klein@open-xchange.com
+
+ - Bugfix #16571: Extended logging to see the nested exceptions stack trace if this occurs again.
+
 * 2010-07-28 - martin.herfurth@open-xchange.com
 
  - Bugfix #16249: Event for changed Attachments.

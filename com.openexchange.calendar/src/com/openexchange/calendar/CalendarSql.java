@@ -1080,7 +1080,8 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(33));
+            LOG.error(e.getMessage(), e); // Unfortunately the nested exception looses its stack trace.
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, I(33));
         } finally {
             if (close_connection) {
                 recColl.closeResultSet(rs);
