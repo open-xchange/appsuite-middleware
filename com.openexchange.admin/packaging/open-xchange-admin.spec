@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 14
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -354,6 +354,13 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Jul 27 2010 - dennis.sieben@open-xchange.com
+ - Bugfix #16542: Timezone setting available twice in the command line help for createuser and changeuser
+   - removed second Timezone setting
+ - added CSV import option to createuser
+* Tue Jul 27 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16166: Updating the last modified timestamp of all users added or removed to a group or being member of a created or deleted
+   group.
 * Wed Jul 21 2010 - marcus.klein@open-xchange.com
  - Bugfix #15999: Checking if for the user are some features enabled conflicting with a disabled global address book.
 * Fri Jul 09 2010 - marcus.klein@open-xchange.com
