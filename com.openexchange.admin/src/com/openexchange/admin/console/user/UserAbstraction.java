@@ -2370,9 +2370,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
     
     protected final void setCsvImport(final AdminParser admp) {
-        admp.setCsvImportOption(setLongOpt(admp, OPT_CSV_IMPORT, "CSV file","Full path to CSV file with user data to import.\r\n" +
-            "                                                   This option makes mandatory options obsolete,\r\n" +
-            "                                                   except credential options (if needed)", true, false, false));
+        admp.setCsvImportOption(setLongOpt(admp, OPT_CSV_IMPORT, "CSV file","Full path to CSV file with user data to import. This option makes \r\n" +
+            "                                                   mandatory command line options obsolete, except credential options (if\r\n" + 
+            "                                                   needed). But they have to be set in the CSV file.", true, false, false));
     }
 
     /**
