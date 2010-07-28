@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 14
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Jul 27 2010 - dennis.sieben@open-xchange.com
+ - added CSV import option to createcontext
 * Thu Jun 24 2010 - choeger@open-xchange.com
  - Bugfix #13441 - Installation fails if not 'root'
 * Wed Jun 23 2010 - marcus.klein@open-xchange.com
