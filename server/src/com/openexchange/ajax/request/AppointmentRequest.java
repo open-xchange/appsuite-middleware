@@ -109,6 +109,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.OXJSONException.Code;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -532,7 +533,13 @@ public class AppointmentRequest {
         
         final TIntIntHashMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {
-            final JSONObject jObject = jData.getJSONObject(a);
+            JSONObject jObject = null;
+            try {
+                jObject = jData.getJSONObject(a);
+            } catch (JSONException e) {
+                throw new OXJSONException(Code.JSON_READ_ERROR, e, jData.toString());
+            }            
+            
             final int objectId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
             final int folderId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
 
