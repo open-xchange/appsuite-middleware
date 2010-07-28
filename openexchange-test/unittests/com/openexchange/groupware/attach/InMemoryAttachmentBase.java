@@ -62,6 +62,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -71,11 +72,11 @@ public class InMemoryAttachmentBase implements AttachmentBase{
     private final Map<Context, List<AttachmentMetadata>> changes = new HashMap<Context, List<AttachmentMetadata>>();
     private final Map<Context, List<AttachmentMetadata>> deletions = new HashMap<Context, List<AttachmentMetadata>>();
     
-    public long attachToObject(final AttachmentMetadata attachment, final InputStream input, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public long attachToObject(final AttachmentMetadata attachment, final InputStream input, Session session, final Context ctx, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
-    public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, Session session, final Context ctx, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 

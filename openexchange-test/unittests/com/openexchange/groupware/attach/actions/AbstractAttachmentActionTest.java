@@ -12,11 +12,14 @@ import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.impl.AttachmentQueryCatalog;
 import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
 
@@ -58,6 +61,10 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 
 	protected Context getContext() {
 		return ctx;
+	}
+	
+	protected Session getSession() throws Exception {
+	    return SessionObjectWrapper.createSessionObject(user.getId(), getContext().getContextId(), String.valueOf(System.currentTimeMillis()));
 	}
 
 	protected List<AttachmentMetadata> getAttachments() {

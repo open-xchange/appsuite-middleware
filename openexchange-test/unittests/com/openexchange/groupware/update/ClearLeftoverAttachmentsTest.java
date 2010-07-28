@@ -40,7 +40,7 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
 	public void tearDown() throws Exception {
         for(final AttachmentImpl attachment : attachments) {
             try {
-                attachmentBase.detachFromObject(22,22,22,new int[]{attachment.getId()}, ctx, user, null);
+                attachmentBase.detachFromObject(22,22,22,new int[]{attachment.getId()}, session, ctx, user, null);
             } catch (final OXException x) {}
         }
         super.tearDown();
@@ -99,7 +99,7 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
 
     private void createCopy(final AttachmentImpl original) throws OXException {
         final AttachmentImpl copy = new AttachmentImpl(original);
-        attachmentBase.attachToObject(copy,new ByteArrayInputStream(new byte[10]),ctx,user,null);
+        attachmentBase.attachToObject(copy,new ByteArrayInputStream(new byte[10]),session,ctx,user,null);
         attachments.add(copy);
     }
 

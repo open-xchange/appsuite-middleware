@@ -82,6 +82,7 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -179,6 +180,10 @@ public class CalendarTest extends TestCase {
     
     public static Context getContext() {
         return new ContextImpl(contextid);
+    }
+    
+    public static SessionObject getSession() throws Exception {
+        return SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), String.valueOf(System.currentTimeMillis()));
     }
     
     public static final void fillDatesInDao(final CalendarDataObject cdao) {

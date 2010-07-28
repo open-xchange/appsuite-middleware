@@ -20,6 +20,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
@@ -30,6 +32,7 @@ public abstract class UpdateTest extends TestCase {
     protected int user_id = -1;
     protected Context ctx;
     protected User user;
+    protected SessionObject session;
     private DBProvider provider;
 
     @Override
@@ -43,6 +46,7 @@ public abstract class UpdateTest extends TestCase {
      
         user_id = ctx.getMailadmin();
         user = UserStorage.getInstance().getUser(user_id, ctx);
+        session = SessionObjectWrapper.createSessionObject(user_id, ctx.getContextId(), String.valueOf(System.currentTimeMillis()));
     }
 
     @Override

@@ -28,6 +28,7 @@ public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTe
     protected UndoableAction getAction() throws Exception {
         final FireAttachedEventAction fireAttached = new FireAttachedEventAction();
         fireAttached.setAttachments(getAttachments());
+        fireAttached.setSession(getSession());
         fireAttached.setContext(getContext());
         fireAttached.setUser(getUser());
         fireAttached.setUserConfiguration(null);

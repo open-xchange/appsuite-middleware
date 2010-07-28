@@ -80,6 +80,8 @@ import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.OXTestToolkit;
@@ -140,7 +142,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         try {
             for(int i = 0; i < 10; i++) {
                 final AttachmentMetadata copy = new AttachmentImpl(attachment);
-                attachmentBase.attachToObject(copy,in = new FileInputStream(testFile),MODE.getContext(),MODE.getUser(), null);
+                attachmentBase.attachToObject(copy,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
                 clean.add(copy);
 
             }
@@ -178,7 +180,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         InputStream in = null;
 
         try {
-            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
             clean.add(attachment);
          } finally {
              if(in != null) {
@@ -191,7 +193,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
          attachment.setFilesize(data.length);
          final Date oldCreationDate = attachment.getCreationDate();
          try {
-            attachmentBase.attachToObject(attachment,in = new ByteArrayInputStream(data),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.attachToObject(attachment,in = new ByteArrayInputStream(data),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
          } finally {
              if(in != null) {
                 in.close();
@@ -222,7 +224,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         Date now = null;
          try {
             now = new Date();
-            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
             clean.add(attachment);
          } finally {
              if(in != null) {
@@ -260,7 +262,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         final int id = clean.get(0).getId();
 
         for(final AttachmentMetadata m : clean) {
-            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
         }
 
         try {
@@ -377,7 +379,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         final List<AttachmentMetadata> all = new ArrayList<AttachmentMetadata>(clean);
 
         for(final AttachmentMetadata m : clean) {
-            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
         }
         clean.clear();
 
@@ -427,7 +429,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         InputStream in = null;
 
         try {
-            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
             clean.add(attachment);
         } finally {
              if(in != null) {
@@ -458,7 +460,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
         final int id = clean.get(0).getId();
 
-        attachmentBase.detachFromObject(folderId,attachedId,moduleId,new int[]{id},MODE.getContext(), MODE.getUser(), null);
+        attachmentBase.detachFromObject(folderId,attachedId,moduleId,new int[]{id},MODE.getSession(),MODE.getContext(), MODE.getUser(), null);
 
         e = listener.getEvent();
 
@@ -478,7 +480,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         try {
             try {
                 final AttachmentMetadata attachment = getAttachment(testFile, folderId,attachedId,moduleId,false);
-                attachmentBase.attachToObject(attachment,null,MODE.getContext(),MODE.getUser(), null);
+                attachmentBase.attachToObject(attachment,null,MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
                 clean.add(attachment);
                 fail("Disallow failed");
             } catch (final OXPermissionException x) {
@@ -528,7 +530,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             }
 
             try {
-                attachmentBase.detachFromObject(folderId,attachedId,moduleId,new int[]{},MODE.getContext(), MODE.getUser(), null);
+                attachmentBase.detachFromObject(folderId,attachedId,moduleId,new int[]{},MODE.getSession(),MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
             } catch (final OXPermissionException x) {
                 authz.assertMayDetach();
@@ -611,7 +613,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
     @Override
     public void tearDown() throws Exception {
         for(final AttachmentMetadata m : clean) {
-            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
         }
         clean.clear();
 
@@ -631,6 +633,8 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         public DBProvider getProvider();
 
         public Context getContext();
+        
+        public Session getSession();
 
         public User getUser();
     }
@@ -652,6 +656,11 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             // TODO Auto-generated method stub
             return null;
         }
+        
+        public Session getSession() {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
     }
 
@@ -661,6 +670,9 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             return new DBPoolProvider();
         }
 
+        public Session getSession() {
+            return SessionObjectWrapper.createSessionObject(getUser().getId(), getContext(), String.valueOf(System.currentTimeMillis()));
+        }
 
         public Context getContext()  {
             try {
@@ -708,6 +720,10 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             provider.setPassword("secret");
 
             return provider;
+        }
+
+        public Session getSession() {
+            return SessionObjectWrapper.createSessionObject(getUser().getId(), getContext(), String.valueOf(System.currentTimeMillis()));
         }
 
         public Context getContext() {
