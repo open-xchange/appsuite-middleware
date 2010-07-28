@@ -183,44 +183,56 @@ public abstract class CreateCore extends ContextAbstraction {
         }
         
         checkContextRequired(idarray);
-        
+
+        int linenumber = 2;
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
             final Context context = getContext(nextLine, idarray);
             final User adminuser = getUser(nextLine, idarray);
             final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
             try {
+                final Context createdCtx;
                 if (-1 != i) {
                     // create call
-                    simpleMainCall(context, adminuser, nextLine[i], auth);
+                    createdCtx = simpleMainCall(context, adminuser, nextLine[i], auth);
                 } else {
                     final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
                     if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
                         // with module access
-                        simpleMainCall(context, adminuser, moduleacess, auth);
+                        createdCtx = simpleMainCall(context, adminuser, moduleacess, auth);
                     } else {
                         // without module access
-                        simpleMainCall(context, adminuser, auth);
+                        createdCtx = simpleMainCall(context, adminuser, auth);
                     }
                     
                 }
-                System.out.println("Context " + context.getId() + " successfully created");
+                System.out.println("Context " + createdCtx.getId() + " successfully created");
             } catch (final StorageException e) {
-                System.err.println("Failed to create context " + context.getId() + ": " + e);
+                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
             } catch (final InvalidCredentialsException e) {
-                System.err.println("Failed to create context " + context.getId() + ": " + e);
+                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
             } catch (final ContextExistsException e) {
-                System.err.println("Failed to create context " + context.getId() + ": " + e);
+                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
             }
+            linenumber++;
         }
 
     }
 
-    protected abstract void simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    private String getContextIdOrLine(final Context context, final int linenumber) {
+        final Integer id = context.getId();
+        if (null != id) {
+            return id.toString();
+        } else {
+            return "in line " + linenumber;
+        }
+    }
+
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
     
-    protected abstract void simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
     
-    protected abstract void simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
     
     protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
         
