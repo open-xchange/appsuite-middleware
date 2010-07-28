@@ -143,7 +143,7 @@ public class ResourceTest extends AbstractTest{
         }
         createdresource.setDescription(createdresource.getDescription()+change_suffix);
         createdresource.setDisplayname(createdresource.getDisplayname()+change_suffix);
-        createdresource.setEmail(createdresource.getEmail()+change_suffix);
+        createdresource.setEmail(getChangedEmailAddress(createdresource.getEmail(),change_suffix));
         createdresource.setName(createdresource.getName()+change_suffix);
         
         // change on server
