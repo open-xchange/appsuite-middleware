@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.CommonObject;
 public class Expectations extends KeyValueHolder {
     
     public Expectations(Changes changes){
-        setMap(changes.getMap());
+        setMap(new HashMap<Integer, Object>(changes.getMap()));
     }
     
     public Expectations(){

@@ -57,6 +57,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -316,15 +317,19 @@ public interface AppointmentSQLInterface {
      * Method to attach or detach attachments
      * @param objectId
      * The object ID
+     * @param folderId
+     * The folder Id
      * @param userId
      * The user ID
+     * @param session
+     * The session
      * @param Context
      * The context
      * @param numberOfAttachments
      * Amount of attached attachments.
      * @throws OXException
      */
-    long attachmentAction(int objectId, int uid, Context c, int numberOfAttachments) throws OXException;
+    long attachmentAction(int objectId, int uid, int folderId, Session session, Context c, int numberOfAttachments) throws OXException;
 
 
     /**

@@ -78,12 +78,12 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     
     public long attached(final AttachmentEvent e) throws Exception {
         final AppointmentSQLInterface csql = appointmentSqlFactory.createAppointmentSql(null);
-        return csql.attachmentAction(e.getAttachedId(), e.getUser().getId(), e.getContext(), 1);
+        return csql.attachmentAction(e.getFolderId(), e.getAttachedId(), e.getUser().getId(), e.getSession(), e.getContext(), 1);
     }
     
     public long detached(final AttachmentEvent e) throws Exception {
         final AppointmentSQLInterface csql = appointmentSqlFactory.createAppointmentSql(null);
-        return csql.attachmentAction(e.getAttachedId(), e.getUser().getId(), e.getContext(), -(e.getDetached().length));
+        return csql.attachmentAction(e.getFolderId(), e.getAttachedId(), e.getUser().getId(), e.getSession(), e.getContext(), -(e.getDetached().length));
     }
     
     public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {

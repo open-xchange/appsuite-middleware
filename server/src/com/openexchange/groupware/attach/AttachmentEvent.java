@@ -55,6 +55,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
  * {@link AttachmentEvent}
@@ -72,6 +73,8 @@ public interface AttachmentEvent {
     AttachmentBase getSource();
 
     Connection getWriteConnection() throws OXException;
+    
+    Session getSession();
 
     Context getContext();
 

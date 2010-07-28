@@ -67,11 +67,13 @@ import com.openexchange.groupware.tx.AbstractUndoable;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.UndoableAction;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 public abstract class AttachmentEventAction extends AbstractUndoable implements
 		UndoableAction {
 	
 	private List<AttachmentMetadata> attachments;
+	private Session session;
 	private Context ctx;
 	private User user;
 	private UserConfiguration userConfig;
@@ -81,10 +83,10 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 	private long ts;
 
 
-	protected void fireAttached(final List<AttachmentMetadata> attachments, final List<AttachmentMetadata> processed, final User user, final UserConfiguration userConfig, final Context ctx, final DBProvider provider) throws Exception {
+	protected void fireAttached(final List<AttachmentMetadata> attachments, final List<AttachmentMetadata> processed, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider) throws Exception {
 		long ts = 0;
 		for(final AttachmentMetadata att : attachments) {
-			final AttachmentEventImpl event = new AttachmentEventImpl(att,att.getFolderId(),att.getAttachedId(),att.getModuleId(),user,userConfig,ctx,provider,source);
+			final AttachmentEventImpl event = new AttachmentEventImpl(att,att.getFolderId(),att.getAttachedId(),att.getModuleId(),user,userConfig,session,ctx,provider,source);
 			
 			try {
 				for(final AttachmentListener listener : listeners) {
@@ -101,7 +103,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		this.ts = ts;
 	}
 	
-	protected void fireDetached(final List<AttachmentMetadata> m, final User user, final UserConfiguration userConfig, final Context ctx, final DBProvider provider) throws Exception {
+	protected void fireDetached(final List<AttachmentMetadata> m, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider) throws Exception {
 		
 		final Map<AttachmentAddress, Set<Integer>> collector = new HashMap<AttachmentAddress, Set<Integer>>();
 		for(final AttachmentMetadata attachment : m) {
@@ -120,7 +122,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 			final int[] idsArr = new int[ids.size()];
 			int i = 0;
 			for(final Integer id : ids) { idsArr[i++] = id.intValue(); }
-			final AttachmentEventImpl event = new AttachmentEventImpl(idsArr,addr.folder,addr.attached,addr.module,user,userConfig,ctx,provider,source);
+			final AttachmentEventImpl event = new AttachmentEventImpl(idsArr,addr.folder,addr.attached,addr.module,user,userConfig,session,ctx,provider,source);
 			try {
 				for(final AttachmentListener listener : listeners) {
 					final long mod = listener.detached(event);
@@ -141,6 +143,14 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 	
 	public List<AttachmentMetadata> getAttachments(){
 		return attachments;
+	}
+	
+	public void setSession(Session session) {
+	    this.session = session;
+	}
+	
+	public Session getSession() {
+	    return session;
 	}
 
 	public void setContext(final Context context) {
@@ -194,6 +204,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		private final int attachedId;
 		private final int moduleId;
 		private final User user;
+		private final Session session;
 		private final Context ctx;
 		private final DBProvider provider;
 		private Connection writeCon;
@@ -202,8 +213,8 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		private final UserConfiguration userConfig;
 
 		
-		public AttachmentEventImpl(final AttachmentMetadata m, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, final Context ctx, final DBProvider provider, final AttachmentBase base) {
-			this(folderId,attachedId,moduleId,user,userConfig,ctx,provider,base);
+		public AttachmentEventImpl(final AttachmentMetadata m, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
+			this(folderId,attachedId,moduleId,user,userConfig,session,ctx,provider,base);
 			this.attachment = m;
 		}
 
@@ -214,19 +225,20 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 			writeCon = null;
 		}
 
-		public AttachmentEventImpl(final int folderId, final int attachedId, final int moduleId, final User user,final UserConfiguration userConfig, final Context ctx, final DBProvider provider, final AttachmentBase base) {
+		public AttachmentEventImpl(final int folderId, final int attachedId, final int moduleId, final User user,final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
 			this.folderId = folderId;
 			this.attachedId = attachedId;
 			this.moduleId = moduleId;
 			this.user = user;
+			this.session = session;
 			this.ctx = ctx;
 			this.provider = provider;
 			this.base = base;
 			this.userConfig = userConfig;
 		}
 		
-		public AttachmentEventImpl(final int[] ids, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, final Context ctx, final DBProvider provider, final AttachmentBase base) {
-			this(folderId, attachedId, moduleId, user,userConfig, ctx, provider, base);
+		public AttachmentEventImpl(final int[] ids, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
+			this(folderId, attachedId, moduleId, user,userConfig, session, ctx, provider, base);
 			this.detached = ids.clone();
 		}
 
@@ -279,6 +291,13 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		public int getModuleId() {
 			return moduleId;
 		}
+
+        /* (non-Javadoc)
+         * @see com.openexchange.groupware.attach.AttachmentEvent#getSession()
+         */
+        public Session getSession() {
+            return session;
+        }
 		
 	}
 	

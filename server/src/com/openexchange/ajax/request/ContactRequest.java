@@ -699,7 +699,7 @@ public class ContactRequest {
         /*
          * Check attachments
          */
-        copyAttachments(folderId, ctx, contactObj, origObjectId, origFolderId, user, uc);
+        copyAttachments(folderId, session, ctx, contactObj, origObjectId, origFolderId, user, uc);
         /*
          * Check links
          */
@@ -776,7 +776,7 @@ public class ContactRequest {
         }
     }
 
-    private static void copyAttachments(final int folderId, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
+    private static void copyAttachments(final int folderId, Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
         /*
          * Copy attachments
          */
@@ -798,7 +798,7 @@ public class ContactRequest {
                         orig.getId(),
                         ctx,
                         user,
-                        uc), ctx, user, uc);
+                        uc), session, ctx, user, uc);
                 } while (iterator.hasNext());
                 attachmentBase.commit();
             } catch (final SearchIteratorException e) {

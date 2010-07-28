@@ -946,8 +946,7 @@ public abstract class CalendarObject extends CommonObject {
             differingFields.add(I(DELETE_EXCEPTIONS));
         }
 
-        if ((!containsEndDate() && other.containsEndDate()) || (containsEndDate() && other.containsEndDate() && getEndDate() != other.getEndDate() && (getEndDate() == null || !getEndDate().equals(
-            other.getEndDate())))) {
+        if ((!containsEndDate() && other.containsEndDate()) || (containsEndDate() && other.containsEndDate() && getEndDate() != other.getEndDate() && (getEndDate() == null || getEndDate().getTime() != other.getEndDate().getTime()))) {
             differingFields.add(I(END_DATE));
         }
 
@@ -1003,8 +1002,7 @@ public abstract class CalendarObject extends CommonObject {
             differingFields.add(RECURRENCE_TYPE);
         }
 
-        if ((!containsStartDate() && other.containsStartDate()) || (containsStartDate() && other.containsStartDate() && getStartDate() != other.getStartDate() && (getStartDate() == null || !getStartDate().equals(
-            other.getStartDate())))) {
+        if ((!containsStartDate() && other.containsStartDate()) || (containsStartDate() && other.containsStartDate() && getStartDate() != other.getStartDate() && (getStartDate() == null || getStartDate().getTime() != other.getStartDate().getTime()))) {
             differingFields.add(START_DATE);
         }
 

@@ -140,7 +140,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
                 ids.add(((AttachmentMetadata)iter.next()).getId());
             }
             
-            ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, ids.toNativeArray(), sessionObj.getContext(), null, null);
+            ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, ids.toNativeArray(), sessionObj, sessionObj.getContext(), null, null);
             ATTACHMENT_BASE.commit();
         
         } catch (final TransactionException e) {

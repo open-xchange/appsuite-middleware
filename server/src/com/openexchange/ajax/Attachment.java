@@ -344,7 +344,7 @@ public class Attachment extends PermissionServlet {
                         // session.getUserId(), session.getContext()));
                         checkSize(sum);
                     }
-                    attach(res, attachments, uploadFiles, ctx, user, userConfig);
+                    attach(res, attachments, uploadFiles, session, ctx, user, userConfig);
                 } finally {
                     if (upload != null) {
                         upload.cleanUp();
@@ -478,7 +478,7 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private void attach(final HttpServletResponse res, final List<AttachmentMetadata> attachments, final List<UploadFile> uploadFiles, final Context ctx, final User user, final UserConfiguration userConfig) {
+    private void attach(final HttpServletResponse res, final List<AttachmentMetadata> attachments, final List<UploadFile> uploadFiles, ServerSession session, final Context ctx, final User user, final UserConfiguration userConfig) {
         initAttachments(attachments, uploadFiles);
         PrintWriter w = null;
         try {
@@ -499,7 +499,7 @@ public class Attachment extends PermissionServlet {
                 attachment.setId(AttachmentBase.NEW);
 
                 final long modified = ATTACHMENT_BASE.attachToObject(attachment, new BufferedInputStream(new FileInputStream(
-                    uploadFile.getTmpFile())), ctx, user, userConfig);
+                    uploadFile.getTmpFile())), session, ctx, user, userConfig);
                 if (modified > timestamp) {
                     timestamp = modified;
                 }

@@ -248,7 +248,9 @@ public class AppointmentState extends LinkableState {
 
 	private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
         Appointment.ALARM,
-        Appointment.LAST_MODIFIED
+        Appointment.LAST_MODIFIED,
+        Appointment.NOTIFICATION,
+        Appointment.RECURRENCE_TYPE
     ));
     
     public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {

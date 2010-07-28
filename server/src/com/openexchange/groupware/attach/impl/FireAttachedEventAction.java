@@ -79,7 +79,7 @@ public class FireAttachedEventAction extends AttachmentEventAction {
 	@Override
 	protected void undoAction() throws AbstractOXException {
 		try {
-			fireDetached(getAttachments(), getUser(), getUserConfiguration(), getContext(), getProvider());
+			fireDetached(getAttachments(), getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
 		} catch (final AbstractOXException e) {
 			throw e;
 		} catch (final Exception e) {
@@ -96,10 +96,10 @@ public class FireAttachedEventAction extends AttachmentEventAction {
 	public void perform() throws AbstractOXException {
 		final List<AttachmentMetadata> processed = new ArrayList<AttachmentMetadata>();
 		try {
-			fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getContext(),getProvider());
+			fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getSession(), getContext(),getProvider());
 		} catch (final Exception e) {
 			try {
-				fireDetached(processed, getUser(), getUserConfiguration(), getContext(), getProvider());
+				fireDetached(processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
 			} catch (final Exception e1) {
 				throw EXCEPTIONS.create(0,e1);
 			}

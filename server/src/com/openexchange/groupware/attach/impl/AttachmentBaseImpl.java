@@ -97,6 +97,7 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -148,7 +149,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             exceptionId = { 0,1 },
             msg = { "Could not save file to the file store.", "Attachments must contain a file." }
     )
-    public long attachToObject(final AttachmentMetadata attachment, final InputStream data, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public long attachToObject(final AttachmentMetadata attachment, final InputStream data, Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
         checkMayAttach(attachment.getFolderId(),attachment.getAttachedId(),attachment.getModuleId(), ctx, user, userConfig);
 
@@ -179,11 +180,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         }
         attachment.setFileId(fileId);
-        return save(attachment,newAttachment,ctx,user,userConfig);
+        return save(attachment,newAttachment,session,ctx,user,userConfig);
 
     }
 
-    public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayDetach(folderId, objectId, moduleId, ctx, user, userConfig);
         //System.out.print("\n\n\nREMOVE: ");
         //for(int id : ids) { System.out.println(" "+id+" "); }
@@ -197,7 +198,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         final List<String> files = getFiles(ids, ctx);
 
-        final long ts = removeAttachments(folderId, objectId, moduleId, ids,ctx,user,userConfig);
+        final long ts = removeAttachments(folderId, objectId, moduleId, ids, session, ctx, user, userConfig);
 
 
         fileIdRemoveList.get().addAll(files);
@@ -359,9 +360,10 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
 
-    private long fireAttached(final AttachmentMetadata m, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
+    private long fireAttached(final AttachmentMetadata m, final User user, final UserConfiguration userConfig, Session session, final Context ctx) throws OXException {
         final FireAttachedEventAction fireAttached = new FireAttachedEventAction();
         fireAttached.setAttachments(Arrays.asList(m));
+        fireAttached.setSession(session);
         fireAttached.setContext(ctx);
         fireAttached.setSource(this);
         fireAttached.setUser(user);
@@ -379,9 +381,10 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     }
 
-    private long fireDetached(final List<AttachmentMetadata> deleted, final int module, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
+    private long fireDetached(final List<AttachmentMetadata> deleted, final int module, final User user, final UserConfiguration userConfig, Session session, final Context ctx) throws OXException {
         final FireDetachedEventAction fireDetached = new FireDetachedEventAction();
         fireDetached.setAttachments(deleted);
+        fireDetached.setSession(session);
         fireDetached.setContext(ctx);
         fireDetached.setSource(this);
         fireDetached.setUser(user);
@@ -639,7 +642,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     @OXThrows(
             category=Category.INTERNAL_ERROR, desc="An error occurred while retrieving the attachments that should be deleted.", exceptionId=7, msg="Could not delete attachment.")
-    private long removeAttachments(final int folderId,final int objectId,final int moduleId,final int[] ids,final Context ctx,final User user,final UserConfiguration userConfig) throws OXException {
+    private long removeAttachments(final int folderId,final int objectId,final int moduleId,final int[] ids,Session session, final Context ctx,final User user,final UserConfiguration userConfig) throws OXException {
         final TimedResult<?> tr = getAttachments(folderId, objectId, moduleId, ids, QUERIES.getFields(), ctx, user, userConfig);
         boolean found = false;
 
@@ -682,7 +685,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             throw new AttachmentException(e1);
         }
 
-        return this.fireDetached(recreate,moduleId,user,userConfig, ctx);
+        return this.fireDetached(recreate,moduleId,user,userConfig, session, ctx);
 
     }
 
@@ -814,7 +817,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return retval;
     }
 
-    private long save(final AttachmentMetadata attachment, final boolean newAttachment, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private long save(final AttachmentMetadata attachment, final boolean newAttachment, Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         AbstractAttachmentAction action = null;
         if(newAttachment) {
             final CreateAttachmentAction createAction = new CreateAttachmentAction();
@@ -844,7 +847,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
 
         if(newAttachment) {
-            return fireAttached(attachment, user, userConfig, ctx);
+            return fireAttached(attachment, user, userConfig, session, ctx);
         }
         return System.currentTimeMillis();
     }

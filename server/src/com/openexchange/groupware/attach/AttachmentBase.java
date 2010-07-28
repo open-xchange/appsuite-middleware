@@ -60,6 +60,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 public interface AttachmentBase extends Service {
 
@@ -71,12 +72,12 @@ public interface AttachmentBase extends Service {
     /**
      * @return the timestamp of modified objects to which this attachment was attached
      */
-    public abstract long attachToObject(AttachmentMetadata attachment, InputStream data, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public abstract long attachToObject(AttachmentMetadata attachment, InputStream data, Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
     /**
      * @return the timestamp of modified objects to which these attachments were detached
      */
-    public abstract long detachFromObject(int folderId, int objectId, int moduleId, int[] ids, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public abstract long detachFromObject(int folderId, int objectId, int moduleId, int[] ids, Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
     public abstract AttachmentMetadata getAttachment(int folderId, int objectId, int moduleId, int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 

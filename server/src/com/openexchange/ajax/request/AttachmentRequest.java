@@ -101,6 +101,7 @@ public class AttachmentRequest extends CommonRequest {
     private final UserConfiguration userConfig;
     private final User user;
     private final Context ctx;
+    private final Session session;
 
     public AttachmentRequest(final Session session, final Context ctx, final JSONWriter w) {
         this(new ServerSessionAdapter(session,ctx),w);
@@ -112,6 +113,7 @@ public class AttachmentRequest extends CommonRequest {
         this.user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
                 session.getContext());
+        this.session = session;
     }
 
     public static boolean hasPermission(final UserConfiguration userConfig) {
@@ -381,7 +383,7 @@ public class AttachmentRequest extends CommonRequest {
         try {
             ATTACHMENT_BASE.startTransaction();
 
-            timestamp = ATTACHMENT_BASE.detachFromObject(folderId,attachedId,moduleId,ids,ctx,user,userConfig);
+            timestamp = ATTACHMENT_BASE.detachFromObject(folderId,attachedId,moduleId,ids,session,ctx,user,userConfig);
 
             ATTACHMENT_BASE.commit();
         } catch (final Throwable t) {

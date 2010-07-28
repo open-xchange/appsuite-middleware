@@ -97,7 +97,7 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
                 copy.setModuleId(Types.APPOINTMENT);
 
                 InputStream is = attachmentBase.getAttachedFile(folderId, exception.getObjectID(), Types.APPOINTMENT, attachment.getId(), ctx, userObject, userConfig);
-                attachmentBase.attachToObject(copy, is, ctx, userObject, userConfig);
+                attachmentBase.attachToObject(copy, is, session, ctx, userObject, userConfig);
             }
             attachmentBase.commit();
         } catch (AbstractOXException x) {

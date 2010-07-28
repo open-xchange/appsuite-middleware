@@ -175,6 +175,7 @@ public final class attachments extends OXServlet {
             ATTACHMENT_BASE.attachToObject(
                 attachmentMeta,
                 is,
+                sessionObj,
                 ctx,
                 UserStorage.getStorageUser(sessionObj.getUserId(), ctx),
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
@@ -366,7 +367,7 @@ public final class attachments extends OXServlet {
             final int folderId = req.getIntHeader(TARGET_FOLDER_ID);
 
             ATTACHMENT_BASE.startTransaction();
-            ATTACHMENT_BASE.detachFromObject(folderId, targetId, module, new int[] { objectId }, ctx, UserStorage.getStorageUser(
+            ATTACHMENT_BASE.detachFromObject(folderId, targetId, module, new int[] { objectId }, sessionObj, ctx, UserStorage.getStorageUser(
                 sessionObj.getUserId(),
                 ctx), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
             ATTACHMENT_BASE.commit();

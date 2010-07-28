@@ -70,6 +70,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.omg.CORBA.CTX_RESTRICT_SCOPE;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -81,6 +82,8 @@ import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.calendar.storage.SQL;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.event.EventException;
+import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
@@ -105,6 +108,7 @@ import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
@@ -2384,7 +2388,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         final boolean solo_reminder = collection.checkForSoloReminderUpdate(cdao, ucols, cup);
         collection.checkAndRemovePastReminders(cdao, edao);
-        if (!solo_reminder && realChange) {
+        if (!solo_reminder) {
             collection.triggerModificationEvent(so, edao, cdao);
         }
         if(rec_action == collection.RECURRING_CREATE_EXCEPTION) {
@@ -3491,7 +3495,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return CalendarObject.NONE;
     }
 
-    public final long attachmentAction(final int oid, final int uid, final Context c, final int numberOfAttachments) throws OXException {
+    public final long attachmentAction(int folderId, final int oid, final int uid, Session session, final Context c, final int numberOfAttachments) throws OXException {
         Connection readcon = null, writecon = null;
         int changes[];
         PreparedStatement pst = null;
@@ -3570,6 +3574,18 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
                 DBPool.closeWriterSilent(c, writecon);
             }
+        }
+        CalendarDataObject edao = new CalendarDataObject();
+        edao.setParentFolderID(folderId);
+        edao.setObjectID(oid);
+        edao.setNumberOfAttachments(oldAmount);
+        EventClient eventclient = new EventClient(session);
+        try {
+            eventclient.modify(edao);
+        } catch (ContextException e) {
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e);
+        } catch (EventException e) {
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e);
         }
         return last_modified;
     }
