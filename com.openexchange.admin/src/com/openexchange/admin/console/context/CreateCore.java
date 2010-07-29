@@ -152,27 +152,9 @@ public abstract class CreateCore extends ContextAbstraction {
         oxlgn.login(auth);
         
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
-        String [] nextLine;
-        final int[] idarray = new int[getConstantsLength()];
-        for (int i = 0; i < idarray.length; i++) {
-            idarray[i] = -1;
-        }
-        // First read the columnnames, we will use them later on like the parameter names for the clts
-        if (null != (nextLine = reader.readNext())) {
-            prepareConstantsMap();
-            for (int i = 0; i < nextLine.length; i++) {
-                final CSVConstants constant = getConstantFromString(nextLine[i]);
-                if (null != constant) {
-                    idarray[constant.getIndex()] = i;
-                }
-            }
-        } else {
-            throw new InvalidDataException("no columnnames found");
-        }
-        
-        checkRequired(idarray);
-
+        int[] idarray = csvParsingCommon(filename, reader);
         int linenumber = 2;
+        String [] nextLine;
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
             final Context context = getContext(nextLine, idarray);
@@ -207,7 +189,7 @@ public abstract class CreateCore extends ContextAbstraction {
 
     }
 
-    protected void prepareConstantsMap() {
+    public void prepareConstantsMap() {
         super.prepareConstantsMap();
         for (final ContextConstants value : ContextConstants.values()) {
             this.constantsMap.put(value.getString(), value);
@@ -242,7 +224,7 @@ public abstract class CreateCore extends ContextAbstraction {
         
     protected abstract void setFurtherOptions(final AdminParser parser);
 
-    protected void checkRequired(final int[] idarray) throws InvalidDataException {
+    public void checkRequired(final int[] idarray) throws InvalidDataException {
         super.checkRequired(idarray);
         for (final ContextConstants value : ContextConstants.values()) {
             if (value.isRequired()) {

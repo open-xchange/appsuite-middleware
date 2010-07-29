@@ -126,7 +126,7 @@ public abstract class CreateCore extends UserAbstraction {
             final String filename = (String) parser.getOptionValue(parser.getCsvImportOption());
 
             if (null != filename) {
-                csvparsing(filename, oxusr);
+                csvParsing(filename, oxusr);
             } else {
                 applyExtendedOptionsToUser(parser, usr);
                 
@@ -141,28 +141,11 @@ public abstract class CreateCore extends UserAbstraction {
 
     protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException, MalformedURLException, NotBoundException, ConnectException;
     
-    private void csvparsing(final String filename, final OXUserInterface oxuser) throws FileNotFoundException, IOException, InvalidDataException {
+    private void csvParsing(final String filename, final OXUserInterface oxuser) throws FileNotFoundException, IOException, InvalidDataException {
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
+        int[] idarray = csvParsingCommon(filename, reader);
+        
         String [] nextLine;
-        final int[] idarray = new int[getConstantsLength()];
-        for (int i = 0; i < idarray.length; i++) {
-            idarray[i] = -1;
-        }
-        // First read the columnnames, we will use them later on like the parameter names for the clts
-        if (null != (nextLine = reader.readNext())) {
-            prepareConstantsMap();
-            for (int i = 0; i < nextLine.length; i++) {
-                final CSVConstants constant = getConstantFromString(nextLine[i]);
-                if (null != constant) {
-                    idarray[constant.getIndex()] = i;
-                }
-            }
-        } else {
-            throw new InvalidDataException("No columnnames found");
-        }
-        
-        checkRequired(idarray);
-        
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
             final Context context = getContext(nextLine, idarray);
@@ -172,22 +155,21 @@ public abstract class CreateCore extends UserAbstraction {
                 final Credentials auth = getCreds(nextLine, idarray);
                 final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
                 try {
+                    final User create;
                     if (-1 != i) {
                         // create call
-                        final User create = oxuser.create(context, adminuser, nextLine[i], auth);
-                        System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
+                        create = oxuser.create(context, adminuser, nextLine[i], auth);
                     } else {
                         final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
                         if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
                             // with module access
-                            final User create = oxuser.create(context, adminuser, moduleacess, auth);
-                            System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
+                            create = oxuser.create(context, adminuser, moduleacess, auth);
                         } else {
                             // without module access
-                            final User create = oxuser.create(context, adminuser, auth);
-                            System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
+                            create = oxuser.create(context, adminuser, auth);
                         }
                     }
+                    System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
                 } catch (final StorageException e) {
                     System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
                 } catch (final InvalidCredentialsException e) {
