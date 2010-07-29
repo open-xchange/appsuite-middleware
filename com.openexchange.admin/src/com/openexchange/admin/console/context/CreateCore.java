@@ -153,36 +153,24 @@ public abstract class CreateCore extends ContextAbstraction {
         
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
         String [] nextLine;
-        // Will stored the
-        final int[] idarray = new int[CONTEXT_INITIAL_CONSTANTS_VALUE + ContextConstants.values().length];
+        final int[] idarray = new int[getConstantsLength()];
         for (int i = 0; i < idarray.length; i++) {
             idarray[i] = -1;
         }
         // First read the columnnames, we will use them later on like the parameter names for the clts
         if (null != (nextLine = reader.readNext())) {
-//            System.out.println("Columnnames");
+            prepareConstantsMap();
             for (int i = 0; i < nextLine.length; i++) {
-                final Constants constantFromString = Constants.getConstantFromString(nextLine[i]);
-                if (null != constantFromString) {
-                    idarray[constantFromString.getIndex()] = i;
-                } else {
-                    final ContextConstants constantFromString2 = ContextConstants.getConstantFromString(nextLine[i]);
-                    if (null != constantFromString2) {
-                        idarray[constantFromString2.getIndex()] = i;
-                    } else {
-                        final AccessCombinations constantFromString3 = AccessCombinations.getConstantFromString(nextLine[i]);
-                        if (null != constantFromString3) {
-                            idarray[constantFromString3.getIndex()] = i;
-                        }
-                    }
+                final CSVConstants constant = getConstantFromString(nextLine[i]);
+                if (null != constant) {
+                    idarray[constant.getIndex()] = i;
                 }
             }
-//            System.out.print("\r\n");
         } else {
             throw new InvalidDataException("no columnnames found");
         }
         
-        checkContextRequired(idarray);
+        checkRequired(idarray);
 
         int linenumber = 2;
         while ((nextLine = reader.readNext()) != null) {
@@ -219,6 +207,22 @@ public abstract class CreateCore extends ContextAbstraction {
 
     }
 
+    protected void prepareConstantsMap() {
+        super.prepareConstantsMap();
+        for (final ContextConstants value : ContextConstants.values()) {
+            this.constantsMap.put(value.getString(), value);
+        }
+    }
+
+    /**
+     * Returns the length of all constants
+     * 
+     * @return
+     */
+    protected int getConstantsLength() {
+        return super.getConstantsLength() + ContextConstants.values().length;
+    }
+
     private String getContextIdOrLine(final Context context, final int linenumber) {
         final Integer id = context.getId();
         if (null != id) {
@@ -238,8 +242,8 @@ public abstract class CreateCore extends ContextAbstraction {
         
     protected abstract void setFurtherOptions(final AdminParser parser);
 
-    private static void checkContextRequired(final int[] idarray) throws InvalidDataException {
-        checkUserRequired(idarray);
+    protected void checkRequired(final int[] idarray) throws InvalidDataException {
+        super.checkRequired(idarray);
         for (final ContextConstants value : ContextConstants.values()) {
             if (value.isRequired()) {
                 if (-1 == idarray[value.getIndex()]) {
