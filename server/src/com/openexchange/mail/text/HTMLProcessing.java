@@ -201,11 +201,11 @@ public final class HTMLProcessing {
             retval = content;
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 if (DisplayMode.DISPLAY.equals(mode)) {
-                    retval = htmlFormat(retval, true, getHrefPositions(retval));
+                    retval = formatURLs(retval);
+                    retval = htmlFormat(retval, true, getAnchorPositions(retval));
                     if (usm.isUseColorQuote()) {
                         retval = replaceHTMLSimpleQuotesForDisplay(retval);
                     }
-                    retval = formatHrefLinks(retval);
                 } else {
                     retval = htmlFormat(retval);
                 }
@@ -224,8 +224,7 @@ public final class HTMLProcessing {
 
     private static final String REGEX_ANCHOR = "<a\\s+href[^>]+>.*?</a>";
 
-    private static final String REGEX_URL =
-        "\\(?\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
+    private static final String REGEX_URL = "\\(?\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
 
     /**
      * The regular expression to match URLs inside text:<br>
@@ -242,6 +241,8 @@ public final class HTMLProcessing {
      * </pre>
      */
     public static final Pattern PATTERN_URL = Pattern.compile(REGEX_URL);
+
+    private static final Pattern PATTERN_ANCHOR = Pattern.compile(REGEX_ANCHOR);
 
     /**
      * The regular expression to match URLs and anchors inside text.
@@ -272,6 +273,24 @@ public final class HTMLProcessing {
     private static List<Range> getHrefPositions(final String content) {
         try {
             final Matcher m = PATTERN_URL.matcher(content);
+            if (m.find()) {
+                final List<Range> positions = new ArrayList<Range>();
+                do {
+                    positions.add(new Range(m.start(), m.end()));
+                } while (m.find());
+                return positions;
+            }
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final StackOverflowError error) {
+            LOG.error(StackOverflowError.class.getName(), error);
+        }
+        return Collections.emptyList();
+    }
+
+    private static List<Range> getAnchorPositions(final String content) {
+        try {
+            final Matcher m = PATTERN_ANCHOR.matcher(content);
             if (m.find()) {
                 final List<Range> positions = new ArrayList<Range>();
                 do {
@@ -340,6 +359,48 @@ public final class HTMLProcessing {
         }
         return content;
     }
+
+    private static String formatURLs(final String content) {
+        try {
+            final Matcher m = PATTERN_URL.matcher(content);
+            final MatcherReplacer mr = new MatcherReplacer(m, content);
+            final StringBuilder sb = new StringBuilder(content.length());
+            final StringBuilder tmp = new StringBuilder(256);
+            while (m.find()) {
+                String url = m.group();
+                tmp.setLength(0);
+                final int mlen = url.length() - 1;
+                if (mlen > 0 && ')' == url.charAt(mlen)) {
+                    /*
+                     * Keep starting parenthesis if present
+                     */
+                    if ('(' == url.charAt(0)) {
+                        url = url.substring(1, mlen);
+                        tmp.append('(');
+                    } else {
+                        url = url.substring(0, mlen);
+                    }
+                    mr.appendLiteralReplacement(
+                        sb,
+                        tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
+                            "\" target=\"_blank\">").append(url).append("</a>)").toString());
+                } else {
+                    mr.appendReplacement(
+                        sb,
+                        tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
+                            "$0\" target=\"_blank\">$0</a>").toString());
+                }
+            }
+            mr.appendTail(sb);
+            return sb.toString();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final StackOverflowError error) {
+            LOG.error(StackOverflowError.class.getName(), error);
+        }
+        return content;
+    }
+
 
     private static final Pattern PATTERN_TARGET = Pattern.compile("(<a[^>]*?target=\"?)([^\\s\">]+)(\"?.*</a>)", Pattern.CASE_INSENSITIVE);
 
@@ -537,8 +598,9 @@ public final class HTMLProcessing {
 
         final String commentStart = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("<!--"), RegexUtility.quote("&lt;!--")), false);
 
-        final String commentEnd =
-            RegexUtility.concat(RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false), "\\s*");
+        final String commentEnd = RegexUtility.concat(RegexUtility.group(RegexUtility.OR(
+            RegexUtility.quote("-->"),
+            RegexUtility.quote("--&gt;")), false), "\\s*");
 
         final String group2 = RegexUtility.group(RegexUtility.concat(commentStart, ".*?", commentEnd), true);
 
@@ -998,8 +1060,9 @@ public final class HTMLProcessing {
         }
     }
 
-    private static final Pattern PATTERN_BLOCKQUOTE =
-        Pattern.compile("(?:(<blockquote.*?>)|(</blockquote>))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_BLOCKQUOTE = Pattern.compile(
+        "(?:(<blockquote.*?>)|(</blockquote>))",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Converts given HTML content into plain text, but keeps <code>&lt;blockquote&gt;</code> tags if any present.<br>
@@ -1338,7 +1401,8 @@ public final class HTMLProcessing {
         } else {
             ignorePositions = new TIntHashSet(ignoreRanges.size() * 16);
             for (final Range ignoreRange : ignoreRanges) {
-                for (int i = ignoreRange.start; i < ignoreRange.end; i++) {
+                final int end = ignoreRange.end;
+                for (int i = ignoreRange.start; i < end; i++) {
                     ignorePositions.add(i);
                 }
             }
@@ -1438,8 +1502,7 @@ public final class HTMLProcessing {
 
     private static final String DEFAULT_COLOR = "#0026ff";
 
-    private static final String BLOCKQUOTE_START_TEMPLATE =
-        "<blockquote type=\"cite\" style=\"margin-left: 0px; margin-right: 0px;" + " padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
+    private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px; margin-right: 0px;" + " padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
 
     /**
      * Determines the quote color for given <code>quotelevel</code>.
@@ -1555,15 +1618,19 @@ public final class HTMLProcessing {
         return handler.getHTML();
     }
 
-    private static final Pattern BACKGROUND_PATTERN =  Pattern.compile("(<[a-zA-Z]+[^>]*?)(?:(?:background=cid:([^\\s>]*))|(?:background=\"cid:([^\"]*)\"))([^>]*/?>)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern BACKGROUND_PATTERN = Pattern.compile(
+        "(<[a-zA-Z]+[^>]*?)(?:(?:background=cid:([^\\s>]*))|(?:background=\"cid:([^\"]*)\"))([^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern CID_PATTERN =
-        Pattern.compile("(?:src=cid:([^\\s>]*))|(?:src=\"cid:([^\"]*)\")", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern CID_PATTERN = Pattern.compile(
+        "(?:src=cid:([^\\s>]*))|(?:src=\"cid:([^\"]*)\")",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern FILENAME_PATTERN =
-        Pattern.compile("src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern FILENAME_PATTERN = Pattern.compile(
+        "src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?",
+        Pattern.CASE_INSENSITIVE);
 
     // private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
@@ -1779,6 +1846,11 @@ public final class HTMLProcessing {
             super();
             this.start = start;
             this.end = end;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder(16).append("start=").append(start).append(" end=").append(end).toString();
         }
 
     }
