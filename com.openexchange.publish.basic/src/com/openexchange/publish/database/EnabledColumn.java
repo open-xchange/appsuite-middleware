@@ -64,17 +64,16 @@ public class EnabledColumn extends SimpleColumnCreationTask{
     }
 
     @Override
-    public String getColumnName() {
+    protected String getColumnName() {
         return "enabled";
     }
 
     @Override
-    public String getTableName() {
+    protected String getTableName() {
         return "publications";
     }
 
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
     }
-
 }

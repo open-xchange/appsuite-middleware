@@ -60,13 +60,12 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
-
 /**
  * {@link SimpleColumnCreationTask}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter{
+public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
 
     private static final String ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1}";
 
@@ -75,10 +74,9 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter{
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
-            if(columnExists(con)) {
+            if (columnExists(con)) {
                 return;
             }
-            
             Statement stmt = null;
             try {
                 stmt = con.createStatement();
@@ -86,7 +84,6 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter{
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
-            
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -96,19 +93,18 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter{
             Database.backNoTimeout(contextId, true, con);
         }
     }
-    
+
     private String getStatement() {
         return MessageFormat.format(ADD_COLUMN, getTableName(), getColumnDefinition());
     }
 
-    public boolean columnExists(Connection con) throws SQLException {
+    private boolean columnExists(Connection con) throws SQLException {
         return Tools.columnExists(con, getTableName(), getColumnName());
     }
-    
-    public abstract String getTableName();
-    public abstract String getColumnName();
-    public abstract String getColumnDefinition();
-    
-    
 
+    protected abstract String getTableName();
+
+    protected abstract String getColumnName();
+
+    protected abstract String getColumnDefinition();
 }

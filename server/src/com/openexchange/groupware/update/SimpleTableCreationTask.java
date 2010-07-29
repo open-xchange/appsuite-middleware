@@ -66,8 +66,6 @@ import com.openexchange.tools.update.Tools;
  */
 public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
 
-    public abstract String[] getDependencies();
-
     protected abstract String getStatement();
 
     protected abstract String getTableName();

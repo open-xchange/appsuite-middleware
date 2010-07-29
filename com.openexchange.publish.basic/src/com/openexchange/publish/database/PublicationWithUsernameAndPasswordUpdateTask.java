@@ -51,13 +51,11 @@ package com.openexchange.publish.database;
 
 import com.openexchange.groupware.update.SimpleTableCreationTask;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PublicationWithUsernameAndPasswordUpdateTask extends SimpleTableCreationTask {
 
-    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
     }
