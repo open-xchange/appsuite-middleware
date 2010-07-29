@@ -1,3 +1,7 @@
+* 2010-07-29 - francisco.laguna@open-xchange.com
+
+ - Bugfix #16575: Survive inability to decode passwords in messaging subsystem
+
 * 2010-07-29 - marcus.klein@open-xchange.com
 
  - Bugfix #16532: Using correct database connection for creating table.

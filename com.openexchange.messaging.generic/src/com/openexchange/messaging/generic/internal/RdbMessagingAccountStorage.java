@@ -166,8 +166,14 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                     for (final String passwordElementName : passwordElementNames) {
                         final String toDecrypt = (String) configuration.get(passwordElementName);
                         if (null != toDecrypt) {
-                            final String decrypted = cryptoService.decrypt(toDecrypt, session.getPassword());
-                            configuration.put(passwordElementName, decrypted);
+                            try {
+                                final String decrypted = cryptoService.decrypt(toDecrypt, session.getPassword());
+                                configuration.put(passwordElementName, decrypted);
+                            } catch (CryptoException x) {
+                                // Must not be fatal
+                                configuration.put(passwordElementName, "");
+                                // Supply a (probably false) password anyway.
+                            }
                         }
                     }
                 }
@@ -182,8 +188,6 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final GenericConfigStorageException e) {
-            throw new MessagingException(e);
-        } catch (final CryptoException e) {
             throw new MessagingException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
