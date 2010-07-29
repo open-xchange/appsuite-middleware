@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.console.user;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -64,6 +65,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TimeZone;
+import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
@@ -3344,6 +3346,29 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 }
             }
         }
+    }
+
+    protected final int[] csvParsingCommon(final String filename, final CSVReader reader) throws IOException, InvalidDataException {
+        String [] nextLine;
+        final int[] idarray = new int[getConstantsLength()];
+        for (int i = 0; i < idarray.length; i++) {
+            idarray[i] = -1;
+        }
+        // First read the columnnames, we will use them later on like the parameter names for the clts
+        if (null != (nextLine = reader.readNext())) {
+            prepareConstantsMap();
+            for (int i = 0; i < nextLine.length; i++) {
+                final CSVConstants constant = getConstantFromString(nextLine[i]);
+                if (null != constant) {
+                    idarray[constant.getIndex()] = i;
+                }
+            }
+        } else {
+            throw new InvalidDataException("no columnnames found");
+        }
+        
+        checkRequired(idarray);
+        return idarray;
     }
 }
 
