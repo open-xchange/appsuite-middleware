@@ -1,3 +1,7 @@
+* 2010-07-29 - benjamin.otterbach@open-xchange.com
+
+  - Fixed Bug #16587 : Autoconfig: No device selection possible
+
 * 2010-07-26 - benjamin.otterbach@open-xchange.com
 
   - Added UI activator file for server
