@@ -1,3 +1,7 @@
+* 2010-07-29 - karsten.will@open-xchange.com
+
+ - Bugfix #16591: Error loading JavaScript from [https://www.gmx.com/client/static/script/compiled-gecko-17-821660071.js]
+
 * 2010-07-28 - marcus.klein@open-xchange.com
 
  - Bugfix #16571: Extended logging to see the nested exceptions stack trace if this occurs again.
