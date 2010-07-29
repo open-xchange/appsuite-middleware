@@ -157,6 +157,32 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Test
+    public void testCreateContextNoQuota() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
+        final Credentials creds = DummyMasterCredentials();
+
+        ResellerAdmin adm = FooAdminUser();
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(MaxOverallUserRestriction(2));
+        adm.setRestrictions(res);
+        oxresell.create(adm, creds);
+
+        Context ctx1 = null;
+        boolean failed_ctx1 = false;
+        try {
+            ctx1 = createContextNoQuota(ResellerFooCredentials());
+        } catch (InvalidDataException e) {
+            failed_ctx1 = true;
+        }
+        assertTrue("creation of ctx1 must fail",failed_ctx1);
+        
+        if( ctx1 != null ) {
+            deleteContext(ctx1, ResellerFooCredentials());
+        }
+        
+        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+    }
+
+    @Test
     public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
         final Credentials creds = DummyMasterCredentials();
 
