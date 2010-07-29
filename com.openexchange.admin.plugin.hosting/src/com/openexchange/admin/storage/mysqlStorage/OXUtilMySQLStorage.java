@@ -600,39 +600,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public Filestore[] listFilestores(String pattern) throws StorageException {
-        final Connection con;
-        try {
-            con = cache.getConnectionForConfigDB();
-        } catch (PoolException e) {
-            throw new StorageException(e);
+        List<Integer> ids = listFilestoreIds(pattern);
+        final List<Filestore> retval = new ArrayList<Filestore>();
+        for (int id : ids) {
+            retval.add(getFilestore(id));
         }
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        List<Filestore> stores = new ArrayList<Filestore>();
-        try {
-            stmt = con.prepareStatement("SELECT id,uri,size,max_context FROM filestore WHERE uri LIKE ?");
-            stmt.setString(1, pattern.replace('*', '%'));
-            result = stmt.executeQuery();
-            while (result.next()) {
-                int i = 1;
-                Filestore fs = new Filestore();
-                fs.setId( result.getInt(i++));
-                fs.setUrl( result.getString(i++));
-                fs.setSize( result.getLong(i++));
-                fs.setMaxContexts( result.getInt(i++));
-                stores.add(fs);
-            }
-        } catch (SQLException e) {
-            throw new StorageException(e);
-        } finally {
-            closeSQLStuff(result, stmt);
-            try {
-                cache.pushConnectionForConfigDB(con);
-            } catch (PoolException e) {
-                LOG.error("Error pushing configdb connection to pool!", e);
-            }
-        }
-        return stores.toArray(new Filestore[]{});
+        return retval.toArray(new Filestore[retval.size()]);
     }
 
     private List<Integer> listFilestoreIds(String pattern) throws StorageException {
