@@ -213,20 +213,28 @@ public class Login extends AJAXServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
+
+            String oldIP = session.getLocalIp();
+            String newIP = req.getRemoteAddr();
+            if (!newIP.equals(oldIP)) {
+                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID" + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+                session.setLocalIp(newIP);
+            }
+            
             writeSecretCookie(resp, session, req.isSecure());
 
-            String usedUIWebPath = req.getParameter(PARAM_UI_WEB_PATH);
-            if (null == usedUIWebPath) {
-                usedUIWebPath = uiWebPath;
-            }
-            // Prevent HTTP response splitting.
-            usedUIWebPath = usedUIWebPath.replaceAll("[\n\r]", "");
-            usedUIWebPath = addFragmentParameter(usedUIWebPath, PARAMETER_SESSION, session.getSessionID());
-            String shouldStore = req.getParameter("store");
-            if(shouldStore != null) {
-                usedUIWebPath = addFragmentParameter(usedUIWebPath, "store", shouldStore);
-            }
             if(ACTION_REDIRECT.equals(action)) {
+                String usedUIWebPath = req.getParameter(PARAM_UI_WEB_PATH);
+                if (null == usedUIWebPath) {
+                    usedUIWebPath = uiWebPath;
+                }
+                // Prevent HTTP response splitting.
+                usedUIWebPath = usedUIWebPath.replaceAll("[\n\r]", "");
+                usedUIWebPath = addFragmentParameter(usedUIWebPath, PARAMETER_SESSION, session.getSessionID());
+                String shouldStore = req.getParameter("store");
+                if(shouldStore != null) {
+                    usedUIWebPath = addFragmentParameter(usedUIWebPath, "store", shouldStore);
+                }
                 resp.sendRedirect(usedUIWebPath);
             } else {
                 try {
@@ -269,6 +277,7 @@ public class Login extends AJAXServlet {
                             String newIP = req.getRemoteAddr();
                             if (!newIP.equals(oldIP)) {
                                 LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID" + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+                                session.setLocalIp(newIP);
                             }
                             try {
                                 final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
