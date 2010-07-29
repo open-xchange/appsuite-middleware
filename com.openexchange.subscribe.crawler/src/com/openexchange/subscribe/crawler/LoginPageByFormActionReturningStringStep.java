@@ -124,7 +124,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
                if (matcher.find()){
                    output = matcher.group(1);
                } else {
-                   LOG.error("Page that does not have the String to imply a successful login : " + pageAfterLogin.getWebResponse().getContentAsString());
+                   LOG.debug("Page that does not have the String to imply a successful login : " + pageAfterLogin.getWebResponse().getContentAsString());
                    throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                }
                              
