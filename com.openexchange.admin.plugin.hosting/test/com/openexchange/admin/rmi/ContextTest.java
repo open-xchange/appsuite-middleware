@@ -49,22 +49,19 @@
 
 package com.openexchange.admin.rmi;
 
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.HashSet;
-import java.util.Arrays;
-import java.util.List;
 import java.util.ArrayList;
-
-import junit.framework.JUnit4TestAdapter;import static junit.framework.Assert.assertEquals;
-
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
-
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -267,6 +264,14 @@ public class ContextTest extends AbstractTest {
         addContext(ctxset, getRMIHostUrl(), cred);
     }
     
+    @Test(expected=InvalidDataException.class)
+    public void testCreateContextNoQuota() throws Exception {
+        final Credentials cred = DummyMasterCredentials();
+        Context ctxset = getTestContextObjectNoQuota(cred);
+        addContext(ctxset, getRMIHostUrl(), cred);
+        deleteContext(ctxset, getRMIHostUrl(), cred);
+    }
+
     @Test
     public void testCreateDeleteCreateContext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
@@ -417,14 +422,20 @@ public class ContextTest extends AbstractTest {
         return getTestContextObject(createNewContextID(cred), 5000);
     }
 
-    // Must be public static to override method
+    public static Context getTestContextObjectNoQuota(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
+        return getTestContextObject(createNewContextID(cred));
+    }
+
     public static Context getTestContextObject(int context_id, long quota_max_in_mb) {
-        Context ctx = new Context(context_id);        
-        final Filestore filestore = new Filestore();
-        filestore.setSize(quota_max_in_mb);
-        ctx.setFilestoreId(filestore.getId());
-        ctx.setName("Name-"+ctx.getId());
+        Context ctx = getTestContextObject(context_id);        
         ctx.setMaxQuota(quota_max_in_mb);
+        return ctx;
+    }
+
+    // Must be public static to override method
+    public static Context getTestContextObject(int context_id) {
+        Context ctx = new Context(context_id);        
+        ctx.setName("Name-"+ctx.getId());
         return ctx;
     }
 
