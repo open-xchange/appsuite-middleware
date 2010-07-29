@@ -120,7 +120,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         return retval.toArray(new Context[retval.size()]);
     }
 
-    private static final String SQL = "SELECT cid,used FROM filestore_usage WHERE cid IN (";
+    private static final String SQL = "SELECT cid,used FROM filestore_usage";
 
     private Collection<Context> loadUsage(Map<Integer, Context> contexts) throws StorageException {
         int cid = contexts.values().iterator().next().getId().intValue();
@@ -133,16 +133,14 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(getIN(SQL, contexts.size()));
-            int pos = 1;
-            for (Context context : contexts.values()) {
-                stmt.setInt(pos++, context.getId().intValue());
-            }
+            stmt = con.prepareStatement(SQL);
             rs = stmt.executeQuery();
             while (rs.next()) {
                 Context context = contexts.get(I(rs.getInt(1)));
-                context.setUsedQuota(L(rs.getLong(2) >> 20));
-                context.setAverage_size(L(averageSize));
+                if (null != context) {
+                    context.setUsedQuota(L(rs.getLong(2) >> 20));
+                    context.setAverage_size(L(averageSize));
+                }
             }
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
@@ -156,8 +154,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         }
         for (Context context : contexts.values()) {
             if (!context.isUsedQuotaset()) {
-                // Value is initialized with first usage.
-                context.setUsedQuota(L(0));
+                throw new StorageException("Was not able to find a filestore usage for context " + context.getId());
             }
         }
         return contexts.values();
