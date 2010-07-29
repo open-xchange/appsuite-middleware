@@ -52,9 +52,7 @@ package com.openexchange.admin.console.context;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ServiceLoader;
@@ -76,18 +74,10 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
     protected static int CONTEXT_INITIAL_CONSTANTS_VALUE = Constants.values().length + AccessCombinations.values().length;
     
-    protected enum ContextConstants {
+    protected enum ContextConstants implements CSVConstants {
         contextname(CONTEXT_INITIAL_CONSTANTS_VALUE, OPT_NAME_CONTEXT_NAME_LONG, false),
         quota(CONTEXT_INITIAL_CONSTANTS_VALUE + 1, OPT_QUOTA_LONG, true),
         lmapping(CONTEXT_INITIAL_CONSTANTS_VALUE + 2, OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG, false);
-        
-        private final static Map<String, ContextConstants> CONSTANT_MAP = new HashMap<String, ContextConstants>(3);
-        
-        static {
-            for (final ContextConstants value : ContextConstants.values()) {
-                CONSTANT_MAP.put(value.getString(), value);
-            }
-        }
         
         private final String string;
         
@@ -112,10 +102,6 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
         public boolean isRequired() {
             return required;
-        }
-
-        public static ContextConstants getConstantFromString(final String string) {
-            return CONSTANT_MAP.get(string);
         }
 
     }
