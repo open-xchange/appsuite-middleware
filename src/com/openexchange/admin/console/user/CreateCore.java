@@ -144,31 +144,24 @@ public abstract class CreateCore extends UserAbstraction {
     private void csvparsing(final String filename, final OXUserInterface oxuser) throws FileNotFoundException, IOException, InvalidDataException {
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
         String [] nextLine;
-        final int[] idarray = new int[Constants.values().length + INITIAL_CONSTANTS_VALUE];
+        final int[] idarray = new int[getConstantsLength()];
         for (int i = 0; i < idarray.length; i++) {
             idarray[i] = -1;
         }
         // First read the columnnames, we will use them later on like the parameter names for the clts
         if (null != (nextLine = reader.readNext())) {
-//            System.out.println("Columnnames");
+            prepareConstantsMap();
             for (int i = 0; i < nextLine.length; i++) {
-                final Constants constantFromString = Constants.getConstantFromString(nextLine[i]);
-                if (null != constantFromString) {
-                    idarray[constantFromString.getIndex()] = i;
-                } else {
-                    final AccessCombinations constantFromString2 = AccessCombinations.getConstantFromString(nextLine[i]);
-                    if (null != constantFromString2) {
-                        idarray[constantFromString2.getIndex()] = i;
-                    }
+                final CSVConstants constant = getConstantFromString(nextLine[i]);
+                if (null != constant) {
+                    idarray[constant.getIndex()] = i;
                 }
-                
             }
-//            System.out.print("\r\n");
         } else {
             throw new InvalidDataException("No columnnames found");
         }
         
-        checkUserRequired(idarray);
+        checkRequired(idarray);
         
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line

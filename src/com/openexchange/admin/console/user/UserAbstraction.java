@@ -77,6 +77,17 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
+    
+    public interface CSVConstants {
+
+        public int getIndex();
+
+        public String getString();
+
+        public boolean isRequired();
+
+    }
+
     protected class MethodAndNames {
         private Method method = null;
         
@@ -165,7 +176,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         
     }
 
-    public enum AccessCombinations {
+    public enum AccessCombinations implements CSVConstants {
         ACCESS_COMBI_NAME(0, OPT_ACCESSRIGHTS_COMBINATION_NAME, false),
         accessCalendar(1, OPT_ACCESS_CALENDAR, false),
         accessContacts(2, OPT_ACCESS_CONTACTS, false),
@@ -195,14 +206,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessActiveSync(26, OPT_ACCESS_ACTIVE_SYNC, false),
         accessUsm(27, OPT_ACCESS_USM, false);
         
-        private final static Map<String, AccessCombinations> CONSTANT_MAP = new HashMap<String, AccessCombinations>(28);
-        
-        static {
-            for (final AccessCombinations value : AccessCombinations.values()) {
-                CONSTANT_MAP.put(value.getString(), value);
-            }
-        }
-
         private final String string;
         
         private final int index;
@@ -228,16 +231,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             return required;
         }
 
-        public static AccessCombinations getConstantFromString(final String string) {
-            return CONSTANT_MAP.get(string);
-        }
-
-
     }
     
-    protected static int INITIAL_CONSTANTS_VALUE = AccessCombinations.values().length;
+    private static int INITIAL_CONSTANTS_VALUE = AccessCombinations.values().length;
     
-    public enum Constants {
+    public enum Constants implements CSVConstants {
         CONTEXTID(INITIAL_CONSTANTS_VALUE, OPT_NAME_CONTEXT_LONG, true),
         adminuser(INITIAL_CONSTANTS_VALUE + 1, OPT_NAME_ADMINUSER_LONG, false),
         adminpass(INITIAL_CONSTANTS_VALUE + 2, OPT_NAME_ADMINPASS_LONG, false),
@@ -356,14 +354,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         DEFAULTSENDERADDRESS(INITIAL_CONSTANTS_VALUE + 115,OPT_DEFAULTSENDERADDRESS_LONG, false),
         gui_spam_filter_capabilities_enabled(INITIAL_CONSTANTS_VALUE + 116,OPT_GUI_LONG, false);
 
-        private final static Map<String, Constants> CONSTANT_MAP = new HashMap<String, Constants>(117);
-        
-        static {
-            for (final Constants value : Constants.values()) {
-                CONSTANT_MAP.put(value.getString(), value);
-            }
-        }
-        
         private final String string;
         
         private final int index;
@@ -389,9 +379,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             return required;
         }
 
-        public static Constants getConstantFromString(final String string) {
-            return CONSTANT_MAP.get(string);
-        }
     }
 
     final static protected UserModuleAccess NO_RIGHTS_ACCESS = new UserModuleAccess();
@@ -751,6 +738,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption foldertreeOption;
     private CLIOption titleOption;
     private CLIOption positionOption;
+
+    protected HashMap<String, CSVConstants> constantsMap;
     
 //    /**
 //     * This field holds all the options which are displayed by default. So this options can be
@@ -1892,6 +1881,16 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             usr.setPrimaryEmail(optionValue6);
             usr.setEmail1(optionValue6);
         }        
+    }
+    
+    protected void prepareConstantsMap() {
+        this.constantsMap = new HashMap<String, CSVConstants>();
+        for (final Constants value : Constants.values()) {
+            this.constantsMap.put(value.getString(), value);
+        }
+        for (final AccessCombinations value : AccessCombinations.values()) {
+            this.constantsMap.put(value.getString(), value);
+        }
     }
     
     /**
@@ -3316,13 +3315,21 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
     }
 
+    protected CSVConstants getConstantFromString(String string) {
+        return this.constantsMap.get(string);
+    }
+
+    protected int getConstantsLength() {
+        return Constants.values().length + INITIAL_CONSTANTS_VALUE;
+    }
+
     /**
      * Checks if required columns are set
      * 
      * @param idarray
      * @throws InvalidDataException 
      */
-    protected static void checkUserRequired(int[] idarray) throws InvalidDataException {
+    protected void checkRequired(int[] idarray) throws InvalidDataException {
         for (final Constants value : Constants.values()) {
             if (value.isRequired()) {
                 if (-1 == idarray[value.getIndex()]) {
