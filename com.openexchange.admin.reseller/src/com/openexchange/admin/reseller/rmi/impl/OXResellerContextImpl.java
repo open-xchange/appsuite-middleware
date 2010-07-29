@@ -436,6 +436,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
     }
 
     public Boolean checkMandatoryMembersContextCreate(Context ctx) throws PluginException {
-        return new Boolean(false);
+        return new Boolean(true);
     }
 }
