@@ -87,7 +87,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
         try {
             final Boolean ret = (Boolean)callPluginMethod("checkMandatoryMembersContextCreate", ctx); 
-            if( ret != null && ret.booleanValue()  ) {
+            if( ret == null || ( ret != null && ret.booleanValue())  ) {
                 if (!ctx.mandatoryCreateMembersSet()) {
                     throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());               
                 }
