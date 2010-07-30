@@ -2,6 +2,7 @@
 
  - Bugfix #15138: Made a log message, complaining, that the server can't reach an external subscription service definition, more meaningful.
  - Bugfix #16351: Complain louder about missing property in templating service.
+ - Bugfix #15302: Make subscription parser more resilient.
  
 * 2010-07-29 - thorben.betten@open-xchange.com
 
