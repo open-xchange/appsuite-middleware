@@ -1,3 +1,7 @@
+* 2010-07-30 - marcus.klein@open-xchange.com
+
+ - Bugfix #16608: Created prepared statements batches but only executed the last one. Now the complete batch is executed.
+
 * 2010-07-29 - choeger@open-xchange.com
 
  - Bugfix #16586: Creating context via RMI without quota set throws NPE
