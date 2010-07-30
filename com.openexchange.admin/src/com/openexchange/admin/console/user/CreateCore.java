@@ -170,6 +170,8 @@ public abstract class CreateCore extends UserAbstraction {
                         }
                     }
                     System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
+                } catch (final RemoteException e) {
+                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
                 } catch (final StorageException e) {
                     System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
                 } catch (final InvalidCredentialsException e) {
