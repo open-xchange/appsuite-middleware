@@ -159,41 +159,46 @@ public abstract class CreateCore extends ContextAbstraction {
         lookupRMI();
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
-            final Context context = getContext(nextLine, idarray);
+            Context context;
             try {
-                applyExtensionValuesFromCSV(nextLine, idarray, context);
-                final User adminuser = getUser(nextLine, idarray);
-                final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
-                final Context createdCtx;
-                if (-1 != i) {
-                    // create call
-                    createdCtx = simpleMainCall(context, adminuser, nextLine[i], auth);
-                } else {
-                    final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
-                    if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
-                        // with module access
-                        createdCtx = simpleMainCall(context, adminuser, moduleacess, auth);
+                context = getContext(nextLine, idarray);
+                try {
+                    applyExtensionValuesFromCSV(nextLine, idarray, context);
+                    final User adminuser = getUser(nextLine, idarray);
+                    final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
+                    final Context createdCtx;
+                    if (-1 != i) {
+                        // create call
+                        createdCtx = simpleMainCall(context, adminuser, nextLine[i], auth);
                     } else {
-                        // without module access
-                        createdCtx = simpleMainCall(context, adminuser, auth);
+                        final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
+                        if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
+                            // with module access
+                            createdCtx = simpleMainCall(context, adminuser, moduleacess, auth);
+                        } else {
+                            // without module access
+                            createdCtx = simpleMainCall(context, adminuser, auth);
+                        }
+
                     }
-                    
+                    System.out.println("Context " + createdCtx.getId() + " successfully created");
+                } catch (final OXConsolePluginException e1) {
+                    System.err.println("Failed to create context: " + "Error while processing extension options: " + e1.getClass().getSimpleName() + ": " + e1.getMessage());
+                } catch (final StorageException e) {
+                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
+                } catch (final RemoteException e) {
+                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
+                } catch (final InvalidCredentialsException e) {
+                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
+                } catch (final InvalidDataException e) {
+                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
+                } catch (final ContextExistsException e) {
+                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
+                } catch (final ParseException e) {
+                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
                 }
-                System.out.println("Context " + createdCtx.getId() + " successfully created");
-            } catch (final OXConsolePluginException e1) {
-                System.err.println("Failed to create context: " + "Error while processing extension options: " + e1.getClass().getSimpleName() + ": " + e1.getMessage());
-            } catch (final StorageException e) {
-                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-            } catch (final RemoteException e) {
-                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-            } catch (final InvalidCredentialsException e) {
-                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-            } catch (final InvalidDataException e) {
-                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-            } catch (final ContextExistsException e) {
-                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-            } catch (final ParseException e) {
-                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
+            } catch (ParseException e2) {
+                System.err.println("Failed to create context " + "in line " + linenumber + ": " + e2);
             }
             linenumber++;
         }

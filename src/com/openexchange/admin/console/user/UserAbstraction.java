@@ -83,7 +83,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         public void callMethod(final Date value) throws ParseException;
     }
 
-    private interface MethodStringClosure {
+    protected interface MethodStringClosure {
         public void callMethod(final String value) throws ParseException, InvalidDataException;
     }
 
@@ -978,14 +978,17 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return credentials;
     }
 
-    protected static Context getContext(final String[] nextLine, final int[] idarray) {
+    protected Context getContext(final String[] nextLine, final int[] idarray) throws InvalidDataException, ParseException {
         final Context context = new Context();
-        final int i = idarray[Constants.CONTEXTID.getIndex()];
-        if (-1 != i) {
-            if (nextLine[i].length() > 0) {
-                context.setId(Integer.parseInt(nextLine[i]));
+        setValue(nextLine, idarray, Constants.CONTEXTID, new MethodStringClosure() {
+            public void callMethod(String value) throws ParseException, InvalidDataException {
+                try {
+                    context.setId(Integer.parseInt(value));
+                } catch (NumberFormatException e) {
+                    throw new InvalidDataException("Value in field " + Constants.CONTEXTID.getString() + " is no integer");
+                }
             }
-        }
+        });
         
         return context;
     }
@@ -1610,7 +1613,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return user;
     }
 
-    private static void setValue(String[] nextLine, int[] idarray, final CSVConstants constant, final MethodStringClosure closure) throws InvalidDataException, ParseException {
+    protected static void setValue(String[] nextLine, int[] idarray, final CSVConstants constant, final MethodStringClosure closure) throws InvalidDataException, ParseException {
         final int i = idarray[constant.getIndex()];
         if (-1 != i) {
             if (nextLine[i].length() > 0) {
