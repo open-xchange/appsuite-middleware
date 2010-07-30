@@ -183,10 +183,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             
             return subscribeService;
         } catch (HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Could not grab external service: "+externalAddress+" Got Error: "+e.getMessage(), e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), externalAddress, e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Could not grab external service: "+externalAddress+" Got Error: "+e.getMessage(), e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), externalAddress, e);
         }
     }
