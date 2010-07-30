@@ -93,7 +93,10 @@ public class Activator implements BundleActivator {
             public boolean validateServices() {
                 boolean hasProperty = config.getProperty(TemplateServiceImpl.PATH_PROPERTY) != null;
                 if(!hasProperty) {
-                    LOG.warn(TemplateServiceImpl.PATH_PROPERTY+" is not set. Templating will remain inactive.");
+                    IllegalStateException exception = new IllegalStateException("Missing Property "+TemplateServiceImpl.PATH_PROPERTY);
+                    exception.fillInStackTrace();
+                    
+                    LOG.error(TemplateServiceImpl.PATH_PROPERTY+" is not set. Templating will remain inactive.",exception);
                 }
                 return hasProperty;
             }
