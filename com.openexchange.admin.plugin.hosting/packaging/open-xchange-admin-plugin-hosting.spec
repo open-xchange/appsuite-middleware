@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Jul 29 2010 - tobias.prinz@open-xchange.com
+ - Bugfix 16585: #getFilestores is now more time efficient.
 * Tue Jul 27 2010 - dennis.sieben@open-xchange.com
  - added CSV import option to createcontext
 * Thu Jun 24 2010 - choeger@open-xchange.com
