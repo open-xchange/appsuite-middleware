@@ -144,48 +144,52 @@ public abstract class CreateCore extends UserAbstraction {
     private void csvParsing(final String filename, final OXUserInterface oxuser) throws FileNotFoundException, IOException, InvalidDataException {
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
         int[] idarray = csvParsingCommon(filename, reader);
-        
+        int linenumber = 2;
         String [] nextLine;
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
-            final Context context = getContext(nextLine, idarray);
-            final User adminuser;
             try {
-                adminuser = getUser(nextLine, idarray);
-                final Credentials auth = getCreds(nextLine, idarray);
-                final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
+                final Context context = getContext(nextLine, idarray);
                 try {
-                    final User create;
-                    if (-1 != i) {
-                        // create call
-                        create = oxuser.create(context, adminuser, nextLine[i], auth);
-                    } else {
-                        final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
-                        if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
-                            // with module access
-                            create = oxuser.create(context, adminuser, moduleacess, auth);
+                    final User adminuser = getUser(nextLine, idarray);
+                    final Credentials auth = getCreds(nextLine, idarray);
+                    final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
+                    try {
+                        final User create;
+                        if (-1 != i) {
+                            // create call
+                            create = oxuser.create(context, adminuser, nextLine[i], auth);
                         } else {
-                            // without module access
-                            create = oxuser.create(context, adminuser, auth);
+                            final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
+                            if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
+                                // with module access
+                                create = oxuser.create(context, adminuser, moduleacess, auth);
+                            } else {
+                                // without module access
+                                create = oxuser.create(context, adminuser, auth);
+                            }
                         }
+                        System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
+                    } catch (final RemoteException e) {
+                        System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                    } catch (final StorageException e) {
+                        System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                    } catch (final InvalidCredentialsException e) {
+                        System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                    } catch (final NoSuchContextException e) {
+                        System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                    } catch (final InvalidDataException e) {
+                        System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                    } catch (final DatabaseUpdateException e) {
+                        System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
                     }
-                    System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
-                } catch (final RemoteException e) {
-                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                } catch (final StorageException e) {
-                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                } catch (final InvalidCredentialsException e) {
-                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                } catch (final NoSuchContextException e) {
-                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                } catch (final InvalidDataException e) {
-                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                } catch (final DatabaseUpdateException e) {
-                    System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
+                } catch (final ParseException e1) {
+                    System.err.println("Failed to create user in context " + context.getId() + ": " + e1);
                 }
             } catch (final ParseException e1) {
-                System.err.println("Failed to create user in context " + context.getId() + ": " + e1);
+                System.err.println("Failed to create user in context in line" + linenumber + ": " + e1);
             }
+            linenumber++;
         }
     }
 }

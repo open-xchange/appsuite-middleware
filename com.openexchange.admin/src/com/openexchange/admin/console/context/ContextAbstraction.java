@@ -50,6 +50,7 @@ package com.openexchange.admin.console.context;
 
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -398,40 +399,27 @@ public abstract class ContextAbstraction extends UserAbstraction {
         return fs;
     }
 
-    protected static Context getContext(final String[] nextLine, final int[] idarray) {
-        final Context context = new Context();
-        {
-            final int i = idarray[Constants.CONTEXTID.getIndex()];
-            if (-1 != i) {
-                if (nextLine[i].length() > 0) {
-                    context.setId(Integer.parseInt(nextLine[i]));
+    protected Context getContext(final String[] nextLine, final int[] idarray) throws InvalidDataException, ParseException {
+        final Context context = super.getContext(nextLine, idarray);
+        setValue(nextLine, idarray, ContextConstants.contextname, new MethodStringClosure() {
+            public void callMethod(String value) throws ParseException, InvalidDataException {
+                context.setName(value);
+            }
+        });
+        setValue(nextLine, idarray, ContextConstants.lmapping, new MethodStringClosure() {
+            public void callMethod(String value) throws ParseException, InvalidDataException {
+                context.addLoginMapping(value);
+            }
+        });
+        setValue(nextLine, idarray, ContextConstants.quota, new MethodStringClosure() {
+            public void callMethod(String value) throws ParseException, InvalidDataException {
+                try {
+                    context.setMaxQuota(Long.valueOf(value));
+                } catch (final NumberFormatException e) {
+                    throw new InvalidDataException("Value in field " + Constants.CONTEXTID.getString() + " is no integer");
                 }
             }
-        }
-        {
-            final int i = idarray[ContextConstants.contextname.getIndex()];
-            if (-1 != i) {
-                if (nextLine[i].length() > 0) {
-                    context.setName(nextLine[i]);
-                }
-            }
-        }
-        {
-            final int i = idarray[ContextConstants.lmapping.getIndex()];
-            if (-1 != i) {
-                if (nextLine[i].length() > 0) {
-                    context.addLoginMapping(nextLine[i]);
-                }
-            }
-        }
-        {
-            final int i = idarray[ContextConstants.quota.getIndex()];
-            if (-1 != i) {
-                if (nextLine[i].length() > 0) {
-                    context.setMaxQuota(Long.valueOf(nextLine[i]));
-                }
-            }
-        }
+        });
         
         return context;
     }
