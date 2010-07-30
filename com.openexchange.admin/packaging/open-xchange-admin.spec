@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -354,6 +354,10 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Jul 30 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16608: Created prepared statements batches but only executed the last one. Now the complete batch is executed.
+* Thu Jul 29 2010 - choeger@open-xchange.com
+ - Bugfix #16586: Creating context via RMI without quota set throws NPE
 * Tue Jul 27 2010 - dennis.sieben@open-xchange.com
  - Bugfix #16542: Timezone setting available twice in the command line help for createuser and changeuser
    - removed second Timezone setting
