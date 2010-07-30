@@ -646,7 +646,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         /*
          * Determine if folder object should be put into cache or not
          */
-        if (FolderCacheManager.isInitialized() && resideInCache) {
+        if (FolderCacheManager.isInitialized()) {
             try {
                 FolderCacheManager.getInstance().putIfAbsent(fo, ctx, resideInCache ? getEternalAttributes() : null);
             } catch (final FolderCacheNotEnabledException e) {
