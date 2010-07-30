@@ -213,7 +213,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 stmt.setInt(3, i(member.getId()));
                 stmt.addBatch();
             }
-            stmt.executeUpdate();
+            stmt.executeBatch();
             // set last modified on group
             changeLastModifiedOnGroup(ctxId, groupId, con);
             Integer[] memberIds = new Integer[members.length];
@@ -366,7 +366,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                     stmt.setInt(3, i(memberId));
                     stmt.addBatch();
                 }
-                stmt.executeUpdate();
+                stmt.executeBatch();
                 stmt.close();
                 changeLastModifiedOfGroupMembers(ctx, con, group.getMembers());
             }
@@ -610,7 +610,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 stmt.setInt(3, i(member.getId()));
                 stmt.addBatch();
             }
-            stmt.executeUpdate();
+            stmt.executeBatch();
             // set last modified
             changeLastModifiedOnGroup(ctxId, groupId, con);
             Integer[] memberIds = new Integer[members.length];
