@@ -87,6 +87,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         public String getString();
 
         public boolean isRequired();
+        
+        public void setRequired(final boolean required);
 
     }
 
@@ -212,7 +214,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         
         private final int index;
         
-        private final boolean required;
+        private boolean required;
         
         private AccessCombinations(final int index, final String string, final boolean required) {
             this.index = index;
@@ -231,6 +233,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         public boolean isRequired() {
             return required;
+        }
+
+        public void setRequired(boolean required) {
+            this.required = required;
         }
 
     }
@@ -360,7 +366,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         
         private final int index;
         
-        private final boolean required;
+        private boolean required;
         
         private Constants(final int index, final String string, final boolean required) {
             this.index = index;
@@ -379,6 +385,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         
         public boolean isRequired() {
             return required;
+        }
+
+        public void setRequired(boolean required) {
+            this.required = required;
         }
 
     }
@@ -3321,10 +3331,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return this.constantsMap.get(string);
     }
 
-    protected int getConstantsLength() {
-        return Constants.values().length + INITIAL_CONSTANTS_VALUE;
-    }
-
     /**
      * Checks if required columns are set
      * 
@@ -3350,13 +3356,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected final int[] csvParsingCommon(final String filename, final CSVReader reader) throws IOException, InvalidDataException {
         String [] nextLine;
-        final int[] idarray = new int[getConstantsLength()];
+        prepareConstantsMap();
+        final int[] idarray = new int[this.constantsMap.size()];
         for (int i = 0; i < idarray.length; i++) {
             idarray[i] = -1;
         }
         // First read the columnnames, we will use them later on like the parameter names for the clts
         if (null != (nextLine = reader.readNext())) {
-            prepareConstantsMap();
             for (int i = 0; i < nextLine.length; i++) {
                 final CSVConstants constant = getConstantFromString(nextLine[i]);
                 if (null != constant) {
