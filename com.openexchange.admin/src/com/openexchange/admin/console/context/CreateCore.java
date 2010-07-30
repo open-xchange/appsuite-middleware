@@ -59,6 +59,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
+import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -146,7 +147,7 @@ public abstract class CreateCore extends ContextAbstraction {
         sysexit(0);
     }
 
-    protected void csvparsing(final String filename, final Credentials auth) throws NotBoundException, IOException, InvalidDataException, ParseException, StorageException, InvalidCredentialsException {
+    protected void csvparsing(final String filename, final Credentials auth) throws NotBoundException, IOException, InvalidDataException, StorageException, InvalidCredentialsException {
         // First check if we can login with the given credentials. Otherwise there's no need to continue
         final OXLoginInterface oxlgn = (OXLoginInterface) Naming.lookup(RMI_HOSTNAME +OXLoginInterface.RMI_NAME);
         oxlgn.login(auth);
@@ -158,9 +159,10 @@ public abstract class CreateCore extends ContextAbstraction {
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
             final Context context = getContext(nextLine, idarray);
-            final User adminuser = getUser(nextLine, idarray);
-            final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
             try {
+                applyExtensionValuesFromCSV(nextLine, idarray, context);
+                final User adminuser = getUser(nextLine, idarray);
+                final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
                 final Context createdCtx;
                 if (-1 != i) {
                     // create call
@@ -177,11 +179,19 @@ public abstract class CreateCore extends ContextAbstraction {
                     
                 }
                 System.out.println("Context " + createdCtx.getId() + " successfully created");
+            } catch (final OXConsolePluginException e1) {
+                System.err.println("Failed to create context: " + "Error while processing extension options: " + e1.getClass().getSimpleName() + ": " + e1.getMessage());
             } catch (final StorageException e) {
+                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
+            } catch (final RemoteException e) {
                 System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
             } catch (final InvalidCredentialsException e) {
                 System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
+            } catch (final InvalidDataException e) {
+                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
             } catch (final ContextExistsException e) {
+                System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
+            } catch (final ParseException e) {
                 System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
             }
             linenumber++;
@@ -189,20 +199,12 @@ public abstract class CreateCore extends ContextAbstraction {
 
     }
 
-    public void prepareConstantsMap() {
+    protected void prepareConstantsMap() {
         super.prepareConstantsMap();
         for (final ContextConstants value : ContextConstants.values()) {
             this.constantsMap.put(value.getString(), value);
         }
-    }
-
-    /**
-     * Returns the length of all constants
-     * 
-     * @return
-     */
-    protected int getConstantsLength() {
-        return super.getConstantsLength() + ContextConstants.values().length;
+        extensionConstantProcessing(this.constantsMap);
     }
 
     private String getContextIdOrLine(final Context context, final int linenumber) {

@@ -1,6 +1,11 @@
 
 package com.openexchange.admin.console.context.extensioninterfaces;
 
+import java.util.HashMap;
+import com.openexchange.admin.console.exception.OXConsolePluginException;
+import com.openexchange.admin.console.user.UserAbstraction.CSVConstants;
+import com.openexchange.admin.rmi.dataobjects.Context;
+
 
 /**
  * This interface must be implemented by a class in the console package of a plugin so that it
@@ -14,5 +19,25 @@ package com.openexchange.admin.console.context.extensioninterfaces;
  * 
  */
 public interface ContextConsoleCreateInterface extends ContextConsoleCommonInterface {
+
+    /**
+     * This method processes a {@link HashMap} of CSVConstants with their name. This method can be used to
+     * modify the map, so you can add or remove parameter which can be used in the CSV file. Or you can
+     * change if a parameter is required or not
+     * 
+     * @param constantsMap - the {@link HashMap}
+     */
+    public void processCSVConstants(HashMap<String, CSVConstants> constantsMap);
+
+    /**
+     * This method processes a single line from a CSV file and adds the results to the corresponding context
+     * object
+     * 
+     * @param nextLine
+     * @param idarray
+     * @param context 
+     * @throws OXConsolePluginException 
+     */
+    public void applyExtensionValuesFromCSV(final String[] nextLine, final int[] idarray, final Context context) throws OXConsolePluginException;
 
 }

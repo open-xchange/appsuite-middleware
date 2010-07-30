@@ -52,12 +52,14 @@ package com.openexchange.admin.console.context;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ServiceLoader;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCommonInterface;
+import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.console.user.UserAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -83,7 +85,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         
         private final int index;
         
-        private final boolean required;
+        private boolean required;
         
         private ContextConstants(final int index, final String string, final boolean required) {
             this.index = index;
@@ -102,6 +104,10 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
         public boolean isRequired() {
             return required;
+        }
+
+        public void setRequired(boolean required) {
+            this.required = required;
         }
 
     }
@@ -150,6 +156,17 @@ public abstract class ContextAbstraction extends UserAbstraction {
         return "context";
     }
 
+    protected void applyExtensionValuesFromCSV(final String[] nextLine, final int[] idarray, final Context context) throws OXConsolePluginException {
+        // We don't check for subclasses being null here because if someone has forgotten
+        // to set the options he will directly fix it and thus there no need for the
+        // future to check everytime
+        for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
+            if (ctxconsole instanceof ContextConsoleCreateInterface) {
+                ((ContextConsoleCreateInterface)ctxconsole).applyExtensionValuesFromCSV(nextLine, idarray, context);
+            }
+        }
+    }
+
     protected void parseAndSetContextName(final AdminParser parser, final Context ctx) {
         this.contextname = (String) parser.getOptionValue(contextNameOption);
         if (this.contextname != null) {
@@ -178,6 +195,17 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
     }
     
+    protected void extensionConstantProcessing(HashMap<String, CSVConstants> constantsMap) {
+        // We don't check for subclasses being null here because if someone has forgotten
+        // to set the options he will directly fix it and thus there no need for the
+        // future to check everytime
+        for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
+            if (ctxconsole instanceof ContextConsoleCreateInterface) {
+                ((ContextConsoleCreateInterface)ctxconsole).processCSVConstants(constantsMap);
+            }
+        }
+    }
+
     @Override
     protected void setAdminPassOption(final AdminParser admp) {
         this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
