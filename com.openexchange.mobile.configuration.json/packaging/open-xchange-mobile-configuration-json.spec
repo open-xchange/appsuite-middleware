@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -89,6 +89,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/groupware/*
 
 %changelog
+* Thu Jul 29 2010 - benjamin.otterbach@open-xchange.com
+  - Fixed Bug #16587 : Autoconfig: No device selection possible
 * Mon Jul 26 2010 - benjamin.otterbach@open-xchange.com
   - Added UI activator file for server
   - Disabled configurations for optional mobile device descriptions (S60, BB)

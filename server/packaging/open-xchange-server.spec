@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -554,6 +554,14 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Jul 29 2010 - karsten.will@open-xchange.com
+ - Bugfix #16591: Error loading JavaScript from [https://www.gmx.com/client/static/script/compiled-gecko-17-821660071.js]
+* Thu Jul 29 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16532: Using correct database connection for creating table.
+* Thu Jul 29 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #16575: Survive inability to decode passwords in messaging subsystem
+* Thu Jul 29 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16557: And additional > after a link as produced by the Mulberry mail client is not included in the link
 * Wed Jul 28 2010 - martin.herfurth@open-xchange.com
  - Bugfix #16249: Event for changed Attachments.
  - Bugfix #16540: Event for changed Alarm.
