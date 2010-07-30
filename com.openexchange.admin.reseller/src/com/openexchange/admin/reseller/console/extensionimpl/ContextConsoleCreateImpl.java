@@ -49,12 +49,14 @@
 
 package com.openexchange.admin.reseller.console.extensionimpl;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
+import com.openexchange.admin.console.user.UserAbstraction.CSVConstants;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -66,6 +68,43 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     
+    public enum ResellerConstants implements CSVConstants {
+        ADD_RESTRICTION(ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, false),
+        CUSTOMID(ResellerAbstraction.OPT_CUSTOMID_LONG, false);
+        
+        private final String string;
+        
+        private int index;
+        
+        private boolean required;
+        
+        private ResellerConstants(final String string, final boolean required) {
+            this.string = string;
+            this.required = required;
+        }
+
+        public String getString() {
+            return string;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index = index;
+        }
+
+        public boolean isRequired() {
+            return required;
+        }
+
+        public void setRequired(boolean required) {
+            this.required = required;
+        }
+
+    }
+    
     protected CLIOption addRestrictionsOption = null;
     protected CLIOption customidOption = null;
 
@@ -75,10 +114,72 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
         customidOption = parser.addOption(ResellerAbstraction.OPT_CUSTOMID_SHORT, ResellerAbstraction.OPT_CUSTOMID_LONG, ResellerAbstraction.OPT_CUSTOMID_LONG, "Custom Context ID", NeededQuadState.notneeded, true); 
     }
 
+    public void applyExtensionValuesFromCSV(final String[] nextLine, final int[] idarray, final Context context) throws OXConsolePluginException {
+        final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) context.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
+        try {
+            if (null == firstExtensionByName) {
+                final OXContextExtensionImpl ctxext = new OXContextExtensionImpl();
+                {
+                    final int i = idarray[ResellerConstants.ADD_RESTRICTION.getIndex()];
+                    if (-1 != i) {
+                        if (nextLine[i].length() > 0) {
+                            ctxext.setRestriction(getRestrictions(getRestrictionFromCSV(nextLine, i)));
+                        }
+                    }
+                }
+                {
+                    final int i = idarray[ResellerConstants.CUSTOMID.getIndex()];
+                    if (-1 != i) {
+                        if (nextLine[i].length() > 0) {
+                            ctxext.setCustomid(nextLine[i]);
+                        }
+                    }
+                }
+                // TODO: Maybe it's worth checking if the extension has data here, this may depend on the how much overhead a set extension imposes to the server
+                context.addExtension(ctxext);
+            } else {
+                {
+                    final int i = idarray[ResellerConstants.ADD_RESTRICTION.getIndex()];
+                    if (-1 != i) {
+                        if (nextLine[i].length() > 0) {
+                            firstExtensionByName.setRestriction(getRestrictions(getRestrictionFromCSV(nextLine, i)));
+                        }
+                    }
+                }
+                {
+                    final int i = idarray[ResellerConstants.CUSTOMID.getIndex()];
+                    if (-1 != i) {
+                        if (nextLine[i].length() > 0) {
+                            firstExtensionByName.setCustomid(nextLine[i]);
+                        }
+                    }
+                }
+                
+            }
+        } catch (final DuplicateExtensionException e) {
+            // Throw this one, but this should never occur as we check beforehand
+            throw new OXConsolePluginException(e);
+        } catch (InvalidDataException e) {
+            throw new OXConsolePluginException(e);
+        } catch (OXResellerException e) {
+            throw new OXConsolePluginException("A reseller exception occured: " + e.getMessage());
+        }
+    }
+
+    private HashSet<Restriction> getRestrictionFromCSV(final String[] nextLine, final int i) throws InvalidDataException {
+        final HashSet<Restriction> res = new HashSet<Restriction>();
+        // The restrictions are given in a comma-separated array
+        final String[] restrictionStringArray = nextLine[i].split(",");
+        for (final String restriction : restrictionStringArray) {
+            res.add(ResellerAbstraction.getRestrictionFromString(restriction));
+        }
+        return res;
+    }
+
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         try {
-            HashSet<Restriction> restrictions = getRestrictions(parser);
+            HashSet<Restriction> restrictions = getRestrictions(ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption));
             final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);
             if (null == firstExtensionByName) {
                 final OXContextExtensionImpl ctxext;
@@ -90,7 +191,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                 if (null != customid) {
                     ctxext.setCustomid(customid);
                 }
-                // TODO: Maybe it's worth checking if the extension has data here, this may depent on the how much overhead a set extension imposes to the server
+                // TODO: Maybe it's worth checking if the extension has data here, this may depend on the how much overhead a set extension imposes to the server
                 ctx.addExtension(ctxext);
             } else {
                 if (null != restrictions) {
@@ -111,15 +212,22 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
 
     }
 
-    private HashSet<Restriction> getRestrictions(final AdminParser parser) throws InvalidDataException, OXResellerException {
-        final HashSet<Restriction> addres = ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption);
-        
+    private HashSet<Restriction> getRestrictions(final HashSet<Restriction> addres) throws InvalidDataException, OXResellerException {
         HashSet<Restriction> restrictions = null;
         if (!addres.isEmpty()) {
             final HashSet<Restriction> dbres = new HashSet<Restriction>();
             restrictions = ResellerAbstraction.handleAddEditRemoveRestrictions(dbres, addres, null, null);
         }
         return restrictions;
+    }
+
+    public void processCSVConstants(HashMap<String, CSVConstants> constantsMap) {
+        // How much contants value to we have already...
+        int currentMaxIndex = constantsMap.size();
+        for (final ResellerConstants value : ResellerConstants.values()) {
+            value.setIndex(currentMaxIndex++);
+            constantsMap.put(value.getString(), value);
+        }
     }
 
 }

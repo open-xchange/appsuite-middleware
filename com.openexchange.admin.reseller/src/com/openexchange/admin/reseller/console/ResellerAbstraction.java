@@ -230,17 +230,21 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         HashSet<Restriction> res = new HashSet<Restriction>();
         for (final Object obj : resopts) {
             final String opt = (String) obj;
-            if( ! opt.contains("=") ) {
-                throw new InvalidDataException("Restriction must be key=value pair");
-            }
-            final String[] keyval = opt.split("=");
-            if( keyval.length > 2 ) {
-                throw new InvalidDataException("Restriction must only contain one \"=\" character");
-            }
-            final Restriction restriction = new Restriction(keyval[0], keyval[1]);
-            res.add(restriction);
+            res.add(getRestrictionFromString(opt));
         }
         return res;
+    }
+
+    public static Restriction getRestrictionFromString(final String opt) throws InvalidDataException {
+        if( ! opt.contains("=") ) {
+            throw new InvalidDataException("Restriction must be key=value pair");
+        }
+        final String[] keyval = opt.split("=");
+        if( keyval.length > 2 ) {
+            throw new InvalidDataException("Restriction must only contain one \"=\" character");
+        }
+        final Restriction restriction = new Restriction(keyval[0], keyval[1]);
+        return restriction;
     }
 
     public static final String parseCustomId(final AdminParser parser, final CLIOption customIdOption) {

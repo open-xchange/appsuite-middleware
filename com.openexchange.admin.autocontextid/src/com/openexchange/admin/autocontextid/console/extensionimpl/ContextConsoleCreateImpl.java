@@ -49,9 +49,11 @@
 
 package com.openexchange.admin.autocontextid.console.extensionimpl;
 
+import java.util.HashMap;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
+import com.openexchange.admin.console.user.UserAbstraction.CSVConstants;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
@@ -62,6 +64,14 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     }
 
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
+    }
+
+    public void processCSVConstants(final HashMap<String, CSVConstants> constantsMap) {
+        final CSVConstants csvConstants = constantsMap.get("contextid");
+        csvConstants.setRequired(false);
+    }
+
+    public void applyExtensionValuesFromCSV(String[] nextLine, int[] idarray, Context context) throws OXConsolePluginException {
     }
 
 }
