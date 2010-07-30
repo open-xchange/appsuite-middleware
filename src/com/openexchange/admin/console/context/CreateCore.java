@@ -156,6 +156,7 @@ public abstract class CreateCore extends ContextAbstraction {
         int[] idarray = csvParsingCommon(filename, reader);
         int linenumber = 2;
         String [] nextLine;
+        lookupRMI();
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
             final Context context = getContext(nextLine, idarray);
@@ -199,6 +200,8 @@ public abstract class CreateCore extends ContextAbstraction {
 
     }
 
+    protected abstract void lookupRMI() throws MalformedURLException, RemoteException, NotBoundException;
+
     protected void prepareConstantsMap() {
         super.prepareConstantsMap();
         for (final ContextConstants value : ContextConstants.values()) {
@@ -216,11 +219,11 @@ public abstract class CreateCore extends ContextAbstraction {
         }
     }
 
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
     
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
     
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
     
     protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
         
