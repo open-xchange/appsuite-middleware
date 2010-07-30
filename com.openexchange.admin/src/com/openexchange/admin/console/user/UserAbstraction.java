@@ -79,7 +79,14 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
-    
+    private interface MethodDateClosure {
+        public void callMethod(final Date value) throws ParseException;
+    }
+
+    private interface MethodStringClosure {
+        public void callMethod(final String value) throws ParseException, InvalidDataException;
+    }
+
     public interface CSVConstants {
 
         public int getIndex();
@@ -985,55 +992,47 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected static User getUser(String[] nextLine, int[] idarray) throws InvalidDataException, ParseException {
         final User user = new User();
-        final int i = idarray[Constants.USERNAME.getIndex()];
-        if (-1 != i) {
-            if (nextLine[i].length() > 0) {
-                user.setName(nextLine[i]);
+        setValue(nextLine, idarray, Constants.USERNAME, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setName(value);
             }
-        }
-        final int j = idarray[Constants.PASSWORD.getIndex()];
-        if (-1 != j) {
-            if (nextLine[j].length() > 0) {
-                user.setPassword(nextLine[j]);
+        });
+        setValue(nextLine, idarray, Constants.PASSWORD, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setPassword(value);
             }
-        }
-        final int j2 = idarray[Constants.EMAIL.getIndex()];
-        if (-1 != j2) {
-            if (nextLine[j2].length() > 0) {
-                user.setPrimaryEmail(nextLine[j2]);
-                user.setEmail1(nextLine[j2]);
+        });
+        setValue(nextLine, idarray, Constants.EMAIL, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setPrimaryEmail(value);
+                user.setEmail1(value);
             }
-        }
-        final int k = idarray[Constants.DISPLAYNAME.getIndex()];
-        if (-1 != k) {
-            if (nextLine[k].length() > 0) {
-                user.setDisplay_name(nextLine[k]);
+        });
+        setValue(nextLine, idarray, Constants.DISPLAYNAME, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setDisplay_name(value);
             }
-        }
-        final int k2 = idarray[Constants.SURNAME.getIndex()];
-        if (-1 != k2) {
-            if (nextLine[k2].length() > 0) {
-                user.setSur_name(nextLine[k2]);
+        });
+        setValue(nextLine, idarray, Constants.SURNAME, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setSur_name(value);
             }
-        }
-        final int l = idarray[Constants.GIVENNAME.getIndex()];
-        if (-1 != l) {
-            if (nextLine[l].length() > 0) {
-                user.setGiven_name(nextLine[l]);
+        });
+        setValue(nextLine, idarray, Constants.GIVENNAME, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setGiven_name(value);
             }
-        }
-        final int l2 = idarray[Constants.LANGUAGE.getIndex()];
-        if (-1 != l2) {
-            if (nextLine[l2].length() > 0) {
-                user.setLanguage(nextLine[l2]);
+        });
+        setValue(nextLine, idarray, Constants.LANGUAGE, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setLanguage(value);
             }
-        }
-        final int m = idarray[Constants.timezone.getIndex()];
-        if (-1 != m) {
-            if (nextLine[m].length() > 0) {
-                user.setTimezone(nextLine[m]);
+        });
+        setValue(nextLine, idarray, Constants.timezone, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTimezone(value);
             }
-        }
+        });
         final int m3 = idarray[Constants.THEME.getIndex()];
         if (-1 != m3) {
             if (nextLine[m3].length() > 0) {
@@ -1051,626 +1050,540 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                     throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (key or val empty)");
                 }
                 user.addGuiPreferences(key, val);
-            }
-        }
-        final int m4 = idarray[Constants.EMAIL1.getIndex()];
-        if (-1 != m4) {
-            if (nextLine[m4].length() > 0) {
-                user.setEmail1(nextLine[m4]);
-            }
-        }
-        final int m5 = idarray[Constants.mailenabled.getIndex()];
-        if (-1 != m5) {
-            if (nextLine[m5].length() > 0) {
-                user.setMailenabled(stringToBool(nextLine[m5]));
-            }
-        }
-        final int m6 = idarray[Constants.birthday.getIndex()];
-        if (-1 != m6) {
-            if (nextLine[m6].length() > 0) {
-                final Date stringToDate = stringToDate(nextLine[m6]);
-                if (null != stringToDate) {
-                    user.setBirthday(stringToDate);
+            } else {
+                if (Constants.THEME.isRequired()) {
+                    throw new InvalidDataException("Field " + Constants.THEME.getString() + " required but not set.");
                 }
             }
         }
-        final int m7 = idarray[Constants.anniversary.getIndex()];
-        if (-1 != m7) {
-            if (nextLine[m7].length() > 0) {
-                final Date stringToDate = stringToDate(nextLine[m7]);
-                if (null != stringToDate) {
-                    user.setAnniversary(stringToDate);
+        setValue(nextLine, idarray, Constants.department, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setDepartment(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.company, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCompany(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.EMAIL1, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setEmail1(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.mailenabled, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setMailenabled(stringToBool(value));
+            }
+        });
+        setValue(nextLine, idarray, Constants.birthday, new MethodDateClosure() {
+            public void callMethod(Date value) throws ParseException {
+                user.setBirthday(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.anniversary, new MethodDateClosure() {
+            public void callMethod(Date value) throws ParseException {
+                user.setAnniversary(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.branches, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setBranches(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.business_category, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setBusiness_category(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.postal_code_business, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setPostal_code_business(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.state_business, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setState_business(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.street_business, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setStreet_business(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_callback, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_callback(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.city_home, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCity_home(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.commercial_register, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCommercial_register(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.country_home, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCountry_home(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.email2, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setEmail2(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.email3, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setEmail3(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.employeetype, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setEmployeeType(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.fax_business, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setFax_business(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.fax_home, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setFax_home(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.fax_other, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setFax_other(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.imapserver, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setImapServer(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.imaplogin, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setImapLogin(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.smtpserver, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setSmtpServer(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.instant_messenger1, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setInstant_messenger1(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.instant_messenger2, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setInstant_messenger2(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_ip, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_ip(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_isdn, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_isdn(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.mail_folder_drafts_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setMail_folder_drafts_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.mail_folder_sent_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setMail_folder_sent_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.mail_folder_spam_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setMail_folder_spam_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.mail_folder_trash_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setMail_folder_trash_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.manager_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setManager_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.marital_status, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setMarital_status(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.cellular_telephone1, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCellular_telephone1(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.cellular_telephone2, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCellular_telephone2(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.info, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setInfo(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.nickname, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setNickname(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.number_of_children, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setNumber_of_children(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.note, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setNote(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.number_of_employee, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setNumber_of_employee(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_pager, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_pager(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.password_expired, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setPassword_expired(stringToBool(value));
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_assistant, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_assistant(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_business1, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_business1(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_business2, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_business2(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_car, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_car(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_company, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_company(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_home1, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_home1(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_home2, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_home2(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_other, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_other(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.position, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setPosition(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.postal_code_home, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setPostal_code_home(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.profession, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setProfession(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_radio, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_radio(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.room_number, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setRoom_number(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.sales_volume, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setSales_volume(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.city_other, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCity_other(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.country_other, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCountry_other(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.middle_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setMiddle_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.postal_code_other, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setPostal_code_other(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.state_other, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setState_other(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.street_other, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setStreet_other(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.spouse_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setSpouse_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.state_home, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setState_home(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.street_home, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setStreet_home(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.suffix, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setSuffix(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.tax_id, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTax_id(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_telex, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_telex(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.title, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTitle(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_ttytdd, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_ttytdd(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.UPLOADFILESIZELIMIT, new MethodStringClosure() {
+            public void callMethod(String value) throws InvalidDataException {
+                try {
+                    user.setUploadFileSizeLimit(Integer.valueOf(value));
+                } catch (NumberFormatException e) {
+                    throw new InvalidDataException("Value in field " + Constants.UPLOADFILESIZELIMIT.getString() + " is no integer");
                 }
             }
-        }
-        final int m8 = idarray[Constants.branches.getIndex()];
-        if (-1 != m8) {
-            if (nextLine[m8].length() > 0) {
-                user.setBranches(nextLine[m8]);
-            }
-        }
-        final int m9 = idarray[Constants.business_category.getIndex()];
-        if (-1 != m9) {
-            if (nextLine[m9].length() > 0) {
-                user.setBusiness_category(nextLine[m9]);
-            }
-        }
-        final int n = idarray[Constants.postal_code_business.getIndex()];
-        if (-1 != n) {
-            if (nextLine[n].length() > 0) {
-                user.setPostal_code_business(nextLine[n]);
-            }
-        }
-        final int n2 = idarray[Constants.state_business.getIndex()];
-        if (-1 != n2) {
-            if (nextLine[n2].length() > 0) {
-                user.setState_business(nextLine[n2]);
-            }
-        }
-        final int n3 = idarray[Constants.street_business.getIndex()];
-        if (-1 != n3) {
-            if (nextLine[n3].length() > 0) {
-                user.setStreet_business(nextLine[n3]);
-            }
-        }
-        final int n4 = idarray[Constants.telephone_callback.getIndex()];
-        if (-1 != n4) {
-            if (nextLine[n4].length() > 0) {
-                user.setTelephone_callback(nextLine[n4]);
-            }
-        }
-        final int n5 = idarray[Constants.city_home.getIndex()];
-        if (-1 != n5) {
-            if (nextLine[n5].length() > 0) {
-                user.setCity_home(nextLine[n5]);
-            }
-        }
-        final int n6 = idarray[Constants.commercial_register.getIndex()];
-        if (-1 != n6) {
-            if (nextLine[n6].length() > 0) {
-                user.setCommercial_register(nextLine[n6]);
-            }
-        }
-        final int n7 = idarray[Constants.country_home.getIndex()];
-        if (-1 != n7) {
-            if (nextLine[n7].length() > 0) {
-                user.setCountry_home(nextLine[n7]);
-            }
-        }
-        final int n8 = idarray[Constants.country_home.getIndex()];
-        if (-1 != n8) {
-            if (nextLine[n8].length() > 0) {
-                user.setCountry_home(nextLine[n8]);
-            }
-        }
-        final int n9 = idarray[Constants.email2.getIndex()];
-        if (-1 != n9) {
-            if (nextLine[n9].length() > 0) {
-                user.setEmail2(nextLine[n9]);
-            }
-        }
-        final int o = idarray[Constants.email3.getIndex()];
-        if (-1 != o) {
-            if (nextLine[o].length() > 0) {
-                user.setEmail3(nextLine[o]);
-            }
-        }
-        final int o2 = idarray[Constants.employeetype.getIndex()];
-        if (-1 != o2) {
-            if (nextLine[o2].length() > 0) {
-                user.setEmployeeType(nextLine[o2]);
-            }
-        }
-        final int o3 = idarray[Constants.fax_business.getIndex()];
-        if (-1 != o3) {
-            if (nextLine[o3].length() > 0) {
-                user.setFax_business(nextLine[o3]);
-            }
-        }
-        final int o4 = idarray[Constants.fax_home.getIndex()];
-        if (-1 != o4) {
-            if (nextLine[o4].length() > 0) {
-                user.setFax_home(nextLine[o4]);
-            }
-        }
-        final int o5 = idarray[Constants.fax_other.getIndex()];
-        if (-1 != o5) {
-            if (nextLine[o5].length() > 0) {
-                user.setFax_other(nextLine[o5]);
-            }
-        }
-        final int o6 = idarray[Constants.imapserver.getIndex()];
-        if (-1 != o6) {
-            if (nextLine[o6].length() > 0) {
-                user.setImapServer(nextLine[o6]);
-            }
-        }
-        final int o7 = idarray[Constants.imaplogin.getIndex()];
-        if (-1 != o7) {
-            if (nextLine[o7].length() > 0) {
-                user.setImapLogin(nextLine[o7]);
-            }
-        }
-        final int o8 = idarray[Constants.smtpserver.getIndex()];
-        if (-1 != o8) {
-            if (nextLine[o8].length() > 0) {
-                user.setSmtpServer(nextLine[o8]);
-            }
-        }
-        final int o9 = idarray[Constants.instant_messenger1.getIndex()];
-        if (-1 != o9) {
-            if (nextLine[o9].length() > 0) {
-                user.setInstant_messenger1(nextLine[o9]);
-            }
-        }
-        final int p = idarray[Constants.instant_messenger2.getIndex()];
-        if (-1 != p) {
-            if (nextLine[p].length() > 0) {
-                user.setInstant_messenger2(nextLine[p]);
-            }
-        }
-        final int p2 = idarray[Constants.telephone_ip.getIndex()];
-        if (-1 != p2) {
-            if (nextLine[p2].length() > 0) {
-                user.setTelephone_ip(nextLine[p2]);
-            }
-        }
-        final int p3 = idarray[Constants.telephone_isdn.getIndex()];
-        if (-1 != p3) {
-            if (nextLine[p3].length() > 0) {
-                user.setTelephone_isdn(nextLine[p3]);
-            }
-        }
-        final int p4 = idarray[Constants.mail_folder_drafts_name.getIndex()];
-        if (-1 != p4) {
-            if (nextLine[p4].length() > 0) {
-                user.setMail_folder_drafts_name(nextLine[p4]);
-            }
-        }
-        final int p5 = idarray[Constants.mail_folder_sent_name.getIndex()];
-        if (-1 != p5) {
-            if (nextLine[p5].length() > 0) {
-                user.setMail_folder_sent_name(nextLine[p5]);
-            }
-        }
-        final int p6 = idarray[Constants.mail_folder_spam_name.getIndex()];
-        if (-1 != p6) {
-            if (nextLine[p6].length() > 0) {
-                user.setMail_folder_spam_name(nextLine[p6]);
-            }
-        }
-        final int p7 = idarray[Constants.mail_folder_trash_name.getIndex()];
-        if (-1 != p7) {
-            if (nextLine[p7].length() > 0) {
-                user.setMail_folder_trash_name(nextLine[p7]);
-            }
-        }
-        final int p8 = idarray[Constants.manager_name.getIndex()];
-        if (-1 != p8) {
-            if (nextLine[p8].length() > 0) {
-                user.setManager_name(nextLine[p8]);
-            }
-        }
-        final int p9 = idarray[Constants.marital_status.getIndex()];
-        if (-1 != p9) {
-            if (nextLine[p9].length() > 0) {
-                user.setMarital_status(nextLine[p9]);
-            }
-        }
-        final int q = idarray[Constants.cellular_telephone1.getIndex()];
-        if (-1 != q) {
-            if (nextLine[q].length() > 0) {
-                user.setCellular_telephone1(nextLine[q]);
-            }
-        }
-        final int q2 = idarray[Constants.cellular_telephone2.getIndex()];
-        if (-1 != q2) {
-            if (nextLine[q2].length() > 0) {
-                user.setCellular_telephone2(nextLine[q2]);
-            }
-        }
-        final int q3 = idarray[Constants.info.getIndex()];
-        if (-1 != q3) {
-            if (nextLine[q3].length() > 0) {
-                user.setInfo(nextLine[q3]);
-            }
-        }
-        final int q4 = idarray[Constants.nickname.getIndex()];
-        if (-1 != q4) {
-            if (nextLine[q4].length() > 0) {
-                user.setNickname(nextLine[q4]);
-            }
-        }
-        final int q5 = idarray[Constants.number_of_children.getIndex()];
-        if (-1 != q5) {
-            if (nextLine[q5].length() > 0) {
-                user.setNumber_of_children(nextLine[q5]);
-            }
-        }
-        final int q6 = idarray[Constants.note.getIndex()];
-        if (-1 != q6) {
-            if (nextLine[q6].length() > 0) {
-                user.setNote(nextLine[q6]);
-            }
-        }
-        final int q7 = idarray[Constants.number_of_employee.getIndex()];
-        if (-1 != q7) {
-            if (nextLine[q7].length() > 0) {
-                user.setNumber_of_employee(nextLine[q7]);
-            }
-        }
-        final int q8 = idarray[Constants.telephone_pager.getIndex()];
-        if (-1 != q8) {
-            if (nextLine[q8].length() > 0) {
-                user.setTelephone_pager(nextLine[q8]);
-            }
-        }
-        final int q9 = idarray[Constants.password_expired.getIndex()];
-        if (-1 != q9) {
-            if (nextLine[q9].length() > 0) {
-                user.setPassword_expired(stringToBool(nextLine[q9]));
-            }
-        }
-        final int r = idarray[Constants.telephone_assistant.getIndex()];
-        if (-1 != r) {
-            if (nextLine[r].length() > 0) {
-                user.setTelephone_assistant(nextLine[r]);
-            }
-        }
-        final int r2 = idarray[Constants.telephone_business1.getIndex()];
-        if (-1 != r2) {
-            if (nextLine[r2].length() > 0) {
-                user.setTelephone_business1(nextLine[r2]);
-            }
-        }
-        final int r3 = idarray[Constants.telephone_business2.getIndex()];
-        if (-1 != r3) {
-            if (nextLine[r3].length() > 0) {
-                user.setTelephone_business2(nextLine[r3]);
-            }
-        }
-        final int r4 = idarray[Constants.telephone_car.getIndex()];
-        if (-1 != r4) {
-            if (nextLine[r4].length() > 0) {
-                user.setTelephone_car(nextLine[r4]);
-            }
-        }
-        final int r5 = idarray[Constants.telephone_company.getIndex()];
-        if (-1 != r5) {
-            if (nextLine[r5].length() > 0) {
-                user.setTelephone_company(nextLine[r5]);
-            }
-        }
-        final int r6 = idarray[Constants.telephone_home1.getIndex()];
-        if (-1 != r6) {
-            if (nextLine[r6].length() > 0) {
-                user.setTelephone_home1(nextLine[r6]);
-            }
-        }
-        final int r7 = idarray[Constants.telephone_home2.getIndex()];
-        if (-1 != r7) {
-            if (nextLine[r7].length() > 0) {
-                user.setTelephone_home2(nextLine[r7]);
-            }
-        }
-        final int r8 = idarray[Constants.telephone_other.getIndex()];
-        if (-1 != r8) {
-            if (nextLine[r8].length() > 0) {
-                user.setTelephone_other(nextLine[r8]);
-            }
-        }
-        final int r9 = idarray[Constants.position.getIndex()];
-        if (-1 != r9) {
-            if (nextLine[r9].length() > 0) {
-                user.setPosition(nextLine[r9]);
-            }
-        }
-        final int s = idarray[Constants.postal_code_home.getIndex()];
-        if (-1 != s) {
-            if (nextLine[s].length() > 0) {
-                user.setPostal_code_home(nextLine[s]);
-            }
-        }
-        final int s1 = idarray[Constants.profession.getIndex()];
-        if (-1 != s1) {
-            if (nextLine[s1].length() > 0) {
-                user.setProfession(nextLine[s1]);
-            }
-        }
-        final int s2 = idarray[Constants.telephone_radio.getIndex()];
-        if (-1 != s2) {
-            if (nextLine[s2].length() > 0) {
-                user.setTelephone_radio(nextLine[s2]);
-            }
-        }
-        final int s3 = idarray[Constants.room_number.getIndex()];
-        if (-1 != s3) {
-            if (nextLine[s3].length() > 0) {
-                user.setRoom_number(nextLine[s3]);
-            }
-        }
-        final int s4 = idarray[Constants.sales_volume.getIndex()];
-        if (-1 != s4) {
-            if (nextLine[s4].length() > 0) {
-                user.setSales_volume(nextLine[s4]);
-            }
-        }
-        final int s5 = idarray[Constants.city_other.getIndex()];
-        if (-1 != s5) {
-            if (nextLine[s5].length() > 0) {
-                user.setCity_other(nextLine[s5]);
-            }
-        }
-        final int s6 = idarray[Constants.country_other.getIndex()];
-        if (-1 != s6) {
-            if (nextLine[s6].length() > 0) {
-                user.setCountry_other(nextLine[s6]);
-            }
-        }
-        final int s7 = idarray[Constants.middle_name.getIndex()];
-        if (-1 != s7) {
-            if (nextLine[s7].length() > 0) {
-                user.setMiddle_name(nextLine[s7]);
-            }
-        }
-        final int s8 = idarray[Constants.postal_code_other.getIndex()];
-        if (-1 != s8) {
-            if (nextLine[s8].length() > 0) {
-                user.setPostal_code_other(nextLine[s8]);
-            }
-        }
-        final int s9 = idarray[Constants.state_other.getIndex()];
-        if (-1 != s9) {
-            if (nextLine[s9].length() > 0) {
-                user.setState_other(nextLine[s9]);
-            }
-        }
-        final int t = idarray[Constants.street_other.getIndex()];
-        if (-1 != t) {
-            if (nextLine[t].length() > 0) {
-                user.setStreet_other(nextLine[t]);
-            }
-        }
-        final int t2 = idarray[Constants.spouse_name.getIndex()];
-        if (-1 != t2) {
-            if (nextLine[t2].length() > 0) {
-                user.setSpouse_name(nextLine[t2]);
-            }
-        }
-        final int t3 = idarray[Constants.state_home.getIndex()];
-        if (-1 != t3) {
-            if (nextLine[t3].length() > 0) {
-                user.setState_home(nextLine[t3]);
-            }
-        }
-        final int t4 = idarray[Constants.street_home.getIndex()];
-        if (-1 != t4) {
-            if (nextLine[t4].length() > 0) {
-                user.setStreet_home(nextLine[t4]);
-            }
-        }
-        final int t5 = idarray[Constants.suffix.getIndex()];
-        if (-1 != t5) {
-            if (nextLine[t5].length() > 0) {
-                user.setSuffix(nextLine[t5]);
-            }
-        }
-        final int t6 = idarray[Constants.tax_id.getIndex()];
-        if (-1 != t6) {
-            if (nextLine[t6].length() > 0) {
-                user.setTax_id(nextLine[t6]);
-            }
-        }
-        final int t7 = idarray[Constants.telephone_telex.getIndex()];
-        if (-1 != t7) {
-            if (nextLine[t7].length() > 0) {
-                user.setTelephone_telex(nextLine[t7]);
-            }
-        }
-        final int t8 = idarray[Constants.title.getIndex()];
-        if (-1 != t8) {
-            if (nextLine[t8].length() > 0) {
-                user.setTitle(nextLine[t8]);
-            }
-        }
-        final int t9 = idarray[Constants.telephone_ttytdd.getIndex()];
-        if (-1 != t9) {
-            if (nextLine[t9].length() > 0) {
-                user.setTelephone_ttytdd(nextLine[t9]);
-            }
-        }
-        final int u = idarray[Constants.UPLOADFILESIZELIMIT.getIndex()];
-        if (-1 != u) {
-            if (nextLine[u].length() > 0) {
-                user.setUploadFileSizeLimit(Integer.valueOf(nextLine[u]));
-            }
-        }
-        final int u2 = idarray[Constants.uploadfilesizelimitperfile.getIndex()];
-        if (-1 != u2) {
-            if (nextLine[u2].length() > 0) {
-                user.setUploadFileSizeLimitPerFile(Integer.valueOf(nextLine[u2]));
-            }
-        }
-        final int u3 = idarray[Constants.url.getIndex()];
-        if (-1 != u3) {
-            if (nextLine[u3].length() > 0) {
-                user.setUrl(nextLine[u3]);
-            }
-        }
-        final int u5 = idarray[Constants.userfield01.getIndex()];
-        if (-1 != u5) {
-            if (nextLine[u5].length() > 0) {
-                user.setUserfield01(nextLine[u5]);
-            }
-        }
-        final int u6 = idarray[Constants.userfield02.getIndex()];
-        if (-1 != u6) {
-            if (nextLine[u6].length() > 0) {
-                user.setUserfield02(nextLine[u6]);
-            }
-        }
-        final int u7 = idarray[Constants.userfield03.getIndex()];
-        if (-1 != u7) {
-            if (nextLine[u7].length() > 0) {
-                user.setUserfield03(nextLine[u7]);
-            }
-        }
-        final int u8 = idarray[Constants.userfield04.getIndex()];
-        if (-1 != u8) {
-            if (nextLine[u8].length() > 0) {
-                user.setUserfield04(nextLine[u8]);
-            }
-        }
-        final int u9 = idarray[Constants.userfield05.getIndex()];
-        if (-1 != u9) {
-            if (nextLine[u9].length() > 0) {
-                user.setUserfield05(nextLine[u9]);
-            }
-        }
-        final int v = idarray[Constants.userfield06.getIndex()];
-        if (-1 != v) {
-            if (nextLine[v].length() > 0) {
-                user.setUserfield06(nextLine[v]);
-            }
-        }
-        final int v1 = idarray[Constants.userfield07.getIndex()];
-        if (-1 != v1) {
-            if (nextLine[v1].length() > 0) {
-                user.setUserfield07(nextLine[v1]);
-            }
-        }
-        final int v2 = idarray[Constants.userfield08.getIndex()];
-        if (-1 != v2) {
-            if (nextLine[v2].length() > 0) {
-                user.setUserfield08(nextLine[v2]);
-            }
-        }
-        final int v3 = idarray[Constants.userfield09.getIndex()];
-        if (-1 != v3) {
-            if (nextLine[v3].length() > 0) {
-                user.setUserfield09(nextLine[v3]);
-            }
-        }
-        final int v4 = idarray[Constants.userfield10.getIndex()];
-        if (-1 != v4) {
-            if (nextLine[v4].length() > 0) {
-                user.setUserfield10(nextLine[v4]);
-            }
-        }
-        final int v5 = idarray[Constants.userfield11.getIndex()];
-        if (-1 != v5) {
-            if (nextLine[v5].length() > 0) {
-                user.setUserfield11(nextLine[v5]);
-            }
-        }
-        final int v6 = idarray[Constants.userfield12.getIndex()];
-        if (-1 != v6) {
-            if (nextLine[v6].length() > 0) {
-                user.setUserfield12(nextLine[v6]);
-            }
-        }
-        final int v7 = idarray[Constants.userfield13.getIndex()];
-        if (-1 != v7) {
-            if (nextLine[v7].length() > 0) {
-                user.setUserfield13(nextLine[v7]);
-            }
-        }
-        final int v8 = idarray[Constants.userfield14.getIndex()];
-        if (-1 != v8) {
-            if (nextLine[v8].length() > 0) {
-                user.setUserfield14(nextLine[v8]);
-            }
-        }
-        final int v9 = idarray[Constants.userfield15.getIndex()];
-        if (-1 != v9) {
-            if (nextLine[v9].length() > 0) {
-                user.setUserfield15(nextLine[v9]);
-            }
-        }
-        final int w = idarray[Constants.userfield16.getIndex()];
-        if (-1 != w) {
-            if (nextLine[w].length() > 0) {
-                user.setUserfield16(nextLine[w]);
-            }
-        }
-        final int w1 = idarray[Constants.userfield17.getIndex()];
-        if (-1 != w1) {
-            if (nextLine[w1].length() > 0) {
-                user.setUserfield17(nextLine[w1]);
-            }
-        }
-        final int w2 = idarray[Constants.userfield18.getIndex()];
-        if (-1 != w2) {
-            if (nextLine[w2].length() > 0) {
-                user.setUserfield18(nextLine[w2]);
-            }
-        }
-        final int w3 = idarray[Constants.userfield19.getIndex()];
-        if (-1 != w3) {
-            if (nextLine[w3].length() > 0) {
-                user.setUserfield19(nextLine[w3]);
-            }
-        }
-        final int w4 = idarray[Constants.userfield20.getIndex()];
-        if (-1 != w4) {
-            if (nextLine[w4].length() > 0) {
-                user.setUserfield20(nextLine[w4]);
-            }
-        }
-        final int w5 = idarray[Constants.city_business.getIndex()];
-        if (-1 != w5) {
-            if (nextLine[w5].length() > 0) {
-                user.setCity_business(nextLine[w5]);
-            }
-        }
-        final int w6 = idarray[Constants.assistant_name.getIndex()];
-        if (-1 != w6) {
-            if (nextLine[w6].length() > 0) {
-                user.setAssistant_name(nextLine[w6]);
-            }
-        }
-        final int w7 = idarray[Constants.telephone_primary.getIndex()];
-        if (-1 != w7) {
-            if (nextLine[w7].length() > 0) {
-                user.setTelephone_primary(nextLine[w7]);
-            }
-        }
-        final int w8 = idarray[Constants.categories.getIndex()];
-        if (-1 != w8) {
-            if (nextLine[w8].length() > 0) {
-                user.setCategories(nextLine[w8]);
-            }
-        }
-        final int w9 = idarray[Constants.PASSWORDMECH.getIndex()];
-        if (-1 != w9) {
-            if (nextLine[w9].length() > 0) {
-                user.setPasswordMech(nextLine[w9]);
-            }
-        }
-        final int x = idarray[Constants.mail_folder_confirmed_ham_name.getIndex()];
-        if (-1 != x) {
-            if (nextLine[x].length() > 0) {
-                user.setMail_folder_confirmed_ham_name(nextLine[x]);
-            }
-        }
-        final int x1 = idarray[Constants.mail_folder_confirmed_spam_name.getIndex()];
-        if (-1 != x1) {
-            if (nextLine[x1].length() > 0) {
-                user.setMail_folder_confirmed_spam_name(nextLine[x1]);
-            }
-        }
-        final int x2 = idarray[Constants.DEFAULTSENDERADDRESS.getIndex()];
-        if (-1 != x2) {
-            if (nextLine[x2].length() > 0) {
-                user.setDefaultSenderAddress(nextLine[x2]);
-            }
-        }
-        final int x3 = idarray[Constants.gui_spam_filter_capabilities_enabled.getIndex()];
-        if (-1 != x3) {
-            if (nextLine[x3].length() > 0) {
-                user.setGui_spam_filter_enabled(stringToBool(nextLine[x3]));
-            }
-        }
+        });
+        setValue(nextLine, idarray, Constants.uploadfilesizelimitperfile, new MethodStringClosure() {
+            public void callMethod(String value) throws InvalidDataException {
+                try {
+                    user.setUploadFileSizeLimitPerFile(Integer.valueOf(value));
+                } catch (NumberFormatException e) {
+                    throw new InvalidDataException("Value in field " + Constants.uploadfilesizelimitperfile.getString() + " is no integer");
+                }
+            }
+        });
+        setValue(nextLine, idarray, Constants.url, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUrl(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield01, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield01(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield02, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield02(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield03, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield03(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield04, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield04(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield05, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield05(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield06, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield06(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield07, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield07(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield08, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield08(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield09, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield09(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield10, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield10(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield11, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield11(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield12, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield12(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield13, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield13(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield14, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield14(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield15, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield15(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield16, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield16(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield17, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield17(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield18, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield18(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield19, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield19(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.userfield20, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setUserfield20(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.city_business, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCity_business(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.country_business, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCountry_business(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.assistant_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setAssistant_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.telephone_primary, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setTelephone_primary(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.categories, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setCategories(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.PASSWORDMECH, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setPasswordMech(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.mail_folder_confirmed_ham_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setMail_folder_confirmed_ham_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.mail_folder_confirmed_spam_name, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setMail_folder_confirmed_spam_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.DEFAULTSENDERADDRESS, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setDefaultSenderAddress(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.gui_spam_filter_capabilities_enabled, new MethodStringClosure() {
+            public void callMethod(String value) {
+                user.setGui_spam_filter_enabled(stringToBool(value));
+            }
+        });
         final int m2 = idarray[Constants.MAILALIAS.getIndex()];
         if (-1 != m2) {
             if (nextLine[m2].length() > 0) {
@@ -1686,6 +1599,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                     aliases.add(email1);
                 }
                 user.setAliases(aliases);
+            } else {
+                if (Constants.MAILALIAS.isRequired()) {
+                    throw new InvalidDataException("Field " + Constants.MAILALIAS.getString() + " required but not set.");
+                }
             }
         }
     
@@ -1693,6 +1610,35 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return user;
     }
 
+    private static void setValue(String[] nextLine, int[] idarray, final CSVConstants constant, final MethodStringClosure closure) throws InvalidDataException, ParseException {
+        final int i = idarray[constant.getIndex()];
+        if (-1 != i) {
+            if (nextLine[i].length() > 0) {
+                closure.callMethod(nextLine[i]);
+            } else {
+                if (constant.isRequired()) {
+                    throw new InvalidDataException("Field " + constant.getString() + " required but not set.");
+                }
+            }
+        }
+    }
+
+    private static void setValue(String[] nextLine, int[] idarray, final CSVConstants constant, final MethodDateClosure closure) throws InvalidDataException, ParseException {
+        final int i = idarray[constant.getIndex()];
+        if (-1 != i) {
+            if (nextLine[i].length() > 0) {
+                final Date stringToDate = stringToDate(nextLine[i]);
+                if (null != stringToDate) {
+                    closure.callMethod(stringToDate);
+                }
+            } else {
+                if (constant.isRequired()) {
+                    throw new InvalidDataException("Field " + constant.getString() + " required but not set.");
+                }
+            }
+        }
+    }
+    
     private static Date stringToDate(String string) throws java.text.ParseException {
         final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
         sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
