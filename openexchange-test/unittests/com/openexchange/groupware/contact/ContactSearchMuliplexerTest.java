@@ -224,6 +224,31 @@ public class ContactSearchMuliplexerTest extends TestCase {
                 // TODO Auto-generated method stub
                 return null;
             }
+
+            public void associateTwoContacts(Contact master, Contact slave) throws OXException {
+                // TODO Auto-generated method stub
+                
+            }
+
+            public List<Contact> getAssociatedContacts(Contact contact) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            public Contact getContactByUUID(String uuid) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            public void separateTwoContacts(Contact master, Contact slave) throws OXException {
+                // TODO Auto-generated method stub
+                
+            }
             
         };
     }
