@@ -87,6 +87,7 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
+import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
@@ -1472,5 +1473,23 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
 
     public LdapServer getLdapServer() {
         return null;
+    }
+
+    public void associateTwoContacts(Contact master, Contact slave) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    public List<Contact> getAssociatedContacts(Contact contact) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException {
+        throw new UnsupportedOperationException();    }
+
+    public Contact getContactByUUID(String uuid) throws OXException {
+        throw new UnsupportedOperationException();    }
+
+    public void separateTwoContacts(Contact master, Contact slave) throws OXException {
+        throw new UnsupportedOperationException();        
     }
 }

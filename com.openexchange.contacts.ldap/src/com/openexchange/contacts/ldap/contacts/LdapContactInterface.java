@@ -76,6 +76,7 @@ import com.openexchange.contacts.ldap.property.FolderProperties.LoginSource;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -749,5 +750,25 @@ public class LdapContactInterface implements ContactInterface {
             // Default sorting
             Collections.sort(subList, new ContactComparator(-1));
         }
+    }
+
+    public void associateTwoContacts(Contact master, Contact slave) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    public List<Contact> getAssociatedContacts(Contact contact) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    public Contact getContactByUUID(String uuid) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    public void separateTwoContacts(Contact master, Contact slave) throws OXException {
+        throw new UnsupportedOperationException();
     }
 }

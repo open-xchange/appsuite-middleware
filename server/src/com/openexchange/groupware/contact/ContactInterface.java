@@ -50,6 +50,8 @@
 package com.openexchange.groupware.contact;
 
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXConcurrentModificationException;
@@ -189,6 +191,16 @@ public interface ContactInterface {
      */
     public SearchIterator<Contact> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
 
+    public Contact getContactByUUID(String uuid) throws OXException;
+    
+    public List<Contact> getAssociatedContacts(Contact contact) throws OXException;
+    
+    public void associateTwoContacts(Contact master, Contact slave) throws OXException;
+    
+    public void separateTwoContacts(Contact master, Contact slave) throws OXException;
+    
+    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException;
+    
     /**
      * Gets the folder ID.
      * 

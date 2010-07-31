@@ -60,6 +60,7 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.contact.LdapServer;
+import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.session.Session;
@@ -243,6 +244,46 @@ public class SimContactSQLInterface implements ContactSQLInterface {
         }
         folders.put(folderId, new LinkedList<Contact>());
         return folders.get(folderId);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.contact.ContactInterface#associateTwoContacts(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact)
+     */
+    public void associateTwoContacts(Contact master, Contact slave) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.contact.ContactInterface#getAssociatedContacts(com.openexchange.groupware.container.Contact)
+     */
+    public List<Contact> getAssociatedContacts(Contact contact) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.contact.ContactInterface#getAssociationBetween(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact)
+     */
+    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.contact.ContactInterface#getContactByUUID(java.lang.String)
+     */
+    public Contact getContactByUUID(String uuid) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.contact.ContactInterface#separateTwoContacts(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact)
+     */
+    public void separateTwoContacts(Contact master, Contact slave) throws OXException {
+        // TODO Auto-generated method stub
+        
     }
 
 }
