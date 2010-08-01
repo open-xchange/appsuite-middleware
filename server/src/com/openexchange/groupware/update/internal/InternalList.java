@@ -339,7 +339,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.AddFileAsForUserContacts(),
         
         // Extend field "reason" for participants.
-        new com.openexchange.groupware.update.tasks.ParticipantCommentFieldLength()
+        new com.openexchange.groupware.update.tasks.ParticipantCommentFieldLength(),
+        
+        //new table for linking several appointments (from different sources) together that represent the same person
+        new com.openexchange.groupware.update.tasks.AggregatingContactTableService()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure
