@@ -1,3 +1,9 @@
+open-xchange-push-udp (6.18.1.0-0) unstable; urgency=low
+
+  * 6.18.1 cycle
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  2 Aug 2010 09:37:03 +0200
+
 open-xchange-push-udp (6.18.0.0-2) unstable; urgency=low
 
   * first build for 6.18-rev2

@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -554,6 +554,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Jul 30 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #15138: Made a log message, complaining, that the server can't reach an external subscription service definition, more meaningful.
+ - Bugfix #16351: Complain louder about missing property in templating service.
+ - Bugfix #15302: Make subscription parser more resilient.
 * Thu Jul 29 2010 - karsten.will@open-xchange.com
  - Bugfix #16591: Error loading JavaScript from [https://www.gmx.com/client/static/script/compiled-gecko-17-821660071.js]
 * Thu Jul 29 2010 - marcus.klein@open-xchange.com
