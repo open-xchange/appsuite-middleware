@@ -224,11 +224,11 @@ public abstract class CreateCore extends ContextAbstraction {
         }
     }
 
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, MalformedURLException, NotBoundException; 
     
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, MalformedURLException, NotBoundException; 
     
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, MalformedURLException, NotBoundException; 
     
     protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
         
