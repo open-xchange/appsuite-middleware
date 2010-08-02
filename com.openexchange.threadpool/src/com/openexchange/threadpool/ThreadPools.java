@@ -57,7 +57,9 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.threadpool.internal.CustomThreadFactory;
 
 /**
  * {@link ThreadPools} - Utility methods for {@link ThreadPoolService} and {@link Task}.
@@ -266,6 +268,15 @@ public final class ThreadPools {
             throw new NullPointerException();
         }
         return new TaskAdapter<T>(task);
+    }
+
+    /**
+     * Initializes a new {@link ThreadFactory}.
+     * 
+     * @param namePrefix The name prefix for created threads; e.g. "MyWorker-"
+     */
+    public static ThreadFactory newThreadFactory(final String namePrefix) {
+        return new CustomThreadFactory(namePrefix);
     }
 
     /**
