@@ -68,6 +68,8 @@ public class Create extends CreateCore {
 	
     private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
     
+    private OXContextInterface csv_oxctx;
+    
     public Create(final String[] args2) {
 
         final AdminParser parser = new AdminParser("createcontext");
@@ -134,21 +136,23 @@ public class Create extends CreateCore {
     }
 
     @Override
-    protected Context simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-        return oxctx.create(ctx, usr, accessCombiName, auth);
+    protected void lookupRMI() throws MalformedURLException, RemoteException, NotBoundException {
+        this.csv_oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+    }
+    
+    @Override
+    protected Context simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        return this.csv_oxctx.create(ctx, usr, accessCombiName, auth);
     }
 
     @Override
-    protected Context simpleMainCall(Context ctx, User usr, UserModuleAccess access, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-        return oxctx.create(ctx, usr, access, auth);
+    protected Context simpleMainCall(Context ctx, User usr, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        return this.csv_oxctx.create(ctx, usr, access, auth);
     }
 
     @Override
-    protected Context simpleMainCall(Context ctx, User usr, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-        return oxctx.create(ctx, usr, auth);
+    protected Context simpleMainCall(Context ctx, User usr, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        return this.csv_oxctx.create(ctx, usr, auth);
     }
 
 }
