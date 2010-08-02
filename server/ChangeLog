@@ -2,6 +2,7 @@
 
  - Bugfix #16614: Fixed NPE in FolderObjectIterator class
  - Bugfix #16616: Using a blocking queue to avoid possible OutOfMemory error due to creation of too many threads
+ - Bugfix #16531: No translation of IMAP folder names
 
 * 2010-07-30 - francisco.laguna@open-xchange.com
 

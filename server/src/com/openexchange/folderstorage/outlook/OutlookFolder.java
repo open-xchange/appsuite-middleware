@@ -181,8 +181,11 @@ public final class OutlookFolder implements Folder {
     }
 
     public String getLocalizedName(final Locale locale) {
+        if (null == name) {
+            return realFolder.getLocalizedName(locale);
+        }
         if (null == localizedName) {
-            localizedName = new StringHelper(locale).getString(getName());
+            localizedName = new StringHelper(locale).getString(name);
         }
         return localizedName;
     }
