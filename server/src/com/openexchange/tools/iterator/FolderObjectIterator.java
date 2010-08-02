@@ -803,7 +803,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 }
             }
             permsMap.clear();
-            executor.shutdown();
         }
 
         public void submitPermissionsFor(final int folderId) {
