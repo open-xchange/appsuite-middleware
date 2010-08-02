@@ -68,7 +68,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.openexchange.api2.OXException;
@@ -84,11 +87,8 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIteratorException.Code;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -351,13 +351,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         if (containsPermissions) {
             permissionLoader = null;
         } else {
-            PermissionLoader tmp;
-            try {
-                tmp = new PermissionLoader(ctx);
-            } catch (final SearchIteratorException e) {
-                tmp = null;
-            }
-            permissionLoader = tmp;
+            permissionLoader = new PermissionLoader(ctx);
         }
         /*
          * Set next to first result set entry
@@ -784,17 +778,21 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         private final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap;
 
-        private final ExecutorService executorService;
+        private final ExecutorService executor;
 
-        public PermissionLoader(final Context ctx) throws SearchIteratorException {
+        public PermissionLoader(final Context ctx) {
             super();
             this.ctx = ctx;
             permsMap = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
-            try {
-                executorService = (ExecutorService) ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true).getExecutor();
-            } catch (final ServiceException e) {
-                throw new SearchIteratorException(e);
-            }
+            executor =
+                Executors.unconfigurableExecutorService(new ThreadPoolExecutor(
+                    1,
+                    1,
+                    0L,
+                    TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>(),
+                    ThreadPools.newThreadFactory("PermissionLoader-"),
+                    new ThreadPoolExecutor.CallerRunsPolicy()));
         }
 
         public void close() {
@@ -805,11 +803,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 }
             }
             permsMap.clear();
+            executor.shutdown();
         }
 
         public void submitPermissionsFor(final int folderId) {
             final Context myCtx = this.ctx;
-            permsMap.put(Integer.valueOf(folderId), executorService.submit(new Callable<OCLPermission[]>() {
+            permsMap.put(Integer.valueOf(folderId), executor.submit(new Callable<OCLPermission[]>() {
 
                 public OCLPermission[] call() throws AbstractOXException {
                     final Connection readCon = Database.get(myCtx, false);

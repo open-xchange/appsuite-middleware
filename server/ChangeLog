@@ -1,3 +1,8 @@
+* 2010-08-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #16614: Fixed NPE in FolderObjectIterator class
+ - Bugfix #16616: Using a single-thread executor to avoid possible OutOfMemory error due to creation of too many threads
+
 * 2010-07-30 - francisco.laguna@open-xchange.com
 
  - Bugfix #15138: Made a log message, complaining, that the server can't reach an external subscription service definition, more meaningful.
