@@ -71,7 +71,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * Note: This one does not use foreign key constraints on prg_contact.userfield19, 
+ * Note: This one does not use foreign key constraints on prg_contact.userfield20, 
  * because it might be used for something else later on.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
