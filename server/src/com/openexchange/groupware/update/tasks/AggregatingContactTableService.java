@@ -84,7 +84,7 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
         return "CREATE TABLE "+AGGREGATING_CONTACTS+" (" +
                     "contributor CHAR(36) NOT NULL, " +
         		    "aggregator CHAR(36) NOT NULL," +
-        		    "stateTINYINT NOT NULL" + 
+        		    "state TINYINT NOT NULL" + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
     
