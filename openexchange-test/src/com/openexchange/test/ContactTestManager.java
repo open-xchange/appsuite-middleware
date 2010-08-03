@@ -195,7 +195,7 @@ public class ContactTestManager implements TestManager {
     /**
      * Create multiple contacts via the HTTP-API at once
      */
-    public void newAction(Contact[] contacts) {
+    public void newAction(Contact... contacts) {
         for (int i = 0; i < contacts.length; i++) {
             this.newAction(contacts[i]);
         }
