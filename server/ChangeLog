@@ -1,3 +1,8 @@
+* 2010-08-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #16495: Added config parameter to decide whether to add client's IP address to mail headers on
+                  delivery as custom header "X-Originating-IP"
+
 * 2010-08-02 - thorben.betten@open-xchange.com
 
  - Bugfix #16614: Fixed NPE in FolderObjectIterator class

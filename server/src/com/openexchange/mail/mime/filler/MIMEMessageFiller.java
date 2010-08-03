@@ -301,7 +301,12 @@ public class MIMEMessageFiller {
              */
             mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, org.toString());
         }
-        mimeMessage.setHeader("X-Originating-IP", session.getLocalIp());
+        /*
+         * Add header X-Originating-IP containing the IP address of the client
+         */
+        if (MailProperties.getInstance().isAddClientIPAddress()) {
+            mimeMessage.setHeader("X-Originating-IP", session.getLocalIp());
+        }
     }
 
     private static final String[] SUPPRESS_HEADERS =

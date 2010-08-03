@@ -171,6 +171,8 @@ public final class MailProperties implements IMailProperties {
 
     private int mailAccessCacheIdleSeconds;
 
+    private boolean addClientIPAddress;
+
     /**
      * Initializes a new {@link MailProperties}
      */
@@ -254,6 +256,7 @@ public final class MailProperties implements IMailProperties {
         adminMailLoginEnabled = false;
         mailAccessCacheShrinkerSeconds = 0;
         mailAccessCacheIdleSeconds = 0;
+        addClientIPAddress = false;
     }
 
     private void loadProperties0() throws MailConfigException {
@@ -443,6 +446,12 @@ public final class MailProperties implements IMailProperties {
             final String supSubsStr = configuration.getProperty("com.openexchange.mail.supportSubscription", "true").trim();
             supportSubscription = Boolean.parseBoolean(supSubsStr);
             logBuilder.append("\tSupport Subscription: ").append(supportSubscription).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.addClientIPAddress", "false").trim();
+            addClientIPAddress = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tAdd Client IP Address: ").append(addClientIPAddress).append('\n');
         }
 
         {
@@ -651,6 +660,15 @@ public final class MailProperties implements IMailProperties {
 
     public boolean isSupportSubscription() {
         return supportSubscription;
+    }
+
+    /**
+     * Checks if client's IP address should be added to mail headers on delivery as custom header <code>"X-Originating-IP"</code>.
+     * 
+     * @return <code>true</code> if client's IP address should be added otherwise <code>false</code>
+     */
+    public boolean isAddClientIPAddress() {
+        return addClientIPAddress;
     }
 
     /**
