@@ -181,11 +181,7 @@ public final class DBUtils {
          * Close connection
          */
         if (con != null) {
-            if (isReadCon) {
-                Database.back(cid, false, con);
-            } else {
-                Database.back(cid, true, con);
-            }
+            Database.back(cid, !isReadCon, con);
         }
     }
 

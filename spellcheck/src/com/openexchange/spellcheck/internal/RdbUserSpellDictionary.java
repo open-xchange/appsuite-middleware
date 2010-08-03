@@ -49,12 +49,12 @@
 
 package com.openexchange.spellcheck.internal;
 
+import static com.openexchange.tools.sql.DBUtils.closeResources;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -122,18 +122,6 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
             this.userId = userId;
             hash = userId ^ contextId;
             timestamp = System.currentTimeMillis();
-        }
-
-        public int getContextId() {
-            return contextId;
-        }
-
-        public int getUserId() {
-            return userId;
-        }
-
-        public long getTimestamp() {
-            return timestamp;
         }
 
         @Override
@@ -364,7 +352,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
             } catch (final SQLException e) {
                 throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
             } finally {
-                closeDBStuff(null, stmt, writeCon, false, key.contextId);
+                closeResources(null, stmt, writeCon, false, key.contextId);
             }
         } finally {
             writeLock.unlock();
@@ -392,7 +380,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
             } catch (final SQLException e) {
                 throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
             } finally {
-                closeDBStuff(rs, stmt, readCon, true, key.contextId);
+                closeResources(rs, stmt, readCon, true, key.contextId);
             }
         } finally {
             readLock.unlock();
@@ -427,43 +415,10 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
             } catch (final JSONException e) {
                 throw new SpellCheckException(SpellCheckException.Code.INVALID_FORMAT, e, e.getMessage());
             } finally {
-                closeDBStuff(rs, stmt, readCon, true, key.contextId);
+                closeResources(rs, stmt, readCon, true, key.contextId);
             }
         } finally {
             readLock.unlock();
-        }
-    }
-
-    private static void closeDBStuff(final ResultSet rs, final Statement stmt, final Connection con, final boolean isReadCon, final int cid) {
-        /*
-         * Close ResultSet
-         */
-        if (rs != null) {
-            try {
-                rs.close();
-            } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-        }
-        /*
-         * Close Statement
-         */
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-        }
-        /*
-         * Close connection
-         */
-        if (con != null) {
-            Database.back(cid, !isReadCon, con);
         }
     }
 
