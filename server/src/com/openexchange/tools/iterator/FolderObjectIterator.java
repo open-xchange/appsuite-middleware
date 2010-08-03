@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.iterator;
 
+import gnu.trove.TIntHashSet;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -56,11 +57,22 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
@@ -69,12 +81,19 @@ import com.openexchange.caching.ElementAttributes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.iterator.SearchIteratorException.Code;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
@@ -97,12 +116,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         @Override
-        public FolderObject next() throws SearchIteratorException {
+        public FolderObject next() {
             return null;
         }
 
         @Override
-        public void close() throws SearchIteratorException {
+        public void close() {
             // Nothing to close
         }
 
@@ -138,7 +157,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private final boolean closeCon;
 
-    private final Set<Integer> folderIds;
+    private final TIntHashSet folderIds;
 
     private FolderObject next;
 
@@ -154,7 +173,15 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private final boolean resideInCache;
 
+    private final boolean containsPermissions;
+
+    private final HashMap<Integer, FolderObject> folders;
+
     private final List<AbstractOXException> warnings;
+
+    private FolderObject future;
+
+    private final PermissionLoader permissionLoader;
 
     private static final String[] selectFields = {
         "fuid", "parent", "fname", "module", "type", "creating_date", "created_from", "changing_date", "changed_from", "permission_flag",
@@ -168,34 +195,90 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      * @return All necessary fields in right order to be used in an SQL <i>SELECT</i> statement
      */
     public static final String getFieldsForSQL(final String tableAlias) {
-        final StringBuilder fields = new StringBuilder();
-        final boolean useTableName = (tableAlias != null);
-        if (useTableName) {
-            fields.append(tableAlias);
-            fields.append('.');
-        }
-        fields.append(selectFields[0]);
-        for (int i = 1; i < selectFields.length; i++) {
-            fields.append(", ");
-            if (useTableName) {
-                fields.append(tableAlias);
-                fields.append('.');
+        final StringBuilder fields = new StringBuilder(128);
+        final String delim = ", ";
+        if (tableAlias != null) {
+            final String prefix = fields.append(tableAlias).append('.').toString();
+            fields.setLength(0);
+            fields.append(prefix).append(selectFields[0]);
+            for (int i = 1; i < selectFields.length; i++) {
+                fields.append(delim).append(prefix).append(selectFields[i]);
             }
-            fields.append(selectFields[i]);
+        } else {
+            fields.append(selectFields[0]);
+            for (int i = 1; i < selectFields.length; i++) {
+                fields.append(delim).append(selectFields[i]);
+            }
         }
         return fields.toString();
+    }
+
+    private static final String[] selectFieldsPerm = { "permission_id", "fp", "orp", "owp", "odp", "admin_flag", "group_flag", "system" };
+
+    /**
+     * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i> statement needed to create instances of
+     * {@link FolderObject} with permissions applied.
+     * 
+     * @param folderAlias The table alias for folder used throughout corresponding SQL <i>SELECT</i> statement or <code>null</code> if no
+     *            alias used.
+     * @param permAlias The table alias for permissions used throughout corresponding SQL <i>SELECT</i> statement or <code>null</code> if no
+     *            alias used.
+     * @return All necessary fields in right order to be used in an SQL <i>SELECT</i> statement
+     */
+    public static final String getFieldsForSQLWithPermissions(final String folderAlias, final String permAlias) {
+        final StringBuilder fields = new StringBuilder(256);
+        final String delim = ", ";
+        if (permAlias != null) {
+            final String prefix = fields.append(permAlias).append('.').toString();
+            fields.setLength(0);
+            fields.append(prefix).append(selectFieldsPerm[0]);
+            for (int i = 1; i < selectFieldsPerm.length; i++) {
+                fields.append(delim).append(prefix).append(selectFieldsPerm[i]);
+            }
+        } else {
+            fields.append(selectFieldsPerm[0]);
+            for (int i = 1; i < selectFieldsPerm.length; i++) {
+                fields.append(delim).append(selectFieldsPerm[i]);
+            }
+        }
+        final String permFields = fields.toString();
+        fields.setLength(0);
+        /*
+         * Now folder fields
+         */
+        if (folderAlias != null) {
+            final String prefix = fields.append(folderAlias).append('.').toString();
+            fields.setLength(0);
+            fields.append(prefix).append(selectFields[0]);
+            for (int i = 1; i < selectFields.length; i++) {
+                fields.append(delim).append(prefix).append(selectFields[i]);
+            }
+        } else {
+            fields.append(selectFields[0]);
+            for (int i = 1; i < selectFields.length; i++) {
+                fields.append(delim).append(selectFields[i]);
+            }
+        }
+        /*
+         * Append permission fields & return
+         */
+        return fields.append(delim).append(permFields).toString();
     }
 
     /**
      * Initializes a new {@link FolderObjectIterator}
      */
-    private FolderObjectIterator() {
+    FolderObjectIterator() {
+        super();
         closeCon = false;
         resideInCache = false;
+        containsPermissions = false;
         ctx = null;
         prefetchQueue = null;
         folderIds = null;
+        folders = null;
         warnings = new ArrayList<AbstractOXException>(2);
+        permissionLoader = null;
     }
 
     /**
@@ -203,15 +286,17 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      * 
      * @param col The collection containing instances of {@link FolderObject}
      * @param resideInCache If objects shall reside in cache permanently or shall be removed according to cache policy
-     * @throws SearchIteratorException If an unsupported collection is specified
      */
-    public FolderObjectIterator(final Collection<FolderObject> col, final boolean resideInCache) throws SearchIteratorException {
+    public FolderObjectIterator(final Collection<FolderObject> col, final boolean resideInCache) {
+        super();
         folderIds = null;
+        folders = null;
         warnings = new ArrayList<AbstractOXException>(2);
         rs = null;
         stmt = null;
         ctx = null;
         closeCon = false;
+        containsPermissions = false;
         this.resideInCache = resideInCache;
         if ((col == null) || col.isEmpty()) {
             next = null;
@@ -220,6 +305,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             prefetchQueue = new LinkedList<FolderObject>(col);
             next = prefetchQueue.poll();
         }
+        permissionLoader = null;
     }
 
     /**
@@ -234,11 +320,29 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      * @throws SearchIteratorException If instantiation fails.
      */
     public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean resideInCache, final Context ctx, final Connection readCon, final boolean closeCon) throws SearchIteratorException {
+        this(rs, stmt, resideInCache, false, ctx, readCon, closeCon);
+    }
+
+    /**
+     * Initializes a new {@link FolderObjectIterator}
+     * 
+     * @param rs The result set providing selected folder data
+     * @param stmt The fired statement (to release all resources on iterator end)
+     * @param resideInCache If objects shall reside in cache permanently or shall be removed according to cache policy
+     * @param containsPermissions If result set contains duplicates because of selected folder permissions; otherwise <code>false</code>
+     * @param ctx The context
+     * @param readCon A connection holding at least read capability
+     * @param closeCon Whether to close given connection or not
+     * @throws SearchIteratorException If instantiation fails.
+     */
+    public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean resideInCache, final boolean containsPermissions, final Context ctx, final Connection readCon, final boolean closeCon) throws SearchIteratorException {
+        super();
         if (OXFolderProperties.isEnableDBGrouping()) {
             folderIds = null;
         } else {
-            folderIds = new HashSet<Integer>();
+            folderIds = new TIntHashSet();
         }
+        folders = containsPermissions ? new LinkedHashMap<Integer, FolderObject>(32) : null;
         warnings = new ArrayList<AbstractOXException>(2);
         this.rs = rs;
         this.stmt = stmt;
@@ -246,6 +350,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         this.ctx = ctx;
         this.closeCon = closeCon;
         this.resideInCache = resideInCache;
+        this.containsPermissions = containsPermissions;
+        if (containsPermissions) {
+            permissionLoader = null;
+        } else {
+            permissionLoader = new PermissionLoader(ctx);
+        }
         /*
          * Set next to first result set entry
          */
@@ -257,9 +367,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 closeResources();
             }
         } catch (final SQLException e) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
         if (prefetchEnabled) {
             prefetchQueue = new LinkedList<FolderObject>();
@@ -269,17 +379,19 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 while (this.rs.next()) {
                     FolderObject fo = createFolderObjectFromSelectedEntry();
-                    while ((fo == null) && this.rs.next()) {
+                    while ((fo == null) && rs.next()) {
                         fo = createFolderObjectFromSelectedEntry();
                     }
-                    if (fo != null) {
-                        prefetchQueue.offer(fo);
-                    }
+                    prefetchQueue.offer(fo);
+                }
+                if (future != null) {
+                    prefetchQueue.offer(future);
+                    future = null;
                 }
             } catch (final SQLException e) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } catch (final DBPoolingException e) {
-                throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } finally {
                 closeResources();
             }
@@ -304,28 +416,58 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     private final FolderObject createFolderObjectFromSelectedEntry() throws SQLException, DBPoolingException {
         // fname, fuid, module, type, creator
         final int folderId = rs.getInt(1);
-        if (!OXFolderProperties.isEnableDBGrouping()) {
-            if (folderIds.contains(Integer.valueOf(folderId))) {
-                return null;
+        final FolderObject fo;
+        if (containsPermissions) {
+            /*
+             * No cache look-up in this mode to not being confused with result set state
+             */
+            final Integer key = Integer.valueOf(folderId);
+            FolderObject current = folders.get(key);
+            if (null == current) {
+                current = createNewFolderObject(folderId);
+                folders.put(key, current);
+                addPermissions(folderId, current);
+            } else {
+                addPermissions(folderId, current);
             }
-            folderIds.add(Integer.valueOf(folderId));
-        }
-        /*
-         * Look up cache
-         */
-        if (FolderCacheManager.isInitialized()) {
-            try {
-                final FolderObject fld = FolderCacheManager.getInstance().getFolderObject(folderId, ctx);
-                if (fld != null) {
-                    return fld;
+            fo = current;
+        } else {
+            if (!OXFolderProperties.isEnableDBGrouping()) {
+                if (folderIds.contains(folderId)) {
+                    return null;
                 }
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                folderIds.add(folderId);
+            }
+            /*
+             * Look up cache
+             */
+            if (FolderCacheManager.isInitialized()) {
+                try {
+                    final FolderObject fld = FolderCacheManager.getInstance().getFolderObject(folderId, ctx);
+                    if (fld != null) {
+                        return fld;
+                    }
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+            /*
+             * Not in cache; create from read data
+             */
+            fo = createNewFolderObject(folderId);
+            /*
+             * Read & set permissions
+             */
+            if (null == permissionLoader) {
+                fo.setPermissionsAsArray(FolderObject.getFolderPermissions(folderId, ctx, readCon));
+            } else {
+                permissionLoader.submitPermissionsFor(folderId);
             }
         }
-        /*
-         * Not in cache; create from read data
-         */
+        return fo;
+    }
+
+    private FolderObject createNewFolderObject(final int folderId) throws SQLException {
         final FolderObject fo = new FolderObject(rs.getString(3), folderId, rs.getInt(4), rs.getInt(5), rs.getInt(7));
         fo.setParentFolderID(rs.getInt(2)); // parent
         long tStmp = rs.getLong(6); // creating_date
@@ -353,29 +495,38 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             defaultFolder = 0;
         }
         fo.setDefaultFolder(defaultFolder > 0);
-        /*
-         * Read & set permissions
-         */
-        fo.setPermissionsAsArray(FolderObject.getFolderPermissions(rs.getInt(1), ctx, readCon));
-        /*
-         * Determine if folder object should be put into cache or not
-         */
-        if (FolderCacheManager.isInitialized()) {
-            try {
-                if (resideInCache) {
-                    FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, getEternalAttributes());
-                } else {
-                    FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, null);
-                }
-            } catch (final FolderCacheNotEnabledException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final CacheException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
         return fo;
+    }
+
+    private void addPermissions(final int folderId, final FolderObject current) throws SQLException {
+        future = null;
+        addNewPermission(current);
+        /*
+         * Read all available permissions for current folder
+         */
+        boolean hasNext;
+        while ((hasNext = rs.next()) && folderId == rs.getInt(1)) {
+            addNewPermission(current);
+        }
+        if (hasNext) {
+            final int fuid = rs.getInt(1);
+            future = createNewFolderObject(fuid);
+            folders.put(Integer.valueOf(fuid), future);
+            /*
+             * Add first available permission from current row
+             */
+            addNewPermission(future);
+        }
+    }
+
+    private void addNewPermission(final FolderObject current) throws SQLException {
+        final OCLPermission p = new OCLPermission();
+        p.setEntity(rs.getInt(13)); // Entity
+        p.setAllPermission(rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17)); // fp, orp, owp, and odp
+        p.setFolderAdmin(rs.getInt(18) > 0 ? true : false); // admin_flag
+        p.setGroupPermission(rs.getInt(19) > 0 ? true : false); // group_flag
+        p.setSystem(rs.getInt(20)); // system
+        current.addPermission(p);
     }
 
     private final void closeResources() throws SearchIteratorException {
@@ -390,7 +541,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 if (LOG.isErrorEnabled()) {
                     LOG.error(e.getMessage(), e);
                 }
-                error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                error = new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             }
             rs = null;
         }
@@ -405,7 +556,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     LOG.error(e.getMessage(), e);
                 }
                 if (error == null) {
-                    error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                    error = new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
                 }
             }
             stmt = null;
@@ -422,10 +573,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#hasNext()
-     */
     public boolean hasNext() {
         if (isClosed) {
             return false;
@@ -433,28 +580,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return next != null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#next()
-     */
     public FolderObject next() throws SearchIteratorException {
         if (isClosed) {
-            throw new SearchIteratorException(SearchIteratorCode.CLOSED, EnumComponent.FOLDER);
+            throw new SearchIteratorException(Code.CLOSED, EnumComponent.FOLDER);
         }
         try {
-            final FolderObject retval = next;
+            final FolderObject retval = prepareFolderObject(next);
             next = null;
-            if (prefetchQueue != null) {
-                /*
-                 * Select next from queue
-                 */
-                if (!prefetchQueue.isEmpty()) {
-                    next = prefetchQueue.poll();
-                    while ((next == null) && !prefetchQueue.isEmpty()) {
-                        next = prefetchQueue.poll();
-                    }
-                }
-            } else {
+            if (prefetchQueue == null) {
                 /*
                  * Select next from underlying ResultSet
                  */
@@ -467,22 +600,67 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                         close();
                     }
                 } else {
+                    next = future;
                     close();
+                }
+            } else {
+                /*
+                 * Select next from queue
+                 */
+                if (!prefetchQueue.isEmpty()) {
+                    next = prefetchQueue.poll();
+                    while ((next == null) && !prefetchQueue.isEmpty()) {
+                        next = prefetchQueue.poll();
+                    }
                 }
             }
             return retval;
         } catch (final SQLException e) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#close()
-     */
-    public void close() throws SearchIteratorException {
+    private FolderObject prepareFolderObject(final FolderObject fo) throws SearchIteratorException {
+        if (null == fo) {
+            return null;
+        }
+        final int folderId = fo.getObjectID();
+        if (!fo.containsPermissions()) {
+            /*
+             * No permissions set, yet
+             */
+            final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissionsFor(folderId, 2000L);
+            try {
+                fo.setPermissionsAsArray(null == permissions ? FolderObject.getFolderPermissions(folderId, ctx, readCon) : permissions);
+            } catch (final DBPoolingException e) {
+                throw new SearchIteratorException(e);
+            } catch (final SQLException e) {
+                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            }
+        }
+        /*
+         * Determine if folder object should be put into cache or not
+         */
+        if (null != ctx && FolderCacheManager.isInitialized()) {
+            try {
+                FolderCacheManager.getInstance().putIfAbsent(fo, ctx, resideInCache ? getEternalAttributes() : null);
+            } catch (final FolderCacheNotEnabledException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final CacheException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        /*
+         * Return prepared folder object
+         */
+        return fo;
+    }
+
+    public void close() {
         if (isClosed) {
             return;
         }
@@ -492,13 +670,24 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         } catch (final SearchIteratorException e) {
             LOG.error(e.getMessage(), e);
         }
+        /*
+         * Close other stuff
+         */
+        if (null != prefetchQueue) {
+            prefetchQueue.clear();
+        }
+        if (null != folderIds) {
+            folderIds.clear();
+        }
+        if (null != folders) {
+            folders.clear();
+        }
+        if (null != permissionLoader) {
+            permissionLoader.close();
+        }
         isClosed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#size()
-     */
     public int size() {
         if (prefetchQueue != null) {
             return prefetchQueue.size() + (next == null ? 0 : 1);
@@ -506,10 +695,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         throw new UnsupportedOperationException("Method size() not implemented");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.iterator.SearchIterator#hasSize()
-     */
     public boolean hasSize() {
         /*
          * Size can be predicted if prefetch queue is not null
@@ -558,9 +743,11 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             if (next == null) {
                 return retval;
             }
-            retval.add(next);
+            retval.add(prepareFolderObject(next));
             if (prefetchQueue != null) {
-                retval.addAll(prefetchQueue);
+                while (!prefetchQueue.isEmpty()) {
+                    retval.add(prepareFolderObject(prefetchQueue.poll()));
+                }
                 return retval;
             }
             while (rs.next()) {
@@ -569,14 +756,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     fo = createFolderObjectFromSelectedEntry();
                 }
                 if (fo != null) {
-                    retval.offer(fo);
+                    retval.offer(prepareFolderObject(fo));
                 }
             }
             return retval;
         } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final SQLException e) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } finally {
             next = null;
             try {
@@ -584,7 +771,121 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             } catch (final SearchIteratorException e) {
                 LOG.error(e.getMessage(), e);
             }
+            /*
+             * Close other stuff
+             */
+            if (null != prefetchQueue) {
+                prefetchQueue.clear();
+            }
+            if (null != folderIds) {
+                folderIds.clear();
+            }
+            if (null != folders) {
+                folders.clear();
+            }
+            if (null != permissionLoader) {
+                permissionLoader.close();
+            }
             isClosed = true;
         }
     }
+
+    private static final class PermissionLoader {
+
+        private final Context ctx;
+
+        private final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap;
+
+        private final BlockingQueue<Integer> queue;
+
+        private final Future<Object> mainFuture;
+
+        public PermissionLoader(final Context ctx) throws SearchIteratorException {
+            super();
+            this.ctx = ctx;
+            final ConcurrentMap<Integer, Future<OCLPermission[]>> m = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
+            permsMap = m;
+            final BlockingQueue<Integer> q = new LinkedBlockingQueue<Integer>();
+            queue = q;
+            try {
+                final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+                mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
+
+                    public Object call() throws Exception {
+                        try {
+                            Integer tmp;
+                            while ((tmp = q.take()) != null) {
+                                final Integer folderId = tmp;
+                                /*
+                                 * Add future to concurrent map
+                                 */
+                                final FutureTask<OCLPermission[]> f = new FutureTask<OCLPermission[]>(new Callable<OCLPermission[]>() {
+        
+                                    public OCLPermission[] call() throws Exception {
+                                        final Connection readCon = Database.get(ctx, false);
+                                        try {
+                                            return FolderObject.getFolderPermissions(folderId.intValue(), ctx, readCon);
+                                        } catch (final SQLException e) {
+                                            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+                                        } finally {
+                                            Database.back(ctx, false, readCon);
+                                        }
+                                    }
+                                });
+                                m.put(folderId, f);
+                                /*
+                                 * Execute task with this thread
+                                 */
+                                f.run();
+                            }
+                            /*
+                             * Return
+                             */
+                            return null;
+                        } catch (final InterruptedException e) {
+                            throw e;
+                        }
+                    }
+                }), CallerRunsBehavior.<Object> getInstance());
+
+            } catch (final ServiceException e) {
+                throw new SearchIteratorException(e);
+            }
+        }
+
+        public void close() {
+            for (final Iterator<Future<OCLPermission[]>> iterator = permsMap.values().iterator(); iterator.hasNext();) {
+                final Future<OCLPermission[]> f = iterator.next();
+                if (null != f && !f.isDone()) {
+                    f.cancel(false);
+                }
+            }
+            permsMap.clear();
+            mainFuture.cancel(true);
+        }
+
+        public void submitPermissionsFor(final int folderId) {
+            queue.offer(Integer.valueOf(folderId));
+        }
+
+        public OCLPermission[] pollPermissionsFor(final int folderId, final long timeoutMsec) throws SearchIteratorException {
+            final Future<OCLPermission[]> f = permsMap.get(Integer.valueOf(folderId));
+            if (null == f) {
+                return null;
+            }
+            try {
+                return f.get(timeoutMsec, TimeUnit.MILLISECONDS);
+            } catch (final InterruptedException e) {
+                throw new SearchIteratorException(Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            } catch (final ExecutionException e) {
+                throw new SearchIteratorException(ThreadPools.launderThrowable(e, AbstractOXException.class));
+            } catch (final TimeoutException e) {
+                /*
+                 * Wait timed out
+                 */
+                return null;
+            }
+        }
+
+    } // End of PermissionLoader
 }
