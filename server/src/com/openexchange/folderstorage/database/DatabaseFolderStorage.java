@@ -100,6 +100,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -131,7 +132,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         super();
     }
 
-    public void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException {
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
         // Nothing to do
     }
 
@@ -190,7 +191,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    public void restore(String treeId, String folderIdentifier, StorageParameters storageParameters) throws FolderException {
+    public void restore(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final Session session = storageParameters.getSession();
@@ -673,6 +674,76 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public FolderType getFolderType() {
         return DatabaseFolderType.getInstance();
+    }
+
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final User user = storageParameters.getUser();
+            final int userId = user.getId();
+            final Context ctx = storageParameters.getContext();
+
+            final int iType = getTypeByFolderTypeWithShared(type);
+            final int iModule = getModuleByContentType(contentType);
+            final List<FolderObject> list =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
+                    userId,
+                    user.getGroups(),
+                    new int[] { iModule },
+                    iType,
+                    new int[] { iModule },
+                    ctx, con)).asList();
+            if (FolderObject.PRIVATE == iType) {
+                /*
+                 * Remove shared ones manually
+                 */
+                for (final Iterator<FolderObject> iterator = list.iterator(); iterator.hasNext();) {
+                    final FolderObject folderObject = iterator.next();
+                    if (folderObject.getCreatedBy() != userId) {
+                        iterator.remove();
+                    }
+                }
+            }
+            StringHelper stringHelper = null;
+            for (final FolderObject folderObject : list) {
+                /*
+                 * Check if folder is user's default folder and set locale-sensitive name
+                 */
+                if (folderObject.isDefaultFolder()) {
+                    final int module = folderObject.getModule();
+                    if (FolderObject.CALENDAR == module) {
+                        if (null == stringHelper) {
+                            stringHelper = new StringHelper(user.getLocale());
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                    } else if (FolderObject.CONTACT == module) {
+                        if (null == stringHelper) {
+                            stringHelper = new StringHelper(user.getLocale());
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                    } else if (FolderObject.TASK == module) {
+                        if (null == stringHelper) {
+                            stringHelper = new StringHelper(user.getLocale());
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
+                    }
+                }
+            }
+            /*
+             * Extract IDs
+             */
+            final List<SortableId> ret = new ArrayList<SortableId>(list.size());
+            int i = 0;
+            for (final FolderObject folderObject : list) {
+                final String id = String.valueOf(folderObject.getObjectID());
+                ret.add(new DatabaseId(id, i++));
+            }
+            return ret.toArray(new SortableId[ret.size()]);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        }
     }
 
     public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws FolderException {
@@ -1184,6 +1255,19 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
         if (PublicType.getInstance().equals(type)) {
             return FolderObject.PUBLIC;
+        }
+        return FolderObject.SYSTEM_TYPE;
+    }
+
+    private static int getTypeByFolderTypeWithShared(final Type type) {
+        if (PrivateType.getInstance().equals(type)) {
+            return FolderObject.PRIVATE;
+        }
+        if (PublicType.getInstance().equals(type)) {
+            return FolderObject.PUBLIC;
+        }
+        if (SharedType.getInstance().equals(type)) {
+            return FolderObject.SHARED;
         }
         return FolderObject.SYSTEM_TYPE;
     }

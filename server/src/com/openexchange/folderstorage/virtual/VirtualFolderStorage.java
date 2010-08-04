@@ -61,6 +61,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.virtual.sql.Delete;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.folderstorage.virtual.sql.Select;
@@ -354,6 +355,10 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
         return new String[0];
+    }
+
+    public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException {
+        throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
     }
 
 }

@@ -78,6 +78,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.mail.contentType.SentContentType;
@@ -196,6 +197,10 @@ public final class MailFolderStorage implements FolderStorage {
                 params.putParameter(MailFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, null);
             }
         }
+    }
+
+    public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException {
+        throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
     }
 
     public void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException {

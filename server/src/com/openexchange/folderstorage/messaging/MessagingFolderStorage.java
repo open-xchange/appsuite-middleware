@@ -76,6 +76,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.mail.MailParameterConstants;
 import com.openexchange.folderstorage.messaging.contentType.DraftsContentType;
 import com.openexchange.folderstorage.messaging.contentType.MessagingContentType;
@@ -197,6 +198,10 @@ public final class MessagingFolderStorage implements FolderStorage {
 
     public void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException {
         // Nothing to do
+    }
+
+    public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException {
+        throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
     }
 
     private MessagingAccountAccess getMessagingAccessForAccount(final String serviceId, final int accountId, final Session session, final ConcurrentMap<Key, MessagingAccountAccess> accesses) throws FolderException {

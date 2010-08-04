@@ -278,6 +278,18 @@ public interface FolderStorage {
     void createFolder(Folder folder, StorageParameters storageParameters) throws FolderException;
 
     /**
+     * Gets the folder identifiers for specified content type and type.
+     * 
+     * @param treeId The tree identifier
+     * @param contentType The content type
+     * @param type The type
+     * @param storageParameters The storage parameters
+     * @return The folder identifiers for specified content type and type
+     * @throws FolderException If returning the folder identifiers fails
+     */
+    SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException;
+
+    /**
      * Gets the subfolder identifiers for specified parent which are visible to storage parameter's entity.
      * 
      * @param treeId The tree identifier

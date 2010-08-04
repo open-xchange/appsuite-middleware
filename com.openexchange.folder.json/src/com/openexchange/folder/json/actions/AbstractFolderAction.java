@@ -193,4 +193,43 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         return ret;
     }
 
+    protected static ContentType parseContentTypeParameter(final String parameterName, final AJAXRequestData request) throws AbstractOXException {
+        final String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            return null;
+        }
+        /*
+         * Get available content types
+         */
+        final Map<Integer, ContentType> availableContentTypes =
+            ServiceRegistry.getInstance().getService(FolderService.class, true).getAvailableContentTypes();
+        final int module = getUnsignedInteger(tmp);
+        if (module < 0) {
+            /*
+             * Not a number
+             */
+            for (final Map.Entry<Integer, ContentType> entry : availableContentTypes.entrySet()) {
+                final ContentType ct = entry.getValue();
+                if (ct.toString().equals(tmp)) {
+                    return ct;
+                }
+            }
+            /*
+             * Not found
+             */
+            org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for module: " + tmp);
+            throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+        }
+        /*
+         * A number
+         */
+        final Integer key = Integer.valueOf(module);
+        final ContentType ct = availableContentTypes.get(key);
+        if (null == ct) {
+            org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for module: " + key);
+            throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+        }
+        return ct;
+    }
+
 }

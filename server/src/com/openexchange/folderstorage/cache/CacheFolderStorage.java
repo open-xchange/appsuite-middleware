@@ -71,6 +71,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
@@ -558,6 +559,32 @@ public final class CacheFolderStorage implements FolderStorage {
 
     public StoragePriority getStoragePriority() {
         return StoragePriority.HIGHEST;
+    }
+
+    public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException {
+        
+        final FolderStorage folderStorage = registry.getFolderStorageByContentType(treeId, contentType);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
+        }
+        final boolean started = folderStorage.startTransaction(storageParameters, true);
+        try {
+            SortableId[] ret = folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+            return ret;
+        } catch (final FolderException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {

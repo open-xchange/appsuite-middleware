@@ -221,6 +221,37 @@ public interface FolderService {
     void unsubscribeFolder(String treeId, String folderId, Session session) throws FolderException;
 
     /**
+     * Gets all visible folders of specified content type and folder type.
+     * 
+     * @param treeId The tree identifier
+     * @param contentType The content type
+     * @param type The folder type
+     * @param all <code>true</code> to deliver all subfolders regardless of their subscribed status; <code>false</code> to deliver
+     *            subscribed folders only.
+     * @param user The user
+     * @param context The context
+     * @param decorator The optional folder service decorator
+     * @return All visible folders of specified content type and folder type.
+     * @throws FolderException If operation fails
+     */
+    FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException;
+
+    /**
+     * Gets all visible folders of specified content type and folder type.
+     * 
+     * @param treeId The tree identifier
+     * @param contentType The content type
+     * @param type The folder type
+     * @param all <code>true</code> to deliver all subfolders regardless of their subscribed status; <code>false</code> to deliver
+     *            subscribed folders only.
+     * @param session The session
+     * @param decorator The optional folder service decorator
+     * @return All visible folders of specified content type and folder type.
+     * @throws FolderException If operation fails
+     */
+    FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws FolderException;
+
+    /**
      * Gets the subfolders of specified parent in given tree.
      * 
      * @param treeId The tree identifier

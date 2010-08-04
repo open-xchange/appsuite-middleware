@@ -78,6 +78,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
@@ -211,6 +212,31 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
                 LOG.warn("Checking consistency failed for tree " + treeId, e);
             }
+        }
+    }
+
+    public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException {
+        final FolderStorage folderStorage = folderStorageRegistry.getFolderStorageByContentType(realTreeId, contentType);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, contentType);
+        }
+        final boolean started = folderStorage.startTransaction(storageParameters, true);
+        try {
+            SortableId[] ret = folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+            return ret;
+        } catch (final FolderException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

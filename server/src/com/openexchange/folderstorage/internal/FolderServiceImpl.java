@@ -58,6 +58,7 @@ import com.openexchange.folderstorage.FolderFilter;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.performers.AllVisibleFoldersPerformer;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
@@ -69,6 +70,7 @@ import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.internal.performers.PathPerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
+import com.openexchange.folderstorage.internal.performers.VisibleFoldersPerformer;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
@@ -183,6 +185,20 @@ public final class FolderServiceImpl implements FolderService {
         try {
             final PathPerformer performer = new PathPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(performer.doPath(treeId, folderId, true), performer.getWarnings());
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    public FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+        final VisibleFoldersPerformer performer = new VisibleFoldersPerformer(user, context, decorator);
+        return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(treeId, contentType, type, all), performer.getWarnings());
+    }
+
+    public FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+        try {
+            final VisibleFoldersPerformer performer = new VisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
+            return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(treeId, contentType, type, all), performer.getWarnings());
         } catch (final ContextException e) {
             throw new FolderException(e);
         }
