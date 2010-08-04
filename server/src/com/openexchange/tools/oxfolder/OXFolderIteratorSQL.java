@@ -1197,7 +1197,15 @@ public final class OXFolderIteratorSQL {
      * type regardless of their parent folder.
      */
     public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Context ctx) throws OXException, SearchIteratorException {
-        return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, type, modules, null, ctx);
+        return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, type, modules, null, ctx, null);
+    }
+
+    /**
+     * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of a certain
+     * type regardless of their parent folder.
+     */
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
+        return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, type, modules, null, ctx, con);
     }
 
     /**
@@ -1205,14 +1213,14 @@ public final class OXFolderIteratorSQL {
      * type and a certain parent folder.
      */
     public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final int parent, final Context ctx) throws OXException, SearchIteratorException {
-        return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, type, modules, Integer.valueOf(parent), ctx);
+        return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, type, modules, Integer.valueOf(parent), ctx, null);
     }
 
     /**
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of a certain
      * type and a certain parent folder.
      */
-    private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx) throws OXException, SearchIteratorException {
+    private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
         final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.module IN (");
         condBuilder.append(modules[0]);
         for (int i = 1; i < modules.length; i++) {
@@ -1228,12 +1236,16 @@ public final class OXFolderIteratorSQL {
         if (parent != null) {
             condBuilder.append(" AND (ot.parent = ").append(parent.intValue()).append(')');
         }
-        Connection readCon = null;
+        Connection readCon = con;
+        boolean closeCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final int contextId = ctx.getContextId();
         try {
-            readCon = DBPool.pickup(ctx);
+            if (null == readCon) {
+                readCon = DBPool.pickup(ctx);
+                closeCon = true;
+            }
             stmt =
                 readCon.prepareStatement(getSQLUserVisibleFolders(
                     FolderObjectIterator.getFieldsForSQL(STR_OT),
@@ -1257,16 +1269,16 @@ public final class OXFolderIteratorSQL {
 
             rs = stmt.executeQuery();
         } catch (final SQLException e) {
-            closeResources(rs, stmt, readCon, true, ctx);
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
-            closeResources(rs, stmt, readCon, true, ctx);
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(contextId));
         } catch (final Throwable t) {
-            closeResources(rs, stmt, readCon, true, ctx);
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
+        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon);
     }
 
     /**
