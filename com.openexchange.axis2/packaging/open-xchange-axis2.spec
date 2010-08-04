@@ -4,7 +4,7 @@
 Name:           open-xchange-axis2
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-server perl
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-server >= @OXVERSION@ perl
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Axis2 Bundle
-Requires:       open-xchange-server
+Requires:       open-xchange-server >= @OXVERSION@
 #
 
 %description
@@ -85,5 +85,7 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install doc
 %config(noreplace) /opt/open-xchange/etc/groupware/axis2.properties
 %doc docs
 %changelog
+* Mon Jul 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
 * Thu Nov 13 2008 - dennis.sieben@open-xchange.com
  - Bugfix #12526: Replaced axis jar by a new version which fixes this issue

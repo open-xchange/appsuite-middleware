@@ -4,8 +4,8 @@
 Name:           open-xchange-publish-basic
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-genconf
-BuildRequires:  open-xchange-genconf-mysql open-xchange-server open-xchange-sql open-xchange-publish
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@
+BuildRequires:  open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ open-xchange-publish >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Basic Publish implementation
-Requires:       open-xchange-common open-xchange-global open-xchange-genconf open-xchange-genconf-mysql open-xchange-server open-xchange-sql open-xchange-publish open-xchange-cache
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-cache >= @OXVERSION@
 #
 
 %description

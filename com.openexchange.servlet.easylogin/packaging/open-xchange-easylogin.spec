@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -70,6 +70,24 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-189
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/easylogin.properties
+   if ! ox_exists_property com.openexchange.easylogin.allowInsecureTransmission $pfile; then
+       ox_set_property com.openexchange.easylogin.allowInsecureTransmission false $pfile
+   fi
+
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware
@@ -79,3 +97,13 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/etc/groupware/*.properties
 
+%changelog
+* Mon Dec 14 2009 - choeger@open-xchange.com
+  - added more logging
+  - disable caching in proxies
+  - do not allow insecure transmissions (must use https now)
+* Mon Oct 12 2009 - manuel.kraft@open-xchange.com
+  - Bugfix #14657 for checking if referrer already contains "?"
+* Fri Jul 10 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #14116 Easylogin throws exception on server shutdown
+    - Added null check in shutdown code

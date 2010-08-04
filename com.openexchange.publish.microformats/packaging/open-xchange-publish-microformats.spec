@@ -4,8 +4,8 @@
 Name:           open-xchange-publish-microformats
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
-BuildRequires:  open-xchange-genconf open-xchange-publish open-xchange-publish-basic open-xchange-templating
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@
+BuildRequires:  open-xchange-genconf >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-publish-basic >= @OXVERSION@ open-xchange-templating >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Publishes a set of objects in OXMF externally
-Requires:       open-xchange-common open-xchange-global open-xchange-server open-xchange-genconf open-xchange-publish open-xchange-publish-basic open-xchange-templating
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-publish-basic >= @OXVERSION@ open-xchange-templating >= @OXVERSION@
 #
 
 %description
@@ -74,8 +74,8 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
-%dir /opt/open-xchange/templates/
 %dir /opt/open-xchange/etc/*/osgi/bundle.d/
+%dir /opt/open-xchange/templates/
 /opt/open-xchange/bundles/*
-/opt/open-xchange/templates/*
 /opt/open-xchange/etc/*/osgi/bundle.d/*
+%config(noreplace) /opt/open-xchange/templates/*

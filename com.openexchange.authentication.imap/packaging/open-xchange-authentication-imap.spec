@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -72,6 +72,24 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-153
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/imapauth.properties
+   if ! ox_exists_property com.openexchange.authentication.imap.imapAuthEnc $pfile; then
+       ox_set_property com.openexchange.authentication.imap.imapAuthEnc "UTF-8" $pfile
+   fi
+
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
@@ -81,6 +99,13 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %config(noreplace) /opt/open-xchange/etc/groupware/imapauth.properties
 
 %changelog
+* Wed Nov 18 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14891: Using proper login to check IMAP authentication
+* Mon Oct 05 2009 - dennis.sieben@open-xchange.com
+ - Bugfix #14634: imap authentication bundle doesn't support utf-8 passwords
+   - Added configuration setting to configure charset
+* Mon Jul 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
 * Wed Dec 24 2008 - manuel.kraft@open-xchange.com
  - Features added:
             Imapservers defined in OX User Accounts can be used instead of single IMAP Server defined in config -> USE_MULTIPLE=false

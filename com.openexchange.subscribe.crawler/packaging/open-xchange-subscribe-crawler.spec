@@ -4,7 +4,7 @@
 Name:           open-xchange-subscribe-crawler
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-subscribe open-xchange-server open-xchange-genconf open-xchange-xml
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -48,8 +48,11 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Subscriptions for OXMF feeds
-Requires:       open-xchange-common open-xchange-global open-xchange-subscribe open-xchange-server open-xchange-genconf open-xchange-xml
-
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@ open-xchange >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@
+Conflicts:   open-xchange-subscribe-linkedin < @OXVERSION@
+Conflicts:   open-xchange-subscribe-xing < @OXVERSION@
+Obsoletes:   open-xchange-subscribe-linkedin
+Obsoletes:   open-xchange-subscribe-xing
 %if 0%{?sles_version} >= 10
 Requires:   open-xchange-xerces-ibm
 Conflicts:  open-xchange-xerces-sun
@@ -77,12 +80,39 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-335
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/crawler.properties
+   if ! ox_exists_property com.openexchange.subscribe.crawler.msn.de $pfile; then
+      ox_set_property com.openexchange.subscribe.crawler.msn.de "true" $pfile
+   fi
+
+   ox_update_permissions "/opt/open-xchange/etc/groupware/crawlers" open-xchange:open-xchange 755
+   for i in $(find /opt/open-xchange/etc/groupware/crawlers -name "*.yml"); do
+       ox_update_permissions "$i" open-xchange:open-xchange 644
+   done
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/etc/groupware/
 %dir /opt/open-xchange/bundles/
+%dir /opt/open-xchange/sbin/
 %dir /opt/open-xchange/etc/*/osgi/bundle.d/
+%dir %attr(-,open-xchange,open-xchange) /opt/open-xchange/etc/groupware/crawlers
+%config(noreplace) /opt/open-xchange/etc/groupware/*.properties
+%config(noreplace) %attr(-,open-xchange,open-xchange) /opt/open-xchange/etc/groupware/crawlers/*
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/*/osgi/bundle.d/*
+/opt/open-xchange/sbin/*

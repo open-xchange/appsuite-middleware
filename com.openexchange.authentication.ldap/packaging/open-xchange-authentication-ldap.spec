@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -71,11 +71,51 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-210
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/ldapauth.properties
+   if ! ox_exists_property subtreeSearch $pfile; then
+       ox_set_property subtreeSearch "false" $pfile
+   fi
+   if ! ox_exists_property searchFilter $pfile; then
+       ox_set_property searchFilter "(objectclass=posixAccount)" $pfile
+   fi
+   if ! ox_exists_property bindDN $pfile; then
+       ox_set_property bindDN "" $pfile
+   fi
+   if ! ox_exists_property bindDNPassword $pfile; then
+       ox_set_property bindDNPassword "" $pfile
+   fi
+
+   # SoftwareChange_Request-134
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/ldapauth.properties
+   if ! ox_exists_property ldapReturnField $pfile; then
+       ox_set_property ldapReturnField "" $pfile
+   fi
+
+   ox_update_permissions "/opt/open-xchange/etc/groupware/ldapauth.properties" root:open-xchange 640
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) /opt/open-xchange/etc/groupware/ldapauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/ldapauth.properties
 
+%changelog
+* Tue Feb 02 2010 - dennis.sieben@open-xchange.com
+ - Bugfix #15309: [L3] open-xchange-authentication-ldap: multiple OUs works
+   only for LDAP-Server on localhost
+   - Enabled usage of config file parameter for user search

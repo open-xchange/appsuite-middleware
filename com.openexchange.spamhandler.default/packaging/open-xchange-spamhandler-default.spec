@@ -6,7 +6,7 @@ Provides:	open-xchange-spamhandler
 Conflicts:	open-xchange-spamhandler-spamassassin
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -48,7 +48,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Default Spam Handler
-Requires:       open-xchange-common open-xchange-global open-xchange-server
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 #
 
 %description
@@ -74,8 +74,9 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/etc/groupware/
 %dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-
+%config(noreplace) /opt/open-xchange/etc/groupware/defaultspamhandler.properties

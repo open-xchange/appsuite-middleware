@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -67,7 +67,7 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 %define adminbundle	com.openexchange.admin.jar
 %define oxprefix	/opt/open-xchange
-%define adminhostingbundle open_xchange_admin_plugin_hosting.jar
+%define adminhostingbundle com.openexchange.admin.plugin.hosting.jar
 
 ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
@@ -96,5 +96,7 @@ mv doc javadoc
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
 
 %changelog
+* Mon Jul 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
 * Wed Jun 24 2009 - marcus.klein@open-xchange.com
  - Bugfix #13886: Fixed NPE when starting bundle.

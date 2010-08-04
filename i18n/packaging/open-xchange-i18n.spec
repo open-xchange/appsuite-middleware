@@ -4,7 +4,7 @@
 Name:           open-xchange-i18n
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-configread open-xchange-global
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange i18n Bundle
-Requires:       open-xchange-common open-xchange-configread open-xchange-global
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@
 #
 
 %description
@@ -67,20 +67,8 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
-%post
-
-if [ ${1:-0} -eq 2 ]; then
-   . /opt/open-xchange/etc/oxfunctions.sh
-
-   ox_update_permissions "/opt/open-xchange/etc/common/i18n.properties" root:open-xchange 640
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
-
-%pre
-/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
-/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
 %files
 %defattr(-,root,root)
@@ -92,4 +80,4 @@ fi
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/*/osgi/bundle.d/*
 /opt/open-xchange/i18n/*
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/common/*.properties
+%config(noreplace) /opt/open-xchange/etc/common/*.properties

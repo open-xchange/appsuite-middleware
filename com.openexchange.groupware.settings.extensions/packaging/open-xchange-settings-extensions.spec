@@ -4,7 +4,7 @@
 Name:           open-xchange-settings-extensions
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-server
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open-Xchange Settings Extensions
-Requires:       open-xchange-common open-xchange-global open-xchange-configread open-xchange-server
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 #
 
 %description
@@ -67,14 +67,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
-%post
-
-if [ ${1:-0} -eq 2 ]; then
-   . /opt/open-xchange/etc/oxfunctions.sh
-
-   ox_update_permissions "/opt/open-xchange/etc/groupware/settings/themes.properties" root:open-xchange 640
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -84,4 +76,4 @@ fi
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/settings/themes.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/settings/themes.properties

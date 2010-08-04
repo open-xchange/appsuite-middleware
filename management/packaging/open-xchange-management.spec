@@ -4,7 +4,7 @@
 Name:           open-xchange-management
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Management Bundle
-Requires:       open-xchange-global open-xchange-configread
+Requires:       open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@
 #
 
 %description
@@ -70,11 +70,50 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-135
+   # -----------------------------------------------------------------------
+   ofile=/opt/open-xchange/etc/groupware/server.properties
+   nfile=/opt/open-xchange/etc/groupware/management.properties
+   if [ -f $ofile ]; then
+      for prop in JMXPort JMXBindAddress JMXLogin JMXPassword; do
+          if ox_exists_property $prop $ofile; then
+              oldval=$(ox_read_property $prop $ofile)
+              ox_set_property $prop "$oldval" $nfile
+              ox_remove_property $prop $ofile
+          fi
+      done
+   fi
+   ofile=/opt/open-xchange/etc/admindaemon/plugin/hosting.properties
+   nfile=/opt/open-xchange/etc/admindaemon/management.properties
+   if [ -f $ofile ]; then
+      for prop in JMXPort JMXBindAddress JMXLogin JMXPassword; do
+          if ox_exists_property $prop $ofile; then
+              oldval=$(ox_read_property $prop $ofile)
+              ox_set_property $prop "$oldval" $nfile
+              ox_remove_property $prop $ofile
+          fi
+      done
+   fi
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles
+%dir /opt/open-xchange/etc/admindaemon
+%dir /opt/open-xchange/etc/groupware
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
+%config(noreplace) /opt/open-xchange/etc/admindaemon/*.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/*.properties

@@ -4,8 +4,8 @@
 Name:           open-xchange-publish-infostore-online
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
-BuildRequires:  open-xchange-genconf open-xchange-publish open-xchange-publish-basic
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@
+BuildRequires:  open-xchange-genconf >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-publish-basic >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Publishes a single infostore document externally
-Requires:       open-xchange-common open-xchange-global open-xchange-server open-xchange-genconf open-xchange-publish open-xchange-publish-basic
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-publish-basic >= @OXVERSION@
 #
 
 %description
