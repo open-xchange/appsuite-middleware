@@ -52,6 +52,7 @@ package com.openexchange.folder.json.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -120,6 +121,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         /*
          * Get all private folders
          */
+        final TimeZone timeZone = Tools.getTimeZone(timeZoneId);
         final FolderResponse<UserizedFolder[]> privateResp =
             folderService.getVisibleFolders(
                 treeId,
@@ -127,7 +129,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PrivateType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
+                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes));
         /*
          * Get all shared folders
          */
@@ -138,7 +140,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 SharedType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
+                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes));
         /*
          * Get all public folders
          */
@@ -149,7 +151,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PublicType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
+                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes));
         /*
          * Determine max. last-modified time stamp
          */
