@@ -155,27 +155,33 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
          */
         long lastModified = 0;
         final UserizedFolder[] privateFolders = privateResp.getResponse();
-        for (final UserizedFolder userizedFolder : privateFolders) {
-            final Date modified = userizedFolder.getLastModifiedUTC();
-            if (modified != null) {
-                final long time = modified.getTime();
-                lastModified = ((lastModified >= time) ? lastModified : time);
+        if (null != privateFolders) {
+            for (final UserizedFolder userizedFolder : privateFolders) {
+                final Date modified = userizedFolder.getLastModifiedUTC();
+                if (modified != null) {
+                    final long time = modified.getTime();
+                    lastModified = ((lastModified >= time) ? lastModified : time);
+                }
             }
         }
         final UserizedFolder[] sharedFolders = sharedResp.getResponse();
-        for (final UserizedFolder userizedFolder : sharedFolders) {
-            final Date modified = userizedFolder.getLastModifiedUTC();
-            if (modified != null) {
-                final long time = modified.getTime();
-                lastModified = ((lastModified >= time) ? lastModified : time);
+        if (null != sharedFolders) {
+            for (final UserizedFolder userizedFolder : sharedFolders) {
+                final Date modified = userizedFolder.getLastModifiedUTC();
+                if (modified != null) {
+                    final long time = modified.getTime();
+                    lastModified = ((lastModified >= time) ? lastModified : time);
+                }
             }
         }
         final UserizedFolder[] publicFolders = publicResp.getResponse();
-        for (final UserizedFolder userizedFolder : publicFolders) {
-            final Date modified = userizedFolder.getLastModifiedUTC();
-            if (modified != null) {
-                final long time = modified.getTime();
-                lastModified = ((lastModified >= time) ? lastModified : time);
+        if (null != publicFolders) {
+            for (final UserizedFolder userizedFolder : publicFolders) {
+                final Date modified = userizedFolder.getLastModifiedUTC();
+                if (modified != null) {
+                    final long time = modified.getTime();
+                    lastModified = ((lastModified >= time) ? lastModified : time);
+                }
             }
         }
         /*
@@ -183,9 +189,17 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
          */
         try {
             final JSONObject ret = new JSONObject();
-            ret.put("private", FolderWriter.writeMultiple2Array(columns, privateFolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
-            ret.put("public", FolderWriter.writeMultiple2Array(columns, publicFolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
-            ret.put("shared", FolderWriter.writeMultiple2Array(columns, sharedFolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
+            if (null != privateFolders && privateFolders.length > 0) {
+                ret.put(
+                    "private",
+                    FolderWriter.writeMultiple2Array(columns, privateFolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
+            }
+            if (null != publicFolders && publicFolders.length > 0) {
+                ret.put("public", FolderWriter.writeMultiple2Array(columns, publicFolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
+            }
+            if (null != sharedFolders && sharedFolders.length > 0) {
+                ret.put("shared", FolderWriter.writeMultiple2Array(columns, sharedFolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
+            }
             /*
              * Return appropriate result
              */
@@ -201,7 +215,9 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
     private static Collection<AbstractOXException> gather(final FolderResponse<UserizedFolder[]>... folderResponses) {
         final List<AbstractOXException> ret = new ArrayList<AbstractOXException>(4);
         for (final FolderResponse<UserizedFolder[]> fr : folderResponses) {
-            ret.addAll(fr.getWarnings());
+            if (null != fr) {
+                ret.addAll(fr.getWarnings());
+            }
         }
         return ret;
     }
