@@ -50,12 +50,12 @@
 package com.openexchange.folder.json.actions;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.folder.json.Constants;
@@ -189,37 +189,30 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
          */
         try {
             final JSONObject ret = new JSONObject();
+            final AdditionalFolderFieldList additionalFolderFieldList = Constants.ADDITIONAL_FOLDER_FIELD_LIST;
             if (null != privateFolders && privateFolders.length > 0) {
-                ret.put(
-                    "private",
-                    FolderWriter.writeMultiple2Array(columns, privateFolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
+                ret.put("private", FolderWriter.writeMultiple2Array(columns, privateFolders, session, additionalFolderFieldList));
             }
             if (null != publicFolders && publicFolders.length > 0) {
-                ret.put("public", FolderWriter.writeMultiple2Array(columns, publicFolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
+                ret.put("public", FolderWriter.writeMultiple2Array(columns, publicFolders, session, additionalFolderFieldList));
             }
             if (null != sharedFolders && sharedFolders.length > 0) {
-                ret.put("shared", FolderWriter.writeMultiple2Array(columns, sharedFolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
+                ret.put("shared", FolderWriter.writeMultiple2Array(columns, sharedFolders, session, additionalFolderFieldList));
             }
+            /*
+             * Gather possible warnings
+             */
+            final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(4);
+            warnings.addAll(privateResp.getWarnings());
+            warnings.addAll(publicResp.getWarnings());
+            warnings.addAll(sharedResp.getWarnings());
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(ret, 0 == lastModified ? null : new Date(lastModified)).addWarnings(gather(
-                privateResp,
-                publicResp,
-                sharedResp));
+            return new AJAXRequestResult(ret, 0 == lastModified ? null : new Date(lastModified)).addWarnings(warnings);
         } catch (JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
-    }
-
-    private static Collection<AbstractOXException> gather(final FolderResponse<UserizedFolder[]>... folderResponses) {
-        final List<AbstractOXException> ret = new ArrayList<AbstractOXException>(4);
-        for (final FolderResponse<UserizedFolder[]> fr : folderResponses) {
-            if (null != fr) {
-                ret.addAll(fr.getWarnings());
-            }
-        }
-        return ret;
     }
 
 }
