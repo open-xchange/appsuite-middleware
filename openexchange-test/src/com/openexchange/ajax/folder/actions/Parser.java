@@ -90,6 +90,9 @@ public final class Parser {
         case FolderObject.MODULE:
             folder.setModule(FolderParser.getModuleFromString((String) value, folder.containsObjectID() ? folder.getObjectID() : -1));
             break;
+        case FolderObject.TYPE:
+            folder.setType(((Integer) value).intValue());
+            break;
         case FolderObject.FOLDER_NAME:
             folder.setFolderName((String) value);
             break;
