@@ -75,7 +75,7 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link VisibleFoldersAction} - Maps the action to a all-of-module action.
+ * {@link VisibleFoldersAction} - Maps the action to a <code>allVisible</code> action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -101,9 +101,9 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
              */
             treeId = getDefaultTreeIdentifier();
         }
-        final ContentType contentType = parseContentTypeParameter("module", request);
+        final ContentType contentType = parseContentTypeParameter(AJAXServlet.PARAMETER_MODULE, request);
         if (null == contentType) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "module");
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_MODULE);
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all;

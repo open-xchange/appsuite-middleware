@@ -704,41 +704,56 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     }
                 }
             }
-            StringHelper stringHelper = null;
-            for (final FolderObject folderObject : list) {
-                /*
-                 * Check if folder is user's default folder and set locale-sensitive name
-                 */
-                if (folderObject.isDefaultFolder()) {
-                    final int module = folderObject.getModule();
-                    if (FolderObject.CALENDAR == module) {
-                        if (null == stringHelper) {
-                            stringHelper = new StringHelper(user.getLocale());
+            /*
+             * Localize folder names
+             */
+            {
+                StringHelper stringHelper = null;
+                for (final FolderObject folderObject : list) {
+                    /*
+                     * Check if folder is user's default folder and set locale-sensitive name
+                     */
+                    if (folderObject.isDefaultFolder()) {
+                        final int module = folderObject.getModule();
+                        if (FolderObject.CALENDAR == module) {
+                            if (null == stringHelper) {
+                                stringHelper = new StringHelper(user.getLocale());
+                            }
+                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                        } else if (FolderObject.CONTACT == module) {
+                            if (null == stringHelper) {
+                                stringHelper = new StringHelper(user.getLocale());
+                            }
+                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                        } else if (FolderObject.TASK == module) {
+                            if (null == stringHelper) {
+                                stringHelper = new StringHelper(user.getLocale());
+                            }
+                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                         }
-                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
-                    } else if (FolderObject.CONTACT == module) {
-                        if (null == stringHelper) {
-                            stringHelper = new StringHelper(user.getLocale());
-                        }
-                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
-                    } else if (FolderObject.TASK == module) {
-                        if (null == stringHelper) {
-                            stringHelper = new StringHelper(user.getLocale());
-                        }
-                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                     }
                 }
+            }
+            if (FolderObject.PRIVATE == iType) {
+                /*
+                 * Sort them by default-flag and name: <user's default folder>, <aaa>, <bbb>, ... <zzz>
+                 */
+                Collections.sort(list, new FolderObjectComparator(user.getLocale()));
+            } else {
+                /*
+                 * Sort them by name only
+                 */
+                Collections.sort(list, new FolderNameComparator(user.getLocale()));
             }
             /*
              * Extract IDs
              */
-            final List<SortableId> ret = new ArrayList<SortableId>(list.size());
-            int i = 0;
-            for (final FolderObject folderObject : list) {
-                final String id = String.valueOf(folderObject.getObjectID());
-                ret.add(new DatabaseId(id, i++));
+            final SortableId[] ret = new SortableId[list.size()];
+            for (int i = 0; i < ret.length; i++) {
+                final String id = String.valueOf(list.get(i).getObjectID());
+                ret[i] = new DatabaseId(id, i);
             }
-            return ret.toArray(new SortableId[ret.size()]);
+            return ret;
         } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final SearchIteratorException e) {
@@ -1295,10 +1310,29 @@ public final class DatabaseFolderStorage implements FolderStorage {
             return collator.compare(o1.getFolderName(), o2.getFolderName());
         }
 
-        private int compareById(final int id1, final int id2) {
+        private static int compareById(final int id1, final int id2) {
             return (id1 < id2 ? -1 : (id1 == id2 ? 0 : 1));
         }
 
     } // End of FolderObjectComparator
+
+    private static final class FolderNameComparator implements Comparator<FolderObject> {
+
+        private final Collator collator;
+
+        public FolderNameComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final FolderObject o1, final FolderObject o2) {
+            /*
+             * Compare by name
+             */
+            return collator.compare(o1.getFolderName(), o2.getFolderName());
+        }
+
+    } // End of FolderNameComparator
 
 }
