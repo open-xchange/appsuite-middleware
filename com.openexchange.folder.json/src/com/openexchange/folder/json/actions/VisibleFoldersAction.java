@@ -101,9 +101,9 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
              */
             treeId = getDefaultTreeIdentifier();
         }
-        final ContentType contentType = parseContentTypeParameter(AJAXServlet.PARAMETER_MODULE, request);
+        final ContentType contentType = parseContentTypeParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, request);
         if (null == contentType) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_MODULE);
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_CONTENT_TYPE);
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all;
