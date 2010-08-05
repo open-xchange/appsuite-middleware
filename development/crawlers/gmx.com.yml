@@ -2,8 +2,7 @@
 crawlerApiVersion: 618
 displayName: gmx.com
 id: com.openexchange.subscribe.crawler.gmx.com
-javascriptEnabled: true
-priority: 4
+priority: 5
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
