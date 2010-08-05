@@ -90,7 +90,7 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
     @Override
     protected void addParameters(List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "allVisible"));
-        params.add(new Parameter(Folder.PARAMETER_MODULE, contentType));
+        params.add(new Parameter(Folder.PARAMETER_CONTENT_TYPE, contentType));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
     }
 
