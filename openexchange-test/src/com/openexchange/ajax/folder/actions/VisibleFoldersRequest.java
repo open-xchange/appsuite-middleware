@@ -55,12 +55,14 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link VisibleFoldersRequest}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersResponse> {
 
     private static final int[] DEFAULT_COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
+        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.TYPE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
         FolderObject.CREATED_BY };
 
     private final String contentType;

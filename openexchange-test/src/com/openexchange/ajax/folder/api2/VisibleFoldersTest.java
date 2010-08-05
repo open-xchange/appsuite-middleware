@@ -49,11 +49,19 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Iterator;
 import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.PermissionTools;
 
 /**
  * {@link VisibleFoldersTest}
@@ -63,6 +71,14 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 public class VisibleFoldersTest extends AbstractAJAXSession {
 
     private AJAXClient clientA;
+    
+    private AJAXClient clientB;
+    
+    private FolderObject createdPrivateFolder;
+    
+    private FolderObject createdPublicFolder;
+    
+    private FolderObject createdSharedFolder;
 
     public VisibleFoldersTest(String name) {
         super(name);
@@ -72,20 +88,102 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        // clientB = new AJAXClient(User.User2);
+        clientB = new AJAXClient(User.User2);
+        
+        {
+            createdPrivateFolder = new FolderObject();
+            createdPrivateFolder.setModule(FolderObject.CALENDAR);
+            createdPrivateFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+            createdPrivateFolder.setType(FolderObject.PRIVATE);
+            createdPrivateFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN));
+            createdPrivateFolder.setFolderName("testPrivateCalendarFolder" + System.currentTimeMillis());
+            InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdPrivateFolder);
+            InsertResponse iResp = client.execute(iReq);
+            iResp.fillObject(createdPrivateFolder);
+        }
+        
+        {
+            createdPublicFolder = new FolderObject();
+            createdPublicFolder.setModule(FolderObject.CALENDAR);
+            createdPublicFolder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+            createdPublicFolder.setType(FolderObject.PUBLIC);
+            createdPublicFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN));
+            createdPublicFolder.setFolderName("testPublicCalendarFolder" + System.currentTimeMillis());
+            InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdPublicFolder);
+            InsertResponse iResp = client.execute(iReq);
+            iResp.fillObject(createdPublicFolder);
+        }
+        
+        {
+            createdSharedFolder = new FolderObject();
+            createdSharedFolder.setModule(FolderObject.CALENDAR);
+            createdSharedFolder.setParentFolderID(clientB.getValues().getPrivateAppointmentFolder());
+            createdSharedFolder.setType(FolderObject.PRIVATE);
+            createdSharedFolder.setPermissions(PermissionTools.P(I(clientB.getValues().getUserId()), PermissionTools.ADMIN, I(clientA.getValues().getUserId()), "arawada"));
+            createdSharedFolder.setFolderName("testSharedCalendarFolder" + System.currentTimeMillis());
+            InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdSharedFolder);
+            InsertResponse iResp = clientB.execute(iReq);
+            iResp.fillObject(createdSharedFolder);
+        }
+        
     }
 
     @Override
     protected void tearDown() throws Exception {
-        //clientA.execute(new DeleteRequest(API.OUTLOOK, createdFolder));
+        clientA.execute(new DeleteRequest(API.OUTLOOK, createdPrivateFolder));
+        clientA.execute(new DeleteRequest(API.OUTLOOK, createdPublicFolder));
+        clientB.execute(new DeleteRequest(API.OUTLOOK, createdSharedFolder));
         super.tearDown();
     }
 
-    public void testForDisappearingFolder() throws Throwable {
+    public void testForVisibleFolders() throws Throwable {
         final VisibleFoldersRequest req = new VisibleFoldersRequest(API.OUTLOOK, "calendar");
         final VisibleFoldersResponse resp = client.execute(req);
-        
-        final Object data = resp.getData();
-        System.out.println(data);
+        /*
+         * Iterate private folder and look-up previously created private folder
+         */
+        {
+            final Iterator<FolderObject> privIter = resp.getPrivateFolders();
+            boolean found = false;
+            while (privIter.hasNext()) {
+                final FolderObject privateFolder = privIter.next();
+                if (privateFolder.getObjectID() == createdPrivateFolder.getObjectID()) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue("Previously created private folder not found in private folders.", found);
+        }
+        /*
+         * Iterate public folder and look-up previously created public folder
+         */
+        {
+            final Iterator<FolderObject> pubIter = resp.getPublicFolders();
+            boolean found = false;
+            while (pubIter.hasNext()) {
+                final FolderObject publicFolder = pubIter.next();
+                if (publicFolder.getObjectID() == createdPublicFolder.getObjectID()) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue("Previously created public folder not found in public folders.", found);
+        }
+        /*
+         * Iterate shared folder and look-up previously created shared folder
+         */
+        {
+            final Iterator<FolderObject> sharedIter = resp.getSharedFolders();
+            boolean found = false;
+            while (sharedIter.hasNext()) {
+                final FolderObject sharedFolder = sharedIter.next();
+                if (sharedFolder.getObjectID() == createdSharedFolder.getObjectID()) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue("Previously created shared folder not found in shared folders.", found);
+        }
     }
+
 }

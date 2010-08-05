@@ -49,21 +49,22 @@
 
 package com.openexchange.ajax.folder;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import com.openexchange.ajax.folder.api2.Bug15752Test;
 import com.openexchange.ajax.folder.api2.Bug15980Test;
+import com.openexchange.ajax.folder.api2.Bug15995Test;
 import com.openexchange.ajax.folder.api2.Bug16163Test;
 import com.openexchange.ajax.folder.api2.Bug16243Test;
 import com.openexchange.ajax.folder.api2.Bug16303Test;
-import com.openexchange.ajax.folder.api2.GetTest;
-import com.openexchange.ajax.folder.api2.Bug15995Test;
 import com.openexchange.ajax.folder.api2.ClearTest;
 import com.openexchange.ajax.folder.api2.CreateTest;
+import com.openexchange.ajax.folder.api2.GetTest;
 import com.openexchange.ajax.folder.api2.MoveTest;
 import com.openexchange.ajax.folder.api2.PathTest;
 import com.openexchange.ajax.folder.api2.UpdateTest;
 import com.openexchange.ajax.folder.api2.UpdatesTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.folder.api2.VisibleFoldersTest;
 
 /**
  * Suite for all folder tests.
@@ -101,6 +102,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(PathTest.class);
         tests.addTestSuite(UpdatesTest.class);
         tests.addTestSuite(UpdateTest.class);
+        tests.addTestSuite(VisibleFoldersTest.class);
 
         // And finally bug tests.
         tests.addTestSuite(Bug12393Test.class);

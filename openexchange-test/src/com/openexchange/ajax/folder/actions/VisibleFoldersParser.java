@@ -54,20 +54,22 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link VisibleFoldersParser}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VisibleFoldersParser extends AbstractAJAXParser<VisibleFoldersResponse> {
 
+    private final int[] columns;
+
     public VisibleFoldersParser(final int[] columns, final boolean failOnError) {
         super(failOnError);
-    }
-
-    protected VisibleFoldersResponse instantiateResponse(final Response response) {
-        return new VisibleFoldersResponse(response);
+        this.columns = columns;
     }
 
     @Override
     protected VisibleFoldersResponse createResponse(Response response) throws JSONException {
-        return new VisibleFoldersResponse(response);
+        return new VisibleFoldersResponse(response, columns);
     }
+
 }
