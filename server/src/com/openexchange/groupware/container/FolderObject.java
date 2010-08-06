@@ -79,10 +79,10 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * {@link FolderObject} - Represents a folder.
@@ -1662,7 +1662,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return getSubfolderIds(folderId, ctx, readConArg, TABLE_OT);
     }
 
-    private static final String SQL_SEL = "SELECT fuid FROM #TABLE# WHERE cid = ? AND parent = ?";
+    private static final String SQL_SEL = "SELECT fuid FROM #TABLE# WHERE cid = ? AND parent = ? ORDER BY default_flag DESC, fname";
 
     /**
      * Gets the subfolder IDs of specified folder.
