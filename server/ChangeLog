@@ -1,3 +1,7 @@
+* 2010-08-06 - thorben.betten@open-xchange.com
+
+ - Bugfix #16655: Fixed sorting of (infostore) folders in classic folder tree
+
 * 2010-08-03 - thorben.betten@open-xchange.com
 
  - Bugfix #16531: No translation of IMAP folders

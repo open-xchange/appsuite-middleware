@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,6 +62,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
@@ -76,10 +77,10 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.OXCloneable;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
-import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -236,14 +237,15 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     public static final int SUBSCR_SUBFLDS = 315;
 
-    public static final int[] ALL_COLUMNS = {
-        // From FolderObject itself
-        FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY, STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED,
-        CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS,
-        // From FolderChildObject
-        FOLDER_ID,
-        // From DataObject
-        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
+    public static final int[] ALL_COLUMNS =
+        {
+            // From FolderObject itself
+            FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY, STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED,
+            CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS,
+            // From FolderChildObject
+            FOLDER_ID,
+            // From DataObject
+            OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
 
     // Modules
     public static final int TASK = 1;
@@ -261,6 +263,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     public static final int MAIL = 7;
 
     public static final int INFOSTORE = 8;
+
+    public static final int MESSAGING = 13;
 
     // Types
     public static final int PRIVATE = 1;
@@ -284,12 +288,14 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     }
 
     // SQL string for standard modules
-    public static final String SQL_IN_STR_STANDARD_MODULES = new StringBuilder().append('(').append(TASK).append(',').append(CALENDAR).append(
-        ',').append(CONTACT).append(',').append(UNBOUND).append(',').append(INFOSTORE).append(')').toString();
+    public static final String SQL_IN_STR_STANDARD_MODULES =
+        new StringBuilder().append('(').append(TASK).append(',').append(CALENDAR).append(',').append(CONTACT).append(',').append(UNBOUND).append(
+            ',').append(INFOSTORE).append(')').toString();
 
     // SQL string for standard modules including system module
-    public static final String SQL_IN_STR_STANDARD_MODULES_ALL = new StringBuilder().append('(').append(TASK).append(',').append(CALENDAR).append(
-        ',').append(CONTACT).append(',').append(UNBOUND).append(',').append(SYSTEM_MODULE).append(',').append(INFOSTORE).append(')').toString();
+    public static final String SQL_IN_STR_STANDARD_MODULES_ALL =
+        new StringBuilder().append('(').append(TASK).append(',').append(CALENDAR).append(',').append(CONTACT).append(',').append(UNBOUND).append(
+            ',').append(SYSTEM_MODULE).append(',').append(INFOSTORE).append(')').toString();
 
     // Permissions
     public static final int PRIVATE_PERMISSION = 1;
@@ -656,6 +662,22 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     }
 
     /**
+     * Adds given permission to this folder object.
+     * 
+     * @param permission The permission to add
+     */
+    public void addPermission(final OCLPermission permission) {
+        if (null == permission) {
+            return;
+        }
+        if (this.permissions == null) {
+            this.permissions = new ArrayList<OCLPermission>(4);
+        }
+        b_permissions = true;
+        this.permissions.add(permission.deepClone());
+    }
+
+    /**
      * Removes the permissions from this folder
      */
     public void removePermissions() {
@@ -772,6 +794,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return hasVisibleSubfolders(user.getId(), user.getGroups(), userConfig, ctx);
     }
 
+    private static final int[] MODULES = { TASK, CALENDAR, CONTACT };
+
     /**
      * Checks if this folder has subfolders visible to specified user
      * 
@@ -785,28 +809,25 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     public final boolean hasVisibleSubfolders(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws OXException {
         SearchIterator<FolderObject> iter = null;
         try {
-            if (objectId == SYSTEM_ROOT_FOLDER_ID) {
+            if (SYSTEM_ROOT_FOLDER_ID == objectId) {
                 return true;
-            } else if (objectId == SYSTEM_PUBLIC_FOLDER_ID) {
-                /*
-                 * At least 'internal users' folder is located beneath system public folder if user has contact module access
-                 */
-                if (userConfig.hasContact()) {
-                    return true;
-                }
+            } else if (SYSTEM_PUBLIC_FOLDER_ID == objectId) {
                 /*
                  * Search for visible subfolders
                  */
-                final int[] modules = { TASK, CALENDAR, CONTACT };
-                return (iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
-                    userId,
-                    groups,
-                    userConfig.getAccessibleModules(),
-                    FolderObject.PUBLIC,
-                    modules,
-                    SYSTEM_PUBLIC_FOLDER_ID,
-                    ctx)).hasNext();
-            } else if (objectId == SYSTEM_INFOSTORE_FOLDER_ID) {
+                if (new OXFolderAccess(ctx).getFolderPermission(SYSTEM_LDAP_FOLDER_ID, userId, userConfig).isFolderVisible()) {
+                    return true;
+                }
+                return (iter =
+                    OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
+                        userId,
+                        groups,
+                        userConfig.getAccessibleModules(),
+                        FolderObject.PUBLIC,
+                        MODULES,
+                        SYSTEM_PUBLIC_FOLDER_ID,
+                        ctx)).hasNext();
+            } else if (SYSTEM_INFOSTORE_FOLDER_ID == objectId) {
                 return userConfig.hasInfostore();
                 // return (iter =
                 // OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType
@@ -826,7 +847,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         } catch (final AbstractOXException e) {
             throw new OXFolderException(e);
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
         } finally {
             if (iter != null) {
                 try {
@@ -898,7 +919,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             } else if (objectId == VIRTUAL_LIST_CONTACT_FOLDER_ID) {
                 iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.CONTACT, userId, groups, userConfig, ctx, null);
             } else if (objectId == VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
-                iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.INFOSTORE, userId, groups, userConfig, ctx, null);
+                iter =
+                    OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.INFOSTORE, userId, groups, userConfig, ctx, null);
             } else {
                 iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null);
             }
@@ -1094,7 +1116,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             } catch (final DBPoolingException e) {
                 throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
             } catch (final SQLException e) {
-                throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
             }
         } else if (containsParentFolderID() && containsFolderName() && containsModule()) {
             try {
@@ -1107,7 +1129,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             } catch (final DBPoolingException e) {
                 throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
             } catch (final SQLException e) {
-                throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
             }
         }
         throw new OXFolderException(FolderCode.UNSUFFICIENT_FOLDER_INFORMATION);
@@ -1260,7 +1282,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @see java.lang.Object#clone()
      */
     @Override
-    public Object clone() {
+    public FolderObject clone() {
         try {
             final FolderObject clone = (FolderObject) super.clone();
             if (b_created_by) {
@@ -1474,7 +1496,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return loadFolderObjectFromDB(folderId, ctx, readConArg, loadPermissions, loadSubfolderList, TABLE_OT, TABLE_OP);
     }
 
-    private static final String SQL_LOAD_F = "SELECT parent, fname, module, type, creating_date, created_from," + " changing_date, changed_from, permission_flag, subfolder_flag, default_flag" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
+    private static final String SQL_LOAD_F =
+        "SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
+
+    private static final Pattern PAT_RPL_TABLE = Pattern.compile("#TABLE#");
 
     /**
      * Loads specified folder from database.
@@ -1500,7 +1525,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                     readCon = DBPool.pickup(ctx);
                     closeCon = true;
                 }
-                stmt = readCon.prepareStatement(SQL_LOAD_F.replaceFirst("#TABLE#", table));
+                stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(SQL_LOAD_F).replaceFirst(table));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
                 rs = stmt.executeQuery();
@@ -1515,11 +1540,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 folderObj.setLastModified(new Date(rs.getLong(7)));
                 folderObj.setModifiedBy(parseStringValue(rs.getString(8), ctx));
                 folderObj.setPermissionFlag(rs.getInt(9));
-                int defaultFolder = rs.getInt(11);
+                final int defaultFolder = rs.getInt(11);
                 if (rs.wasNull()) {
-                    defaultFolder = 0;
+                    folderObj.setDefaultFolder(false);
+                } else {
+                    folderObj.setDefaultFolder(defaultFolder > 0);
                 }
-                folderObj.setDefaultFolder(defaultFolder > 0);
                 if (loadSubfolderList) {
                     final ArrayList<Integer> subfolderList = getSubfolderIds(folderId, ctx, readCon, table);
                     folderObj.setSubfolderIds(subfolderList);
@@ -1575,7 +1601,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return getFolderPermissions(folderId, ctx, readConArg, TABLE_OP);
     }
 
-    private static final String SQL_LOAD_P = "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
+    private static final String SQL_LOAD_P =
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
@@ -1593,83 +1620,23 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         boolean closeCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        if (folderId == SYSTEM_LDAP_FOLDER_ID && TABLE_OP.equals(table)) {
-            boolean update = false;
-            int owp = OCLPermission.NO_PERMISSIONS;
-            try {
-                if (readCon == null) {
-                    readCon = DBPool.pickup(ctx);
-                    closeCon = true;
-                }
-                stmt = readCon.prepareStatement(SQL_LOAD_P.replaceFirst("#TABLE#", table));
-                stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, folderId);
-                rs = stmt.executeQuery();
-                final OCLPermission[] permissions = new OCLPermission[1];
-                if (rs.next()) {
-                    final int entity = rs.getInt(1);
-                    final OCLPermission p = new OCLPermission();
-                    p.setEntity(entity);
-                    /*
-                     * Get object-write-permission
-                     */
-                    owp = rs.getInt(4);
-                    if (OXFolderProperties.isEnableInternalUsersEdit() && owp < OCLPermission.WRITE_OWN_OBJECTS) {
-                        /*
-                         * Object-write-permission is out of sync with database
-                         */
-                        owp = OCLPermission.WRITE_OWN_OBJECTS;
-                        update = true;
-                    } else if (!OXFolderProperties.isEnableInternalUsersEdit() && owp > OCLPermission.NO_PERMISSIONS) {
-                        /*
-                         * Object-write-permission is out of sync with database
-                         */
-                        owp = OCLPermission.NO_PERMISSIONS;
-                        update = true;
-                    }
-                    p.setAllPermission(rs.getInt(2), rs.getInt(3), owp, rs.getInt(5));
-                    p.setFolderAdmin(rs.getInt(6) > 0 ? true : false);
-                    p.setGroupPermission(rs.getInt(7) > 0 ? true : false);
-                    p.setSystem(rs.getInt(8));
-                    permissions[0] = p;
-                }
-                stmt.close();
-                rs = null;
-                stmt = null;
-                return permissions;
-            } finally {
-                closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
-                if (update) {
-                    OXFolderSQL.updateSinglePermission(
-                        folderId,
-                        OCLPermission.ALL_GROUPS_AND_USERS,
-                        OCLPermission.READ_FOLDER,
-                        OCLPermission.READ_ALL_OBJECTS,
-                        owp,
-                        OCLPermission.NO_PERMISSIONS,
-                        null,
-                        ctx);
-                }
-            }
-        }
         try {
             if (readCon == null) {
                 readCon = DBPool.pickup(ctx);
                 closeCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_LOAD_P.replaceFirst("#TABLE#", table));
+            stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(SQL_LOAD_P).replaceFirst(table));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
             final ArrayList<OCLPermission> permList = new ArrayList<OCLPermission>();
             while (rs.next()) {
-                final int entity = rs.getInt(1);
                 final OCLPermission p = new OCLPermission();
-                p.setEntity(entity);
-                p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5));
-                p.setFolderAdmin(rs.getInt(6) > 0 ? true : false);
-                p.setGroupPermission(rs.getInt(7) > 0 ? true : false);
-                p.setSystem(rs.getInt(8));
+                p.setEntity(rs.getInt(1)); // Entity
+                p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5)); // fp, orp, owp, and odp
+                p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
+                p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
+                p.setSystem(rs.getInt(8)); // system
                 permList.add(p);
             }
             stmt.close();
@@ -1681,12 +1648,33 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
+    /**
+     * Gets the subfolder IDs of specified folder.
+     * 
+     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param ctx The context
+     * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
+     * @return The subfolder IDs of specified folder
+     * @throws SQLException If a SQL error occurs
+     * @throws DBPoolingException If a pooling error occurs
+     */
     public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
         return getSubfolderIds(folderId, ctx, readConArg, TABLE_OT);
     }
 
-    private static final String SQL_SEL = "SELECT fuid FROM #TABLE# WHERE cid = ? AND parent = ?";
+    private static final String SQL_SEL = "SELECT fuid FROM #TABLE# WHERE cid = ? AND parent = ? ORDER BY default_flag DESC, fname";
 
+    /**
+     * Gets the subfolder IDs of specified folder.
+     * 
+     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param ctx The context
+     * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
+     * @param table The folder's working or backup table name
+     * @return The subfolder IDs of specified folder
+     * @throws SQLException If a SQL error occurs
+     * @throws DBPoolingException If a pooling error occurs
+     */
     public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
         Connection readCon = readConArg;
         boolean closeCon = false;
@@ -1711,7 +1699,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
-    public static final OCLPermission VIRTUAL_FOLDER_PERMISSION = new OCLPermission();
+    private static final OCLPermission VIRTUAL_FOLDER_PERMISSION = new OCLPermission();
 
     static {
         VIRTUAL_FOLDER_PERMISSION.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
@@ -1724,10 +1712,31 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             OCLPermission.NO_PERMISSIONS);
     }
 
+    /**
+     * Creates a folder instance representing a virtual folder.
+     * 
+     * @param objectID The virtual object ID
+     * @param name The name
+     * @param module The module
+     * @param hasSubfolders Whether the folder is supposed to contain subfolders
+     * @param type The type
+     * @return A folder instance representing a virtual folder
+     */
     public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module, final boolean hasSubfolders, final int type) {
         return createVirtualFolderObject(objectID, name, module, hasSubfolders, type, null);
     }
 
+    /**
+     * Creates a folder instance representing a virtual folder.
+     * 
+     * @param objectID The virtual object ID
+     * @param name The name
+     * @param module The module
+     * @param hasSubfolders Whether the folder is supposed to contain subfolders
+     * @param type The type
+     * @param virtualPerm The folder's permission
+     * @return A folder instance representing a virtual folder
+     */
     public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module, final boolean hasSubfolders, final int type, final OCLPermission virtualPerm) {
         final OCLPermission p = virtualPerm == null ? VIRTUAL_FOLDER_PERMISSION : virtualPerm;
         final FolderObject virtualFolder = new FolderObject(objectID);
@@ -1740,6 +1749,16 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return virtualFolder;
     }
 
+    /**
+     * Creates a folder instance representing a virtual folder.
+     * 
+     * @param fullName The folder's fullname
+     * @param name The name
+     * @param module The module
+     * @param hasSubfolders Whether the folder is supposed to contain subfolders
+     * @param type The type
+     * @return A folder instance representing a virtual folder
+     */
     public static final FolderObject createVirtualFolderObject(final String fullName, final String name, final int module, final boolean hasSubfolders, final int type) {
         final OCLPermission p = VIRTUAL_FOLDER_PERMISSION;
         final FolderObject virtualFolder = new FolderObject();
@@ -1752,6 +1771,13 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return virtualFolder;
     }
 
+    /**
+     * Creates a folder instance representing a shared folder.
+     * 
+     * @param createdBy The user ID of shared folder's owner
+     * @param creatorDisplayName The display name of shared folder's owner
+     * @return A folder instance representing a shared folder.
+     */
     public static final FolderObject createVirtualSharedFolderObject(final int createdBy, final String creatorDisplayName) {
         return createVirtualFolderObject(
             new StringBuilder(20).append(SHARED_PREFIX).append(createdBy).toString(),
