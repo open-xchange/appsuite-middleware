@@ -454,7 +454,7 @@ public final class Contacts {
                     Integer.valueOf(so.getContextId()),
                     Integer.valueOf(user));
             }
-            if (!co.containsFileAs() || ((co.getFileAs() != null) && (co.getFileAs().length() > 0))) {
+            if (!co.containsFileAs()) {
                 co.setFileAs(co.getDisplayName());
             }
             co.removeContextID();

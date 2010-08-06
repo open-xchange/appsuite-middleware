@@ -901,6 +901,14 @@ public class ContactParser extends CommonParser {
             public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField20(parseString(jsonobject, ContactFields.USERFIELD20));
             }
+        },
+        new JSONAttributeMapper() {
+        	public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.FILE_AS);
+            }
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
+                contactobject.setFileAs(parseString(jsonobject, ContactFields.FILE_AS));
+            }
         }
     };
 }
