@@ -1043,8 +1043,25 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                 }
                 if (!MailProperties.getInstance().isIgnoreSubscription() && toUpdate.containsSubscribed()) {
-                    updateMe.setSubscribed(toUpdate.isSubscribed());
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), toUpdate.isSubscribed());
+                    /*
+                     * Check read permission
+                     */
+                    if (imapConfig.isSupportsACLs()) {
+                        if (isSelectable(updateMe)) {
+                            try {
+                                if (!getACLExtension().canLookUp(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
+                                    throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, fullname);
+                                }
+                            } catch (final MessagingException e) {
+                                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullname);
+                            }
+                        } else {
+                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, fullname);
+                        }
+                    }
+                    final boolean subscribe = toUpdate.isSubscribed();
+                    updateMe.setSubscribed(subscribe);
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), subscribe);
                 }
                 return updateMe.getFullName();
             }
