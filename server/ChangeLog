@@ -1,3 +1,7 @@
+* 2010-08-06 - steffen.templin@open-xchange.com
+
+ - Bugfix #16515: fileas in contacts will be set correctly after creating a new contact with Outlook.
+
 * 2010-08-03 - thorben.betten@open-xchange.com
 
  - Bugfix #16495: Added config parameter to decide whether to add client's IP address to mail headers on
