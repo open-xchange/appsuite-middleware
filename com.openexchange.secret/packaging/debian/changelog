@@ -1,3 +1,9 @@
+open-xchange-secret (6.18.1.0-0) unstable; urgency=low
+
+  * update version.
+
+ -- Francisco Laguna <francisco.laguna@open-xchange.com>  Wed, 7 Aug 2010 16:41:00 +0200
+
 open-xchange-secret (6.18.0.0-0) unstable; urgency=low
 
   * initial version.
