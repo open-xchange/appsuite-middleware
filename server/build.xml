@@ -67,6 +67,7 @@
     <property name="conversionjar" value="com.openexchange.conversion.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
+	<property name="secretjar" value="com.openexchange.secret.jar"/>
     <property name="managementjar" value="com.openexchange.management.jar"/>
     <property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="commonjar" value="common.jar"/>
@@ -113,6 +114,7 @@
         <pathelement location="${bundlesdir}/${conversionjar}"/>
         <pathelement location="${bundlesdir}/${configjar}"/>
         <pathelement location="${bundlesdir}/${monitoringjar}"/>
+        <pathelement location="${bundlesdir}/${secretjar}"/>
         <pathelement location="${bundlesdir}/${managementjar}"/>
         <pathelement location="${bundlesdir}/${cachingBundle}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>

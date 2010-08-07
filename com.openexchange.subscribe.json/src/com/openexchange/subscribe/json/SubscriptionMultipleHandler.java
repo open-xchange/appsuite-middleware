@@ -70,6 +70,7 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.secret.SecretService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
@@ -87,6 +88,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
 
     private final SubscriptionSourceDiscoveryService discovery;
     private final SubscriptionExecutionService executor;
+    private final SecretService secretService;
 
     public static final Set<String> ACTIONS_REQUIRING_BODY = new HashSet<String>() {{
        add("new");
@@ -95,10 +97,11 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
        add("list");
     }};
     
-    public SubscriptionMultipleHandler(final SubscriptionSourceDiscoveryService discovery, final SubscriptionExecutionService executor) {
+    public SubscriptionMultipleHandler(final SubscriptionSourceDiscoveryService discovery, final SubscriptionExecutionService executor, final SecretService secretService) {
         super();
         this.discovery = discovery;
         this.executor = executor;
+        this.secretService = secretService;
     }
 
     public void close() {
@@ -152,7 +155,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         if (request.has("folder")) {
             final String folderId = request.getString("folder");
             List<Subscription> allSubscriptions = null;
-            allSubscriptions = getSubscriptionsInFolder(context, folderId, session.getPassword());
+            allSubscriptions = getSubscriptionsInFolder(context, folderId, secretService.getSecret(session));
             Collections.sort(allSubscriptions, new Comparator<Subscription>() {
 
                 public int compare(Subscription o1, Subscription o2) {
@@ -170,7 +173,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         }
         if (request.has("id")) {
             final int id = request.getInt("id");
-            final Subscription subscription = loadSubscription(id, context, request.optString("source"), session.getPassword());
+            final Subscription subscription = loadSubscription(id, context, request.optString("source"), secretService.getSecret(session));
             if (!ids.contains(id)) {
                 ids.add(id);
                 subscriptionsToRefresh.add(subscription);
@@ -183,6 +186,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return 1;
     }
 
+
     private Object listSubscriptions(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
         final JSONArray ids = request.getJSONArray(ResponseFields.DATA);
         final Context context = session.getContext();
@@ -192,7 +196,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             final SubscriptionSource source = discovery.getSource(context, id);
             if(source != null) {
                 final SubscribeService subscribeService = source.getSubscribeService();
-                final Subscription subscription = subscribeService.loadSubscription(context, id, session.getPassword());
+                final Subscription subscription = subscribeService.loadSubscription(context, id, secretService.getSecret(session));
                 if (subscription != null) {
                     subscriptions.add(subscription);
                 }
@@ -210,7 +214,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final Context context = session.getContext();
 
         List<Subscription> allSubscriptions = null;
-        allSubscriptions = getSubscriptionsInFolder(context, folderId, session.getPassword());
+        allSubscriptions = getSubscriptionsInFolder(context, folderId, secretService.getSecret(session));
 
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
@@ -294,7 +298,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final int id = request.getInt("id");
         final String source = request.optString("source");
         final Context context = session.getContext();
-        final Subscription subscription = loadSubscription(id, context, source, session.getPassword());
+        final Subscription subscription = loadSubscription(id, context, source, secretService.getSecret(session));
         return createResponse(subscription, request.optString("__serverURL"));
     }
 
@@ -340,14 +344,14 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
     }
 
     private Object updateSubscription(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
-        final Subscription subscription = getSubscription(request, session, session.getPassword());
+        final Subscription subscription = getSubscription(request, session, secretService.getSecret(session));
         final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
         subscribeService.update(subscription);
         return 1;
     }
 
     private Object createSubscription(final JSONObject request, final ServerSession session) throws AbstractOXException, JSONException {
-        final Subscription subscription = getSubscription(request, session, session.getPassword());
+        final Subscription subscription = getSubscription(request, session, secretService.getSecret(session));
         subscription.setId(-1);
         final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
         subscribeService.subscribe(subscription);

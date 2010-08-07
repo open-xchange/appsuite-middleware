@@ -78,6 +78,7 @@ import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccount;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -162,12 +163,11 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                  */
                 final List<String> passwordElementNames = getPasswordElementNames(serviceId);
                 if (!passwordElementNames.isEmpty()) {
-                    final CryptoService cryptoService = getService(CryptoService.class);
                     for (final String passwordElementName : passwordElementNames) {
                         final String toDecrypt = (String) configuration.get(passwordElementName);
                         if (null != toDecrypt) {
                             try {
-                                final String decrypted = cryptoService.decrypt(toDecrypt, session.getPassword());
+                                final String decrypted = decrypt(toDecrypt, session);
                                 configuration.put(passwordElementName, decrypted);
                             } catch (CryptoException x) {
                                 // Must not be fatal
@@ -331,11 +331,10 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                  */
                 final List<String> passwordElementNames = getPasswordElementNames(serviceId);
                 if (!passwordElementNames.isEmpty()) {
-                    final CryptoService cryptoService = getService(CryptoService.class);
                     for (final String passwordElementName : passwordElementNames) {
                         final String toCrypt = (String) configuration.get(passwordElementName);
                         if (null != toCrypt) {
-                            final String encrypted = cryptoService.encrypt(toCrypt, session.getPassword());
+                            final String encrypted = encrypt(toCrypt, session);
                             configuration.put(passwordElementName, encrypted);
                         }
                     }
@@ -370,6 +369,18 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             DBUtils.autocommit(wc);
             databaseService.backWritable(contextId, wc);
         }
+    }
+
+    private String encrypt(String toCrypt, Session session) throws MessagingException, CryptoException {
+        final CryptoService cryptoService = getService(CryptoService.class);
+        final SecretService secretService = getService(SecretService.class);
+        return cryptoService.encrypt(toCrypt, secretService.getSecret(session));
+    }
+    
+    private String decrypt(String toDecrypt, Session session) throws MessagingException, CryptoException {
+        final CryptoService cryptoService = getService(CryptoService.class);
+        final SecretService secretService = getService(SecretService.class);
+        return cryptoService.decrypt(toDecrypt, secretService.getSecret(session));
     }
 
     private static final String SQL_DELETE = "DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
@@ -461,11 +472,10 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                      */
                     final List<String> passwordElementNames = getPasswordElementNames(serviceId);
                     if (!passwordElementNames.isEmpty()) {
-                        final CryptoService cryptoService = getService(CryptoService.class);
                         for (final String passwordElementName : passwordElementNames) {
                             final String toCrypt = (String) configuration.get(passwordElementName);
                             if (null != toCrypt) {
-                                final String encrypted = cryptoService.encrypt(toCrypt, session.getPassword());
+                                final String encrypted = encrypt(toCrypt, session);
                                 configuration.put(passwordElementName, encrypted);
                             }
                         }

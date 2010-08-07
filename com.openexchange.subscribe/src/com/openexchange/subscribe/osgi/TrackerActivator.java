@@ -55,6 +55,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
@@ -65,6 +67,7 @@ import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 public final class TrackerActivator implements BundleActivator {
 
     private List<ServiceTracker> trackers;
+    private WhiteboardSecretService secretService;
 
     /**
      * Initializes a new {@link TrackerActivator}.
@@ -94,6 +97,9 @@ public final class TrackerActivator implements BundleActivator {
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }
+        
+        SubscriptionServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
+        secretService.open();
     }
 
     private void closeTrackers() {
@@ -102,6 +108,9 @@ public final class TrackerActivator implements BundleActivator {
                 tracker.close();
             }
             trackers = null;
+        }
+        if(secretService != null) {
+            secretService.close();
         }
     }
 

@@ -88,6 +88,7 @@ import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 import com.openexchange.mailaccount.servlet.parser.MailAccountParser;
 import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
+import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -287,7 +288,7 @@ public final class MailAccountRequest {
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             final int id =
-                storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session.getPassword());
+                storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), getSecret(session));
 
             final JSONObject jsonAccount =
                 MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
@@ -296,6 +297,11 @@ public final class MailAccountRequest {
         } catch (final AbstractOXException e) {
             throw new OXException(e);
         }
+    }
+
+    private String getSecret(ServerSession session) {
+        SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
+        return secretService.getSecret(session);
     }
 
     private Object actionValidate(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
@@ -321,7 +327,7 @@ public final class MailAccountRequest {
 
                 final String encodedPassword =
                     storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
-                accountDescription.setPassword(MailPasswordUtil.decrypt(encodedPassword, session.getPassword()));
+                accountDescription.setPassword(MailPasswordUtil.decrypt(encodedPassword, getSecret(session)));
             }
 
             checkNeededFields(accountDescription);
@@ -582,7 +588,7 @@ public final class MailAccountRequest {
                 fieldsToUpdate,
                 session.getUserId(),
                 session.getContextId(),
-                session.getPassword());
+                getSecret(session));
 
             if (fieldsToUpdate.removeAll(DEFAULT)) {
                 /*

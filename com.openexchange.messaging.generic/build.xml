@@ -34,6 +34,7 @@
 
     <property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="cryptojar" value="com.openexchange.crypto.jar"/>
+	<property name="secretjar" value="com.openexchange.secret.jar"/>
     <property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="genericonfstoragejar" value="com.openexchange.datatypes.genericonf.storage.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
@@ -56,8 +57,9 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
 
         <pathelement location="${bundlesdir}/${cachingBundle}/${cachingjar}"/>
-        <pathelement location="${bundlesdir}/${cryptojar}"/>
-        <pathelement location="${bundlesdir}/${genericonfjar}"/>
+        <pathelement location="${bundlesdir}/${secretjar}"/>
+    	<pathelement location="${bundlesdir}/${cryptojar}"/>
+    	<pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${genericonfstoragejar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${messagingjar}"/>

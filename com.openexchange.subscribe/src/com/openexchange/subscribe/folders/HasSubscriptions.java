@@ -55,8 +55,10 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.secret.SecretService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -90,13 +92,15 @@ public class HasSubscriptions implements AdditionalFolderField {
 
         final List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
         try {
+            SecretService secretService = SubscriptionServiceRegistry.getInstance().getService(SecretService.class);
+            
             for (final SubscriptionSource subscriptionSource : sources) {
                 final String fn = folder.getFullName();
                 final boolean hasSubscriptions =
                     !subscriptionSource.getSubscribeService().loadSubscriptions(
                         session.getContext(),
                         null == fn ? String.valueOf(folder.getObjectID()) : fn,
-                        session.getPassword()).isEmpty();
+                        secretService.getSecret(session)).isEmpty();
                 if (hasSubscriptions) {
                     return Boolean.TRUE;
                 }

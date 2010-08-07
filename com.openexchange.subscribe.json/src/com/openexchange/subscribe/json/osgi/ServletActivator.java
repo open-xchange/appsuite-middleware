@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
@@ -87,6 +88,8 @@ public class ServletActivator extends DeferredActivator {
     private ServiceRegistration subscriptionsMultipleReg;
 
     private ServiceRegistration subscriptionSourceMultipleReg;
+
+    private WhiteboardSecretService secretService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -142,7 +145,8 @@ public class ServletActivator extends DeferredActivator {
     private void createMultipleHandler() {
         SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
 
-        SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(discoverer, subscriptionExecutionService);
+        SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(discoverer, subscriptionExecutionService, secretService = new WhiteboardSecretService(context));
+        secretService.open();
         SubscriptionSourceMultipleFactory subscriptionSourcesFactory = new SubscriptionSourceMultipleFactory(discoverer);
         
         SubscriptionServlet.setFactory(subscriptionsFactory);
@@ -167,6 +171,7 @@ public class ServletActivator extends DeferredActivator {
     }
 
     private void destroyMultipleHandler() {
+        secretService.close();
         subscriptionsMultipleReg.unregister();
         subscriptionSourceMultipleReg.unregister();
         SubscriptionServlet.setFactory(null);

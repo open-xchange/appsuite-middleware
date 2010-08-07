@@ -34,6 +34,7 @@
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="sqljar" value="com.openexchange.sql.jar"/>
     <property name="cryptojar" value="com.openexchange.crypto.jar"/>
+    <property name="secretjar" value="com.openexchange.secret.jar"/>
     <property name="calendarjar" value="com.openexchange.calendar.jar"/>
     <property name="commonjar" value="common.jar"/>
 	<property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
@@ -52,6 +53,7 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${sqljar}"/>
         <pathelement location="${bundlesdir}/${cryptojar}"/>
+    	<pathelement location="${bundlesdir}/${secretjar}"/>
         <pathelement location="${bundlesdir}/${calendarjar}"/>
     </path>
 

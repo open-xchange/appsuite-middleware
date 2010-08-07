@@ -51,6 +51,7 @@ package com.openexchange.subscribe.json;
 
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.secret.SecretService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
@@ -65,14 +66,16 @@ public class SubscriptionMultipleFactory implements MultipleHandlerFactoryServic
 
     private SubscriptionExecutionService executor;
     private SubscriptionSourceDiscoveryService discovery;
+    private SecretService secretService;
     
-    public SubscriptionMultipleFactory(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor) {
+    public SubscriptionMultipleFactory(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor, SecretService secretService) {
         this.executor = executor;
         this.discovery = discovery;
+        this.secretService = secretService;
     }
 
     public MultipleHandler createMultipleHandler() {
-        return new SubscriptionMultipleHandler(discovery, executor);
+        return new SubscriptionMultipleHandler(discovery, executor, secretService);
     }
 
     public String getSupportedModule() {

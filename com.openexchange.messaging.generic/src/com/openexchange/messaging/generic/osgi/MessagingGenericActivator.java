@@ -70,6 +70,8 @@ import com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableT
 import com.openexchange.messaging.generic.groupware.MessagingGenericDeleteListener;
 import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
@@ -84,6 +86,8 @@ public class MessagingGenericActivator extends DeferredActivator {
     private List<ServiceTracker> trackers;
 
     private List<ServiceRegistration> registrations;
+
+    private WhiteboardSecretService secretService;
 
     public MessagingGenericActivator() {
         super();
@@ -130,6 +134,8 @@ public class MessagingGenericActivator extends DeferredActivator {
                         registry.addService(classes[i], service);
                     }
                 }
+                registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
+                secretService.open();
             }
             
             {
@@ -198,6 +204,7 @@ public class MessagingGenericActivator extends DeferredActivator {
              * Clear service registry
              */
             getServiceRegistry().clearRegistry();
+            secretService.close();
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(MessagingGenericActivator.class).error(e.getMessage(), e);
             throw e;

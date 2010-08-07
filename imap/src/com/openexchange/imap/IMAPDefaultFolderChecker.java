@@ -82,6 +82,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
@@ -636,12 +637,14 @@ public final class IMAPDefaultFolderChecker {
                         try {
                             final MailAccountStorageService storageService =
                                 IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
+                            final SecretService secretService = IMAPServiceRegistry.getService(SecretService.class);
+                            
                             storageService.updateMailAccount(
                                 mad,
                                 attributes,
                                 session.getUserId(),
                                 session.getContextId(),
-                                session.getPassword());
+                                secretService.getSecret(session));
                         } catch (final ServiceException e) {
                             throw new IMAPException(e);
                         } catch (final MailAccountException e) {

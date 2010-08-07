@@ -163,6 +163,8 @@ import com.openexchange.search.SearchException;
 import com.openexchange.search.SearchExceptionFactory;
 import com.openexchange.search.SearchService;
 import com.openexchange.search.internal.SearchServiceImpl;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
@@ -232,6 +234,8 @@ public final class ServerActivator extends DeferredActivator {
     private final AtomicBoolean started;
 
     private Boolean adminBundleInstalled;
+
+    private WhiteboardSecretService secretService;
 
     /**
      * Initializes a new {@link ServerActivator}
@@ -603,7 +607,10 @@ public final class ServerActivator extends DeferredActivator {
         for (final BundleActivator activator : activators) {
             activator.start(context);
         }
-
+        
+        ServerServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
+        secretService.open();
+        
         /*
          * Register components
          */
@@ -671,6 +678,7 @@ public final class ServerActivator extends DeferredActivator {
              * Clear service registry
              */
             ServerServiceRegistry.getInstance().clearRegistry();
+            secretService.close();
         } finally {
             started.set(false);
             adminBundleInstalled = null;

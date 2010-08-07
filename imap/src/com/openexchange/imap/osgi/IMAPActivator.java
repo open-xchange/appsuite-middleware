@@ -59,6 +59,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -77,6 +79,8 @@ public final class IMAPActivator extends DeferredActivator {
     private final Dictionary<String, String> dictionary;
 
     private ServiceRegistration imapServiceRegistration;
+
+    private WhiteboardSecretService secretService;
 
     /**
      * Initializes a new {@link IMAPActivator}
@@ -129,6 +133,9 @@ public final class IMAPActivator extends DeferredActivator {
                         registry.addService(classes[i], service);
                     }
                 }
+                
+                registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
+                secretService.open();
             }
             imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary);
         } catch (final Exception e) {
@@ -148,6 +155,7 @@ public final class IMAPActivator extends DeferredActivator {
              * Clear service registry
              */
             getServiceRegistry().clearRegistry();
+            secretService.close();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

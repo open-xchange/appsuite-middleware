@@ -215,7 +215,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
     private class InfostoreSession {
         public int folderId;
         public User user;
-        public UserConfiguration userConfig;
+        public UserConfiguration userConfig;    
         public ServerSession serverSession;
         
         public InfostoreSession(Subscription subscription) throws UserConfigurationException, UserException, SubscriptionException {
