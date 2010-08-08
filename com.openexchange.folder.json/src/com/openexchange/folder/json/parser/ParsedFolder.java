@@ -266,6 +266,14 @@ public final class ParsedFolder implements Folder {
         this.subscribed = subscribed;
     }
 
+    public boolean hasSubscribedSubfolders() {
+        return false;
+    }
+
+    public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
+        // No-op
+    }
+    
     public boolean isVirtual() {
         return false;
     }

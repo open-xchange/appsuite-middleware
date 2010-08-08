@@ -259,6 +259,14 @@ public final class VirtualFolder implements Folder {
         this.subscribed = subscribed;
     }
 
+    public boolean hasSubscribedSubfolders() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
+        throw new UnsupportedOperationException();
+    }
+
     public boolean isVirtual() {
         return true;
     }

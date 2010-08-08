@@ -277,6 +277,14 @@ public abstract class AbstractFolder implements Folder {
     public void setSubscribed(final boolean subscribed) {
         this.subscribed = subscribed;
     }
+   
+    public boolean hasSubscribedSubfolders() {
+        return subscribedSubfolders;
+    }
+    
+    public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
+        this.subscribedSubfolders = subscribedSubfolders;
+    }
 
     public boolean isVirtual() {
         return false;
