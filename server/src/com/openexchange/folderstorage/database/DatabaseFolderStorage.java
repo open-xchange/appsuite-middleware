@@ -643,7 +643,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                         tmp.add(id.toString());
                                     }
                                     retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
-                                    retval.setSubscribedSubfolders(!tmp.isEmpty());
+                                    retval.setSubscribedSubfolders(true);
                                 }
                             }
                         }

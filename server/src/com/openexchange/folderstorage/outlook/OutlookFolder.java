@@ -270,7 +270,10 @@ public final class OutlookFolder implements Folder {
     }
 
     public boolean hasSubscribedSubfolders() {
-        return null == subscribedSubfolders ? realFolder.hasSubscribedSubfolders() : subscribedSubfolders.booleanValue();
+        if (null == subscribedSubfolders) {
+            return null == subfolders || subfolders.length > 0;
+        }
+        return subscribedSubfolders.booleanValue();
     }
     
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
