@@ -53,17 +53,17 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link SecretService}
+ * {@link SecretService} - Provides the secret string for a certain {@link Session session}.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SecretService {
 
     /**
-     * Gets the secret for specified session.
+     * Gets the secret string for specified session.
      * 
      * @param session The session
-     * @return The secret
+     * @return The secret string
      */
     public String getSecret(Session session);
 

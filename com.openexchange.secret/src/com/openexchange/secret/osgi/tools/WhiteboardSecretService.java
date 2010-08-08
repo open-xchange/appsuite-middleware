@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link WhiteboardSecretService}
+ * {@link WhiteboardSecretService} - Whiteboard pattern for {@link SecretService}.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
