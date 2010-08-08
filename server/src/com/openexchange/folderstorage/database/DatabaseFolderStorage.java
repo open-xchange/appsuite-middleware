@@ -624,7 +624,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                 /*
                                  * A shared folder has no subfolders in real tree
                                  */
-                                retval.setSubfolderIDs(null);
+                                retval.setSubfolderIDs(new String[0]);
+                                retval.setSubscribedSubfolders(false);
                                 retval.setCacheable(false);
                                 retval.setParentID(new StringBuilder(16).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
                             } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != folderId) {
@@ -633,14 +634,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                  * used.
                                  */
                                 final List<Integer> subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
-                                final List<String> subfolderIdentifies = new ArrayList<String>(subfolderIds.size());
-                                for (final Integer id : subfolderIds) {
-                                    subfolderIdentifies.add(id.toString());
+                                if (subfolderIds.isEmpty()) {
+                                    retval.setSubfolderIDs(new String[0]);
+                                    retval.setSubscribedSubfolders(false);
+                                } else {
+                                    final List<String> tmp = new ArrayList<String>(subfolderIds.size());
+                                    for (final Integer id : subfolderIds) {
+                                        tmp.add(id.toString());
+                                    }
+                                    retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                                    retval.setSubscribedSubfolders(!tmp.isEmpty());
                                 }
-                                retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
-                            }
-                            if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
-                                retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
                             }
                         }
                     }

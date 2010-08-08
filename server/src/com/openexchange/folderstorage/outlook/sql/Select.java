@@ -511,6 +511,8 @@ public final class Select {
         }
     }
 
+    private static final String SQL_TEMPL_SUBSR_SUBF = "SELECT t.folderId, s.subscribed FROM #T# as t LEFT JOIN #S# as s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.tree = ? AND t.user = ? and t.parentId = ?";
+
     /**
      * Fills specified folder, does nothing if folder does not exist in tables.
      * 
@@ -639,6 +641,42 @@ public final class Select {
                 subscribed = rs.getInt(pos) > 0;
             }
             outlookFolder.setSubscribed(subscribed);
+        } catch (final SQLException e) {
+            if (null != stmt) {
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                if (LOG.isDebugEnabled()) {
+                    final String sql = getSQLString(stmt);
+                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                }
+            }
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        stmt = null;
+        // Set subscribed subfolder if and only if table contains virtually added subscribed subfolders
+        try {
+            final String sql = working ? SQL_TEMPL_SUBSR_SUBF.replaceFirst("#T#", "virtualTree").replaceFirst("#S#", "virtualSubscription") : SQL_TEMPL_SUBSR_SUBF.replaceFirst("#T#", "virtualBackupTree").replaceFirst("#S#", "virtualBackupSubscription");
+            stmt = con.prepareStatement(sql);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            rs = stmt.executeQuery();
+            pos = 2;
+            boolean subscribedSubfolder = false;
+            while (!subscribedSubfolder && rs.next()) {
+                final int subfolderSubscription = rs.getInt(pos);
+                if (rs.wasNull()) {
+                    subscribedSubfolder = true;
+                } else {
+                    subscribedSubfolder = subfolderSubscription > 0;
+                }
+            }
+            if (subscribedSubfolder) {
+                outlookFolder.setSubscribedSubfolders(true);
+            }
         } catch (final SQLException e) {
             if (null != stmt) {
                 final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);

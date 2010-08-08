@@ -140,7 +140,9 @@ public final class SystemSharedFolder {
             /*
              * Set to null if a shared folder exists otherwise to empty array to indicate no subfolders
              */
-            retval.setSubfolderIDs(searchIterator.hasNext() ? null : new String[0]);
+            final boolean hasNext = searchIterator.hasNext();
+            retval.setSubfolderIDs(hasNext ? null : new String[0]);
+            retval.setSubscribedSubfolders(hasNext);
         } finally {
             try {
                 searchIterator.close();

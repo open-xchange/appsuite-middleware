@@ -100,6 +100,7 @@ public final class SystemInfostoreFolder {
         retval.setContentType(InfostoreContentType.getInstance());
         // Enforce getSubfolders() on storage
         retval.setSubfolderIDs(null);
+        retval.setSubscribedSubfolders(true);
         return retval;
     }
 

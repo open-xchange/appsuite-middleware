@@ -100,6 +100,7 @@ public final class SystemPrivateFolder {
         retval.setName(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME);
         // Enforce getSubfolders() on storage
         retval.setSubfolderIDs(null);
+        retval.setSubscribedSubfolders(true);
         return retval;
     }
 

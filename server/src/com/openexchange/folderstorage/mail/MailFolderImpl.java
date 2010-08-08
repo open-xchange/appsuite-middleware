@@ -159,6 +159,7 @@ public final class MailFolderImpl extends AbstractFolder {
         }
         type = SystemType.getInstance();
         this.subscribed = mailFolder.isSubscribed() || mailFolder.hasSubscribedSubfolders();
+        this.subscribedSubfolders = mailFolder.hasSubscribedSubfolders();
         this.capabilities = capabilities;
         {
             final String value =

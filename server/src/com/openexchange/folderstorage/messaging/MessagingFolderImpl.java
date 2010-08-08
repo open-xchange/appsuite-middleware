@@ -69,7 +69,6 @@ import com.openexchange.folderstorage.messaging.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingPermission;
@@ -173,6 +172,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
         }
         type = SystemType.getInstance();
         this.subscribed = messagingFolder.isSubscribed();
+        this.subscribedSubfolders = messagingFolder.hasSubscribedSubfolders();
         this.capabilities = parseCaps(messagingFolder.getCapabilities());
         {
             final String value =

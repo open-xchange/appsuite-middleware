@@ -74,16 +74,6 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
     private ConcurrentMap<Locale, Future<String>> localizedNames;
 
     /**
-     * Initializes an empty {@link LocalizedDatabaseFolder}.
-     * 
-     * @param cacheable <code>true</code> if this database folder is cacheable; otherwise <code>false</code>
-     */
-    public LocalizedDatabaseFolder(final boolean cacheable) {
-        super(cacheable);
-        localizedNames = new ConcurrentHashMap<Locale, Future<String>>();
-    }
-
-    /**
      * Initializes a new cacheable {@link LocalizedDatabaseFolder} from given database folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor. Moreover passed database folder is considered to be

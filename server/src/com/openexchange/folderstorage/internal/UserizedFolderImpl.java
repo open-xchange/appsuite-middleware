@@ -200,6 +200,10 @@ public final class UserizedFolderImpl implements UserizedFolder {
         return folder.isSubscribed();
     }
 
+    public boolean hasSubscribedSubfolders() {
+        return folder.hasSubscribedSubfolders();
+    }
+
     public boolean isVirtual() {
         return folder.isVirtual();
     }
@@ -230,6 +234,10 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     public void setSubscribed(final boolean subscribed) {
         folder.setSubscribed(subscribed);
+    }
+
+    public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
+        folder.setSubscribedSubfolders(subscribedSubfolders);
     }
 
     public void setTreeID(final String id) {

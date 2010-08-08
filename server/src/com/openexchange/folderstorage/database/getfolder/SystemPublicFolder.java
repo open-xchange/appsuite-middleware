@@ -97,6 +97,7 @@ public final class SystemPublicFolder {
         retval.setName(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME);
         // Enforce getSubfolders() on storage
         retval.setSubfolderIDs(null);
+        retval.setSubscribedSubfolders(true);
         return retval;
     }
 

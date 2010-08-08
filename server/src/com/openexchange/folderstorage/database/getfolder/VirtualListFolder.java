@@ -180,6 +180,7 @@ public final class VirtualListFolder {
         }
         final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
         retval.setSubfolderIDs(null);
+        retval.setSubscribedSubfolders(true);
         retval.setGlobal(true);
         return retval;
     }

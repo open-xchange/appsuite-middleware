@@ -2500,12 +2500,10 @@ public class Folder extends SessionServlet {
         }
 
         public Object call() throws MailException {
-            final MailFolder rootFolder;
             final MailAccess<?, ?> mailAccess;
             final int accountId = mailAccount.getId();
             try {
                 mailAccess = MailAccess.getInstance(session, accountId);
-                rootFolder = mailAccess.getRootFolder();
             } catch (final MailException e) {
                 arrays[index] = null;
                 if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
@@ -2517,6 +2515,7 @@ public class Folder extends SessionServlet {
                 logger.error(e.getMessage(), e);
                 throw e;
             }
+            final MailFolder rootFolder = mailAccess.getRootFolder();
             try {
                 final MailFolderFieldWriter[] mailFolderWriters =
                     com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(columns, mailAccess.getMailConfig(), session);

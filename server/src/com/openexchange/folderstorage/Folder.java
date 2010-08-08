@@ -299,6 +299,20 @@ public interface Folder extends Serializable, Cloneable {
      * @param subscribed <code>true</code> if this folder is subscribed; otherwise <code>false</code>
      */
     void setSubscribed(boolean subscribed);
+    
+    /**
+     * Indicates if this folder has subscribed subfolders.
+     * 
+     * @return <code>true</code> if this folder has subscribed subfolders; otherwise <code>false</code>
+     */
+    boolean hasSubscribedSubfolders();
+
+    /**
+     * Sets whether this folder has subscribed subfolders.
+     * 
+     * @param subscribedSubfolders <code>true</code> if this folder has subscribed subfolders; otherwise <code>false</code>
+     */
+    void setSubscribedSubfolders(boolean subscribedSubfolders);
 
     /**
      * Gets the summary.
