@@ -76,8 +76,6 @@ public final class IMAPActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class);
 
-    private final Dictionary<String, String> dictionary;
-
     private ServiceRegistration imapServiceRegistration;
 
     private WhiteboardSecretService secretService;
@@ -87,8 +85,6 @@ public final class IMAPActivator extends DeferredActivator {
      */
     public IMAPActivator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
     }
 
     @Override
@@ -137,6 +133,11 @@ public final class IMAPActivator extends DeferredActivator {
                 registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
                 secretService.open();
             }
+            /*
+             * Register IMAP mail provider
+             */
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
             imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -155,7 +156,10 @@ public final class IMAPActivator extends DeferredActivator {
              * Clear service registry
              */
             getServiceRegistry().clearRegistry();
-            secretService.close();
+            if (secretService != null) {
+                secretService.close();
+                secretService = null;
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
