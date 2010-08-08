@@ -58,5 +58,13 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SecretService {
+
+    /**
+     * Gets the secret for specified session.
+     * 
+     * @param session The session
+     * @return The secret
+     */
     public String getSecret(Session session);
+
 }
