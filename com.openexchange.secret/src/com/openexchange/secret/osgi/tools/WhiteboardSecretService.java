@@ -81,10 +81,16 @@ public class WhiteboardSecretService implements SecretService{
         return secretService.getSecret(session);
     }
     
+    /**
+     * Open this {@link WhiteboardSecretService} and begin tracking {@link SecretService}. 
+     */
     public void open() {
         tracker.open();
     }
     
+    /**
+     * Close this {@link WhiteboardSecretService}.
+     */
     public void close() {
         tracker.close();
     }
