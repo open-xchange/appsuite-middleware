@@ -293,4 +293,12 @@ final class DummyFolder implements Folder {
         throw new UnsupportedOperationException("DummyFolder.setNewID()");
     }
 
+    public boolean hasSubscribedSubfolders() {
+        throw new UnsupportedOperationException("DummyFolder.hasSubscribedSubfolders()");
+    }
+
+    public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
+        throw new UnsupportedOperationException("DummyFolder.setSubscribedSubfolders()");
+    }
+
 }
