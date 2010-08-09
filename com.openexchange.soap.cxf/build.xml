@@ -38,7 +38,15 @@
 	<property name="commonjar" value="common.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
+	
+    <!-- Third party libs -->
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
+        <exclude name="CVS"/>
+        <exclude name="${lib.dir}/*-sources.jar"/>
+    </fileset>
 
+	
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -56,7 +64,8 @@
         <pathelement location="${bundlesdir}/${woodstoxjar}"/>
         <pathelement location="${bundlesdir}/${jaxbapijar}"/>
         <pathelement location="${bundlesdir}/${staxapijar}"/>
-          
+    	
+    	<fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
