@@ -158,7 +158,7 @@ public final class MailFolderImpl extends AbstractFolder {
             this.permissions[i] = new MailPermissionImpl(mailPermissions[i]);
         }
         type = SystemType.getInstance();
-        this.subscribed = mailFolder.isSubscribed() || mailFolder.hasSubscribedSubfolders();
+        this.subscribed = mailFolder.isSubscribed(); // || mailFolder.hasSubscribedSubfolders();
         this.subscribedSubfolders = mailFolder.hasSubscribedSubfolders();
         this.capabilities = capabilities;
         {
