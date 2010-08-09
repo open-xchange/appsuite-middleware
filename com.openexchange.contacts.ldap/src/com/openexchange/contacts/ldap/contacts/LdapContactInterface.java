@@ -487,6 +487,7 @@ public class LdapContactInterface implements ContactInterface {
         for (final int col : cols) {
             columns.add(Autoboxing.I(col));
         }
+        columns.add(Integer.valueOf(Contact.CREATION_DATE));
         return columns;
     }
 
