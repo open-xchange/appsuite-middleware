@@ -1,0 +1,11 @@
+open-xchange-publish-json (6.18.1.0-0) unstable; urgency=low
+
+  * updated version.
+
+ -- Francisco Laguna <francisco.laguna@open-xchange.com>  Mon, 09 Aug 2010 09:38:00 +0200
+
+open-xchange-publish-json (6.18.0.0-0) unstable; urgency=low
+
+  * initial version.
+
+ -- Francisco Laguna <francisco.laguna@open-xchange.com>  Mon, 09 Aug 2010 09:37:00 +0200
