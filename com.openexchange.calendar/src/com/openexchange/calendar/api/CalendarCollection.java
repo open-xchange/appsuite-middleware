@@ -1190,9 +1190,6 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @throws OXCalendarException If check fails
      */
     public void checkRecurringCompleteness(final CalendarObject cdao, final boolean ignoreUntilAndOccurrence) throws OXCalendarException {
-        if (!cdao.containsRecurrenceType()) {
-            throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_TYPE);
-        }
         final int recType = cdao.getRecurrenceType();
         if (CalendarObject.NO_RECURRENCE == recType) {
             return;
