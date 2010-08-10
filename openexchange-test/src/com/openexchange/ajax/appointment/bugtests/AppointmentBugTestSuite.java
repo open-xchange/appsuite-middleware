@@ -118,8 +118,7 @@ public class AppointmentBugTestSuite extends TestSuite{
         tests.addTestSuite(Bug16211Test.class);
         tests.addTestSuite(Bug16089Test.class);
         tests.addTestSuite(Bug16107Test.class);
-        // FIXME Enable the following test when the bug is fixed.
-        // tests.addTestSuite(Bug16441Test.class);
+        tests.addTestSuite(Bug16441Test.class);
         tests.addTestSuite(Bug16476Test.class);
         tests.addTestSuite(Bug16249Test.class);
         return tests;
