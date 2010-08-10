@@ -8,4 +8,5 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
  lib/activation-1.1.1.jar
-Export-Package: javax.activation
+Export-Package: javax.activation,
+ javax.activation;version=1.1

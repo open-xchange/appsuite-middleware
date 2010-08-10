@@ -47,109 +47,90 @@
  *
  */
 
-package com.openexchange.session;
+package com.openexchange.sessiond;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.exception.SessiondException;
+
 
 /**
- * {@link SimSession}
+ * {@link AbstractSimSessiondService}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SimSession implements Session {
+public class AbstractSimSessiondService implements SessiondService{
 
-    private String loginName;
-    private String randomToken;
-    private String sessionId;
-    private Map<String,Object> parameters = new HashMap<String, Object>();
-
-    public SimSession() {
-        super();
-    }
-
-    public boolean containsParameter(String name) {
-        return parameters.containsKey(name);
-    }
-
-    public String getAuthId() {
-        return null;
-    }
-
-    public int getContextId() {
-        return 0;
-    }
-
-    public String getLocalIp() {
-        return null;
-    }
-
-    public String getLogin() {
-        return null;
-    }
-
-    public String getLoginName() {
-        return loginName;
-    }
-
-    public void setLoginName(String loginName) {
-        this.loginName = loginName;
-    }
-
-    public Object getParameter(String name) {
-        return parameters.get(name);
-    }
-
-    public String getPassword() {
-        return null;
-    }
-
-    public String getRandomToken() {
-        return randomToken;
-    }
-
-    public void setRandomToken(String randomToken) {
-        this.randomToken = randomToken;
-    }
-
-    public void removeRandomToken() {
-        randomToken = null;
-    }
-
-    public String getSecret() {
-        return null;
-    }
-
-    public String getSessionID() {
-        return sessionId;
-    }
-
-    public void setSessionID(String sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    public int getUserId() {
-        return 0;
-    }
-
-    public String getUserlogin() {
-        return null;
-    }
-
-    public void setParameter(String name, Object value) {
-        parameters.put(name, value);
-    }
-
-    public String getHash() {
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#addSession(com.openexchange.sessiond.AddSessionParameter)
+     */
+    public String addSession(AddSessionParameter parameterObject) throws SessiondException {
         // TODO Auto-generated method stub
         return null;
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
+     * @see com.openexchange.sessiond.SessiondService#changeSessionPassword(java.lang.String, java.lang.String)
      */
-    public void setLocalIp(String ip) {
+    public void changeSessionPassword(String sessionId, String newPassword) throws SessiondException {
         // TODO Auto-generated method stub
         
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#getNumberOfActiveSessions()
+     */
+    public int getNumberOfActiveSessions() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#getSession(java.lang.String)
+     */
+    public Session getSession(String sessionId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#getSessionByRandomToken(java.lang.String, java.lang.String)
+     */
+    public Session getSessionByRandomToken(String randomToken, String localIp) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#getUserSessions(int, int)
+     */
+    public int getUserSessions(int userId, int contextId) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#refreshSession(java.lang.String)
+     */
+    public boolean refreshSession(String sessionId) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#removeSession(java.lang.String)
+     */
+    public boolean removeSession(String sessionId) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#removeUserSessions(int, com.openexchange.groupware.contexts.Context)
+     */
+    public int removeUserSessions(int userId, Context ctx) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }
