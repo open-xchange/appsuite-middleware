@@ -143,6 +143,34 @@ if [ ${1:-0} -eq 2 ]; then
 
   GLOBIGNORE='*'
 
+   # -----------------------------------------------------------------------
+   # bugfix id#16667
+   pfile=/opt/open-xchange/etc/admindaemon/User.properties
+   ox_system_type
+   type=$?
+   if [ $type -eq $DEBIAN ]; then
+      ofile="${pfile}.dpkg-dist"
+   else
+      ofile="${pfile}.rpmnew"
+   fi
+   if [ -n "$ofile" ] && [ -e "$ofile" ]; then
+      for ll in JA_JP PL_PL; do
+	  nl=
+	  vstr="SENT_MAILFOLDER TRASH_MAILFOLDER DRAFTS_MAILFOLDER SPAM_MAILFOLDER CONFIRMED_SPAM_MAILFOLDER CONFIRMED_HAM_MAILFOLDER"
+	  for pp in $vstr; do
+	      local llpp="${pp}_${ll}"
+	      if ! ox_exists_property $llpp $pfile; then
+		  if [ -z "$nl" ]; then
+		      echo >> $pfile
+		  fi
+		  local defv=$(ox_read_property $llpp $ofile)
+		  ox_set_property $llpp "$defv" $pfile
+		  nl=true
+	      fi
+	  done
+      done
+   fi
+
    # SoftwareChange_Request-282
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties

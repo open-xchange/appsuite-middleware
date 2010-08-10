@@ -1,3 +1,8 @@
+* 2010-08-10 - choeger@open-xchange.com
+
+ - Bugfix #16667 - [L3] No Polish translations for default mail folders in User.properties
+   added japanese and polish translations to configfile and added postinst code
+
 * 2010-07-30 - marcus.klein@open-xchange.com
 
  - Bugfix #16608: Created prepared statements batches but only executed the last one. Now the complete batch is executed.
