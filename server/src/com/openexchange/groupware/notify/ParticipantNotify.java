@@ -91,6 +91,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -146,6 +147,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -506,9 +508,28 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (Types.APPOINTMENT == state.getModule()) {
             final Appointment newApp = (Appointment) newObj;
             final Appointment oldApp = oldObj == null ? null : ((Appointment) oldObj);
+            
             if (!newApp.containsFullTime() && oldApp != null && oldApp.containsFullTime()) {
                 newApp.setFullTime(oldApp.getFullTime());
             }
+            
+            // Set correct recurrence information if CalendarObject is an Appointment
+            if (newApp.getRecurrenceType() != Appointment.NO_RECURRENCE) {
+                try {
+                    ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true).fillDAO(
+                        (CalendarDataObject) newApp);
+                    if (oldObj != null) {
+                        ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, false).fillDAO(
+                            (CalendarDataObject) oldApp);
+                    }
+                } catch (Exception e) {
+                    if (e instanceof ServiceException || e instanceof OXException) {
+                        final StringBuilder builder = new StringBuilder(256).append("Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
+                            newObj.getObjectID()).append("). Cause:\n");
+                        LOG.error(builder.toString() + e.getMessage(), e);
+                    }                    
+                }
+            }            
         }
 
         /*
@@ -767,6 +788,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         final MailMessage msg = new MailMessage();
         final Template createTemplate = state.getTemplate();
         final StringHelper strings = new StringHelper(locale);
+
         b.setLength(0);
         actionRepl.setLocale(locale);
         msg.title = b.append(actionRepl.getReplacement()).append(": ").append(title).toString();
