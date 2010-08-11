@@ -248,7 +248,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             /*
                              * Check for access rights and subscribed status dependent on parameter "all"
                              */
-                            if ((all || subfolder.isSubscribed())) {
+                            if ((all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders()))) {
                                 final Permission subfolderPermission;
                                 if (null == getSession()) {
                                     subfolderPermission =
@@ -431,7 +431,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                         /*
                          * Check for subscribed status dependent on parameter "all"
                          */
-                        if (all || subfolder.isSubscribed()) {
+                        if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
                             final Permission userPermission;
                             if (null == getSession()) {
                                 userPermission =

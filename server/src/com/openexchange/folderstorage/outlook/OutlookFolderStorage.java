@@ -661,8 +661,14 @@ public final class OutlookFolderStorage implements FolderStorage {
              * Set subfolders if empty
              */
             final String[] realSubfolderIDs = realFolder.getSubfolderIDs();
-            if (null != realSubfolderIDs) {
-                if (realSubfolderIDs.length == 0) {
+            if (null == realSubfolderIDs) {
+                /*
+                 * Subfolders available; set to null to indicate this condition since AbstractUserizedFolderPerformer#getUserizedFolder()
+                 * interprets null as if subfolders are present.
+                 */
+                outlookFolder.setSubfolderIDs(null);
+            } else {
+                if (0 == realSubfolderIDs.length) {
                     /*
                      * Folder indicates to hold no subfolders; verify against virtual tree
                      */
@@ -677,6 +683,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     }
                     if (contains) {
                         outlookFolder.setSubfolderIDs(null);
+                        outlookFolder.setSubscribedSubfolders(true);
                     } else {
                         outlookFolder.setSubfolderIDs(realSubfolderIDs); // Zero-length array => No subfolders
                     }
@@ -702,15 +709,15 @@ public final class OutlookFolderStorage implements FolderStorage {
                                 found = true;
                             }
                         }
-                        outlookFolder.setSubfolderIDs(found ? null : new String[0]);
+                        if (found) {
+                            outlookFolder.setSubfolderIDs(null);
+                            outlookFolder.setSubscribedSubfolders(true);
+                        } else {
+                            outlookFolder.setSubfolderIDs(new String[0]);
+                            outlookFolder.setSubscribedSubfolders(false);
+                        }
                     }
                 }
-            } else {
-                /*
-                 * Subfolders available; set to null to indicate this condition since AbstractUserizedFolderPerformer#getUserizedFolder()
-                 * interprets null as if subfolders are present.
-                 */
-                outlookFolder.setSubfolderIDs(null);
             }
         }
         /*

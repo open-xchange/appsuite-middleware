@@ -194,7 +194,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                             /*
                              * Check for subscribed status dependent on parameter "all"
                              */
-                            if (all || subfolder.isSubscribed()) {
+                            if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
                                 final Permission userPermission;
                                 if (null == getSession()) {
                                     userPermission =

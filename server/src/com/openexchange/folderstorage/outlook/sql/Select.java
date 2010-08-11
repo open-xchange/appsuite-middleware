@@ -655,8 +655,6 @@ public final class Select {
         }
         stmt = null;
         // Set subscribed subfolder if and only if table contains virtually added subscribed subfolders
-        /*-
-         * 
         try {
             final String sql = working ? SQL_TEMPL_SUBSR_SUBF.replaceFirst("#T#", "virtualTree").replaceFirst("#S#", "virtualSubscription") : SQL_TEMPL_SUBSR_SUBF.replaceFirst("#T#", "virtualBackupTree").replaceFirst("#S#", "virtualBackupSubscription");
             stmt = con.prepareStatement(sql);
@@ -691,7 +689,6 @@ public final class Select {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        */
         return true;
     }
 
