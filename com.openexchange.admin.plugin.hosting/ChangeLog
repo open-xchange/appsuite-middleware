@@ -1,3 +1,7 @@
+* 2010-08-11 - tobias.prinz@open-xchange.com
+
+ - Bugfix 16383: #listcontext is now more time efficient.
+
 * 2010-07-29 - tobias.prinz@open-xchange.com
 
  - Bugfix 16585: #getFilestores is now more time efficient.
