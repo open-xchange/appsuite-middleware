@@ -1,0 +1,5 @@
+open-xchange-soap-cxf (6.18.0.0-0) unstable; urgency=low
+
+  * initial version.
+
+ -- Francisco Laguna <francisco.laguna@open-xchange.com>  Mon, 09 Aug 2010 09:37:00 +0200
