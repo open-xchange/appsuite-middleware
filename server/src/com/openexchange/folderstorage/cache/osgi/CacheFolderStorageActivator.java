@@ -68,6 +68,7 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -207,12 +208,11 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         final EventHandler eventHandler = new EventHandler() {
             
             public void handleEvent(final Event event) {
-                final int userId = ((Integer) event.getProperty(PushEventConstants.PROPERTY_USER)).intValue();
-                final int contextId = ((Integer) event.getProperty(PushEventConstants.PROPERTY_CONTEXT)).intValue();
+                final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
                 final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
                 try {
-                    tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, userId, contextId);
-                } catch (FolderException e) {
+                    tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, session);
+                } catch (final FolderException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
