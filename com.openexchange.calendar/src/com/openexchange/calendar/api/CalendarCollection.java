@@ -29,7 +29,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 
 package com.openexchange.calendar.api;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,7 +74,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.CacheException;
 import com.openexchange.calendar.CachedCalendarIterator;
@@ -89,6 +90,8 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
@@ -113,6 +116,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.settings.SettingException;
@@ -178,6 +182,8 @@ public final class CalendarCollection implements CalendarCollectionService {
     
     
     private static final Log LOG = LogFactory.getLog(CalendarCollection.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
     
     public CalendarCollection() {
         super();
@@ -210,6 +216,10 @@ public final class CalendarCollection implements CalendarCollectionService {
         
         fieldMap.put(Integer.valueOf(Appointment.FOLDER_ID), "fid");
         fieldMap.put(Integer.valueOf(CalendarDataObject.TIMEZONE), "timezone");
+
+        fieldMap.put(Integer.valueOf(CalendarDataObject.ORGANIZER), "organizer");
+        fieldMap.put(Integer.valueOf(CalendarDataObject.UID), "uid");
+        fieldMap.put(Integer.valueOf(CalendarDataObject.SEQUENCE), "sequence");
     }
     
     /**
@@ -267,54 +277,54 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
     
     private void checkAndCorrectErrors(final CalendarDataObject cdao) {
-        if (cdao.getInterval() > MAXTC) {
+        if (cdao.getInterval() > MAX_OCCURRENCESE) {
             final OXCalendarException exc = new OXCalendarException(
                     OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getInterval()), Integer
-                            .valueOf(MAXTC));
+                            .valueOf(MAX_OCCURRENCESE));
             if (LOG.isWarnEnabled()) {
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
             }
-            cdao.setInterval(MAXTC);
+            cdao.setInterval(MAX_OCCURRENCESE);
         }
-        if (cdao.getOccurrence() > MAXTC) {
+        if (cdao.getOccurrence() > MAX_OCCURRENCESE) {
             final OXCalendarException exc = new OXCalendarException(
                     OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getOccurrence()), Integer
-                            .valueOf(MAXTC));
+                            .valueOf(MAX_OCCURRENCESE));
             if (LOG.isWarnEnabled()) {
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
             }
-            cdao.setOccurrence(MAXTC);
+            cdao.setOccurrence(MAX_OCCURRENCESE);
         }
         if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
             if (cdao.getInterval() < 1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (daily), set interval to 1, the given interval was: "+cdao.getInterval());
                 }
                 cdao.setInterval(1);
             }
         } else if (cdao.getRecurrenceType() == CalendarDataObject.WEEKLY) {
             if (cdao.getInterval() < 1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (weekly), set interval to 1, the given interval was: "+cdao.getInterval());
                 }
                 cdao.setInterval(1);
             }
             if (cdao.getDays() < 1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (weekly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
                 }
                 cdao.setDays(CalendarDataObject.MONDAY);
             }
         } else if (cdao.getRecurrenceType() == CalendarDataObject.MONTHLY) {
             if (cdao.getInterval() < 1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (montly), set interval to 1, the given interval was: "+cdao.getInterval());
                 }
                 cdao.setInterval(1);
             }
             if (cdao.containsDays() && cdao.getDays() != 0 && (getDay(cdao.getDays()) == -1)) {
                 //if (getDay(cdao.getDays()) == -1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (monthly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
                 }
                 cdao.setDays(CalendarDataObject.MONDAY);
@@ -322,14 +332,14 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
         } else if (cdao.getRecurrenceType() == CalendarDataObject.YEARLY) {
             if (cdao.getMonth() < 0 || cdao.getMonth() > 12) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (monthy), set month to 1, the given interval was: "+cdao.getMonth());
                 }
                 cdao.setMonth(Calendar.JANUARY);
             }
             if (cdao.containsDays() && (getDay(cdao.getDays()) == -1)) {
                 //if (getDay(cdao.getDays()) == -1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (yearly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
                 }
                 cdao.setDays(CalendarDataObject.MONDAY);
@@ -504,6 +514,8 @@ public final class CalendarCollection implements CalendarCollectionService {
                 cdao.setRecurrenceDatePosition(new Date(rr.getNormalized()));
                 return;
             }
+            
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_POSITION);
         } else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
             /*
              * Determine recurrence position from recurrence date position
@@ -520,8 +532,11 @@ public final class CalendarCollection implements CalendarCollectionService {
                 cdao.setRecurrencePosition(x);
                 return;
             }
+            
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_POSITION);
+        } else {
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
         }
-        throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
     }
 
     /**
@@ -605,7 +620,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
 
     public void changeRecurrenceString(final CalendarDataObject cdao) throws OXException {
-        String recString = createDSString(cdao);
+        final String recString = createDSString(cdao);
         if (recString == null) {
             cdao.removeRecurrenceID();
         }
@@ -625,23 +640,23 @@ public final class CalendarCollection implements CalendarCollectionService {
             StringBuilder recStrBuilder = new StringBuilder(64);
             final int recurrenceType = cdao.getRecurrenceType();
             int interval = cdao.getInterval(); // i
-            if (interval > MAXTC) {
+            if (interval > MAX_OCCURRENCESE) {
                 final OXCalendarException exc = new OXCalendarException(Code
                     .RECURRING_VALUE_CONSTRAINT, Integer.valueOf(interval), Integer
-                    .valueOf(MAXTC));
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
-                interval = MAXTC;
+                    .valueOf(MAX_OCCURRENCESE));
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
+                interval = MAX_OCCURRENCESE;
             }
             final int weekdays = cdao.getDays();
             final int monthday = cdao.getDayInMonth();
             final int month = cdao.getMonth();
             int occurrences = cdao.getOccurrence();
-            if (occurrences > MAXTC) {
+            if (occurrences > MAX_OCCURRENCESE) {
                 final OXCalendarException exc = new OXCalendarException(Code
                     .RECURRING_VALUE_CONSTRAINT, Integer.valueOf(occurrences),
-                    Integer.valueOf(MAXTC));
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
-                occurrences = MAXTC;
+                    Integer.valueOf(MAX_OCCURRENCESE));
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
+                occurrences = MAX_OCCURRENCESE;
             }
             if (!cdao.containsUntil() && !cdao.containsOccurrence()) {
                 occurrences = -1;
@@ -865,13 +880,13 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @throws OXException If calculating the first occurrence fails
      */
     public RecurringResultsInterface calculateFirstRecurring(final CalendarObject cdao) throws OXException {
-        return calculateRecurring(cdao, 0, 0, 1, MAXTC, true, true);
+        return calculateRecurring(cdao, 0, 0, 1, MAX_OCCURRENCESE, true, true);
     }
 
     /**
      * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResultsInterface} collection.
      * <p>
-     * <b>! This method returns max. {@link #MAXTC} results AND ignores exceptions !</b>
+     * <b>! This method returns max. {@link #MAX_OCCURRENCESE} results AND ignores exceptions !</b>
      * <p>
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
@@ -885,13 +900,13 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @throws OXException If calculating the occurrences fails
      */
     public RecurringResultsInterface calculateRecurringIgnoringExceptions(final CalendarObject cdao, final long range_start,final  long range_end, final int pos) throws OXException {
-        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, true, false);
+        return calculateRecurring(cdao, range_start, range_end, pos, MAX_OCCURRENCESE, true, false);
     }
 
     /**
      * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResultsInterface} collection.
      * <p>
-     * <b>! This method returns max. {@link #MAXTC} results !</b>
+     * <b>! This method returns max. {@link #MAX_OCCURRENCESE} results !</b>
      * <p>
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
@@ -905,7 +920,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @throws OXException If calculating the occurrences fails
      */
     public RecurringResultsInterface calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos) throws OXException {
-        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, false, false);
+        return calculateRecurring(cdao, range_start, range_end, pos, MAX_OCCURRENCESE, false, false);
     }
     
     /**
@@ -919,7 +934,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
-     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAXTC}
+     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAX_OCCURRENCESE}
      * @param ignore_exceptions <code>true</code> to ignore change and delete exceptions during calculation, meaning corresponding occurrences do not appear in returned {@link RecurringResultsInterface} collection; otherwise <code>false</code>
      * @return The calculated occurrences kept in a {@link RecurringResultsInterface} collection
      * @throws OXException If calculating the occurrences fails
@@ -939,7 +954,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
-     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAXTC}
+     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAX_OCCURRENCESE}
      * @param ignore_exceptions <code>true</code> to ignore change and delete exceptions during calculation, meaning corresponding occurrences do not appear in returned {@link RecurringResultsInterface} collection; otherwise <code>false</code>
      * @param calc_until This parameter is not used, yet
      * @return The calculated occurrences kept in a {@link RecurringResultsInterface} collection
@@ -1095,7 +1110,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         dsf(sb, 't', type);
     }
     
-    public Date calculateRecurringDate(final long date, final long time, int timeZoneOffsetDiff) {
+    public Date calculateRecurringDate(final long date, final long time, final int timeZoneOffsetDiff) {
         return new Date((date - (date % Constants.MILLI_DAY)) + time + timeZoneOffsetDiff);
     }
 
@@ -1175,9 +1190,6 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @throws OXCalendarException If check fails
      */
     public void checkRecurringCompleteness(final CalendarObject cdao, final boolean ignoreUntilAndOccurrence) throws OXCalendarException {
-        if (!cdao.containsRecurrenceType()) {
-            throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_TYPE);
-        }
         final int recType = cdao.getRecurrenceType();
         if (CalendarObject.NO_RECURRENCE == recType) {
             return;
@@ -1218,7 +1230,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 /*
                  * Weekday needed for monthly2 recurrence
                  */
-                throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_WEEKDAY);
+                throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_DAY);
             }
         } else if (CalendarObject.YEARLY == recType) {
             if (!cdao.containsDayInMonth()) {
@@ -1243,13 +1255,13 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
     
     public void checkRecurring(final CalendarObject cdao) throws OXException {
-        if (cdao.getInterval() > MAXTC) {
+        if (cdao.getInterval() > MAX_OCCURRENCESE) {
             throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
-                    .getInterval()), Integer.valueOf(MAXTC));
+                    .getInterval()), Integer.valueOf(MAX_OCCURRENCESE));
         }
-        if (cdao.getOccurrence() > MAXTC) {
+        if (cdao.getOccurrence() > MAX_OCCURRENCESE) {
             throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
-                    .getOccurrence()), Integer.valueOf(MAXTC));
+                    .getOccurrence()), Integer.valueOf(MAX_OCCURRENCESE));
         }
         if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
             if (cdao.getInterval() < 1) {
@@ -1283,14 +1295,14 @@ public final class CalendarCollection implements CalendarCollectionService {
                 if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5) {
                     throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_TYPE, Integer.valueOf(cdao.getDayInMonth()));
                 }
-                if (cdao.getMonth() < 0 || cdao.getMonth() > 12) {
-                    throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL_2, Integer.valueOf(cdao.getMonth()));
+                if (!cdao.containsMonth() || cdao.getMonth() < 0 || cdao.getMonth() > 12) {
+                    throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH, Integer.valueOf(cdao.getMonth()));
                 }
             } else {
                 if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 32) {
                     throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL, Integer.valueOf(cdao.getDayInMonth()));
                 }
-                if (cdao.getMonth() < 0 || cdao.getMonth() > 12) {
+                if (!cdao.containsMonth() || cdao.getMonth() < 0 || cdao.getMonth() > 12) {
                     throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH, Integer.valueOf(cdao.getMonth()));
                 }
             }
@@ -1380,16 +1392,16 @@ public final class CalendarCollection implements CalendarCollectionService {
         return clone;
     }
 
-    private void ensureOriginFolder(CalendarDataObject edao, CalendarDataObject clone) {
+    private void ensureOriginFolder(final CalendarDataObject edao, final CalendarDataObject clone) {
         int originFolder = 0;
-        for (UserParticipant userParticipant : edao.getUsers()) {
+        for (final UserParticipant userParticipant : edao.getUsers()) {
             if (userParticipant.getIdentifier() == edao.getCreatedBy()) {
                 originFolder = userParticipant.getPersonalFolderId();
                 break;
             }
         }
         if (originFolder != 0) {
-            for (UserParticipant userParticipant : clone.getUsers()) {
+            for (final UserParticipant userParticipant : clone.getUsers()) {
                 if (userParticipant.getIdentifier() == edao.getCreatedBy()) {
                     userParticipant.setPersonalFolderId(originFolder);
                     break;
@@ -1430,10 +1442,19 @@ public final class CalendarCollection implements CalendarCollectionService {
                     normalized + Constants.MILLI_WEEK,
                     0);
                 final int pos = rrs.getPositionByLong(normalized);
-                rs = rrs.getRecurringResult(pos - 1);
+                RecurringResultInterface tmp = rrs.getRecurringResult(pos - 1);
+                if (null == tmp) {
+                    tmp = rrs.getRecurringResult(0);
+                }
+                rs = tmp;
             }
-            startDate = rs.getStart();
-            endDate = rs.getEnd();
+            if (rs == null) {
+                startDate = cdao.containsStartDate() ? cdao.getStartDate().getTime() : 0L;
+                endDate = cdao.containsEndDate() ? cdao.getEndDate().getTime() : 0L;
+            } else {
+                startDate = rs.getStart();
+                endDate = rs.getEnd();
+            }
         } else {
             startDate = edao.getStartDate().getTime();
             endDate = edao.getEndDate().getTime();
@@ -1502,7 +1523,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     0,
                     0,
                     1,
-                    MAXTC,
+                    MAX_OCCURRENCESE,
                     true);
                 final RecurringResultInterface rr = rrs.getRecurringResultByPosition(1);
                 if (rr != null) {
@@ -1538,9 +1559,11 @@ public final class CalendarCollection implements CalendarCollectionService {
          */
         long maxEnd;
         if (cdao.getRecurrenceType() == CalendarObject.YEARLY) {
-            maxEnd = normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * 99));
+            maxEnd = normalizeLong(addYears(cdao.getStartDate().getTime(), CalendarCollectionService.MAX_OCCURRENCESE));
+            //maxEnd = normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * CalendarCollectionService.MAX_OCCURRENCESE));
         } else {
-            maxEnd = normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * recColl.getMAX_END_YEARS()));
+            maxEnd = normalizeLong(addYears(cdao.getStartDate().getTime(), recColl.getMAX_END_YEARS()));
+            //maxEnd = normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * recColl.getMAX_END_YEARS()));
         }
 
         /*
@@ -1550,7 +1573,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         clone.setEndDate(new Date(maxEnd));
         final RecurringResultsInterface rresults;
         try {
-            rresults = calculateRecurringIgnoringExceptions(clone, 0, 0, recColl.MAXTC);
+            rresults = calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarCollectionService.MAX_OCCURRENCESE);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return new Date(maxEnd);
@@ -1563,6 +1586,13 @@ public final class CalendarCollection implements CalendarCollectionService {
             return new Date(normalizeLong(rresult.getEnd()));
         }
         return new Date(maxEnd);
+    }
+    
+    public long addYears(long base, int years) {
+        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.setTimeInMillis(base);
+        calendar.add(Calendar.YEAR, years);
+        return calendar.getTimeInMillis();
     }
 
     /* (non-Javadoc)
@@ -1604,9 +1634,6 @@ public final class CalendarCollection implements CalendarCollectionService {
         return -1;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkPermissions(com.openexchange.calendar.CalendarDataObject, com.openexchange.session.Session, com.openexchange.groupware.contexts.Context, java.sql.Connection, int, int)
-     */
     public boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Context ctx, final Connection readcon, final int action, final int inFolder) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
@@ -1617,7 +1644,6 @@ public final class CalendarCollection implements CalendarCollectionService {
                 if (cdao.getFolderType() != FolderObject.SHARED) {
                     EffectivePermission oclp = null;
                     oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
-                    //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canReadAllObjects()) {
                         return true;
                     } else if (oclp.canReadOwnObjects()) {
@@ -1627,19 +1653,10 @@ public final class CalendarCollection implements CalendarCollectionService {
                     }
                 } else {
                     cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
-                    //cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), readcon));
-                    if (cdao.getPrivateFlag()) {
-                        return false;
-                    }
-                    EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
-                    //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
-                    if (oclp.canReadAllObjects()) {
-                        return true;
-                    } else if (oclp.canReadOwnObjects()) {
-                        if (cdao.getCreatedBy() == so.getUserId()) {
+
+                    EffectivePermission oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
+                    if (oclp.canReadAllObjects()|| oclp.canReadOwnObjects()) {
                             return true;
-                        }
                     }
                 }
             } else if (action == CalendarOperation.INSERT) {
@@ -1813,7 +1830,18 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndFillIfUserIsParticipant(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
      */
-    public void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
+    public void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, UserParticipant up) {
+        if (cdao.getParticipants() != null) {
+            for (Participant p : cdao.getParticipants()) {
+                if (p.getType() == Participant.USER && p.getIdentifier() == up.getIdentifier()) {
+                    UserParticipant userFromParticipant = (UserParticipant) p;
+                    if (userFromParticipant.containsConfirm())
+                        up.setConfirm(userFromParticipant.getConfirm());
+                    if (userFromParticipant.containsConfirmMessage())
+                        up.setConfirmMessage(userFromParticipant.getConfirmMessage());
+                }
+            }
+        }
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
             Arrays.sort(check);
@@ -1834,30 +1862,50 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
     
     /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndConfirmIfUserUserIsParticipant(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
+     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndConfirmIfUserUserIsParticipantInPublicFolder(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
      */
-    public void checkAndConfirmIfUserUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
-        final UserParticipant check[] = cdao.getUsers();
-        if (check != null && check.length > 0) {
-            Arrays.sort(check);
-            final int fi = Arrays.binarySearch(check, up);
-            if (fi >= 0) {
-                if (!check[fi].containsConfirm()) {
-                    check[fi].setConfirm(CalendarDataObject.ACCEPT);
+    public void checkAndConfirmIfUserUserIsParticipantInPublicFolder(final CalendarDataObject cdao, final UserParticipant up) {
+        Participant[] participants = cdao.getParticipants();
+        boolean isInParticipants = false;
+        if (participants != null) {
+            for (Participant participant : participants) {
+                if (participant.getIdentifier() == up.getIdentifier()) {
+                    isInParticipants  = true;
+                    break;
+                }
+            }
+        }
+
+        UserParticipant check[] = cdao.getUsers();
+        if (check == null || check.length == 0) {
+            if (isInParticipants)
+                cdao.setUsers(new UserParticipant[] { up } );
+            return;
+        }
+        
+        for (UserParticipant user : check) {
+            if (user.getIdentifier() == up.getIdentifier()) {
+                if (!user.containsConfirm()) {
+                    user.setConfirm(CalendarDataObject.ACCEPT);
                     cdao.setUsers(check);
                 }
             }
-        } else {
-            cdao.setUsers(new UserParticipant[] { up } );
         }
     }
     
-    public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid, int inFolder) throws OXException {
+    public void updateDefaultStatus(final CalendarDataObject cdao, final Context ctx, final int uid, final int inFolder) throws OXException {
         if (cdao.getUsers() == null) {
             return;
         }
-        for (UserParticipant user : cdao.getUsers()) {
+        for (final UserParticipant user : cdao.getUsers()) {
             if (user.getIdentifier() == uid) {
+                if (!user.containsConfirm()) {
+                    try {
+                        user.setConfirm(ServerUserSetting.getDefaultInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
+                    } catch (SettingException e) {
+                        throw new OXCalendarException(e);
+                    }
+                }
                 continue;
             }
             if (user.containsConfirm()) {
@@ -1866,7 +1914,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             try {
                 switch (cdao.getFolderType()) {
                 case FolderObject.SHARED:
-                    int folderOwner = new OXFolderAccess(ctx).getFolderOwner(inFolder);
+                    final int folderOwner = new OXFolderAccess(ctx).getFolderOwner(inFolder);
                     if (user.getIdentifier() == folderOwner) {
                         continue;
                     } else {
@@ -1882,7 +1930,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 default:
                     break;
                 }
-            } catch (SettingException e) {
+            } catch (final SettingException e) {
                 throw new OXCalendarException(e);
             }
         }
@@ -1945,21 +1993,46 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndFillIfUserIsUser(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.Participant)
      */
-    public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) {
+    public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) throws OXException {
         final Participant check[] = cdao.getParticipants();
         if (check != null && check.length > 0) {
-            Arrays.sort(check);
-            if (Arrays.binarySearch(check, p) < 0) {
-                final Participant newp[] = new Participant[check.length+1];
-                System.arraycopy(check, 0, newp, 0, check.length);
-                newp[check.length] = p;
-                cdao.setParticipants(newp);
+            try {
+                if (!containsParticipant(check, p, cdao.getContext())) {
+                    final Participant newp[] = new Participant[check.length+1];
+                    System.arraycopy(check, 0, newp, 0, check.length);
+                    newp[check.length] = p;
+                    cdao.setParticipants(newp);
+                }
+            } catch (LdapException e) {
+                throw new OXException(e);
             }
         } else {
             final Participant newp[] = new Participant[1];
             newp[0] = p;
             cdao.setParticipants(newp);
         }
+    }
+    
+    private boolean containsParticipant(Participant[] participants, Participant p, Context ctx) throws LdapException {
+        for (Participant part : participants) {
+            if (part.getType() == p.getType()) {
+                if (part.getIdentifier() == p.getIdentifier()) {
+                    return true;
+                }
+            } else {
+                if (part.getType() == Participant.GROUP) {
+                    GroupStorage groups = GroupStorage.getInstance();
+                    Group group = groups.getGroup(part.getIdentifier(), ctx);
+                    int[] member = group.getMember();
+                    for (int memberId : member) {
+                        if (memberId == p.getIdentifier()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
     
     /* (non-Javadoc)
@@ -1978,34 +2051,31 @@ public final class CalendarCollection implements CalendarCollectionService {
                         throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT, uid);
                     }
                 }
-                cdao.setUsers(ret);
             }
+            cdao.setUsers(ret);
         } else {
             throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT_2);
         }
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#removeUserParticipant(com.openexchange.calendar.CalendarDataObject, int)
-     */
     public void removeUserParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
-                final Participant check[] = cdao.getParticipants();
-                if (check != null && check.length > 0) {
-                    final Participant ret[] = new Participant[check.length-1];
-                    int x = 0;
-                    for (int a = 0; a < check.length; a++)  {
-                        if (check[a].getIdentifier() != uid) {
-                            if (x < ret.length) {
-                                ret[x++] = check[a];
-                            } else {
-                                throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT, uid);
-                            }
-                        }
-                        cdao.setParticipants(ret);
+        final Participant check[] = cdao.getParticipants();
+        if (check != null && check.length > 0) {
+            final Participant ret[] = new Participant[check.length-1];
+            int x = 0;
+            for (int a = 0; a < check.length; a++)  {
+                if (check[a].getIdentifier() != uid) {
+                    if (x < ret.length) {
+                        ret[x++] = check[a];
+                    } else {
+                        throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT, uid);
                     }
-                } else {
-                    throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT_2);
                 }
+                cdao.setParticipants(ret);
+            }
+        } else {
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT_2);
+        }
     }        
     
     /* (non-Javadoc)
@@ -2043,7 +2113,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#existsReminder(com.openexchange.groupware.contexts.Context, int, int)
      */
     public boolean existsReminder(final Context c, final int oid, final int uid) {
-        final ReminderSQLInterface rsql = new ReminderHandler(c);
+        final ReminderService rsql = new ReminderHandler(c);
         try {
             return rsql.existsReminder(oid, uid, Types.APPOINTMENT);
         } catch (final OXException ex) {
@@ -2078,7 +2148,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#debugRecurringResult(com.openexchange.calendar.RecurringResult)
      */
     public void debugRecurringResult(final RecurringResultInterface rr) {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(Integer.valueOf(rr.getPosition()));
             LOG.debug(" : ");
             LOG.debug(StringCollection.date2String(new Date(rr.getStart())));
@@ -2391,22 +2461,12 @@ public final class CalendarCollection implements CalendarCollectionService {
         return false;
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getVisibleAndReadableFolderObject(int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration, java.sql.Connection)
-     */
-    public CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[],
-            final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException,
-            DBPoolingException, SearchIteratorException, OXException {
+    public CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
         return _getVisibleAndReadableFolderObject(uid, groups, c, uc, readcon, false);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getAllVisibleAndReadableFolderObject(int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration, java.sql.Connection)
-     */
-    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[],
-            final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException,
-            DBPoolingException, SearchIteratorException, OXException {
-        return _getVisibleAndReadableFolderObject(uid, groups, c, uc, readcon, true);
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+        return _getVisibleAndReadableFolderObject(uid, groups, c, uc, null, true);
     }
 
     private CalendarFolderObject _getVisibleAndReadableFolderObject(final int uid, final int groups[],
@@ -2642,13 +2702,6 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
     
     /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#isInThePast(java.sql.Date)
-     */
-    public boolean isInThePast(final java.sql.Date check) {
-        return checkMillisInThePast(check.getTime());
-    }
-    
-    /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#isInThePast(java.util.Date)
      */
     public boolean isInThePast(final java.util.Date check) {
@@ -2756,7 +2809,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             return cdao;
         }
         
-        final CalendarDataObject clone = (CalendarDataObject)cdao.clone();
+        final CalendarDataObject clone = cdao.clone();
         if (!clone.containsShownAs()) {
             clone.setShownAs(edao.getShownAs());
         }
@@ -2852,9 +2905,6 @@ public final class CalendarCollection implements CalendarCollectionService {
         return false;
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#detectFolderMoveAction(com.openexchange.calendar.CalendarDataObject, com.openexchange.calendar.CalendarDataObject)
-     */
     public void detectFolderMoveAction(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (cdao.getFolderMove()) { // TODO: Recurring apointments are not allowed to move, this must be checked !!
             if (FolderObject.SHARED == cdao.getFolderType()) {
@@ -2875,8 +2925,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     cdao.setParentFolderID(0);
                     cdao.setFolderMoveAction(CalendarOperation.PRIVATE_ALL_PARTICIPANTS);
                 } else {
-                    throw new OXCalendarException(OXCalendarException.Code.MOVE_NOT_SUPPORTED, Integer.valueOf(edao
-                            .getFolderType()), Integer.valueOf(cdao.getFolderType()));
+                    throw new OXCalendarException(Code.MOVE_NOT_SUPPORTED, I(edao.getFolderType()), I(cdao.getFolderType()));
                 }
             }
         }
@@ -3264,7 +3313,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#fillEventInformation(com.openexchange.calendar.CalendarDataObject, com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
      */
-    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[]) {
+    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants,final UserParticipant[] modified_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[], Participant[] modified_participants) {
         final Participants pu = new Participants();
         final Participants p = new Participants();
         final UserParticipant oup[] = edao.getUsers();
@@ -3308,6 +3357,20 @@ public final class CalendarCollection implements CalendarCollectionService {
                 }
             }
         }
+        
+        // Apply changes
+        if(modified_userparticipants != null && modified_userparticipants.length > 0) {
+            for (UserParticipant participant : modified_userparticipants) {
+                if(participant.getType() == Participant.USER) {
+                    for(int i = 0; i < up_event.length; i++) {
+                        if(up_event[i].getIdentifier() == participant.getIdentifier()) {
+                            up_event[i] =  participant;
+                        }
+                    }
+                }
+            }
+        }
+        
         p_event = p.getList();
         if (deleted_participants != null && deleted_participants.length > 0) {
             Arrays.sort(p_event);
@@ -3438,7 +3501,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             rangeStart,
             rangeEnd,
             0,
-            MAXTC,
+            MAX_OCCURRENCESE,
             true);
         return (rresults.getPositionByLong(date.getTime()) != -1);
     }
@@ -3466,7 +3529,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             rangeStart,
             rangeEnd,
             0,
-            MAXTC,
+            MAX_OCCURRENCESE,
             true);
         boolean result = true;
         for (int i = 0; i < dates.length && result; i++) {
@@ -3498,7 +3561,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             rangeStart,
             rangeEnd,
             0,
-            MAXTC,
+            MAX_OCCURRENCESE,
             true);
 
         final int[] retval = new int[dates.length];
