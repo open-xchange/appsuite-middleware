@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,12 +49,15 @@
 
 package com.openexchange.groupware.notify;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,9 +68,21 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import javax.activation.DataHandler;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.ITipContainer;
+import com.openexchange.data.conversion.ical.ITipMethod;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.impl.AppointmentEventInterface2;
 import com.openexchange.event.impl.TaskEventInterface2;
@@ -76,10 +91,14 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -92,6 +111,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -120,17 +140,24 @@ import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class ParticipantNotify implements AppointmentEventInterface2, TaskEventInterface2 {
 
@@ -139,6 +166,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private static final String STR_UNKNOWN = "UNKNOWN";
 
     private final static Log LOG = LogFactory.getLog(ParticipantNotify.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
 
@@ -160,16 +189,16 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @param state The state
      */
     protected static void sendMessage(final MailMessage mmsg, final ServerSession session, final CalendarObject obj, final State state) {
-        messageSender.sendMessage(mmsg.title, mmsg.message, mmsg.addresses, session, obj, mmsg.folderId, state, false, mmsg.internal);
+        messageSender.sendMessage(mmsg, session, obj, state, false);
     }
 
-    protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, final int folderId, final State state, final boolean suppressOXReminderHeader, final boolean internal) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(message.length() + 64).append("Sending message to: ").append(name).append("\n=====[").append(
-                messageTitle).append("]====\n\n").append(message).append("\n\n"));
+    protected void sendMessage(MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
+        if (DEBUG) {
+            LOG.debug(new StringBuilder().append("Sending message to: ").append(msg.addresses).append("\n=====[").append(
+                msg.title).append("]====\n\n").append(msg.message).append("\n\n"));
         }
 
-        int fuid = folderId;
+        int fuid = msg.folderId;
         if (fuid == -1) {
             fuid = obj.getParentFolderID();
         }
@@ -177,21 +206,48 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (suppressOXReminderHeader) {
             fuid = MailObject.DONT_SET;
         }
-
-        final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule(), state.getType().toString());
-        mail.setFromAddr(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
-        mail.setToAddrs(name.toArray(new String[name.size()]));
-        mail.setText(message);
-        mail.setSubject(messageTitle);
-        mail.setContentType("text/plain; charset=UTF-8");
-
-        if (internal) {
-            state.modifyInternal(mail, obj, session);
+        String type = (msg.overrideType != null) ? msg.overrideType.toString() : state.getType().toString();
+        final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule(), type);
+                
+        String fromAddr;
+        String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+        if (senderSource.equals("defaultSenderAddress")) {          
+            try {
+                fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+                fromAddr = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail();
+            }
         } else {
-            state.modifyExternal(mail, obj, session);
+            fromAddr = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail();
+        }   
+        
+        User sender = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+        
+        if (sender != null) {
+            mail.setFromAddr("\"" + sender.getDisplayName() + "\"" + " <" + fromAddr + ">");
+        } else {
+            mail.setFromAddr(fromAddr);
         }
 
-        // System.out.println(folderId);
+        mail.setToAddrs(msg.addresses.toArray(new String[msg.addresses.size()]));
+        mail.setText(msg.message);
+        mail.setSubject(msg.title);
+        
+        if (Multipart.class.isInstance(msg.message)) {
+            mail.setContentType("multipart/alternative");
+        } else {
+            mail.setContentType("text/plain; charset=UTF-8");
+        }
+
+        if (state.getModule() == Types.TASK) {
+            if (msg.internal) {
+                state.modifyInternal(mail, obj, session);
+            } else {
+                state.modifyExternal(mail, obj, session);
+            }
+        }
+
         try {
             mail.send();
         } catch (final MailException e) {
@@ -387,7 +443,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
          * Check if notification shall be dropped
          */
         if (newObj.containsNotification() && !newObj.getNotification() && newObj.getCreatedBy() == serverSession.getUserId() && !forceNotifyOthers) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder(256).append("Dropping notification for ").append(
                     (state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (").append(
                     newObj.getObjectID()).append(") since it indicates to discard its notification").toString());
@@ -396,7 +452,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         if (newObj.getParticipants() == null) {
             if (oldObj == null || oldObj.getParticipants() == null) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     final StringBuilder builder = new StringBuilder(256).append("Dropping notification for ").append(
                         (state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (").append(
                         newObj.getObjectID()).append(") since it contains NO participants");
@@ -452,9 +508,28 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (Types.APPOINTMENT == state.getModule()) {
             final Appointment newApp = (Appointment) newObj;
             final Appointment oldApp = oldObj == null ? null : ((Appointment) oldObj);
+            
             if (!newApp.containsFullTime() && oldApp != null && oldApp.containsFullTime()) {
                 newApp.setFullTime(oldApp.getFullTime());
             }
+            
+            // Set correct recurrence information if CalendarObject is an Appointment
+            if (newApp.getRecurrenceType() != Appointment.NO_RECURRENCE) {
+                try {
+                    ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true).fillDAO(
+                        (CalendarDataObject) newApp);
+                    if (oldObj != null) {
+                        ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, false).fillDAO(
+                            (CalendarDataObject) oldApp);
+                    }
+                } catch (Exception e) {
+                    if (e instanceof ServiceException || e instanceof OXException) {
+                        final StringBuilder builder = new StringBuilder(256).append("Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
+                            newObj.getObjectID()).append("). Cause:\n");
+                        LOG.error(builder.toString() + e.getMessage(), e);
+                    }                    
+                }
+            }            
         }
 
         /*
@@ -464,7 +539,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         /*
          * Generate a render map filled with object-specific information
          */
-        final RenderMap renderMap = createRenderMap(newObj, oldObj, isUpdate, title, state.getModule(), receivers, serverSession);
+        final RenderMap renderMap = createRenderMap(newObj, oldObj, isUpdate, title, state, receivers, serverSession);
 
         /*
          * Add confirmation action replacement to render map if non-null
@@ -494,16 +569,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
          * Send messages
          */
         for (final MailMessage mmsg : messages) {
-            sendMessage(
-                mmsg.title,
-                mmsg.message,
-                mmsg.addresses,
-                serverSession,
-                newObj,
-                mmsg.folderId,
-                state,
-                suppressOXReminderHeader,
-                mmsg.internal);
+            sendMessage(mmsg, serverSession, newObj, state, suppressOXReminderHeader);
         }
     }
 
@@ -556,6 +622,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     }
                 } else {
                     sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
+                    sendMail = sendMail && (!EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType()) || p.email.equals(newObj.getOrganizer()));
                     if (p.timeZone != null) {
                         tz = p.timeZone;
                     }
@@ -596,7 +663,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                          */
                         NotificationPool.getInstance().put(
                             new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(), session, newObj));
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
                                 " update (id = ").append(newObj.getObjectID()).append(") notification added to pool for receiver ").append(
                                 p.email).toString());
@@ -605,21 +672,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         /*
                          * Compose message
                          */
+                        MailMessage message = null;
                         if (Participant.USER == p.type) {
-                            messages.add(createUserMessage(
-                                p,
-                                (userCanReadObject(p, newObj, session)),
-                                title,
-                                actionRepl,
-                                state,
-                                locale,
-                                renderMap,
-                                isUpdate,
-                                b));
+                            message = createUserMessage(session, newObj, p, (userCanReadObject(p, newObj, session)), title, actionRepl, state, locale, renderMap, isUpdate, b);
                         } else {
-                            messages.add(createParticipantMessage(p, title, actionRepl, state, locale, renderMap, isUpdate, b));
+                            message = createParticipantMessage(session, newObj, p, title, actionRepl, state, locale, renderMap, isUpdate, b);
                         }
-                        if (LOG.isDebugEnabled()) {
+                        messages.add(message);
+                        if (DEBUG) {
                             LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
                                 " (id = ").append(newObj.getObjectID()).append(") \"").append(
                                 EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString())).append(
@@ -645,6 +705,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(participant.id, session.getContext());
             final OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
+            
+            if (oxfa.getFolderType(obj.getParentFolderID()) == FolderObject.PRIVATE) {
+                return true;
+            }
+            
             final EffectivePermission permission = oxfa.getFolderPermission(obj.getParentFolderID(), participant.id, userConfig);
 
             if (permission.canReadAllObjects()) {
@@ -684,6 +749,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Creates a message for specified user.
+     * @param session 
      * 
      * @param p The participant
      * @param canRead <code>true</code> if provided participant has read permission; otherwise <code>false</code>
@@ -696,12 +762,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @param b A string builder
      * @return The created message
      */
-    protected static MailMessage createUserMessage(final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
-        return createParticipantMessage0(p, canRead, title, actionRepl, state, locale, renderMap, isUpdate, b);
+    protected static MailMessage createUserMessage(ServerSession session, CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
+        return createParticipantMessage0(session, cal, p, canRead, title, actionRepl, state, locale, renderMap, isUpdate, b);
     }
 
     /**
      * Creates a message for specified participant.
+     * @param session 
      * 
      * @param p The participant
      * @param title The object's title
@@ -713,14 +780,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @param b A string builder
      * @return The created message
      */
-    protected static MailMessage createParticipantMessage(final EmailableParticipant p, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
-        return createParticipantMessage0(p, true, title, actionRepl, state, locale, renderMap, isUpdate, b);
+    protected static MailMessage createParticipantMessage(ServerSession session, CalendarObject cal, final EmailableParticipant p, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
+        return createParticipantMessage0(session, cal, p, true, title, actionRepl, state, locale, renderMap, isUpdate, b);
     }
 
-    private static MailMessage createParticipantMessage0(final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
+    private static MailMessage createParticipantMessage0(ServerSession session, CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
         final MailMessage msg = new MailMessage();
         final Template createTemplate = state.getTemplate();
         final StringHelper strings = new StringHelper(locale);
+
         b.setLength(0);
         actionRepl.setLocale(locale);
         msg.title = b.append(actionRepl.getReplacement()).append(": ").append(title).toString();
@@ -730,6 +798,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 /*
                  * Current participant is removed by caught update event
                  */
+                msg.overrideType = State.Type.DELETED;
                 /*
                  * Get cloned version of render map to apply changed status
                  */
@@ -757,6 +826,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 /*
                  * Current participant is added by caught update event
                  */
+                msg.overrideType = State.Type.NEW;
                 /*
                  * Get cloned version of render map to apply changed status
                  */
@@ -793,26 +863,63 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         } else {
             if (State.Type.NEW.equals(state.getType())) {
+                String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
                     final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CREATE_MAIL_EXT : Notifications.TASK_CREATE_MAIL_EXT);
-                    msg.message = new StringTemplate(template).render(p.getLocale(), renderMap);
+                    textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else if (!canRead) {
                     final String template = strings.getString(state.getModule() == Types.APPOINTMENT ? Notifications.APPOINTMENT_CREATE_MAIL_NO_ACCESS : Notifications.TASK_CREATE_MAIL_NO_ACCESS);
-                    msg.message = new StringTemplate(template).render(p.getLocale(), renderMap);
+                    textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else {
+                    textMessage = createTemplate.render(p.getLocale(), renderMap);
+                }
+                if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
+                    msg.message = textMessage;
+                } else {
+                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
+                }
+            } else if (EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType())) {
+                String textMessage = "";
+                if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
+                    final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CONFIRMATION_MAIL_EXT : Notifications.TASK_CONFIRMATION_MAIL_EXT);
+                    textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
+                } else {
+                    textMessage = createTemplate.render(p.getLocale(), renderMap);
+                }
+                // Attach IMIP Magic only for external users on secondary events, to tell them the state of the appointment, but don't bother with internal users.
+                if(p.type == Participant.EXTERNAL_USER) {
+                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REPLY, p, strings, b);
+                } else {
+                    msg.message = textMessage;
+                }
+            } else  if (state.getType() == State.Type.DELETED) {
+                if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
                     msg.message = createTemplate.render(p.getLocale(), renderMap);
+                } else {
+                    msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL, p, strings, b);
                 }
             } else {
                 msg.message = createTemplate.render(p.getLocale(), renderMap);
             }
         }
         if (Participant.RESOURCE == p.type) {
-            /*
-             * Special prefixes for resource participant receivers
+            /*-
+             * Special prefixes for resource participant receivers.
+             * 
+             * Prefix already applied to multipart/* content, therefore only check for text/plain content
              */
-            msg.message = b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(
-                msg.message).toString();
-            b.setLength(0);
+            final Object content = msg.message;
+            if (content instanceof String) {
+                /*
+                 * Prepend prefix to text content
+                 */
+                msg.message = b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(
+                    content).toString();
+                b.setLength(0);
+            }
+            /*
+             * Prefix title
+             */
             msg.title = b.append('[').append(strings.getString(Notifications.RESOURCE_TITLE_PREFIX)).append("] ").append(msg.title).toString();
             b.setLength(0);
         }
@@ -820,6 +927,97 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         msg.folderId = p.folderId;
         msg.internal = p.type != Participant.EXTERNAL_USER;
         return msg;
+    }
+
+    /**
+     * Builds a multipart object containing the text/plain and iCal part
+     * @return The multipart object or given text if building failed
+     */
+    private static Object generateMessageMultipart(ServerSession session, CalendarObject cal, String text, int module, State.Type type, ITipMethod method, EmailableParticipant p, final StringHelper strings, final StringBuilder b) {
+        if (module == Types.TASK) {
+            return text;
+        }
+        /*
+         * Generate iCal for appointment
+         */
+        try {
+            final Multipart mp = new MimeMultipart("alternative");
+            /*
+             * Compose text part
+             */
+            final BodyPart textPart = new MimeBodyPart();
+            if (Participant.RESOURCE == p.type) {
+                /*
+                 * Prepend resource prefix to first text/plain body part
+                 */
+                textPart.setContent(
+                    b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(text).toString(),
+                    "text/plain; charset=UTF-8");
+                b.setLength(0);
+            } else {
+                /*
+                 * Apply text as given
+                 */
+                textPart.setContent(text, "text/plain; charset=UTF-8");
+            }
+            /*
+             * Compose iCal part
+             */
+            final Appointment app = (Appointment) cal;
+            final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
+            final ICalSession icalSession = emitter.createSession();
+            Date until = null;
+            if (Appointment.NO_RECURRENCE != app.getRecurrenceType()) {
+                until = app.getEndDate();
+                app.setEndDate(computeFirstOccurrenceEnd(app));
+            }
+            final boolean hasAlarm = app.containsAlarm();
+            final int alarm = app.getAlarm();
+            app.removeAlarm();
+            final ITipContainer iTip = new ITipContainer(method, type, session.getUserId());
+            emitter.writeAppointment(
+                icalSession,
+                app,
+                session.getContext(),
+                iTip,
+                new ArrayList<ConversionError>(),
+                new ArrayList<ConversionWarning>());
+            if (null != until) {
+                app.setEndDate(until);
+            }
+            if (hasAlarm) {
+                app.setAlarm(alarm);
+            }
+            final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
+            emitter.writeSession(icalSession, byteArrayOutputStream);
+            final InputStream icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+
+            final BodyPart iCalPart = new MimeBodyPart();
+
+            final String contentType = b.append("text/calendar; ").append(method.getMethod()).toString();
+            b.setLength(0);
+            iCalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
+            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType));
+            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+            /*
+             * Add the parts to parental multipart & return
+             */
+            mp.addBodyPart(textPart);
+            mp.addBodyPart(iCalPart);
+            return mp;
+        } catch (final MessagingException e) {
+            LOG.error("Unable to compose message", e);
+        } catch (final ConversionError e) {
+            LOG.error("Unable to compose message", e);
+        } catch (final IOException e) {
+            LOG.error("Unable to compose message", e);
+        } catch (final OXException e) {
+            LOG.error("Unable to compose message", e);
+        }
+        /*
+         * Failed to create multipart
+         */
+        return text;
     }
 
     private static String getTaskCreateMessage(final EmailableParticipant p, final boolean canRead) {
@@ -842,7 +1040,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private RenderMap createRenderMap(final CalendarObject newObj, final CalendarObject oldObj, final boolean isUpdate, final String title, final int module, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session) {
+    private RenderMap createRenderMap(final CalendarObject newObj, final CalendarObject oldObj, final boolean isUpdate, final String title, final State state, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session) {
+        final int module = state.getModule();
         /*
          * Containers for traversed participants
          */
@@ -877,7 +1076,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 resourceSet,
                 receivers,
                 session,
-                all);
+                all,
+                newObj.getOrganizer());
         }
         /*
          * Generate a render map
@@ -1092,7 +1292,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         for (final User user : memberObjects) {
 
                             final int[] groups = user.getGroups();
-                            final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
+                            final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
 
                             if (user.getMail() != null) {
                                 p = new EmailableParticipant(
@@ -1126,16 +1326,20 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all) {
+    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, String organizer) {
         sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
-        sortOldExternalParticipantsAndResources(oldParticipants, resourceSet, receivers, all, session, newParticipants);
+        sortOldExternalParticipantsAndResources(oldParticipants, participantSet, resourceSet, receivers, all, session, newParticipants, organizer);
     }
 
-    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants) {
+    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, String organizer) {
         if (oldParticipants == null) {
             return;
         }
         final Context ctx = session.getContext();
+//        List<Participant> mergedWithOrganizer = new ArrayList<Participant>(Arrays.asList(oldParticipants));
+//        if (organizer != null && !organizer.trim().equals(""))
+//            mergedWithOrganizer.add(new ExternalUserParticipant(organizer));
+        
         for (final Participant participant : oldParticipants) {
             switch (participant.getType()) {
             case Participant.USER:
@@ -1144,7 +1348,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 EmailableParticipant p = getExternalParticipant(participant, session);
                 if (p != null) {
                     p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, null, resourceSet, receivers, all, false);
+                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
                 }
                 break;
             case Participant.RESOURCE:
@@ -1155,7 +1359,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
                 if (p != null) {
                     p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, null, resourceSet, receivers, all, true);
+                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
                 }
                 break;
             case Participant.GROUP:
@@ -1163,6 +1367,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             default:
                 throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
             }
+        }
+        
+        if (organizer != null) {
+            addSingleParticipant(getExternalParticipant(new ExternalUserParticipant(organizer), session), participantSet, resourceSet, receivers, all, false);
         }
     }
 
@@ -1245,7 +1453,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     for (final User user : memberObjects) {
                         // final String lang = user.getPreferredLanguage();
                         final int[] groups = user.getGroups();
-                        final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
+                        final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
 
                         if (user.getMail() != null) {
                             p = new EmailableParticipant(
@@ -1316,7 +1524,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     for (final User user : memberObjects) {
                         // final String lang = user.getPreferredLanguage();
                         final int[] groups = user.getGroups();
-                        final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
+                        final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
 
                         if (user.getMail() != null) {
                             p = new EmailableParticipant(
@@ -1567,6 +1775,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     static final class MailMessage {
 
+        public Type overrideType;
+
         /**
          * Initializes a new MailMessage
          */
@@ -1574,7 +1784,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             super();
         }
 
-        public String message;
+        public Object message;
 
         public String title;
 
@@ -1731,14 +1941,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 final Date endDate = calendarObj.getEndDate();
                 if (endDate != null) {
                     if (Types.APPOINTMENT == module && endDate.getTime() < now) {
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(new StringBuilder().append("Ignoring notification(s) for single appointment object ").append(
                                 calendarObj.getObjectID()).append(" since its end date is in the past").toString());
                         }
                         return false;
                     }
                     if (Types.TASK == module && !compare2Date(endDate.getTime(), now)) {
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(new StringBuilder().append("Ignoring notification(s) for single task object ").append(
                                 calendarObj.getObjectID()).append(" since its end date is in the past").toString());
                         }
@@ -1752,7 +1962,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 final Date startDate = calendarObj.getStartDate();
                 if (startDate != null) {
                     if (Types.APPOINTMENT == module && (now - startDate.getTime()) > THIRTY_MINUTES) {
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(new StringBuilder().append("Ignoring notification(s) for single appointment object ").append(
                                 calendarObj.getObjectID()).append(" since its start date is more than 30 minutes in the past").toString());
                         }
@@ -1766,14 +1976,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final Date untilDate = calendarObj.getUntil();
             if (null != untilDate) {
                 if (Types.APPOINTMENT == module && untilDate.getTime() < now) {
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug(new StringBuilder().append("Ignoring notification(s) for recurring appointment object ").append(
                             calendarObj.getObjectID()).append(" since its until date is in the past").toString());
                     }
                     return false;
                 }
                 if (Types.TASK == module && !compare2Date(untilDate.getTime(), now)) {
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug(new StringBuilder().append("Ignoring notification(s) for recurring task object ").append(
                             calendarObj.getObjectID()).append(" since its until date is in the past").toString());
                     }
@@ -1811,6 +2021,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
         cal.set(Calendar.MINUTE, minutes);
         return cal.getTime();
+    }
+
+    private static Date computeFirstOccurrenceEnd(CalendarObject app) throws OXException {
+        CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        RecurringResultsInterface recurrences = service.calculateFirstRecurring(app);
+        RecurringResultInterface recurringResult = recurrences.getRecurringResult(0);
+        return new Date(recurringResult.getEnd());
     }
 
     /**
