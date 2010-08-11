@@ -136,6 +136,11 @@ public final class OutlookFolderStorage implements FolderStorage {
      */
     static final String PREPARED_FULLNAME_INBOX = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX");
 
+    /**
+     * The prepared fullname.
+     */
+    static final String PREPARED_FULLNAME_DEFAULT = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+
     private static final ThreadPools.ExpectedExceptionFactory<FolderException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<FolderException>() {
 
@@ -1763,6 +1768,8 @@ public final class OutlookFolderStorage implements FolderStorage {
         } else if (isDefaultMailFolder(folder)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isNonPrimaryMailAccountFolder(folder)) {
+            folder.setParentID(FolderStorage.PRIVATE_ID);
+        } else if (PREPARED_FULLNAME_DEFAULT.equals(folder.getParentID())) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         }
     }
