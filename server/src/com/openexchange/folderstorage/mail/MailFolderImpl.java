@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,13 +51,24 @@ package com.openexchange.folderstorage.mail;
 
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.SystemType;
+import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.mail.contentType.SentContentType;
+import com.openexchange.folderstorage.mail.contentType.SpamContentType;
+import com.openexchange.folderstorage.mail.contentType.TrashContentType;
+import com.openexchange.folderstorage.type.MailType;
+import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link MailFolderImpl} - A mail folder.
@@ -69,11 +80,58 @@ public final class MailFolderImpl extends AbstractFolder {
     private static final long serialVersionUID = 6445442372690458946L;
 
     /**
+     * The mail folder content type.
+     */
+    public static enum MailFolderType {
+        NONE(MailContentType.getInstance(), 0),
+        ROOT(SystemContentType.getInstance(), 0),
+        INBOX(MailContentType.getInstance(), 7), // FolderObject.MAIL
+        DRAFTS(DraftsContentType.getInstance(), 9),
+        SENT(SentContentType.getInstance(), 10),
+        SPAM(SpamContentType.getInstance(), 11),
+        TRASH(TrashContentType.getInstance(), 12);
+
+        private final ContentType contentType;
+
+        private final int type;
+
+        private MailFolderType(final ContentType contentType, final int type) {
+            this.contentType = contentType;
+            this.type = type;
+        }
+
+        /**
+         * Gets the content type associated with this mail folder type.
+         * 
+         * @return The content type
+         */
+        public ContentType getContentType() {
+            return contentType;
+        }
+
+        /**
+         * Gets the type.
+         * 
+         * @return The type
+         */
+        public int getType() {
+            return type;
+        }
+
+    }
+
+    private MailFolderType mailFolderType;
+
+    private boolean cacheable;
+
+    /**
      * Initializes an empty {@link MailFolderImpl}.
      */
     public MailFolderImpl() {
         super();
     }
+
+    private static final int BIT_USER_FLAG = (1 << 29);
 
     /**
      * Initializes a new {@link MailFolderImpl} from given mail folder.
@@ -82,29 +140,195 @@ public final class MailFolderImpl extends AbstractFolder {
      * 
      * @param mailFolder The underlying mail folder
      * @param accountId The account identifier
+     * @param capabilities The capabilities
+     * @param fullnameProvider The (optional) fullname provider
+     * @throws FolderException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId) {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
         super();
-        this.id = MailFolderUtility.prepareFullname(accountId, mailFolder.getFullname());
-        this.name = mailFolder.getName();
-        this.parent = MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
+        final String fullname = mailFolder.getFullname();
+        this.id = MailFolderUtility.prepareFullname(accountId, fullname);
+        this.name = "INBOX".equals(fullname) ? "Inbox" : mailFolder.getName();
+        // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
+        this.parent =
+            mailFolder.isRootFolder() ? String.valueOf(1) : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
         final MailPermission[] mailPermissions = mailFolder.getPermissions();
         this.permissions = new Permission[mailPermissions.length];
         for (int i = 0; i < mailPermissions.length; i++) {
             this.permissions[i] = new MailPermissionImpl(mailPermissions[i]);
         }
         type = SystemType.getInstance();
-        this.subscribed = mailFolder.isSubscribed();
+        this.subscribed = mailFolder.isSubscribed(); // || mailFolder.hasSubscribedSubfolders();
+        this.subscribedSubfolders = mailFolder.hasSubscribedSubfolders();
+        this.capabilities = capabilities;
+        {
+            final String value =
+                mailFolder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(mailFolder.getMessageCount()).append('/').append(
+                    mailFolder.getUnreadMessageCount()).append(')').toString();
+            this.summary = value;
+        }
+        this.deefault = /* mailFolder.isDefaultFolder(); */0 == accountId && mailFolder.isDefaultFolder();
+        this.total = mailFolder.getMessageCount();
+        this.nu = mailFolder.getNewMessageCount();
+        this.unread = mailFolder.getUnreadMessageCount();
+        this.deleted = mailFolder.getDeletedMessageCount();
+        final MailPermission mp;
+        if (mailFolder.isRootFolder()) {
+            mailFolderType = MailFolderType.ROOT;
+            final MailPermission rootPermission = mailFolder.getOwnPermission();
+            if (rootPermission == null) {
+                mp = new DefaultMailPermission();
+                mp.setAllPermission(
+                    OCLPermission.CREATE_SUB_FOLDERS,
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS);
+                mp.setFolderAdmin(false);
+            } else {
+                mp = rootPermission;
+            }
+        } else {
+            mp = mailFolder.getOwnPermission();
+            /*
+             * Check if entity's permission allows to read the folder: Every mail folder listed is at least visible to user
+             */
+            for (final Permission pe : permissions) {
+                if ((pe.getEntity() == mp.getEntity()) && (pe.getFolderPermission() <= Permission.NO_PERMISSIONS)) {
+                    pe.setFolderPermission(Permission.READ_FOLDER);
+                }
+            }
+            if (mailFolder.containsDefaultFolderType()) {
+                if (mailFolder.isInbox()) {
+                    mailFolderType = MailFolderType.INBOX;
+                } else if (mailFolder.isTrash()) {
+                    mailFolderType = MailFolderType.TRASH;
+                } else if (mailFolder.isSent()) {
+                    mailFolderType = MailFolderType.SENT;
+                } else if (mailFolder.isSpam()) {
+                    mailFolderType = MailFolderType.SPAM;
+                } else if (mailFolder.isDrafts()) {
+                    mailFolderType = MailFolderType.DRAFTS;
+                } else {
+                    mailFolderType = MailFolderType.NONE;
+                }
+            } else if (null != fullname) {
+                try {
+                    if (fullname.equals(fullnameProvider.getDraftsFolder())) {
+                        mailFolderType = MailFolderType.DRAFTS;
+                    } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
+                        mailFolderType = MailFolderType.INBOX;
+                    } else if (fullname.equals(fullnameProvider.getSentFolder())) {
+                        mailFolderType = MailFolderType.SENT;
+                    } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
+                        mailFolderType = MailFolderType.SPAM;
+                    } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
+                        mailFolderType = MailFolderType.TRASH;
+                    } else {
+                        mailFolderType = MailFolderType.NONE;
+                    }
+                } catch (final MailException e) {
+                    org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class).error(e.getMessage(), e);
+                    mailFolderType = MailFolderType.NONE;
+                }
+            } else {
+                mailFolderType = MailFolderType.NONE;
+            }
+        }
+        if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
+            // Cannot contain subfolders; therefore deny subfolder creation
+            mp.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+        }
+        if (!mailFolder.isHoldsMessages() && mp.canReadOwnObjects()) {
+            // Cannot contain messages; therefore deny read access. Folder is not selectable.
+            mp.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
+        }
+        int permissionBits =
+            createPermissionBits(
+                mp.getFolderPermission(),
+                mp.getReadPermission(),
+                mp.getWritePermission(),
+                mp.getDeletePermission(),
+                mp.isFolderAdmin());
+        if (mailFolder.isSupportsUserFlags()) {
+            permissionBits |= BIT_USER_FLAG;
+        }
+        bits = permissionBits;
+        /*
+         * Trash folder must not be cacheable
+         */
+        this.cacheable = !mailFolder.isDefaultFolder(); // || !mailFolderType.equals(MailFolderType.TRASH);
+    }
+
+    private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
+
+    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws FolderException {
+        final int[] perms = new int[5];
+        perms[0] = fp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
+        perms[1] = orp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
+        perms[2] = owp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : owp;
+        perms[3] = odp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : odp;
+        perms[4] = adminFlag ? 1 : 0;
+        return createPermissionBits(perms);
+    }
+
+    /**
+     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
+     */
+    private static final int MAX_PERMISSION = 64;
+
+    private static int createPermissionBits(final int[] permission) throws FolderException {
+        int retval = 0;
+        boolean first = true;
+        for (int i = permission.length - 1; i >= 0; i--) {
+            final int shiftVal = (i * 7); // Number of bits to be shifted
+            if (first) {
+                retval += permission[i] << shiftVal;
+                first = false;
+            } else {
+                if (permission[i] == OCLPermission.ADMIN_PERMISSION) {
+                    retval += MAX_PERMISSION << shiftVal;
+                } else {
+                    try {
+                        retval += mapping[permission[i]] << shiftVal;
+                    } catch (final Exception e) {
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    }
+                }
+            }
+        }
+        return retval;
+    }
+
+    @Override
+    public Object clone() {
+        final MailFolderImpl clone = (MailFolderImpl) super.clone();
+        clone.cacheable = cacheable;
+        return clone;
+    }
+
+    @Override
+    public boolean isCacheable() {
+        return cacheable;
     }
 
     @Override
     public ContentType getContentType() {
-        return MailContentType.getInstance();
+        return mailFolderType.getContentType();
+    }
+
+    @Override
+    public int getDefaultType() {
+        return mailFolderType.getType();
+    }
+
+    @Override
+    public void setDefaultType(final int defaultType) {
+        // Nothing to do
     }
 
     @Override
     public Type getType() {
-        return SystemType.getInstance();
+        return MailType.getInstance();
     }
 
     @Override

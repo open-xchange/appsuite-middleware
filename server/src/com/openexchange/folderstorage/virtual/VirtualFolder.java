@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,14 +49,16 @@
 
 package com.openexchange.folderstorage.virtual;
 
+import java.util.Date;
 import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
- * {@link VirtualFolder} - A virtual folder.
+ * {@link VirtualFolder} - A virtual folder backed by a real folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -64,11 +66,17 @@ public final class VirtualFolder implements Folder {
 
     private static final long serialVersionUID = 1076412172524386127L;
 
-    private final Folder realFolder;
+    private Folder realFolder;
+
+    private Date lastModified;
+
+    private int modifiedBy;
 
     private String treeId;
 
     private String name;
+
+    private String localizedName;
 
     private String parent;
 
@@ -78,6 +86,8 @@ public final class VirtualFolder implements Folder {
 
     private boolean subscribed;
 
+    private String newId;
+
     /**
      * Initializes a {@link VirtualFolder} with specified real folder.
      * 
@@ -86,6 +96,75 @@ public final class VirtualFolder implements Folder {
     public VirtualFolder(final Folder source) {
         super();
         this.realFolder = source;
+        modifiedBy = -1;
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            final VirtualFolder clone = (VirtualFolder) super.clone();
+            clone.realFolder = (Folder) (realFolder == null ? null : realFolder.clone());
+            clone.lastModified = cloneDate(lastModified);
+            if (permissions != null) {
+                final Permission[] thisPermissions = this.permissions;
+                final Permission[] clonePermissions = new Permission[thisPermissions.length];
+                for (int i = 0; i < thisPermissions.length; i++) {
+                    clonePermissions[i] = (Permission) thisPermissions[i].clone();
+                }
+                clone.permissions = clonePermissions;
+            }
+            if (subfolders != null) {
+                final String[] thisSub = subfolders;
+                final String[] cloneSub = new String[thisSub.length];
+                for (int i = 0; i < cloneSub.length; i++) {
+                    cloneSub[i] = thisSub[i];
+                }
+                clone.subfolders = cloneSub;
+            }
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError(e.getMessage());
+        }
+    }
+
+    public String getNewID() {
+        return newId;
+    }
+
+    public void setNewID(final String newId) {
+        this.newId = newId;
+    }
+
+    public int getCreatedBy() {
+        return realFolder.getCreatedBy();
+    }
+
+    public Date getCreationDate() {
+        return realFolder.getCreationDate();
+    }
+
+    public Date getLastModified() {
+        return lastModified == null ? realFolder.getLastModified() : cloneDate(lastModified);
+    }
+
+    public int getModifiedBy() {
+        return -1 == modifiedBy ? realFolder.getModifiedBy() : modifiedBy;
+    }
+
+    public void setCreatedBy(final int createdBy) {
+        // Nothing to do
+    }
+
+    public void setCreationDate(final Date creationDate) {
+        // Nothing to do
+    }
+
+    public void setLastModified(final Date lastModified) {
+        this.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
+    }
+
+    public void setModifiedBy(final int modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 
     public ContentType getContentType() {
@@ -97,19 +176,34 @@ public final class VirtualFolder implements Folder {
     }
 
     public String getLocalizedName(final Locale locale) {
-        return name;
+        if (null == localizedName) {
+            localizedName = new StringHelper(locale).getString(getName());
+        }
+        return localizedName;
     }
 
     public String getName() {
-        return name;
+        return null == name ? realFolder.getName() : name;
     }
 
     public String getParentID() {
         return parent;
     }
 
+    /**
+     * Gets either real folder's permissions or virtual folder's individual permissions (if set)
+     * 
+     * <pre>
+     * return permissions == null ? realFolder.getPermissions() : permissions;
+     * </pre>
+     * 
+     * @return The permissions for this virtual folder
+     */
     public Permission[] getPermissions() {
-        return permissions;
+        /*
+         * If no permissions applied return real folder's permissions
+         */
+        return permissions == null ? realFolder.getPermissions() : permissions;
     }
 
     public String[] getSubfolderIDs() {
@@ -134,6 +228,7 @@ public final class VirtualFolder implements Folder {
 
     public void setName(final String name) {
         this.name = name;
+        this.localizedName = null;
     }
 
     public void setParentID(final String parentId) {
@@ -164,12 +259,103 @@ public final class VirtualFolder implements Folder {
         this.subscribed = subscribed;
     }
 
+    public boolean hasSubscribedSubfolders() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
+        throw new UnsupportedOperationException();
+    }
+
     public boolean isVirtual() {
         return true;
     }
 
     public boolean isGlobalID() {
-        return realFolder.isGlobalID();
+        return false;
+    }
+
+    public boolean isCacheable() {
+        return true;
+    }
+
+    public int getCapabilities() {
+        return realFolder.getCapabilities();
+    }
+
+    public int getDeleted() {
+        return realFolder.getDeleted();
+    }
+
+    public int getNew() {
+        return realFolder.getNew();
+    }
+
+    public String getSummary() {
+        return realFolder.getSummary();
+    }
+
+    public int getTotal() {
+        return realFolder.getTotal();
+    }
+
+    public int getUnread() {
+        return realFolder.getUnread();
+    }
+
+    public boolean isDefault() {
+        return realFolder.isDefault();
+    }
+
+    public void setCapabilities(final int capabilities) {
+        // Nothing to do
+    }
+
+    public void setDefault(final boolean deefault) {
+        // Nothing to do
+    }
+
+    public void setDeleted(final int deleted) {
+        // Nothing to do
+    }
+
+    public void setNew(final int nu) {
+        // Nothing to do
+    }
+
+    public void setSummary(final String summary) {
+        // Nothing to do
+    }
+
+    public void setTotal(final int total) {
+        // Nothing to do
+    }
+
+    public void setUnread(final int unread) {
+        // Nothing to do
+    }
+
+    public int getDefaultType() {
+        return realFolder.getDefaultType();
+    }
+
+    public void setDefaultType(final int defaultType) {
+        // Nothing to do
+    }
+
+    public int getBits() {
+        return realFolder.getBits();
+    }
+
+    public void setBits(final int bits) {
+        // Nothing to do
+    }
+
+    private static Date cloneDate(final Date d) {
+        if (null == d) {
+            return null;
+        }
+        return new Date(d.getTime());
     }
 
 }

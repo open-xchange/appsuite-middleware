@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,15 +49,19 @@
 
 package com.openexchange.folderstorage.database;
 
+import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
@@ -71,24 +75,41 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
+import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.database.contentType.UnboundContentType;
-import com.openexchange.folderstorage.database.type.PrivateType;
-import com.openexchange.folderstorage.database.type.PublicType;
-import com.openexchange.folderstorage.database.type.SharedType;
+import com.openexchange.folderstorage.database.getfolder.SharedPrefixFolder;
+import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
+import com.openexchange.folderstorage.database.getfolder.SystemPrivateFolder;
+import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
+import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
+import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
+import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.FolderObjectIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -110,10 +131,27 @@ public final class DatabaseFolderStorage implements FolderStorage {
         super();
     }
 
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
+        // Nothing to do
+    }
+
+    private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters, final FolderType folderType) {
+        OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(folderType, DatabaseParameterConstants.PARAM_ACCESS);
+        if (null == ret) {
+            ret = new OXFolderAccess(storageParameters.getContext());
+            storageParameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_ACCESS, ret);
+        }
+        return ret;
+    }
+
     public ContentType[] getSupportedContentTypes() {
         return new ContentType[] {
             TaskContentType.getInstance(), CalendarContentType.getInstance(), ContactContentType.getInstance(),
-            InfostoreContentType.getInstance(), UnboundContentType.getInstance() };
+            InfostoreContentType.getInstance(), UnboundContentType.getInstance(), SystemContentType.getInstance() };
+    }
+
+    public ContentType getDefaultContentType() {
+        return ContactContentType.getInstance();
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
@@ -123,7 +161,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
             con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
             writable = getParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
         } catch (final FolderException e) {
-            LOG.error(e.getMessage(), e);
+            /*
+             * Already committed
+             */
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Storage already committed:\n" + params.getCommittedTrace(), e);
+            }
             return;
         }
         try {
@@ -140,11 +183,41 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     databaseService.backReadOnly(params.getContext(), con);
                 }
             }
+            final FolderType folderType = getFolderType();
+            params.putParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(folderType, DatabaseParameterConstants.PARAM_WRITABLE, null);
+            params.markCommitted();
+        }
+    }
+
+    public void restore(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
+            final int folderId = Integer.parseInt(folderIdentifier);
+            final Context context = storageParameters.getContext();
+            FolderObject.loadFolderObjectFromDB(folderId, context, con, false, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            /*
+             * From backup to working table
+             */
+            OXFolderSQL.restore(folderId, context, null);
+        } catch (final NumberFormatException e) {
+            throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(folderIdentifier);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -178,7 +251,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
             {
                 final Type t = folder.getType();
-                if (null != t) {
+                if (null == t) {
+                    /*
+                     * Determine folder type by examining parent folder
+                     */
+                    createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters, getFolderType()));
+                } else {
                     createMe.setType(getTypeByFolderType(t));
                 }
             }
@@ -200,24 +278,82 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     oclPerm.setSystem(p.getSystem());
                     oclPermissions[i] = oclPerm;
                 }
+                createMe.setPermissionsAsArray(oclPermissions);
             }
             // Create
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session);
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.createFolder(createMe, true, millis);
+            folder.setID(String.valueOf(createMe.getObjectID()));
         } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    private static final int[] PUBLIC_FOLDER_IDS =
+        {
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
+
+    private static int getFolderType(final int folderIdArg, final StorageParameters storageParameters, final FolderType folderType) throws OXException {
+        int type = -1;
+        int folderId = folderIdArg;
+        /*
+         * Special treatment for system folders
+         */
+        if (folderId == FolderObject.SYSTEM_SHARED_FOLDER_ID) {
+            folderId = FolderObject.SYSTEM_PRIVATE_FOLDER_ID;
+            type = FolderObject.SHARED;
+        } else if (folderId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID) {
+            type = FolderObject.PRIVATE;
+        } else if (Arrays.binarySearch(PUBLIC_FOLDER_IDS, folderId) >= 0) {
+            type = FolderObject.PUBLIC;
+        } else if (folderId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
+            type = FolderObject.PROJECT;
+        } else {
+            type = getFolderAccess(storageParameters, folderType).getFolderType(folderId);
+        }
+        return type;
+    }
+
+    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final FolderObject fo = new FolderObject();
-            fo.setObjectID(Integer.parseInt(folderId));
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final FolderObject fo = getFolderAccess(storageParameters, getFolderType()).getFolderObject(Integer.parseInt(folderId));
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session);
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
+            folderManager.clearFolder(fo, true, System.currentTimeMillis());
+        } catch (final OXFolderException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    public void deleteFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final FolderObject fo = new FolderObject();
+            final int folderId = Integer.parseInt(folderIdentifier);
+            fo.setObjectID(folderId);
+            final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
+            /*-
+             * TODO: Perform last-modified check?
+            {
+                final Date clientLastModified = storageParameters.getTimeStamp();
+                if (null != clientLastModified && getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(
+                    clientLastModified)) {
+                    throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
+                }
+            }
+             * 
+             */
             folderManager.deleteFolder(fo, true, System.currentTimeMillis());
         } catch (final OXFolderException e) {
             throw new FolderException(e);
@@ -244,10 +380,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             } else if (InfostoreContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.INFOSTORE, con, context);
             } else {
-                throw new FolderException(new OXFolderException(
-                    OXFolderException.FolderCode.UNKNOWN_MODULE,
-                    contentType.toString(),
-                    Integer.valueOf(context.getContextId())));
+                return null;
             }
             return String.valueOf(folderId);
         } catch (final DBPoolingException e) {
@@ -257,36 +390,280 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
-
-            final FolderObject fo = FolderObject.loadFolderObjectFromDB(Integer.parseInt(folderId), storageParameters.getContext(), con);
-            final DatabaseFolder retval = new DatabaseFolder(fo);
-            retval.setTreeID(treeId);
+            final Context ctx = storageParameters.getContext();
             /*
-             * Don't set subfolders for private folder to enforce FolderStorage.getSubfolders() invocation
+             * A numeric folder identifier
              */
-            if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != Integer.parseInt(folderId)) {
+            final int folderId = getUnsignedInteger(folderIdentifier);
+            if (folderId < 0) {
+                throw new OXFolderNotFoundException(folderIdentifier, ctx);
+            }
+            if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                return false;
+            } else if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
                 /*
-                 * Set subfolder IDs
+                 * The system shared folder
                  */
-                final List<Integer> subfolderIds = FolderObject.getSubfolderIds(
-                    Integer.parseInt(folderId),
-                    storageParameters.getContext(),
-                    con);
-                final List<String> subfolderIdentifies = new ArrayList<String>(subfolderIds.size());
-                for (final Integer id : subfolderIds) {
-                    subfolderIdentifies.add(id.toString());
-                }
-                retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
+                return false;
+            } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                /*
+                 * The system public folder
+                 */
+                return false;
+            } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                /*
+                 * The system infostore folder
+                 */
+                return false;
+            } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                /*
+                 * The system private folder
+                 */
+                return false;
+            } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                /*
+                 * A virtual database folder
+                 */
+                return true;
+            } else {
+                /*
+                 * A non-virtual database folder
+                 */
+                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+                return getFolderAccess(storageParameters, getFolderType()).containsForeignObjects(fo, storageParameters.getSession(), ctx);
             }
-            // TODO: Subscribed?
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    }
 
-            // Check for shared folder, that is folder is of type private and requesting user is different from folder's owner
-            if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUser().getId() != retval.getOwner()) {
-                retval.setType(SharedType.getInstance());
+    public boolean isEmpty(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Context ctx = storageParameters.getContext();
+            /*
+             * A numeric folder identifier
+             */
+            final int folderId = getUnsignedInteger(folderIdentifier);
+            if (folderId < 0) {
+                throw new OXFolderNotFoundException(folderIdentifier, ctx);
             }
+            if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                return true;
+            } else if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                /*
+                 * The system shared folder
+                 */
+                return true;
+            } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                /*
+                 * The system public folder
+                 */
+                return true;
+            } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                /*
+                 * The system infostore folder
+                 */
+                return true;
+            } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                /*
+                 * The system private folder
+                 */
+                return true;
+            } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                /*
+                 * A virtual database folder
+                 */
+                return false;
+            } else {
+                /*
+                 * A non-virtual database folder
+                 */
+                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+                return getFolderAccess(storageParameters, getFolderType()).isEmpty(fo, storageParameters.getSession(), ctx);
+            }
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    public void updateLastModified(final long lastModified, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Context ctx = storageParameters.getContext();
+            final int folderId = getUnsignedInteger(folderIdentifier);
+            if (getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(new Date(lastModified))) {
+                throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
+            }
+            OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    public Folder getFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        return getFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
+    }
+
+    private static final int[] VIRTUAL_IDS =
+        {
+            FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+            FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
+
+    public Folder getFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final User user = storageParameters.getUser();
+            final Context ctx = storageParameters.getContext();
+            final UserConfiguration userConfiguration;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                } else {
+                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                }
+            }
+
+            final DatabaseFolder retval;
+
+            if (StorageType.WORKING.equals(storageType)) {
+                if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
+                    retval = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+                } else {
+                    /*
+                     * A numeric folder identifier
+                     */
+                    final int folderId = getUnsignedInteger(folderIdentifier);
+
+                    if (folderId < 0) {
+                        throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                    }
+
+                    if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                        retval = SystemRootFolder.getSystemRootFolder();
+                    } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                        /*
+                         * A virtual database folder
+                         */
+                        retval = VirtualListFolder.getVirtualListFolder(folderId);
+                    } else {
+                        /*
+                         * A non-virtual database folder
+                         */
+                        final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+
+                        if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                            /*
+                             * The system shared folder
+                             */
+                            retval = SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, ctx, con);
+                        } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                            /*
+                             * The system public folder
+                             */
+                            retval = SystemPublicFolder.getSystemPublicFolder(fo);
+                        } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                            /*
+                             * The system infostore folder
+                             */
+                            retval = SystemInfostoreFolder.getSystemInfostoreFolder(fo);
+                        } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                            /*
+                             * The system private folder
+                             */
+                            retval = SystemPrivateFolder.getSystemPrivateFolder(fo);
+                        } else {
+                            /*
+                             * Check for shared folder, that is folder is of type private and requesting user is different from folder's
+                             * owner
+                             */
+                            if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+                                retval = new LocalizedDatabaseFolder(fo);
+                                retval.setName(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
+                            } else if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
+                                retval = new LocalizedDatabaseFolder(fo);
+                                retval.setName(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
+                            } else if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
+                                retval = new LocalizedDatabaseFolder(fo);
+                                retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
+                                retval.setParentID(FolderStorage.PUBLIC_ID);
+                            } else if (FolderObject.SYSTEM_GLOBAL_FOLDER_ID == folderId) {
+                                retval = new LocalizedDatabaseFolder(fo);
+                                retval.setName(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
+                                retval.setParentID(FolderStorage.PUBLIC_ID);
+                            } else if (fo.isDefaultFolder()) {
+                                /*
+                                 * A default folder: set locale-sensitive name
+                                 */
+                                if (fo.getModule() == FolderObject.TASK) {
+                                    retval = new LocalizedDatabaseFolder(fo);
+                                    retval.setName(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
+                                } else if (fo.getModule() == FolderObject.CONTACT) {
+                                    retval = new LocalizedDatabaseFolder(fo);
+                                    retval.setName(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
+                                } else if (fo.getModule() == FolderObject.CALENDAR) {
+                                    retval = new LocalizedDatabaseFolder(fo);
+                                    retval.setName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
+                                } else {
+                                    retval = new DatabaseFolder(fo);
+                                }
+                            } else {
+                                retval = new DatabaseFolder(fo);
+                            }
+                            if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUserId() != retval.getCreatedBy()) {
+                                retval.setType(SharedType.getInstance());
+                                /*
+                                 * A shared folder has no subfolders in real tree
+                                 */
+                                retval.setSubfolderIDs(new String[0]);
+                                retval.setSubscribedSubfolders(false);
+                                retval.setCacheable(false);
+                                retval.setParentID(new StringBuilder(16).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
+                            } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != folderId) {
+                                /*
+                                 * Set subfolders for non-private folder. For private folder FolderStorage.getSubfolders() is supposed to be
+                                 * used.
+                                 */
+                                final List<Integer> subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
+                                if (subfolderIds.isEmpty()) {
+                                    retval.setSubfolderIDs(new String[0]);
+                                    retval.setSubscribedSubfolders(false);
+                                } else {
+                                    final List<String> tmp = new ArrayList<String>(subfolderIds.size());
+                                    for (final Integer id : subfolderIds) {
+                                        tmp.add(id.toString());
+                                    }
+                                    retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                                    retval.setSubscribedSubfolders(true);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                /*
+                 * Get from backup tables
+                 */
+                final int folderId = getUnsignedInteger(folderIdentifier);
+
+                if (folderId < 0) {
+                    throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                }
+
+                final FolderObject fo =
+                    FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+                retval = new DatabaseFolder(fo);
+            }
+            retval.setTreeID(treeId);
+            // TODO: Subscribed?
 
             return retval;
         } catch (final DBPoolingException e) {
@@ -302,11 +679,137 @@ public final class DatabaseFolderStorage implements FolderStorage {
         return DatabaseFolderType.getInstance();
     }
 
-    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
 
-            final List<Integer> subfolderIds = FolderObject.getSubfolderIds(Integer.parseInt(parentId), storageParameters.getContext(), con);
+            final int parentId = Integer.parseInt(parentIdentifier);
+
+            if (FolderObject.SYSTEM_ROOT_FOLDER_ID == parentId) {
+                final String[] subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder();
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
+                for (int i = 0; i < subfolderIds.length; i++) {
+                    list.add(new DatabaseId(subfolderIds[i], i));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
+
+            if (Arrays.binarySearch(VIRTUAL_IDS, parentId) >= 0) {
+                /*
+                 * A virtual database folder
+                 */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserConfiguration userConfiguration;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    } else {
+                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    }
+                }
+                final String[] subfolderIds = VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userConfiguration, ctx, con);
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
+                for (int i = 0; i < subfolderIds.length; i++) {
+                    list.add(new DatabaseId(subfolderIds[i], i));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
+
+            if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == parentId) {
+                /*
+                 * The system private folder
+                 */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserConfiguration userConfiguration;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    } else {
+                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    }
+                }
+                final String[] subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, ctx, con);
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
+                for (int i = 0; i < subfolderIds.length; i++) {
+                    list.add(new DatabaseId(subfolderIds[i], i));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
+
+            if (FolderObject.SYSTEM_SHARED_FOLDER_ID == parentId) {
+                /*
+                 * The system shared folder
+                 */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserConfiguration userConfiguration;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    } else {
+                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    }
+                }
+                final String[] subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userConfiguration, ctx, con);
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
+                for (int i = 0; i < subfolderIds.length; i++) {
+                    list.add(new DatabaseId(subfolderIds[i], i));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
+
+            if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentId) {
+                /*
+                 * The system public folder
+                 */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserConfiguration userConfiguration;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    } else {
+                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    }
+                }
+                final String[] subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userConfiguration, ctx, con);
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
+                for (int i = 0; i < subfolderIds.length; i++) {
+                    list.add(new DatabaseId(subfolderIds[i], i));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
+
+            if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == parentId) {
+                /*
+                 * The system infostore folder
+                 */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserConfiguration userConfiguration;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    } else {
+                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    }
+                }
+                final String[] subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, con);
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
+                for (int i = 0; i < subfolderIds.length; i++) {
+                    list.add(new DatabaseId(subfolderIds[i], i));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
+
+            final List<Integer> subfolderIds = FolderObject.getSubfolderIds(parentId, storageParameters.getContext(), con);
             final List<FolderObject> subfolders = new ArrayList<FolderObject>(subfolderIds.size());
             for (final Integer folderId : subfolderIds) {
                 subfolders.add(FolderObject.loadFolderObjectFromDB(folderId.intValue(), storageParameters.getContext(), con, false, false));
@@ -364,18 +867,36 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     databaseService.backReadOnly(params.getContext(), con);
                 }
             }
+            params.putParameter(getFolderType(), DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, null);
         }
     }
 
-    public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+        final FolderType folderType = getFolderType();
+        if (null != parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION)) {
+            // Connection already present
+            return false;
+        }
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-            final Connection con = modify ? databaseService.getWritable(parameters.getContext()) : databaseService.getReadOnly(parameters.getContext());
+            final Context context = parameters.getContext();
+            final Connection con = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
             con.setAutoCommit(false);
             // Put to parameters
-            parameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, con);
-            parameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, Boolean.valueOf(modify));
-            return parameters;
+            if (parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_CONNECTION, con)) {
+                // Success
+                parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_WRITABLE, Boolean.valueOf(modify));
+            } else {
+                // Fail
+                con.setAutoCommit(true);
+                if (modify) {
+                    databaseService.backWritable(context, con);
+                } else {
+                    databaseService.backReadOnly(context, con);
+                }
+            }
+            return true;
         } catch (final ServiceException e) {
             throw new FolderException(e);
         } catch (final DBPoolingException e) {
@@ -387,14 +908,28 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            final long millis = System.currentTimeMillis();
+            final int folderId = Integer.parseInt(folder.getID());
+
+            /*
+             * Check for concurrent modification
+             */
+            {
+                final Date clientLastModified = storageParameters.getTimeStamp();
+                if (null != clientLastModified && getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(
+                    clientLastModified)) {
+                    throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
+                }
+            }
+
+            final Date millis = new Date();
 
             final FolderObject updateMe = new FolderObject();
-            updateMe.setObjectID(Integer.parseInt(folder.getID()));
+            updateMe.setObjectID(folderId);
             updateMe.setDefaultFolder(false);
             {
                 final String name = folder.getName();
@@ -402,7 +937,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     updateMe.setFolderName(name);
                 }
             }
-            updateMe.setLastModified(new Date(millis));
+            updateMe.setLastModified(millis);
+            folder.setLastModified(millis);
             updateMe.setModifiedBy(session.getUserId());
             {
                 final ContentType ct = folder.getContentType();
@@ -412,7 +948,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
             {
                 final String parentId = folder.getParentID();
-                if (null != parentId) {
+                if (null == parentId) {
+                    updateMe.setParentFolderID(getFolderAccess(storageParameters, getFolderType()).getFolderObject(folderId).getParentFolderID());
+                } else {
                     updateMe.setParentFolderID(Integer.parseInt(parentId));
                 }
             }
@@ -440,13 +978,177 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     oclPerm.setSystem(p.getSystem());
                     oclPermissions[i] = oclPerm;
                 }
+                updateMe.setPermissionsAsArray(oclPermissions);
             }
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session);
-            folderManager.updateFolder(updateMe, true, millis);
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
+            folderManager.updateFolder(updateMe, true, millis.getTime());
         } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
+
+    public StoragePriority getStoragePriority() {
+        return StoragePriority.NORMAL;
+    }
+
+    public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        return containsFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
+    }
+
+    public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final User user = storageParameters.getUser();
+            final Context ctx = storageParameters.getContext();
+            final UserConfiguration userConfiguration;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                } else {
+                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                }
+            }
+
+            final boolean retval;
+
+            if (StorageType.WORKING.equals(storageType)) {
+                if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
+
+                    retval = SharedPrefixFolder.existsSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+                } else {
+                    /*
+                     * A numeric folder identifier
+                     */
+                    final int folderId = getUnsignedInteger(folderIdentifier);
+
+                    if (folderId < 0) {
+                        retval = false;
+                    } else {
+                        if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                            retval = true;
+                        } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                            /*
+                             * A virtual database folder
+                             */
+                            retval = VirtualListFolder.existsVirtualListFolder(folderId, user, userConfiguration, ctx, con);
+                        } else {
+                            /*
+                             * A non-virtual database folder
+                             */
+
+                            if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                                /*
+                                 * The system shared folder
+                                 */
+                                retval = true;
+                            } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                                /*
+                                 * The system public folder
+                                 */
+                                retval = true;
+                            } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                                /*
+                                 * The system infostore folder
+                                 */
+                                retval = true;
+                            } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                                /*
+                                 * The system private folder
+                                 */
+                                retval = true;
+                            } else {
+                                /*
+                                 * Check for shared folder, that is folder is of type private and requesting user is different from folder's
+                                 * owner
+                                 */
+                                retval = OXFolderSQL.exists(folderId, con, ctx);
+                            }
+                        }
+                    }
+                }
+            } else {
+                final int folderId = getUnsignedInteger(folderIdentifier);
+
+                if (folderId < 0) {
+                    retval = false;
+                } else {
+                    retval = OXFolderSQL.exists(folderId, con, ctx, "del_oxfolder_tree");
+                }
+            }
+            return retval;
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        }
+    } // End of containsFolder()
+
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Context ctx = storageParameters.getContext();
+
+            final Queue<FolderObject> q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getAllModifiedFoldersSince(
+                    timeStamp == null ? new Date(0) : timeStamp,
+                    ctx,
+                    con)).asQueue();
+            final int size = q.size();
+            final Iterator<FolderObject> iterator = q.iterator();
+            final String[] ret = new String[size];
+            for (int i = 0; i < size; i++) {
+                ret[i] = String.valueOf(iterator.next().getObjectID());
+            }
+
+            return ret;
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    } // End of getModifiedFolderIDs()
+
+    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final User user = storageParameters.getUser();
+            final Context ctx = storageParameters.getContext();
+            final UserConfiguration userConfiguration;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                } else {
+                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                }
+            }
+
+            final Queue<FolderObject> q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getDeletedFoldersSince(
+                    timeStamp,
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration.getAccessibleModules(),
+                    ctx,
+                    con)).asQueue();
+            final int size = q.size();
+            final Iterator<FolderObject> iterator = q.iterator();
+            final String[] ret = new String[size];
+            for (int i = 0; i < size; i++) {
+                ret[i] = String.valueOf(iterator.next().getObjectID());
+            }
+
+            return ret;
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+
+    } // End of getDeletedFolderIDs()
 
     /*-
      * ############################# HELPER METHODS #############################
@@ -513,14 +1215,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
             return collator.compare(o1.getFolderName(), o2.getFolderName());
         }
 
-        private int compareById(final int id1, final int id2) {
+        private static int compareById(final int id1, final int id2) {
             return (id1 < id2 ? -1 : (id1 == id2 ? 0 : 1));
         }
 
-    } // End of MailAccountComparator
-
-    public StoragePriority getStoragePriority() {
-        return StoragePriority.NORMAL;
-    }
+    } // End of FolderObjectComparator
 
 }

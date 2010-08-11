@@ -47,17 +47,21 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.folder.json.parser;
 
 import java.util.Date;
 import java.util.Locale;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Type;
 
 /**
- * {@link AbstractFolder} - An abstract folder.
+ * {@link ParsedFolder} - A parsed folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractFolder implements Folder {
+public final class ParsedFolder implements Folder {
 
     private static final long serialVersionUID = 11110622220507954L;
 
@@ -73,8 +77,6 @@ public abstract class AbstractFolder implements Folder {
 
     protected String id;
 
-    protected String newId;
-
     protected String name;
 
     protected String parent;
@@ -84,8 +86,6 @@ public abstract class AbstractFolder implements Folder {
     protected String[] subfolders;
 
     protected boolean subscribed;
-
-    protected boolean subscribedSubfolders;
 
     protected ContentType contentType;
 
@@ -103,16 +103,18 @@ public abstract class AbstractFolder implements Folder {
 
     protected int capabilities;
 
-    protected int bits;
-
     protected boolean deefault;
 
     protected int defaultType;
 
+    protected int bits;
+
+    protected String newId;
+
     /**
-     * Initializes an empty {@link AbstractFolder}.
+     * Initializes an empty {@link ParsedFolder}.
      */
-    protected AbstractFolder() {
+    public ParsedFolder() {
         super();
         createdBy = -1;
         modifiedBy = -1;
@@ -122,18 +124,12 @@ public abstract class AbstractFolder implements Folder {
         deleted = -1;
         capabilities = -1;
         bits = -1;
-        defaultType = 0;
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder(32).append("{ name=").append(getName()).append(", id=").append(getID()).append('}').toString();
     }
 
     @Override
     public Object clone() {
         try {
-            final AbstractFolder clone = (AbstractFolder) super.clone();
+            final ParsedFolder clone = (ParsedFolder) super.clone();
             if (creationDate != null) {
                 clone.creationDate = new Date(creationDate.getTime());
             }
@@ -202,10 +198,6 @@ public abstract class AbstractFolder implements Folder {
         return id;
     }
 
-    public String getNewID() {
-        return newId;
-    }
-
     public String getLocalizedName(final Locale locale) {
         return name;
     }
@@ -242,10 +234,6 @@ public abstract class AbstractFolder implements Folder {
         this.id = id;
     }
 
-    public void setNewID(final String newId) {
-        this.newId = newId;
-    }
-
     public void setName(final String name) {
         this.name = name;
     }
@@ -277,15 +265,15 @@ public abstract class AbstractFolder implements Folder {
     public void setSubscribed(final boolean subscribed) {
         this.subscribed = subscribed;
     }
-   
+
     public boolean hasSubscribedSubfolders() {
-        return subscribedSubfolders;
-    }
-    
-    public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
-        this.subscribedSubfolders = subscribedSubfolders;
+        return false;
     }
 
+    public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
+        // No-op
+    }
+    
     public boolean isVirtual() {
         return false;
     }
@@ -358,12 +346,24 @@ public abstract class AbstractFolder implements Folder {
         this.capabilities = capabilities;
     }
 
+    public boolean isGlobalID() {
+        return false;
+    }
+
     public int getBits() {
         return bits;
     }
 
     public void setBits(final int bits) {
         this.bits = bits;
+    }
+
+    public String getNewID() {
+        return newId;
+    }
+
+    public void setNewID(final String newId) {
+        this.newId = newId;
     }
 
 }

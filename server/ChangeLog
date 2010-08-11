@@ -1,3 +1,7 @@
+* 2010-08-11 - thorben.betten@open-xchange.com
+
+ - Bugfix #16654: Fixed mail folder subscriptions (backend part)
+
 * 2010-08-11 steffen.templin@open-xchange.com
 
  - Bugfix #16643: Wrong series information in notification mails

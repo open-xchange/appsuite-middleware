@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -181,11 +181,7 @@ public final class DBUtils {
          * Close connection
          */
         if (con != null) {
-            if (isReadCon) {
-                Database.back(cid, false, con);
-            } else {
-                Database.back(cid, true, con);
-            }
+            Database.back(cid, !isReadCon, con);
         }
     }
 
@@ -214,7 +210,9 @@ public final class DBUtils {
             return;
         }
         try {
-            con.rollback();
+            if (!con.isClosed()) {
+                con.rollback();
+            }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -226,8 +224,13 @@ public final class DBUtils {
      * @param con connection that should go into autocommit mode.
      */
     public static void autocommit(final Connection con) {
+        if (null == con) {
+            return;
+        }
         try {
-            con.setAutoCommit(true);
+            if (!con.isClosed()) {
+                con.setAutoCommit(true);
+            }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
         }

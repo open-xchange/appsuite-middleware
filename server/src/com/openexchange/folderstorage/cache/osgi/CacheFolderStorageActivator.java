@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,13 +56,20 @@ import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link CacheFolderStorageActivator} - {@link BundleActivator Activator} for cache folder storage.
@@ -71,11 +78,12 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public final class CacheFolderStorageActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageActivator.class);
-
-    private final Dictionary<String, String> dictionary;
+    static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageActivator.class);
 
     private ServiceRegistration folderStorageRegistration;
+
+    private ServiceRegistration eventHandlerRegistration;
 
     private CacheFolderStorage cacheFolderStorage;
 
@@ -86,13 +94,11 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
      */
     public CacheFolderStorageActivator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("tree", FolderStorage.ALL_TREE_ID);
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class };
+        return new Class<?>[] { CacheService.class, ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override
@@ -194,10 +200,34 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         cacheFolderStorage = new CacheFolderStorage();
         cacheFolderStorage.onCacheAvailable();
         // Register folder storage
+        final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+        dictionary.put("tree", FolderStorage.ALL_TREE_ID);
         folderStorageRegistration = context.registerService(FolderStorage.class.getName(), cacheFolderStorage, dictionary);
+        // Register event handler for content-related changes on a mail folder
+        final CacheFolderStorage tmp = cacheFolderStorage;
+        final EventHandler eventHandler = new EventHandler() {
+            
+            public void handleEvent(final Event event) {
+                final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
+                final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                try {
+                    tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, session);
+                } catch (final FolderException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        };
+        final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+        dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC_ATTR);
+        eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
     }
 
     private void unregisterCacheFolderStorage() {
+        // Unregister event handler
+        if (null != eventHandlerRegistration) {
+            eventHandlerRegistration.unregister();
+            eventHandlerRegistration = null;
+        }
         // Unregister folder storage
         if (null != folderStorageRegistration) {
             folderStorageRegistration.unregister();
