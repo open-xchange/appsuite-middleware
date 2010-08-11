@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange IMAP
 Bundle-SymbolicName: com.openexchange.imap
-Bundle-Version: 6.11.0.0
+Bundle-Version: 6.18.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.api2,
  com.openexchange.caching,
@@ -28,11 +28,15 @@ Import-Package: com.openexchange.api2,
  com.openexchange.mail.utils,
  com.openexchange.mailaccount,
  com.openexchange.monitoring,
+ com.openexchange.secret,
+ com.openexchange.secret.osgi.tools,
  com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
  com.openexchange.spamhandler,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
  com.openexchange.timer,
  com.openexchange.tools,
  com.openexchange.tools.sql,
@@ -41,6 +45,8 @@ Import-Package: com.openexchange.api2,
  com.sun.mail.iap,
  com.sun.mail.imap,
  com.sun.mail.imap.protocol,
+ com.sun.mail.util,
+ gnu.trove,
  javax.activation,
  javax.mail,
  javax.mail.event,

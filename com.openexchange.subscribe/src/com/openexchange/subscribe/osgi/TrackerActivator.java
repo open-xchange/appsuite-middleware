@@ -47,39 +47,71 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.subscribe.osgi;
 
-import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
+import java.util.ArrayList;
+import java.util.List;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.secret.SecretService;
-import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
- * {@link SubscriptionMultipleFactory}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * {@link TrackerActivator} - The activator for starting/stopping needed service trackers.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SubscriptionMultipleFactory implements MultipleHandlerFactoryService {
+public final class TrackerActivator implements BundleActivator {
 
-    private SubscriptionExecutionService executor;
-    private SubscriptionSourceDiscoveryService discovery;
-    private SecretService secretService;
-    
-    public SubscriptionMultipleFactory(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor, SecretService secretService) {
-        this.executor = executor;
-        this.discovery = discovery;
-        this.secretService = secretService;
+    private List<ServiceTracker> trackers;
+    private WhiteboardSecretService secretService;
+
+    /**
+     * Initializes a new {@link TrackerActivator}.
+     */
+    public TrackerActivator() {
+        super();
     }
 
-    public MultipleHandler createMultipleHandler() {
-        return new SubscriptionMultipleHandler(discovery, executor, secretService);
+    public void start(final BundleContext context) throws Exception {
+        closeTrackers();
+        openTrackers(context);
     }
 
-    public String getSupportedModule() {
-        return "subscriptions";
+    public void stop(final BundleContext context) throws Exception {
+        closeTrackers();
+    }
+
+    private void openTrackers(final BundleContext context) {
+        trackers = new ArrayList<ServiceTracker>();
+        trackers.add(new ServiceTracker(
+            context,
+            ConfigurationService.class.getName(),
+            new RegistryServiceTrackerCustomizer<ConfigurationService>(
+                context,
+                SubscriptionServiceRegistry.getInstance(),
+                ConfigurationService.class)));
+        for (final ServiceTracker tracker : trackers) {
+            tracker.open();
+        }
+        
+        SubscriptionServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
+        secretService.open();
+    }
+
+    private void closeTrackers() {
+        if (null != trackers) {
+            for (final ServiceTracker tracker : trackers) {
+                tracker.close();
+            }
+            trackers = null;
+        }
+        if(secretService != null) {
+            secretService.close();
+        }
     }
 
 }

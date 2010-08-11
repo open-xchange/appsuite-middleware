@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,8 +59,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
@@ -77,6 +80,8 @@ public final class IMAPActivator extends DeferredActivator {
 
     private ServiceRegistration imapServiceRegistration;
 
+    private WhiteboardSecretService secretService;
+
     /**
      * Initializes a new {@link IMAPActivator}
      */
@@ -89,7 +94,8 @@ public final class IMAPActivator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, TimerService.class };
+            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ThreadPoolService.class,
+            TimerService.class };
     }
 
     @Override
@@ -127,6 +133,9 @@ public final class IMAPActivator extends DeferredActivator {
                         registry.addService(classes[i], service);
                     }
                 }
+                
+                registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
+                secretService.open();
             }
             imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary);
         } catch (final Exception e) {
@@ -146,6 +155,7 @@ public final class IMAPActivator extends DeferredActivator {
              * Clear service registry
              */
             getServiceRegistry().clearRegistry();
+            secretService.close();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

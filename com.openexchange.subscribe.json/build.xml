@@ -30,7 +30,9 @@
 	
     <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
 	
-    <property name="serverjar" value="com.openexchange.server.jar"/>
+    <property name="secretjar" value="com.openexchange.secret.jar"/>
+
+	<property name="serverjar" value="com.openexchange.server.jar"/>
 	
     <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
 	
@@ -49,7 +51,9 @@
 		
         <pathelement location="${bundlesdir}/${subscribejar}"/>
 		
-        <pathelement location="${bundlesdir}/${serverjar}"/>
+    	<pathelement location="${bundlesdir}/${secretjar}"/>
+    			
+    	<pathelement location="${bundlesdir}/${serverjar}"/>
 		
         <pathelement location="${bundlesdir}/${genconfjar}"/>
 		

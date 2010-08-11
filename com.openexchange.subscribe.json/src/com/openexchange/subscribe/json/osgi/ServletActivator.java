@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,17 +54,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.SubscriptionHandler;
-import com.openexchange.subscribe.json.SubscribeJSONServlet;
 import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
-import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 import com.openexchange.subscribe.json.SubscriptionMultipleFactory;
-import com.openexchange.subscribe.json.SubscriptionMultipleHandler;
 import com.openexchange.subscribe.json.SubscriptionServlet;
-import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
 import com.openexchange.subscribe.json.SubscriptionSourceMultipleFactory;
 import com.openexchange.subscribe.json.SubscriptionSourcesServlet;
 import com.openexchange.subscribe.osgi.tools.WhiteboardSubscriptionSourceDiscoveryService;
@@ -93,6 +88,8 @@ public class ServletActivator extends DeferredActivator {
     private ServiceRegistration subscriptionsMultipleReg;
 
     private ServiceRegistration subscriptionSourceMultipleReg;
+
+    private WhiteboardSecretService secretService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -148,7 +145,8 @@ public class ServletActivator extends DeferredActivator {
     private void createMultipleHandler() {
         SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
 
-        SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(discoverer, subscriptionExecutionService);
+        SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(discoverer, subscriptionExecutionService, secretService = new WhiteboardSecretService(context));
+        secretService.open();
         SubscriptionSourceMultipleFactory subscriptionSourcesFactory = new SubscriptionSourceMultipleFactory(discoverer);
         
         SubscriptionServlet.setFactory(subscriptionsFactory);
@@ -173,6 +171,7 @@ public class ServletActivator extends DeferredActivator {
     }
 
     private void destroyMultipleHandler() {
+        secretService.close();
         subscriptionsMultipleReg.unregister();
         subscriptionSourceMultipleReg.unregister();
         SubscriptionServlet.setFactory(null);

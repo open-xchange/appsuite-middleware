@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,12 +58,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.RdbContactInterfaceFactory;
@@ -96,6 +102,7 @@ import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
 import com.openexchange.folder.internal.FolderServiceImpl;
+import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
@@ -105,26 +112,30 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
+import com.openexchange.groupware.contact.datahandler.ContactJSONDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
+import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
+import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.osgi.InfostoreActivator;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.reminder.ReminderDeleteInterface;
+import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskServiceTrackerCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.image.ImageService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
+import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
+import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
@@ -140,16 +151,20 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.management.ManagementService;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.search.SearchException;
 import com.openexchange.search.SearchExceptionFactory;
 import com.openexchange.search.SearchService;
 import com.openexchange.search.internal.SearchServiceImpl;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
@@ -162,6 +177,7 @@ import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.user.UserService;
@@ -190,14 +206,18 @@ public final class ServerActivator extends DeferredActivator {
      */
     private static final String STR_IDENTIFIER = "identifier";
 
-    private static final Class<?>[] NEEDED_SERVICES_ADMIN = {
-        ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class, CalendarAdministrationService.class,
-        CalendarCollectionService.class };
+    private static final Class<?>[] NEEDED_SERVICES_ADMIN =
+        {
+            ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class, ThreadPoolService.class,
+            CalendarAdministrationService.class, CalendarCollectionService.class
+        };
 
-    private static final Class<?>[] NEEDED_SERVICES_SERVER = {
-        ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
-        TimerService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class,
-        ReminderDeleteInterface.class };
+    private static final Class<?>[] NEEDED_SERVICES_SERVER =
+        {
+            ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
+            TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
+            CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class
+        };
 
     private final List<ServiceRegistration> registrationList;
 
@@ -207,11 +227,15 @@ public final class ServerActivator extends DeferredActivator {
 
     private final List<EventHandlerRegistration> eventHandlerList;
 
+    private final List<BundleActivator> activators;
+
     private final Starter starter;
 
     private final AtomicBoolean started;
 
     private Boolean adminBundleInstalled;
+
+    private WhiteboardSecretService secretService;
 
     /**
      * Initializes a new {@link ServerActivator}
@@ -224,6 +248,7 @@ public final class ServerActivator extends DeferredActivator {
         serviceTrackerList = new ArrayList<ServiceTracker>();
         componentRegistrationList = new ArrayList<ComponentRegistration>();
         eventHandlerList = new ArrayList<EventHandlerRegistration>();
+        activators = new ArrayList<BundleActivator>(8);
     }
 
     /**
@@ -307,13 +332,13 @@ public final class ServerActivator extends DeferredActivator {
          * Add service trackers
          */
         // Configuration service load
-        serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context)));
+        final ServiceTracker confTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context));
+        confTracker.open(); // We need this for {@link Starter#start()}
+        serviceTrackerList.add(confTracker);
         // move this to the required services once the database component gets into its own bundle.
         serviceTrackerList.add(new ServiceTracker(context, DatabaseService.class.getName(), new DatabaseCustomizer(context)));
         // I18n service load
         serviceTrackerList.add(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceListener(context)));
-        // Update task service tracker
-        serviceTrackerList.add(new ServiceTracker(context, UpdateTaskProviderService.class.getName(), new UpdateTaskServiceTrackerCustomizer(context)));
 
         // Mail account delete listener
         serviceTrackerList.add(new ServiceTracker(
@@ -341,7 +366,7 @@ public final class ServerActivator extends DeferredActivator {
             ICalParser.class){ 
             
             @Override
-            protected ICalParser customize(ICalParser service) {
+            protected ICalParser customize(final ICalParser service) {
                 return new ExtraneousSeriesMasterRecoveryParser(service, ServerServiceRegistry.getInstance());
             }
             
@@ -367,7 +392,8 @@ public final class ServerActivator extends DeferredActivator {
             context,
             FolderDeleteListenerService.class.getName(),
             new FolderDeleteListenerServiceTrackerCustomizer(context)));
-
+        
+        
         /*
          * Register EventHandler
          */
@@ -439,6 +465,10 @@ public final class ServerActivator extends DeferredActivator {
                 PublicationTargetDiscoveryService.class.getName(),
                 new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
 
+            // Folder Fields
+            
+            serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
+            
             // Start up server the usual way
             starter.start();
         }
@@ -454,12 +484,21 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(UserService.class.getName(), ServerServiceRegistry.getInstance().getService(
             UserService.class,
             true), null));
-        registrationList.add(context.registerService(UserConfigurationService.class.getName(), new UserConfigurationServiceImpl(), null));
+        ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
+        registrationList.add(context.registerService(
+            UserConfigurationService.class.getName(),
+            ServerServiceRegistry.getInstance().getService(UserConfigurationService.class),
+            null));
         registrationList.add(context.registerService(ContextService.class.getName(), ServerServiceRegistry.getInstance().getService(
             ContextService.class,
             true), null));
         registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
-        registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
+        {
+            registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
+            final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, MailSessionEventHandler.getTopics());
+            registrationList.add(context.registerService(EventHandler.class.getName(), new MailSessionEventHandler(), serviceProperties));
+        }
         registrationList.add(context.registerService(ImageService.class.getName(), ServerServiceRegistry.getInstance().getService(
             ImageService.class), null));
         // TODO: Register search service here until its encapsulated in an own bundle
@@ -467,6 +506,7 @@ public final class ServerActivator extends DeferredActivator {
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new MailLoginHandler(), null));
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new TransportLoginHandler(), null));
+        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new LastLoginRecorder(), null));
         // Register table creation for mail account storage.
         registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateMailAccountTables(), null));
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
@@ -497,6 +537,18 @@ public final class ServerActivator extends DeferredActivator {
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
             registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(), props));
         }
+        {
+            final InlineImageDataSource dataSource = new InlineImageDataSource();
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+            registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
+        }
+        {
+            final ContactImageDataSource dataSource = new ContactImageDataSource();
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+            registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
+        }
         /*
          * Register data handlers
          */
@@ -507,8 +559,18 @@ public final class ServerActivator extends DeferredActivator {
         }
         {
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.contact.json");
+            registrationList.add(context.registerService(DataHandler.class.getName(), new ContactJSONDataHandler(), props));
+        }
+        {
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
             props.put(STR_IDENTIFIER, "com.openexchange.ical");
             registrationList.add(context.registerService(DataHandler.class.getName(), new ICalInsertDataHandler(), props));
+        }
+        {
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.ical.json");
+            registrationList.add(context.registerService(DataHandler.class.getName(), new ICalJSONDataHandler(), props));
         }
         {
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
@@ -539,7 +601,16 @@ public final class ServerActivator extends DeferredActivator {
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
         registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
         ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
-
+        
+        // Fake bundle start
+        activators.add(new FolderStorageActivator());
+        for (final BundleActivator activator : activators) {
+            activator.start(context);
+        }
+        
+        ServerServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
+        secretService.open();
+        
         /*
          * Register components
          */
@@ -565,6 +636,13 @@ public final class ServerActivator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.server");
         try {
+            /*
+             * Fake bundle stop
+             */
+            for (final BundleActivator activator : activators) {
+                activator.stop(context);
+            }
+            activators.clear();
             /*
              * Unregister components
              */
@@ -600,6 +678,7 @@ public final class ServerActivator extends DeferredActivator {
              * Clear service registry
              */
             ServerServiceRegistry.getInstance().clearRegistry();
+            secretService.close();
         } finally {
             started.set(false);
             adminBundleInstalled = null;

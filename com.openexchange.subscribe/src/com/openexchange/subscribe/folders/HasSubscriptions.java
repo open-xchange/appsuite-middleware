@@ -47,39 +47,73 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.subscribe.folders;
 
-import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.secret.SecretService;
-import com.openexchange.subscribe.SubscriptionExecutionService;
+import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-
+import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SubscriptionMultipleFactory}
- *
+ * {@link HasSubscriptions}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SubscriptionMultipleFactory implements MultipleHandlerFactoryService {
+public class HasSubscriptions implements AdditionalFolderField {
 
-    private SubscriptionExecutionService executor;
-    private SubscriptionSourceDiscoveryService discovery;
-    private SecretService secretService;
-    
-    public SubscriptionMultipleFactory(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor, SecretService secretService) {
-        this.executor = executor;
+    private static final Log LOG = LogFactory.getLog(HasSubscriptions.class);
+
+    private final SubscriptionSourceDiscoveryService discovery;
+
+    public HasSubscriptions(final SubscriptionSourceDiscoveryService discovery) {
+        super();
         this.discovery = discovery;
-        this.secretService = secretService;
     }
 
-    public MultipleHandler createMultipleHandler() {
-        return new SubscriptionMultipleHandler(discovery, executor, secretService);
+    public int getColumnID() {
+        return 3020;
     }
 
-    public String getSupportedModule() {
-        return "subscriptions";
+    public String getColumnName() {
+        return "com.openexchange.subscribe.subscriptionFlag";
+    }
+
+    public Object getValue(final FolderObject folder, final ServerSession session) {
+        if (!session.getUserConfiguration().isSubscription()) {
+            return Boolean.FALSE;
+        }
+
+        final List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
+        try {
+            SecretService secretService = SubscriptionServiceRegistry.getInstance().getService(SecretService.class);
+            
+            for (final SubscriptionSource subscriptionSource : sources) {
+                final String fn = folder.getFullName();
+                final boolean hasSubscriptions =
+                    !subscriptionSource.getSubscribeService().loadSubscriptions(
+                        session.getContext(),
+                        null == fn ? String.valueOf(folder.getObjectID()) : fn,
+                        secretService.getSecret(session)).isEmpty();
+                if (hasSubscriptions) {
+                    return Boolean.TRUE;
+                }
+            }
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+
+        return Boolean.FALSE;
+    }
+
+    public Object renderJSON(final Object value) {
+        return value;
     }
 
 }

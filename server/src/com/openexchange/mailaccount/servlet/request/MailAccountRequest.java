@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -66,6 +67,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
@@ -86,6 +88,7 @@ import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 import com.openexchange.mailaccount.servlet.parser.MailAccountParser;
 import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
+import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -100,6 +103,8 @@ import com.openexchange.tools.session.ServerSession;
 public final class MailAccountRequest {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountRequest.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final ServerSession session;
 
@@ -138,20 +143,22 @@ public final class MailAccountRequest {
      * @throws OXJSONException If a JSON error occurs
      */
     public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
-        if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
+        if (AJAXServlet.ACTION_DELETE.equalsIgnoreCase(action)) {
             return actionDelete(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
+        } else if (AJAXServlet.ACTION_NEW.equalsIgnoreCase(action)) {
             return actionNew(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+        } else if (AJAXServlet.ACTION_UPDATE.equalsIgnoreCase(action)) {
             return actionUpate(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
+        } else if (AJAXServlet.ACTION_GET.equalsIgnoreCase(action)) {
             return actionGet(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
+        } else if (AJAXServlet.ACTION_ALL.equalsIgnoreCase(action)) {
             return actionAll(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
+        } else if (AJAXServlet.ACTION_LIST.equalsIgnoreCase(action)) {
             return actionList(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_VALIDATE)) {
+        } else if (AJAXServlet.ACTION_VALIDATE.equalsIgnoreCase(action)) {
             return actionValidate(jsonObject);
+        } else if ("get_tree".equalsIgnoreCase(action)) {
+            return actionGetTree(jsonObject);
         } else {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
@@ -161,9 +168,8 @@ public final class MailAccountRequest {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
 
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
@@ -189,6 +195,38 @@ public final class MailAccountRequest {
         }
     }
 
+    private JSONObject actionGetTree(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
+        final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
+
+        try {
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+
+            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+
+            if (isUnifiedINBOXAccount(mailAccount)) {
+                // Treat as no hit
+                throw MailAccountExceptionMessages.NOT_FOUND.create(
+                    Integer.valueOf(id),
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
+            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+                throw MailAccountExceptionFactory.getInstance().create(
+                    MailAccountExceptionMessages.NOT_ENABLED,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
+            // Create a mail access instance
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+            return actionValidateTree0(mailAccess);
+        } catch (final AbstractOXException exc) {
+            throw new OXException(exc);
+        }
+    }
+
     private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
         final int[] ids = DataParser.checkJSONIntArray(jsonObject, AJAXServlet.PARAMETER_DATA);
 
@@ -205,9 +243,8 @@ public final class MailAccountRequest {
                 }
             }
 
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             for (int i = 0; i < ids.length; i++) {
                 final int id = ids[i];
@@ -247,25 +284,24 @@ public final class MailAccountRequest {
                 throw MailAccountExceptionMessages.CREATION_FAILED.create();
             }
 
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            final int id = storageService.insertMailAccount(
-                accountDescription,
-                session.getUserId(),
-                session.getContext(),
-                session.getPassword());
+            final int id =
+                storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), getSecret(session));
 
-            final JSONObject jsonAccount = MailAccountWriter.write(storageService.getMailAccount(
-                id,
-                session.getUserId(),
-                session.getContextId()));
+            final JSONObject jsonAccount =
+                MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
             return jsonAccount;
         } catch (final AbstractOXException e) {
             throw new OXException(e);
         }
+    }
+
+    private String getSecret(ServerSession session) {
+        SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
+        return secretService.getSecret(session);
     }
 
     private Object actionValidate(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
@@ -286,15 +322,12 @@ public final class MailAccountRequest {
                 /*
                  * ID is delivered, but password not set. Thus load from storage version.
                  */
-                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class,
-                    true);
+                final MailAccountStorageService storageService =
+                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-                final String encodedPassword = storageService.getMailAccount(
-                    accountDescription.getId(),
-                    session.getUserId(),
-                    session.getContextId()).getPassword();
-                accountDescription.setPassword(MailPasswordUtil.decrypt(encodedPassword, session.getPassword()));
+                final String encodedPassword =
+                    storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
+                accountDescription.setPassword(MailPasswordUtil.decrypt(encodedPassword, getSecret(session)));
             }
 
             checkNeededFields(accountDescription);
@@ -325,13 +358,17 @@ public final class MailAccountRequest {
         }
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription);
+        return actionValidateTree0(mailAccess);
+    }
+
+    private JSONObject actionValidateTree0(final MailAccess<?, ?> mailAccess) throws JSONException {
         // Now try to connect
         boolean close = false;
         try {
             mailAccess.connect();
             close = true;
             // Compose folder tree
-            final JSONObject root = FolderWriter.writeMailFolder(-1, mailAccess.getRootFolder(), mailAccess.getMailConfig());
+            final JSONObject root = FolderWriter.writeMailFolder(-1, mailAccess.getRootFolder(), mailAccess.getMailConfig(), session);
             // Recursive call
             addSubfolders(
                 root,
@@ -340,7 +377,7 @@ public final class MailAccountRequest {
                 mailAccess.getMailConfig());
             return root;
         } catch (final AbstractOXException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Composing mail account's folder tree failed.", e);
             }
             // TODO: How to indicate error if folder tree requested?
@@ -361,7 +398,7 @@ public final class MailAccountRequest {
         parent.put("subfolder_array", subfolderArray);
 
         for (final MailFolder subfolder : subfolders) {
-            final JSONObject subfolderObject = FolderWriter.writeMailFolder(-1, subfolder, mailConfig);
+            final JSONObject subfolderObject = FolderWriter.writeMailFolder(-1, subfolder, mailConfig, session);
             subfolderArray.put(subfolderObject);
             // Recursive call
             addSubfolders(
@@ -396,7 +433,7 @@ public final class MailAccountRequest {
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
         if (null == mailProvider) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
             }
             return null;
@@ -448,7 +485,7 @@ public final class MailAccountRequest {
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
         if (null == transportProvider) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Validating mail account failed. No transport provider found for URL: " + transportServerURL);
             }
             return false;
@@ -488,7 +525,7 @@ public final class MailAccountRequest {
             mailTransport.ping();
             close = true;
         } catch (final AbstractOXException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Validating transport account failed.", e);
             }
             validated = false;
@@ -499,6 +536,21 @@ public final class MailAccountRequest {
         }
         return validated;
     }
+
+    private static final EnumSet<Attribute> DEFAULT =
+        EnumSet.of(
+            Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+            Attribute.CONFIRMED_HAM_LITERAL,
+            Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+            Attribute.CONFIRMED_SPAM_LITERAL,
+            Attribute.DRAFTS_FULLNAME_LITERAL,
+            Attribute.DRAFTS_LITERAL,
+            Attribute.SENT_FULLNAME_LITERAL,
+            Attribute.SENT_LITERAL,
+            Attribute.SPAM_FULLNAME_LITERAL,
+            Attribute.SPAM_LITERAL,
+            Attribute.TRASH_FULLNAME_LITERAL,
+            Attribute.TRASH_LITERAL);
 
     private JSONObject actionUpate(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
@@ -514,9 +566,8 @@ public final class MailAccountRequest {
                     Integer.valueOf(session.getContextId()));
             }
 
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             final int id = accountDescription.getId();
             if (-1 == id) {
@@ -537,12 +588,36 @@ public final class MailAccountRequest {
                 fieldsToUpdate,
                 session.getUserId(),
                 session.getContextId(),
-                session.getPassword());
+                getSecret(session));
 
-            final JSONObject jsonAccount = MailAccountWriter.write(storageService.getMailAccount(
-                id,
-                session.getUserId(),
-                session.getContextId()));
+            if (fieldsToUpdate.removeAll(DEFAULT)) {
+                /*
+                 * Drop all session parameters related to default folders for this account
+                 */
+                MailSessionCache.getInstance(session).removeAccountParameters(id);
+                /*-
+                 * 
+                session.setParameter(MailSessionParameterNames.getParamDefaultFolderArray(id), null);
+                session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(id), null);
+                 */
+                /*
+                 * Re-Init account's default folders
+                 */
+                try {
+                    final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, id);
+                    mailAccess.connect(false);
+                    try {
+                        mailAccess.getFolderStorage().checkDefaultFolders();
+                    } finally {
+                        mailAccess.close(true);
+                    }
+                } catch (final MailException e) {
+                    LOG.warn(e.getMessage(), e);
+                }
+            }
+
+            final JSONObject jsonAccount =
+                MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
             return jsonAccount;
         } catch (final AbstractOXException e) {
@@ -555,9 +630,8 @@ public final class MailAccountRequest {
 
         final List<Attribute> attributes = getColumns(colString);
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
 
@@ -599,9 +673,8 @@ public final class MailAccountRequest {
 
         final List<Attribute> attributes = getColumns(colString);
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             final JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
 

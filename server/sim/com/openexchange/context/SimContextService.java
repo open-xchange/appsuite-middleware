@@ -47,39 +47,61 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.context;
 
-import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.secret.SecretService;
-import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import java.util.List;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 
 
 /**
- * {@link SubscriptionMultipleFactory}
+ * {@link SimContextService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SubscriptionMultipleFactory implements MultipleHandlerFactoryService {
-
-    private SubscriptionExecutionService executor;
-    private SubscriptionSourceDiscoveryService discovery;
-    private SecretService secretService;
-    
-    public SubscriptionMultipleFactory(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor, SecretService secretService) {
-        this.executor = executor;
-        this.discovery = discovery;
-        this.secretService = secretService;
+public class SimContextService implements ContextService{
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getAllContextIds()
+     */
+    public List<Integer> getAllContextIds() throws ContextException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    public MultipleHandler createMultipleHandler() {
-        return new SubscriptionMultipleHandler(discovery, executor, secretService);
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getContext(int)
+     */
+    public Context getContext(int contextId) throws ContextException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    public String getSupportedModule() {
-        return "subscriptions";
+    public Context loadContext(int contextId) throws ContextException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getContextId(java.lang.String)
+     */
+    public int getContextId(String loginContextInfo) throws ContextException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#invalidateContext(int)
+     */
+    public void invalidateContext(int contextId) throws ContextException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#invalidateLoginInfo(java.lang.String)
+     */
+    public void invalidateLoginInfo(String loginContextInfo) throws ContextException {
+        // TODO Auto-generated method stub
+        
+    }
 }

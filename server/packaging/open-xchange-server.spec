@@ -5,7 +5,7 @@
 Name:           open-xchange-server
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-secret >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Bundle
-Requires:       open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-management >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@
+Requires:       open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-management >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@  open-xchange-genconf >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -554,10 +554,6 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
-* Tue Aug 03 2010 - thorben.betten@open-xchange.com
- - Bugfix #16531: No translation of IMAP folders
- - Bugfix #16616: Using a blocking queue to avoid possible out-of-memory error
- - Bugfix #16614: FIxed NPE in FolderObjectIterator class
 * Thu Jul 29 2010 - karsten.will@open-xchange.com
  - Bugfix #16591: Error loading JavaScript from [https://www.gmx.com/client/static/script/compiled-gecko-17-821660071.js]
 * Thu Jul 29 2010 - marcus.klein@open-xchange.com

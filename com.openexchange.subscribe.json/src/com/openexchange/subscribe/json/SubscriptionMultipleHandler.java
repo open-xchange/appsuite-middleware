@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,6 +70,7 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.secret.SecretService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
@@ -84,8 +86,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SubscriptionMultipleHandler implements MultipleHandler {
 
-    private SubscriptionSourceDiscoveryService discovery;
-    private SubscriptionExecutionService executor;
+    private final SubscriptionSourceDiscoveryService discovery;
+    private final SubscriptionExecutionService executor;
+    private final SecretService secretService;
 
     public static final Set<String> ACTIONS_REQUIRING_BODY = new HashSet<String>() {{
        add("new");
@@ -94,10 +97,11 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
        add("list");
     }};
     
-    public SubscriptionMultipleHandler(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor) {
+    public SubscriptionMultipleHandler(final SubscriptionSourceDiscoveryService discovery, final SubscriptionExecutionService executor, final SecretService secretService) {
         super();
         this.discovery = discovery;
         this.executor = executor;
+        this.secretService = secretService;
     }
 
     public void close() {
@@ -108,7 +112,11 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public Object performRequest(String action, JSONObject request, ServerSession session) throws AbstractOXException, JSONException {
+    public Collection<AbstractOXException> getWarnings() {
+        return Collections.<AbstractOXException> emptySet();
+    }
+
+    public Object performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         try {
             if (null == action) {
                 MISSING_PARAMETER.throwException("action");
@@ -131,23 +139,42 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                 UNKNOWN_ACTION.throwException(action);
                 return null;
             }
-        } catch (AbstractOXException x) {
+        } catch (final AbstractOXException x) {
             throw x;
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw x;
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             throw wrapThrowable(t);
         }
     }
 
-    private Object refreshSubscriptions(JSONObject request, ServerSession session) throws AbstractOXException, JSONException {
-        List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
-        Context context = session.getContext();
-        Set<Integer> ids = new HashSet<Integer>();
+    private Object refreshSubscriptions(final JSONObject request, final ServerSession session) throws AbstractOXException, JSONException {
+        final List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
+        final Context context = session.getContext();
+        final Set<Integer> ids = new HashSet<Integer>();
+        if (request.has("folder")) {
+            final String folderId = request.getString("folder");
+            List<Subscription> allSubscriptions = null;
+            allSubscriptions = getSubscriptionsInFolder(context, folderId, secretService.getSecret(session));
+            Collections.sort(allSubscriptions, new Comparator<Subscription>() {
+
+                public int compare(Subscription o1, Subscription o2) {
+                    if(o1.getLastUpdate() == o2.getLastUpdate()) {
+                        return o2.getId() - o1.getId();
+                    }
+                    return (int) (o2.getLastUpdate() - o1.getLastUpdate());
+                }
+                
+            });
+            for (Subscription subscription : allSubscriptions) {
+                ids.add(subscription.getId());
+                subscriptionsToRefresh.add(subscription);
+            }
+        }
         if (request.has("id")) {
-            int id = request.getInt("id");
-            Subscription subscription = loadSubscription(id, context, request.optString("source"), session.getPassword());
-            if (!ids.contains(ids)) {
+            final int id = request.getInt("id");
+            final Subscription subscription = loadSubscription(id, context, request.optString("source"), secretService.getSecret(session));
+            if (!ids.contains(id)) {
                 ids.add(id);
                 subscriptionsToRefresh.add(subscription);
             }
@@ -159,54 +186,58 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return 1;
     }
 
-    private Object listSubscriptions(JSONObject request, ServerSession session) throws JSONException, AbstractOXException {
-        JSONArray ids = request.getJSONArray(ResponseFields.DATA);
-        Context context = session.getContext();
-        List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());
+
+    private Object listSubscriptions(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
+        final JSONArray ids = request.getJSONArray(ResponseFields.DATA);
+        final Context context = session.getContext();
+        final List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());
         for (int i = 0, size = ids.length(); i < size; i++) {
-            int id = ids.getInt(i);
-            SubscribeService subscribeService = discovery.getSource(context, id).getSubscribeService();
-            Subscription subscription = subscribeService.loadSubscription(context, id, session.getPassword());
-            if (subscription != null) {
-                subscriptions.add(subscription);
+            final int id = ids.getInt(i);
+            final SubscriptionSource source = discovery.getSource(context, id);
+            if(source != null) {
+                final SubscribeService subscribeService = source.getSubscribeService();
+                final Subscription subscription = subscribeService.loadSubscription(context, id, secretService.getSecret(session));
+                if (subscription != null) {
+                    subscriptions.add(subscription);
+                }
             }
         }
-        String[] basicColumns = getBasicColumns(request);
-        Map<String, String[]> dynamicColumns = getDynamicColumns(request);
-        List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
+        final String[] basicColumns = getBasicColumns(request);
+        final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
+        final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
 
         return createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
     }
 
-    private Object loadAllSubscriptionsInFolder(JSONObject request, ServerSession session) throws JSONException, AbstractOXException {
-        String folderId = request.getString("folder");
-        Context context = session.getContext();
+    private Object loadAllSubscriptionsInFolder(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
+        final String folderId = request.getString("folder");
+        final Context context = session.getContext();
 
         List<Subscription> allSubscriptions = null;
-        allSubscriptions = getSubscriptionsInFolder(context, folderId, session.getPassword());
+        allSubscriptions = getSubscriptionsInFolder(context, folderId, secretService.getSecret(session));
 
-        String[] basicColumns = getBasicColumns(request);
-        Map<String, String[]> dynamicColumns = getDynamicColumns(request);
-        List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
+        final String[] basicColumns = getBasicColumns(request);
+        final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
+        final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
 
         return createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
     }
 
-    private List<Subscription> getSubscriptionsInFolder(Context context, String folder, String secret) throws AbstractOXException {
-        List<SubscriptionSource> sources = discovery.getSources();
-        List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
-        for (SubscriptionSource subscriptionSource : sources) {
-            Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder, secret);
+    private List<Subscription> getSubscriptionsInFolder(final Context context, final String folder, final String secret) throws AbstractOXException {
+        final List<SubscriptionSource> sources = discovery.getSources();
+        final List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
+        for (final SubscriptionSource subscriptionSource : sources) {
+            final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder, secret);
             allSubscriptions.addAll(subscriptions);
         }
         return allSubscriptions;
     }
 
-    private Object createResponse(List<Subscription> allSubscriptions, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder) throws SubscriptionJSONException, JSONException {
-        JSONArray rows = new JSONArray();
-        SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
-        for (Subscription subscription : allSubscriptions) {
-            JSONArray row = writer.writeArray(
+    private Object createResponse(final List<Subscription> allSubscriptions, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder) throws SubscriptionJSONException, JSONException {
+        final JSONArray rows = new JSONArray();
+        final SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
+        for (final Subscription subscription : allSubscriptions) {
+            final JSONArray row = writer.writeArray(
                 subscription,
                 basicColumns,
                 dynamicColumns,
@@ -217,12 +248,12 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return rows;
     }
 
-    private Map<String, String[]> getDynamicColumns(JSONObject request) throws JSONException {
-        List<String> identifiers = getDynamicColumnOrder(request);
-        Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
-        for (String identifier : identifiers) {
-            String columns = request.optString(identifier);
-            if (columns != null || !columns.equals("")) {
+    private Map<String, String[]> getDynamicColumns(final JSONObject request) throws JSONException {
+        final List<String> identifiers = getDynamicColumnOrder(request);
+        final Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
+        for (final String identifier : identifiers) {
+            final String columns = request.optString(identifier);
+            if (columns != null && !columns.equals("")) {
                 dynamicColumns.put(identifier, columns.split("\\s*,\\s*"));
             }
         }
@@ -239,60 +270,72 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         }
     };
 
-    private List<String> getDynamicColumnOrder(JSONObject request) throws JSONException {
+    private List<String> getDynamicColumnOrder(final JSONObject request) throws JSONException {
         if (request.has("dynamicColumnPlugins")) {
             return Arrays.asList(request.getString("dynamicColumnPlugins").split("\\s*,\\s*"));
         }
 
-        List<String> dynamicColumnIdentifiers = new ArrayList<String>();
-        for (String paramName : request.keySet()) {
+        final List<String> dynamicColumnIdentifiers = new ArrayList<String>();
+        for (final String paramName : request.keySet()) {
             if (!KNOWN_PARAMS.contains(paramName) && paramName.contains(".")) {
                 dynamicColumnIdentifiers.add(paramName);
             }
         }
-        String order = request.optString("__query");
+        final String order = request.optString("__query");
         Collections.sort(dynamicColumnIdentifiers, new QueryStringPositionComparator(order));
         return dynamicColumnIdentifiers;
     }
 
-    private String[] getBasicColumns(JSONObject request) {
-        String columns = request.optString("columns");
+    private String[] getBasicColumns(final JSONObject request) {
+        final String columns = request.optString("columns");
         if (columns == null || columns.equals("")) {
             return new String[] { "id", "folder", "source" };
         }
         return columns.split("\\s*,\\s*");
     }
 
-    private Object loadSubscription(JSONObject request, ServerSession session) throws JSONException, AbstractOXException {
-        int id = request.getInt("id");
-        String source = request.optString("source");
-        Context context = session.getContext();
-        Subscription subscription = loadSubscription(id, context, source, session.getPassword());
-        return createResponse(subscription);
+    private Object loadSubscription(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
+        final int id = request.getInt("id");
+        final String source = request.optString("source");
+        final Context context = session.getContext();
+        final Subscription subscription = loadSubscription(id, context, source, secretService.getSecret(session));
+        return createResponse(subscription, request.optString("__serverURL"));
     }
 
-    private Object createResponse(Subscription subscription) throws JSONException, SubscriptionJSONException {
-        JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription());
+    private Object createResponse(final Subscription subscription, final String urlPrefix) throws JSONException, SubscriptionJSONException {
+        final JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
         return object;
     }
 
-    private Subscription loadSubscription(int id, Context context, String source, String secret) throws AbstractOXException {
+    private Subscription loadSubscription(final int id, final Context context, final String source, final String secret) throws AbstractOXException {
         SubscribeService service = null;
         if (source != null && !source.equals("")) {
-            service = discovery.getSource(source).getSubscribeService();
+            final SubscriptionSource s = discovery.getSource(source);
+            if(s == null) {
+                return null;
+            }
+            service = s.getSubscribeService();
         } else {
-            service = discovery.getSource(context, id).getSubscribeService();
+            final SubscriptionSource s = discovery.getSource(context, id);
+            if(s == null) {
+                return null;
+            }
+            service = s.getSubscribeService();
         }
         return service.loadSubscription(context, id, secret);
     }
 
-    private Object deleteSubscriptions(JSONObject request, ServerSession session) throws JSONException, AbstractOXException {
-        JSONArray ids = request.getJSONArray(ResponseFields.DATA);
-        Context context = session.getContext();
+    private Object deleteSubscriptions(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
+        final JSONArray ids = request.getJSONArray(ResponseFields.DATA);
+        final Context context = session.getContext();
         for (int i = 0, size = ids.length(); i < size; i++) {
-            int id = ids.getInt(i);
-            SubscribeService subscribeService = discovery.getSource(context, id).getSubscribeService();
-            Subscription subscription = new Subscription();
+            final int id = ids.getInt(i);
+            final SubscriptionSource s = discovery.getSource(context, id);
+            if(s == null) {
+                continue;
+            }
+            final SubscribeService subscribeService = s.getSubscribeService();
+            final Subscription subscription = new Subscription();
             subscription.setContext(context);
             subscription.setId(id);
             subscribeService.unsubscribe(subscription);
@@ -300,24 +343,24 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return 1;
     }
 
-    private Object updateSubscription(JSONObject request, ServerSession session) throws JSONException, AbstractOXException {
-        Subscription subscription = getSubscription(request, session, session.getPassword());
-        SubscribeService subscribeService = subscription.getSource().getSubscribeService();
+    private Object updateSubscription(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
+        final Subscription subscription = getSubscription(request, session, secretService.getSecret(session));
+        final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
         subscribeService.update(subscription);
         return 1;
     }
 
-    private Object createSubscription(JSONObject request, ServerSession session) throws AbstractOXException, JSONException {
-        Subscription subscription = getSubscription(request, session, session.getPassword());
+    private Object createSubscription(final JSONObject request, final ServerSession session) throws AbstractOXException, JSONException {
+        final Subscription subscription = getSubscription(request, session, secretService.getSecret(session));
         subscription.setId(-1);
-        SubscribeService subscribeService = subscription.getSource().getSubscribeService();
+        final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
         subscribeService.subscribe(subscription);
         return subscription.getId();
     }
 
-    private Subscription getSubscription(JSONObject request, ServerSession session, String secret) throws JSONException {
-        JSONObject object = request.getJSONObject(ResponseFields.DATA);
-        Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);
+    private Subscription getSubscription(final JSONObject request, final ServerSession session, final String secret) throws JSONException {
+        final JSONObject object = request.getJSONObject(ResponseFields.DATA);
+        final Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);
         subscription.setContext(session.getContext());
         subscription.setUserId(session.getUserId());
         subscription.getConfiguration().put("com.openexchange.crypto.secret", secret);
