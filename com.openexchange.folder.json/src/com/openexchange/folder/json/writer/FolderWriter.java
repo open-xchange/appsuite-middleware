@@ -329,8 +329,12 @@ public final class FolderWriter {
         m.put(FolderField.SUBSCR_SUBFLDS.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+                /*-
+                 * 
                 final String[] obj = folder.getSubfolderIDs();
                 jsonPutter.put(FolderField.SUBSCR_SUBFLDS.getName(), null == obj ? JSONObject.NULL : Boolean.valueOf(obj.length > 0));
+                 */
+                jsonPutter.put(FolderField.SUBSCR_SUBFLDS.getName(), Boolean.valueOf(folder.hasSubscribedSubfolders()));
             }
         });
         m.put(FolderField.CAPABILITIES.getColumn(), new FolderFieldWriter() {
