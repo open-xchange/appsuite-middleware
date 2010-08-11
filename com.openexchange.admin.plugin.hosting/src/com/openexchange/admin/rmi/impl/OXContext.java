@@ -526,7 +526,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw invalidDataException;
         }
         new BasicAuthenticator(context).doAuthentication(auth);
-
+        
         log.debug("" + search_pattern);
 
         try {
@@ -573,12 +573,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } else {
                 ctxs = oxcox.listContext(search_pattern, retval.getTablename(), retval.getQuerypart());
             }
-            final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(oxcox.getData(ctxs)), auth, oxcox);
-            if (null != callGetDataPlugins) {
+            final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ctxs), auth, oxcox);
+            if (null != callGetDataPlugins)
                 return callGetDataPlugins.toArray(new Context[callGetDataPlugins.size()]);
-            } else {
-                return ctxs;
-            }
+            return ctxs;
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -1111,4 +1109,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final OXToolStorageInterface oxtool = OXToolMySQLStorage.getInstance();
         return oxtool.getAdminForContext(ctx);
     }
+
+//    public boolean checkExists(Context ctx) throws InvalidDataException, StorageException {
+//        if(ctx == null)
+//            throw new InvalidDataException("Given context is invalid");
+//
+//        return tool.existsContext(ctx);
+//    }
 }
