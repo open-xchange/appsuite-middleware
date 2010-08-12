@@ -519,7 +519,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true).fillDAO(
                         (CalendarDataObject) newApp);
                     if (oldObj != null) {
-                        ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, false).fillDAO(
+                        ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true).fillDAO(
                             (CalendarDataObject) oldApp);
                     }
                 } catch (Exception e) {
