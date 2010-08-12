@@ -161,6 +161,21 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-plesk
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX into Plesk integration
+Requires:	%{oxcommon}
+Requires:	open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-upsell-generic
+
+%description -n open-xchange-meta-plesk
+The Open-Xchange Meta package for OX into Plesk integration
+
+Authors:
+--------
+    Open-Xchange
+
+
+# ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-parallels
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX into Parallels integration
@@ -225,6 +240,10 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-meta-singleserver
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-plesk
 %defattr(-,root,root)
 %doc README.TXT
 
