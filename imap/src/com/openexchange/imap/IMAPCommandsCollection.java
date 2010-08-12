@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import gnu.trove.TIntLongHashMap;
+import gnu.trove.TLongIntHashMap;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,14 +77,14 @@ import javax.mail.event.FolderEvent;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
-import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
+import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -97,6 +99,7 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.ENVELOPE;
@@ -121,6 +124,8 @@ public final class IMAPCommandsCollection {
     private static final String STR_FETCH = "FETCH";
 
     static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPCommandsCollection.class);
+
+    static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Prevent instantiation.
@@ -184,7 +189,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if IMAP root folder allows subfolder creation; otherwise <code>false</code>
      * @throws MessagingException If checking IMAP root folder for subfolder creation fails
      */
-    public static boolean canCreateSubfolder(final DefaultFolder rootFolder) throws MessagingException {
+    public static Boolean canCreateSubfolder(final DefaultFolder rootFolder) throws MessagingException {
         return ((Boolean) rootFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
@@ -204,7 +209,7 @@ public final class IMAPCommandsCollection {
                 }
                 return Boolean.FALSE;
             }
-        })).booleanValue();
+        }));
     }
 
     /**
@@ -233,37 +238,47 @@ public final class IMAPCommandsCollection {
                 } else {
                     fullName = new StringBuilder(64).append(fullnamePrefix).append(String.valueOf(System.currentTimeMillis())).toString();
                 }
-                Boolean retval = Boolean.TRUE;
-                boolean delete = false;
                 try {
-                    if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
-                        // Only holds folders
-                        final char separator = getSeparator(p);
-                        p.create(fullName + separator);
-                        delete = true;
-                    } else {
-                        p.create(fullName);
-                        delete = true;
-                        /*
-                         * Some IMAP servers do not allow creation of folders that can contain messages AND subfolders. Verify that created
-                         * folder may also contain subfolders.
-                         */
-                        if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
-                            final ListInfo[] li = p.list("", fullName);
-                            if (li != null && !li[0].hasInferiors) {
-                                /*
-                                 * The new folder doesn't support inferiors.
-                                 */
-                                retval = Boolean.FALSE;
+                    Boolean retval = Boolean.TRUE;
+                    boolean delete = false;
+                    try {
+                        if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
+                            // Only holds folders
+                            final char separator = getSeparator(p);
+                            p.create(fullName + separator);
+                            delete = true;
+                        } else {
+                            p.create(fullName);
+                            delete = true;
+                            /*
+                             * Some IMAP servers do not allow creation of folders that can contain messages AND subfolders. Verify that
+                             * created folder may also contain subfolders.
+                             */
+                            if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
+                                final ListInfo[] li = p.list("", fullName);
+                                if (li != null && !li[0].hasInferiors) {
+                                    /*
+                                     * The new folder doesn't support inferiors.
+                                     */
+                                    retval = Boolean.FALSE;
+                                }
                             }
                         }
+                    } finally {
+                        if (delete) {
+                            p.delete(fullName);
+                        }
                     }
-                } finally {
-                    if (delete) {
-                        p.delete(fullName);
+                    return retval;
+                } catch (final CommandFailedException e) {
+                    /*
+                     * Either creation or deletion of temporary folder failed. Assume maildir folder format.
+                     */
+                    if (DEBUG) {
+                        LOG.debug("Either creation or deletion of temporary folder failed. Assume maildir folder format.", e);
                     }
+                    return Boolean.valueOf((((type & IMAPFolder.HOLDS_MESSAGES) > 0)) && ((type & IMAPFolder.HOLDS_FOLDERS) > 0));
                 }
-                return retval;
             }
         }))).booleanValue();
     }
@@ -331,6 +346,13 @@ public final class IMAPCommandsCollection {
         })).booleanValue();
     }
 
+    /**
+     * Gets total, recent, and unseen counts from given IMAP folder
+     * 
+     * @param imapFolder The IMAP folder
+     * @return The total, recent, and unseen counts wrapped in an <code>int</code> array
+     * @throws MessagingException If determining counts fails
+     */
     public static int[] getStatus(final IMAPFolder imapFolder) throws MessagingException {
         return (int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -614,8 +636,10 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = p.command(new StringBuilder().append(COMMAND_LSUB).append(" \"\" ").append(
-                    prepareStringArgument(lfolder)).toString(), null);
+                final Response[] r =
+                    p.command(
+                        new StringBuilder().append(COMMAND_LSUB).append(" \"\" ").append(prepareStringArgument(lfolder)).toString(),
+                        null);
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     int res = -1;
@@ -695,8 +719,9 @@ public final class IMAPCommandsCollection {
             }
         });
         if (null == ret) {
-            final ProtocolException pex = new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(
-                newFolder.getFullName()).append("\" cannot be created.").toString());
+            final ProtocolException pex =
+                new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(newFolder.getFullName()).append(
+                    "\" cannot be created.").toString());
             throw new MessagingException(pex.getMessage(), pex);
         }
         // Set exists, type, and attributes
@@ -707,7 +732,8 @@ public final class IMAPCommandsCollection {
 
     private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";
 
-    private static final String ALL_COLOR_LABELS = "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
+    private static final String ALL_COLOR_LABELS =
+        "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
 
     /**
      * Clears all set color label (which are stored as user flags) from messages which correspond to given UIDs.
@@ -830,10 +856,38 @@ public final class IMAPCommandsCollection {
                      * Grab last response that should indicate an OK
                      */
                     final Response response = r[r.length - 1];
-                    if (response.isOK()) {
-                        return Boolean.TRUE;
-                    }
-                    return Boolean.FALSE;
+                    return Boolean.valueOf(response.isOK());
+                }
+
+            });
+        } catch (final MessagingException e) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Tries to propagate specified client IP through a NOOP command; e.g. "A01 NOOP <CLIENT_IP>".
+     * 
+     * @param f The IMAP folder
+     * @param clientIP The client IP address
+     */
+    public static void propagateClientIP(final IMAPFolder f, final String clientIP) {
+        try {
+            f.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                /*
+                 * (non-Javadoc)
+                 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com .sun.mail.imap.protocol.IMAPProtocol)
+                 */
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    final Response[] r = protocol.command(new StringBuilder(COMMAND_NOOP).append(' ').append(clientIP).toString(), null);
+                    /*
+                     * Grab last response that should indicate an OK
+                     */
+                    final Response response = r[r.length - 1];
+                    return Boolean.valueOf(response.isOK());
                 }
 
             });
@@ -899,8 +953,8 @@ public final class IMAPCommandsCollection {
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String command = new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(
-                    numArgument).toString();
+                final String command =
+                    new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
                 final Response[] r = p.command(command, null);
                 final Response response = r[r.length - 1];
                 final SmartIntArray sia = new SmartIntArray(32);
@@ -953,11 +1007,12 @@ public final class IMAPCommandsCollection {
      * @param folder The IMAP folder
      * @param fields The desired fields
      * @param sortField The sort-by field
-     * @param imapProperties The IMAP properties
+     * @param fastFetch Whether to perform a fast <code>FETCH</code> or not
+     * @param limit The limit
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final IIMAPProperties imapProperties) throws MessagingException {
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -966,48 +1021,34 @@ public final class IMAPCommandsCollection {
                 /*
                  * Result is something like: SEARCH 12 20 24
                  */
-                int[] newMsgSeqNums = null;
-                final Response response = r[r.length - 1];
+                final int[] newMsgSeqNums;
                 {
-                    final SmartIntArray tmp = new SmartIntArray(32);
-                    if (response.isOK()) {
-                        for (int i = 0, len = r.length - 1; i < len; i++) {
-                            if (!(r[i] instanceof IMAPResponse)) {
-                                r[i] = null;
-                                continue;
-                            }
-                            final IMAPResponse ir = (IMAPResponse) r[i];
+                    int[] tmp = handleSearchResponses(r, p);
+                    final int len = tmp.length;
+                    if (limit > 0 && limit < len) {
+                        try {
                             /*
-                             * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
-                             * messages that match the searching criteria.
+                             * Sort exceeding list on server
                              */
-                            if (ir.keyEquals(COMMAND_SEARCH)) {
-                                String num;
-                                while ((num = ir.readAtomString()) != null) {
-                                    try {
-                                        tmp.append(Integer.parseInt(num));
-                                    } catch (final NumberFormatException e) {
-                                        continue;
-                                    }
-                                }
+                            if (((IMAPStore) folder.getStore()).hasCapability("SORT")) {
+                                final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
+                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
+                                tmp = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, tmp);
                             }
-                            r[i] = null;
+                            /*
+                             * Copy to fitting array
+                             */
+                            final int[] ni = new int[limit];
+                            System.arraycopy(tmp, 0, ni, 0, limit);
+                            newMsgSeqNums = ni;
+                        } catch (final IMAPException e) {
+                            throw wrapException(e, null);
+                        } catch (final MessagingException e) {
+                            throw wrapException(e, null);
                         }
-                        p.notifyResponseHandlers(r);
-                    } else if (response.isBAD()) {
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            COMMAND_SEARCH_UNSEEN,
-                            response.toString()));
-                    } else if (response.isNO()) {
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            COMMAND_SEARCH_UNSEEN,
-                            response.toString()));
                     } else {
-                        p.handleResult(response);
+                        newMsgSeqNums = tmp;
                     }
-                    newMsgSeqNums = tmp.toArray();
                 }
                 /*
                  * No new messages found
@@ -1025,9 +1066,9 @@ public final class IMAPCommandsCollection {
                     final MailField sort = MailField.toField(sortField.getListField());
                     final FetchProfile fp;
                     if (null == sort) {
-                        fp = getFetchProfile(fields, imapProperties.isFastFetch());
+                        fp = getFetchProfile(fields, fastFetch);
                     } else {
-                        fp = getFetchProfile(fields, sort, imapProperties.isFastFetch());
+                        fp = getFetchProfile(fields, sort, fastFetch);
                     }
                     newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
                 } catch (final MessagingException e) {
@@ -1035,6 +1076,50 @@ public final class IMAPCommandsCollection {
                 }
                 return newMsgs;
             }
+
+            private int[] handleSearchResponses(final Response[] r, final IMAPProtocol p) throws ProtocolException {
+                final Response response = r[r.length - 1];
+                final SmartIntArray tmp = new SmartIntArray(32);
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length - 1; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            r[i] = null;
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        /*
+                         * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
+                         * messages that match the searching criteria.
+                         */
+                        if (ir.keyEquals(COMMAND_SEARCH)) {
+                            String num;
+                            while ((num = ir.readAtomString()) != null) {
+                                try {
+                                    tmp.append(Integer.parseInt(num));
+                                } catch (final NumberFormatException e) {
+                                    continue;
+                                }
+                            }
+                        }
+                        r[i] = null;
+                    }
+                    p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_SEARCH_UNSEEN,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_SEARCH_UNSEEN,
+                        response.toString()));
+                } else {
+                    p.handleResult(response);
+                }
+                return tmp.toArray();
+            } // End of handleSearchResponses()
+
         });
         return val;
     }
@@ -1063,9 +1148,8 @@ public final class IMAPCommandsCollection {
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r = p.command(COMMAND_EXPUNGE, null);
                 final Response response = r[r.length - 1];
-                Boolean retval = Boolean.FALSE;
                 if (response.isOK()) {
-                    retval = Boolean.TRUE;
+                    return Boolean.TRUE;
                 } else if (response.isBAD()) {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
@@ -1079,7 +1163,7 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
-                return retval;
+                return Boolean.FALSE;
             }
         }))).booleanValue();
     }
@@ -1111,7 +1195,7 @@ public final class IMAPCommandsCollection {
                 final long start = System.currentTimeMillis();
                 IMAPCommandsCollection.uidExpunge(imapFolder, uids);
                 MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
                 }
@@ -1301,11 +1385,12 @@ public final class IMAPCommandsCollection {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r = p.command(FETCH_FLAGS, null);
-                final Response response = r[r.length - 1];
+                final int mlen = r.length - 1;
+                final Response response = r[mlen];
                 long[] retval = null;
                 if (response.isOK()) {
                     final Set<Long> set = new TreeSet<Long>();
-                    final int mlen = r.length - 1;
+                    final String flagsItemName = "FLAGS";
                     for (int i = 0; i < mlen; i++) {
                         if (!(r[i] instanceof FetchResponse)) {
                             continue;
@@ -1313,7 +1398,7 @@ public final class IMAPCommandsCollection {
                         final FetchResponse fr = (FetchResponse) r[i];
                         final boolean deleted;
                         {
-                            final FLAGS item = getItemOf(FLAGS.class, fr, "FLAGS");
+                            final FLAGS item = getItemOf(FLAGS.class, fr, flagsItemName);
                             deleted = item.contains(Flags.Flag.DELETED);
                         }
                         if (deleted) {
@@ -1345,6 +1430,10 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
+                /*
+                 * Consume remaining responses
+                 */
+                p.notifyResponseHandlers(r);
                 return retval;
             }
         }));
@@ -1485,10 +1574,17 @@ public final class IMAPCommandsCollection {
              */
             return new int[0];
         }
+        final int length = uids.length;
+        if (length == 0) {
+            /*
+             * Empty array...
+             */
+            return new int[0];
+        }
         return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Map<Long, Integer> m = new HashMap<Long, Integer>(uids.length);
+                final TLongIntHashMap m = new TLongIntHashMap(length);
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
@@ -1512,7 +1608,7 @@ public final class IMAPCommandsCollection {
                             if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fr = (FetchResponse) r[j];
                                 final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
+                                m.put(uidItem.uid, fr.getNumber());
                                 r[j] = null;
                             }
                         }
@@ -1531,15 +1627,15 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(128).append(imapFolder.getFullName()).append(
-                        ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(uids.length).append(" messages took ").append(
+                        ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(length).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
                 }
-                final int[] retval = new int[m.size()];
+                final int[] retval = new int[length];
                 for (int i = 0; i < retval.length; i++) {
-                    final Long key = Long.valueOf(uids[i]);
-                    retval[i] = m.containsKey(key) ? m.get(key).intValue() : -1;
+                    final int seqNum = m.get(uids[i]);
+                    retval[i] = 0 == seqNum ? -1 : seqNum;
                 }
                 return retval;
             }
@@ -1554,18 +1650,17 @@ public final class IMAPCommandsCollection {
      * @return A map resolving specified UIDs to current corresponding sequence numbers
      * @throws MessagingException If a messaging error occurs
      */
-    @SuppressWarnings("unchecked")
-    public static Map<Long, Integer> uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static TLongIntHashMap uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
         if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
              */
-            return Collections.emptyMap();
+            return new TLongIntHashMap(0);
         }
-        return (Map<Long, Integer>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (TLongIntHashMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Map<Long, Integer> m = new HashMap<Long, Integer>(uids.length);
+                final TLongIntHashMap m = new TLongIntHashMap(uids.length);
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
@@ -1589,7 +1684,7 @@ public final class IMAPCommandsCollection {
                             if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fr = (FetchResponse) r[j];
                                 final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
+                                m.put(uidItem.uid, fr.getNumber());
                                 r[j] = null;
                             }
                         }
@@ -1608,7 +1703,7 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(128).append(imapFolder.getFullName()).append(
                         ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(uids.length).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
@@ -1626,18 +1721,17 @@ public final class IMAPCommandsCollection {
      * @return A map resolving corresponding sequence numbers to specified UIDs
      * @throws MessagingException If a messaging error occurs
      */
-    @SuppressWarnings("unchecked")
-    public static Map<Integer, Long> seqNums2uidsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static TIntLongHashMap seqNums2uidsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
         if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
              */
-            return Collections.emptyMap();
+            return new TIntLongHashMap(0);
         }
-        return (Map<Integer, Long>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (TIntLongHashMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Map<Integer, Long> m = new HashMap<Integer, Long>(uids.length);
+                final TIntLongHashMap m = new TIntLongHashMap(uids.length);
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -1661,7 +1755,7 @@ public final class IMAPCommandsCollection {
                                 final FetchResponse fr = (FetchResponse) r[j];
                                 final UID uidItem = getItemOf(UID.class, fr);
                                 if (uidItem != null) {
-                                    m.put(Integer.valueOf(fr.getNumber()), Long.valueOf(uidItem.uid));
+                                    m.put(fr.getNumber(), uidItem.uid);
                                 }
                                 r[j] = null;
                             }
@@ -1943,7 +2037,8 @@ public final class IMAPCommandsCollection {
 
     private static final String COMMAND_FETCH_OXMARK_RFC = "FETCH 1:* (UID RFC822.HEADER.LINES (" + MessageHeaders.HDR_X_OX_MARKER + "))";
 
-    private static final String COMMAND_FETCH_OXMARK_REV1 = "FETCH 1:* (UID BODY.PEEK[HEADER.FIELDS (" + MessageHeaders.HDR_X_OX_MARKER + ")])";
+    private static final String COMMAND_FETCH_OXMARK_REV1 =
+        "FETCH 1:* (UID BODY.PEEK[HEADER.FIELDS (" + MessageHeaders.HDR_X_OX_MARKER + ")])";
 
     private static interface HeaderString {
 
@@ -2074,7 +2169,7 @@ public final class IMAPCommandsCollection {
                         }
                         return retval;
                     }
-                } catch (final MailException e) {
+                } catch (final Exception e) {
                     throw wrapException(e, null);
                 } finally {
                     // p.notifyResponseHandlers(r);
