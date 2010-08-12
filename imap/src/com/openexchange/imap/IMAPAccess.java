@@ -484,6 +484,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             connected = true;
             /*
+             * Propagate client IP address
+             */
+            if (imapConfProps.isPropagateClientIPAddress()) {
+                IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), session.getLocalIp());
+            }
+            /*
              * Add server's capabilities
              */
             config.initializeCapabilities(imapStore);

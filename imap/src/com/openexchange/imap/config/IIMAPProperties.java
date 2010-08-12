@@ -62,6 +62,13 @@ import com.openexchange.mail.api.MailConfig.BoolCapVal;
 public interface IIMAPProperties extends IMailProperties {
 
     /**
+     * Whether client's IP address should be propagated by a NOOP command.
+     * 
+     * @return <code>true</code> if client's IP address should be propagated by a NOOP command; otherwise <code>false</code>
+     */
+    public boolean isPropagateClientIPAddress();
+
+    /**
      * Checks if fast <code>FETCH</code> is enabled.
      * 
      * @return <code>true</code> if fast <code>FETCH</code> is enabled; otherwise <code>false</code>

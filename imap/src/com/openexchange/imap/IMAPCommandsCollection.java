@@ -919,7 +919,7 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Tries to propagate specified client IP through a NOOP command.
+     * Tries to propagate specified client IP through a NOOP command; e.g. "A01 NOOP <CLIENT_IP>".
      * 
      * @param f The IMAP folder
      * @param clientIP The client IP address

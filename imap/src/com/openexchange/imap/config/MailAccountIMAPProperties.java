@@ -181,6 +181,15 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return Boolean.parseBoolean(tmp);
     }
 
+    public boolean isPropagateClientIPAddress() {
+        final String tmp = properties.get("com.openexchange.imap.propagateClientIPAddress");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().isPropagateClientIPAddress();
+        }
+
+        return Boolean.parseBoolean(tmp);
+    }
+
     public boolean isImapSearch() {
         final String tmp = properties.get("com.openexchange.imap.imapSearch");
         if (null == tmp) {

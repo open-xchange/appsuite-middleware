@@ -114,6 +114,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private String spamHandlerName;
 
+    private boolean propagateClientIPAddress;
+
     /**
      * Initializes a new {@link IMAPProperties}
      */
@@ -145,6 +147,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String fastFetchStr = configuration.getProperty("com.openexchange.imap.imapFastFetch", STR_TRUE).trim();
             fastFetch = Boolean.parseBoolean(fastFetchStr);
             logBuilder.append("\tFast Fetch Enabled: ").append(fastFetch).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.propagateClientIPAddress", STR_FALSE).trim();
+            propagateClientIPAddress = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tPropagate Client IP Address: ").append(propagateClientIPAddress).append('\n');
         }
 
         {
@@ -246,7 +254,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     protected void resetFields() {
         imapSort = false;
         imapSearch = false;
-        fastFetch = false;
+        fastFetch = true;
+        propagateClientIPAddress = false;
         supportsACLs = null;
         imapTimeout = 0;
         imapConnectionTimeout = 0;
@@ -260,6 +269,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     public boolean isFastFetch() {
         return fastFetch;
+    }
+
+    public boolean isPropagateClientIPAddress() {
+        return propagateClientIPAddress;
     }
 
     public String getImapAuthEnc() {
