@@ -656,7 +656,9 @@ public final class HTMLProcessing {
             StringBuilder tmp = null;
             do {
                 // Un-quote
-                final String match = PATTERN_UNQUOTE2.matcher(PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll("-->");
+                final String match =
+                    Matcher.quoteReplacement(PATTERN_UNQUOTE2.matcher(PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll(
+                        "-->"));
                 // Check for additional HTML comments
                 if (PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("").indexOf(endingComment) == -1) {
                     // No additional HTML comments
