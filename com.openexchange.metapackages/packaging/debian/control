@@ -33,7 +33,7 @@ Description: The Open-Xchange Meta package for Publish and Subscribe
 
 Package: open-xchange-meta-messaging
 Architecture: all
-Depends: open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook
+Depends: open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook, open-xchange-messaging-mail
 Description: The Open-Xchange Meta package for Messaging
 
 Package: open-xchange-meta-gui
@@ -53,6 +53,6 @@ Description: The Open-Xchange Meta package for OX managed via database only
 
 Package: open-xchange-meta-mobility
 Architecture: all
-Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas
+Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-mobile-configuration-generator, open-xchange-mobile-configuration-json, open-xchange-mobile-configuration-json-action-email, open-xchange-mobile-configuration-gui
 Description: The Open-Xchange Meta package for Business Mobility
 

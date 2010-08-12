@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open-Xchange Meta packages
 
-%define oxcommon open-xchange, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-management, open-xchange-monitoring, open-xchange-pop3, open-xchange-push-udp, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-threadpool, open-xchange-charset, open-xchange-control, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin, open-xchange-report-client
+%define oxcommon open-xchange, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-management, open-xchange-monitoring, open-xchange-pop3, open-xchange-push-udp, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-threadpool, open-xchange-charset, open-xchange-control, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin, open-xchange-report-client, open-xchange-secret
 
 # ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-server
@@ -93,7 +93,7 @@ Authors:
 %package -n	open-xchange-meta-messaging
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for Messaging
-Requires:	open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook
+Requires:	open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook, open-xchange-messaging-mail
 
 
 %description -n open-xchange-meta-messaging
@@ -150,7 +150,7 @@ Authors:
 %package -n	open-xchange-meta-mobility
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for Business Mobility
-Requires:	open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas
+Requires:	open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-mobile-configuration-generator, open-xchange-mobile-configuration-json, open-xchange-mobile-configuration-json-action-email, open-xchange-mobile-configuration-gui
 
 
 %description -n open-xchange-meta-mobility
