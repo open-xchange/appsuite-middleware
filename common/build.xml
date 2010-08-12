@@ -33,6 +33,7 @@
         <include name="org.apache.commons.*"/>
        	<include name="org.apache.servicemix*"/>
         <include name="org.eclipse.equinox*"/>
+        <include name="org.eclipse.osgi*"/>
         <include name="geronimo*"/>
     </fileset>
 
