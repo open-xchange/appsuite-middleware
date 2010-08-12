@@ -58,8 +58,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 
@@ -193,22 +191,18 @@ public final class Entity2ACLAutoDetector {
              * No known IMAP server found, check if ACLs are disabled anyway. If yes entity2acl is never used and can safely be mapped to
              * default implementation.
              */
-            try {
-                if (!ACLExtensionFactory.getInstance().getACLExtension(imapConfig).aclSupport()) {
-                    /*
-                     * Return fallback implementation
-                     */
-                    if (logger.isWarnEnabled()) {
-                        final StringBuilder warnBuilder = new StringBuilder(512).append("No IMAP server found ").append(
-                            "that corresponds to greeting:\n\"").append(info.replaceAll("\r?\n", "")).append("\" on ").append(address).append(
-                            ".\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"").append(
-                            IMAPServer.CYRUS.getName()).append("\" is used as fallback.");
-                        logger.warn(warnBuilder.toString());
-                    }
-                    return IMAPServer.CYRUS;
+            if (!imapConfig.getACLExtension().aclSupport()) {
+                /*
+                 * Return fallback implementation
+                 */
+                if (logger.isWarnEnabled()) {
+                    final StringBuilder warnBuilder = new StringBuilder(512).append("No IMAP server found ").append(
+                        "that corresponds to greeting:\n\"").append(info.replaceAll("\r?\n", "")).append("\" on ").append(address).append(
+                        ".\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"").append(
+                        IMAPServer.CYRUS.getName()).append("\" is used as fallback.");
+                    logger.warn(warnBuilder.toString());
                 }
-            } catch (final IMAPException e) {
-                throw new Entity2ACLException(e);
+                return IMAPServer.CYRUS;
             }
             throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
         }

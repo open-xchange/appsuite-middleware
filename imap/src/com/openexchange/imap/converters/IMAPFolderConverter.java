@@ -64,8 +64,6 @@ import com.openexchange.imap.ACLPermission;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.NamespaceFolder;
-import com.openexchange.imap.acl.ACLExtension;
-import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
@@ -341,8 +339,7 @@ public final class IMAPFolderConverter {
             /*
              * Set message counts for total, new, unread, and deleted
              */
-            final ACLExtensionProxy proxy = new ACLExtensionProxy(imapConfig);
-            if (selectable && proxy.getACLExtension().canRead(ownRights)) {
+            if (selectable && imapConfig.getACLExtension().canRead(ownRights)) {
                 try {
                     mailFolder.setMessageCount(imapFolder.getMessageCount());
                     mailFolder.setNewMessageCount(imapFolder.getNewMessageCount());
@@ -372,7 +369,7 @@ public final class IMAPFolderConverter {
             mailFolder.setSubscribed(MailProperties.getInstance().isSupportSubscription() ? ("INBOX".equals(mailFolder.getFullname()) ? true : imapFolder.isSubscribed()) : true);
             if (imapConfig.isSupportsACLs()) {
                 // Check if ACLs can be read; meaning GETACL is allowed
-                if (selectable && exists && proxy.getACLExtension().canGetACL(ownRights)) {
+                if (selectable && exists && imapConfig.getACLExtension().canGetACL(ownRights)) {
                     try {
                         applyACL2Permissions(imapFolder, session, imapConfig, mailFolder, ownRights, ctx);
                     } catch (final MailException e) {
@@ -388,7 +385,7 @@ public final class IMAPFolderConverter {
             } else {
                 addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
             }
-            if (MailProperties.getInstance().isUserFlagsEnabled() && exists && selectable && proxy.getACLExtension().canRead(ownRights) && UserFlagsCache.supportsUserFlags(
+            if (MailProperties.getInstance().isUserFlagsEnabled() && exists && selectable && imapConfig.getACLExtension().canRead(ownRights) && UserFlagsCache.supportsUserFlags(
                 imapFolder,
                 true,
                 session,
@@ -736,12 +733,7 @@ public final class IMAPFolderConverter {
             /*
              * No ACLs enabled. User has full access.
              */
-            try {
-                retval = ACLExtensionFactory.getInstance().getACLExtension(imapConfig).getFullRights();
-            } catch (final IMAPException e) {
-                LOG.error(e.getMessage(), e);
-                return new Rights("acdilprsw");
-            }
+            retval = imapConfig.getACLExtension().getFullRights();
         }
         return retval;
     }
@@ -757,28 +749,6 @@ public final class IMAPFolderConverter {
             }
         } else {
             LOG.error(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Simple proxy class for {@link ACLExtension} to have it loaded only when needed.
-     */
-    private static final class ACLExtensionProxy {
-
-        private final IMAPConfig imapConfig;
-
-        private ACLExtension aclExtension;
-
-        public ACLExtensionProxy(final IMAPConfig imapConfig) {
-            super();
-            this.imapConfig = imapConfig;
-        }
-
-        public ACLExtension getACLExtension() throws IMAPException {
-            if (null == aclExtension) {
-                aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
-            }
-            return aclExtension;
         }
     }
 

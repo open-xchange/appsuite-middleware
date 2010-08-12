@@ -55,6 +55,7 @@ import gnu.trove.TLongIntHashMap;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,6 +133,56 @@ public final class IMAPCommandsCollection {
      */
     private IMAPCommandsCollection() {
         super();
+    }
+
+    /**
+     * The IMAP capabilities.
+     */
+    public static final class Capabilities {
+
+        private final Set<String> set;
+
+        Capabilities(final Collection<String> col) {
+            super();
+            this.set = Collections.unmodifiableSet(new HashSet<String>(col));
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder(set.size() * 8);
+            for (final String cap : set) {
+                sb.append(' ').append(cap);
+            }
+            sb.deleteCharAt(0);
+            return sb.toString();
+        }
+
+        /**
+         * Gets the capabilities.
+         * 
+         * @return The capabilities
+         */
+        public Set<String> getSet() {
+            return set;
+        }
+
+    }
+
+    /**
+     * Gets the IMAP capabilities from the IMAP store associated with given connected IMAP folder.
+     * 
+     * @param imapFolder The IMAP folder
+     * @return The IMAP capabilities
+     * @throws MessagingException If a messaging error occurs
+     */
+    @SuppressWarnings("unchecked")
+    public static Capabilities getCapabilities(final IMAPFolder imapFolder) throws MessagingException {
+        return ((Capabilities) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                return new Capabilities(p.getCapabilities().values());
+            }
+        }));
     }
 
     /**
@@ -1205,8 +1256,10 @@ public final class IMAPCommandsCollection {
                     }
                 }
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getMessage()).append(
-                        ".\nPerforming fallback actions.").toString(), e);
+                    LOG.warn(
+                        new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getMessage()).append(
+                            ".\nPerforming fallback actions.").toString(),
+                        e);
                 }
                 performFallback = true;
             }

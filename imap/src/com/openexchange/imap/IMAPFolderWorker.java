@@ -58,7 +58,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.imap.acl.ACLExtension;
-import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
@@ -134,7 +133,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         }
         usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
         imapConfig = imapAccess.getIMAPConfig();
-        aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+        aclExtension = imapConfig.getACLExtension();
     }
 
     @Override

@@ -54,12 +54,17 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCapabilities;
+import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.IMAPCommandsCollection.Capabilities;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.acl.ACLExtension;
+import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
+import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -74,6 +79,10 @@ public final class IMAPConfig extends MailConfig {
     private static final String PROTOCOL_IMAP_SECURE = "imaps";
 
     private volatile IMAPCapabilities imapCapabilities;
+
+    private volatile Capabilities capabilities;
+
+    private volatile ACLExtension aclExtension;
 
     private int imapPort;
 
@@ -101,12 +110,37 @@ public final class IMAPConfig extends MailConfig {
     }
 
     /**
-     * Gets the IMAP capabilities
+     * Gets the IMAP capabilities.
      * 
      * @return The IMAP capabilities
      */
     public IMAPCapabilities getImapCapabilities() {
         return imapCapabilities;
+    }
+
+    /**
+     * Gets the object view of the IMAP capabilities.
+     * 
+     * @return The object of IMAP capabilities
+     */
+    public Capabilities asObject() {
+        return capabilities;
+    }
+
+    /**
+     * Gets the ACL extension appropriate for this IMAP configuration.
+     * 
+     * @return The ACL extension
+     */
+    public ACLExtension getACLExtension() {
+        if (null == aclExtension) {
+            synchronized (this) {
+                if (null == aclExtension) {
+                    aclExtension = ACLExtensionFactory.getInstance().getACLExtension(this);
+                }
+            }
+        }
+        return aclExtension;
     }
 
     /**
@@ -166,6 +200,10 @@ public final class IMAPConfig extends MailConfig {
                     imapCaps.setChildren(imapStore.hasCapability(IMAPCapabilities.CAP_CHILDREN));
                     imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
                     imapCapabilities = imapCaps;
+                    /*
+                     * Initialize set
+                     */
+                    capabilities = IMAPCommandsCollection.getCapabilities((IMAPFolder) imapStore.getFolder("INBOX"));
                 } catch (final MessagingException e) {
                     throw new MailConfigException(e);
                 }

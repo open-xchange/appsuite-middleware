@@ -49,9 +49,7 @@
 
 package com.openexchange.imap.acl;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.config.IMAPConfig;
 
 /**
@@ -97,15 +95,10 @@ public final class ACLExtensionFactory {
      * 
      * @param imapConfig The IMAP configuration providing needed access data.
      * @return The appropriate ACL extension
-     * @throws IMAPException If an I/O error occurs
      */
-    public ACLExtension getACLExtension(final IMAPConfig imapConfig) throws IMAPException {
+    public ACLExtension getACLExtension(final IMAPConfig imapConfig) {
         if (!instantiated.get()) {
-            try {
-                return ACLExtensionAutoDetector.getACLExtension(imapConfig);
-            } catch (final IOException e) {
-                throw IMAPException.create(IMAPException.Code.IO_ERROR, e, e.getMessage());
-            }
+            return ACLExtensionAutoDetector.getACLExtension(imapConfig);
         }
         return configured;
     }

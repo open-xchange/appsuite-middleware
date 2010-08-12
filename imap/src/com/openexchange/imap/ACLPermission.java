@@ -52,7 +52,6 @@ package com.openexchange.imap;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.acl.ACLExtension;
-import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
@@ -217,11 +216,10 @@ public final class ACLPermission extends MailPermission {
      * @param permission The permission
      * @param imapConfig The IMAP configuration
      * @return Mapped rights
-     * @throws IMAPException If an IMAP error occurs
      */
-    public static Rights permission2Rights(final OCLPermission permission, final IMAPConfig imapConfig) throws IMAPException {
+    public static Rights permission2Rights(final OCLPermission permission, final IMAPConfig imapConfig) {
         final Rights rights = new Rights();
-        final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+        final ACLExtension aclExtension = imapConfig.getACLExtension();
         boolean hasAnyRights = false;
         if (permission.isFolderAdmin()) {
             aclExtension.addFolderAdminRights(rights);
@@ -264,11 +262,10 @@ public final class ACLPermission extends MailPermission {
      * @param permission The permission object which may be <code>null</code>
      * @param imapConfig The IMAP configuration
      * @return The corresponding permission
-     * @throws IMAPException If an IMAP error occurs
      */
-    public static OCLPermission rights2Permission(final Rights rights, final OCLPermission permission, final IMAPConfig imapConfig) throws IMAPException {
+    public static OCLPermission rights2Permission(final Rights rights, final OCLPermission permission, final IMAPConfig imapConfig) {
         final OCLPermission oclPermission = permission == null ? new OCLPermission() : permission;
-        final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+        final ACLExtension aclExtension = imapConfig.getACLExtension();
         /*
          * Folder admin
          */

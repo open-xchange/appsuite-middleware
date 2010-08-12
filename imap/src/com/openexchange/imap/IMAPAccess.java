@@ -54,14 +54,13 @@ import java.net.SocketTimeoutException;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.acl.ACLExtension;
-import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.acl.ACLExtensionInit;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
@@ -311,7 +310,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Check read access
                  */
-                final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+                final ACLExtension aclExtension = imapConfig.getACLExtension();
                 if (!aclExtension.aclSupport() || aclExtension.canRead(IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig))) {
                     retval = IMAPFolderConverter.getUnreadCount(imapFolder);
                 } else {
