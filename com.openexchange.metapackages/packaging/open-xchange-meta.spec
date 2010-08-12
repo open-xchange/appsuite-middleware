@@ -93,7 +93,7 @@ Authors:
 %package -n	open-xchange-meta-messaging
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for Messaging
-Requires:	open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook, open-xchange-messaging-mail
+Requires:	open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook
 
 
 %description -n open-xchange-meta-messaging
