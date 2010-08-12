@@ -16,6 +16,11 @@ Architecture: all
 Depends: ${oxcommon}, open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl
 Description: The Open-Xchange Meta package for OX into Parallels integration
 
+Package: open-xchange-meta-plesk
+Architecture: all
+Depends: ${oxcommon}, open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-upsell-generic
+Description: The Open-Xchange Meta package for OX into Plesk integration
+
 Package: open-xchange-meta-server
 Architecture: all
 Depends: ${oxcommon}, open-xchange-authentication, open-xchange-spamhandler
