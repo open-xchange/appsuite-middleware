@@ -1,12 +1,10 @@
 
 # norootforbuild
 
-Name:           open-xchange-subscribe
+Name:           open-xchange-soap-cxf
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@
-BuildRequires:  open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@
-BuildRequires:  open-xchange-crypto  >= @OXVERSION@ open-xchange-secret  >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -40,19 +38,19 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        Basic subscribe implementation
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ open-xchange-crypto >= @OXVERSION@ open-xchange-secret  >= @OXVERSION@
+Summary:        HTTP-API for publish
+Requires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 #
 
 %description
-Basic OSGi based implementation of the subscription infrastructure
+Bundle to offer SOAP webservices as discovered in the OSGi system
   
 Authors:
 --------

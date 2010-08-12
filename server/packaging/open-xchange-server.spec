@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -554,6 +554,18 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Aug 12 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16669: Proper quoting of regex replacement
+* Wed Aug 11 2010 steffen.templin@open-xchange.com
+ - Bugfix #16643: Wrong series information in notification mails
+* Wed Aug 11 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16654: Fixed mail folder subscriptions (backend part)
+* Fri Aug 06 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16655: Fixed sorting of (infostore) folders in classic folder tree
+* Tue Aug 03 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16531: No translation of IMAP folders
+ - Bugfix #16616: Using a blocking queue to avoid possible out-of-memory error
+ - Bugfix #16614: FIxed NPE in FolderObjectIterator class
 * Thu Jul 29 2010 - karsten.will@open-xchange.com
  - Bugfix #16591: Error loading JavaScript from [https://www.gmx.com/client/static/script/compiled-gecko-17-821660071.js]
 * Thu Jul 29 2010 - marcus.klein@open-xchange.com

@@ -1,3 +1,9 @@
+open-xchange-messaging (6.18.0.0-4) unstable; urgency=low
+
+  * first build for 6.18-rev4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 12 Aug 2010 14:05:15 +0200
+
 open-xchange-messaging (6.18.0.0-3) unstable; urgency=low
 
   * first build for 6.18-rev3
