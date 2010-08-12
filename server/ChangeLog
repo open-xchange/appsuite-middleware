@@ -1,3 +1,7 @@
+* 2010-08-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #16669: Proper quoting of regex replacement
+
 * 2010-08-11 - thorben.betten@open-xchange.com
 
  - Bugfix #16654: Fixed mail folder subscriptions (backend part)
