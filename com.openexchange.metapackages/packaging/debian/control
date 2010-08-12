@@ -38,7 +38,7 @@ Description: The Open-Xchange Meta package for Publish and Subscribe
 
 Package: open-xchange-meta-messaging
 Architecture: all
-Depends: open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook, open-xchange-messaging-mail
+Depends: open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook
 Description: The Open-Xchange Meta package for Messaging
 
 Package: open-xchange-meta-gui
