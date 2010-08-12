@@ -65,10 +65,10 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 
 /**
  * Transforms strings of the kind "users:user_a" or "contacts:my_contact" into an internet
- * address (to be used as email address). If the suffix "(notification)" is used at a fixture,
+ * address (to be used as email address). If the suffix "(plain)" is used at a fixture,
  * only the plain e-mail address is added to the internet address object.
  *
- * @author tfriedrich
+ * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  * @author Martin Braun <martin.braun@open-xchange.com>
  */
 public class InternetAddressTransformator implements Transformator {
@@ -91,14 +91,14 @@ public class InternetAddressTransformator implements Transformator {
 		final String[] splitted = value.split(",");
 		
 		final Pattern patFlags = Pattern.compile("\\((\\w+)\\)");
-		final String notificationMarker = "(notification)";
-		final boolean[] notificationFlags = new boolean[splitted.length];
+		final String plainMarker = "(plain)";
+		final boolean[] plainFLags = new boolean[splitted.length];
 		
 		for (int i = 0; i < splitted.length; i++) {		
 	        Matcher mFlag = patFlags.matcher(splitted[i]);
-	        if(mFlag.find() && mFlag.group().contains(notificationMarker)) {
-	        	notificationFlags[i] = true;
-	        	splitted[i] = splitted[i].replace(notificationMarker, "").replace(" ", "");
+	        if(mFlag.find() && mFlag.group().contains(plainMarker)) {
+	        	plainFLags[i] = true;
+	        	splitted[i] = splitted[i].replace(plainMarker, "").replace(" ", "");
 	        }
 		}
         
@@ -111,7 +111,7 @@ public class InternetAddressTransformator implements Transformator {
 			} else {
 				fixtureEntry = splitted[i];
 			}
-			addresses.addAll(getAddresses(fixtureName, fixtureEntry, notificationFlags[i]));
+			addresses.addAll(getAddresses(fixtureName, fixtureEntry, plainFLags[i]));
 		}
 		return addresses.toArray(new InternetAddress[addresses.size()]);
     }
@@ -124,18 +124,18 @@ public class InternetAddressTransformator implements Transformator {
 		}
 	}
 	
-	private List<InternetAddress> getAddresses(final String fixtureName, final String fixtureEntry, final boolean notificationFlags) throws FixtureException {
+	private List<InternetAddress> getAddresses(final String fixtureName, final String fixtureEntry, final boolean plainFlags) throws FixtureException {
 		final Contact contact = ("users".equals(fixtureName)) 
 			? fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact() //users
 			: fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry(); //contacts
 		if (null == contact) {
 			throw new FixtureException("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a contact.");
 		} else {
-			return getAddresses(contact, notificationFlags);
+			return getAddresses(contact, plainFlags);
 		}
 	}
 
-	private List<InternetAddress> getAddresses(final Contact contact, final boolean notificationFlags) throws FixtureException {
+	private List<InternetAddress> getAddresses(final Contact contact, final boolean plainFlags) throws FixtureException {
 		final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
 		if (contact.containsDistributionLists()) {
 			final DistributionListEntryObject[] entries = contact.getDistributionList();
@@ -153,20 +153,20 @@ public class InternetAddressTransformator implements Transformator {
 		} else {
 			try {
 				if (contact.containsEmail1()) {
-					if (false == notificationFlags) {
+					if (false == plainFlags) {
 						addresses.add(new InternetAddress(contact.getEmail1(), contact.getDisplayName()));
 					} else {
 						addresses.add(new InternetAddress(contact.getEmail1()));
 					}
 					
 				} else if (contact.containsEmail2()) {
-					if (false == notificationFlags) {
+					if (false == plainFlags) {
 						addresses.add(new InternetAddress(contact.getEmail2(), contact.getDisplayName()));
 					} else {
 						addresses.add(new InternetAddress(contact.getEmail2()));
 					}
 				} else if (contact.containsEmail3()) {
-					if (false == notificationFlags) {
+					if (false == plainFlags) {
 						addresses.add(new InternetAddress(contact.getEmail3(), contact.getDisplayName()));
 					} else {
 						addresses.add(new InternetAddress(contact.getEmail3()));
