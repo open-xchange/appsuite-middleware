@@ -792,8 +792,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private static final class PermissionLoader {
 
-        private final Context ctx;
-
         private final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap;
 
         private final BlockingQueue<Integer> queue;
@@ -802,7 +800,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         public PermissionLoader(final Context ctx) throws SearchIteratorException {
             super();
-            this.ctx = ctx;
             final ConcurrentMap<Integer, Future<OCLPermission[]>> m = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
             permsMap = m;
             final BlockingQueue<Integer> q = new LinkedBlockingQueue<Integer>();
