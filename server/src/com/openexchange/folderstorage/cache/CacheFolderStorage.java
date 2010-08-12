@@ -286,18 +286,26 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     /**
-     * Removes specified folder from cache.
+     * Removes specified folder and all of its predecessor folders from cache.
      * 
      * @param id The folder identifier
      * @param treeId The tree identifier
+     * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's path to root folder
      * @param session The session providing user information
      * @throws FolderException If removal fails
      */
-    public void removeFromCache(final String id, final String treeId, final Session session) throws FolderException {
-        try {
-            removeFromCache(id, treeId, session.getUserId(), session.getContextId(), new PathPerformer(new ServerSessionAdapter(session), null, registry));
-        } catch (final ContextException e) {
-            throw new FolderException(e);
+    public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session) throws FolderException {
+        if (singleOnly) {
+            removeSingleFromCache(id, treeId, session.getUserId(), session.getContextId());
+        } else {
+            try {
+                removeFromCache(id, treeId, session.getUserId(), session.getContextId(), new PathPerformer(
+                    new ServerSessionAdapter(session),
+                    null,
+                    registry));
+            } catch (final ContextException e) {
+                throw new FolderException(e);
+            }
         }
     }
 
