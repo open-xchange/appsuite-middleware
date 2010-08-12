@@ -61,9 +61,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import com.openexchange.database.DBPoolingException;
@@ -1351,6 +1351,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     }
                 }
                 if (!messagingAccounts.isEmpty()) {
+                    Collections.sort(messagingAccounts, new MessagingAccountComparator(locale));
                     final int sz = messagingAccounts.size();
                     messagingSubfolderIDs = new ArrayList<String>(sz);
                     for (int i = 0; i < sz; i++) {
@@ -1684,6 +1685,22 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
 
     } // End of MailAccountComparator
+
+    private static final class MessagingAccountComparator implements Comparator<MessagingAccount> {
+
+        private final Collator collator;
+
+        public MessagingAccountComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final MessagingAccount o1, final MessagingAccount o2) {
+            return collator.compare(o1.getDisplayName(), o2.getDisplayName());
+        }
+
+    } // End of MessagingAccountComparator
 
     private static final class FolderNameComparator implements Comparator<String> {
 
