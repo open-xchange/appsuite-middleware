@@ -289,10 +289,11 @@ public final class CacheFolderStorage implements FolderStorage {
      * 
      * @param id The folder identifier
      * @param treeId The tree identifier
+     * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's path to root folder
      * @param session The session providing user information
      * @throws FolderException If removal fails
      */
-    public void removeFromCache(final String id, final String treeId, final Session session) throws FolderException {
+    public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session) throws FolderException {
         try {
             removeFromCache(id, treeId, session.getUserId(), session.getContextId(), new PathPerformer(new ServerSessionAdapter(session), null, registry));
         } catch (final ContextException e) {
