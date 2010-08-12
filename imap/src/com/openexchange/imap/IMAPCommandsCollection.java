@@ -907,10 +907,38 @@ public final class IMAPCommandsCollection {
                      * Grab last response that should indicate an OK
                      */
                     final Response response = r[r.length - 1];
-                    if (response.isOK()) {
-                        return Boolean.TRUE;
-                    }
-                    return Boolean.FALSE;
+                    return Boolean.valueOf(response.isOK());
+                }
+
+            });
+        } catch (final MessagingException e) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Tries to propagate specified client IP through a NOOP command.
+     * 
+     * @param f The IMAP folder
+     * @param clientIP The client IP address
+     */
+    public static void propagateClientIP(final IMAPFolder f, final String clientIP) {
+        try {
+            f.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                /*
+                 * (non-Javadoc)
+                 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com .sun.mail.imap.protocol.IMAPProtocol)
+                 */
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    final Response[] r = protocol.command(new StringBuilder(COMMAND_NOOP).append(' ').append(clientIP).toString(), null);
+                    /*
+                     * Grab last response that should indicate an OK
+                     */
+                    final Response response = r[r.length - 1];
+                    return Boolean.valueOf(response.isOK());
                 }
 
             });
