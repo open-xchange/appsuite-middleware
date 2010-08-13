@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.contact.action;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractInsertParser;
+import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.ajax.parser.ResponseParser;
 
 /**
  * 
@@ -58,11 +62,26 @@ import com.openexchange.ajax.framework.AbstractInsertParser;
  */
 public class InsertParser extends AbstractInsertParser<InsertResponse> {
 
+    private final boolean withImage;
+
     /**
      * Default constructor.
      */
-    InsertParser(final boolean failOnError) {
+    InsertParser(final boolean failOnError, final boolean withImage) {
         super(failOnError);
+        this.withImage = withImage;
+    }
+
+    @Override
+    public InsertResponse parse(String body) throws JSONException {
+        final Response response;
+        if (withImage) {
+            JSONObject tmp = new JSONObject(AbstractUploadParser.extractFromCallback(body));
+            response = ResponseParser.parse(tmp);
+        } else {
+            response = getResponse(body);
+        }
+        return createResponse(response);
     }
 
     @Override

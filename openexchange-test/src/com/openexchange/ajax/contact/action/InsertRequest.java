@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.contact.action;
 
+import java.io.ByteArrayInputStream;
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.container.Contact;
 
@@ -64,6 +64,11 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	 * Contact to insert.
 	 */
 	final Contact contactObj;
+
+	final boolean withImage;
+	
+	String fieldContent;
+
 	
 	/**
 	 * Should the parser fail on error in server response.
@@ -89,6 +94,14 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 		super();
 		this.contactObj = contactObj;
 		this.failOnError = failOnError;
+		withImage = contactObj.containsImage1() && (null != contactObj.getImage1());
+		if (withImage) {
+		    try {
+                fieldContent = convert(contactObj).toString();
+            } catch (final JSONException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
 	}
 	
 	/**
@@ -102,13 +115,21 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	 * {@inheritDoc}
 	 */
 	public Method getMethod() {
-		return Method.PUT;
+		return withImage ? Method.UPLOAD : Method.PUT;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public Parameter[] getParameters() {
+	    if (withImage) {
+	        return new Parameter[] {
+	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
+	            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(contactObj.getParentFolderID())),
+	            new FieldParameter("json", fieldContent),
+	            new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactObj.getImage1()), "image/jpg")
+	        };
+        }
 		return new Parameter[] {
 			new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
 			new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(contactObj.getParentFolderID()))
@@ -119,6 +140,6 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	 * {@inheritDoc}
 	 */
 	public InsertParser getParser() {
-		return new InsertParser(failOnError);
+		return new InsertParser(failOnError, withImage);
 	}
 }
