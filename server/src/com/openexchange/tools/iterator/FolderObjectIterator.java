@@ -855,9 +855,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         public void close() {
             flag.set(false);
+            mainFuture.cancel(true);
             queue.clear();
             permsMap.clear();
-            mainFuture.cancel(true);
         }
 
         public void submitPermissionsFor(final int folderId) {
