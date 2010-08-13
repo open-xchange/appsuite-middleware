@@ -81,6 +81,7 @@ import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.monitoring.MonitoringInfo;
@@ -484,9 +485,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             connected = true;
             /*
-             * Propagate client IP address
+             * Propagate client IP address in case of primary mail account access
              */
-            if (imapConfProps.isPropagateClientIPAddress()) {
+            if (imapConfProps.isPropagateClientIPAddress() && MailAccount.DEFAULT_ID == accountId) {
                 IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), session.getLocalIp());
             }
             /*
