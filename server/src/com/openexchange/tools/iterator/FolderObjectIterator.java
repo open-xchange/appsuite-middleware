@@ -851,6 +851,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void close() {
+            queue.clear();
             for (final Iterator<Future<OCLPermission[]>> iterator = permsMap.values().iterator(); iterator.hasNext();) {
                 final Future<OCLPermission[]> f = iterator.next();
                 if (null != f && !f.isDone()) {
