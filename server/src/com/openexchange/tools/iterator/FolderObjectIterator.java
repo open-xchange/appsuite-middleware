@@ -804,10 +804,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             super();
             final AtomicBoolean flag = new AtomicBoolean(true);
             this.flag = flag;
-            final ConcurrentMap<Integer, Future<OCLPermission[]>> m = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
-            permsMap = m;
-            final BlockingQueue<Integer> q = new LinkedBlockingQueue<Integer>();
-            queue = q;
+            final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
+            this.permsMap = permsMap;
+            final BlockingQueue<Integer> queue = new LinkedBlockingQueue<Integer>();
+            this.queue = queue;
             try {
                 final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
@@ -815,7 +815,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     public Object call() throws Exception {
                         try {
                             while (flag.get()) {
-                                final Integer folderId = q.take();
+                                final Integer folderId = queue.take();
                                 /*
                                  * Add future to concurrent map
                                  */
@@ -832,7 +832,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                                         }
                                     }
                                 });
-                                m.put(folderId, f);
+                                permsMap.put(folderId, f);
                                 /*
                                  * Execute task with this thread
                                  */
