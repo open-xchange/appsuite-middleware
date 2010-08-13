@@ -73,15 +73,16 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -89,10 +90,9 @@ import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
-import com.openexchange.groupware.contact.ContactConfig.Property;
-import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
@@ -320,7 +320,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG,
         ContactException.NO_PERMISSION_MSG, "An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d" })
     public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
-        int[] extendedCols = cols;
+        int[] extendedCols = checkColumns(cols);
         final ContactSql cs = new ContactMySql(session, ctx);
         cs.setFolder(folderId);
 
