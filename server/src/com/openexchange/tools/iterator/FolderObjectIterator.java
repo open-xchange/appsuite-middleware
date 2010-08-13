@@ -803,7 +803,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         public PermissionLoader(final Context ctx) throws SearchIteratorException {
             super();
             final AtomicBoolean flag = new AtomicBoolean(true);
-            this.flag = new AtomicBoolean();
+            this.flag = flag;
             final ConcurrentMap<Integer, Future<OCLPermission[]>> m = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
             permsMap = m;
             final BlockingQueue<Integer> q = new LinkedBlockingQueue<Integer>();
