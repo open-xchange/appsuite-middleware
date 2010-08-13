@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,6 +72,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
@@ -798,8 +798,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         private final Future<Object> mainFuture;
 
+        private final AtomicBoolean flag;
+
         public PermissionLoader(final Context ctx) throws SearchIteratorException {
             super();
+            final AtomicBoolean flag = new AtomicBoolean(true);
+            this.flag = new AtomicBoolean();
             final ConcurrentMap<Integer, Future<OCLPermission[]>> m = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
             permsMap = m;
             final BlockingQueue<Integer> q = new LinkedBlockingQueue<Integer>();
@@ -810,9 +814,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
                     public Object call() throws Exception {
                         try {
-                            Integer tmp;
-                            while ((tmp = q.take()) != null) {
-                                final Integer folderId = tmp;
+                            while (flag.get()) {
+                                final Integer folderId = q.take();
                                 /*
                                  * Add future to concurrent map
                                  */
@@ -851,13 +854,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void close() {
+            flag.set(false);
             queue.clear();
-            for (final Iterator<Future<OCLPermission[]>> iterator = permsMap.values().iterator(); iterator.hasNext();) {
-                final Future<OCLPermission[]> f = iterator.next();
-                if (null != f && !f.isDone()) {
-                    f.cancel(false);
-                }
-            }
             permsMap.clear();
             mainFuture.cancel(true);
         }
