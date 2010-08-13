@@ -54,10 +54,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -84,6 +82,7 @@ public class UserValues {
     private int privateTaskFolder = -1;
     private TimeZone timeZone;
     private int userId = -1;
+    private int contextId = -1;
 
     private String defaultAddress;
 
@@ -187,6 +186,13 @@ public class UserValues {
             userId = client.execute(new GetRequest(Tree.Identifier)).getInteger();
         }
         return userId;
+    }
+
+    public int getContextId() throws AjaxException, IOException, SAXException, JSONException {
+        if (-1 == contextId) {
+            contextId = client.execute(new GetRequest(Tree.ContextID)).getInteger();
+        }
+        return contextId;
     }
 
     public String getDefaultAddress() throws AjaxException, IOException, SAXException, JSONException {
