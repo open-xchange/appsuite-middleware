@@ -125,25 +125,23 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.FAX_HOME, contact.getFaxHome(), json);
         writeParameter(ContactFields.FAX_OTHER, contact.getFaxOther(), json);
         writeParameter(ContactFields.NUMBER_OF_IMAGES, contact.getNumberOfImages(), json);
-        if (contact.containsImage1()) {
-            if (contact.containsContextId()) {
-                final byte[] imageData = contact.getImage1();
-                if (imageData != null) {
-                    final String imageURL;
-                    {
-                        final ContactImageDataSource imgSource = new ContactImageDataSource();
-                        final DataArguments args = new DataArguments();
-                        final String[] argsNames = imgSource.getRequiredArguments();
-                        args.put(argsNames[0], String.valueOf(contact.getParentFolderID()));
-                        args.put(argsNames[1], String.valueOf(contact.getObjectID()));
-                        imageURL =
-                            ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
-                                session,
-                                imgSource,
-                                args).getImageURL();
-                    }
-                    writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
+        if (contact.containsImage1() && contact.containsContextId()) {
+            final byte[] imageData = contact.getImage1();
+            if (imageData != null) {
+                final String imageURL;
+                {
+                    final ContactImageDataSource imgSource = new ContactImageDataSource();
+                    final DataArguments args = new DataArguments();
+                    final String[] argsNames = imgSource.getRequiredArguments();
+                    args.put(argsNames[0], String.valueOf(contact.getParentFolderID()));
+                    args.put(argsNames[1], String.valueOf(contact.getObjectID()));
+                    imageURL =
+                        ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
+                            session,
+                            imgSource,
+                            args).getImageURL();
                 }
+                writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
             }
         }
         // writeParameter(ContactFields.IMAGE1, contactobject.getImage1());
