@@ -75,6 +75,14 @@ public final class FixedExecutorService extends AbstractExecutorService {
         }
 
         @Override
+        public void run() {
+            
+            System.out.println("Active: " + count.get() + ", Queued: " + queue.size());
+            
+            super.run();
+        }
+
+        @Override
         protected void done() {
             pollFromQueue();
         }
@@ -85,11 +93,11 @@ public final class FixedExecutorService extends AbstractExecutorService {
 
     private final Lock lock;
 
-    private final BlockingQueue<Runnable> queue;
+    protected final BlockingQueue<Runnable> queue;
 
     private final int size;
 
-    private final AtomicInteger count;
+    protected final AtomicInteger count;
 
     /**
      * Initializes a new {@link FixedExecutorService}.

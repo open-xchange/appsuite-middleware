@@ -354,6 +354,15 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return new CompletionFutureImpl<T>(completionService);
     }
 
+    /**
+     * Gets the thread pool executor.
+     * 
+     * @return The thread pool executor
+     */
+    public CustomThreadPoolExecutor getThreadPoolExecutor() {
+        return threadPoolExecutor;
+    }
+
     public ExecutorService getExecutor() {
         return new DelegateExecutorService(threadPoolExecutor);
     }

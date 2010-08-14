@@ -58,7 +58,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
 import com.openexchange.threadpool.internal.QueueProvider;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
@@ -133,7 +132,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
             registrations = new ArrayList<ServiceRegistration>(2);
             registrations.add(context.registerService(ThreadPoolService.class.getName(), threadPool, null));
             registrations.add(context.registerService(TimerService.class.getName(), new CustomThreadPoolExecutorTimerService(
-                (CustomThreadPoolExecutor) threadPool.getExecutor()), null));
+                threadPool.getThreadPoolExecutor()), null));
         } catch (final Exception e) {
             LOG.error("Failed start-up of bundle com.openexchange.threadpool: " + e.getMessage(), e);
             throw e;
