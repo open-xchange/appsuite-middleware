@@ -1791,8 +1791,10 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
+    private static final int MODULE_MAIL = MailContentType.getInstance().getModule();
+
     private static boolean isDefaultMailFolder(final OutlookFolder folder) {
-        return folder.isDefault() && (MailContentType.getInstance().getModule() == folder.getContentType().getModule());
+        return folder.isDefault() && (MODULE_MAIL == folder.getContentType().getModule());
     }
 
     private static boolean isNonPrimaryMailAccountFolder(final OutlookFolder folder) {
