@@ -1753,9 +1753,9 @@ public final class OutlookFolderStorage implements FolderStorage {
     private static void doModifications(final OutlookFolder folder) {
         final String id = folder.getID();
         if (FolderStorage.PUBLIC_ID.equals(id)) {
-            doPublicRootModifications(folder);
+            folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (FolderStorage.SHARED_ID.equals(id)) {
-            doSharedRootModifications(folder);
+            folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isDefaultMailFolder(folder)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isNonPrimaryMailAccountFolder(folder)) {
@@ -1765,8 +1765,10 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
+    private static final int MODULE_MAIL = MailContentType.getInstance().getModule();
+
     private static boolean isDefaultMailFolder(final OutlookFolder folder) {
-        return folder.isDefault() && (MailContentType.getInstance().getModule() == folder.getContentType().getModule());
+        return folder.isDefault() && (MODULE_MAIL == folder.getContentType().getModule());
     }
 
     private static boolean isNonPrimaryMailAccountFolder(final OutlookFolder folder) {
@@ -1775,21 +1777,13 @@ public final class OutlookFolderStorage implements FolderStorage {
             return false;
         }
         try {
-            final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(id);
-            return argument.getAccountId() != MailAccount.DEFAULT_ID;
+            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(id);
+            return MailFolder.DEFAULT_FOLDER_ID.equals(arg.getFullname()) && arg.getAccountId() != MailAccount.DEFAULT_ID;
         } catch (final RuntimeException e) {
             /*
              * Parsing failed
              */
             return false;
         }
-    }
-
-    private static void doPublicRootModifications(final OutlookFolder folder) {
-        folder.setParentID(FolderStorage.PRIVATE_ID);
-    }
-
-    private static void doSharedRootModifications(final OutlookFolder folder) {
-        folder.setParentID(FolderStorage.PRIVATE_ID);
     }
 }
