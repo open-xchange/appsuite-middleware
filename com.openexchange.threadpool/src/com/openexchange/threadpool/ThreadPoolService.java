@@ -51,7 +51,7 @@ package com.openexchange.threadpool;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -145,7 +145,6 @@ public interface ThreadPoolService {
      * <p>
      * When awaiting completion of given tasks, programmer should obey the following pattern:
      * 
-     * 
      * <pre>
      * try {
      *     for (int i = tasks.size(); i &gt; 0; i--) {
@@ -161,7 +160,7 @@ public interface ThreadPoolService {
      *     // Can only occur if task was canceled
      *     /* Do something &#42;/
      * } catch (ExecutionException e) {
-     *      throw ThreadPools.launderThrowable(e, ExpectedException.class);
+     *     throw ThreadPools.launderThrowable(e, ExpectedException.class);
      * }
      * </pre>
      * 
@@ -194,10 +193,10 @@ public interface ThreadPoolService {
      *     // Can only occur if task was canceled
      *     /* Do something &#42;/
      * } catch (ExecutionException e) {
-     *      throw ThreadPools.launderThrowable(e, ExpectedException.class);
+     *     throw ThreadPools.launderThrowable(e, ExpectedException.class);
      * }
      * </pre>
-     *
+     * 
      * @param tasks The collection of tasks
      * @return A {@link CompletionFuture} instance to await completion of given tasks
      * @throws RejectedExecutionException If task cannot be scheduled for execution
@@ -251,11 +250,23 @@ public interface ThreadPoolService {
     <T> CompletionFuture<T> invoke(Collection<? extends Task<T>> tasks, RefusedExecutionBehavior<T> refusedExecutionBehavior);
 
     /**
-     * Gets the {@link Executor} view on this thread pool.
+     * Gets the {@link ExecutorService} view on this thread pool.
+     * <p>
+     * <b>Note</b>: Shut-down operations are not permitted and will throw an {@link UnsupportedOperationException}.
      * 
-     * @return The {@link Executor} view on this thread pool
+     * @return The {@link ExecutorService} view on this thread pool
      */
-    Executor getExecutor();
+    ExecutorService getExecutor();
+
+    /**
+     * Spawns a new {@link ExecutorService} from this thread pool which only uses specified number of concurrent active tasks.
+     * <p>
+     * <b>Note</b>: Shut-down operations are not permitted and will throw an {@link UnsupportedOperationException}.
+     * 
+     * @param size The number of concurrent active tasks.
+     * @return The fixed-size {@link ExecutorService} backed by this thread pool
+     */
+    ExecutorService getFixedExecutor(int size);
 
     /* Statistics */
 

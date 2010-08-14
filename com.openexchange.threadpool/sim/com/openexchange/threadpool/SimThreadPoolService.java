@@ -51,10 +51,10 @@ package com.openexchange.threadpool;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import com.openexchange.threadpool.internal.FixedExecutorService;
 
 /**
  * {@link SimThreadPoolService}
@@ -78,8 +78,12 @@ public class SimThreadPoolService implements ThreadPoolService {
         throw new UnsupportedOperationException();
     }
 
-    public Executor getExecutor() {
+    public ExecutorService getExecutor() {
         return executor;
+    }
+
+    public ExecutorService getFixedExecutor(final int size) {
+        return new FixedExecutorService(size, executor);
     }
 
     public int getLargestPoolSize() {
@@ -94,23 +98,23 @@ public class SimThreadPoolService implements ThreadPoolService {
         throw new UnsupportedOperationException();
     }
 
-    public <T> CompletionFuture<T> invoke(Collection<? extends Task<T>> tasks) {
+    public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks) {
         throw new UnsupportedOperationException();
     }
 
-    public <T> CompletionFuture<T> invoke(Task<T>[] tasks) {
+    public <T> CompletionFuture<T> invoke(final Task<T>[] tasks) {
         throw new UnsupportedOperationException();
     }
 
-    public <T> CompletionFuture<T> invoke(Collection<? extends Task<T>> tasks, RefusedExecutionBehavior<T> refusedExecutionBehavior) {
+    public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks, final RefusedExecutionBehavior<T> refusedExecutionBehavior) {
         throw new UnsupportedOperationException();
     }
 
-    public <T> List<Future<T>> invokeAll(Collection<? extends Task<T>> tasks) {
+    public <T> List<Future<T>> invokeAll(final Collection<? extends Task<T>> tasks) {
         throw new UnsupportedOperationException();
     }
 
-    public <T> List<Future<T>> invokeAll(Collection<? extends Task<T>> tasks, long timeout) {
+    public <T> List<Future<T>> invokeAll(final Collection<? extends Task<T>> tasks, final long timeout) {
         throw new UnsupportedOperationException();
     }
 
@@ -122,11 +126,11 @@ public class SimThreadPoolService implements ThreadPoolService {
         return null == executor;
     }
 
-    public <T> Future<T> submit(Task<T> task) {
+    public <T> Future<T> submit(final Task<T> task) {
         return executor.submit(task);
     }
 
-    public <T> Future<T> submit(Task<T> task, RefusedExecutionBehavior<T> refusedExecutionBehavior) {
+    public <T> Future<T> submit(final Task<T> task, final RefusedExecutionBehavior<T> refusedExecutionBehavior) {
         throw new UnsupportedOperationException();
     }
 

@@ -60,6 +60,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -331,7 +332,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return new CompletionFutureImpl<T>(completionService);
     }
 
-    public <T> CompletionFuture<T> invoke(Task<T>[] tasks) {
+    public <T> CompletionFuture<T> invoke(final Task<T>[] tasks) {
         if (tasks == null) {
             throw new NullPointerException();
         }
@@ -353,8 +354,12 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return new CompletionFutureImpl<T>(completionService);
     }
 
-    public Executor getExecutor() {
-        return threadPoolExecutor;
+    public ExecutorService getExecutor() {
+        return new DelegateExecutorService(threadPoolExecutor);
+    }
+
+    public ExecutorService getFixedExecutor(final int size) {
+        return new FixedExecutorService(size, threadPoolExecutor);
     }
 
     public boolean isShutdown() {
