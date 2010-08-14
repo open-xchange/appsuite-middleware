@@ -61,9 +61,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import com.openexchange.database.DBPoolingException;
@@ -1801,8 +1801,8 @@ public final class OutlookFolderStorage implements FolderStorage {
             return false;
         }
         try {
-            final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(id);
-            return argument.getAccountId() != MailAccount.DEFAULT_ID;
+            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(id);
+            return MailFolder.DEFAULT_FOLDER_ID.equals(arg.getFullname()) && arg.getAccountId() != MailAccount.DEFAULT_ID;
         } catch (final RuntimeException e) {
             /*
              * Parsing failed
