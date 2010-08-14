@@ -49,17 +49,13 @@
 
 package com.openexchange.threadpool.internal;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -70,7 +66,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FixedExecutorService implements ExecutorService {
+public final class FixedExecutorService extends AbstractExecutorService {
 
     private final class CountingFuture extends FutureTask<Object> {
 
@@ -151,22 +147,6 @@ public final class FixedExecutorService implements ExecutorService {
         }
     }
 
-    public <T> List<Future<T>> invokeAll(final Collection<Callable<T>> tasks, final long timeout, final TimeUnit unit) throws InterruptedException {
-        return executorService.invokeAll(tasks, timeout, unit);
-    }
-
-    public <T> List<Future<T>> invokeAll(final Collection<Callable<T>> tasks) throws InterruptedException {
-        return executorService.invokeAll(tasks);
-    }
-
-    public <T> T invokeAny(final Collection<Callable<T>> tasks, final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return executorService.invokeAny(tasks, timeout, unit);
-    }
-
-    public <T> T invokeAny(final Collection<Callable<T>> tasks) throws InterruptedException, ExecutionException {
-        return executorService.invokeAny(tasks);
-    }
-
     public boolean isShutdown() {
         return false;
     }
@@ -183,18 +163,6 @@ public final class FixedExecutorService implements ExecutorService {
     public List<Runnable> shutdownNow() {
         // No shut-down
         throw new UnsupportedOperationException();
-    }
-
-    public <T> Future<T> submit(final Callable<T> task) {
-        return executorService.submit(task);
-    }
-
-    public <T> Future<T> submit(final Runnable task, final T result) {
-        return executorService.submit(task, result);
-    }
-
-    public Future<?> submit(final Runnable task) {
-        return executorService.submit(task);
     }
 
 }
