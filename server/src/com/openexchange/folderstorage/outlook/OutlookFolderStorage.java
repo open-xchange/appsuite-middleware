@@ -1779,9 +1779,9 @@ public final class OutlookFolderStorage implements FolderStorage {
     private static void doModifications(final OutlookFolder folder) {
         final String id = folder.getID();
         if (FolderStorage.PUBLIC_ID.equals(id)) {
-            doPublicRootModifications(folder);
+            folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (FolderStorage.SHARED_ID.equals(id)) {
-            doSharedRootModifications(folder);
+            folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isDefaultMailFolder(folder)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isNonPrimaryMailAccountFolder(folder)) {
@@ -1811,13 +1811,5 @@ public final class OutlookFolderStorage implements FolderStorage {
              */
             return false;
         }
-    }
-
-    private static void doPublicRootModifications(final OutlookFolder folder) {
-        folder.setParentID(FolderStorage.PRIVATE_ID);
-    }
-
-    private static void doSharedRootModifications(final OutlookFolder folder) {
-        folder.setParentID(FolderStorage.PRIVATE_ID);
     }
 }
