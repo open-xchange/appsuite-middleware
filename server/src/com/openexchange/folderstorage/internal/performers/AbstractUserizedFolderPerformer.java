@@ -272,9 +272,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         // Modify parent
         if (isShared) {
             // Remain tree if parent is viewable, too.
-            FolderStorage parentStorage = getOpenedStorage(treeId, folder.getParentID(), storageParameters, openedStorages);
-            Folder parent = parentStorage.getFolder(treeId, folder.getParentID(), storageParameters);
-            Permission permission = CalculatePermission.calculate(parent, session, getAllowedContentTypes());
+            final FolderStorage parentStorage = getOpenedStorage(treeId, folder.getParentID(), storageParameters, openedStorages);
+            final Folder parent = parentStorage.getFolder(treeId, folder.getParentID(), storageParameters);
+            final Permission permission = CalculatePermission.calculate(parent, session, getAllowedContentTypes());
             if (!permission.isVisible()) {
                 userizedFolder.setParentID(FolderObject.SHARED_PREFIX + FolderObject.SYSTEM_SHARED_FOLDER_ID);
             }
@@ -345,7 +345,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                         for (int j = 0; visibleSubfolderIds.isEmpty() && j < visibleIds.length; j++) {
                             final String id = visibleIds[0].getId();
                             final Folder subfolder = curStorage.getFolder(treeId, id, storageParameters);
-                            if (all || subfolder.isSubscribed()) {
+                            if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
                                 final Permission p = CalculatePermission.calculate(subfolder, session, getAllowedContentTypes());
                                 if (p.isVisible()) {
                                     visibleSubfolderIds.add(id);
@@ -377,7 +377,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                     } else {
                         subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                     }
-                    if (subfolderPermission.isVisible() && (all || subfolder.isSubscribed())) {
+                    if (subfolderPermission.isVisible() && (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders()))) {
                         visibleSubfolderIds.add(id);
                     }
                 }
