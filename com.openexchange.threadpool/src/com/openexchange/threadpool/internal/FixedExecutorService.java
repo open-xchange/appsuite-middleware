@@ -76,9 +76,6 @@ public final class FixedExecutorService extends AbstractExecutorService {
 
         @Override
         public void run() {
-            
-            System.out.println("Active: " + count.get() + ", Queued: " + queue.size());
-            
             super.run();
         }
 
@@ -93,11 +90,11 @@ public final class FixedExecutorService extends AbstractExecutorService {
 
     private final Lock lock;
 
-    protected final BlockingQueue<Runnable> queue;
+    private final BlockingQueue<Runnable> queue;
 
     private final int size;
 
-    protected final AtomicInteger count;
+    private final AtomicInteger count;
 
     /**
      * Initializes a new {@link FixedExecutorService}.
@@ -118,10 +115,11 @@ public final class FixedExecutorService extends AbstractExecutorService {
     public void execute(final Runnable command) {
         lock.lock();
         try {
-            if (queue.isEmpty() && count.incrementAndGet() <= size) {
+            if (queue.isEmpty() && count.get() < size) {
                 /*
                  * Pass to execute() and leave
                  */
+                count.incrementAndGet();
                 executorService.execute(new CountingFuture(command));
             } else {
                 /*
