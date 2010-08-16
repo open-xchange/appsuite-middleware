@@ -47,79 +47,76 @@
  *
  */
 
-package com.openexchange.config;
+package com.openexchange.sessiond.impl;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link IPRange}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SimConfigurationService implements ConfigurationService {
+public class IPRange {
+
+    private int[] start;
+    private int[] end;
     
-    public Map<String, String> stringProperties = new HashMap<String, String>();
-
-    public boolean getBoolProperty(String name, boolean defaultValue) {
-        // TODO Auto-generated method stub
-        return false;
+    public IPRange(int[] start, int[] end) {
+        super();
+        this.start = start;
+        this.end = end;
+    }
+    
+    public IPRange(int[] start) {
+        this.start = start;
+        this.end = start;
+    }
+    
+    public int[] getStart() {
+        return start;
+    }
+    
+    public int[] getEnd() {
+        return end;
     }
 
-    public Properties getFile(String filename) {
-        // TODO Auto-generated method stub
-        return null;
+    public boolean contains(String ipAddress) {
+        int[] other = parse(ipAddress);
+
+        boolean endCarryOver = false;
+        boolean startCarryOver = false;
+        
+        for(int i = 0; i < 4; i++) {
+            int part = other[i];
+            endCarryOver = endCarryOver || part < end[i];
+            startCarryOver = startCarryOver || part > start[i];
+            if(startCarryOver && endCarryOver) {
+                return true;
+            }
+            if((part < start[i] && ! startCarryOver)|| (part > end[i] && ! endCarryOver) ) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    public int getIntProperty(String name, int defaultValue) {
-        // TODO Auto-generated method stub
-        return 0;
+    private static int[] parse(String ipAddress) {
+        String[] split = ipAddress.split("\\.");
+        if(split.length != 4) {
+            throw new IllegalArgumentException("Doesn't look like an IP address: "+ipAddress);
+        }
+        int[] parsed = new int[4];
+        for(int i = 0; i < 4; i++) {
+            parsed[i] = Integer.parseInt(split[i]);
+        }
+        return parsed;
     }
 
-    public Properties getPropertiesInFolder(String folderName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public String getProperty(String name) {
-        return stringProperties.get(name);
-    }
-
-    public String getProperty(String name, String defaultValue) {
-        return stringProperties.containsKey(name) ? stringProperties.get(name) : defaultValue;
-    }
-
-    public String getProperty(String name, PropertyListener listener) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public String getProperty(String name, String defaultValue, PropertyListener listener) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public Iterator<String> propertyNames() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public void removePropertyListener(String name, PropertyListener listener) {
-        // TODO Auto-generated method stub
-
-    }
-
-    public int size() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.config.ConfigurationService#getText(java.lang.String)
-     */
-    public String getText(String filename) {
-        // TODO Auto-generated method stub
-        return null;
+    public static IPRange parseRange(String string) {
+        if(string.contains("-")) {
+            String[] addresses = string.split("\\s*-\\s*");
+            return new IPRange(parse(addresses[0]), parse(addresses[1]));
+        }
+        return new IPRange(parse(string));
     }
 
 }

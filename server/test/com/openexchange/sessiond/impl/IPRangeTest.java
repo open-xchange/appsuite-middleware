@@ -47,79 +47,84 @@
  *
  */
 
-package com.openexchange.config;
+package com.openexchange.sessiond.impl;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link IPRangeTest}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SimConfigurationService implements ConfigurationService {
+public class IPRangeTest {
     
-    public Map<String, String> stringProperties = new HashMap<String, String>();
-
-    public boolean getBoolProperty(String name, boolean defaultValue) {
-        // TODO Auto-generated method stub
-        return false;
+    @Test
+    public void simpleIP() {
+        IPRange singleIP = new IPRange(new int[]{192,168,32,99});
+        
+        assertTrue(singleIP.contains("192.168.32.99"));
+        assertFalse(singleIP.contains("192.168.32.98"));
+        
     }
-
-    public Properties getFile(String filename) {
-        // TODO Auto-generated method stub
-        return null;
+    
+    @Test
+    public void range() {
+        IPRange range = new IPRange(new int[]{192,168,32,100}, new int[]{192,168,32,200});
+        assertTrue(range.contains("192.168.32.150"));
+        assertFalse(range.contains("192.168.32.99"));
+        assertFalse(range.contains("191.168.32.150"));
     }
-
-    public int getIntProperty(String name, int defaultValue) {
-        // TODO Auto-generated method stub
-        return 0;
+    
+    @Test
+    public void rangeWithCarryOver() {
+        IPRange range = new IPRange(new int[]{192,168,32,99}, new int[]{192,168,33,20});
+        
+        assertTrue(range.contains("192.168.32.100"));
+        assertTrue(range.contains("192.168.33.19"));
+        assertFalse(range.contains("192.168.34.0"));
+        
     }
-
-    public Properties getPropertiesInFolder(String folderName) {
-        // TODO Auto-generated method stub
-        return null;
+    
+    @Test
+    public void parseSimple() {
+        IPRange range = IPRange.parseRange("192.168.32.99");
+        
+        int[] start = range.getStart();
+        
+        assertEquals(192, start[0]);
+        assertEquals(168, start[1]);
+        assertEquals(32, start[2]);
+        assertEquals(99, start[3]);
+        
+        int[] end = range.getEnd();
+        
+        assertEquals(192, end[0]);
+        assertEquals(168, end[1]);
+        assertEquals(32, end[2]);
+        assertEquals(99, end[3]);
+        
+        
     }
-
-    public String getProperty(String name) {
-        return stringProperties.get(name);
+    
+    @Test
+    public void parseRange() {
+        IPRange range = IPRange.parseRange("192.168.32.100  -  192.168.32.200");
+        
+        int[] start = range.getStart();
+        
+        assertEquals(192, start[0]);
+        assertEquals(168, start[1]);
+        assertEquals(32, start[2]);
+        assertEquals(100, start[3]);
+        
+        int[] end = range.getEnd();
+        
+        assertEquals(192, end[0]);
+        assertEquals(168, end[1]);
+        assertEquals(32, end[2]);
+        assertEquals(200, end[3]);
+        
     }
-
-    public String getProperty(String name, String defaultValue) {
-        return stringProperties.containsKey(name) ? stringProperties.get(name) : defaultValue;
-    }
-
-    public String getProperty(String name, PropertyListener listener) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public String getProperty(String name, String defaultValue, PropertyListener listener) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public Iterator<String> propertyNames() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public void removePropertyListener(String name, PropertyListener listener) {
-        // TODO Auto-generated method stub
-
-    }
-
-    public int size() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.config.ConfigurationService#getText(java.lang.String)
-     */
-    public String getText(String filename) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -63,15 +68,20 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -80,13 +90,13 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.Classes;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
 import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * Overridden service method that checks if a valid session can be found for the
- * request.
+ * Overridden service method that checks if a valid session can be found for the request.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
@@ -94,49 +104,64 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 @OXExceptionSource(classId = Classes.SESSION_SERVLET, component = EnumComponent.SESSION)
 public abstract class SessionServlet extends AJAXServlet {
 
-    /**
-     * Serial version UID for serialization
-     */
     private static final long serialVersionUID = -8308340875362868795L;
 
-    /**
-     * Logger.
-     */
-    private static transient final Log LOG = LogFactory.getLog(SessionServlet.class);
+    private static final Log LOG = LogFactory.getLog(SessionServlet.class);
 
-    /**
-     * Factory for creating exceptions.
-     */
-    private static transient final SessionExceptionFactory EXCEPTION = new SessionExceptionFactory(SessionServlet.class);
+    private static final SessionExceptionFactory EXCEPTION = new SessionExceptionFactory(SessionServlet.class);
 
-    /**
-     * Name of the key to remember the session for the request.
-     */
     public static final String SESSION_KEY = "sessionObject";
 
-    /**
-     * Default constructor.
-     */
+    private static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
+
+    private boolean checkIP = true;
+
+    private static List<IPRange> ranges = new ArrayList<IPRange>(5);
+    
     protected SessionServlet() {
         super();
     }
 
+    @Override
+    public void init(final ServletConfig config) throws ServletException {
+        super.init(config);
+        checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        
+        if(checkIP) {
+            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if(configurationService == null) {
+                LOG.fatal("No configuration service available, can not read whitelist");
+            } else {
+                String text = configurationService.getText(SESSION_WHITELIST_FILE);
+                if(text == null) {
+                    LOG.info("No exceptions from IP Check have been defined.");
+                } else {
+                    String[] lines = text.split("\n");
+                    for (String line : lines) {
+                        line = line.replaceAll("\\s", "");
+                        if(!line.equals("") && ! line.startsWith("#")) {
+                            ranges.add(IPRange.parseRange(line));
+                        }
+                    }
+                }
+            }
+        }
+    
+    }
+
     /**
      * Checks the session ID supplied as a query parameter in the request URI.
-     * {@inheritDoc}
      */
     @Override
     @OXThrows(category = Category.TRY_AGAIN, desc = "", exceptionId = 4, msg = "Context is locked.")
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (sessiondService == null) {
-                throw new SessiondException(
-                    new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+                throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
             }
-            final Session session = getSession(req, resp, getCookieId(req), sessiondService);
+            final Session session = getSession(req, getSessionId(req), sessiondService);
             final String sessionId = session.getSessionID();
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             if (!ctx.isEnabled()) {
@@ -144,7 +169,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 sessiondCon.removeSession(sessionId);
                 throw EXCEPTION.create(4);
             }
-            checkIP(session.getLocalIp(), req.getRemoteAddr());
+            checkIP(session, req.getRemoteAddr());
             rememberSession(req, new ServerSessionAdapter(session, ctx));
             super.service(req, resp);
         } catch (final SessiondException e) {
@@ -160,8 +185,8 @@ public abstract class SessionServlet extends AJAXServlet {
                 log(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
-        } catch (final ContextException e) {
-            LOG.debug(e.getMessage(), e);
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -176,37 +201,65 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    private void checkIP(final Session session, final String actual) throws SessiondException {
+        checkIP(checkIP, session, actual);
+    }
+
     /**
-     * Checks if the client IP address of the current request matches the one
-     * through that the session has been created.
-     * 
-     * @param remembered
-     *            IP address stored in the session object.
-     * @param actual
-     *            IP address of the current request.
-     * @throws SessionException
-     *             if the IP addresses don't match.
+     * Checks if the client IP address of the current request matches the one through that the session has been created.
+     * @param checkIP <code>true</code> to deny request with an exception.
+     * @param session session object
+     * @param actual IP address of the current request.
+     * @throws SessionException if the IP addresses don't match.
      */
-    @OXThrows(category = Category.PERMISSION, desc = "If a session exists every request is checked for its client IP "
-            + "address to match the one while creating the session.", exceptionId = 5, msg = "Wrong client IP address.")
-    public static void checkIP(final String remembered, final String actual) throws SessiondException {
-        if (null == actual || !actual.equals(remembered)) {
-            throw EXCEPTION.create(5);
+    @OXThrows(
+        category = Category.PERMISSION,
+        desc = "If a session exists every request is checked for its client IP address to match the one while creating the session.",
+        exceptionId = 5,
+        msg = "Request to server was refused. Original client IP address changed. Please try again."
+    )
+    public static void checkIP(final boolean checkIP, final Session session, final String actual) throws SessiondException {
+        if (null == actual || (!isWhitelistedFromIPCheck(actual) && !actual.equals(session.getLocalIp()))) {
+            if (checkIP) {
+                LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
+                throw EXCEPTION.create(5);
+            }
+            if (LOG.isDebugEnabled()) {
+                final StringBuilder sb = new StringBuilder(64);
+                sb.append("Session ");
+                sb.append(session.getSessionID());
+                sb.append(" requests now from ");
+                sb.append(actual);
+                sb.append(" but login came from ");
+                sb.append(session.getLocalIp());
+                LOG.debug(sb.toString());
+            }
         }
+    }
+
+    private static boolean isWhitelistedFromIPCheck(String actual) {
+        for (IPRange range : ranges) {
+            if(range.contains(actual)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Gets the cookie identifier from the request.
      * 
-     * @param req
-     *            servlet request.
+     * @param req servlet request.
      * @return the cookie identifier.
-     * @throws SessionException
-     *             if the cookie identifier can not be found.
+     * @throws SessionException if the cookie identifier can not be found.
      */
-    @OXThrows(category = Category.CODE_ERROR, desc = "Every AJAX request must contain a parameter named session "
-            + "that value contains the identifier of the session cookie.", exceptionId = 1, msg = "The session parameter is missing.")
-    private static String getCookieId(final ServletRequest req) throws SessiondException {
+    @OXThrows(
+        category = Category.CODE_ERROR,
+        desc = "Every AJAX request must contain a parameter named session that value contains the identifier of the session cookie.",
+        exceptionId = 1,
+        msg = "The session parameter is missing."
+    )
+    private static String getSessionId(final ServletRequest req) throws SessiondException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
             if (LOG.isDebugEnabled()) {
@@ -227,175 +280,88 @@ public abstract class SessionServlet extends AJAXServlet {
         return retval;
     }
 
-    /**
-     * Gets the session identifier from the cookies.
-     * @param req HTTP servlet request.
-     * @param cookieId cookie identifier from the session parameter.
-     * @return a found session identifier or <code>null</code> if the session
-     * identifier can not be found.
-     */
-    private static String getSessionId(final HttpServletRequest req, final String cookieId) {
-        final Cookie[] cookies = req.getCookies();
-        String sessionId = null;
-        if (cookies != null) {
-            final String cookieName = new StringBuilder(Login.COOKIE_PREFIX).append(cookieId).toString();
-            for (final Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
-                    sessionId = cookie.getValue();
-                    break;
-                }
-            }
-        }
-        return sessionId;
-    }
+
+
 
     /**
-     * Gets the session identifier from the request.
+     * Finds appropriate local session.
      * 
-     * @param req
-     *            HTTP servlet request.
-     * @param resp
-     *            HTTP servlet response
-     * @param cookieId
-     *            Identifier of the cookie.
-     * @param sessiondService
-     *            The SessionD service
-     * @return The appropriate session.
-     * @throws SessionException
-     *             if either the session identifier can not be found in a cookie
-     *             or the session is missing at all.
+     * @param sessionId identifier of the session.
+     * @param sessiondService The SessionD service
+     * @return the session.
+     * @throws SessionException if the session can not be found.
      */
-    @OXThrows(category = Category.CODE_ERROR, desc = "Your browser does not send the cookie for identifying your "
-            + "session.", exceptionId = 2, msg = "The cookie with the session identifier is missing.")
-    private static Session getSession(final HttpServletRequest req, final HttpServletResponse resp,
-            final String cookieId, final SessiondService sessiondService)
-            throws SessiondException {
-        /*
-         * Look for a local session
-         */
+    @OXThrowsMultiple(
+        category = { Category.TRY_AGAIN, Category.TRY_AGAIN },
+        desc = { "A session with the given identifier can not be found.", "" },
+        exceptionId = { 3, 6 },
+        msg = { "Your session %s expired. Please start a new browser session.", "Session secret is different. Given %1$s differs from %2$s in session." }
+    )
+    public static Session getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
+        final Session session = sessiondService.getSession(sessionId);
+        if (null == session) {
+            throw EXCEPTION.create(3, sessionId);
+        }
+        String secret = extractSecret(session.getHash(), req.getCookies());
+        
+        if (secret == null || !session.getSecret().equals(secret)) {
+            throw EXCEPTION.create(6, secret, session.getSecret());
+        }
         try {
-            final String sessionId = getSessionId(req, cookieId);
-            if (null != sessionId) {
-                return getLocalSession(sessionId, sessiondService);
+            final Context context = ContextStorage.getStorageContext(session.getContextId());
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+            if (!user.isMailEnabled()) {
+                throw EXCEPTION.create(3, session.getSessionID());
             }
-        } catch (final SessiondException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("No appropriate local session found");
-            }
-            /*
-             * Look for a cached session on second try
-             */
-            final Session session = getCachedSession(req, resp, cookieId, sessiondService);
-            if (null != session) {
-                return session;
-            }
-            /*
-             * Re-throw original exception to indicate session absence
-             */
-            throw e;
+        } catch (UndeclaredThrowableException e) {
+            throw new UserException(UserException.Code.USER_NOT_FOUND, e, I(session.getUserId()), I(session.getContextId()));
         }
-        /*
-         * No appropriate cookie found: check session cache
-         */
-        final Session session = getCachedSession(req, resp, cookieId, sessiondService);
-        if (null != session) {
-            return session;
-        }
-        /*
-         * A cache miss: throw error
-         */
-        final Cookie[] cookies = req.getCookies();
-        if (LOG.isDebugEnabled() && cookies != null) {
-            final StringBuilder debug = new StringBuilder(256);
-            debug.append("No cookie for ID: ");
-            debug.append(cookieId);
-            debug.append(". Cookie names: ");
-            for (final Cookie cookie : cookies) {
-                debug.append(cookie.getName());
-                debug.append(',');
-            }
-            debug.setCharAt(debug.length() - 1, '.');
-            LOG.debug(debug.toString());
-        }
-        throw EXCEPTION.create(2);
+        return session;
     }
-
-    /**
-     * Finds appropriate cached session.
-     * 
-     * @param req
-     *            HTTP servlet request
-     * @param resp
-     *            HTTP servlet response
-     * @param cookieId
-     *            Identifier of the cookie
-     * @param sessiondService
-     *            The SessionD service
-     * @return The session if fetched from cache; otherwise <code>null</code>.
-     */
-    private static Session getCachedSession(final HttpServletRequest req, final HttpServletResponse resp,
-            final String cookieId, final SessiondService sessiondService) {
-        final Session session = sessiondService.getCachedSession(cookieId, req.getRemoteAddr());
-        if (null != session) {
-            /*
-             * Adapt cookie
-             */
-            Login.writeCookie(resp, session);
-            return session;
+    
+    public static String extractSecret(String hash, Cookie[] cookies) {
+        String cookieName = Login.SECRET_PREFIX+hash;
+        for (Cookie cookie : cookies) {
+            if(cookie.getName().equals(cookieName)) {
+                return cookie.getValue();
+            }
         }
         return null;
     }
 
     /**
-     * Finds appropriate local session.
+     * Convenience method to remember the session for a request in the servlet attributes.
      * 
-     * @param sessionId
-     *            identifier of the session.
-     * @param sessiondService
-     *            The SessionD service
-     * @return the session.
-     * @throws SessionException
-     *             if the session can not be found.
-     */
-    @OXThrows(category = Category.TRY_AGAIN, desc = "A session with the given identifier can not be found.", exceptionId = 3, msg = "Your session %s expired. Please start a new browser session.")
-    private static Session getLocalSession(final String sessionId, final SessiondService sessiondService)
-            throws SessiondException {
-        final Session retval = sessiondService.getSession(sessionId);
-        if (null == retval) {
-            throw EXCEPTION.create(3, sessionId);
-        }
-        try {
-            final Context context = ContextStorage.getStorageContext(retval.getContextId());
-            final User user = UserStorage.getInstance().getUser(retval.getUserId(), context);
-            if (!user.isMailEnabled()) {
-                throw EXCEPTION.create(3, sessionId);
-            }
-        } catch (final UndeclaredThrowableException e) {
-            throw EXCEPTION.create(3, sessionId);
-        } catch (final AbstractOXException e) {
-            throw EXCEPTION.create(3, sessionId);
-        }
-        return retval;
-    }
-
-    /**
-     * Convenience method to remember the session for a request in the servlet
-     * attributes.
-     * 
-     * @param req
-     *            servlet request.
-     * @param session
-     *            session to remember.
+     * @param req servlet request.
+     * @param session session to remember.
      */
     public static void rememberSession(final ServletRequest req, final ServerSession session) {
         req.setAttribute(SESSION_KEY, session);
     }
+    
+    public static void removeOXCookies(String hash, HttpServletRequest req, HttpServletResponse resp) {
+        Cookie[] cookies = req.getCookies();
+        if (cookies == null) {
+            return;
+        }
+        List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
+        for (Cookie cookie : cookies) {
+            for (String string : cookieNames) {
+                if (cookie.getName().startsWith(string)) {
+                    final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+                    respCookie.setPath("/");
+                    respCookie.setMaxAge(0); // delete
+                    resp.addCookie(respCookie);
+                }
+            }
+        }
+    }
+
 
     /**
      * Returns the remembered session.
      * 
-     * @param req
-     *            servlet request.
+     * @param req servlet request.
      * @return the remembered session.
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {

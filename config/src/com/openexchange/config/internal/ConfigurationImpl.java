@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,11 +49,14 @@
 
 package com.openexchange.config.internal;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
@@ -78,6 +82,10 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private static final String EXT = ".properties";
 
+    private Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
+
+    private Map<String, String> texts = new ConcurrentHashMap<String, String>();
+    
     private final File[] dirs;
 
     private static final class PropertyFileFilter implements FileFilter {
@@ -104,10 +112,11 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     private static final String[] getDirectories() {
-        List<String> tmp = new ArrayList<String>();
-        for (String property : new String[] { "openexchange.propdir", "openexchange.propdir2" }) {
-            if (null != System.getProperty(property)) {
-                tmp.add(System.getProperty(property));
+        final List<String> tmp = new ArrayList<String>();
+        for (final String property : new String[] { "openexchange.propdir", "openexchange.propdir2" }) {
+            final String sysProp = System.getProperty(property);
+            if (null != sysProp) {
+                tmp.add(sysProp);
             }
         }
         return tmp.toArray(new String[tmp.size()]);
@@ -118,7 +127,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      * 
      * @param directory The directory where property files are located
      */
-    public ConfigurationImpl(String[] directories) {
+    public ConfigurationImpl(final String[] directories) {
         super();
         if (null == directories || directories.length == 0) {
             throw new IllegalArgumentException("Missing configuration directory path.");
@@ -133,44 +142,47 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
             dirs[i] = new File(directories[i]);
             if (!dirs[i].exists()) {
-                throw new IllegalArgumentException("Not found: \"" + directories[i] + "\".");
+                throw new IllegalArgumentException(MessageFormat.format("Not found: \"{0}\".", directories[i]));
             } else if (!dirs[i].isDirectory()) {
-                throw new IllegalArgumentException("Not a directory: " + directories[i]);
+                throw new IllegalArgumentException(MessageFormat.format("Not a directory: {0}", directories[i]));
             }
-            processDirectory(dirs[i], fileFilter, properties, propertiesFiles);
+            processDirectory(dirs[i], fileFilter, properties, propertiesFiles, propertiesByFile);
         }
     }
 
-    private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
+    private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles, Map<String, Properties> propertiesByFile) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
-            LOG.info("Can't read " + dir + ". Skipping.");
+            LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
             return;
         }
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
-                processDirectory(files[i], fileFilter, properties, propertiesFiles);
+                processDirectory(files[i], fileFilter, properties, propertiesFiles, propertiesByFile);
             } else {
-                processPropertiesFile(files[i], properties, propertiesFiles);
+                processPropertiesFile(files[i], properties, propertiesFiles, propertiesByFile);
             }
         }
     }
 
-    private static void processPropertiesFile(final File propFile, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
-        FileInputStream fis = null;
+    private static void processPropertiesFile(final File propFile, final Map<String, String> properties, final Map<String, String> propertiesFiles, Map<String, Properties> propertiesByFile) {
         try {
-            fis = new FileInputStream(propFile);
-            final Properties tmp = new Properties();
-            tmp.load(fis);
+            final Properties tmp = loadProperties(propFile);
+            propertiesByFile.put(propFile.getPath(), tmp);
             final int size = tmp.size();
             final Iterator<Entry<Object, Object>> iter = tmp.entrySet().iterator();
             for (int i = 0; i < size; i++) {
                 final Entry<Object, Object> e = iter.next();
                 final String propName = e.getKey().toString().trim();
-                String otherValue = properties.get(propName);
+                final String otherValue = properties.get(propName);
                 if (properties.containsKey(propName) && otherValue != null && !otherValue.equals(e.getValue())) {
-                    String otherFile = propertiesFiles.get(propName);
-                    LOG.warn("Overwriting property " + propName + " from file '" + otherFile + "' with property from file '" + propFile.getPath() + "', overwriting value '" + otherValue + "' with value '" + e.getValue() + "'.");
+                    final String otherFile = propertiesFiles.get(propName);
+                    if (LOG.isWarnEnabled()) {
+                        final StringBuilder sb = new StringBuilder(64).append("Overwriting property ").append(propName).append(" from file '");
+                        sb.append(otherFile).append("' with property from file '").append(propFile.getPath()).append("', overwriting value '");
+                        sb.append(otherValue).append("' with value '").append(e.getValue()).append("'.");
+                        LOG.warn(sb.toString());
+                    }
                 }
                 properties.put(propName, e.getValue().toString().trim());
                 propertiesFiles.put(propName, propFile.getPath());
@@ -179,13 +191,20 @@ public final class ConfigurationImpl implements ConfigurationService {
             LOG.error(e.getMessage(), e);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private static Properties loadProperties(final File propFile) throws FileNotFoundException, IOException {
+        final FileInputStream fis = new FileInputStream(propFile);
+        try {
+            final Properties tmp = new Properties();
+            tmp.load(fis);
+            return tmp;
         } finally {
-            if (null != fis) {
-                try {
-                    fis.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+            try {
+                fis.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
     }
@@ -255,18 +274,29 @@ public final class ConfigurationImpl implements ConfigurationService {
      * {@inheritDoc}
      */
     public Properties getFile(final String filename, final PropertyListener listener) {
+        String key = null;
+        for (String k : propertiesByFile.keySet()) {
+            if(k.endsWith(filename)) {
+                key = k;
+                break;
+            }
+        }
+        
+        if(key == null) {
+            return new Properties();
+        }
+        
+        Properties tmp = propertiesByFile.get(key);
         final Properties retval = new Properties();
-        final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
-        while (iter.hasNext()) {
-            final Entry<String, String> entry = iter.next();
-            if (entry.getValue().endsWith(filename)) {
-                final String value;
-                if (null == listener) {
-                    value = getProperty(entry.getKey());
-                } else {
-                    value = getProperty(entry.getKey(), listener);
-                }
-                retval.put(entry.getKey(), value);
+        
+        for( Entry<Object, Object> entry : tmp.entrySet()) {
+            retval.put(entry.getKey(), entry.getValue());
+        }
+        
+        
+        if(listener != null) {
+            for(Object k : retval.keySet()) {
+                getProperty((String) k, listener);
             }
         }
         return retval;
@@ -276,20 +306,21 @@ public final class ConfigurationImpl implements ConfigurationService {
         return getPropertiesInFolder(folderName, null);
     }
 
-    public Properties getPropertiesInFolder(String folderName, final PropertyListener listener) {
+    public Properties getPropertiesInFolder(final String folderName, final PropertyListener listener) {
         final Properties retval = new Properties();
         final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
-        for (File dir : dirs) {
-            folderName = dir.getAbsolutePath() + "/" + folderName + "/";
+        String fldName = folderName;
+        for (final File dir : dirs) {
+            fldName = dir.getAbsolutePath() + "/" + fldName + "/";
             while (iter.hasNext()) {
                 final Entry<String, String> entry = iter.next();
-                if (entry.getValue().startsWith(folderName)) {
+                if (entry.getValue().startsWith(fldName)) {
                     final String value;
                     if (null == listener) {
                         value = getProperty(entry.getKey());
                     } else {
                         value = getProperty(entry.getKey(), listener);
-                    } // FIXME: this could have been overriden by some property
+                    } // FIXME: this could have been overridden by some property
                     // external to the requested folder.
                     retval.put(entry.getKey(), value);
                 }
@@ -303,8 +334,9 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @see com.openexchange.config.Configuration#getProperty(java.lang.String, boolean)
      */
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
-        if (properties.containsKey(name)) {
-            return Boolean.parseBoolean(properties.get(name));
+        final String prop = properties.get(name);
+        if (null != prop) {
+            return Boolean.parseBoolean(prop.trim());
         }
         return defaultValue;
     }
@@ -314,8 +346,8 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @see com.openexchange.config.Configuration#getProperty(java.lang.String, int)
      */
     public int getIntProperty(final String name, final int defaultValue) {
-        final String prop;
-        if (properties.containsKey(name) && (prop = properties.get(name)) != null) {
+        final String prop = properties.get(name);
+        if (prop != null) {
             try {
                 return Integer.parseInt(prop.trim());
             } catch (final NumberFormatException e) {
@@ -341,5 +373,58 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public int size() {
         return properties.size();
+    }
+
+    public String getText(String filename) {
+        String text = texts.get(filename);
+        if(text != null) {
+            return text;
+        }
+        
+        String[] directories = getDirectories();
+        for (String dir : directories) {
+            String s = traverse(new File(dir), filename);
+            if(s != null) {
+                texts.put(filename, s);
+                return s;
+            }
+        }
+        return null;
+    }
+
+    private String traverse(File file, String filename) {
+        if(file.getName().equals(filename) && file.isFile()) {
+            BufferedReader r = null;
+            try {
+                r = new BufferedReader(new FileReader(file));
+                StringBuilder builder = new StringBuilder();
+                String s = null;
+                while((s = r.readLine()) != null) {
+                    builder.append(s).append("\n");
+                }
+                return builder.toString();
+            } catch (IOException x) {
+                LOG.fatal("Can't read file: "+file);
+                return null;
+            } finally {
+                if (r != null) {
+                    try {
+                        r.close();
+                    } catch (IOException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        File[] files = file.listFiles();
+        if(files != null) {
+            for (File f : files) {
+                String s = traverse(f, filename);
+                if(s != null) {
+                    return s;
+                }
+            }
+        }
+        return null;
     }
 }
