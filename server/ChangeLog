@@ -1,3 +1,7 @@
+* 2010-08-16 - francisco.laguna@open-xchange.com
+
+ - Add whitelist capability to ip check.
+
 * 2010-08-13 - thorben.betten@open-xchange.com
 
  - Bugfix #16618: Allowing contact image URL on action=all

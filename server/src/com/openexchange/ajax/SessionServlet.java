@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -67,6 +68,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -88,6 +90,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.Classes;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
 import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -109,8 +112,12 @@ public abstract class SessionServlet extends AJAXServlet {
 
     public static final String SESSION_KEY = "sessionObject";
 
+    private static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
+
     private boolean checkIP = true;
 
+    private static List<IPRange> ranges = new ArrayList<IPRange>(5);
+    
     protected SessionServlet() {
         super();
     }
@@ -119,6 +126,27 @@ public abstract class SessionServlet extends AJAXServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        
+        if(checkIP) {
+            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if(configurationService == null) {
+                LOG.fatal("No configuration service available, can not read whitelist");
+            } else {
+                String text = configurationService.getText(SESSION_WHITELIST_FILE);
+                if(text == null) {
+                    LOG.info("No exceptions from IP Check have been defined.");
+                } else {
+                    String[] lines = text.split("\n");
+                    for (String line : lines) {
+                        line = line.replaceAll("\\s", "");
+                        if(!line.equals("") && ! line.startsWith("#")) {
+                            ranges.add(IPRange.parseRange(line));
+                        }
+                    }
+                }
+            }
+        }
+    
     }
 
     /**
@@ -191,7 +219,7 @@ public abstract class SessionServlet extends AJAXServlet {
         msg = "Request to server was refused. Original client IP address changed. Please try again."
     )
     public static void checkIP(final boolean checkIP, final Session session, final String actual) throws SessiondException {
-        if (null == actual || !actual.equals(session.getLocalIp())) {
+        if (null == actual || (!isWhitelistedFromIPCheck(actual) && !actual.equals(session.getLocalIp()))) {
             if (checkIP) {
                 LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
                 throw EXCEPTION.create(5);
@@ -207,6 +235,15 @@ public abstract class SessionServlet extends AJAXServlet {
                 LOG.debug(sb.toString());
             }
         }
+    }
+
+    private static boolean isWhitelistedFromIPCheck(String actual) {
+        for (IPRange range : ranges) {
+            if(range.contains(actual)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
