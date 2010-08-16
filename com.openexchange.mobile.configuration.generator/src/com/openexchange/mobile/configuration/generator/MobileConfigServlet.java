@@ -289,7 +289,7 @@ public class MobileConfigServlet extends HttpServlet {
             } else if (Locale.GERMAN.equals(locale)) {
                 writer.println("<h1>" + "Geben Sie für die automatische Konfiguration Ihres Gerätes Ihren Benutzernamen ein." + "</h1>");
             }
-            writer.println("<input name=\"" + PARAMETER_LOGIN +"\" type=\"text\" size=\"30\" maxlength=\"30\">");
+            writer.println("<input name=\"" + PARAMETER_LOGIN +"\" type=\"text\" size=\"30\" maxlength=\"100\">");
             writer.println("<input type=\"submit\" value=\" Absenden \">");
             writer.println("</td>");
             writer.println("</tr>");
