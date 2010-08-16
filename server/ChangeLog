@@ -1,3 +1,7 @@
+* 2010-08-16 - tobias.prinz@open-xchange.com
+
+ - Bugfix #16613: Ignoring ID element in ATTACH in an ICAL file.
+ 
 * 2010-08-12 - thorben.betten@open-xchange.com
 
  - Bugfix #16669: Proper quoting of regex replacement
