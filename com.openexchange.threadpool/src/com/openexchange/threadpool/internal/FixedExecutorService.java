@@ -167,12 +167,12 @@ public final class FixedExecutorService extends AbstractExecutorService {
 
     public void shutdown() {
         // No shut-down
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Shutdown not allowed.");
     }
 
     public List<Runnable> shutdownNow() {
         // No shut-down
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Shutdown not allowed.");
     }
 
 }

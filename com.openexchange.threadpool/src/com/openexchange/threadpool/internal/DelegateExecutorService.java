@@ -54,10 +54,9 @@ import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-
 /**
- * {@link DelegateExecutorService} - TODO Short description of this class' purpose.
- *
+ * {@link DelegateExecutorService} - A delegating {@link ExecutorService} which denies shut-down.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DelegateExecutorService extends AbstractExecutorService {

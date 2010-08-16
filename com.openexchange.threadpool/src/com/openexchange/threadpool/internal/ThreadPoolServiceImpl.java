@@ -129,7 +129,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
     private final CustomThreadPoolExecutor threadPoolExecutor;
 
     /**
-     * Creates a new <tt>ThreadPoolExecutor</tt> with the given initial parameters.
+     * Creates a new <tt>ThreadPoolServiceImpl</tt> with the given initial parameters.
      * 
      * @param corePoolSize The number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize The maximum number of threads to allow in the pool.
