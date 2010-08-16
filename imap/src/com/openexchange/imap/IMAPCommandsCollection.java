@@ -897,10 +897,6 @@ public final class IMAPCommandsCollection {
         try {
             f.doCommand(new IMAPFolder.ProtocolCommand() {
 
-                /*
-                 * (non-Javadoc)
-                 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com .sun.mail.imap.protocol.IMAPProtocol)
-                 */
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                     final Response[] r = protocol.command(COMMAND_NOOP, null);
                     /*
@@ -928,10 +924,6 @@ public final class IMAPCommandsCollection {
         try {
             f.doCommand(new IMAPFolder.ProtocolCommand() {
 
-                /*
-                 * (non-Javadoc)
-                 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com .sun.mail.imap.protocol.IMAPProtocol)
-                 */
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                     final Response[] r = protocol.command(new StringBuilder(COMMAND_NOOP).append(' ').append(clientIP).toString(), null);
                     /*
