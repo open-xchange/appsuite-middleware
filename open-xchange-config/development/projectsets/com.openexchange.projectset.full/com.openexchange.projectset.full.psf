@@ -67,5 +67,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,openexchange-test-fitnesse,openexchange-test-fitnesse"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.proxy,com.openexchange.proxy"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.mobileconfig,com.openexchange.mobileconfig"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.secret,com.openexchange.secret"/>
 </provider>
 </psf>
