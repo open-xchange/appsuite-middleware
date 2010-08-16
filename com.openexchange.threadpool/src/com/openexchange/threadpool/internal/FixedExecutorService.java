@@ -68,19 +68,17 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class FixedExecutorService extends AbstractExecutorService {
 
-    private final class CountingFuture extends FutureTask<Object> {
+    private final class PollingFuture extends FutureTask<Object> {
 
-        public CountingFuture(final Runnable command) {
+        public PollingFuture(final Runnable command) {
             super(command, null);
         }
 
         @Override
-        public void run() {
-            super.run();
-        }
-
-        @Override
         protected void done() {
+            /*
+             * Poll next available command from queue
+             */
             pollFromQueue();
         }
 
@@ -120,7 +118,7 @@ public final class FixedExecutorService extends AbstractExecutorService {
                  * Pass to execute() and leave
                  */
                 count.incrementAndGet();
-                executorService.execute(new CountingFuture(command));
+                executorService.execute(new PollingFuture(command));
             } else {
                 /*
                  * Too many in-progress commands or queue not empty. Enqueue and leave
@@ -132,6 +130,12 @@ public final class FixedExecutorService extends AbstractExecutorService {
         }
     }
 
+    /**
+     * Polls next available command from queue. If queue is not empty, command is immediately passed to {@link #execute(Runnable)} method;
+     * otherwise counter is decremented to signal a free resource for further processing of passed {@link Runnable commands}.
+     * 
+     * @return <code>true</code> if queue was not empty and thus a command is scheduled for execution; otherwise <code>false</code>
+     */
     protected boolean pollFromQueue() {
         lock.lock();
         try {
@@ -140,7 +144,7 @@ public final class FixedExecutorService extends AbstractExecutorService {
                 /*
                  * Continue executing next queued command
                  */
-                executorService.execute(new CountingFuture(command));
+                executorService.execute(new PollingFuture(command));
                 return true;
             }
             /*
