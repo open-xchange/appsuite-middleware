@@ -74,6 +74,8 @@ public class CrawlerDescription {
     private boolean javascriptEnabled = false;
     
     private boolean mobileUserAgentEnabled = false;
+    
+    private boolean quirkyCookieQuotes;
 
     public CrawlerDescription() {
 
@@ -83,6 +85,7 @@ public class CrawlerDescription {
         Workflow workflow = new Workflow(steps);
         if (mobileUserAgentEnabled) workflow.setMobileUserAgent(true);  
         if (javascriptEnabled) workflow.setEnableJavascript(true);
+        if (quirkyCookieQuotes) workflow.setQuirkyCookieQuotes(true);
         this.setWorkflowString(Yaml.dump(workflow));
     }
     
@@ -161,5 +164,16 @@ public class CrawlerDescription {
         this.mobileUserAgentEnabled = mobileUserAgentEnabled;
     }
 
+    
+    public boolean isQuirkyCookieQuotes() {
+        return quirkyCookieQuotes;
+    }
+
+    
+    public void setQuirkyCookieQuotes(boolean quirkyCookieQuotes) {
+        this.quirkyCookieQuotes = quirkyCookieQuotes;
+    }
+
+    
     
 }

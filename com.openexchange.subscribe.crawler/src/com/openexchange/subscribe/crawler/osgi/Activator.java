@@ -148,6 +148,8 @@ public class Activator implements BundleActivator {
         if (files == null) {
             LOG.warn("Could not find crawler descriptions in " + directory + ". Skipping crawler initialisation.");
             return crawlers;
+        } else {
+            LOG.info("Loading crawler descriptions from directory : " + directory);
         }
         for (final File file : files) {
             try {

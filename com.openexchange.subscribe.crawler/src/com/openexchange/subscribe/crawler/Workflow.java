@@ -52,19 +52,17 @@ package com.openexchange.subscribe.crawler;
 import java.util.List;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.params.DefaultHttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.CrawlerCookieManager;
 import com.gargoylesoftware.htmlunit.CrawlerCookieSpec;
+import com.gargoylesoftware.htmlunit.CrawlerCookieSpecWithQuirkyQuotes;
 import com.gargoylesoftware.htmlunit.CrawlerWebConnection;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.util.WebConnectionWrapper;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
@@ -98,6 +96,8 @@ public class Workflow {
     private boolean debuggingEnabled = false;
 
     private boolean mobileUserAgent = false;
+    
+    private boolean quirkyCookieQuotes;
 
     public Workflow() {
 
@@ -138,7 +138,9 @@ public class Workflow {
 
         // use a custom CookiePolicy to be more lenient and thereby work with more websites
         CrawlerWebConnection crawlerConnection = new CrawlerWebConnection(webClient);
+        if (quirkyCookieQuotes) {crawlerConnection.setQuirkyCookieQuotes(true);}
         CookiePolicy.registerCookieSpec("crawler-special", CrawlerCookieSpec.class);
+        CookiePolicy.registerCookieSpec("crawler-special-qq", CrawlerCookieSpecWithQuirkyQuotes.class);
         webClient.setCookieManager(new CrawlerCookieManager());
         // System.out.println(CookiePolicy.getCookieSpec("crawler-special"));
 
@@ -246,5 +248,17 @@ public class Workflow {
     public void setMobileUserAgent(boolean mobileUserAgent) {
         this.mobileUserAgent = mobileUserAgent;
     }
+
+    
+    public boolean isQuirkyCookieQuotes() {
+        return quirkyCookieQuotes;
+    }
+
+    
+    public void setQuirkyCookieQuotes(boolean quirkyCookieQuotes) {
+        this.quirkyCookieQuotes = quirkyCookieQuotes;
+    }
+    
+    
 
 }

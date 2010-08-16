@@ -57,9 +57,9 @@ import java.util.regex.Pattern;
 
 /**
  * This describes a sequence of ->PageParts to unequivocally identify information (e.g. a contact\u00b4s name) in a webpages sourcecode. To
- * identify a particular bit of information two factors are used: - Its place in the sequence (e.g. in the page\u00b4s sourcecode the last name
- * is listed after the first name) - The sourcecode immediately surrounding it. There are two kinds of page parts: - Fillers, only used to
- * make the sequence unequivocal and containing a single-capture-group regex identifiyng them - Infos, containing a three-capture-group
+ * identify a particular bit of information two factors are used: - Its place in the sequence (e.g. in the page\u00b4s sourcecode the last
+ * name is listed after the first name) - The sourcecode immediately surrounding it. There are two kinds of page parts: - Fillers, only used
+ * to make the sequence unequivocal and containing a single-capture-group regex identifiyng them - Infos, containing a three-capture-group
  * regex (immediately before, relevant part, immediately after)
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -68,7 +68,7 @@ public class PagePartSequence {
 
     private ArrayList<PagePart> pageParts;
 
-    private String page;
+    private String page, limit;
 
     public PagePartSequence() {
 
@@ -79,25 +79,57 @@ public class PagePartSequence {
         this.page = page;
     }
 
+    /**
+     * This includes the parameter "limit" as a way to separate the input into parts beforehand that each will become a contact later on.
+     * This is by far easier to do than using regular expressions to make sure that a specific bit of content belongs to one object and not
+     * another. Initializes a new {@link PagePartSequence}.
+     * 
+     * @param pageParts
+     * @param page
+     * @param limit
+     */
+    public PagePartSequence(final ArrayList<PagePart> pageParts, final String page, String limit) {
+        this.pageParts = pageParts;
+        this.page = page;
+        this.limit = limit;
+    }
+
     public HashMap<String, String> retrieveInformation() {
         final HashMap<String, String> retrievedInformation = new HashMap<String, String>();
         extractInformationOnce(retrievedInformation);
 
         return retrievedInformation;
     }
-    
+
     public Collection<HashMap<String, String>> retrieveMultipleInformation() {
         HashMap<String, String> retrievedInformation = null;
         ArrayList<HashMap<String, String>> multiple = new ArrayList<HashMap<String, String>>();
-        
+
         final Pattern pattern = Pattern.compile(pageParts.get(1).getRegex());
         Matcher matcher = pattern.matcher(page);
-        while (matcher.find()){
+        while (matcher.find()) {
             retrievedInformation = new HashMap<String, String>();
             extractInformationOnce(retrievedInformation);
             multiple.add(retrievedInformation);
         }
-        
+
+        return multiple;
+    }
+
+    public Collection<HashMap<String, String>> retrieveMultipleInformationConstrainedByLimit() {
+        HashMap<String, String> retrievedInformation = null;
+        ArrayList<HashMap<String, String>> multiple = new ArrayList<HashMap<String, String>>();
+
+        while (page.indexOf(limit) != -1) {
+            String substring = page.substring(0, page.indexOf(limit) + limit.length());
+            String restOfPage = page.substring(page.indexOf(limit) + limit.length());
+            page = substring;
+            retrievedInformation = new HashMap<String, String>();
+            extractInformationOnce(retrievedInformation);
+            multiple.add(retrievedInformation);
+            page = restOfPage;
+        }
+
         return multiple;
     }
 
@@ -113,12 +145,12 @@ public class PagePartSequence {
                     final String info = matcher.group(2);
                     if (!info.equals("") && pagePart.getAddInfo() == 0) {
                         retrievedInformation.put(pagePart.getTypeOfInfo(), info);
-                    } else if (!info.equals("") && pagePart.getAddInfo() != 0 && pagePart.getAddInfo() <= 3 && pagePart.getAddInfo() >=1) {
-                        retrievedInformation.put(pagePart.getTypeOfInfo(), info + " ("+matcher.group(pagePart.getAddInfo())+")");
+                    } else if (!info.equals("") && pagePart.getAddInfo() != 0 && pagePart.getAddInfo() <= 3 && pagePart.getAddInfo() >= 1) {
+                        retrievedInformation.put(pagePart.getTypeOfInfo(), info + " (" + matcher.group(pagePart.getAddInfo()) + ")");
                     }
                 }
                 // throw away the part of the String that was just matched or leave it
-                if (!pagePart.isKeepStringAfterMatching()){
+                if (!pagePart.isKeepStringAfterMatching()) {
                     // set the page to the rest (after this part)
                     page = page.substring(indexOfPageRest);
                 }
@@ -140,6 +172,14 @@ public class PagePartSequence {
 
     public void setPage(final String page) {
         this.page = page;
+    }
+
+    public String getLimit() {
+        return limit;
+    }
+
+    public void setLimit(String limit) {
+        this.limit = limit;
     }
 
 }

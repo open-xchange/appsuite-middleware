@@ -57,7 +57,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
@@ -68,13 +67,11 @@ import com.openexchange.tools.versit.converter.ConverterException;
 
 
 /**
- * {@link ContactObjectsByPageAndPagePartSequenceStep}
- * 
- * This returns 
+ * {@link ContactObjectsByStringAndPagePartSequenceStep}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Contact[], HtmlPage> {
+public class ContactObjectsByStringAndPagePartSequenceStep extends AbstractStep<Contact[], String> {
 
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
@@ -82,11 +79,10 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
 
     private static final Log LOG = LogFactory.getLog(ContactObjectsByPageAndPagePartSequenceStep.class);
 
-    public ContactObjectsByPageAndPagePartSequenceStep() {
-        
+    public ContactObjectsByStringAndPagePartSequenceStep() {
     }
-    
-    public ContactObjectsByPageAndPagePartSequenceStep(final String description, final PagePartSequence pageParts) {
+
+    public ContactObjectsByStringAndPagePartSequenceStep(final String description, final PagePartSequence pageParts) {
         this.description = description;
         this.pageParts = pageParts;
     }
@@ -97,11 +93,10 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
     @Override
     public void execute(WebClient webClient) throws SubscriptionException {
         final List<Contact> contactObjects = new ArrayList<Contact>();
-            try {
-                final String pageString = StringEscapeUtils.unescapeHtml(input.getWebResponse().getContentAsString());                
-                pageParts.setPage(pageString);
-                LOG.debug("Page evaluated is : "+pageString);
-                final Collection<HashMap<String, String>> maps = pageParts.retrieveMultipleInformation();
+            try {                
+                LOG.debug("Page evaluated is : "+input);
+                pageParts.setPage(input);                
+                final Collection<HashMap<String, String>> maps = pageParts.retrieveMultipleInformationConstrainedByLimit();
 
                 for (HashMap<String, String> map : maps){
                     final Contact contact = Mappings.translateMapToContact(map);

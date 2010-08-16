@@ -15,7 +15,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.1.1.jar" sourcepath="source/commons-logging_1.1.1_sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cssparser-0.9.5.jar" sourcepath="source/cssparser_0.9.5_sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/facebook-java-api-1.8-final.jar" sourcepath="source/facebook-java-api-1.8-final-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/htmlunit-2.5.jar" sourcepath="source/htmlunit_2.5_sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlunit-core-js-2.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jaxb-api-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jaxb-impl-2.1.jar"/>
@@ -31,5 +30,15 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="lib" path="lib/gdata-calendar-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/gdata-calendar-meta-2.0.jar"/>
+	<classpathentry kind="lib" path="lib/htmlunit-2.5.jar" sourcepath="source/htmlunit_2.5_sources.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-20100601.jar" sourcepath="source/oauth-20100601-sources.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-consumer-20100601.jar" sourcepath="source/oauth-consumer-20100601-sources.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-httpclient3-20100601.jar" sourcepath="source/oauth-httpclient3-20100601-sources.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-httpclient4-20100601.jar" sourcepath="source/oauth-httpclient4-20100601-sources.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-provider-20100601.jar" sourcepath="source/oauth-provider-20100601-sources.jar"/>
+	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.0.1.jar" sourcepath="source/httpclient-4.0.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -104,6 +104,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
     private HttpClient httpClient_;
     private String virtualHost_;
     private static Log LOG = LogFactory.getLog(CrawlerWebConnection.class);
+    private boolean quirkyCookieQuotes;
 
     /**
      * Initializes a new {@link CrawlerWebConnection}.
@@ -302,7 +303,11 @@ public class CrawlerWebConnection extends HttpWebConnection {
             // Cookies are enabled. Note that it's important that we enable single cookie headers,
             // for compatibility purposes.
             httpMethod.getParams().setBooleanParameter(HttpMethodParams.SINGLE_COOKIE_HEADER, true);
-            httpMethod.getParams().setCookiePolicy("crawler-special");            
+            if (quirkyCookieQuotes){
+                httpMethod.getParams().setCookiePolicy("crawler-special-qq");
+            } else {
+                httpMethod.getParams().setCookiePolicy("crawler-special");
+            }
         }
         else {
             // Cookies are disabled.
@@ -559,4 +564,15 @@ public class CrawlerWebConnection extends HttpWebConnection {
         }
     }
 
+    
+    public boolean isQuirkyCookieQuotes() {
+        return quirkyCookieQuotes;
+    }
+
+    
+    public void setQuirkyCookieQuotes(boolean quirkyCookieQuotes) {
+        this.quirkyCookieQuotes = quirkyCookieQuotes;
+    }
+
+    
 }
