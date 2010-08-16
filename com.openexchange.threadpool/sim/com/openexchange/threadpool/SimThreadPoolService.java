@@ -65,9 +65,16 @@ public class SimThreadPoolService implements ThreadPoolService {
 
     private ExecutorService executor;
 
+    private final int corePoolSize;
+
     public SimThreadPoolService() {
         super();
         executor = Executors.newSingleThreadExecutor();
+        this.corePoolSize = getCorePoolSize();
+    }
+
+    private static int getCorePoolSize() {
+        return Runtime.getRuntime().availableProcessors() + 1;
     }
 
     public int getActiveCount() {
@@ -84,6 +91,10 @@ public class SimThreadPoolService implements ThreadPoolService {
 
     public ExecutorService getFixedExecutor(final int size) {
         return new FixedExecutorService(size, executor);
+    }
+
+    public ExecutorService getFixedExecutor() {
+        return new FixedExecutorService(corePoolSize, executor);
     }
 
     public int getLargestPoolSize() {

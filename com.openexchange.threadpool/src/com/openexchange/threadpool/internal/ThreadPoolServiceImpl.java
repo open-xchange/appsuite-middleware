@@ -128,6 +128,8 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
     private final CustomThreadPoolExecutor threadPoolExecutor;
 
+    private final int corePoolSize;
+
     /**
      * Creates a new <tt>ThreadPoolServiceImpl</tt> with the given initial parameters.
      * 
@@ -146,9 +148,10 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         if (null == queueType) {
             throw new IllegalArgumentException("Unknown queue type: " + workQueue);
         }
+        this.corePoolSize = getCorePoolSize(corePoolSize);
         threadPoolExecutor =
             new CustomThreadPoolExecutor(
-                getCorePoolSize(corePoolSize),
+                this.corePoolSize,
                 maximumPoolSize,
                 keepAliveTime,
                 TimeUnit.MILLISECONDS,
@@ -365,6 +368,10 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
     public ExecutorService getExecutor() {
         return new DelegateExecutorService(threadPoolExecutor);
+    }
+
+    public ExecutorService getFixedExecutor() {
+        return new FixedExecutorService(corePoolSize, threadPoolExecutor);
     }
 
     public ExecutorService getFixedExecutor(final int size) {

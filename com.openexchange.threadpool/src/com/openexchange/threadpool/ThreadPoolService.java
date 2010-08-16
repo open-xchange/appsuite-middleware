@@ -259,6 +259,15 @@ public interface ThreadPoolService {
     ExecutorService getExecutor();
 
     /**
+     * Spawns a new {@link ExecutorService} from this thread pool which only uses thread pool's core size as number of concurrent active tasks.
+     * <p>
+     * <b>Note</b>: Shut-down operations are not permitted and will throw an {@link UnsupportedOperationException}.
+     * 
+     * @return The fixed-size {@link ExecutorService} backed by this thread pool
+     */
+    ExecutorService getFixedExecutor();
+
+    /**
      * Spawns a new {@link ExecutorService} from this thread pool which only uses specified number of concurrent active tasks.
      * <p>
      * <b>Note</b>: Shut-down operations are not permitted and will throw an {@link UnsupportedOperationException}.
