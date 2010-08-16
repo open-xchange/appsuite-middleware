@@ -122,6 +122,13 @@ public interface ConfigurationService {
      * @return the properties from that file or an empty properties if that file was not read.
      */
     public Properties getFile(String filename);
+    
+    /**
+     * If no property format is used for configuration data, the text content of a file can be retrieved with this call.
+     * @param filename The logical filename of the file to be retrieved.
+     * @return The text content of the configuration
+     */
+    public String getText(String filename);
 
     /**
      * Returns all properties defined in a specific properties file. The filename of the properties file must not contains any path

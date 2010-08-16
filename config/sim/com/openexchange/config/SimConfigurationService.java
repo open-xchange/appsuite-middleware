@@ -114,4 +114,12 @@ public class SimConfigurationService implements ConfigurationService {
         return 0;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.config.ConfigurationService#getText(java.lang.String)
+     */
+    public String getText(String filename) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

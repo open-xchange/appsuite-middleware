@@ -49,10 +49,12 @@
 
 package com.openexchange.config.internal;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -62,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
@@ -81,6 +84,8 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
 
+    private Map<String, String> texts = new ConcurrentHashMap<String, String>();
+    
     private final File[] dirs;
 
     private static final class PropertyFileFilter implements FileFilter {
@@ -368,5 +373,58 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public int size() {
         return properties.size();
+    }
+
+    public String getText(String filename) {
+        String text = texts.get(filename);
+        if(text != null) {
+            return text;
+        }
+        
+        String[] directories = getDirectories();
+        for (String dir : directories) {
+            String s = traverse(new File(dir), filename);
+            if(s != null) {
+                texts.put(filename, s);
+                return s;
+            }
+        }
+        return null;
+    }
+
+    private String traverse(File file, String filename) {
+        if(file.getName().equals(filename) && file.isFile()) {
+            BufferedReader r = null;
+            try {
+                r = new BufferedReader(new FileReader(file));
+                StringBuilder builder = new StringBuilder();
+                String s = null;
+                while((s = r.readLine()) != null) {
+                    builder.append(s).append("\n");
+                }
+                return builder.toString();
+            } catch (IOException x) {
+                LOG.fatal("Can't read file: "+file);
+                return null;
+            } finally {
+                if (r != null) {
+                    try {
+                        r.close();
+                    } catch (IOException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        File[] files = file.listFiles();
+        if(files != null) {
+            for (File f : files) {
+                String s = traverse(f, filename);
+                if(s != null) {
+                    return s;
+                }
+            }
+        }
+        return null;
     }
 }
