@@ -92,10 +92,8 @@ public class I18nServices {
 
     public I18nService getService(Locale locale) {
         I18nService retval = services.get(locale);
-        if (null == retval) {
-            if (!"en".equalsIgnoreCase(locale.getLanguage())) {
-                LOG.warn("No i18n service for locale " + locale + ".");
-            }
+        if (null == retval && !"en".equalsIgnoreCase(locale.getLanguage())) {
+            LOG.warn("No i18n service for locale " + locale + ".");
         }
         return retval;
     }

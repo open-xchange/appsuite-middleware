@@ -59,10 +59,7 @@ import com.openexchange.server.services.I18nServices;
 
 public class I18nServiceListener implements ServiceTrackerCustomizer{
 
-    private static final Log LOG = LogFactory.getLog(I18nServiceListener.class);
-
     private final BundleContext context;
-
     private final I18nServices services = I18nServices.getInstance();
 
     public I18nServiceListener(BundleContext context) {
@@ -71,9 +68,8 @@ public class I18nServiceListener implements ServiceTrackerCustomizer{
     }
 
     public Object addingService(ServiceReference reference) {
-        final I18nService i18n = (I18nService) context.getService(reference);
-        LOG.info("Adding service I18nService for locale " + i18n.getLocale());
-        services.addService(i18n.getLocale(), i18n);
+        I18nService i18n = (I18nService) context.getService(reference);
+        services.addService(i18n);
         return i18n;
     }
 
@@ -83,9 +79,7 @@ public class I18nServiceListener implements ServiceTrackerCustomizer{
 
     public void removedService(ServiceReference reference, Object service) {
         try {
-            final I18nService i18n = (I18nService) service;
-            LOG.info("Removing service I18nService for locale " + i18n.getLocale());
-            services.removeService(i18n.getLocale(), i18n);
+            services.removeService((I18nService) service);
         } finally {
             context.ungetService(reference);
         }
