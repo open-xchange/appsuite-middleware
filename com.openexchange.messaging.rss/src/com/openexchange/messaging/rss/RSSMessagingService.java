@@ -47,63 +47,73 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.json;
+package com.openexchange.messaging.rss;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.i18n.Translator;
+import com.openexchange.messaging.MessagingAccountAccess;
+import com.openexchange.messaging.MessagingAccountManager;
+import com.openexchange.messaging.MessagingAccountTransport;
+import com.openexchange.messaging.MessagingAction;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
+import com.openexchange.session.Session;
+import com.sun.syndication.fetcher.FeedFetcher;
+import com.sun.syndication.fetcher.impl.HashMapFeedInfoCache;
+import com.sun.syndication.fetcher.impl.HttpURLFeedFetcher;
 
 /**
- * {@link FormDescriptionWriter}
- * 
+ * {@link RSSMessagingService}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FormDescriptionWriter {
+public class RSSMessagingService implements MessagingService {
 
-    public static final String WIDGET = "widget";
+    private static final String DISPLAY_NAME = "RSS Feed";
+    private static final DynamicFormDescription FORM_DESCRIPTION = new DynamicFormDescription();
+    public static final String ID = "com.openexchange.messaging.rss";
+    static {
+        FORM_DESCRIPTION.add(FormElement.input("url", FormStrings.FORM_LABEL_URL));
+    }
+    
+    private final MessagingAccountManager accountManager = new DefaultMessagingAccountManager(ID);
+    private FeedFetcher fetcher = new HttpURLFeedFetcher(HashMapFeedInfoCache.getInstance());
 
-    public static final String NAME = "name";
-
-    public static final String DISPLAY_NAME = "displayName";
-
-    private static final String MANDATORY = "mandatory";
-
-    private static final String DEFAULT_VALUE = "defaultValue";
-
-    private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
-
-    private final Translator translator;
-
-    public FormDescriptionWriter(Translator translator) {
-        super();
-        this.translator = translator;
+    
+    public MessagingAccountAccess getAccountAccess(int accountId, Session session) throws MessagingException {
+        return new RSSFeedOperations(accountId, session, fetcher, accountManager);
     }
 
-    public FormDescriptionWriter() {
-        this(null);
+    public MessagingAccountManager getAccountManager() {
+        return accountManager;
     }
 
-    public JSONArray write(DynamicFormDescription form) throws JSONException {
-        JSONArray formDescriptionArray = new JSONArray();
-        for (FormElement formElement : form) {
-            JSONObject formElementObject = write(formElement);
-            formDescriptionArray.put(formElementObject);
-        }
-        return formDescriptionArray;
+    public MessagingAccountTransport getAccountTransport(int accountId, Session session) throws MessagingException {
+        return new RSSFeedOperations(accountId, session, fetcher, accountManager);
     }
 
-    public JSONObject write(FormElement formElement) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(WIDGET, formElement.getWidget().getKeyword());
-        object.put(NAME, formElement.getName());
-        object.put(DISPLAY_NAME, translator.translate(formElement.getDisplayName()));
-        object.put(MANDATORY, formElement.isMandatory());
-        if (null != formElement.getDefaultValue()) {
-            object.put(DEFAULT_VALUE, formElement.getWidget().doSwitch(valueWrite, formElement.getDefaultValue()));
-        }
-        return object;
+    public String getDisplayName() {
+        return DISPLAY_NAME;
+    }
+
+    public DynamicFormDescription getFormDescription() {
+        return FORM_DESCRIPTION;
+    }
+
+    public String getId() {
+        return ID;
+    }
+
+    public List<MessagingAction> getMessageActions() {
+        return Collections.emptyList();
+    }
+
+    public static String buildFolderId(int accountId, String folder) {
+        StringBuilder stringBuilder = new StringBuilder(ID);
+        stringBuilder.append("://").append(accountId).append('/').append(folder);
+        return stringBuilder.toString();
     }
 }

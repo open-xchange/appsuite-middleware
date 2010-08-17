@@ -47,26 +47,36 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.messaging.json.actions.services;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Activator}
+ * Lists all known messaging services. No parameters are needed. Returns a JSONArray consisting of the JSON representations of
+ * all known MessagingServices.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class AllAction extends AbstractMessagingServiceAction {
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
-
-    public Activator() {
-        super();
+    public AllAction(MessagingServiceRegistry registry) {
+        super(registry);
     }
 
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
+        JSONArray result = new JSONArray();
+        for(MessagingService service : registry.getAllServices()) {
+            result.put(getWriter(session).write(service));
+        }
+        return new AJAXRequestResult(result);
     }
 }

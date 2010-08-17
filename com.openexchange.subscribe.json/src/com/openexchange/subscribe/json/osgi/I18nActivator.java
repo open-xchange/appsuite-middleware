@@ -50,23 +50,29 @@
 package com.openexchange.subscribe.json.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link Activator}
+ * {@link I18nActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class I18nActivator implements BundleActivator {
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
+    private ServiceTracker tracker;
 
-    public Activator() {
+    I18nActivator() {
         super();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public void start(BundleContext context) throws Exception {
+        tracker = new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context));
+        tracker.open();
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        tracker.close();
     }
 }

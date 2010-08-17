@@ -47,26 +47,44 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.messaging.json.actions.services;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Activator}
- *
+ * Loads a certain messaging service. Parameters are:
+ * <dl>
+ *  <dt>id</dt><dd>The messaging service id.</dd>
+ * </dl>
+ * Returns the JSON representation of the loaded messaging service id.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class GetAction extends AbstractMessagingServiceAction {
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
-
-    public Activator() {
-        super();
+    public GetAction(MessagingServiceRegistry registry) {
+        super(registry);
     }
 
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
+        String id = request.getParameter("id");
+        if (id == null) {
+            throw MessagingExceptionCodes.MISSING_PARAMETER.create("id");
+        }
+        MessagingService service = registry.getMessagingService(id);
+        if (null == service) {
+            throw MessagingExceptionCodes.UNKNOWN_MESSAGING_SERVICE.create(id);
+        }
+        JSONObject responseObject = getWriter(session).write(service);
+        return new AJAXRequestResult(responseObject);
     }
 }

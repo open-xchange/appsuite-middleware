@@ -47,26 +47,32 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.messaging.json.actions.services;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
- * {@link Activator}
+ * {@link ServicesActionFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class ServicesActionFactory implements AJAXActionServiceFactory {
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
+    public static ServicesActionFactory INSTANCE; // Initialized in Activator
 
-    public Activator() {
-        super();
+    private Map<String, AJAXActionService> actions;
+
+    public ServicesActionFactory(MessagingServiceRegistry registry) {
+        this.actions = new HashMap<String, AJAXActionService>();
+        actions.put("all", new AllAction(registry));
+        actions.put("get", new GetAction(registry));
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public AJAXActionService createActionService(String action) {
+        return actions.get(action);
     }
 }

@@ -47,26 +47,53 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.subscribe.json;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.Locale;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link Activator}
+ * Registry for all found {@link I18nService} instances.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class I18nServices {
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
+    private static final Log LOG = LogFactory.getLog(I18nServices.class);
+    private static final I18nServices SINGLETON = new I18nServices();
 
-    public Activator() {
+    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
+
+    private I18nServices() {
         super();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public static I18nServices getInstance() {
+        return SINGLETON;
+    }
+
+    public void addService(I18nService service) {
+        if (null != services.put(service.getLocale(), service)) {
+            LOG.warn("Another i18n translation service discovered for " + service.getLocale());
+        }
+    }
+
+    public void removeService(I18nService service) {
+        if (null == services.remove(service.getLocale())) {
+            LOG.warn("Unknown i18n translation service shut down for " + service.getLocale());
+        }
+    }
+
+    public I18nService getService(Locale locale) {
+        I18nService retval = services.get(locale);
+        if (null == retval && !"en".equalsIgnoreCase(locale.getLanguage())) {
+            LOG.warn("No i18n service for locale " + locale + ".");
+        }
+        return retval;
     }
 }

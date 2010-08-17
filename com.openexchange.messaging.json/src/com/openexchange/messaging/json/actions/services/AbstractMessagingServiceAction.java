@@ -47,26 +47,49 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.messaging.json.actions.services;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nTranslator;
+import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.json.I18nServices;
+import com.openexchange.messaging.json.MessagingServiceWriter;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Activator}
+ * Common superclass of actions for accessing the known messaging services. Subclasses must implement
+ * {@link #doIt(AJAXRequestData, ServerSession)}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends CompositeBundleActivator {
+public abstract class AbstractMessagingServiceAction implements AJAXActionService{
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
+    protected MessagingServiceRegistry registry;
 
-    public Activator() {
+    public AbstractMessagingServiceAction(MessagingServiceRegistry registry) {
         super();
+        this.registry = registry;
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        try {
+            return doIt(request, session);
+        } catch (JSONException x) {
+            throw MessagingExceptionCodes.JSON_ERROR.create(x, x.getMessage());
+        }
+    }
+
+    protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException;
+
+    protected final MessagingServiceWriter getWriter(ServerSession session) {
+        I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
+        return new MessagingServiceWriter(new I18nTranslator(service));
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,8 +49,10 @@
 
 package com.openexchange.subscribe.json;
 
+import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.JSONEXCEPTION;
+import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.MISSING_FIELD;
+import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.MISSING_FORM_FIELD;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
@@ -59,8 +61,8 @@ import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.i18n.Translator;
 import com.openexchange.subscribe.SubscriptionSource;
-import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.*;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -68,10 +70,14 @@ import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.*;
 public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWriterInterface {
 
     public static final int CLASS_ID = 2;
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.json.SubscriptionSourceJSONWriterInterface#writeJSON(com.openexchange.subscribe.SubscriptionSource)
-     */
+
+    private final Translator translator;
+
+    public SubscriptionSourceJSONWriter(Translator translator) {
+        super();
+        this.translator = translator;
+    }
+
     public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException {
         validate(source);
         JSONObject retval = null;
@@ -83,9 +89,6 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         return retval;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.json.SubscriptionSourceJSONWriterInterface#writeJson(java.util.List)
-     */
     public JSONArray writeJSONArray(List<SubscriptionSource> sourceList, String[] fields) throws SubscriptionJSONException {
         JSONArray retval = new JSONArray();
         for (SubscriptionSource source : sourceList) {
@@ -113,7 +116,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         }
         return retval;
     }
-    
+
     private JSONObject parse(SubscriptionSource source) throws JSONException {
         JSONObject retval = new JSONObject();
 
@@ -145,7 +148,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
             FormElement element = iter.next();
             JSONObject jsonElement = new JSONObject();
             jsonElement.put(NAME, element.getName());
-            jsonElement.put(DISPLAY_NAME, element.getDisplayName());
+            jsonElement.put(DISPLAY_NAME, translator.translate(element.getDisplayName()));
             jsonElement.put(WIDGET, element.getWidget().getKeyword());
             jsonElement.put(MANDATORY, element.isMandatory());
             if (element.getDefaultValue() != null) {

@@ -47,26 +47,56 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.messaging.json;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
+import com.openexchange.i18n.Translator;
+import com.openexchange.messaging.MessagingAction;
+import com.openexchange.messaging.MessagingService;
 
 /**
- * {@link Activator}
+ * Renders a given MessagingService as its JSON representation. This also contains a dynamic form description.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class MessagingServiceWriter {
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
+    private static final String FORM_DESCRIPTION = "formDescription";
+    private static final String MESSAGE_ACTIONS = "messagingActions";
+    private static final String DISPLAY_NAME = "displayName";
+    private static final String ID = "id";
 
-    public Activator() {
-        super();
+    private Translator translator;
+    
+    public MessagingServiceWriter(Translator translator) {
+        this.translator = translator;
+    }
+    
+    public JSONObject write(MessagingService messagingService) throws JSONException {
+        JSONObject object = new JSONObject();
+        object.put(ID, messagingService.getId());
+        object.put(DISPLAY_NAME, messagingService.getDisplayName());
+        object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
+        if(null != messagingService.getFormDescription()) {
+            object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
+        }
+        return object;
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private JSONArray writeCapabilities(List<MessagingAction> capabilities) {
+        JSONArray array = new JSONArray();
+        if(capabilities == null) {
+            return array;
+        }
+        for (MessagingAction action : capabilities) {
+            array.put(action.getName());
+        }
+        return array;
     }
+
 }

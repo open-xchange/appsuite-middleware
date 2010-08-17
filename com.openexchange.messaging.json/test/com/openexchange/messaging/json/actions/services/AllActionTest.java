@@ -47,26 +47,66 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.messaging.json.actions.services;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import junit.framework.TestCase;
+import org.json.JSONArray;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.SimMessagingService;
+import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 
 /**
- * {@link Activator}
+ * {@link AllActionTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class AllActionTest extends TestCase {
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
+    // Success Case
+    public void testSuccess() throws AbstractOXException {
+        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
-    public Activator() {
-        super();
+        SimMessagingService messagingService = new SimMessagingService();
+        messagingService.setId("com.openexchange.test");
+
+        registry.add(messagingService);
+
+        AllAction action = new AllAction(registry);
+
+        AJAXRequestResult result = action.perform(null, null);
+
+        assertNotNull(result);
+
+        Object resultObject = result.getResultObject();
+        assertNotNull(resultObject);
+
+        assertTrue(JSONArray.class.isInstance(resultObject));
+
+        JSONArray all = (JSONArray) resultObject;
+        assertEquals(1, all.length());
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    // Error Cases
+
+    public void testMessagingException() throws AbstractOXException {
+        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        registry.setException(new MessagingException(null, -1, null, null));
+
+        SimMessagingService messagingService = new SimMessagingService();
+        messagingService.setId("com.openexchange.test");
+
+        registry.add(messagingService);
+
+        AllAction action = new AllAction(registry);
+
+        try {
+            AJAXRequestResult result = action.perform(null, null);
+            fail("Should not swallow exceptions");
+            assertNull(result);
+        } catch (MessagingException x) {
+            // Success
+        }
     }
 }

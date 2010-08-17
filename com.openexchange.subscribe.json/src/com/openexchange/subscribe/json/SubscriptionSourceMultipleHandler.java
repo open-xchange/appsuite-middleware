@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,9 +49,10 @@
 
 package com.openexchange.subscribe.json;
 
+import static com.openexchange.subscribe.json.MultipleHandlerTools.wrapThrowable;
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.MISSING_PARAMETER;
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.UNKNOWN_ACTION;
-import static com.openexchange.subscribe.json.MultipleHandlerTools.wrapThrowable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -62,40 +63,44 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nTranslator;
+import com.openexchange.i18n.Translator;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link SubscriptionSourceMultipleHandler}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SubscriptionSourceMultipleHandler implements MultipleHandler {
 
     public static final int CLASS_ID = 1;
     public static final Set<String> ACTIONS_REQUIRING_BODY = Collections.emptySet();
 
-    private SubscriptionSourceDiscoveryService discoverer;
-    private SubscriptionSourceJSONWriterInterface writer = new SubscriptionSourceJSONWriter();
-    
-    public SubscriptionSourceMultipleHandler(SubscriptionSourceDiscoveryService discoverer) {
+    private final SubscriptionSourceDiscoveryService discoverer;
+
+    public SubscriptionSourceMultipleHandler(final SubscriptionSourceDiscoveryService discoverer) {
         super();
         this.discoverer = discoverer;
     }
 
     public void close() {
-
+        // Nothing to close.
     }
 
     public Date getTimestamp() {
         return null;
     }
 
-    public JSONValue performRequest(String action, JSONObject request, ServerSession session) throws AbstractOXException, JSONException {
+    public Collection<AbstractOXException> getWarnings() {
+        return Collections.<AbstractOXException> emptySet();
+    }
+
+    public JSONValue performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         try {
             if(null == action) {
                 MISSING_PARAMETER.throwException("action");
@@ -108,43 +113,48 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
                 UNKNOWN_ACTION.throwException(action);
                 return null;
             }
-        } catch (AbstractOXException x) {
+        } catch (final AbstractOXException x) {
             throw x;
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw x;
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             throw wrapThrowable(t);
         }
     }
 
-    protected JSONValue listSources(JSONObject req, ServerSession session) throws AbstractOXException, JSONException  {
-        int module = getModule(req);
-        List<SubscriptionSource> sources = discoverer.getSources(module);
-        String[] columns = getColumns(req);
-        JSONArray json = writer.writeJSONArray(sources, columns);
+    protected JSONValue listSources(final JSONObject req, final ServerSession session) throws AbstractOXException  {
+        final int module = getModule(req);
+        final List<SubscriptionSource> sources = discoverer.getSources(module);
+        final String[] columns = getColumns(req);
+        final JSONArray json = new SubscriptionSourceJSONWriter(createTranslator(session)).writeJSONArray(sources, columns);
         return json;
     }
-    
-    private String[] getColumns(JSONObject req) {
-        String columns = req.optString("columns");
+
+    private Translator createTranslator(ServerSession session) {
+        final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
+        return null == service ? Translator.EMPTY : new I18nTranslator(service);
+    }
+
+    private String[] getColumns(final JSONObject req) {
+        final String columns = req.optString("columns");
         if(columns == null) {
             return new String[]{"id", "displayName", "module", "icon",  "formDescription"};
         }
-        return columns.split("\\s*,\\s*"); 
+        return columns.split("\\s*,\\s*");
     }
 
-    protected JSONValue getSource(JSONObject req, ServerSession session) throws AbstractOXException, JSONException {
-        String identifier = req.getString("id");
+    protected JSONValue getSource(final JSONObject req, final ServerSession session) throws AbstractOXException, JSONException {
+        final String identifier = req.getString("id");
         if(identifier == null) {
             MISSING_PARAMETER.throwException("id");
         }
-        SubscriptionSource source = discoverer.getSource(identifier);
-        JSONObject data = writer.writeJSON(source);
+        final SubscriptionSource source = discoverer.getSource(identifier);
+        final JSONObject data = new SubscriptionSourceJSONWriter(createTranslator(session)).writeJSON(source);
         return data;
     }
-    
-    protected int getModule(JSONObject req) throws AbstractOXException {
-        String moduleAsString = req.optString("module");
+
+    protected int getModule(final JSONObject req) {
+        final String moduleAsString = req.optString("module");
         if(moduleAsString == null) {
             return -1;
         }
@@ -159,6 +169,4 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         }
         return -1;
     }
-
-
 }

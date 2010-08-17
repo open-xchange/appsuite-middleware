@@ -47,26 +47,20 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.messaging.rss;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Activator}
+ * {@link FormStrings}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class FormStrings implements LocalizableStrings {
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
+    public static final String FORM_LABEL_URL = "URL";
 
-    public Activator() {
+    private FormStrings() {
         super();
-    }
-
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
     }
 }

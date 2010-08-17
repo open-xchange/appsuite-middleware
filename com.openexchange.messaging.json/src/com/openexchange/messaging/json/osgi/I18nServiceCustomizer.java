@@ -47,26 +47,44 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.messaging.json.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.messaging.json.I18nServices;
 
 /**
- * {@link Activator}
+ * {@link I18nServiceCustomizer}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class I18nServiceCustomizer implements ServiceTrackerCustomizer {
 
-    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
+    private final BundleContext context;
+    private final I18nServices services = I18nServices.getInstance();
 
-    public Activator() {
+    I18nServiceCustomizer(BundleContext context) {
         super();
+        this.context = context;
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public Object addingService(ServiceReference reference) {
+        I18nService service = (I18nService) context.getService(reference);
+        services.addService(service);
+        return service;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        try {
+            services.removeService((I18nService) service);
+        } finally {
+            context.ungetService(reference);
+        }
     }
 }
