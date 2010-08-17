@@ -60,6 +60,7 @@ import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
+import com.openexchange.messaging.generic.ReadOnlyDynamicFormDescription;
 import com.openexchange.session.Session;
 import com.sun.syndication.fetcher.FeedFetcher;
 import com.sun.syndication.fetcher.impl.HashMapFeedInfoCache;
@@ -74,17 +75,22 @@ import com.sun.syndication.fetcher.impl.HttpURLFeedFetcher;
 public class RSSMessagingService implements MessagingService {
 
     private static final String DISPLAY_NAME = "RSS Feed";
-    private static final DynamicFormDescription FORM_DESCRIPTION = new DynamicFormDescription();
-    public static final String ID = "com.openexchange.messaging.rss";
-    static {
-        FORM_DESCRIPTION.add(FormElement.input("url", "URL"));
-    }
-    
-    private final MessagingAccountManager accountManager = new DefaultMessagingAccountManager(ID);
-    private FeedFetcher fetcher = new HttpURLFeedFetcher(HashMapFeedInfoCache.getInstance());
 
-    
-    public MessagingAccountAccess getAccountAccess(int accountId, Session session) throws MessagingException {
+    private static final DynamicFormDescription FORM_DESCRIPTION;
+
+    public static final String ID = "com.openexchange.messaging.rss";
+
+    static {
+        final DynamicFormDescription fd = new DynamicFormDescription();
+        fd.add(FormElement.input("url", "URL"));
+        FORM_DESCRIPTION = new ReadOnlyDynamicFormDescription(fd);
+    }
+
+    private final MessagingAccountManager accountManager = new DefaultMessagingAccountManager(ID);
+
+    private final FeedFetcher fetcher = new HttpURLFeedFetcher(HashMapFeedInfoCache.getInstance());
+
+    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {
         return new RSSFeedOperations(accountId, session, fetcher, accountManager);
     }
 
@@ -92,7 +98,7 @@ public class RSSMessagingService implements MessagingService {
         return accountManager;
     }
 
-    public MessagingAccountTransport getAccountTransport(int accountId, Session session) throws MessagingException {
+    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws MessagingException {
         return new RSSFeedOperations(accountId, session, fetcher, accountManager);
     }
 
@@ -112,8 +118,8 @@ public class RSSMessagingService implements MessagingService {
         return Collections.emptyList();
     }
 
-    public static String buildFolderId(int accountId, String folder) {
-        StringBuilder stringBuilder = new StringBuilder(ID);
+    public static String buildFolderId(final int accountId, final String folder) {
+        final StringBuilder stringBuilder = new StringBuilder(ID);
         stringBuilder.append("://").append(accountId).append('/').append(folder);
         return stringBuilder.toString();
     }
