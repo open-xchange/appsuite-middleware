@@ -194,7 +194,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
             OAuthMessage response = sendRequest(paramProps, apiRequest);
             String result = response.readBodyAsString();
-            System.out.println("This is the result of the whole operation : " + result);
+            LOG.debug("This is the result of the whole operation : " + result);
             output = result;
         } catch (IOException e) {
             e.printStackTrace();
