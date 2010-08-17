@@ -86,9 +86,16 @@ public class AJAXClient {
 
     public AJAXClient(final User user) throws ConfigurationException, AjaxException, IOException, SAXException, JSONException {
         AJAXConfig.init();
-        final String login = AJAXConfig.getProperty(user.getLogin());
+        String login = AJAXConfig.getProperty(user.getLogin());
         if (null == login) {
             throw new ConfigurationException(Code.PROPERTY_MISSING, user.getLogin().getPropertyName());
+        }
+        if(!login.contains("@")){
+            final String context = AJAXConfig.getProperty(Property.CONTEXTNAME);
+            if (null == context) {
+                throw new ConfigurationException(Code.PROPERTY_MISSING, Property.CONTEXTNAME.getPropertyName());
+            }
+            login += "@"+context;
         }
         final String password = AJAXConfig.getProperty(user.getPassword());
         if (null == password) {
