@@ -16,6 +16,7 @@ Import-Package: com.openexchange.admin.plugins,
  org.osgi.framework;version="1.3.0"
 Require-Bundle: com.openexchange.server,
  com.openexchange.admin,
- com.openexchange.admin.plugin.hosting
+ com.openexchange.admin.plugin.hosting,
+ com.openexchange.admin.autocontextid
 Eclipse-RegisterBuddy: com.openexchange.admin,
  com.openexchange.admin.plugin.hosting

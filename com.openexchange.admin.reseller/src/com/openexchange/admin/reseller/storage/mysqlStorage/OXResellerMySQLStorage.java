@@ -1436,31 +1436,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#generateContextId()
-     */
-    @Override
-    public int generateContextId() throws StorageException {
-        Connection con = null;
-        try {
-            con = cache.getConnectionForConfigDB();
-            con.setAutoCommit(false);
-            int id = IDGenerator.getId(con, -2);
-            con.commit();
-            return id;
-        } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
-            doRollback(con);
-            throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
-            log.error(e.getMessage(), e);
-            doRollback(con);
-            throw new StorageException(e.getMessage());
-        } finally {
-            cache.closeConfigDBSqlStuff(con, null);
-        }
-    }
-
-    /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#getCustomId(com.openexchange.admin.rmi.dataobjects.Context)
      */
     @Override

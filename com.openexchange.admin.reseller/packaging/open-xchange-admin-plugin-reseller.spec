@@ -3,7 +3,7 @@
 
 Name:           open-xchange-admin-plugin-reseller
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin-soap
+BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin-soap >= @OXVERSION@ open-xchange-admin-plugin-autocontextid >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -47,6 +47,7 @@ Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Reseller Plugin
 Requires:       open-xchange-admin-client >= @OXVERSION@
 Requires:       open-xchange-admin-plugin-hosting >= @OXVERSION@
+Requires:       open-xchange-admin-plugin-autocontextid >= @OXVERSION@ 
 #
 %package -n	open-xchange-admin-plugin-reseller-soap
 Group:          Applications/Productivity

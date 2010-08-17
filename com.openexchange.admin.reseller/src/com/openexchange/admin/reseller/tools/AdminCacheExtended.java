@@ -65,12 +65,6 @@ public class AdminCacheExtended extends AdminCache {
         prop = new PropertyHandlerExtended(System.getProperties());
     }
 
-    public void initIDGenerator() throws SQLException {
-        Implementations.NODBFUNCTION.getImpl().registerType("reseller_context_sequence", -2);
-        Implementations.PREPAREDSTATEMENT.getImpl().registerType("CALL get_reseller_context_id()", -2);
-        Implementations.CALLABLESTATEMENT.getImpl().registerType("{call get_reseller_context_id()}", -2);
-    }
-
     @Override
     public PropertyHandlerExtended getProperties() {
         return prop;

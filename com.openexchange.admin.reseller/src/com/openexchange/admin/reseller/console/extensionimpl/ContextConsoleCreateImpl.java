@@ -109,7 +109,6 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     protected CLIOption customidOption = null;
 
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
-        parser.removeOption("c", "contextid");
         addRestrictionsOption = parser.addOption(ResellerAbstraction.OPT_ADD_RESTRICTION_SHORT, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified multiple times)", NeededQuadState.notneeded, true);
         customidOption = parser.addOption(ResellerAbstraction.OPT_CUSTOMID_SHORT, ResellerAbstraction.OPT_CUSTOMID_LONG, ResellerAbstraction.OPT_CUSTOMID_LONG, "Custom Context ID", NeededQuadState.notneeded, true); 
     }

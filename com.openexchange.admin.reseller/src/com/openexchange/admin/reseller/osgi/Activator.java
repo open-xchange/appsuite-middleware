@@ -165,7 +165,6 @@ public class Activator implements BundleActivator {
         AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
         cache.initCacheExtended();
-        cache.initIDGenerator();
         ClientAdminThreadExtended.cache = cache;
         LOG.info("ResellerBundle: Cache and Pools initialized!");
     }
