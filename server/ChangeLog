@@ -11,6 +11,7 @@
 
  - Bugfix #16693: Fixed setting "subscr_subflds" field for shared folder
  - Bugfix #13785: Proper calculation of modified and "deleted" folders for XML/WebDAV interface
+ - Partial fix for #16688: Increased space of PermGen heap section
 
 * 2010-08-16 - tobias.prinz@open-xchange.com
 
