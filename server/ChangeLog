@@ -1,3 +1,7 @@
+* 2010-08-17 - thorben.betten@open-xchange.com
+
+  - Bugfix #16693: Fixed setting "subscr_subflds" field for shared folder
+
 * 2010-08-16 - tobias.prinz@open-xchange.com
 
  - Bugfix #16613: Ignoring ID element in ATTACH in an ICAL file.
