@@ -417,10 +417,10 @@ public final class Init {
         final I18nServices i18nServices = I18nServices.getInstance();
         try {
             for (final ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
-                i18nServices.addService(rc.getLocale(), new I18nImpl(rc));
+                i18nServices.addService(new I18nImpl(rc));
             }
             for (final Translations tr : new POTranslationsDiscoverer(dir).getTranslations()) {
-                i18nServices.addService(tr.getLocale(), new TranslationsI18N(tr));
+                i18nServices.addService(new TranslationsI18N(tr));
             }
         } catch (final NullPointerException e) {
             e.printStackTrace();
