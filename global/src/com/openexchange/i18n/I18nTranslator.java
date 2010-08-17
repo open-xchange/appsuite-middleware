@@ -49,6 +49,9 @@
 
 package com.openexchange.i18n;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Implementation of a {@link Translator} backed with an {@link I18nService}.
  *
@@ -56,17 +59,20 @@ package com.openexchange.i18n;
  */
 public class I18nTranslator implements Translator {
 
+    private static final Log LOG = LogFactory.getLog(I18nTranslator.class);
+
     private final I18nService service;
 
-    /**
-     * Initializes a new {@link I18nTranslator}.
-     */
     public I18nTranslator(I18nService service) {
         super();
         this.service = service;
     }
 
     public String translate(String toTranslate) {
+        if (!service.hasKey(toTranslate)) {
+            LOG.warn("I18n service for locale " + service.getLocale() + " has no translation for \"" + toTranslate + "\".");
+            return toTranslate;
+        }
         return service.getLocalized(toTranslate);
     }
 }
