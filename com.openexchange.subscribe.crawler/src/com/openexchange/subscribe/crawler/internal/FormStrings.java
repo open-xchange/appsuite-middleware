@@ -62,7 +62,7 @@ public class FormStrings implements LocalizableStrings {
 
     public static final String FORM_LABEL_PASSWORD = "Password";
 
-    public FormStrings() {
+    private FormStrings() {
         super();
     }
 }
