@@ -191,7 +191,7 @@ public class FolderWriter extends FolderChildWriter {
     		 * Calculate updated and "deleted" folders
     		 */
     		if (modified || deleted) {
-    		    final UpdatesResult updatesResult = calculateUpdates(sqlinterface, lastsync, !deleted, false, false, serverSession, lastsync);
+    		    final UpdatesResult updatesResult = calculateUpdates(sqlinterface, lastsync, !deleted, false, false, serverSession);
     	        /*
     	         * Fist send all 'deletes', than all 'modified'
     	         */
@@ -370,24 +370,21 @@ public class FolderWriter extends FolderChildWriter {
 	 * Stuff for calculating deleted/updates folders
 	 */
 	
-	public static final class UpdatesResult {
-        
-        public final Date lastModified;
+	private static final class UpdatesResult {
         
         public final Queue<FolderObject> updatedQueue;
         
         public final Queue<FolderObject> deletedQueue;
 
-        public UpdatesResult(final Date lastModified, final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue) {
+        public UpdatesResult(final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue) {
             super();
-            this.lastModified = lastModified;
             this.updatedQueue = updatedQueue;
             this.deletedQueue = deletedQueue;
         }
 
     }
 
-    public static UpdatesResult calculateUpdates(final FolderSQLInterface foldersqlinterface, final Date timestamp, final boolean ignoreDeleted, final boolean includeVirtualListFolder, final boolean gatherDisplayNamesOfSharedFolders, final ServerSession session, final Date lastModified) throws AbstractOXException {
+    private static UpdatesResult calculateUpdates(final FolderSQLInterface foldersqlinterface, final Date timestamp, final boolean ignoreDeleted, final boolean includeVirtualListFolder, final boolean gatherDisplayNamesOfSharedFolders, final ServerSession session) throws AbstractOXException {
         final Context ctx = session.getContext();
         /*
          * Get all updated OX folders
@@ -399,13 +396,13 @@ public class FolderWriter extends FolderChildWriter {
         final Map<String, Integer> displayNames = gatherDisplayNamesOfSharedFolders ? new HashMap<String, Integer>() : Collections.<String, Integer> emptyMap();
         boolean addSystemSharedFolder = false;
         boolean checkVirtualListFolders = false;
-        int size = q.size();
-        Iterator<FolderObject> iter = q.iterator();
         try {
             final UserConfiguration userConf = session.getUserConfiguration();
             final UserStorage us = UserStorage.getInstance();
             final StringHelper strHelper = new StringHelper(session.getUser().getLocale());
             final boolean sharedFolderAccess = userConf.hasFullSharedFolderAccess();
+            final int size = q.size();
+            final Iterator<FolderObject> iter = q.iterator();
             for (int i = 0; i < size; i++) {
                 final FolderObject fo = iter.next();
                 if (fo.isVisible(session.getUserId(), userConf)) {
@@ -502,7 +499,6 @@ public class FolderWriter extends FolderChildWriter {
         }
         /*
          * Output updated folders
-         */
         size = updatedQueue.size();
         iter = updatedQueue.iterator();
         for (int i = 0; i < size; i++) {
@@ -514,6 +510,7 @@ public class FolderWriter extends FolderChildWriter {
                 }
             }
         }
+        */
         if (!ignoreDeleted) {
             /*
              * Get deleted OX folders
@@ -526,12 +523,12 @@ public class FolderWriter extends FolderChildWriter {
             /*
              * Return with deleted folders
              */
-            return new UpdatesResult(lastModified, updatedQueue, q);
+            return new UpdatesResult(updatedQueue, q);
         }
         /*
          * Return without deleted folders
          */
-        return new UpdatesResult(lastModified, updatedQueue, null);
+        return new UpdatesResult(updatedQueue, null);
     }
 
 }
