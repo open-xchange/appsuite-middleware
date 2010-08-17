@@ -61,7 +61,6 @@ import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
@@ -139,8 +138,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
-    public SearchIterator<Task> getModifiedTasksInFolder(final int folderId,
-        final int[] columns, final Date since) throws OXException {
+    private SearchIterator<Task> getModifiedTasksInFolder(int folderId, int[] columns, Date since, StorageType type) throws OXException {
         final Context ctx;
         final User user;
         final int userId = session.getUserId();
@@ -151,53 +149,29 @@ public class TasksSQLImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             userConfig = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (final TaskException e) {
+        } catch (TaskException e) {
             throw Tools.convert(e);
         }
         boolean onlyOwn;
         try {
             onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
-        } catch (final TaskException e) {
+        } catch (TaskException e) {
             throw Tools.convert(e);
         }
         final boolean noPrivate = Tools.isFolderShared(folder, user);
         try {
-            return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
-                StorageType.ACTIVE, columns, since, onlyOwn, userId, noPrivate);
+            return TaskSearch.getInstance().listModifiedTasks(ctx, folderId, type, columns, since, onlyOwn, userId, noPrivate);
         } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
 
-    public SearchIterator<Task> getDeletedTasksInFolder(final int folderId,
-        final int[] columns, final Date since) throws OXException {
-        final Context ctx;
-        final User user;
-        final int userId = session.getUserId();
-        final UserConfiguration userConfig;
-        FolderObject folder;
-        try {
-            ctx = Tools.getContext(session.getContextId());
-            user = Tools.getUser(ctx, userId);
-            userConfig = Tools.getUserConfiguration(ctx, userId);
-            folder = Tools.getFolder(ctx, folderId);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
-        }
-        boolean onlyOwn;
-        try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
-        }
-        final boolean noPrivate = Tools.isFolderShared(folder, user);
-        try {
-            return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
-                StorageType.DELETED, columns, since, onlyOwn, userId,
-                noPrivate);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
-        }
+    public SearchIterator<Task> getModifiedTasksInFolder(int folderId, int[] columns, Date since) throws OXException {
+        return getModifiedTasksInFolder(folderId, columns, since, StorageType.ACTIVE);
+    }
+
+    public SearchIterator<Task> getDeletedTasksInFolder(int folderId, int[] columns, Date since) throws OXException {
+        return getModifiedTasksInFolder(folderId, columns, since, StorageType.DELETED);
     }
 
     public void insertTaskObject(final Task task) throws OXException {
