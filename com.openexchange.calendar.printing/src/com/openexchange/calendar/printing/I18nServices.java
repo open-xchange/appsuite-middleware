@@ -60,12 +60,12 @@ import com.openexchange.i18n.LocaleTools;
 
 /**
  * Registry for all found {@link I18nService} instances.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class I18nServices {
 
     private static final Log LOG = LogFactory.getLog(I18nServices.class);
-
     private static final I18nServices SINGLETON = new I18nServices();
 
     private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
@@ -75,11 +75,15 @@ public class I18nServices {
     }
 
     public void addService(I18nService service) {
-        services.put(service.getLocale(), service);
+        if (null != services.put(service.getLocale(), service)) {
+            LOG.warn("Another i18n translation service found for " + service.getLocale());
+        }
     }
 
     public void removeService(I18nService service) {
-        services.remove(service.getLocale());
+        if (null == services.remove(service.getLocale())) {
+            LOG.warn("Unknown i18n translation service shut down for " + service.getLocale());
+        }
     }
 
     public static I18nServices getInstance() {
@@ -87,15 +91,18 @@ public class I18nServices {
     }
 
     public I18nService getService(Locale locale) {
-        return services.get(locale);
+        I18nService retval = services.get(locale);
+        if (null == retval) {
+            if (!"en".equalsIgnoreCase(locale.getLanguage())) {
+                LOG.warn("No i18n service for locale " + locale + ".");
+            }
+        }
+        return retval;
     }
 
     public String translate(Locale locale, String toTranslate) {
         I18nService service = services.get(locale);
         if (null == service) {
-            if (!"en".equalsIgnoreCase(locale.getLanguage())) {
-                LOG.warn("No i18n service for locale " + locale + ".");
-            }
             return toTranslate;
         }
         if (!service.hasKey(toTranslate)) {
