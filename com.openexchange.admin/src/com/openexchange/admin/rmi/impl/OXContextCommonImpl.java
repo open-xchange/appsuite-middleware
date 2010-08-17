@@ -179,6 +179,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
      * @throws StorageException
      */
     protected Object callPluginMethod(final String method, final Object... args) throws StorageException {
+        Object ret = null;
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
@@ -204,7 +205,10 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                                     classes[i] = args[i].getClass();
                                 }
                                 final Method pmethod = OXContextPluginInterface.class.getDeclaredMethod(method, classes);
-                                return pmethod.invoke(oxctx, args);
+                                ret = pmethod.invoke(oxctx, args);
+                                if( args[0] instanceof Context && ret instanceof Context ) {
+                                    args[0] = ret;
+                                }
                             } catch (SecurityException e) {
                                 log.error("Error while calling method " + method + " of plugin " + bundlename,e);
                                 throw new StorageException(e.getCause());
@@ -226,7 +230,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 }
             }
         }
-        return null;
+        return ret;
     }
 
     /**
