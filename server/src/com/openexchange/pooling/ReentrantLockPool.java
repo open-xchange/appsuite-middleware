@@ -104,6 +104,11 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     private int numBroken;
 
     /**
+     * Keeps the time stamp when the last warning was logged. Warnings should only be logged once a minute.
+     */
+    private long lastWarning;
+
+    /**
      * Default constructor.
      * @param lifecycle Implementation of the interface for handling the life cycle of pooled objects.
      * @param config Configuration of the pool parameters.
@@ -251,10 +256,14 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         throw new PoolingException("Pool exhausted.");
                     case BLOCK:
                         final String threadName = Thread.currentThread().getName();
-                        PoolingException warn = new PoolingException("Thread " + threadName
-                            + " is sent to sleep until an object in the pool is available. " + data.numActive()
-                            + " objects are already in use.");
-                        LOG.warn(warn.getMessage(), warn);
+                        boolean writeWarning = System.currentTimeMillis() > (lastWarning + 60000l);
+                        if (writeWarning) {
+                            lastWarning = System.currentTimeMillis();
+                            PoolingException warn = new PoolingException("Thread " + threadName
+                                + " is sent to sleep until an object in the pool is available. " + data.numActive()
+                                + " objects are already in use.");
+                            LOG.warn(warn.getMessage(), warn);
+                        }
                         final long sleepStartTime = System.currentTimeMillis();
                         boolean timedOut = false;
                         try {
@@ -266,9 +275,11 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         } catch (InterruptedException e) {
                             LOG.error("Thread " + threadName + " was interrupted.", e);
                         }
-                        warn = new PoolingException("Thread " + threadName + " slept for " + (System.currentTimeMillis() - sleepStartTime)
-                            + "ms.");
-                        LOG.warn(warn.getMessage(), warn);
+                        if (writeWarning) {
+                            PoolingException warn = new PoolingException("Thread " + threadName + " slept for "
+                                + (System.currentTimeMillis() - sleepStartTime) + "ms.");
+                            LOG.warn(warn.getMessage(), warn);
+                        }
                         if (timedOut) {
                             idleAvailable.signal();
                             throw new PoolingException("Wait time exceeded. Active: " + data.numActive() + ", Idle: " + data.numIdle()
