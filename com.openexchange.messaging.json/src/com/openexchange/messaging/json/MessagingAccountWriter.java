@@ -55,26 +55,35 @@ import static com.openexchange.messaging.json.MessagingAccountConstants.ID;
 import static com.openexchange.messaging.json.MessagingAccountConstants.MESSAGING_SERVICE;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingService;
 
 /**
  * Renders a MessagingAccount in its JSON representation also using the dynamic form description of the parent messaging service.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingAccountWriter {
 
- 
+    /**
+     * Initializes a new {@link MessagingAccountWriter}.
+     */
+    public MessagingAccountWriter() {
+        super();
+    }
 
-    public JSONObject write(MessagingAccount account) throws JSONException {
-        JSONObject accountJSON = new JSONObject();
+    public JSONObject write(final MessagingAccount account) throws JSONException {
+        final JSONObject accountJSON = new JSONObject();
         accountJSON.put(ID, account.getId());
         accountJSON.put(DISPLAY_NAME, account.getDisplayName());
-        accountJSON.put(MESSAGING_SERVICE, account.getMessagingService().getId());
-        if(null != account.getMessagingService().getFormDescription() && null != account.getConfiguration()) {
-            JSONObject configJSON = new FormContentWriter().write(account.getMessagingService().getFormDescription(), account.getConfiguration(), null);
+        final MessagingService messagingService = account.getMessagingService();
+        accountJSON.put(MESSAGING_SERVICE, messagingService.getId());
+        final DynamicFormDescription formDescription = messagingService.getFormDescription();
+        if (null != formDescription && null != account.getConfiguration()) {
+            final JSONObject configJSON = new FormContentWriter().write(formDescription, account.getConfiguration(), null);
             accountJSON.put(CONFIGURATION, configJSON);
         }
         return accountJSON;

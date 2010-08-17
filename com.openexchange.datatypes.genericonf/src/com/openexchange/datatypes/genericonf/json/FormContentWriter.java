@@ -55,26 +55,31 @@ import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 
-
 /**
  * {@link FormContentWriter}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class FormContentWriter {
 
-    private static final ValueWriterSwitch valueWriter = new ValueWriterSwitch();
-    
-    public JSONObject write(DynamicFormDescription form, Map<String, Object> content, String urlPrefix) throws JSONException {
-        JSONObject object = new JSONObject();
-        if(form == null) {
+    private static final ValueWriterSwitch VALUE_WRITER = new ValueWriterSwitch();
+
+    /**
+     * Initializes a new {@link FormContentWriter}.
+     */
+    public FormContentWriter() {
+        super();
+    }
+
+    public JSONObject write(final DynamicFormDescription form, final Map<String, Object> content, final String urlPrefix) throws JSONException {
+        final JSONObject object = new JSONObject();
+        if (form == null) {
             return object;
         }
-        for(FormElement element : form) {
-            if(content.containsKey(element.getName())) {
-                Object value = content.get(element.getName());
-                object.put(element.getName(), element.doSwitch(valueWriter, value, urlPrefix));
+        for (final FormElement element : form) {
+            if (content.containsKey(element.getName())) {
+                final Object value = content.get(element.getName());
+                object.put(element.getName(), element.doSwitch(VALUE_WRITER, value, urlPrefix));
             }
         }
         return object;
