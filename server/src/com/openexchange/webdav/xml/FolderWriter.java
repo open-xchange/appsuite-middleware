@@ -53,6 +53,7 @@ package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -395,7 +396,7 @@ public class FolderWriter extends FolderChildWriter {
         final OXFolderAccess access = new OXFolderAccess(ctx);
         final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
         final Queue<FolderObject> deletedQueue = ignoreDeleted ? null : new LinkedList<FolderObject>();
-        final Map<String, Integer> displayNames = gatherDisplayNamesOfSharedFolders ? new HashMap<String, Integer>() : null;
+        final Map<String, Integer> displayNames = gatherDisplayNamesOfSharedFolders ? new HashMap<String, Integer>() : Collections.<String, Integer> emptyMap();
         boolean addSystemSharedFolder = false;
         boolean checkVirtualListFolders = false;
         int size = q.size();
