@@ -5,6 +5,7 @@
 * 2010-08-17 - marcus.klein@open-xchange.com
 
  - Bugfix #16615: Warning of exceeded database connection pool is only written once a minute.
+ - Bugfix #16681: Translating form labels for dynamic forms sent by the back end for subscriptions and messaging.
 
 * 2010-08-17 - thorben.betten@open-xchange.com
 

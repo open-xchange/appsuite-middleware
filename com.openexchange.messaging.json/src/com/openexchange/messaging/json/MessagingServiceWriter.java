@@ -88,7 +88,7 @@ public class MessagingServiceWriter {
         return object;
     }
 
-    private JSONArray writeCapabilities(List<MessagingAction> capabilities) throws JSONException {
+    private JSONArray writeCapabilities(List<MessagingAction> capabilities) {
         JSONArray array = new JSONArray();
         if(capabilities == null) {
             return array;

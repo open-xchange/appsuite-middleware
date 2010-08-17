@@ -47,24 +47,32 @@
  *
  */
 
-package com.openexchange.subscribe.microformats;
+package com.openexchange.subscribe.json.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link FormStrings}
+ * {@link I18nActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class FormStrings implements LocalizableStrings {
+public class I18nActivator implements BundleActivator {
 
-    public static final String FORM_LABEL_URL = "URL";
+    private ServiceTracker tracker;
 
-    public static final String SOURCE_NAME_CONTACTS = "OXMF Contacts";
-
-    public static final String SOURCE_NAME_INFOSTORE = "OXMF Infostore";
-
-    private FormStrings() {
+    I18nActivator() {
         super();
+    }
+
+    public void start(BundleContext context) throws Exception {
+        tracker = new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context));
+        tracker.open();
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        tracker.close();
     }
 }

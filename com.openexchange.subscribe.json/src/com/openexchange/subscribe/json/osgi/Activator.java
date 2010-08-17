@@ -52,21 +52,21 @@ package com.openexchange.subscribe.json.osgi;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.server.osgiservice.CompositeBundleActivator;
 
-
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class Activator extends CompositeBundleActivator {
-    
-    private static final BundleActivator[] ACTIVATORS = {new ServletActivator(), new PreferencesActivator()};
-   
-    
+
+    private static final BundleActivator[] ACTIVATORS = { new ServletActivator(), new PreferencesActivator(), new I18nActivator() };
+
+    public Activator() {
+        super();
+    }
+
     @Override
     protected BundleActivator[] getActivators() {
         return ACTIVATORS;
     }
-
 }

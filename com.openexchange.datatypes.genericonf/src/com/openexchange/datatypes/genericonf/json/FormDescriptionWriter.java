@@ -99,15 +99,11 @@ public class FormDescriptionWriter {
         JSONObject object = new JSONObject();
         object.put(WIDGET, formElement.getWidget().getKeyword());
         object.put(NAME, formElement.getName());
-        object.put(DISPLAY_NAME, translate(formElement.getDisplayName()));
+        object.put(DISPLAY_NAME, translator.translate(formElement.getDisplayName()));
         object.put(MANDATORY, formElement.isMandatory());
         if (null != formElement.getDefaultValue()) {
             object.put(DEFAULT_VALUE, formElement.getWidget().doSwitch(valueWrite, formElement.getDefaultValue()));
         }
         return object;
-    }
-
-    private String translate(String toTranslate) {
-        return null == translator ? toTranslate : translator.translate(toTranslate);
     }
 }

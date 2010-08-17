@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.microformats;
+package com.openexchange.messaging.twitter;
 
 import com.openexchange.i18n.LocalizableStrings;
 
@@ -58,11 +58,9 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class FormStrings implements LocalizableStrings {
 
-    public static final String FORM_LABEL_URL = "URL";
+    public static final String FORM_LABEL_LOGIN = "Login";
 
-    public static final String SOURCE_NAME_CONTACTS = "OXMF Contacts";
-
-    public static final String SOURCE_NAME_INFOSTORE = "OXMF Infostore";
+    public static final String FORM_LABEL_PASSWORD = "Password";
 
     private FormStrings() {
         super();

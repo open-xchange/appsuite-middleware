@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.twitter;
 
+import static com.openexchange.messaging.twitter.FormStrings.FORM_LABEL_LOGIN;
+import static com.openexchange.messaging.twitter.FormStrings.FORM_LABEL_PASSWORD;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -66,7 +68,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TwitterMessagingService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingService implements MessagingService {
@@ -84,7 +86,7 @@ public final class TwitterMessagingService implements MessagingService {
 
     /**
      * Gets the service identifier for twitter messaging service.
-     * 
+     *
      * @return The service identifier
      */
     public static String getServiceId() {
@@ -105,10 +107,10 @@ public final class TwitterMessagingService implements MessagingService {
     public TwitterMessagingService() {
         super();
         accountManager = new DefaultMessagingAccountManager(ID);
-        final DynamicFormDescription formDescription = new DynamicFormDescription();
-        formDescription.add(FormElement.input(TwitterConstants.TWITTER_LOGIN, "Login", true, ""));
-        formDescription.add(FormElement.password(TwitterConstants.TWITTER_PASSWORD, "Password", true, ""));
-        this.formDescription = new ReadOnlyDynamicFormDescription(formDescription);
+        final DynamicFormDescription tmpDescription = new DynamicFormDescription();
+        tmpDescription.add(FormElement.input(TwitterConstants.TWITTER_LOGIN, FORM_LABEL_LOGIN, true, ""));
+        tmpDescription.add(FormElement.password(TwitterConstants.TWITTER_PASSWORD, FORM_LABEL_PASSWORD, true, ""));
+        this.formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
 
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {
@@ -138,5 +140,4 @@ public final class TwitterMessagingService implements MessagingService {
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
-
 }

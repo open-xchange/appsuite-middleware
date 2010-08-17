@@ -50,6 +50,8 @@
 package com.openexchange.subscribe.microformats.osgi;
 
 import static com.openexchange.subscribe.microformats.FormStrings.FORM_LABEL_URL;
+import static com.openexchange.subscribe.microformats.FormStrings.SOURCE_NAME_CONTACTS;
+import static com.openexchange.subscribe.microformats.FormStrings.SOURCE_NAME_INFOSTORE;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
@@ -106,7 +108,7 @@ public class SubcriptionServicesActivator implements BundleActivator {
         final MapToContactObjectTransformer mapToContactObject = new MapToContactObjectTransformer();
 
         final SubscriptionSource contactSubscriptionSource = new SubscriptionSource();
-        contactSubscriptionSource.setDisplayName("OXMF Contacts");
+        contactSubscriptionSource.setDisplayName(SOURCE_NAME_CONTACTS);
         contactSubscriptionSource.setId("com.openexchange.subscribe.microformats.contacts.http");
         contactSubscriptionSource.setFolderModule(FolderObject.CONTACT);
 
@@ -128,7 +130,7 @@ public class SubcriptionServicesActivator implements BundleActivator {
         final MapToDocumentMetadataHolderTransformer mapToDocumentMetadataHolder = new MapToDocumentMetadataHolderTransformer();
 
         final SubscriptionSource infostoreSubscriptionSource = new SubscriptionSource();
-        infostoreSubscriptionSource.setDisplayName("OXMF Infostore");
+        infostoreSubscriptionSource.setDisplayName(SOURCE_NAME_INFOSTORE);
         infostoreSubscriptionSource.setId("com.openexchange.subscribe.microformats.infostore.http");
         infostoreSubscriptionSource.setFolderModule(FolderObject.INFOSTORE);
 

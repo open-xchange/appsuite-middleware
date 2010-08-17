@@ -54,11 +54,9 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.i18n.Translator;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * Lists all known messaging services. No parameters are needed. Returns a JSONArray consisting of the JSON representations of
@@ -68,19 +66,17 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllAction extends AbstractMessagingServiceAction {
-    
-    
-    public AllAction(MessagingServiceRegistry registry, Translator translator) {
-        super(registry, translator);
+
+    public AllAction(MessagingServiceRegistry registry) {
+        super(registry);
     }
 
     @Override
     public AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
         JSONArray result = new JSONArray();
         for(MessagingService service : registry.getAllServices()) {
-            result.put(writer.write(service));
+            result.put(getWriter(session).write(service));
         }
         return new AJAXRequestResult(result);
     }
-
 }

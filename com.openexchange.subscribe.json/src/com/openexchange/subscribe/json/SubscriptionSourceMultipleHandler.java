@@ -63,17 +63,18 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nTranslator;
+import com.openexchange.i18n.Translator;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link SubscriptionSourceMultipleHandler}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SubscriptionSourceMultipleHandler implements MultipleHandler {
 
@@ -81,15 +82,14 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
     public static final Set<String> ACTIONS_REQUIRING_BODY = Collections.emptySet();
 
     private final SubscriptionSourceDiscoveryService discoverer;
-    private final SubscriptionSourceJSONWriterInterface writer = new SubscriptionSourceJSONWriter();
-    
+
     public SubscriptionSourceMultipleHandler(final SubscriptionSourceDiscoveryService discoverer) {
         super();
         this.discoverer = discoverer;
     }
 
     public void close() {
-
+        // Nothing to close.
     }
 
     public Date getTimestamp() {
@@ -122,20 +122,25 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         }
     }
 
-    protected JSONValue listSources(final JSONObject req, final ServerSession session) throws AbstractOXException, JSONException  {
+    protected JSONValue listSources(final JSONObject req, final ServerSession session) throws AbstractOXException  {
         final int module = getModule(req);
         final List<SubscriptionSource> sources = discoverer.getSources(module);
         final String[] columns = getColumns(req);
-        final JSONArray json = writer.writeJSONArray(sources, columns);
+        final JSONArray json = new SubscriptionSourceJSONWriter(createTranslator(session)).writeJSONArray(sources, columns);
         return json;
     }
-    
+
+    private Translator createTranslator(ServerSession session) {
+        final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
+        return null == service ? Translator.EMPTY : new I18nTranslator(service);
+    }
+
     private String[] getColumns(final JSONObject req) {
         final String columns = req.optString("columns");
         if(columns == null) {
             return new String[]{"id", "displayName", "module", "icon",  "formDescription"};
         }
-        return columns.split("\\s*,\\s*"); 
+        return columns.split("\\s*,\\s*");
     }
 
     protected JSONValue getSource(final JSONObject req, final ServerSession session) throws AbstractOXException, JSONException {
@@ -144,11 +149,11 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
             MISSING_PARAMETER.throwException("id");
         }
         final SubscriptionSource source = discoverer.getSource(identifier);
-        final JSONObject data = writer.writeJSON(source);
+        final JSONObject data = new SubscriptionSourceJSONWriter(createTranslator(session)).writeJSON(source);
         return data;
     }
-    
-    protected int getModule(final JSONObject req) throws AbstractOXException {
+
+    protected int getModule(final JSONObject req) {
         final String moduleAsString = req.optString("module");
         if(moduleAsString == null) {
             return -1;
@@ -164,6 +169,4 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         }
         return -1;
     }
-
-
 }

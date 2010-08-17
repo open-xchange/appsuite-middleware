@@ -54,12 +54,10 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.i18n.Translator;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * Loads a certain messaging service. Parameters are:
@@ -72,23 +70,21 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GetAction extends AbstractMessagingServiceAction {
 
-    public GetAction(MessagingServiceRegistry registry, Translator translator) {
-        super(registry, translator);
+    public GetAction(MessagingServiceRegistry registry) {
+        super(registry);
     }
 
     @Override
     protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
         String id = request.getParameter("id");
-        if(id == null) {
+        if (id == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("id");
         }
         MessagingService service = registry.getMessagingService(id);
-        if(null == service) {
+        if (null == service) {
             throw MessagingExceptionCodes.UNKNOWN_MESSAGING_SERVICE.create(id);
         }
-        JSONObject responseObject = writer.write(service);
-        
+        JSONObject responseObject = getWriter(session).write(service);
         return new AJAXRequestResult(responseObject);
     }
-
 }

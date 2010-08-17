@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.facebook;
 
+import static com.openexchange.messaging.facebook.FormStrings.FORM_LABEL_LOGIN;
+import static com.openexchange.messaging.facebook.FormStrings.FORM_LABEL_PASSWORD;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -66,7 +68,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FacebookMessagingService} - The facebook messaging service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -78,7 +80,7 @@ public final class FacebookMessagingService implements MessagingService {
 
     /**
      * Gets the service identifier for facebook messaging service.
-     * 
+     *
      * @return The service identifier
      */
     public static String getServiceId() {
@@ -99,13 +101,13 @@ public final class FacebookMessagingService implements MessagingService {
     public FacebookMessagingService() {
         super();
         accountManager = new DefaultMessagingAccountManager(ID);
-        final DynamicFormDescription formDescription = new DynamicFormDescription();
+        final DynamicFormDescription tmpDescription = new DynamicFormDescription();
         /*
          * API & secret key
          */
-        formDescription.add(FormElement.input(FacebookConstants.FACEBOOK_LOGIN, "Login", true, ""));
-        formDescription.add(FormElement.password(FacebookConstants.FACEBOOK_PASSWORD, "Password", true, ""));
-        this.formDescription = new ReadOnlyDynamicFormDescription(formDescription);
+        tmpDescription.add(FormElement.input(FacebookConstants.FACEBOOK_LOGIN, FORM_LABEL_LOGIN, true, ""));
+        tmpDescription.add(FormElement.password(FacebookConstants.FACEBOOK_PASSWORD, FORM_LABEL_PASSWORD, true, ""));
+        this.formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
 
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {
@@ -143,5 +145,4 @@ public final class FacebookMessagingService implements MessagingService {
          */
         return ACTIONS;
     }
-
 }

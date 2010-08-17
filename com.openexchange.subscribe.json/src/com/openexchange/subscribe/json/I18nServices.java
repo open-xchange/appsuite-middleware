@@ -47,24 +47,53 @@
  *
  */
 
-package com.openexchange.subscribe.microformats;
+package com.openexchange.subscribe.json;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.Locale;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link FormStrings}
+ * Registry for all found {@link I18nService} instances.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class FormStrings implements LocalizableStrings {
+public final class I18nServices {
 
-    public static final String FORM_LABEL_URL = "URL";
+    private static final Log LOG = LogFactory.getLog(I18nServices.class);
+    private static final I18nServices SINGLETON = new I18nServices();
 
-    public static final String SOURCE_NAME_CONTACTS = "OXMF Contacts";
+    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
 
-    public static final String SOURCE_NAME_INFOSTORE = "OXMF Infostore";
-
-    private FormStrings() {
+    private I18nServices() {
         super();
+    }
+
+    public static I18nServices getInstance() {
+        return SINGLETON;
+    }
+
+    public void addService(I18nService service) {
+        if (null != services.put(service.getLocale(), service)) {
+            LOG.warn("Another i18n translation service discovered for " + service.getLocale());
+        }
+    }
+
+    public void removeService(I18nService service) {
+        if (null == services.remove(service.getLocale())) {
+            LOG.warn("Unknown i18n translation service shut down for " + service.getLocale());
+        }
+    }
+
+    public I18nService getService(Locale locale) {
+        I18nService retval = services.get(locale);
+        if (null == retval && !"en".equalsIgnoreCase(locale.getLanguage())) {
+            LOG.warn("No i18n service for locale " + locale + ".");
+        }
+        return retval;
     }
 }

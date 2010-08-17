@@ -63,7 +63,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.json.Enabled;
 import com.openexchange.messaging.json.GUI;
 import com.openexchange.messaging.json.MessagingMessageParser;
@@ -84,7 +84,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
-    private static final Class[] NEEDED_SERVICES = new Class[]{MessagingServiceRegistry.class, HttpService.class, CacheService.class};
+    private static final Class<?>[] NEEDED_SERVICES = new Class[]{MessagingServiceRegistry.class, HttpService.class, CacheService.class};
     
     private List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
     private List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
@@ -95,7 +95,6 @@ public class Activator extends DeferredActivator {
     private CacheService cacheService;
     private boolean cacheConfigured;
 
-    
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
@@ -140,6 +139,7 @@ public class Activator extends DeferredActivator {
             writer = new MessagingMessageWriter();
             trackers.add(new ContentWriterTracker(context, writer));
             trackers.add(new HeaderWriterTracker(context, writer));
+            trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
 
             for (ServiceTracker tracker : trackers) {
                 tracker.open();
@@ -165,7 +165,7 @@ public class Activator extends DeferredActivator {
         
         AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
         MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
-        ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry, Translator.EMPTY); // FIXME
+        ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
 
         try {
             httpService.registerServlet("/ajax/messaging/account", new AccountServlet(), null, null);

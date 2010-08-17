@@ -53,10 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.i18n.Translator;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.tools.servlet.AjaxException;
-
 
 /**
  * {@link ServicesActionFactory}
@@ -66,17 +63,16 @@ import com.openexchange.tools.servlet.AjaxException;
 public class ServicesActionFactory implements AJAXActionServiceFactory {
 
     public static ServicesActionFactory INSTANCE; // Initialized in Activator
-    
+
     private Map<String, AJAXActionService> actions;
-    
-    public ServicesActionFactory(MessagingServiceRegistry registry, Translator translator) {
+
+    public ServicesActionFactory(MessagingServiceRegistry registry) {
         this.actions = new HashMap<String, AJAXActionService>();
-        actions.put("all", new AllAction(registry, translator));
-        actions.put("get", new GetAction(registry, translator));
-    }
-    
-    public AJAXActionService createActionService(String action) throws AjaxException {
-        return actions.get(action);
+        actions.put("all", new AllAction(registry));
+        actions.put("get", new GetAction(registry));
     }
 
+    public AJAXActionService createActionService(String action) {
+        return actions.get(action);
+    }
 }

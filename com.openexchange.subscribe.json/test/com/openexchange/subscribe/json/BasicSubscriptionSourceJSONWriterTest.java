@@ -58,6 +58,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.FormElement.Widget;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.i18n.Translator;
 import com.openexchange.subscribe.SubscriptionSource;
 import junit.framework.TestCase;
 
@@ -72,6 +73,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
 
     private SubscriptionSource subscriptionSource2;
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         
@@ -130,6 +132,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         sourceList.add(subscriptionSource2);
     }
 
+    @Override
     public void tearDown() throws Exception {
         subscriptionSource = null;
         sourceList = null;
@@ -137,13 +140,13 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
     }
 
     public void testBasicSubscriptionSourceParsing() throws Exception {
-        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter();
+        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
         JSONObject json = parser.writeJSON(subscriptionSource);
         checkJson(json);
     }
 
     public void testListSubscriptionSourceParsing() throws Exception {
-        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter();
+        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
         JSONArray rows = parser.writeJSONArray(sourceList, new String[]{"id", "displayName", "icon", "module"});
         assertEquals(2, rows.length());
         
@@ -167,12 +170,12 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
     }
     
     public void testUnknownColumn() {
-        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter();
+        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
         try {
             parser.writeJSONArray(sourceList, new String[]{"id", "unkownColumn"});
             fail("Unknown column was accepted");
         } catch (SubscriptionJSONException x) {
-            
+            // Exception is expected
         }
     }
     
@@ -184,7 +187,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
     }
     
     public void testMandatoryFieldCheck() throws Exception {
-        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter();
+        SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
         
         String temp = subscriptionSource.getId();
         subscriptionSource.setId(null);

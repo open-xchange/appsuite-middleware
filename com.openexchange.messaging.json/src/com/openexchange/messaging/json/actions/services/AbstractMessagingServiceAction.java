@@ -54,12 +54,13 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nTranslator;
 import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.json.I18nServices;
 import com.openexchange.messaging.json.MessagingServiceWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * Common superclass of actions for accessing the known messaging services. Subclasses must implement
@@ -71,13 +72,12 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractMessagingServiceAction implements AJAXActionService{
 
     protected MessagingServiceRegistry registry;
-    protected MessagingServiceWriter writer;
-    
-    public AbstractMessagingServiceAction(MessagingServiceRegistry registry, Translator translator) {
+
+    public AbstractMessagingServiceAction(MessagingServiceRegistry registry) {
+        super();
         this.registry = registry;
-        this.writer = new MessagingServiceWriter(translator);
     }
-    
+
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
         try {
             return doIt(request, session);
@@ -88,5 +88,8 @@ public abstract class AbstractMessagingServiceAction implements AJAXActionServic
 
     protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException;
 
-
+    protected final MessagingServiceWriter getWriter(ServerSession session) {
+        I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
+        return new MessagingServiceWriter(new I18nTranslator(service));
+    }
 }

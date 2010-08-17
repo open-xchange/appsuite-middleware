@@ -47,24 +47,44 @@
  *
  */
 
-package com.openexchange.subscribe.microformats;
+package com.openexchange.subscribe.json.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.subscribe.json.I18nServices;
 
 /**
- * {@link FormStrings}
+ * {@link I18nServiceCustomizer}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class FormStrings implements LocalizableStrings {
+public class I18nServiceCustomizer implements ServiceTrackerCustomizer {
 
-    public static final String FORM_LABEL_URL = "URL";
+    private final BundleContext context;
+    private final I18nServices services = I18nServices.getInstance();
 
-    public static final String SOURCE_NAME_CONTACTS = "OXMF Contacts";
-
-    public static final String SOURCE_NAME_INFOSTORE = "OXMF Infostore";
-
-    private FormStrings() {
+    I18nServiceCustomizer(BundleContext context) {
         super();
+        this.context = context;
+    }
+
+    public Object addingService(ServiceReference reference) {
+        I18nService service = (I18nService) context.getService(reference);
+        services.addService(service);
+        return service;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        try {
+            services.removeService((I18nService) service);
+        } finally {
+            context.ungetService(reference);
+        }
     }
 }
