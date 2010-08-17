@@ -194,6 +194,7 @@ public final class SharedPrefixFolder {
             subfolderIds.add(String.valueOf(iter.next().getObjectID()));
         }
         retval.setSubfolderIDs(subfolderIds.toArray(new String[subfolderIds.size()]));
+        retval.setSubscribedSubfolders(!subfolderIds.isEmpty());
         return retval;
     }
 
