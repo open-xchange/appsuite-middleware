@@ -141,7 +141,6 @@ import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
 import com.openexchange.threadpool.internal.QueueProvider;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
@@ -151,8 +150,8 @@ import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
+import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
 import com.openexchange.user.UserService;
@@ -350,7 +349,7 @@ public final class Init {
                 props.getRefusedExecutionBehavior());
         services.put(ThreadPoolService.class, threadPool);
         ServerServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
-        final TimerService timer = new CustomThreadPoolExecutorTimerService((CustomThreadPoolExecutor) threadPool.getExecutor());
+        final TimerService timer = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
         services.put(TimerService.class, timer);
         ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
     }
