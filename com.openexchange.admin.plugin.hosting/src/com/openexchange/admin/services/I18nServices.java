@@ -50,32 +50,39 @@
 package com.openexchange.admin.services;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.i18n.I18nService;
 
+/**
+ * Registry for all found {@link I18nService} instances.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class I18nServices {
 
     private static final Log LOG = LogFactory.getLog(I18nServices.class);
-
-    private final ConcurrentHashMap<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
-
     private static final I18nServices SINGLETON = new I18nServices();
+
+    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
 
     private I18nServices() {
         super();
     }
 
-    public void addService(Locale locale, I18nService i18n) {
-        if (null !=services.put(locale, i18n)) {
-            LOG.warn("Another i18n translation service found for " + locale);
+    public void addService(I18nService i18n) {
+        if (null != services.put(i18n.getLocale(), i18n)) {
+            LOG.warn("Another i18n translation service found for " + i18n.getLocale());
         }
     }
 
-    public void removeService(Locale locale, I18nService i18n) {
-        services.remove(locale, i18n);
+    public void removeService(I18nService i18n) {
+        if (null == services.remove(i18n.getLocale())) {
+            LOG.warn("Unknown i18n translation service shut down for " + i18n.getLocale());
+        }
     }
 
     public static I18nServices getInstance() {

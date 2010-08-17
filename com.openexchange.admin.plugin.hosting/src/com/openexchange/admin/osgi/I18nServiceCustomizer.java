@@ -60,11 +60,10 @@ import com.openexchange.i18n.I18nService;
 
 /**
  * Adds a found {@link I18nService} to the registry for the services.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class I18nServiceCustomizer implements ServiceTrackerCustomizer {
-
-    private static final Log LOG = LogFactory.getLog(I18nServiceCustomizer.class);
 
     private final BundleContext context;
 
@@ -75,8 +74,7 @@ public class I18nServiceCustomizer implements ServiceTrackerCustomizer {
 
     public Object addingService(ServiceReference reference) {
         I18nService i18n = (I18nService) context.getService(reference);
-        LOG.debug("Adding translation service for locale " + i18n.getLocale() + " to administration daemon.");
-        I18nServices.getInstance().addService(i18n.getLocale(), i18n);
+        I18nServices.getInstance().addService(i18n);
         return i18n;
     }
 
@@ -86,9 +84,7 @@ public class I18nServiceCustomizer implements ServiceTrackerCustomizer {
 
     public void removedService(ServiceReference reference, Object service) {
         try {
-            I18nService i18n = (I18nService) service;
-            I18nServices.getInstance().removeService(i18n.getLocale(), i18n);
-            LOG.debug("Removing translation service for locale " + i18n.getLocale() + " from administration daemon.");
+            I18nServices.getInstance().removeService((I18nService) service);
         } finally {
             context.ungetService(reference);
         }
