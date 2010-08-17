@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.mail;
 
+import static com.openexchange.messaging.mail.FormStrings.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +66,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailMessageService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
@@ -80,7 +81,7 @@ public final class MailMessageService implements MessagingService {
 
     /**
      * Gets a new instance.
-     * 
+     *
      * @return A new instance
      */
     public static MailMessageService newInstance() {
@@ -96,88 +97,88 @@ public final class MailMessageService implements MessagingService {
      */
     private MailMessageService() {
         super();
-        final DynamicFormDescription formDescription = new DynamicFormDescription();
+        final DynamicFormDescription tmpDescription = new DynamicFormDescription();
         /*
          * Configuration
          */
-        formDescription.add(FormElement.input(MailConstants.MAIL_LOGIN, "Login", true, ""));
-        formDescription.add(FormElement.password(MailConstants.MAIL_PASSWORD, "Password", true, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_LOGIN, FORM_LABEL_LOGIN, true, ""));
+        tmpDescription.add(FormElement.password(MailConstants.MAIL_PASSWORD, FORM_LABEL_PASSWORD, true, ""));
         /*-
          * Confirmed ham
          * Confirmed ham fullname
          */
-        formDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_HAM, "Confirmed Ham", false, "confirmed-ham"));
-        formDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_HAM_FULLNAME, "Confirmed Ham Fullname", false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_HAM, FORM_LABEL_CONFIRMED_HAM, false, "confirmed-ham"));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_HAM_FULLNAME, FORM_LABEL_CONFIRMED_HAM_FULLNAME, false, ""));
         /*-
          * Confirmed spam
          * Confirmed spam fullname
          */
-        formDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_SPAM, "Confirmed Spam", false, "confirmed-spam"));
-        formDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_SPAM_FULLNAME, "Confirmed Spam Fullname", false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_SPAM, FORM_LABEL_CONFIRMED_SPAM, false, "confirmed-spam"));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_SPAM_FULLNAME, FORM_LABEL_CONFIRMED_SPAM_FULLNAME, false, ""));
         /*-
          * Drafts
          * Drafts fullname
          */
-        formDescription.add(FormElement.input(MailConstants.MAIL_DRAFTS, "Drafts", false, "Drafts"));
-        formDescription.add(FormElement.input(MailConstants.MAIL_DRAFTS_FULLNAME, "Drafts Fullname", false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_DRAFTS, FORM_LABEL_DRAFTS, false, "Drafts"));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_DRAFTS_FULLNAME, FORM_LABEL_DRAFTS_FULLNAME, false, ""));
         /*-
          * Sent
          * Sent fullname
          */
-        formDescription.add(FormElement.input(MailConstants.MAIL_SENT, "Sent", false, "Sent"));
-        formDescription.add(FormElement.input(MailConstants.MAIL_SENT_FULLNAME, "Sent Fullname", false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_SENT, FORM_LABEL_SENT, false, "Sent"));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_SENT_FULLNAME, FORM_LABEL_SENT_FULLNAME, false, ""));
         /*-
          * Spam
          * Spam fullname
          */
-        formDescription.add(FormElement.input(MailConstants.MAIL_SPAM, "Spam", false, "Spam"));
-        formDescription.add(FormElement.input(MailConstants.MAIL_SPAM_FULLNAME, "Spam Fullname", false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_SPAM, FORM_LABEL_SPAM, false, "Spam"));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_SPAM_FULLNAME, FORM_LABEL_SPAM_FULLNAME, false, ""));
         /*-
          * Trash
          * Trash fullname
          */
-        formDescription.add(FormElement.input(MailConstants.MAIL_TRASH, "Trash", false, "Trash"));
-        formDescription.add(FormElement.input(MailConstants.MAIL_TRASH_FULLNAME, "Trash Fullname", false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_TRASH, FORM_LABEL_TRASH, false, "Trash"));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_TRASH_FULLNAME, FORM_LABEL_TRASH_FULLNAME, false, ""));
         /*-
          * Mail port
          * Mail protocol
          * Mail secure
          * Mail server
          */
-        formDescription.add(FormElement.input(MailConstants.MAIL_PORT, "Mail Port", true, ""));
-        formDescription.add(FormElement.input(MailConstants.MAIL_PROTOCOL, "Mail Protocol", true, ""));
-        formDescription.add(FormElement.checkbox(MailConstants.MAIL_SECURE, "Mail Secure", false, Boolean.FALSE));
-        formDescription.add(FormElement.input(MailConstants.MAIL_SERVER, "Mail Server", true, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_PORT, FORM_LABEL_PORT, true, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_PROTOCOL, FORM_LABEL_PROTOCOL, true, ""));
+        tmpDescription.add(FormElement.checkbox(MailConstants.MAIL_SECURE, FORM_LABEL_SECURE, false, Boolean.FALSE));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_SERVER, FORM_LABEL_SERVER, true, ""));
         /*-
          * Primary address
          * Personal
          */
-        formDescription.add(FormElement.input(MailConstants.MAIL_PRIMARY_ADDRESS, "Primary Address", true, ""));
-        formDescription.add(FormElement.input(MailConstants.MAIL_PERSONAL, "Personal", false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_PRIMARY_ADDRESS, FORM_LABEL_PRIMARY_ADDRESS, true, ""));
+        tmpDescription.add(FormElement.input(MailConstants.MAIL_PERSONAL, FORM_LABEL_PERSONAL, false, ""));
         /*-
          * Transport login
          * Transport password
          */
-        formDescription.add(FormElement.input(MailConstants.TRANSPORT_LOGIN, "Transport Login", false, ""));
-        formDescription.add(FormElement.password(MailConstants.TRANSPORT_PASSWORD, "Transport Password", false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.TRANSPORT_LOGIN, FORM_LABEL_TRANSPORT_LOGIN, false, ""));
+        tmpDescription.add(FormElement.password(MailConstants.TRANSPORT_PASSWORD, FORM_LABEL_TRANSPORT_PASSWORD, false, ""));
         /*-
          * Transport port
          * Transport protocol
          * Transport secure
          * Transport server
          */
-        formDescription.add(FormElement.input(MailConstants.TRANSPORT_PORT, "Mail Port", false, ""));
-        formDescription.add(FormElement.input(MailConstants.TRANSPORT_PROTOCOL, "Mail Protocol", false, ""));
-        formDescription.add(FormElement.checkbox(MailConstants.TRANSPORT_SECURE, "Mail Secure", false, Boolean.FALSE));
-        formDescription.add(FormElement.input(MailConstants.TRANSPORT_SERVER, "Mail Server", false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.TRANSPORT_PORT, FORM_LABEL_TRANSPORT_PORT, false, ""));
+        tmpDescription.add(FormElement.input(MailConstants.TRANSPORT_PROTOCOL, FORM_LABEL_TRANSPORT_PROTOCOL, false, ""));
+        tmpDescription.add(FormElement.checkbox(MailConstants.TRANSPORT_SECURE, FORM_LABEL_TRANSPORT_SECURE, false, Boolean.FALSE));
+        tmpDescription.add(FormElement.input(MailConstants.TRANSPORT_SERVER, FORM_LABEL_TRANSPORT_SERVER, false, ""));
         /*
          * Unified mail enabled
          */
-        formDescription.add(FormElement.checkbox(MailConstants.UNIFIED_MAIL_ENABLED, "Unified Mail Enabled", false, Boolean.FALSE));
+        tmpDescription.add(FormElement.checkbox(MailConstants.UNIFIED_MAIL_ENABLED, FORM_LABEL_UNIFIED_MAIL_ENABLED, false, Boolean.FALSE));
         /*
          * Create read-only view on generated form description
          */
-        this.formDescription = new ReadOnlyDynamicFormDescription(formDescription);
+        this.formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
 
     private MailMessageService init() {
@@ -218,5 +219,4 @@ public final class MailMessageService implements MessagingService {
     public List<MessagingAction> getMessageActions() {
         return ACTIONS;
     }
-
 }
