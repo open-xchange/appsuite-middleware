@@ -1,7 +1,11 @@
 * 2010-08-17 - martin.herfurth@open-xchange.com
 
  - Bugfix #16689: Notifications for appointments which start in the past.
- 
+
+* 2010-08-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #16615: Warning of exceeded database connection pool is only written once a minute.
+
 * 2010-08-17 - thorben.betten@open-xchange.com
 
  - Bugfix #16693: Fixed setting "subscr_subflds" field for shared folder
