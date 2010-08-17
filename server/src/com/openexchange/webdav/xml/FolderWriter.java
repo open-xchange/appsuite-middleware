@@ -52,8 +52,15 @@
 package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,12 +70,23 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.Groups;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -119,51 +137,101 @@ public class FolderWriter extends FolderChildWriter {
 	}
 	
 	public void startWriter(final boolean modified, final boolean deleted, final boolean bList, Date lastsync, final OutputStream os) throws Exception {
-		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(new ServerSessionAdapter(sessionObj));
+		final ServerSessionAdapter serverSession = new ServerSessionAdapter(sessionObj);
+        final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(serverSession);
 		
 		final XMLOutputter xo = new XMLOutputter();
 		
 		if (lastsync == null) {
 			lastsync = new Date(0);
 		}
-		/*
-         * Fist send all 'deletes', than all 'modified'
-         */
-		if (deleted) {
-            SearchIterator it = null;
-            try {
-                it = sqlinterface.getDeletedFolders(lastsync);
-                writeIterator(it, true, xo, os);
-            } finally {
-                if (it != null) {
-                    it.close();
+		final boolean oldBehavior = false;
+		if (oldBehavior) {
+		    /*
+	         * Fist send all 'deletes', than all 'modified'
+	         */
+	        if (deleted) {
+	            SearchIterator<FolderObject>  it = null;
+	            try {
+	                it = sqlinterface.getDeletedFolders(lastsync);
+	                writeIterator(it, true, xo, os);
+	            } finally {
+	                if (it != null) {
+	                    it.close();
+	                }
+	            }
+	        }
+	        
+	        if (modified) {
+	            SearchIterator<FolderObject>  it = null;
+	            try {
+	                it = sqlinterface.getModifiedUserFolders(lastsync);
+	                writeIterator(it, false, xo, os);
+	            } finally {
+	                if (it != null) {
+	                    it.close();
+	                }
+	            }
+	        }
+	        
+	        if (bList) {
+	            SearchIterator<FolderObject>  it = null;
+	            try {
+	                it = sqlinterface.getModifiedUserFolders(new Date(0));
+	                writeList(it, xo, os);
+	            } finally {
+	                if (it != null) {
+	                    it.close();
+	                }
+	            }
+	        }
+        } else {
+    		/*
+    		 * Calculate updated and "deleted" folders
+    		 */
+    		if (modified || deleted) {
+    		    final UpdatesResult updatesResult = calculateUpdates(sqlinterface, lastsync, !deleted, false, false, serverSession, lastsync);
+    	        /*
+    	         * Fist send all 'deletes', than all 'modified'
+    	         */
+    	        if (deleted) {
+    	            final Queue<FolderObject> deletedQueue = updatesResult.deletedQueue;
+    	            SearchIterator<FolderObject> it = null;
+    	            try {
+    	                it = new SearchIteratorAdapter<FolderObject>(deletedQueue.iterator(), deletedQueue.size());
+    	                writeIterator(it, true, xo, os);
+    	            } finally {
+    	                if (it != null) {
+    	                    it.close();
+    	                }
+    	            }
+    	        }
+    	        if (modified) {
+    	            SearchIterator<FolderObject> it = null;
+    	            try {
+    	                final Queue<FolderObject> updatedQueue = updatesResult.updatedQueue;
+    	                it = new SearchIteratorAdapter<FolderObject>(updatedQueue.iterator(), updatedQueue.size());
+    	                writeIterator(it, false, xo, os);
+    	            } finally {
+    	                if (it != null) {
+    	                    it.close();
+    	                }
+    	            }
+    	        }
+    		}
+    
+    		if (bList) {
+    		    SearchIterator<FolderObject>  it = null;
+                try {
+                    it = sqlinterface.getModifiedUserFolders(new Date(0));
+                    writeList(it, xo, os);
+                } finally {
+                    if (it != null) {
+                        it.close();
+                    }
                 }
-            }
+    		}
         }
-		
-		if (modified) {
-			SearchIterator it = null;
-			try {
-				it = sqlinterface.getModifiedUserFolders(lastsync);
-				writeIterator(it, false, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
-		
-		if (bList) {
-			SearchIterator it = null;
-			try {
-				it = sqlinterface.getModifiedUserFolders(new Date(0));
-				writeList(it, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
 	}
 	
 	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
@@ -296,4 +364,173 @@ public class FolderWriter extends FolderChildWriter {
 		e.setAttribute("objectdeletepermission", String.valueOf(odp), namespace);
 		e.setAttribute("admin_flag", String.valueOf(adminFlag), namespace);
 	}
+
+	/*
+	 * Stuff for calculating deleted/updates folders
+	 */
+	
+	public static final class UpdatesResult {
+        
+        public final Date lastModified;
+        
+        public final Queue<FolderObject> updatedQueue;
+        
+        public final Queue<FolderObject> deletedQueue;
+
+        public UpdatesResult(final Date lastModified, final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue) {
+            super();
+            this.lastModified = lastModified;
+            this.updatedQueue = updatedQueue;
+            this.deletedQueue = deletedQueue;
+        }
+
+    }
+
+    public static UpdatesResult calculateUpdates(final FolderSQLInterface foldersqlinterface, final Date timestamp, final boolean ignoreDeleted, final boolean includeVirtualListFolder, final boolean gatherDisplayNamesOfSharedFolders, final ServerSession session, final Date lastModified) throws AbstractOXException {
+        final Context ctx = session.getContext();
+        /*
+         * Get all updated OX folders
+         */
+        Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getAllModifiedFolders(timestamp)).asQueue();
+        final OXFolderAccess access = new OXFolderAccess(ctx);
+        final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
+        final Queue<FolderObject> deletedQueue = ignoreDeleted ? null : new LinkedList<FolderObject>();
+        final Map<String, Integer> displayNames = gatherDisplayNamesOfSharedFolders ? new HashMap<String, Integer>() : null;
+        boolean addSystemSharedFolder = false;
+        boolean checkVirtualListFolders = false;
+        int size = q.size();
+        Iterator<FolderObject> iter = q.iterator();
+        try {
+            final UserConfiguration userConf = session.getUserConfiguration();
+            final UserStorage us = UserStorage.getInstance();
+            final StringHelper strHelper = new StringHelper(session.getUser().getLocale());
+            final boolean sharedFolderAccess = userConf.hasFullSharedFolderAccess();
+            for (int i = 0; i < size; i++) {
+                final FolderObject fo = iter.next();
+                if (fo.isVisible(session.getUserId(), userConf)) {
+                    if (fo.isShared(session.getUserId())) {
+                        if (sharedFolderAccess) {
+                            /*
+                             * Add display name of shared folder owner
+                             */
+                            if (gatherDisplayNamesOfSharedFolders) {
+                                String creatorDisplayName;
+                                try {
+                                    creatorDisplayName = us.getUser(fo.getCreatedBy(), ctx).getDisplayName();
+                                } catch (final LdapException e) {
+                                    if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
+                                        throw new AbstractOXException(e);
+                                    }
+                                    creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
+                                }
+                                if (!displayNames.containsKey(creatorDisplayName)) {
+                                    displayNames.put(creatorDisplayName, Integer.valueOf(fo.getCreatedBy()));
+                                }
+                            }
+                            /*
+                             * Remember to include system shared folder
+                             */
+                            addSystemSharedFolder = true;
+                        } else {
+                            if (!ignoreDeleted) {
+                                deletedQueue.add(fo);
+                            }
+                        }
+                    } else if (FolderObject.PUBLIC == fo.getType()) {
+                        if (access.getFolderPermission(fo.getParentFolderID(), session.getUserId(), userConf).isFolderVisible()) {
+                            /*
+                             * Parent is already visible: Add real parent
+                             */
+                            updatedQueue.add(access.getFolderObject(fo.getParentFolderID()));
+                        } else {
+                            /*
+                             * Parent is not visible: Update superior system folder to let the newly visible folder appear underneath
+                             * virtual "Other XYZ folders"
+                             */
+                            updatedQueue.add(fo.getModule() == FolderObject.INFOSTORE ? access.getFolderObject(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) : access.getFolderObject(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+                        }
+                    }
+                    updatedQueue.add(fo);
+                } else {
+                    checkVirtualListFolders |= (FolderObject.PUBLIC == fo.getType());
+                    if (!ignoreDeleted) {
+                        deletedQueue.add(fo);
+                    }
+                }
+            }
+            /*
+             * Check virtual list folders
+             */
+            if (includeVirtualListFolder && checkVirtualListFolders && !ignoreDeleted) {
+                if (userConf.hasTask() && !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
+                    final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
+                    virtualTasks.setLastModified(new Date(0));
+                    deletedQueue.add(virtualTasks);
+                }
+                if (userConf.hasCalendar() && !foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
+                    final FolderObject virtualCalendar = new FolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
+                    virtualCalendar.setLastModified(new Date(0));
+                    deletedQueue.add(virtualCalendar);
+                }
+                if (userConf.hasContact() && !foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
+                    final FolderObject virtualContact = new FolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
+                    virtualContact.setLastModified(new Date(0));
+                    deletedQueue.add(virtualContact);
+                }
+                if (userConf.hasInfostore() && !foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
+                    final FolderObject virtualInfostore = new FolderObject(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
+                    virtualInfostore.setLastModified(new Date(0));
+                    deletedQueue.add(virtualInfostore);
+                }
+            }
+        } catch (final SQLException e) {
+            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+        }
+        /*
+         * Check if shared folder must be updated, too
+         */
+        if (addSystemSharedFolder) {
+            final FolderObject sharedFolder = access.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+            sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, session.getUser().getLocale()));
+            updatedQueue.add(sharedFolder);
+            if (!displayNames.isEmpty()) {
+                for (final Entry<String, Integer> entry : displayNames.entrySet()) {
+                    updatedQueue.add(FolderObject.createVirtualSharedFolderObject(entry.getValue().intValue(), entry.getKey()));
+                }
+            }
+        }
+        /*
+         * Output updated folders
+         */
+        size = updatedQueue.size();
+        iter = updatedQueue.iterator();
+        for (int i = 0; i < size; i++) {
+            final FolderObject fo = iter.next();
+            {
+                final Date modified = fo.getLastModified();
+                if (null != modified && lastModified.before(modified)) {
+                    lastModified.setTime(modified.getTime());
+                }
+            }
+        }
+        if (!ignoreDeleted) {
+            /*
+             * Get deleted OX folders
+             */
+            q = ((FolderObjectIterator) foldersqlinterface.getDeletedFolders(timestamp)).asQueue();
+            /*
+             * Add deleted OX folders from above
+             */
+            q.addAll(deletedQueue);
+            /*
+             * Return with deleted folders
+             */
+            return new UpdatesResult(lastModified, updatedQueue, q);
+        }
+        /*
+         * Return without deleted folders
+         */
+        return new UpdatesResult(lastModified, updatedQueue, null);
+    }
+
 }
