@@ -213,7 +213,7 @@ if [ -n "$CREATEADMIN" ]; then
     if [ -n "$MYSQL_ROOT_PASSWD" ]; then
 	ROOTAUTH="-u $MYSQL_ROOT_USER -p${MYSQL_ROOT_PASSWD}"
     fi
-    cat<<EOF | mysql $(eval echo $ROOTAUTH) || die
+    cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT $(eval echo $ROOTAUTH) || die
 drop database if exists \`${CONFIGDB_DBNAME}\`;
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'%' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'localhost' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
@@ -232,7 +232,7 @@ cat $ADMINCONF/mysql/configdb.sql \
 echo " done"
 
 if [ -n "$ADDON_SQL" ]; then
-    for sql in "$ADDON_SQL"; do
+    for sql in $ADDON_SQL; do
 	if [ -f $ADMINCONF/mysql/$sql ]; then
 	    echo "applying additional sql initialisation from $ADMINCONF/mysql/$sql"
 	    cat $ADMINCONF/mysql/$sql \
