@@ -66,7 +66,7 @@ public class FormStrings implements LocalizableStrings {
 
     public static final String FORM_LABEL_LINK = "URL";
 
-    private FormStrings() {
+    public FormStrings() {
         super();
     }
 }

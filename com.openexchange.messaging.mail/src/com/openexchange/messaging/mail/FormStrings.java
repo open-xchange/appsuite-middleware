@@ -112,7 +112,7 @@ public final class FormStrings implements LocalizableStrings {
 
     public static final String FORM_LABEL_UNIFIED_MAIL_ENABLED = "Unified Mail Enabled";
 
-    private FormStrings() {
+    public FormStrings() {
         super();
     }
 }

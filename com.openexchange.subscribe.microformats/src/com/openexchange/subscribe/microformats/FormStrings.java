@@ -64,7 +64,7 @@ public class FormStrings implements LocalizableStrings {
 
     public static final String SOURCE_NAME_INFOSTORE = "OXMF Infostore";
 
-    private FormStrings() {
+    public FormStrings() {
         super();
     }
 }
