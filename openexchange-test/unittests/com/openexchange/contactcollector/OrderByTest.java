@@ -64,10 +64,9 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -107,9 +106,6 @@ public class OrderByTest extends TestCase {
         userId = tools.resolveUser(user, ctx);
         session = tools.getSessionForUser(user, ctx);
         contactFolder = getStandardContactFolder();
-
-        ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), userId, contactFolder.getObjectID());
-        ServerUserSetting.setContactColletion(ctx, session, userId, true);
     }
 
     public void testOrderByUserfield20() throws Throwable {

@@ -49,6 +49,7 @@
 
 package com.openexchange.contactcollector;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Types;
@@ -71,6 +72,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
@@ -126,37 +128,38 @@ public class ContactCollectorTest extends TestCase {
 
     @Override
     public void tearDown() throws Exception {
-        ServerUserSetting.setContactColletion(ctx, session, userId, false);
+        ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, false);
+        ServerUserSetting.getInstance().setContactCollectOnMailTransport(ctx.getContextId(), userId, false);
         Init.stopServer();
         deleteContactFromFolder(mail);
     }
     
     public void testNoFolder() throws Throwable {
-        ServerUserSetting.setContactColletion(ctx, session, userId, true);
+        ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
         setFolderNULL();
         Connection con = DBPool.pickupWriteable(ctx);
-        new ContactCollectorFolderCreator().create(session, ctx, new StringHelper(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con, false);
+        new ContactCollectorFolderCreator().create(session, ctx, new StringHelper(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con);
         DBPool.closeWriterSilent(ctx, con);
-        Integer folder = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), userId);
+        Integer folder = ServerUserSetting.getInstance().getContactCollectionFolder(ctx.getContextId(), userId);
         assertNotNull("Folder should not be NULL", folder);
         assertTrue("Invalid folder id", folder > 0);
     }
-    
+
     public void testNewFeature() throws Throwable {
         removeUserEntry();
         Connection con = DBPool.pickupWriteable(ctx);
-        new ContactCollectorFolderCreator().create(session, ctx, new StringHelper(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con, true);
-        ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
-        assertNotNull("No folder for contact collection", setting.getIContactCollectionFolder(ctx.getContextId(), userId));
-        assertTrue("No folder for contact collection", setting.getIContactCollectionFolder(ctx.getContextId(), userId) > 0);
-        assertTrue("Feature should be switched on", setting.isIContactCollectionEnabled(ctx.getContextId(), userId));
+        new ContactCollectorFolderCreator().create(session, ctx, new StringHelper(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con);
+        ServerUserSetting setting = ServerUserSetting.getInstance();
+        assertNotNull("No folder for contact collection", setting.getContactCollectionFolder(ctx.getContextId(), userId));
+        assertTrue("No folder for contact collection", setting.getContactCollectionFolder(ctx.getContextId(), userId) > 0);
+        assertTrue("Feature should be switched on", setting.isContactCollectionEnabled(ctx.getContextId(), userId));
         assertTrue("Should collect incoming", setting.isContactCollectOnMailAccess(ctx.getContextId(), userId));
         assertTrue("Should collect on outgoing", setting.isContactCollectOnMailTransport(ctx.getContextId(), userId));
     }
 
     public void testNewContact() throws Throwable {
-        ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), userId, contactFolder.getObjectID());
-        ServerUserSetting.setContactColletion(ctx, session, userId, true);
+        ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
+        ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
         
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
         collector.start();
@@ -164,8 +167,7 @@ public class ContactCollectorTest extends TestCase {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
             addresses.add(address);
-            collector.memorizeAddresses(addresses, session);
-            Thread.sleep(1000);
+            collector.memorizeAddresses(addresses, session, false);
             final List<Contact> contacts = searchContact(mail);
             assertEquals("No object found", 1, contacts.size());
             assertEquals("Count does not match", 1, contacts.get(0).getUseCount());
@@ -175,8 +177,8 @@ public class ContactCollectorTest extends TestCase {
     }
 
     public void testExistingContact() throws Throwable {
-        ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), userId, contactFolder.getObjectID());
-        ServerUserSetting.setContactColletion(ctx, session, userId, true);
+        ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
+        ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
         
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
         collector.start();
@@ -184,12 +186,9 @@ public class ContactCollectorTest extends TestCase {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
             addresses.add(address);
-            collector.memorizeAddresses(addresses, session);
-            Thread.sleep(1000);
-            collector.memorizeAddresses(addresses, session);
-            Thread.sleep(1000);
-            collector.memorizeAddresses(addresses, session);
-            Thread.sleep(1000);
+            collector.memorizeAddresses(addresses, session, false);
+            collector.memorizeAddresses(addresses, session, false);
+            collector.memorizeAddresses(addresses, session, false);
             final List<Contact> contacts = searchContact(mail);
             assertEquals("Ammount of objects found is not correct", 1, contacts.size());
             assertEquals("Count does not match", 3, contacts.get(0).getUseCount());

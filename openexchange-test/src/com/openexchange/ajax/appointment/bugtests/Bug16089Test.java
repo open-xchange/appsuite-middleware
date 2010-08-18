@@ -85,7 +85,7 @@ public class Bug16089Test extends AbstractAJAXSession {
                 for (ConfirmableParticipant c : confirmations) {
                     if (c.getIdentifier() == client.getValues().getUserId()) {
                         int ctx = getContextID(client);                        
-                        int publicConfig = ServerUserSetting.getDefaultInstance().getDefaultStatusPublic(ctx, client.getValues().getUserId());
+                        int publicConfig = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx, client.getValues().getUserId());
                         assertEquals("Confirm status isn't equal with user setting.", c.getConfirm(),publicConfig);
                     }
                 }
