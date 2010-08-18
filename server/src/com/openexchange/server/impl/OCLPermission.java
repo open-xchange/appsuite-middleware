@@ -179,6 +179,10 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
      */
     public OCLPermission() {
         super();
+        fp = NO_PERMISSIONS;
+        orp = NO_PERMISSIONS;
+        owp = NO_PERMISSIONS;
+        odp = NO_PERMISSIONS;
     }
 
     /**
@@ -189,6 +193,10 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
      */
     public OCLPermission(final int entity, final int fuid) {
         super();
+        fp = NO_PERMISSIONS;
+        orp = NO_PERMISSIONS;
+        owp = NO_PERMISSIONS;
+        odp = NO_PERMISSIONS;
         this.entity = entity;
         this.fuid = fuid;
     }

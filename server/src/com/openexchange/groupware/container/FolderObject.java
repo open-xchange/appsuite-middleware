@@ -1166,11 +1166,6 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      */
     public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final Connection readConArg) throws SQLException, DBPoolingException {
         final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), userConfig);
-        maxPerm.setAllPermission(
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
         final int[] idArr;
         {
             final int[] groups = userConfig.getGroups();
