@@ -554,6 +554,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Aug 18 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16620: Contact collect folder can now be enabled again because options are always visible.
 * Tue Aug 17 2010 - thorben.betten@open-xchange.com
   - Bugfix #16693: Fixed setting "subscr_subflds" field for shared folder
   - Partial fix for #16688: Increased space of PermGen heap section
