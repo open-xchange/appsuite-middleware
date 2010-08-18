@@ -52,7 +52,6 @@ package com.openexchange.webdav.xml;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -81,7 +80,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link FolderWriter}
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -336,8 +335,8 @@ public class FolderWriter extends FolderChildWriter {
         e.setAttribute("admin_flag", String.valueOf(adminFlag), namespace);
     }
 
-    /*
-     * Stuff for calculating deleted/updates folders
+    /*-
+     * ----------------------------- Stuff for calculating deleted/updated folders -----------------------------
      */
 
     private static final class UpdatesResult {
@@ -354,43 +353,134 @@ public class FolderWriter extends FolderChildWriter {
 
     }
 
-    private static UpdatesResult calculateUpdates(final FolderSQLInterface foldersqlinterface, final Date timestamp, final boolean ignoreDeleted, final ServerSession session) throws AbstractOXException {
-        /*
-         * Get all updated OX folders
-         */
-        Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getAllModifiedFolders(timestamp)).asQueue();
-        final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
-        final Queue<FolderObject> deletedQueue = ignoreDeleted ? null : new LinkedList<FolderObject>();
-        try {
-            final int userId = session.getUserId();
-            final UserConfiguration userConf = session.getUserConfiguration();
-            final boolean sharedFolderAccess = userConf.hasFullSharedFolderAccess();
-            final int size = q.size();
-            final Iterator<FolderObject> iter = q.iterator();
-            for (int i = 0; i < size; i++) {
-                final FolderObject fo = iter.next();
+    private static interface Enqueuer {
+        public void enqueue(FolderObject fo) throws AbstractOXException;
+    } // End of Enqueuer interface
+
+    private static class FullEnqueuer implements Enqueuer {
+
+        protected final int userId;
+        protected final UserConfiguration userConf;
+        protected final Queue<FolderObject> updatedQueue;
+        protected final Queue<FolderObject> deletedQueue;
+
+        public FullEnqueuer(final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue, final UserConfiguration userConf) {
+            super();
+            this.updatedQueue = updatedQueue;
+            this.deletedQueue = deletedQueue;
+            this.userId = userConf.getUserId();
+            this.userConf = userConf;
+        }
+
+        public void enqueue(final FolderObject fo) throws AbstractOXException {
+            try {
                 if (fo.isVisible(userId, userConf)) {
-                    if (!sharedFolderAccess && fo.isShared(userId)) {
+                    updatedQueue.add(fo);
+                } else {
+                    deletedQueue.add(fo);
+                }
+            } catch (final SQLException e) {
+                throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            }
+        }
+
+    } // End of FullEnqueuer class
+
+    private static final class NoSharedAccessEnqueuer extends FullEnqueuer {
+
+        public NoSharedAccessEnqueuer(final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue, final UserConfiguration userConf) {
+            super(updatedQueue, deletedQueue, userConf);
+        }
+
+        @Override
+        public void enqueue(final FolderObject fo) throws AbstractOXException {
+            try {
+                if (fo.isVisible(userId, userConf)) {
+                    if (fo.isShared(userId)) {
                         /*
-                         * No shared folder access as per user configuration
+                         * No shared folder access: Enqueue to deleted queue
                          */
-                        if (!ignoreDeleted) {
-                            deletedQueue.add(fo);
-                        }
+                        deletedQueue.add(fo);
                     } else {
                         updatedQueue.add(fo);
                     }
                 } else {
-                    /*
-                     * Folder no more/not visible as per effective permission
-                     */
-                    if (!ignoreDeleted) {
-                        deletedQueue.add(fo);
-                    }
+                    deletedQueue.add(fo);
                 }
+            } catch (final SQLException e) {
+                throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
             }
-        } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+        }
+
+    } // End of NoSharedAccessEnqueuer class
+
+    private static final class IgnoreDeletedFullEnqueuer extends FullEnqueuer {
+
+        public IgnoreDeletedFullEnqueuer(final Queue<FolderObject> updatedQueue, final UserConfiguration userConf) {
+            super(updatedQueue, null, userConf);
+        }
+
+        @Override
+        public void enqueue(final FolderObject fo) throws AbstractOXException {
+            try {
+                if (fo.isVisible(userId, userConf)) {
+                    updatedQueue.add(fo);
+                }
+            } catch (final SQLException e) {
+                throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            }
+        }
+
+    } // End of IgnoreDeletedFullEnqueuer class
+
+    private static final class IgnoreDeletedNoSharedAccessEnqueuer extends FullEnqueuer {
+
+        public IgnoreDeletedNoSharedAccessEnqueuer(final Queue<FolderObject> updatedQueue, final UserConfiguration userConf) {
+            super(updatedQueue, null, userConf);
+        }
+
+        @Override
+        public void enqueue(final FolderObject fo) throws AbstractOXException {
+            try {
+                if (!fo.isShared(userId) && fo.isVisible(userId, userConf)) {
+                    /*
+                     * A visible, non-shared folder
+                     */
+                    updatedQueue.add(fo);
+                }
+            } catch (final SQLException e) {
+                throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            }
+        }
+
+    } // End of IgnoreDeletedNoSharedAccessEnqueuer class
+
+    private static Enqueuer getEnqueuer(final boolean ignoreDeleted, final UserConfiguration userConf, final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue) {
+        if (ignoreDeleted) {
+            if (userConf.hasFullSharedFolderAccess()) {
+                return new IgnoreDeletedFullEnqueuer(updatedQueue, userConf);
+            }
+            return new IgnoreDeletedNoSharedAccessEnqueuer(updatedQueue, userConf);
+        }
+        if (userConf.hasFullSharedFolderAccess()) {
+            return new FullEnqueuer(updatedQueue, deletedQueue, userConf);
+        }
+        return new NoSharedAccessEnqueuer(updatedQueue, deletedQueue, userConf);
+    }
+
+    private static UpdatesResult calculateUpdates(final FolderSQLInterface sqlInterface, final Date timestamp, final boolean ignoreDeleted, final ServerSession session) throws AbstractOXException {
+        /*
+         * Get all updated folders
+         */
+        Queue<FolderObject> queue = ((FolderObjectIterator) sqlInterface.getAllModifiedFolders(timestamp)).asQueue();
+        final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
+        final Queue<FolderObject> deletedQueue = ignoreDeleted ? null : new LinkedList<FolderObject>();
+        /*
+         * Enqueue each folder in proper queue
+         */
+        final Enqueuer enqueuer = getEnqueuer(ignoreDeleted, session.getUserConfiguration(), updatedQueue, deletedQueue);
+        for (final FolderObject fo : queue) {
+            enqueuer.enqueue(fo);
         }
         /*
          * Prepare result
@@ -402,17 +492,17 @@ public class FolderWriter extends FolderChildWriter {
             return new UpdatesResult(updatedQueue, null);
         }
         /*
-         * Get deleted folders
+         * Get all deleted folders
          */
-        q = ((FolderObjectIterator) foldersqlinterface.getDeletedFolders(timestamp)).asQueue();
+        queue = ((FolderObjectIterator) sqlInterface.getDeletedFolders(timestamp)).asQueue();
         /*
          * Add deleted folders from above
          */
-        q.addAll(deletedQueue);
+        queue.addAll(deletedQueue);
         /*
          * Return with deleted folders
          */
-        return new UpdatesResult(updatedQueue, q);
+        return new UpdatesResult(updatedQueue, queue);
     }
 
 }
