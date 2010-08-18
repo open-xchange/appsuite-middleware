@@ -497,38 +497,24 @@ public class FolderWriter extends FolderChildWriter {
                 }
             }
         }
-        /*
-         * Output updated folders
-        size = updatedQueue.size();
-        iter = updatedQueue.iterator();
-        for (int i = 0; i < size; i++) {
-            final FolderObject fo = iter.next();
-            {
-                final Date modified = fo.getLastModified();
-                if (null != modified && lastModified.before(modified)) {
-                    lastModified.setTime(modified.getTime());
-                }
-            }
-        }
-        */
-        if (!ignoreDeleted) {
+        if (ignoreDeleted) {
             /*
-             * Get deleted OX folders
+             * Return without deleted folders
              */
-            q = ((FolderObjectIterator) foldersqlinterface.getDeletedFolders(timestamp)).asQueue();
-            /*
-             * Add deleted OX folders from above
-             */
-            q.addAll(deletedQueue);
-            /*
-             * Return with deleted folders
-             */
-            return new UpdatesResult(updatedQueue, q);
+            return new UpdatesResult(updatedQueue, null);
         }
         /*
-         * Return without deleted folders
+         * Get deleted OX folders
          */
-        return new UpdatesResult(updatedQueue, null);
+        q = ((FolderObjectIterator) foldersqlinterface.getDeletedFolders(timestamp)).asQueue();
+        /*
+         * Add deleted OX folders from above
+         */
+        q.addAll(deletedQueue);
+        /*
+         * Return with deleted folders
+         */
+        return new UpdatesResult(updatedQueue, q);
     }
 
 }
