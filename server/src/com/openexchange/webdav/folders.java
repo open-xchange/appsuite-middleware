@@ -196,8 +196,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
     @Override
     protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
             final OutputStream os) throws Exception {
-        final FolderWriter folderwriter = new FolderWriter(sessionObj, ctx);
-        folderwriter.startWriter(objectId, os);
+        new FolderWriter(sessionObj, ctx).startWriter(objectId, os);
     }
 
     @Override
@@ -209,8 +208,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
     @Override
     protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean modified,
             final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-        final FolderWriter folderwriter = new FolderWriter(sessionObj, ctx);
-        folderwriter.startWriter(modified, deleted, bList, lastsync, os);
+        new FolderWriter(sessionObj, ctx).startWriter(modified, deleted, bList, lastsync, os);
     }
 
     @Override
