@@ -91,7 +91,7 @@ public class Tree implements PreferencesItemService {
             }
 
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
-                Integer tree = ServerUserSetting.getDefaultInstance().getFolderTree(ctx.getContextId(), user.getId());
+                Integer tree = ServerUserSetting.getInstance().getFolderTree(ctx.getContextId(), user.getId());
                 if (null == tree) {
                     final ConfigurationService configurationService;
                     try {
@@ -128,7 +128,7 @@ public class Tree implements PreferencesItemService {
                 } catch (NumberFormatException e) {
                     throw new SettingException(Code.INVALID_VALUE, e, value, Strings.join(getPath(), "/"));
                 }
-                ServerUserSetting.getDefaultInstance().setFolderTree(ctx.getContextId(), user.getId(), tree);
+                ServerUserSetting.getInstance().setFolderTree(ctx.getContextId(), user.getId(), tree);
             }
         };
     }

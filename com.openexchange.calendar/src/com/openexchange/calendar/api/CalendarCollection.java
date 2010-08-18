@@ -1901,7 +1901,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             if (user.getIdentifier() == uid) {
                 if (!user.containsConfirm()) {
                     try {
-                        user.setConfirm(ServerUserSetting.getDefaultInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
+                        user.setConfirm(ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
                     } catch (SettingException e) {
                         throw new OXCalendarException(e);
                     }
@@ -1918,14 +1918,14 @@ public final class CalendarCollection implements CalendarCollectionService {
                     if (user.getIdentifier() == folderOwner) {
                         continue;
                     } else {
-                        user.setConfirm(ServerUserSetting.getDefaultInstance().getDefaultStatusPrivate(ctx.getContextId(), user.getIdentifier()));
+                        user.setConfirm(ServerUserSetting.getInstance().getDefaultStatusPrivate(ctx.getContextId(), user.getIdentifier()));
                     }
                     break;
                 case FolderObject.PRIVATE:
-                    user.setConfirm(ServerUserSetting.getDefaultInstance().getDefaultStatusPrivate(ctx.getContextId(), user.getIdentifier()));
+                    user.setConfirm(ServerUserSetting.getInstance().getDefaultStatusPrivate(ctx.getContextId(), user.getIdentifier()));
                     break;
                 case FolderObject.PUBLIC:
-                    user.setConfirm(ServerUserSetting.getDefaultInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
+                    user.setConfirm(ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
                     break;
                 default:
                     break;

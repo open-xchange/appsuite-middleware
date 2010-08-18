@@ -102,7 +102,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
             databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class, true);
             con = databaseService.getWritable(cid);
             String folderName = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
-            create(login.getSession(), login.getContext(), folderName, con, true);
+            create(login.getSession(), login.getContext(), folderName, con);
         } catch (ServiceException e) {
             throw new LoginException(e);
         } catch (DBPoolingException e) {
@@ -121,13 +121,13 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         }
     }
     
-    public void create(Session session, Context ctx, String folderName, Connection con, boolean enableIfNotExisting) throws AbstractOXException, SQLException {
+    public void create(Session session, Context ctx, String folderName, Connection con) throws AbstractOXException, SQLException {
         final int cid = session.getContextId();
         final int userId = session.getUserId();
     
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance(con);
 
-        final Integer folderId = serverUserSetting.getIContactCollectionFolder(cid, userId);
+        final Integer folderId = serverUserSetting.getContactCollectionFolder(cid, userId);
         final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
         if (folderId != null && folderAccess.exists(folderId.intValue())) {
             /*
@@ -135,7 +135,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
              */
             return;
         }
-        if (!serverUserSetting.isIContactCollectionEnabled(cid, userId).booleanValue() && isConfigured(serverUserSetting, cid, userId)) {
+        if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue() && isConfigured(serverUserSetting, cid, userId)) {
             /*
              * Explicitly turned off
              */
@@ -165,8 +165,9 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         /*
          * Remember folder ID
          */
-        serverUserSetting.setIContactCollectionFolder(cid, userId, Integer.valueOf(collectFolderID));
-        serverUserSetting.setIContactColletion(ctx, session, userId, true);
+        serverUserSetting.setContactCollectionFolder(cid, userId, Integer.valueOf(collectFolderID));
+        serverUserSetting.setContactCollectOnMailAccess(cid, userId, true);
+        serverUserSetting.setContactCollectOnMailTransport(cid, userId, true);
         if (LOG.isInfoEnabled()) {
             LOG.info(new StringBuilder("Contact collector folder (id=").append(collectFolderID).append(
                 ") successfully created for user ").append(userId).append(" in context ").append(cid));
@@ -174,7 +175,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
     }
     
     private boolean isConfigured(ServerUserSetting setting, int cid, int userId) throws SettingException {
-        return setting.getIContactCollectionFolder(cid, userId) != null;
+        return setting.getContactCollectionFolder(cid, userId) != null;
     }
 
     private FolderObject createNewContactFolder(final int userId, final String name, final int parent) {
@@ -200,8 +201,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         return newFolder;
     }
 
-    public void handleLogout(final LoginResult logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) {
         // Nothing to do on logout
     }
-
 }

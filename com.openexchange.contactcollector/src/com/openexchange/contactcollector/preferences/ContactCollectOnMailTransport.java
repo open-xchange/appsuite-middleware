@@ -82,7 +82,7 @@ public class ContactCollectOnMailTransport implements PreferencesItemService {
             }
 
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
-                Boolean value = ServerUserSetting.getDefaultInstance().isContactCollectOnMailTransport(ctx.getContextId(), user.getId());
+                Boolean value = ServerUserSetting.getInstance().isContactCollectOnMailTransport(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
 
@@ -97,7 +97,7 @@ public class ContactCollectOnMailTransport implements PreferencesItemService {
             public void writeValue(
                 final Session session, Context ctx, User user, Setting setting) throws SettingException {
                 boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));
-                ServerUserSetting.getDefaultInstance().setContactCollectOnMailTransport(ctx.getContextId(), user.getId(), value);
+                ServerUserSetting.getInstance().setContactCollectOnMailTransport(ctx.getContextId(), user.getId(), value);
             }
         };
     }

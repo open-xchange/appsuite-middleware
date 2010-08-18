@@ -288,7 +288,7 @@ public class Memorizer implements Runnable {
     private int getFolderId() {
         int retval = 0;
         try {
-            final Integer folder = ServerUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
+            final Integer folder = ServerUserSetting.getInstance().getContactCollectionFolder(session.getContextId(), session.getUserId());
             if (null != folder) {
                 retval = folder.intValue();
             }
@@ -300,16 +300,16 @@ public class Memorizer implements Runnable {
 
     private boolean isEnabled() {
         Boolean enabled = null;
-        Boolean enabledRight = null;
+        boolean enabledRight = false;
         try {
-            enabled = ServerUserSetting.isContactCollectionEnabled(session.getContextId(), session.getUserId());
+            enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
             enabledRight = new ServerSessionAdapter(session).getUserConfiguration().isCollectEmailAddresses();
         } catch (final SettingException e) {
             LOG.error(e.getMessage(), e);
         } catch (final ContextException e) {
             LOG.error(e.getMessage(), e);
         }
-        return enabled != null && enabledRight != null && enabled.booleanValue() && enabled.booleanValue();
+        return enabledRight && enabled != null && enabled.booleanValue();
     }
 
     private Contact transformInternetAddress(final InternetAddress address) throws ParseException, UnsupportedEncodingException {

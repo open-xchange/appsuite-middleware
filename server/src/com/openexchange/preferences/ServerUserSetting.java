@@ -49,26 +49,18 @@
 
 package com.openexchange.preferences;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
 
 /**
  * Interface for accessing configuration settings.
@@ -228,54 +220,11 @@ public class ServerUserSetting {
     private static final ServerUserSetting defaultInstance = new ServerUserSetting();
 
     /**
-     * Enables/Disables the collection of contacts triggered by mails.
-     * 
-     * @param cid context id
-     * @param user user id
-     */
-    public static void setContactColletion(Context ctx, Session session, final int userId, final boolean enabled) throws SettingException {
-        defaultInstance.setIContactColletion(ctx, session, userId, enabled);
-    }
-
-    /**
-     * Gets the flag for contact collection.
-     * 
-     * @param cid context id
-     * @param user user id
-     * @return <code>true</code> if mails should be collected, <code>false</code> otherwise
-     */
-    public static Boolean isContactCollectionEnabled(final int cid, final int user) throws SettingException {
-        return defaultInstance.isIContactCollectionEnabled(cid, user);
-    }
-
-    /**
-     * Sets the folder used to store collected contacts.
-     * 
-     * @param cid context id
-     * @param user user id
-     * @param folder folder id
-     */
-    public static void setContactCollectionFolder(final int cid, final int user, final int folder) throws SettingException {
-        defaultInstance.setIContactCollectionFolder(cid, user, I(folder));
-    }
-
-    /**
-     * Returns the folder used to store collected contacts.
-     * 
-     * @param cid context id
-     * @param user user id
-     * @return folder id or <code>null</code> if none found
-     */
-    public static Integer getContactCollectionFolder(final int cid, final int user) throws SettingException {
-        return defaultInstance.getIContactCollectionFolder(cid, user);
-    }
-
-    /**
      * Gets the default instance.
      * 
      * @return The default instance.
      */
-    public static ServerUserSetting getDefaultInstance() {
+    public static ServerUserSetting getInstance() {
         return defaultInstance;
     }
 
@@ -313,40 +262,14 @@ public class ServerUserSetting {
     }
 
     /**
-     * Enables/Disables the collection of contacts triggered by mails.
-     * 
-     * @param cid context id
-     * @param user user id
-     */
-    public void setIContactColletion(Context ctx, Session session, final int userId, final boolean enabled) throws SettingException {
-        setAttribute(ctx.getContextId(), userId, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled));
-        if (enabled && getAttribute(ctx.getContextId(), userId, CONTACT_COLLECT_FOLDER) == null) {
-            ContactCollectorService contactCollectService = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
-            User user;
-            try {
-                user = UserStorage.getInstance().getUser(userId, ctx);
-                String folderName = new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
-                contactCollectService.createCollectFolder(session, ctx, folderName, connection);
-            } catch (LdapException e) {
-                throw new SettingException(SettingException.Code.SUBSYSTEM, e);
-            } catch (AbstractOXException e) {
-                throw new SettingException(SettingException.Code.SUBSYSTEM, e);
-            } catch (SQLException e) {
-                throw new SettingException(SettingException.Code.SQL_ERROR, e);
-            }
-        }
-    }
-
-    /**
-     * Gets the flag for contact collection.
+     * Complete feature is enabled if one of its sub switches is enabled.
      * 
      * @param cid context id
      * @param user user id
      * @return The value or <code>false</code> if no entry is found.
      */
-    public Boolean isIContactCollectionEnabled(final int cid, final int user) throws SettingException {
-        final Boolean attribute = getAttribute(cid, user, CONTACT_COLLECT_ENABLED);
-        return null == attribute ? Boolean.FALSE : attribute;
+    public Boolean isContactCollectionEnabled(final int cid, final int user) throws SettingException {
+        return B(b(isContactCollectOnMailAccess(cid, user)) || b(isContactCollectOnMailTransport(cid, user)));
     }
 
     /**
@@ -356,7 +279,7 @@ public class ServerUserSetting {
      * @param user user id
      * @param folder folder id
      */
-    public void setIContactCollectionFolder(final int cid, final int user, final Integer folder) throws SettingException {
+    public void setContactCollectionFolder(final int cid, final int user, final Integer folder) throws SettingException {
         setAttribute(cid, user, CONTACT_COLLECT_FOLDER, folder);
     }
 
@@ -367,7 +290,7 @@ public class ServerUserSetting {
      * @param user The user id
      * @return folder id or <code>null</code> if no entry found.
      */
-    public Integer getIContactCollectionFolder(final int cid, final int user) throws SettingException {
+    public Integer getContactCollectionFolder(final int cid, final int user) throws SettingException {
         return getAttribute(cid, user, CONTACT_COLLECT_FOLDER);
     }
 

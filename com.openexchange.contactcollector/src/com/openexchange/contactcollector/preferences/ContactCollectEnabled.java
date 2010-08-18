@@ -53,6 +53,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -72,28 +73,15 @@ public class ContactCollectEnabled implements PreferencesItemService {
     }
 
     public IValueHandler getSharedValue() {
-        return new IValueHandler() {
-
-            public int getId() {
-                return -1;
-            }
+        return new ReadOnlyValue() {
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                final Boolean value = ServerUserSetting.getDefaultInstance().isIContactCollectionEnabled(ctx.getContextId(), user.getId());
+                final Boolean value = ServerUserSetting.getInstance().isContactCollectionEnabled(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
 
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail() && userConfig.hasContact() && userConfig.isCollectEmailAddresses();
-            }
-
-            public boolean isWritable() {
-                return true;
-            }
-
-            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
-                final boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));
-                ServerUserSetting.getDefaultInstance().setIContactColletion(ctx, session, user.getId(), value);
             }
         };
     }

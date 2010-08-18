@@ -79,7 +79,7 @@ public class DefaultStatusPublic implements PreferencesItemService {
             }
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                Integer value = ServerUserSetting.getDefaultInstance().getDefaultStatusPublic(ctx.getContextId(), user.getId());
+                Integer value = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getId());
                 if (value == null) {
                     value = Integer.valueOf(0);
                 }
@@ -104,7 +104,7 @@ public class DefaultStatusPublic implements PreferencesItemService {
                 if (value < 0 || value > 3) {
                     throw new SettingException(Code.INVALID_VALUE, setting.getSingleValue());
                 }
-                ServerUserSetting.getDefaultInstance().setDefaultStatusPublic(ctx.getContextId(), user.getId(), value);
+                ServerUserSetting.getInstance().setDefaultStatusPublic(ctx.getContextId(), user.getId(), value);
             }
 
         };

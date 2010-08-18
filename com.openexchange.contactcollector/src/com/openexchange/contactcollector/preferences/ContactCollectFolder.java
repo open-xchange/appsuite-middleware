@@ -80,7 +80,7 @@ public class ContactCollectFolder implements PreferencesItemService {
             }
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                final Integer value = ServerUserSetting.getDefaultInstance().getIContactCollectionFolder(ctx.getContextId(), user.getId());
+                final Integer value = ServerUserSetting.getInstance().getContactCollectionFolder(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
 
@@ -102,7 +102,7 @@ public class ContactCollectFolder implements PreferencesItemService {
                 } catch (final NumberFormatException e) {
                     throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue(), "contactCollectFolder");
                 }
-                ServerUserSetting.getDefaultInstance().setIContactCollectionFolder(ctx.getContextId(), user.getId(), value);
+                ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), user.getId(), value);
             }
         };
     }

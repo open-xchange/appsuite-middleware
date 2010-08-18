@@ -422,7 +422,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
             if (!searchobject.hasFolders() && !allFolders) {
                 searchobject.addFolder(oxfs.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID());
                 try {
-                    final Integer contactCollectFolder = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), userId);
+                    final Integer contactCollectFolder = ServerUserSetting.getInstance().getContactCollectionFolder(ctx.getContextId(), userId);
                     if (null != contactCollectFolder && oxfs.exists(contactCollectFolder.intValue())) {
                         searchobject.addFolder(contactCollectFolder.intValue());
                     }

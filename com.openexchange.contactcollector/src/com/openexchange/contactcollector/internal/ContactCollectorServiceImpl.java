@@ -85,11 +85,15 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
     }
 
     public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
+        memorizeAddresses(addresses, session, true);
+    }
+
+    public void memorizeAddresses(final List<InternetAddress> addresses, final Session session, boolean background) {
         /*
          * Delegate to thread pool if available
          */
         final ThreadPoolService threadPoolService = CCServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        if (null == threadPoolService) {
+        if (background && null == threadPoolService) {
             // Run in calling thread
             new Memorizer(addresses, session, aliasesMap).run();
         } else {
@@ -119,7 +123,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
     }
 
     public void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws AbstractOXException, SQLException {
-        new ContactCollectorFolderCreator().create(session, ctx, folderName, con, false);
+        new ContactCollectorFolderCreator().create(session, ctx, folderName, con);
     }
 
 }

@@ -1600,10 +1600,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 Links.deleteAllFolderLinks(folderID, ctx.getContextId(), wc);
 
                 final ServerUserSetting sus = ServerUserSetting.getInstance(wc);
-                final Integer collectFolder = sus.getIContactCollectionFolder(ctx.getContextId(), user.getId());
+                final Integer collectFolder = sus.getContactCollectionFolder(ctx.getContextId(), user.getId());
                 if (null != collectFolder && folderID == collectFolder.intValue()) {
-                    sus.setIContactColletion(ctx, session, user.getId(), false);
-                    sus.setIContactCollectionFolder(ctx.getContextId(), user.getId(), null);
+                    sus.setContactCollectOnMailAccess(ctx.getContextId(), user.getId(), false);
+                    sus.setContactCollectOnMailTransport(ctx.getContextId(), user.getId(), false);
+                    sus.setContactCollectionFolder(ctx.getContextId(), user.getId(), null);
                 }
             } catch (final SettingException e) {
                 throw new OXFolderException(e);
