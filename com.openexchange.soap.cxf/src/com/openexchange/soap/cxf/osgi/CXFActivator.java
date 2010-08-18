@@ -49,6 +49,8 @@
 
 package com.openexchange.soap.cxf.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
@@ -59,7 +61,9 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  */
 public class CXFActivator extends DeferredActivator {
     private static final String PATH = "/webservices";
-
+    private static final Log LOG = LogFactory.getLog(CXFActivator.class);
+    
+    
     private static final Class<?>[] CLASSES = new Class[]{HttpService.class};
     private WebserviceCollector collector;
 
@@ -82,19 +86,21 @@ public class CXFActivator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
+            LOG.info("Starting Bundle :com.openexchange.soap.cxf");
             HttpService httpService = getService(HttpService.class);
             final CXFNonSpringServlet cxf = new CXFNonSpringServlet();
             final Bus bus = cxf.getBus();
             BusFactory.setDefaultBus(bus);
 
+            LOG.info("Registering CXF servlet under "+PATH);
             httpService.registerServlet(PATH, cxf, null, null);
 
             collector = new WebserviceCollector(context);
             context.addServiceListener(collector);
             collector.open();
-
+            LOG.info("com.openexchange.soap.cxf is up and running");
         } catch (Throwable t) {
-            t.printStackTrace();
+            LOG.error(t.getMessage(), t);
         }
                 
     }
