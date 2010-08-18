@@ -1,3 +1,9 @@
+open-xchange-authentication-imap (6.18.0.0-5) unstable; urgency=low
+
+  * first build for 6.18-rev5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 18 Aug 2010 14:17:08 +0200
+
 open-xchange-authentication-imap (6.18.0.0-4) unstable; urgency=low
 
   * first build for 6.18-rev4

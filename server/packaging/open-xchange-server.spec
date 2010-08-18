@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -554,6 +554,16 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Aug 17 2010 - thorben.betten@open-xchange.com
+  - Bugfix #16693: Fixed setting "subscr_subflds" field for shared folder
+  - Partial fix for #16688: Increased space of PermGen heap section
+* Tue Aug 17 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16615: Warning of exceeded database connection pool is only written once a minute.
+ - Bugfix #16681: Translating form labels for dynamic forms sent by the back end for subscriptions and messaging.
+* Tue Aug 17 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16689: Notifications for appointments which start in the past.
+* Mon Aug 16 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #16613: Ignoring ID element in ATTACH in an ICAL file.
 * Thu Aug 12 2010 - thorben.betten@open-xchange.com
  - Bugfix #16669: Proper quoting of regex replacement
 * Wed Aug 11 2010 steffen.templin@open-xchange.com
