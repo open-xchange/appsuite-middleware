@@ -197,27 +197,11 @@ public class FolderWriter extends FolderChildWriter {
     	         */
     	        if (deleted) {
     	            final Queue<FolderObject> deletedQueue = updatesResult.deletedQueue;
-    	            SearchIterator<FolderObject> it = null;
-    	            try {
-    	                it = new SearchIteratorAdapter<FolderObject>(deletedQueue.iterator(), deletedQueue.size());
-    	                writeIterator(it, true, xo, os);
-    	            } finally {
-    	                if (it != null) {
-    	                    it.close();
-    	                }
-    	            }
+    	            writeIterator(new SearchIteratorAdapter<FolderObject>(deletedQueue.iterator()), true, xo, os);
     	        }
     	        if (modified) {
-    	            SearchIterator<FolderObject> it = null;
-    	            try {
-    	                final Queue<FolderObject> updatedQueue = updatesResult.updatedQueue;
-    	                it = new SearchIteratorAdapter<FolderObject>(updatedQueue.iterator(), updatedQueue.size());
-    	                writeIterator(it, false, xo, os);
-    	            } finally {
-    	                if (it != null) {
-    	                    it.close();
-    	                }
-    	            }
+	                final Queue<FolderObject> updatedQueue = updatesResult.updatedQueue;
+	                writeIterator(new SearchIteratorAdapter<FolderObject>(updatedQueue.iterator()), false, xo, os);
     	        }
     		}
     
@@ -235,9 +219,9 @@ public class FolderWriter extends FolderChildWriter {
         }
 	}
 	
-	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+	public void writeIterator(final SearchIterator<FolderObject> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		while (it.hasNext()) {
-			writeObject((FolderObject)it.next(), delete, xo, os);
+			writeObject(it.next(), delete, xo, os);
 		}
 	}
 	
@@ -321,12 +305,12 @@ public class FolderWriter extends FolderChildWriter {
 		}
 	}
 	
-	public static void addElementPermission(final List permissions, final Element e_prop) throws Exception {
+	public static void addElementPermission(final List<OCLPermission>  permissions, final Element e_prop) throws Exception {
 		final Element e_permissions = new Element("permissions", XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 		
 		if (permissions != null) {
 			for (int a = 0; a < permissions.size(); a++) {
-				final OCLPermission oclp = (OCLPermission)permissions.get(a);
+				final OCLPermission oclp = permissions.get(a);
 				final int entity = oclp.getEntity();
 				final int fp = oclp.getFolderPermission();
 				final int orp = oclp.getReadPermission();
