@@ -118,7 +118,7 @@
     	<bean class="java.lang.Exception" excludeProperties="Exception" />
     	<bean class="com.openexchange.admin.rmi.exceptions.InvalidDataException" excludeProperties="fieldnames" />
 	</parameter>
-    <parameter name="ServiceClass">com.openexchange.admin.soap.OXUser</parameter>
+    <parameter name="ServiceClass">com.openexchange.admin.reseller.soap.OXResellerUser</parameter>
 </service>
 
 <service name="OXResellerGroupService" scope="application">
@@ -155,7 +155,7 @@
     	<bean class="java.lang.Exception" excludeProperties="Exception" />
     	<bean class="com.openexchange.admin.rmi.exceptions.InvalidDataException" excludeProperties="fieldnames" />
 	</parameter>
-    <parameter name="ServiceClass">com.openexchange.admin.soap.OXGroup</parameter>
+    <parameter name="ServiceClass">com.openexchange.admin.reseller.soap.OXResellerGroup</parameter>
 </service>
 
 <service name="OXResellerResourceService" scope="application">
@@ -182,7 +182,7 @@
     	<bean class="java.lang.Exception" excludeProperties="Exception" />
     	<bean class="com.openexchange.admin.rmi.exceptions.InvalidDataException" excludeProperties="fieldnames" />
 	</parameter>
-    <parameter name="ServiceClass">com.openexchange.admin.soap.OXResource</parameter>
+    <parameter name="ServiceClass">com.openexchange.admin.reseller.soap.OXResellerResource</parameter>
 </service>
 
 </serviceGroup>
