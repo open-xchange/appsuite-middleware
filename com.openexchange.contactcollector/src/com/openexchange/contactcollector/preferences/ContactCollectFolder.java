@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,26 +80,29 @@ public class ContactCollectFolder implements PreferencesItemService {
             }
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                final Integer value = ServerUserSetting.getDefaultInstance().getIContactCollectionFolder(ctx.getContextId(), user.getId());
+                final Integer value = ServerUserSetting.getInstance().getContactCollectionFolder(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
 
             public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail() && userConfig.hasContact();
+                return userConfig.hasWebMail() && userConfig.hasContact() && userConfig.isCollectEmailAddresses();
             }
 
             public boolean isWritable() {
                 return true;
             }
 
-            public void writeValue(final Context ctx, final User user, final Setting setting) throws SettingException {
-                final Integer value;
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
+                Integer value;
                 try {
-                    value = new Integer(String.valueOf(setting.getSingleValue()));
+                    if (setting.getSingleValue() == null)
+                        value = null;
+                    else
+                        value = new Integer(String.valueOf(setting.getSingleValue()));
                 } catch (final NumberFormatException e) {
-                    throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue());
+                    throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue(), "contactCollectFolder");
                 }
-                ServerUserSetting.getDefaultInstance().setIContactCollectionFolder(ctx.getContextId(), user.getId(), value);
+                ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), user.getId(), value);
             }
         };
     }

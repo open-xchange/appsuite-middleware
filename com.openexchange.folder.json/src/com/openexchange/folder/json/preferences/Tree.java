@@ -47,8 +47,12 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree.modules.calendar;
+package com.openexchange.folder.json.preferences;
 
+import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -57,57 +61,75 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * Preferences tree item to allow the user to configure what folder tree he wants to use.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DefaultStatusPrivate implements PreferencesItemService {
+public class Tree implements PreferencesItemService {
 
-    private static final String[] PATH = new String[] { "modules", "calendar", "defaultStatusPrivate" };
+    private static final String PROPERTY_NAME = "com.openexchange.folder.tree";
+    private static final String NAME = "tree";
+
+    public Tree() {
+        super();
+    }
 
     public String[] getPath() {
-        return PATH;
+        return new String[] { "modules", "folder", NAME };
     }
 
     public IValueHandler getSharedValue() {
         return new IValueHandler() {
-
             public int getId() {
-                return -1;
+                return NO_ID;
             }
 
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                Integer value = ServerUserSetting.getInstance().getDefaultStatusPrivate(ctx.getContextId(), user.getId());
-                if (value == null) {
-                    value = Integer.valueOf(0);
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                Integer tree = ServerUserSetting.getInstance().getFolderTree(ctx.getContextId(), user.getId());
+                if (null == tree) {
+                    final ConfigurationService configurationService;
+                    try {
+                        configurationService = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
+                    } catch (ServiceException e) {
+                        throw new SettingException(e);
+                    }
+                    String value = configurationService.getProperty(PROPERTY_NAME, "0");
+                    try {
+                        tree = Integer.valueOf(value);
+                    } catch (NumberFormatException e) {
+                        throw new SettingException(new ConfigurationException(
+                            ConfigurationException.Code.PROPERTY_NOT_AN_INTEGER,
+                            e,
+                            PROPERTY_NAME));
+                    }
                 }
-                setting.setSingleValue(value);
+                setting.setSingleValue(tree);
             }
 
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasCalendar();
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
             }
 
             public boolean isWritable() {
                 return true;
             }
 
-            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
-                Integer value;
+            public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
+                String value = setting.getSingleValue().toString();
+                final Integer tree;
                 try {
-                    value = new Integer(String.valueOf(setting.getSingleValue()));
-                } catch (final NumberFormatException e) {
-                    throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue());
+                    tree = I(Integer.parseInt(value));
+                } catch (NumberFormatException e) {
+                    throw new SettingException(Code.INVALID_VALUE, e, value, Strings.join(getPath(), "/"));
                 }
-                if (value < 0 || value > 3) {
-                    throw new SettingException(Code.INVALID_VALUE, setting.getSingleValue());
-                }
-                ServerUserSetting.getInstance().setDefaultStatusPrivate(ctx.getContextId(), user.getId(), value);
+                ServerUserSetting.getInstance().setFolderTree(ctx.getContextId(), user.getId(), tree);
             }
-
         };
     }
-
 }

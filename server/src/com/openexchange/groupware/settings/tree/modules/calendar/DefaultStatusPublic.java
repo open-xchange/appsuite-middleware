@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,15 +78,15 @@ public class DefaultStatusPublic implements PreferencesItemService {
                 return -1;
             }
 
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
-                Integer value = ServerUserSetting.getDefaultInstance().getDefaultStatusPublic(ctx.getContextId(), user.getId());
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                Integer value = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getId());
                 if (value == null) {
-                    value = new Integer(0);
+                    value = Integer.valueOf(0);
                 }
                 setting.setSingleValue(value);
             }
 
-            public boolean isAvailable(UserConfiguration userConfig) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasCalendar();
             }
 
@@ -94,7 +94,7 @@ public class DefaultStatusPublic implements PreferencesItemService {
                 return true;
             }
 
-            public void writeValue(Context ctx, User user, Setting setting) throws SettingException {
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
                 Integer value;
                 try {
                     value = new Integer(String.valueOf(setting.getSingleValue()));
@@ -104,7 +104,7 @@ public class DefaultStatusPublic implements PreferencesItemService {
                 if (value < 0 || value > 3) {
                     throw new SettingException(Code.INVALID_VALUE, setting.getSingleValue());
                 }
-                ServerUserSetting.getDefaultInstance().setDefaultStatusPublic(ctx.getContextId(), user.getId(), value);
+                ServerUserSetting.getInstance().setDefaultStatusPublic(ctx.getContextId(), user.getId(), value);
             }
 
         };

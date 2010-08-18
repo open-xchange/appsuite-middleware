@@ -1,3 +1,7 @@
+* 2010-08-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #16620: Contact collect folder can now be enabled again because options are always visible.
+
 * 2010-08-17 - martin.herfurth@open-xchange.com
 
  - Bugfix #16689: Notifications for appointments which start in the past.

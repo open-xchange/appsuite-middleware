@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,28 +49,33 @@
 
 package com.openexchange.contactcollector.internal;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Set;
+import java.util.concurrent.Future;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
+import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link ContactCollectorServiceImpl}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContactCollectorServiceImpl implements ContactCollectorService {
 
-    /**
-     * The contact collector's executor.<br>
-     * TODO: Replace with global thread pool if supported later on.
-     */
-    private ExecutorService executor;
+    private TimeoutConcurrentMap<Integer, Future<Set<InternetAddress>>> aliasesMap;
 
     /**
      * Initializes a new {@link ContactCollectorServiceImpl}.
@@ -80,57 +85,45 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
     }
 
     public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
+        memorizeAddresses(addresses, session, true);
+    }
+
+    public void memorizeAddresses(final List<InternetAddress> addresses, final Session session, boolean background) {
         /*
-         * Enqueue in executor
+         * Delegate to thread pool if available
          */
-        executor.execute(new Memorizer(addresses, session));
+        final ThreadPoolService threadPoolService = CCServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        if (background && null == threadPoolService) {
+            // Run in calling thread
+            new Memorizer(addresses, session, aliasesMap).run();
+        } else {
+            threadPoolService.submit(
+                ThreadPools.task(new Memorizer(addresses, session, aliasesMap), "ContactCollector"),
+                CallerRunsBehavior.getInstance());
+        }
     }
 
     /**
-     * Starts this contact collector.
-     */
-    public void start() {
-        executor = Executors.newSingleThreadExecutor(new CollectorThreadFactory("Collector-"));
-    }
-
-    /**
-     * Stops this contact collector.
+     * Starts this contact collector service implementation.
      * 
-     * @throws InterruptedException If shut-down is interrupted
+     * @throws ServiceException If a needed service is missing
      */
-    public void stop() throws InterruptedException {
-        // Maybe an abrupt shut-down through executor.shutdownNow();?
-        executor.shutdown();
-        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+    public void start() throws ServiceException {
+        aliasesMap = new TimeoutConcurrentMap<Integer, Future<Set<InternetAddress>>>(60, true);
     }
 
-    /*-
-     * #####################################################################
+    /**
+     * Stops this contact collector service implementation.
      */
-
-    private static final class CollectorThreadFactory implements ThreadFactory {
-
-        private final AtomicInteger threadNumber;
-
-        private final String namePrefix;
-
-        public CollectorThreadFactory(final String namePrefix) {
-            super();
-            threadNumber = new AtomicInteger(1);
-            this.namePrefix = namePrefix;
-        }
-
-        public Thread newThread(final Runnable r) {
-            return new Thread(r, getThreadName(
-                threadNumber.getAndIncrement(),
-                new StringBuilder(namePrefix.length() + 5).append(namePrefix)));
-        }
-
-        private static String getThreadName(final int threadNumber, final StringBuilder sb) {
-            for (int i = threadNumber; i < 10000; i *= 10) {
-                sb.append('0');
-            }
-            return sb.append(threadNumber).toString();
+    public void stop() {
+        if (null != aliasesMap) {
+            aliasesMap.dispose();
+            aliasesMap = null;
         }
     }
+
+    public void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws AbstractOXException, SQLException {
+        new ContactCollectorFolderCreator().create(session, ctx, folderName, con);
+    }
+
 }

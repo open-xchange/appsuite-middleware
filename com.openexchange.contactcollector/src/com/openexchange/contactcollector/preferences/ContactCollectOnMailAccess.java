@@ -53,36 +53,53 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
 
-public class ContactCollectEnabled implements PreferencesItemService {
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
+public class ContactCollectOnMailAccess implements PreferencesItemService {
 
-    private static final String[] PATH = new String[] { "modules", "mail", "contactCollectEnabled" };
-
-    public ContactCollectEnabled() {
+    private static final String[] PATH = new String[] { "modules", "mail", "contactCollectOnMailAccess" };
+    
+    public ContactCollectOnMailAccess() {
         super();
     }
-
+    
     public String[] getPath() {
         return PATH;
     }
 
     public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
+        return new IValueHandler() {
 
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                final Boolean value = ServerUserSetting.getInstance().isContactCollectionEnabled(ctx.getContextId(), user.getId());
+            public int getId() {
+                return -1;
+            }
+
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                Boolean value = ServerUserSetting.getInstance().isContactCollectOnMailAccess(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
 
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail() && userConfig.hasContact() && userConfig.isCollectEmailAddresses();
             }
+
+            public boolean isWritable() {
+                return true;
+            }
+
+            public void writeValue(
+                final Session session, Context ctx, User user, Setting setting) throws SettingException {
+                boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));
+                ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), user.getId(), value);
+            }
         };
     }
+
 }
