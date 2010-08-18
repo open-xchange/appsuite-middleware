@@ -69,7 +69,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
 /**
  * {@link ServletResponseWrapper} - Wrapper for {@link ServletResponse}
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ServletResponseWrapper implements ServletResponse {

@@ -56,7 +56,7 @@ import com.openexchange.sessiond.exception.SessiondException;
 /**
  * {@link SessiondService}
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
 public interface SessiondService {

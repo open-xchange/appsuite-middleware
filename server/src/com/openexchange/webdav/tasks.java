@@ -87,7 +87,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 /**
  * {@link tasks} - The WebDAV/XML servlet for task module.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class tasks extends XmlServlet<TasksSQLInterface> {
 

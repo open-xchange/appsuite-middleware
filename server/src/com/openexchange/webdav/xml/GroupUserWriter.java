@@ -77,7 +77,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 /**
  * AppointmentWriter
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class GroupUserWriter extends ContactWriter {
 

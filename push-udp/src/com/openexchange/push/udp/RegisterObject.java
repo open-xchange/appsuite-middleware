@@ -54,7 +54,7 @@ import java.util.Date;
 /**
  * {@link RegisterObject} - Represents a registered client waiting for remote events.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class RegisterObject extends AbstractPushObject {
 

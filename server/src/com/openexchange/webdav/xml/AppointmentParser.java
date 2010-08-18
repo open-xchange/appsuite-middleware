@@ -48,7 +48,6 @@
  */
 
 
-
 package com.openexchange.webdav.xml;
 
 import java.util.Date;
@@ -64,9 +63,8 @@ import com.openexchange.webdav.xml.fields.AppointmentFields;
 /**
  * AppointmentParser
  *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-
 public class AppointmentParser extends CalendarParser {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentParser.class);

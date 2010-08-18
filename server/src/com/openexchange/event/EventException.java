@@ -54,7 +54,7 @@ package com.openexchange.event;
 /**
  * EventException
  * TODO Error codes
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class EventException extends Exception
 {

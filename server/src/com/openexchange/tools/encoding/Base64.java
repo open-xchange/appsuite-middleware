@@ -52,7 +52,7 @@ package com.openexchange.tools.encoding;
 /**
  * Central entry point for a base64 en/decoder.
  * 
- * @author <a href="mailto:martin.kauss@netline-is.de">Martin Kauss</a>
+ * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Base64 {

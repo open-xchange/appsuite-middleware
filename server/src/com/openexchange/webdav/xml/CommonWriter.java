@@ -63,7 +63,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 /**
  * CommonWriter
  *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class CommonWriter extends FolderChildWriter {
 

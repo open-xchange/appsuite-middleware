@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This timer rotates the containers in the SessionHandler.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class SessiondTimer implements Runnable {
 

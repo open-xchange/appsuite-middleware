@@ -52,7 +52,7 @@ package com.openexchange.control.console.internal;
 /**
  * ConsoleException
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ConsoleException extends Exception {
 

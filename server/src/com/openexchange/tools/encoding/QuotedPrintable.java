@@ -52,7 +52,7 @@ package com.openexchange.tools.encoding;
 /**
  * QuotedPrintable
  * 
- * @author <a href="mailto:martin.kauss@netline-is.de">Martin Kauss</a>
+ * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
  */
 
 public final class QuotedPrintable {

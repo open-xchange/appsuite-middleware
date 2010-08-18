@@ -54,7 +54,7 @@ package com.openexchange.groupware.impl;
 /**
  *   PasswordExpiredException
  * TODO Integrate into LoginException
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @deprecated use LoginException.
  */
 @Deprecated

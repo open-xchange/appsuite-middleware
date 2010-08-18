@@ -55,7 +55,7 @@ import com.openexchange.groupware.EnumComponent;
 /**
  * OXConcurrentModificationException
  * 
- * @author <a href="mailto:martin.kauss@netline-is.de">Martin Kauss</a>
+ * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
  */
 public class OXConcurrentModificationException extends OXException {
 

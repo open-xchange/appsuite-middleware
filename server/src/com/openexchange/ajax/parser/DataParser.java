@@ -66,7 +66,7 @@ import com.openexchange.tools.servlet.OXJSONException.Code;
 /**
  * DataParser
  * TODO make protected fields private.
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class DataParser {
 

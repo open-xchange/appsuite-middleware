@@ -60,7 +60,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * MultiCastPushSocket
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
 public class PushMulticastSocket implements Runnable {

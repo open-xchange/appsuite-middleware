@@ -54,7 +54,7 @@ import com.openexchange.sessiond.exception.SessiondException;
 /**
  * {@link SessionIdGenerator} - The session ID generator
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
 public abstract class SessionIdGenerator {

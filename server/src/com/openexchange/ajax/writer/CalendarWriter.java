@@ -66,7 +66,7 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 /**
  * {@link CalendarWriter} - Writer for calendar objects
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

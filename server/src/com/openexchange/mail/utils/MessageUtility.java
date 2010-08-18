@@ -282,6 +282,15 @@ public final class MessageUtility {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             return STR_EMPTY;
+        } catch (final IOException e) {
+            if ("No content".equals(e.getMessage())) {
+                /*-
+                 * Special JavaMail I/O error to indicate no content available from IMAP server.
+                 * Return the empty string in this case.
+                 */
+                return STR_EMPTY;
+            }
+            throw e;
         } finally {
             if (null != isr) {
                 try {

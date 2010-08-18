@@ -87,7 +87,7 @@ import com.openexchange.webdav.xml.fields.ContactFields;
 /**
  * ContactWriter
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
 public class ContactWriter extends CommonWriter {

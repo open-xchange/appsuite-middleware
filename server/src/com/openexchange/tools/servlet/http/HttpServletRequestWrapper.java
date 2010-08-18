@@ -64,7 +64,7 @@ import com.openexchange.tools.servlet.ServletRequestWrapper;
 /**
  * HttpServletRequestWrapper
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HttpServletRequestWrapper extends ServletRequestWrapper implements HttpServletRequest {

@@ -115,7 +115,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link AppointmentRequest} - Processes appointment requests.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class AppointmentRequest {
 

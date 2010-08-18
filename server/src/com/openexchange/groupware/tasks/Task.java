@@ -63,7 +63,7 @@ import com.openexchange.groupware.tasks.mapping.Alarm;
 /**
  * This class defines the data container for tasks.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.com">Marcus Klein</a>
  */
 public class Task extends CalendarObject {

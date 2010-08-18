@@ -54,7 +54,7 @@ import com.openexchange.tools.webdav.OXServlet;
 
 /**
  * attachments
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class links extends OXServlet {
 

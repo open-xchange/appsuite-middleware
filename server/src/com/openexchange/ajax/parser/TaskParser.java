@@ -63,7 +63,7 @@ import com.openexchange.tools.servlet.OXJSONException;
 /**
  * TaskParser
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class TaskParser extends CalendarParser {
 

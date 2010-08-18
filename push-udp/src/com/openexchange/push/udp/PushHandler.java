@@ -78,7 +78,7 @@ import com.openexchange.server.impl.OCLPermission;
 /**
  * {@link PushHandler} - The push {@link EventHandler event handler}.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushHandler implements EventHandler {
 

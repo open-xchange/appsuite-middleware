@@ -52,7 +52,7 @@ package com.openexchange.ajax.fields;
 /**
  * DistributionListFields
  *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface DistributionListFields extends ContactFields {
 

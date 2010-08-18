@@ -52,7 +52,7 @@ package com.openexchange.control.internal;
 /**
  * {@link BundleNotFoundException} - Indicates that a bundle could not be found.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class BundleNotFoundException extends Exception {
 

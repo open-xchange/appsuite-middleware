@@ -64,7 +64,7 @@ import com.openexchange.tools.servlet.OXJSONException;
 /**
  * Parses JSON to contact objects.
  *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ContactParser extends CommonParser {
 

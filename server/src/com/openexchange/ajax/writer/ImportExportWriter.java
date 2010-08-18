@@ -66,7 +66,7 @@ import com.openexchange.json.OXJSONWriter;
  * This writer's main objective is to wrap ImportResults into JSON, which then
  * is fed to the AJAX GUI of the OX. TODO remove JSONWriter
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.org">Tobias Prinz</a>
  *         (Refactoring comment and errorhandling workaround)
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

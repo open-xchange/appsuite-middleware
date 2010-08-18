@@ -55,7 +55,7 @@ import java.util.Date;
 /**
  * {@link RemoteHostObject} - Represents a remote Open-Xchange server.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class RemoteHostObject {
 

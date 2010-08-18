@@ -73,7 +73,7 @@ import com.openexchange.tools.StringCollection;
 /**
  * {@link PushOutputQueue} - Holds main queue containing objects to deliver.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushOutputQueue implements Runnable {
 
