@@ -1177,29 +1177,39 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         if (!containsPermissions()) {
             setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), readConArg));
         }
-        final List<OCLPermission> list = getPermissions();
-        final int permissionsSize = list.size();
-        final Iterator<OCLPermission> iter = list.iterator();
-        for (int i = 0; i < permissionsSize; i++) {
-            final OCLPermission oclPerm = iter.next();
+        int fp = 0;
+        int orp = 0;
+        int owp = 0;
+        int odp = 0;
+        boolean admin = false;
+        for (final OCLPermission oclPerm : getPermissions()) {
             if (Arrays.binarySearch(idArr, oclPerm.getEntity()) >= 0) {
-                if (oclPerm.getFolderPermission() > maxPerm.getFolderPermission()) {
-                    maxPerm.setFolderPermission(oclPerm.getFolderPermission());
+                // Folder permission
+                int cur = oclPerm.getFolderPermission();
+                if (cur > fp) {
+                    fp = cur;
                 }
-                if (oclPerm.getReadPermission() > maxPerm.getReadPermission()) {
-                    maxPerm.setReadObjectPermission(oclPerm.getReadPermission());
+                // Read permission
+                cur = oclPerm.getReadPermission();
+                if (cur > orp) {
+                    orp = cur;
                 }
-                if (oclPerm.getWritePermission() > maxPerm.getWritePermission()) {
-                    maxPerm.setWriteObjectPermission(oclPerm.getWritePermission());
+                // Write permission
+                cur = oclPerm.getWritePermission();
+                if (cur > owp) {
+                    owp = cur;
                 }
-                if (oclPerm.getDeletePermission() > maxPerm.getDeletePermission()) {
-                    maxPerm.setDeleteObjectPermission(oclPerm.getDeletePermission());
+                // Delete permission
+                cur = oclPerm.getDeletePermission();
+                if (cur > odp) {
+                    odp = cur;
                 }
-                if (!maxPerm.isFolderAdmin() && oclPerm.isFolderAdmin()) {
-                    maxPerm.setFolderAdmin(true);
-                }
+                // Admin flag
+                admin |= oclPerm.isFolderAdmin();
             }
         }
+        maxPerm.setAllPermission(fp, orp, owp, odp);
+        maxPerm.setFolderAdmin(admin);
         return maxPerm;
     }
 
