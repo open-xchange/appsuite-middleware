@@ -72,18 +72,33 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     private final Iterator<T> delegate;
 
-    private int size;
+    private final int size;
 
-    private boolean b_size;
+    private final boolean b_size;
 
     private final List<AbstractOXException> warnings;
 
+    /**
+     * Initializes a new {@link SearchIteratorAdapter}.
+     * 
+     * @param iter The iterator to delegate to
+     */
     public SearchIteratorAdapter(final Iterator<T> iter) {
+        super();
         delegate = iter;
         warnings = new ArrayList<AbstractOXException>(2);
+        b_size = false;
+        size = -1;
     }
 
+    /**
+     * Initializes a new {@link SearchIteratorAdapter}.
+     * 
+     * @param iter The iterator to delegate to
+     * @param size The number of elements contained by passed iterator
+     */
     public SearchIteratorAdapter(final Iterator<T> iter, final int size) {
+        super();
         delegate = iter;
         this.size = size;
         warnings = new ArrayList<AbstractOXException>(2);
@@ -125,35 +140,56 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         return !warnings.isEmpty();
     }
 
+    /**
+     * Creates an empty {@link SearchIterator iterator} of specified type.
+     * 
+     * @param <T> The iterator's type
+     * @return An empty iterator
+     */
     public static <T> SearchIterator<T> createEmptyIterator() {
         return new SearchIterator<T>() {
+
             public boolean hasNext() {
                 return false;
             }
+
             public T next() {
                 return null;
             }
+
             public void close() {
                 // empty must not be closed.
             }
+
             public int size() {
                 return 0;
             }
+
             public boolean hasSize() {
                 return true;
             }
+
             public void addWarning(final AbstractOXException warning) {
                 throw new UnsupportedOperationException("Method is not implemented");
             }
+
             public AbstractOXException[] getWarnings() {
                 return null;
             }
+
             public boolean hasWarnings() {
                 return false;
             }
         };
     }
 
+    /**
+     * Creates an {@link SearchIterator iterator} for given array.
+     * 
+     * @param <T> The array's type
+     * @param array The array to iterate
+     * @return An {@link SearchIterator iterator} for given array
+     */
     public static <T> SearchIterator<T> createArrayIterator(final T[] array) {
         if (null == array) {
             return createEmptyIterator();
@@ -161,6 +197,13 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         return new ArrayIterator<T>(array);
     }
 
+    /**
+     * Turns specified {@link SearchIterator iterator} to an {@link Iterable}.
+     * 
+     * @param <T> The iterator's type
+     * @param iterator The iterator from which to create the {@link Iterable}
+     * @return The {@link Iterable}
+     */
     public static <T> Iterable<T> toIterable(final SearchIterator<T> iterator) {
         class SIIterator implements Iterator<T> {
 
@@ -191,12 +234,22 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             }
         };
     }
-    
+
+    /**
+     * Turns specified {@link SearchIterator iterator} to a {@link List}.
+     * 
+     * @param <T> The iterator's type
+     * @param iterator The iterator from which to create the list
+     * @return The list created from iterator
+     * @throws SearchIteratorException If list cannot be created
+     * @throws OXException If list cannot be created
+     */
     public static <T> List<T> toList(final SearchIterator<T> iterator) throws SearchIteratorException, OXException {
-        List<T> list = new ArrayList<T>();
-        while(iterator.hasNext()) {
+        final List<T> list = new ArrayList<T>();
+        while (iterator.hasNext()) {
             list.add(iterator.next());
         }
         return list;
     }
+
 }
