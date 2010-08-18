@@ -52,10 +52,10 @@ package com.openexchange.imap.config;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Map;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.imap.IMAPCommandsCollection.Capabilities;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
@@ -80,7 +80,7 @@ public final class IMAPConfig extends MailConfig {
 
     private volatile IMAPCapabilities imapCapabilities;
 
-    private volatile Capabilities capabilities;
+    private volatile Map<String, String> capabilities;
 
     private volatile ACLExtension aclExtension;
 
@@ -119,11 +119,11 @@ public final class IMAPConfig extends MailConfig {
     }
 
     /**
-     * Gets the object view of the IMAP capabilities.
+     * Gets the (unmodifiable) map view of the IMAP capabilities.
      * 
-     * @return The object of IMAP capabilities
+     * @return The (unmodifiable) map containing IMAP capabilities
      */
-    public Capabilities asObject() {
+    public Map<String, String> asMap() {
         return capabilities;
     }
 

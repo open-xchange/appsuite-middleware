@@ -50,8 +50,8 @@
 package com.openexchange.imap.acl;
 
 import java.net.InetSocketAddress;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Locale;
+import java.util.Map;
 import com.openexchange.imap.config.IMAPConfig;
 
 /**
@@ -82,17 +82,12 @@ final class ACLExtensionAutoDetector {
         return parse(imapConfig);
     }
 
-    private static final Pattern PAT_ACL = Pattern.compile("(^|\\s)(ACL)(\\s+|$)");
-
-    private static final Pattern PAT_RIGHTS = Pattern.compile("(?:^|\\s)(?:RIGHTS=)([a-zA-Z0-9]+)(?:\\s+|$)");
-
     private static ACLExtension parse(final IMAPConfig imapConfig) {
         /*
          * Examine CAPABILITY response
          */
-        final String capabilities = imapConfig.asObject().toString();
-        final boolean hasACL = PAT_ACL.matcher(capabilities).find();
-        if (!hasACL) {
+        final Map<String, String> capabilities = imapConfig.asMap();
+        if (!capabilities.containsKey("ACL")) {
             if (DEBUG) {
                 LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(
                     new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
@@ -100,21 +95,26 @@ final class ACLExtensionAutoDetector {
             }
             return NoACLExtension.getInstance();
         }
-        final Matcher m = PAT_RIGHTS.matcher(capabilities);
-        if (m.find()) {
-            final String allowedRights = m.group(1);
-            /*
-             * Check if "RIGHTS=" provides any of new characters "k", "x", "t", or "e" as defined in RFC 4314
-             */
-            final boolean containsRFC4314Character = containsRFC4314Character(allowedRights);
-            if (DEBUG) {
-                LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(
-                    new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
-                    "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"RIGHTS=").append(allowedRights).append(
-                    "\" capability.").append("\n\tACL extension according to ").append(containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(
-                    " is going to be used.\n"));
+        /*
+         * Check if newer ACL extension is supported
+         */
+        for (final String upperName : capabilities.keySet()) {
+            if (upperName.startsWith("RIGHTS=")) {
+                final int pos = upperName.indexOf('=') + 1;
+                final String allowedRights = pos < upperName.length() ? upperName.substring(pos).toLowerCase(Locale.ENGLISH) : "";
+                /*
+                 * Check if "RIGHTS=" provides any of new characters "k", "x", "t", or "e" as defined in RFC 4314
+                 */
+                final boolean containsRFC4314Character = containsRFC4314Character(allowedRights);
+                if (DEBUG) {
+                    LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(
+                        new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
+                        "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"RIGHTS=").append(allowedRights).append(
+                        "\" capability.").append("\n\tACL extension according to ").append(containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(
+                        " is going to be used.\n"));
+                }
+                return containsRFC4314Character ? new RFC4314ACLExtension() : new RFC2086ACLExtension();
             }
-            return containsRFC4314Character ? new RFC4314ACLExtension() : new RFC2086ACLExtension();
         }
         if (DEBUG) {
             LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(

@@ -172,15 +172,15 @@ public final class IMAPCommandsCollection {
      * Gets the IMAP capabilities from the IMAP store associated with given connected IMAP folder.
      * 
      * @param imapFolder The IMAP folder
-     * @return The IMAP capabilities
+     * @return The IMAP capabilities as an unmodifiable {@link Map}
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static Capabilities getCapabilities(final IMAPFolder imapFolder) throws MessagingException {
-        return ((Capabilities) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+    public static Map<String, String> getCapabilities(final IMAPFolder imapFolder) throws MessagingException {
+        return ((Map<String, String>) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                return new Capabilities(p.getCapabilities().values());
+                return Collections.unmodifiableMap(new HashMap<String, String>(p.getCapabilities()));
             }
         }));
     }
