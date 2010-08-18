@@ -130,75 +130,32 @@ public class FolderWriter extends FolderChildWriter {
         final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(serverSession);
         final XMLOutputter xo = new XMLOutputter();
         final Date dLastSync = lastsync == null ? new Date(0) : lastsync;
-
-        final boolean oldBehavior = false;
-        if (oldBehavior) {
+        /*
+         * Calculate updated and "deleted" folders
+         */
+        if (modified || deleted) {
+            final UpdatesResult updatesResult = calculateUpdates(sqlinterface, dLastSync, !deleted, serverSession);
             /*
              * Fist send all 'deletes', than all 'modified'
              */
             if (deleted) {
-                SearchIterator<FolderObject> it = null;
-                try {
-                    it = sqlinterface.getDeletedFolders(dLastSync);
-                    writeIterator(it, true, xo, os);
-                } finally {
-                    if (it != null) {
-                        it.close();
-                    }
-                }
+                final Queue<FolderObject> deletedQueue = updatesResult.deletedQueue;
+                writeIterator(new SearchIteratorAdapter<FolderObject>(deletedQueue.iterator()), true, xo, os);
             }
-
             if (modified) {
-                SearchIterator<FolderObject> it = null;
-                try {
-                    it = sqlinterface.getModifiedUserFolders(dLastSync);
-                    writeIterator(it, false, xo, os);
-                } finally {
-                    if (it != null) {
-                        it.close();
-                    }
-                }
+                final Queue<FolderObject> updatedQueue = updatesResult.updatedQueue;
+                writeIterator(new SearchIteratorAdapter<FolderObject>(updatedQueue.iterator()), false, xo, os);
             }
+        }
 
-            if (bList) {
-                SearchIterator<FolderObject> it = null;
-                try {
-                    it = sqlinterface.getModifiedUserFolders(new Date(0));
-                    writeList(it, xo, os);
-                } finally {
-                    if (it != null) {
-                        it.close();
-                    }
-                }
-            }
-        } else {
-            /*
-             * Calculate updated and "deleted" folders
-             */
-            if (modified || deleted) {
-                final UpdatesResult updatesResult = calculateUpdates(sqlinterface, dLastSync, !deleted, serverSession);
-                /*
-                 * Fist send all 'deletes', than all 'modified'
-                 */
-                if (deleted) {
-                    final Queue<FolderObject> deletedQueue = updatesResult.deletedQueue;
-                    writeIterator(new SearchIteratorAdapter<FolderObject>(deletedQueue.iterator()), true, xo, os);
-                }
-                if (modified) {
-                    final Queue<FolderObject> updatedQueue = updatesResult.updatedQueue;
-                    writeIterator(new SearchIteratorAdapter<FolderObject>(updatedQueue.iterator()), false, xo, os);
-                }
-            }
-
-            if (bList) {
-                SearchIterator<FolderObject> it = null;
-                try {
-                    it = sqlinterface.getModifiedUserFolders(new Date(0));
-                    writeList(it, xo, os);
-                } finally {
-                    if (it != null) {
-                        it.close();
-                    }
+        if (bList) {
+            SearchIterator<FolderObject> it = null;
+            try {
+                it = sqlinterface.getModifiedUserFolders(new Date(0));
+                writeList(it, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
                 }
             }
         }
