@@ -23,6 +23,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.tools.versit,
  com.openexchange.tools.versit.converter,
  javax.activation,
+ javax.crypto,
  javax.imageio,
  javax.imageio.stream,
  javax.management,
@@ -114,4 +115,3 @@ Bundle-ClassPath: lib/commons-collections-3.2.1.jar,
  lib/oauth-httpclient4-20100601.jar,
  lib/oauth-provider-20100601.jar,
  .
- 
