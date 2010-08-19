@@ -1,3 +1,7 @@
+* 2010-08-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #16700: Fixed NullPointerException if no I18nService can be found for a specific locale in messaging component.
+
 * 2010-08-18 - marcus.klein@open-xchange.com
 
  - Bugfix #16620: Contact collect folder can now be enabled again because options are always visible.
