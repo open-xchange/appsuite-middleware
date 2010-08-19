@@ -172,6 +172,7 @@ public final class CalculatePermission {
     private static Permission getMaxPermission(final Permission[] permissions, final UserConfiguration userConfig) {
         final DummyPermission p = new DummyPermission();
         p.setNoPermissions();
+        p.setEntity(userConfig.getUserId());
 
         final int[] idArr;
         {

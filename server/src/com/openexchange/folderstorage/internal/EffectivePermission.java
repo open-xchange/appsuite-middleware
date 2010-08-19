@@ -179,10 +179,7 @@ public final class EffectivePermission implements Permission {
         if (!userConfig.hasModuleAccess(getModule())) {
             return false;
         }
-        if (allowedContentTypes.isEmpty()) {
-            return true;
-        }
-        return allowedContentTypes.contains(Integer.valueOf(getModule()));
+        return allowedContentTypes.isEmpty() ? true : allowedContentTypes.contains(Integer.valueOf(getModule()));
     }
 
     private int getType() {
