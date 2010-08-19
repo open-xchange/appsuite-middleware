@@ -187,30 +187,30 @@ public final class CalculatePermission {
         int wp = 0;
         int dp = 0;
         boolean admin = false;
-        for (final Permission curp : permissions) {
-            if (Arrays.binarySearch(idArr, curp.getEntity()) >= 0) {
+        for (final Permission cur : permissions) {
+            if (Arrays.binarySearch(idArr, cur.getEntity()) >= 0) {
                 // Folder permission
-                int cur = curp.getFolderPermission();
-                if (cur > fp) {
-                    fp = cur;
+                int tmp = cur.getFolderPermission();
+                if (tmp > fp) {
+                    fp = tmp;
                 }
                 // Read permission
-                cur = curp.getReadPermission();
-                if (cur > rp) {
-                    rp = cur;
+                tmp = cur.getReadPermission();
+                if (tmp > rp) {
+                    rp = tmp;
                 }
                 // Write permission
-                cur = curp.getWritePermission();
-                if (cur > wp) {
-                    wp = cur;
+                tmp = cur.getWritePermission();
+                if (tmp > wp) {
+                    wp = tmp;
                 }
                 // Delete permission
-                cur = curp.getDeletePermission();
-                if (cur > dp) {
-                    dp = cur;
+                tmp = cur.getDeletePermission();
+                if (tmp > dp) {
+                    dp = tmp;
                 }
                 // Admin flag
-                admin |= curp.isAdmin();
+                admin |= cur.isAdmin();
             }
         }
         p.setAllPermissions(fp, rp, wp, dp);
