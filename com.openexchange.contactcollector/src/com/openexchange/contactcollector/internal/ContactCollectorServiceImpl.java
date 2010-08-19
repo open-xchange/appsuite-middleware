@@ -93,7 +93,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
          * Delegate to thread pool if available
          */
         final ThreadPoolService threadPoolService = CCServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        if (background && null == threadPoolService) {
+        if (!background || null == threadPoolService) {
             // Run in calling thread
             new Memorizer(addresses, session, aliasesMap).run();
         } else {
