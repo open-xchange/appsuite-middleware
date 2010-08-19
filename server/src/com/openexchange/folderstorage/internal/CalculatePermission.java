@@ -182,26 +182,39 @@ public final class CalculatePermission {
             Arrays.sort(idArr);
         }
 
-        for (int i = 0; i < permissions.length; i++) {
-            final Permission cur = permissions[i];
-            if (Arrays.binarySearch(idArr, cur.getEntity()) >= 0) {
-                if (cur.getFolderPermission() > p.getFolderPermission()) {
-                    p.setFolderPermission(cur.getFolderPermission());
+        int fp = 0;
+        int rp = 0;
+        int wp = 0;
+        int dp = 0;
+        boolean admin = false;
+        for (final Permission curp : permissions) {
+            if (Arrays.binarySearch(idArr, curp.getEntity()) >= 0) {
+                // Folder permission
+                int cur = curp.getFolderPermission();
+                if (cur > fp) {
+                    fp = cur;
                 }
-                if (cur.getReadPermission() > p.getReadPermission()) {
-                    p.setReadPermission(cur.getReadPermission());
+                // Read permission
+                cur = curp.getReadPermission();
+                if (cur > rp) {
+                    rp = cur;
                 }
-                if (cur.getWritePermission() > p.getWritePermission()) {
-                    p.setWritePermission(cur.getWritePermission());
+                // Write permission
+                cur = curp.getWritePermission();
+                if (cur > wp) {
+                    wp = cur;
                 }
-                if (cur.getDeletePermission() > p.getDeletePermission()) {
-                    p.setDeletePermission(cur.getDeletePermission());
+                // Delete permission
+                cur = curp.getDeletePermission();
+                if (cur > dp) {
+                    dp = cur;
                 }
-                if (!p.isAdmin() && cur.isAdmin()) {
-                    p.setAdmin(true);
-                }
+                // Admin flag
+                admin |= curp.isAdmin();
             }
         }
+        p.setAllPermissions(fp, rp, wp, dp);
+        p.setAdmin(admin);
 
         return p;
     }
