@@ -496,7 +496,6 @@ public final class Init {
 
     private static void startAndInjectContactCollector() throws Exception {
         final CCServiceRegistry reg = CCServiceRegistry.getInstance();
-        reg.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
         reg.addService(TimerService.class, services.get(TimerService.class));
         reg.addService(ContextService.class, services.get(ContextService.class));
         reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
