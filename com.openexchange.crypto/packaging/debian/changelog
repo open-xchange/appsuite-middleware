@@ -1,3 +1,9 @@
+open-xchange-crypto (6.18.0.0-6) unstable; urgency=low
+
+  * first build for 6.18-rev6
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 19 Aug 2010 17:02:37 +0200
+
 open-xchange-crypto (6.18.0.0-5) unstable; urgency=low
 
   * first build for 6.18-rev5

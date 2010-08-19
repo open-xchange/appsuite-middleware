@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -554,6 +554,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Aug 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16700: Fixed NullPointerException if no I18nService can be found for a specific locale in messaging component.
 * Wed Aug 18 2010 - marcus.klein@open-xchange.com
  - Bugfix #16620: Contact collect folder can now be enabled again because options are always visible.
 * Tue Aug 17 2010 - thorben.betten@open-xchange.com
