@@ -110,7 +110,7 @@ public class ContactCollectorTest extends TestCase {
         user = prepareUser(config.getUser());
 
         tools = new TestContextToolkit();
-        ctx = tools.getDefaultContext();
+        ctx = tools.getContextByName(config.getContextName());
         userId = tools.resolveUser(user, ctx);
         session = tools.getSessionForUser(user, ctx);
         contactFolder = getStandardContactFolder();
