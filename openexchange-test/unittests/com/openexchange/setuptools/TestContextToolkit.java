@@ -120,12 +120,7 @@ public class TestContextToolkit {
     }
 
     public Context getDefaultContext() {
-        try {
-            return ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
-        } catch (final ContextException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return getContextByName("defaultcontext");
     }
 
     public Context getContextByName(final String name) {
