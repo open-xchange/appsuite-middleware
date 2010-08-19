@@ -504,7 +504,7 @@ public class HeaderCollection implements Serializable {
      */
     public Iterator<String> getHeaderNames() {
         final List<String> tmp = new ArrayList<String>(map.size());
-        for (HeaderName headerName : map.keySet()) {
+        for (final HeaderName headerName : map.keySet()) {
             tmp.add(headerName.toString());
         }
         return tmp.iterator();
@@ -800,11 +800,17 @@ public class HeaderCollection implements Serializable {
                 return true;
             }
             for (int i = 0; i < chars.length; i++) {
-                if (Character.isWhitespace(chars[i])) {
+                if (Character.isWhitespace(chars[i]) || (chars[i] >= 128)) {
+                    /*
+                     * Whitespace or non-ascii character
+                     */
                     return true;
                 }
             }
-            return !isAscii(str);
+            /*
+             * All fine
+             */
+            return false;
         }
         if (str.length() == 0) {
             return false;
