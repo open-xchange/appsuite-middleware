@@ -102,8 +102,8 @@ public class Bug15491Test extends AppointmentTest {
         assertNotNull("Loaded Appointment is null", loadAppointment);
         assertNotNull("Uid is null", loadAppointment.getUid());
         assertFalse("Uid is empty", loadAppointment.getUid().trim().equals(""));
-        
-        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, new Date(now), true, true, PROTOCOL + getHostName(), getLogin(), getPassword());
+        Date date = new Date(loadAppointment.getLastModified().getTime() - 1);
+        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, date, true, true, PROTOCOL + getHostName(), getLogin(), getPassword());
         
         boolean found = false;
         for (Appointment current : listAppointments) {
@@ -127,7 +127,9 @@ public class Bug15491Test extends AppointmentTest {
         assertNotNull("Uid is null", loadAppointment.getUid());
         assertEquals("Wrong Uid", "ichbineineuid", loadAppointment.getUid());
         
-        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, new Date(now), true, true, PROTOCOL + getHostName(), getLogin(), getPassword());
+        Date date = new Date(loadAppointment.getLastModified().getTime() - 1);
+
+        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, date, true, true, PROTOCOL + getHostName(), getLogin(), getPassword());
         
         boolean found = false;
         for (Appointment current : listAppointments) {
