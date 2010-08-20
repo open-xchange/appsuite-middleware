@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,6 @@
 package com.openexchange.smtp;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import static java.util.regex.Matcher.quoteReplacement;
@@ -62,13 +61,16 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import javax.activation.DataHandler;
 import javax.mail.Address;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
 import javax.mail.Transport;
-import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.groupware.contexts.Context;
@@ -86,6 +88,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
@@ -130,7 +133,7 @@ public final class SMTPTransport extends MailTransport {
 
     private final UserSettingMail usm;
 
-    private volatile SMTPConfig smtpConfig;
+    private volatile SMTPConfig cachedSmtpConfig;
 
     protected SMTPTransport() {
         super();
@@ -251,8 +254,8 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Specify SSL protocols
                          */
-                        smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
-                        smtpProps.put("mail.smtp.ssl", "true");
+                        // smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+                        // smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4
                          */
@@ -275,7 +278,7 @@ public final class SMTPTransport extends MailTransport {
                          * Specify SSL protocols
                          */
                         smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
-                        smtpProps.put("mail.smtp.ssl", "true");
+                        // smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4
                          */
@@ -299,18 +302,19 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private SMTPConfig getTransportConfig0() throws MailException {
-        if (smtpConfig == null) {
+        if (cachedSmtpConfig == null) {
             synchronized (this) {
-                if (smtpConfig == null) {
-                    smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session, accountId);
-                    smtpConfig.setTransportProperties(createNewMailProperties());
+                if (cachedSmtpConfig == null) {
+                    cachedSmtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session, accountId);
+                    cachedSmtpConfig.setTransportProperties(createNewMailProperties());
                 }
             }
         }
-        return smtpConfig;
+        return cachedSmtpConfig;
     }
 
-    private static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\r\nFinal-Recipient: rfc822; #FROM#\r\n" + "Original-Message-ID: #MSG ID#\r\nDisposition: manual-action/MDN-sent-manually; displayed\r\n";
+    private static final String ACK_TEXT =
+        "Reporting-UA: OPEN-XCHANGE - WebMail\r\nFinal-Recipient: rfc822; #FROM#\r\n" + "Original-Message-ID: #MSG ID#\r\nDisposition: manual-action/MDN-sent-manually; displayed\r\n";
 
     private static final String CT_TEXT_PLAIN = "text/plain; charset=#CS#";
 
@@ -354,6 +358,7 @@ public final class SMTPTransport extends MailTransport {
              * Set header
              */
             smtpMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, "3 (normal)");
+            smtpMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Medium");
             /*
              * Subject
              */
@@ -363,7 +368,12 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Sent date in UTC time
              */
-            smtpMessage.setSentDate(new Date());
+            {
+                final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+                synchronized (mdf) {
+                    smtpMessage.setHeader("Date", mdf.format(new Date()));
+                }
+            }
             /*
              * Set common headers
              */
@@ -391,7 +401,7 @@ public final class SMTPTransport extends MailTransport {
                         usm.getAutoLinebreak()),
                     defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
+                text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
                 mixedMultipart.addBodyPart(text);
             }
             /*
@@ -405,7 +415,7 @@ public final class SMTPTransport extends MailTransport {
                     "#MSG ID#",
                     quoteReplacement(msgId)), defaultMimeCS);
                 ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
+                ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
                 ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, CD_READ_ACK);
                 mixedMultipart.addBodyPart(ack);
             }
@@ -418,17 +428,21 @@ public final class SMTPTransport extends MailTransport {
              */
             final long start = System.currentTimeMillis();
             final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-            if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                transport.connect(
-                    smtpConfig.getServer(),
-                    smtpConfig.getPort(),
-                    smtpConfig.getLogin(),
-                    encodePassword(smtpConfig.getPassword()));
-            } else {
-                transport.connect();
+            try {
+                if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+                    transport.connect(
+                        smtpConfig.getServer(),
+                        smtpConfig.getPort(),
+                        smtpConfig.getLogin(),
+                        encodePassword(smtpConfig.getPassword()));
+                } else {
+                    transport.connect();
+                }
+            } catch (final javax.mail.AuthenticationFailedException e) {
+                throw new MIMEMailException(MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS, e, smtpConfig.getServer(), e.getMessage());
             }
             try {
-                smtpMessage.saveChanges();
+                saveChangesSafe(smtpMessage);
                 transport.sendMessage(smtpMessage, smtpMessage.getAllRecipients());
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             } finally {
@@ -454,14 +468,23 @@ public final class SMTPTransport extends MailTransport {
             try {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-                if (getTransportConfig0().getSMTPProperties().isSmtpAuth()) {
-                    final SMTPConfig config = getTransportConfig0();
-                    transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config.getPassword()));
-                } else {
-                    transport.connect();
+                final SMTPConfig smtpConfig = getTransportConfig0();
+                try {
+                    if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+                        final String encPass = encodePassword(smtpConfig.getPassword());
+                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
+                    } else {
+                        transport.connect();
+                    }
+                } catch (final javax.mail.AuthenticationFailedException e) {
+                    throw new MIMEMailException(
+                        MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS,
+                        e,
+                        smtpConfig.getServer(),
+                        e.getMessage());
                 }
                 try {
-                    smtpMessage.saveChanges();
+                    saveChangesSafe(smtpMessage);
                     transport.sendMessage(smtpMessage, recipients);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 } finally {
@@ -513,17 +536,24 @@ public final class SMTPTransport extends MailTransport {
                     LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
                         System.currentTimeMillis() - startPrep).append("msec").toString());
                 }
-
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-                if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                    final String encPass = encodePassword(smtpConfig.getPassword());
-                    transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
-                } else {
-                    transport.connect();
+                try {
+                    if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+                        final String encPass = encodePassword(smtpConfig.getPassword());
+                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
+                    } else {
+                        transport.connect();
+                    }
+                } catch (final javax.mail.AuthenticationFailedException e) {
+                    throw new MIMEMailException(
+                        MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS,
+                        e,
+                        smtpConfig.getServer(),
+                        e.getMessage());
                 }
                 try {
-                    smtpMessage.saveChanges();
+                    saveChangesSafe(smtpMessage);
                     /*
                      * TODO: Do encryption here
                      */
@@ -595,13 +625,16 @@ public final class SMTPTransport extends MailTransport {
         boolean close = false;
         try {
             final SMTPConfig config = getTransportConfig0();
-            if (config.getSMTPProperties().isSmtpAuth()) {
-                final String encPass = encodePassword(config.getPassword());
-                transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
+            try {
+                if (config.getSMTPProperties().isSmtpAuth()) {
+                    final String encPass = encodePassword(config.getPassword());
+                    transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
+                } else {
+                    transport.connect();
+                }
                 close = true;
-            } else {
-                transport.connect();
-                close = true;
+            } catch (final javax.mail.AuthenticationFailedException e) {
+                throw new MIMEMailException(MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS, e, config.getServer(), e.getMessage());
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
@@ -619,14 +652,88 @@ public final class SMTPTransport extends MailTransport {
     @Override
     protected ITransportProperties createNewMailProperties() throws MailException {
         try {
-            final MailAccountStorageService storageService = SMTPServiceRegistry.getServiceRegistry().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                SMTPServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final ServiceException e) {
             throw new MailException(e);
         } catch (final MailAccountException e) {
             throw new MailException(e);
+        }
+    }
+
+    private static void saveChangesSafe(final SMTPMessage smtpMessage) throws MailException {
+        try {
+            try {
+                smtpMessage.saveChanges();
+            } catch (final javax.mail.internet.ParseException e) {
+                /*-
+                 * Probably parsing of a Content-Type header failed.
+                 * 
+                 * Try to sanitize parameter list headers
+                 */
+                sanitizeContentTypeHeaders(smtpMessage, new ContentType());
+                /*
+                 * ... and retry
+                 */
+                smtpMessage.saveChanges();
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws MailException {
+        final DataHandler dh;
+        try {
+            dh = part.getDataHandler();
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+        if (dh == null) {
+            return;
+        }
+        try {
+            final String type = dh.getContentType();
+            sanitizer.setContentType(type);
+            try {
+                /*
+                 * Try to parse with JavaMail Content-Type implementation
+                 */
+                new javax.mail.internet.ContentType(type);
+            } catch (final javax.mail.internet.ParseException e) {
+                /*
+                 * Sanitize Content-Type header
+                 */
+                final String cts = sanitizer.toString(true);
+                try {
+                    new javax.mail.internet.ContentType(cts);
+                } catch (final javax.mail.internet.ParseException pe) {
+                    /*
+                     * Still not parseable
+                     */
+                    throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, e, type);
+                }
+                part.setDataHandler(new DataHandlerWrapper(dh, cts));
+                part.setHeader("Content-Type", cts);
+            }
+            /*
+             * Check for recursive invocation
+             */
+            if (sanitizer.startsWith("multipart/")) {
+                final Object o = dh.getContent();
+                if (o instanceof MimeMultipart) {
+                    final MimeMultipart mm = (MimeMultipart) o;
+                    final int count = mm.getCount();
+                    for (int i = 0; i < count; i++) {
+                        sanitizeContentTypeHeaders(mm.getBodyPart(i), sanitizer);
+                    }
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
