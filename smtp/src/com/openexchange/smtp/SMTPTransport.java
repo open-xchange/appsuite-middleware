@@ -63,12 +63,12 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.activation.DataHandler;
 import javax.mail.Address;
-import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.Transport;
+import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
@@ -254,8 +254,8 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Specify SSL protocols
                          */
-                        smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
-                        smtpProps.put("mail.smtp.ssl", "true");
+                        // smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+                        // smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4
                          */
@@ -278,7 +278,7 @@ public final class SMTPTransport extends MailTransport {
                          * Specify SSL protocols
                          */
                         smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
-                        smtpProps.put("mail.smtp.ssl", "true");
+                        // smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4
                          */
@@ -632,6 +632,7 @@ public final class SMTPTransport extends MailTransport {
                 } else {
                     transport.connect();
                 }
+                close = true;
             } catch (final javax.mail.AuthenticationFailedException e) {
                 throw new MIMEMailException(MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS, e, config.getServer(), e.getMessage());
             }
