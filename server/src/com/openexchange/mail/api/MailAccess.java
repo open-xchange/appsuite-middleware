@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,9 @@
 package com.openexchange.mail.api;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -100,6 +103,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     protected final int accountId;
 
+    protected final Collection<MailException> warnings;
+
     protected boolean cacheable;
 
     private transient MailConfig mailConfig;
@@ -127,9 +132,28 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     protected MailAccess(final Session session, final int accountId) {
         super();
+        warnings = new ArrayList<MailException>(2);
         this.session = session;
         this.accountId = accountId;
         cacheable = true;
+    }
+
+    /**
+     * Adds given warnings.
+     * 
+     * @param warnings The warnings to add
+     */
+    protected void addWarnings(final Collection<MailException> warnings) {
+        this.warnings.addAll(warnings);
+    }
+
+    /**
+     * Gets possible warnings.
+     * 
+     * @return Possible warnings.
+     */
+    public Collection<MailException> getWarnings() {
+        return Collections.unmodifiableCollection(warnings);
     }
 
     /**
@@ -256,9 +280,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 LOCK_CON.unlock();
             }
         }
-        /*
-         * Create a new mail access through user's mail provider
-         */
         return MailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
     }
 
@@ -288,7 +309,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * 
      * @return the mailProperties
      */
-    public final Properties getMailProperties() {
+    public Properties getMailProperties() {
         return mailProperties;
     }
 
@@ -297,7 +318,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * 
      * @param mailProperties The properties
      */
-    public final void setMailProperties(final Properties mailProperties) {
+    public void setMailProperties(final Properties mailProperties) {
         this.mailProperties = mailProperties;
     }
 
@@ -309,14 +330,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws MailException If a necessary field is missing
      * @see #connect()
      */
-    protected final void checkFieldsBeforeConnect(final MailConfig mailConfig) throws MailException {
+    protected void checkFieldsBeforeConnect(final MailConfig mailConfig) throws MailException {
 
         /*
          * Properties are implementation specific and therefore are created within connectInternal()
          */
         if (mailConfig.getServer() == null) {
             throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "mail server");
-        } else if (checkMailServerPort() && (mailConfig.getPort() <= 0)) {
+        } else if (delegateCheckMailServerPort() && (mailConfig.getPort() <= 0)) {
             throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "mail server port");
         } else if (mailConfig.getLogin() == null) {
             throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "login");
@@ -354,6 +375,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
+     * Opens this access. May be invoked on an already opened access.
+     * 
+     * @param checkDefaultFolders <code>true</code> to check existence of default folders; otherwise <code>false</code> to omit check
+     * @throws MailException If the connection could not be established for various reasons
+     */
+    public final void connect(final boolean checkDefaultFolders) throws MailException {
+        connect0(checkDefaultFolders);
+    }
+
+    /**
      * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
      * the root folder.
      * <p>
@@ -375,27 +406,65 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws MailException If returning the root folder fails
      */
     public MailFolder getRootFolder() throws MailException {
-        connect0(false);
+        if (!isConnected()) {
+            connect0(false);
+        }
         return getFolderStorage().getRootFolder();
+    }
+
+    /**
+     * Convenience method to obtain folder's number of unread messages in a fast way; meaning no default folder check is performed.
+     * <p>
+     * The same result is yielded through calling <code>getFolderStorage().getFolder().getUnreadMessageCount()</code> on a connected
+     * {@link MailAccess}.
+     * <p>
+     * Since this mail access instance is connected if not already done before, the {@link #close(boolean)} operation should be invoked
+     * afterwards:
+     * 
+     * <pre>
+     * final MailAccess mailAccess = MailAccess.getInstance(session);
+     * final int unreadCount = mailAccess.getNumberOfUnreadMessages();
+     * try {
+     *  // Do something with unread count
+     * } finally {
+     *  mailAccess.close(putToCache)
+     * }
+     * </pre>
+     * 
+     * @throws MailException If returning the unread count fails
+     */
+    public int getUnreadMessagesCount(final String fullname) throws MailException {
+        if (!isConnected()) {
+            connect0(false);
+        }
+        return getFolderStorage().getFolder(fullname).getUnreadMessageCount();
     }
 
     private final void connect0(final boolean checkDefaultFolder) throws MailException {
         applyNewThread();
         if (isConnected()) {
-            getFolderStorage().checkDefaultFolders();
-            MailAccessWatcher.addMailAccess(this);
-            return;
+            if (checkDefaultFolder) {
+                checkDefaultFolderOnConnect();
+            }
+        } else {
+            checkFieldsBeforeConnect(getMailConfig());
+            delegateConnectInternal();
+            if (checkDefaultFolder) {
+                checkDefaultFolderOnConnect();
+            }
         }
-        checkFieldsBeforeConnect(getMailConfig());
-        connectInternal();
-        if (checkDefaultFolder) {
-            try {
-                getFolderStorage().checkDefaultFolders();
-            } catch (final MailException e) {
-                throw e;
-            } catch (final Exception e) {
-                final MailConfig mailConfig = getMailConfig();
-                final MailException mailExc = new MailException(
+        MailAccessWatcher.addMailAccess(this);
+    }
+
+    private void checkDefaultFolderOnConnect() throws MailException {
+        try {
+            getFolderStorage().checkDefaultFolders();
+        } catch (final MailException e) {
+            throw e;
+        } catch (final Exception e) {
+            final MailConfig mailConfig = getMailConfig();
+            final MailException mailExc =
+                new MailException(
                     MailException.Code.DEFAULT_FOLDER_CHECK_FAILED,
                     e,
                     mailConfig.getServer(),
@@ -403,12 +472,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     mailConfig.getLogin(),
                     Integer.valueOf(session.getContextId()),
                     e.getMessage());
-                LOG.error(mailExc.getMessage(), mailExc);
-                closeInternal();
-                throw mailExc;
-            }
+            LOG.error(mailExc.getMessage(), mailExc);
+            delegateCloseInternal();
+            throw mailExc;
         }
-        MailAccessWatcher.addMailAccess(this);
     }
 
     /**
@@ -418,6 +485,13 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws MailException If connection could not be established
      */
     protected abstract void connectInternal() throws MailException;
+
+    /**
+     * For delegating purpose. Don't invoke.
+     */
+    public void delegateConnectInternal() throws MailException {
+        connectInternal();
+    }
 
     /**
      * Closes this access.
@@ -436,7 +510,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 /*
                  * Release all used, non-cachable resources
                  */
-                releaseResources();
+                delegateReleaseResources();
             } catch (final Throwable t) {
                 /*
                  * Dropping
@@ -462,7 +536,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             /*
              * Close mail connection
              */
-            closeInternal();
+            delegateCloseInternal();
             signalAvailableConnection();
         } finally {
             /*
@@ -509,7 +583,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * 
      * @return The mail configuration
      */
-    public final MailConfig getMailConfig() throws MailException {
+    public MailConfig getMailConfig() throws MailException {
         if (null == mailConfig) {
             mailConfig = createMailConfig();
         }
@@ -532,8 +606,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws MailException If creating a new mail configuration fails
      */
     private final MailConfig createMailConfig() throws MailException {
-        final MailConfig instance = createNewMailConfig();
-        instance.setMailProperties(createNewMailProperties());
+        final MailConfig instance = delegateCreateNewMailConfig();
+        instance.setMailProperties(delegateCreateNewMailProperties());
         return MailConfig.getConfig(instance.getClass(), instance, session, accountId);
     }
 
@@ -578,8 +652,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Admin mail login is not permitted per configuration
              */
             Context ctx;
+            final String key = MailSessionParameterNames.getParamSessionContext();
             try {
-                ctx = (Context) session.getParameter(MailSessionParameterNames.getParamSessionContext(accountId));
+                ctx = (Context) session.getParameter(key);
             } catch (final ClassCastException e1) {
                 ctx = null;
             }
@@ -589,6 +664,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 } catch (final ContextException e) {
                     throw new MailException(e);
                 }
+                session.setParameter(key, ctx);
             }
             if (session.getUserId() == ctx.getMailadmin()) {
                 throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(ctx.getContextId()));
@@ -632,12 +708,26 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected abstract MailConfig createNewMailConfig();
 
     /**
+     * For delegating purpose. Don't invoke.
+     */
+    public MailConfig delegateCreateNewMailConfig() {
+        return createNewMailConfig();
+    }
+
+    /**
      * Gets an implementation-specific new instance of {@link IMailProperties}.
      * 
      * @return An implementation-specific new instance of {@link IMailProperties}
      * @throws MailException If creating a new instance of {@link IMailProperties} fails
      */
     protected abstract IMailProperties createNewMailProperties() throws MailException;
+
+    /**
+     * For delegating purpose. Don't invoke.
+     */
+    public IMailProperties delegateCreateNewMailProperties() throws MailException {
+        return createNewMailProperties();
+    }
 
     /**
      * Defines if mail server port has to be present in provided mail configuration before establishing any connection.
@@ -647,14 +737,35 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected abstract boolean checkMailServerPort();
 
     /**
+     * For delegating purpose. Don't invoke.
+     */
+    public boolean delegateCheckMailServerPort() {
+        return checkMailServerPort();
+    }
+
+    /**
      * Releases all used resources prior to caching or closing a connection.
      */
     protected abstract void releaseResources();
 
     /**
+     * For delegating purpose. Don't invoke.
+     */
+    public void delegateReleaseResources() {
+        releaseResources();
+    }
+
+    /**
      * Internal close method to drop a mail connection.
      */
     protected abstract void closeInternal();
+
+    /**
+     * For delegating purpose. Don't invoke.
+     */
+    public void delegateCloseInternal() {
+        closeInternal();
+    }
 
     /**
      * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
