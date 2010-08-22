@@ -330,7 +330,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws MailException If a necessary field is missing
      * @see #connect()
      */
-    protected final void checkFieldsBeforeConnect(final MailConfig mailConfig) throws MailException {
+    protected void checkFieldsBeforeConnect(final MailConfig mailConfig) throws MailException {
 
         /*
          * Properties are implementation specific and therefore are created within connectInternal()
