@@ -52,6 +52,7 @@ package com.openexchange.ajax.parser;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -312,6 +313,18 @@ public abstract class DataParser {
             d.setTime(d.getTime()-offset);
             return d;
         } catch (final NumberFormatException exc) {
+            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+        }
+    }
+    
+    public static UUID checkUUID(final JSONObject jsonObj, final String name) throws OXJSONException, AjaxException {
+        final String tmp = parseString(jsonObj, name);
+        if (tmp == null) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+        try {
+            return UUID.fromString(tmp);
+        } catch (final IllegalArgumentException exc) {
             throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
         }
     }
