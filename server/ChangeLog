@@ -1,6 +1,6 @@
 * 2010-08-22 - thorben.betten@open-xchange.com
 
- - Bugfix #16708: Removed 'final' modified from checkFieldsBeforeConnect() method to allow overriding in concrete MAL implementations
+ - Bugfix #16708: Removed 'final' modifier from checkFieldsBeforeConnect() method to allow overriding in concrete MAL implementations
 
 * 2010-08-20 - thorben.betten@open-xchange.com
 
