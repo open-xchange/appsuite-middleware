@@ -327,7 +327,6 @@ public final class SMTPTransport extends MailTransport {
     @Override
     public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws MailException {
         try {
-            clearUp();
             final InternetAddress dispNotification = srcMail.getDispositionNotification();
             if (dispNotification == null) {
                 throw new SMTPException(
@@ -456,7 +455,6 @@ public final class SMTPTransport extends MailTransport {
     @Override
     public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws MailException {
         try {
-            clearUp();
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), new UnsynchronizedByteArrayInputStream(asciiBytes));
             /*
              * Check recipients
@@ -502,7 +500,6 @@ public final class SMTPTransport extends MailTransport {
     @Override
     public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients) throws MailException {
         try {
-            clearUp();
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
             /*
              * Fill message dependent on send type
