@@ -55,9 +55,7 @@ import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.rmi.dataobjects.Context;
 
-/**
- *  
- */
+
 public class ResellerContext extends Context {
 
     /**

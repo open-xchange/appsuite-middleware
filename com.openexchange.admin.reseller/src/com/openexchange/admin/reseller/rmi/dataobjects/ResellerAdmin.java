@@ -276,6 +276,8 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
     }
 
     /**
+     * This parameter is currently not used
+     * 
      * @param pid the pid to set
      */
     public void setParentId(final Integer pid) {

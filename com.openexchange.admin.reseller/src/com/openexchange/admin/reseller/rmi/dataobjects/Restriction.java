@@ -71,21 +71,29 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
 
     /**
      * The maximum number of users a subadmin may create distibuted over all contexts
+     * Important: The oxadminuser is also counted as a user which means that when setting
+     *            MaxOverallUser to 10, only 9 additional users can be created 
      */
     public static final String MAX_OVERALL_USER_PER_SUBADMIN = "Subadmin.MaxOverallUser";
     
     /**
      * The maximum number of users with a specific {@link UserModuleAccess} a subadmin may create distibuted over all contexts
+     * Important: The oxadminuser is also counted as a user which means that when setting
+     *            MaxOverallUser to 10, only 9 additional users can be created 
      */
     public static final String MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX = "Subadmin.MaxOverallUserByModuleaccess_";
     
     /**
      * The maximum number of users that can be created in this context
+     * Important: The oxadminuser is also counted as a user which means that when setting
+     *            MaxOverallUser to 10, only 9 additional users can be created 
      */
     public static final String MAX_USER_PER_CONTEXT = "Context.MaxUser";
     
     /**
      * The maximum number of users with a specific {@link UserModuleAccess} that can be created in this context
+     * Important: The oxadminuser is also counted as a user which means that when setting
+     *            MaxOverallUser to 10, only 9 additional users can be created 
      */
     public static final String MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "Context.MaxUserByModuleaccess_";
     
