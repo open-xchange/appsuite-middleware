@@ -1,3 +1,7 @@
+* 2010-08-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #13785: Proper calculation of modified and "deleted" folders for XML/WebDAV interface
+
 * 2010-08-22 - thorben.betten@open-xchange.com
 
  - Bugfix #16708: Removed 'final' modifier from checkFieldsBeforeConnect() method to allow overriding in concrete MAL implementations
