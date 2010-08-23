@@ -1,3 +1,7 @@
+* 2010-08-17 - martin.herfurth@open-xchange.com
+
+ - Bugfix #16579: New Until for Appointment Series.
+
 * 2010-08-22 - thorben.betten@open-xchange.com
 
  - Bugfix #16708: Removed 'final' modifier from checkFieldsBeforeConnect() method to allow overriding in concrete MAL implementations
