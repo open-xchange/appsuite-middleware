@@ -80,9 +80,12 @@ fi
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
+%dir /opt/open-xchange/etc/groupware
 %dir /opt/open-xchange/bundles
+%config(noreplace) /opt/open-xchange/etc/groupware/mobile_configuration_action_sms.properties
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
+%config(noreplace) /opt/open-xchange/etc/groupware/*
 
 %changelog
 * Sat Jun 26 2010 - manuel.kraft@open-xchange.com
