@@ -49,9 +49,14 @@
 
 package com.gargoylesoftware.htmlunit;
 
+import java.util.Calendar;
+import java.util.Date;
 import org.apache.commons.httpclient.Cookie;
+import org.apache.commons.httpclient.cookie.CookieSpec;
 import org.apache.commons.httpclient.cookie.CookieSpecBase;
 import org.apache.commons.httpclient.cookie.MalformedCookieException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -60,6 +65,8 @@ import org.apache.commons.httpclient.cookie.MalformedCookieException;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CrawlerCookieSpec extends CookieSpecBase {
+    
+    protected static final Log LOG = LogFactory.getLog(CrawlerCookieSpec.class);
     
     public CrawlerCookieSpec(){
     }
@@ -120,6 +127,18 @@ public class CrawlerCookieSpec extends CookieSpecBase {
 //                }
             }
         } 
+//        if (cookie.getName().equals("s_leo_auth_token") && cookie.getValue().equals("delete me")){
+//            throw new MalformedCookieException ("Not accepting this cookie because it has a value of delete_me: " 
+//                + cookie);
+//        }
+        // setting expiry date to one year in the future for all cookies that have none 
+        if (null == cookie.getExpiryDate()){
+            Calendar calendar = Calendar.getInstance();
+            Date date = calendar.getTime();
+            date.setYear(date.getYear() + 1);
+            cookie.setExpiryDate(date);
+        }
+        //System.out.println("Added this cookie : "+ cookie + ", Expiry: " +cookie.getExpiryDate() + ", Path: "+cookie.getPath() + ", Domain: " + cookie.getDomain() + ", Secure ?: " + cookie.getSecure() + ", Comment: " + cookie.getComment());
 //        else {
 //            if (!host.equals(cookie.getDomain())) {
 //                throw new MalformedCookieException(

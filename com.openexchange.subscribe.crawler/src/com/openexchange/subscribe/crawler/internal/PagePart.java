@@ -72,6 +72,8 @@ public class PagePart {
     private String typeOfInfo;
     
     private int addInfo;
+    
+    private boolean keepStringAfterMatching;
 
     public PagePart() {
 
@@ -82,6 +84,14 @@ public class PagePart {
         this.regex = regex;
         this.typeOfInfo = typeOfInfo;
         this.addInfo = 0;
+    }
+    
+    public PagePart(final String regex, final String typeOfInfo, boolean keepStringAfterMatching) {
+        type = INFO;
+        this.regex = regex;
+        this.typeOfInfo = typeOfInfo;
+        this.addInfo = 0;
+        this.keepStringAfterMatching = keepStringAfterMatching;
     }
     
     public PagePart(final String regex, final String typeOfInfo, int addInfo) {
@@ -130,5 +140,14 @@ public class PagePart {
         this.addInfo = addInfo;
     }
 
+    
+    public boolean isKeepStringAfterMatching() {
+        return keepStringAfterMatching;
+    }
+
+    
+    public void setKeepStringAfterMatching(boolean keepStringAfterMatching) {
+        this.keepStringAfterMatching = keepStringAfterMatching;
+    }
     
 }

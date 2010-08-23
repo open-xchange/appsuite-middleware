@@ -31,5 +31,14 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="lib" path="lib/gdata-calendar-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/gdata-calendar-meta-2.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-20100601.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-consumer-20100601.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-httpclient3-20100601.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-httpclient4-20100601.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-provider-20100601.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

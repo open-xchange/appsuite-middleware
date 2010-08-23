@@ -57,6 +57,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.net.ssl.SSLProtocolException;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -89,8 +90,7 @@ import org.apache.commons.httpclient.util.EncodingUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.SimpleLog;
-import com.gargoylesoftware.htmlunit.HttpWebConnection;
-import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep;
 
 
 /**
@@ -103,6 +103,8 @@ public class CrawlerWebConnection extends HttpWebConnection {
     private final WebClient webClient_;
     private HttpClient httpClient_;
     private String virtualHost_;
+    private static Log LOG = LogFactory.getLog(CrawlerWebConnection.class);
+    private boolean quirkyCookieQuotes;
 
     /**
      * Initializes a new {@link CrawlerWebConnection}.
@@ -118,6 +120,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * {@inheritDoc}
      */
     public WebResponse getResponse(final WebRequestSettings settings) throws IOException {
+        
         final URL url = settings.getUrl();
 
         final HttpClient httpClient = getHttpClient();
@@ -131,6 +134,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
             final long endTime = System.currentTimeMillis();
             webClient_.getCookieManager().updateFromState(httpClient.getState());
             return makeWebResponse(responseCode, httpMethod, settings, endTime - startTime, settings.getCharset());
+
         }
         catch (final HttpException e) {
             // KLUDGE: hitting www.yahoo.com will cause an exception to be thrown while
@@ -154,7 +158,12 @@ public class CrawlerWebConnection extends HttpWebConnection {
                 newRequest.setAdditionalHeaders(settings.getAdditionalHeaders());
                 return getResponse(newRequest);
             }
-            throw new RuntimeException("HTTP Error: " + e.getMessage(), e);
+            throw new RuntimeException("HTTP Error: " + e.getMessage(), e);        
+        }
+        // this is done so the logfile is not cluttered with irrelevant data as per bug 16591
+        catch (SSLProtocolException e){            
+            LOG.error(e);
+            return null;
         }
         finally {
             onResponseGenerated(httpMethod);
@@ -294,7 +303,11 @@ public class CrawlerWebConnection extends HttpWebConnection {
             // Cookies are enabled. Note that it's important that we enable single cookie headers,
             // for compatibility purposes.
             httpMethod.getParams().setBooleanParameter(HttpMethodParams.SINGLE_COOKIE_HEADER, true);
-            httpMethod.getParams().setCookiePolicy("crawler-special");            
+            if (quirkyCookieQuotes){
+                httpMethod.getParams().setCookiePolicy("crawler-special-qq");
+            } else {
+                httpMethod.getParams().setCookiePolicy("crawler-special");
+            }
         }
         else {
             // Cookies are disabled.
@@ -551,4 +564,15 @@ public class CrawlerWebConnection extends HttpWebConnection {
         }
     }
 
+    
+    public boolean isQuirkyCookieQuotes() {
+        return quirkyCookieQuotes;
+    }
+
+    
+    public void setQuirkyCookieQuotes(boolean quirkyCookieQuotes) {
+        this.quirkyCookieQuotes = quirkyCookieQuotes;
+    }
+
+    
 }

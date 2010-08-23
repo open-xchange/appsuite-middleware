@@ -58,12 +58,11 @@ import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.CrawlerCookieManager;
 import com.gargoylesoftware.htmlunit.CrawlerCookieSpec;
+import com.gargoylesoftware.htmlunit.CrawlerCookieSpecWithQuirkyQuotes;
 import com.gargoylesoftware.htmlunit.CrawlerWebConnection;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.util.WebConnectionWrapper;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
@@ -87,14 +86,18 @@ public class Workflow {
     private Subscription subscription;
 
     private boolean useThreadedRefreshHandler;
-    
+
     private static final Log LOG = LogFactory.getLog(Workflow.class);
-    
+
     private Activator activator;
-    
+
     private boolean enableJavascript;
-    
+
     private boolean debuggingEnabled = false;
+
+    private boolean mobileUserAgent = false;
+    
+    private boolean quirkyCookieQuotes;
 
     public Workflow() {
 
@@ -108,7 +111,7 @@ public class Workflow {
     // Convenience method for setting username and password after the workflow was created
     public Object[] execute(final String username, final String password) throws SubscriptionException {
         for (final Step currentStep : steps) {
-            if (debuggingEnabled){
+            if (debuggingEnabled) {
                 currentStep.setDebuggingEnabled(true);
             }
             if (currentStep instanceof LoginStep) {
@@ -125,20 +128,30 @@ public class Workflow {
 
     public Object[] execute() throws SubscriptionException {
 
-        // emulate a known client, hopefully keeping our profile low
-        final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
+        // emulate a specific browser
+        // final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_3);
+        BrowserVersion browser = BrowserVersion.FIREFOX_3;
+        if (mobileUserAgent) {
+            browser.setUserAgent("Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16");
+        }
+        final WebClient webClient = new WebClient(browser);
+
         // use a custom CookiePolicy to be more lenient and thereby work with more websites
         CrawlerWebConnection crawlerConnection = new CrawlerWebConnection(webClient);
+        if (quirkyCookieQuotes) {crawlerConnection.setQuirkyCookieQuotes(true);}
         CookiePolicy.registerCookieSpec("crawler-special", CrawlerCookieSpec.class);
-        webClient.setCookieManager(new CrawlerCookieManager());                
-        
+        CookiePolicy.registerCookieSpec("crawler-special-qq", CrawlerCookieSpecWithQuirkyQuotes.class);
+        webClient.setCookieManager(new CrawlerCookieManager());
+        // System.out.println(CookiePolicy.getCookieSpec("crawler-special"));
+
+        webClient.setWebConnection(crawlerConnection);
         // Javascript is disable by default for security reasons but may be activated for single crawlers
         webClient.setJavaScriptEnabled(enableJavascript);
         webClient.setTimeout(60000);
         webClient.setAjaxController(new NicelyResynchronizingAjaxController());
         if (useThreadedRefreshHandler) {
             webClient.setRefreshHandler(new ThreadedRefreshHandler());
-        }        
+        }
         try {
 
             Step previousStep = null;
@@ -158,11 +171,15 @@ public class Workflow {
                 if (!(currentStep instanceof LogoutStep)) {
                     result = currentStep.getOutput();
                 }
-            }
+            }        
 
-            webClient.closeAllWindows();            
+            webClient.closeAllWindows();
             return (Object[]) result;
-        } finally {
+        } 
+        catch (NullPointerException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+        }
+        finally {
             MultiThreadedHttpConnectionManager manager = (MultiThreadedHttpConnectionManager) crawlerConnection.getHttpClient().getHttpConnectionManager();
             manager.shutdown();
         }
@@ -200,35 +217,48 @@ public class Workflow {
         this.useThreadedRefreshHandler = useThreadedRefreshHandler;
     }
 
-    
     public Activator getActivator() {
         return activator;
     }
 
-    
     public void setActivator(Activator activator) {
         this.activator = activator;
     }
 
-    
     public boolean isEnableJavascript() {
         return enableJavascript;
     }
 
-    
     public void setEnableJavascript(boolean enableJavascript) {
         this.enableJavascript = enableJavascript;
     }
 
-    
     public boolean isDebuggingEnabled() {
         return debuggingEnabled;
     }
 
-    
     public void setDebuggingEnabled(boolean debuggingEnabled) {
         this.debuggingEnabled = debuggingEnabled;
     }
 
+    public boolean isMobileUserAgent() {
+        return mobileUserAgent;
+    }
+
+    public void setMobileUserAgent(boolean mobileUserAgent) {
+        this.mobileUserAgent = mobileUserAgent;
+    }
+
     
+    public boolean isQuirkyCookieQuotes() {
+        return quirkyCookieQuotes;
+    }
+
+    
+    public void setQuirkyCookieQuotes(boolean quirkyCookieQuotes) {
+        this.quirkyCookieQuotes = quirkyCookieQuotes;
+    }
+    
+    
+
 }

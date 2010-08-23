@@ -192,12 +192,23 @@ public class Mappings {
             contact.setURL(map.get("url"));
         }
         if (map.containsKey("instant_messenger1")) {
-            contact.setInstantMessenger1(map.get("instant_messenger1"));
+            if (map.containsKey("instant_messenger1_type")){
+                contact.setInstantMessenger1(map.get("instant_messenger1") + " (" + map.get("instant_messenger1_type") + ")");
+            } else {
+                contact.setInstantMessenger1(map.get("instant_messenger1"));
+            }
         }
         if (map.containsKey("instant_messenger2")) {
-            contact.setInstantMessenger2(map.get("instant_messenger2"));
+            if (map.containsKey("instant_messenger2_type")){
+                contact.setInstantMessenger1(map.get("instant_messenger2") + " (" + map.get("instant_messenger2_type") + ")");
+            } else {
+                contact.setInstantMessenger1(map.get("instant_messenger2"));
+            }
         }
         // handle birthdays
+        if (map.containsKey("birthday_month_real")){
+            map.put("birthday_month", Integer.toString(Integer.parseInt(map.get("birthday_month_real"))-1));
+        }
         if (map.containsKey("birthday_month_string")) {
             String month = map.get("birthday_month_string");
             if (month.matches("(Januar|January|janvier|enero)")) {
