@@ -148,7 +148,6 @@
     	<copy todir="doc/resources" file="javadoc/OX_Logo.jpg"/>
         <javadoc
             failonerror="true"
-			sourcepath="src"
         	destdir="doc"
             author="true"
             public="true"
@@ -160,8 +159,11 @@
             <fileset dir="src/com/openexchange/admin/reseller/rmi" defaultexcludes="yes">
 				<include name="*Interface*"/>
 				<include name="dataobjects/*"/>
+				<include name="extensions/*"/>
             </fileset>
-            <fileset dir="src/com/openexchange/admin/reseller/rmi/exceptions" defaultexcludes="yes">
+            <fileset dir="src/com/openexchange/admin/reseller/soap" defaultexcludes="yes">
+				<include name="**.java"/>
+            	<exclude name="ResellerContextUtil.java"/>
             </fileset>
         	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
         	<link href="${doccorelink}"/>
