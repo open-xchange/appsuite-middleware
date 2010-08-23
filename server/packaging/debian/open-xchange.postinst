@@ -27,6 +27,15 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-371
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
+  local jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+  jopts=${jopts//\"/}
+  if ! echo $jopts | grep "MaxPermSize" > /dev/null; then
+      ox_set_property JAVA_XTRAOPTS \""$jopts -XX:MaxPermSize=128M"\" $pfile
+  fi
+
   # SoftwareChange_Request-354
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/mail.properties
