@@ -1,0 +1,11 @@
+open-xchange-mobile-configuration-json-action-sms (6.18.0.0-0) unstable; urgency=low
+
+  * 6.18.0 cycle
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Mon, 23 Aug 2010 11:30:00 +0200
+
+open-xchange-mobile-configuration-json-action-sms (6.17.0.0-0) unstable; urgency=low
+
+  * initial
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Fri, 25 Jun 2010 11:30:00 +0200
