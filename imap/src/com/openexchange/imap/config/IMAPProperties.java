@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,12 +49,12 @@
 
 package com.openexchange.imap.config;
 
-import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.entity2acl.Entity2ACL;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
@@ -114,6 +114,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private String spamHandlerName;
 
+    private boolean propagateClientIPAddress;
+
     /**
      * Initializes a new {@link IMAPProperties}
      */
@@ -128,7 +130,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global IMAP properties...\n");
 
-        final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService configuration = IMAPServiceRegistry.getService(ConfigurationService.class);
         {
             final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application").trim();
             imapSort = "imap".equalsIgnoreCase(imapSortStr);
@@ -145,6 +147,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String fastFetchStr = configuration.getProperty("com.openexchange.imap.imapFastFetch", STR_TRUE).trim();
             fastFetch = Boolean.parseBoolean(fastFetchStr);
             logBuilder.append("\tFast Fetch Enabled: ").append(fastFetch).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.propagateClientIPAddress", STR_FALSE).trim();
+            propagateClientIPAddress = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tPropagate Client IP Address: ").append(propagateClientIPAddress).append('\n');
         }
 
         {
@@ -246,7 +254,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     protected void resetFields() {
         imapSort = false;
         imapSearch = false;
-        fastFetch = false;
+        fastFetch = true;
+        propagateClientIPAddress = false;
         supportsACLs = null;
         imapTimeout = 0;
         imapConnectionTimeout = 0;
@@ -260,6 +269,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     public boolean isFastFetch() {
         return fastFetch;
+    }
+
+    public boolean isPropagateClientIPAddress() {
+        return propagateClientIPAddress;
     }
 
     public String getImapAuthEnc() {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -176,6 +176,15 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         final String tmp = properties.get("com.openexchange.imap.imapFastFetch");
         if (null == tmp) {
             return IMAPProperties.getInstance().isFastFetch();
+        }
+
+        return Boolean.parseBoolean(tmp);
+    }
+
+    public boolean isPropagateClientIPAddress() {
+        final String tmp = properties.get("com.openexchange.imap.propagateClientIPAddress");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().isPropagateClientIPAddress();
         }
 
         return Boolean.parseBoolean(tmp);

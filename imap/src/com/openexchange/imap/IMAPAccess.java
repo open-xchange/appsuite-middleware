@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,18 +51,24 @@ package com.openexchange.imap;
 
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.imap.acl.ACLExtension;
+import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.acl.ACLExtensionInit;
+import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
+import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
@@ -73,14 +79,19 @@ import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -96,6 +107,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static final long serialVersionUID = -7510487764376433468L;
 
     /**
+     * The max. temporary-down value; 5 Minutes.
+     */
+    private static final long MAX_TEMP_DOWN = 300000L;
+
+    /**
+     * The timeout for failed logins.
+     */
+    private static final long FAILED_AUTH_TIMEOUT = 10000L;
+
+    /**
      * The logger instance for {@link IMAPAccess} class.
      */
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPAccess.class);
@@ -109,13 +130,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * Remembers timed out servers for {@link IIMAPProperties#getImapTemporaryDown()} milliseconds. Any further attempts to connect to such
      * a server-port-pair will throw an appropriate exception.
      */
-    private static Map<HostAndPort, Long> timedOutServers;
+    private static volatile Map<HostAndPort, Long> timedOutServers;
 
     /**
      * Remembers failed authentication for 10 seconds. Any further login attempts with such remembered credentials will throw an appropriate
      * exception.
      */
-    private static Map<LoginAndPass, Long> failedAuths;
+    private static volatile Map<LoginAndPass, StampAndError> failedAuths;
+
+    /**
+     * The scheduled timer task to clean-up maps.
+     */
+    private static ScheduledTimerTask cleanUpTimerTask;
 
     /*-
      * Member section
@@ -242,6 +268,67 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
+    public int getUnreadMessagesCount(final String fullname) throws MailException {
+        if (!isConnected()) {
+            connect(false);
+        }
+        /*
+         * Check for root folder
+         */
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+            return 0;
+        }
+        try {
+            /*
+             * Obtain IMAP folder
+             */
+            final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullname);
+            final boolean exists = imapFolder.exists();
+            final IMAPConfig imapConfig = getIMAPConfig();
+            if (!exists) {
+                throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
+            }
+            String[] attrs;
+            try {
+                attrs = imapFolder.getAttributes();
+            } catch (final NullPointerException e) {
+                /*
+                 * No attributes available.
+                 */
+                attrs = null;
+            }
+            if (null != attrs) {
+                for (final String attribute : attrs) {
+                    if ("\\NonExistent".equalsIgnoreCase(attribute)) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
+                    }
+                }
+            }
+            final int retval;
+            /*
+             * Selectable?
+             */
+            if ((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) > 0) {
+                /*
+                 * Check read access
+                 */
+                final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+                if (!aclExtension.aclSupport() || aclExtension.canRead(IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig))) {
+                    retval = IMAPFolderConverter.getUnreadCount(imapFolder);
+                } else {
+                    // ACL support AND no read access
+                    retval = -1;
+                }
+            } else {
+                retval = -1;
+            }
+            return retval;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, getMailConfig(), session);
+        }
+    }
+
+    @Override
     public boolean ping() throws MailException {
         final IMAPConfig config = getIMAPConfig();
         checkFieldsBeforeConnect(config);
@@ -268,12 +355,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            final javax.mail.Session imapSession = setConnectProperties(
-                config.getPort(),
-                config.isSecure(),
-                imapConfProps.getImapTimeout(),
-                imapConfProps.getImapConnectionTimeout(),
-                imapProps);
+            final javax.mail.Session imapSession =
+                setConnectProperties(
+                    config.getPort(),
+                    config.isSecure(),
+                    imapConfProps.getImapTimeout(),
+                    imapConfProps.getImapConnectionTimeout(),
+                    imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -349,12 +437,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            imapSession = setConnectProperties(
-                config.getPort(),
-                config.isSecure(),
-                imapConfProps.getImapTimeout(),
-                imapConfProps.getImapConnectionTimeout(),
-                imapProps);
+            imapSession =
+                setConnectProperties(
+                    config.getPort(),
+                    config.isSecure(),
+                    imapConfProps.getImapTimeout(),
+                    imapConfProps.getImapConnectionTimeout(),
+                    imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -371,27 +460,37 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             try {
                 imapStore.connect(config.getServer(), config.getPort(), login, tmpPass);
+                // final Throwable stack = new Throwable();
             } catch (final AuthenticationFailedException e) {
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to fasten subsequent connect trials
                  */
-                failedAuths.put(new LoginAndPass(login, tmpPass), Long.valueOf(System.currentTimeMillis()));
+                failedAuths.put(new LoginAndPass(login, tmpPass), new StampAndError(e, System.currentTimeMillis()));
                 throw e;
             } catch (final MessagingException e) {
                 /*
                  * TODO: Re-think if exception's message should be part of condition or just checking if nested exception is an instance of
                  * SocketTimeoutException
                  */
-                if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException()) && ((SocketTimeoutException) e.getNextException()).getMessage().toLowerCase(
-                    Locale.ENGLISH).indexOf(ERR_CONNECT_TIMEOUT) != -1) {
-                    /*
-                     * Remember a timed-out IMAP server on connect attempt
-                     */
-                    timedOutServers.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
+                if (tmpDownEnabled) {
+                    final Exception nextException = e.getNextException();
+                    if (SocketTimeoutException.class.isInstance(nextException) && ((SocketTimeoutException) nextException).getMessage().toLowerCase(
+                        Locale.ENGLISH).indexOf(ERR_CONNECT_TIMEOUT) != -1) {
+                        /*
+                         * Remember a timed-out IMAP server on connect attempt
+                         */
+                        timedOutServers.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
+                    }
                 }
                 throw e;
             }
             connected = true;
+            /*
+             * Propagate client IP address in case of primary mail account access
+             */
+            if (imapConfProps.isPropagateClientIPAddress() && MailAccount.DEFAULT_ID == accountId) {
+                IMAPCommandsCollection.propagateClientIP((IMAPFolder) imapStore.getFolder("INBOX"), session.getLocalIp());
+            }
             /*
              * Add server's capabilities
              */
@@ -413,27 +512,30 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static void checkFailedAuths(final String login, final String pass) throws AuthenticationFailedException {
         final LoginAndPass key = new LoginAndPass(login, pass);
-        final Long range = failedAuths.get(key);
-        if (range != null) {
+        final Map<LoginAndPass, StampAndError> map = failedAuths;
+        final StampAndError sae = map.get(key);
+        if (sae != null) {
             // TODO: Put time-out to imap.properties
-            if (System.currentTimeMillis() - range.longValue() <= 10000) {
-                throw new AuthenticationFailedException("Login failed: authentication failure");
+            if ((System.currentTimeMillis() - sae.stamp) <= FAILED_AUTH_TIMEOUT) {
+                throw sae.error;
             }
-            failedAuths.remove(key);
+            map.remove(key);
         }
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws MailException, IMAPException {
-        final HostAndPort key = new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort());
-        final Long range = timedOutServers.get(key);
+        final MailConfig mailConfig = getMailConfig();
+        final HostAndPort key = new HostAndPort(mailConfig.getServer(), mailConfig.getPort());
+        final Map<HostAndPort, Long> map = timedOutServers;
+        final Long range = map.get(key);
         if (range != null) {
             if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
                 /*
                  * Still treated as being temporary broken
                  */
-                throw IMAPException.create(IMAPException.Code.CONNECT_ERROR, getMailConfig().getServer(), getMailConfig().getLogin());
+                throw IMAPException.create(IMAPException.Code.CONNECT_ERROR, mailConfig.getServer(), mailConfig.getLogin());
             }
-            timedOutServers.remove(key);
+            map.remove(key);
         }
     }
 
@@ -499,6 +601,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected void startup() throws MailException {
         initMaps();
         IMAPCapabilityAndGreetingCache.init();
+        MBoxEnabledCache.init();
         try {
             ACLExtensionInit.getInstance().start();
         } catch (final MailException e) {
@@ -522,7 +625,41 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
         }
         if (null == failedAuths) {
-            failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
+            failedAuths = new ConcurrentHashMap<LoginAndPass, StampAndError>();
+        }
+        if (null == cleanUpTimerTask) {
+            final TimerService timerService = IMAPServiceRegistry.getService(TimerService.class);
+            if (null != timerService) {
+                final Map<HostAndPort, Long> map1 = timedOutServers;
+                final Map<LoginAndPass, StampAndError> map2 = failedAuths;
+                final Runnable r = new Runnable() {
+
+                    public void run() {
+                        /*
+                         * Clean-up temporary-down map
+                         */
+                        for (final Iterator<Entry<HostAndPort, Long>> iter = map1.entrySet().iterator(); iter.hasNext();) {
+                            final Entry<HostAndPort, Long> entry = iter.next();
+                            if (System.currentTimeMillis() - entry.getValue().longValue() > MAX_TEMP_DOWN) {
+                                iter.remove();
+                            }
+                        }
+                        /*
+                         * Clean-up failed-login map
+                         */
+                        for (final Iterator<Entry<LoginAndPass, StampAndError>> iter = map2.entrySet().iterator(); iter.hasNext();) {
+                            final Entry<LoginAndPass, StampAndError> entry = iter.next();
+                            if (System.currentTimeMillis() - entry.getValue().stamp > FAILED_AUTH_TIMEOUT) {
+                                iter.remove();
+                            }
+                        }
+                    }
+                };
+                /*
+                 * Schedule every minute
+                 */
+                cleanUpTimerTask = timerService.scheduleWithFixedDelay(r, 60000, 60000);
+            }
         }
     }
 
@@ -545,11 +682,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             throw new MailException(e);
         }
         IMAPCapabilityAndGreetingCache.tearDown();
+        MBoxEnabledCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
         dropMaps();
     }
 
     private static synchronized void dropMaps() {
+        if (null != cleanUpTimerTask) {
+            cleanUpTimerTask.cancel(false);
+            cleanUpTimerTask = null;
+        }
         if (null != timedOutServers) {
             timedOutServers = null;
         }
@@ -561,6 +703,20 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected boolean checkMailServerPort() {
         return true;
+    }
+
+    private static final class StampAndError {
+
+        final AuthenticationFailedException error;
+
+        final long stamp;
+
+        StampAndError(final AuthenticationFailedException error, final long stamp) {
+            super();
+            this.error = error;
+            this.stamp = stamp;
+        }
+
     }
 
     private static final class LoginAndPass {
@@ -669,9 +825,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected IMailProperties createNewMailProperties() throws MailException {
         try {
-            final MailAccountStorageService storageService = IMAPServiceRegistry.getServiceRegistry().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
             return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final ServiceException e) {
             throw new IMAPException(e);
@@ -733,6 +887,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
         }
+        /*
+         * Create new IMAP session from initialized properties
+         */
         return javax.mail.Session.getInstance(imapProps, null);
     }
 
