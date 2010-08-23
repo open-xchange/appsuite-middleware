@@ -1,3 +1,8 @@
+* 2010-08-23 - choeger@open-xchange.com
+
+ - SoftwareChange_Request-371: added -XX:MaxPermSize=128M in oxinstaller for
+   /opt/open-xchange/etc/groupware/ox-scriptconf.sh
+
 * 2010-08-11 - tobias.prinz@open-xchange.com
 
  - Bugfix 16383: #listcontext is now more time efficient.

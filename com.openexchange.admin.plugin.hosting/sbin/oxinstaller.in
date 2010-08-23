@@ -467,7 +467,7 @@ setup_groupware()
 
     # this formular and parameters are from Holger
     NSIZE=$(( ${SERVER_MEMORY} / 2 ))
-    SERVEROPTS="-Xms${SERVER_MEMORY}m -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
+    SERVEROPTS="-Xms${SERVER_MEMORY}m -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6 -XX:MaxPermSize=128M"
 
     v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${SERVERCONF}/ox-scriptconf.sh
 
