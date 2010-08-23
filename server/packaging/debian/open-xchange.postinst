@@ -27,6 +27,206 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-371
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
+  local jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+  jopts=${jopts//\"/}
+  if ! echo $jopts | grep "MaxPermSize" > /dev/null; then
+      ox_set_property JAVA_XTRAOPTS \""$jopts -XX:MaxPermSize=128M"\" $pfile
+  fi
+
+  # SoftwareChange_Request-354
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/mail.properties
+  if ! ox_exists_property com.openexchange.mail.addClientIPAddress $pfile; then
+      ox_set_property com.openexchange.mail.addClientIPAddress false $pfile
+  fi
+
+  # SoftwareChange_Request-334
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/sessiond.properties
+  if ! ox_exists_property com.openexchange.sessiond.autologin $pfile; then
+      ox_set_property com.openexchange.sessiond.autologin false $pfile
+  fi
+  if ! ox_exists_property com.openexchange.sessiond.cookie.ttl $pfile; then
+      ox_set_property com.openexchange.sessiond.cookie.ttl 1W $pfile
+  fi
+
+  # SoftwareChange_Request-341
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/contact.properties
+  if ! ox_exists_property com.openexchange.contacts.allFoldersForAutoComplete $pfile; then
+      ox_set_property com.openexchange.contacts.allFoldersForAutoComplete true $pfile
+  fi
+
+  # SoftwareChange_Request-308
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/whitelist.properties
+  for prop in html.tag.dd html.tag.dt; do
+      if ! ox_exists_property $prop $pfile; then
+	  ox_set_property $prop '""' $pfile
+      fi
+  done
+
+  # SoftwareChange_Request-294
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/mailcache.ccf
+  local ptmp=${pfile}.$$
+  if grep -E "^jcs.default" $pfile > /dev/null; then
+      grep -vE "^jcs.default" $pfile > $ptmp
+      if [ -s $ptmp ]; then
+	  cp $ptmp $pfile
+      fi
+      rm -f $ptmp
+  fi
+
+  # SoftwareChange_Request-293
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/notification.properties
+  if ! ox_exists_property com.openexchange.notification.fromSource $pfile; then
+      ox_set_property com.openexchange.notification.fromSource "primaryMail" $pfile
+  fi
+
+  # SoftwareChange_Request-285
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/server.properties
+  if ! ox_exists_property com.openexchange.UIWebPath $pfile; then
+      ox_set_property com.openexchange.UIWebPath "/ox6/index.html" $pfile
+  fi
+
+  # SoftwareChange_Request-266
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/user.properties
+  if ! ox_exists_property com.openexchange.folder.tree $pfile; then
+      ox_set_property com.openexchange.folder.tree 0 $pfile
+  fi
+
+  # Property to disable iCal attachment for iMIP mail messages to internal users.
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/notification.properties
+  if ! ox_exists_property imipForInternalUser $pfile; then
+      ox_set_property imipForInternalUser false $pfile
+  fi
+
+  # SoftwareChange_Request-194
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/cache.ccf
+  local val=0$(ox_read_property jcs.region.User.cacheattributes.MaxObjects $pfile)
+  if [ $val -lt 40000 ]; then
+      ox_set_property jcs.region.User.cacheattributes.MaxObjects 40000 $pfile
+  fi
+  local val=0$(ox_read_property jcs.region.UserConfiguration.cacheattributes.MaxObjects $pfile)
+  if [ $val -lt 20000 ]; then
+      ox_set_property jcs.region.UserConfiguration.cacheattributes.MaxObjects 20000 $pfile
+  fi
+  local val=0$(ox_read_property jcs.region.UserSettingMail.cacheattributes.MaxObjects $pfile)
+  if [ $val -lt 20000 ]; then
+      ox_set_property jcs.region.UserSettingMail.cacheattributes.MaxObjects 20000 $pfile
+  fi
+  local val=0$(ox_read_property jcs.region.OXDBPoolCache.cacheattributes.MaxObjects $pfile)
+  if [ $val -lt 20000 ]; then
+      ox_set_property jcs.region.OXDBPoolCache.cacheattributes.MaxObjects 20000 $pfile
+  fi
+  local val=0$(ox_read_property jcs.region.MailAccount.cacheattributes.MaxObjects $pfile)
+  if [ $val -lt 100000 ]; then
+      ox_set_property jcs.region.MailAccount.cacheattributes.MaxObjects 100000 $pfile
+  fi
+
+  # SoftwareChange_Request-131
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/server.properties
+  if ! ox_exists_property com.openexchange.IPCheck $pfile; then
+      ox_set_property com.openexchange.IPCheck true $pfile
+  fi
+
+  # SoftwareChange_Request-124
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/cache.ccf
+  grep jcs.region.GlobalFolderCache $pfile >/dev/null || {
+cat<<EOF >> $pfile
+# Pre-defined cache regions for global folder objects.
+jcs.region.GlobalFolderCache=LTCP
+jcs.region.GlobalFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.GlobalFolderCache.cacheattributes.MaxObjects=10000000
+jcs.region.GlobalFolderCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.GlobalFolderCache.cacheattributes.UseMemoryShrinker=true
+# Disable MaxMemoryIdleTimeSeconds cause some entries can be eternal
+# Shrinker removal works as follows:
+# 1. Check 'Eternal', 'MaxLifeSeconds' AND 'IdleTime' for element-attribute-caused removal
+# 2. Check 'MaxMemoryIdleTime' for cache-attribute-caused removal
+jcs.region.GlobalFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.GlobalFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.GlobalFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.GlobalFolderCache.elementattributes.IsEternal=false
+jcs.region.GlobalFolderCache.elementattributes.MaxLifeSeconds=300
+jcs.region.GlobalFolderCache.elementattributes.IdleTime=180
+jcs.region.GlobalFolderCache.elementattributes.IsSpool=false
+jcs.region.GlobalFolderCache.elementattributes.IsRemote=false
+jcs.region.GlobalFolderCache.elementattributes.IsLateral=false
+EOF
+}
+  grep jcs.region.UserFolderCache $pfile >/dev/null || {
+cat<<EOF >> $pfile
+# Pre-defined cache regions for user-sensitive folder objects.
+jcs.region.UserFolderCache=LTCP
+jcs.region.UserFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.UserFolderCache.cacheattributes.MaxObjects=10000000
+jcs.region.UserFolderCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.UserFolderCache.cacheattributes.UseMemoryShrinker=true
+# Disable MaxMemoryIdleTimeSeconds cause some entries can be eternal
+# Shrinker removal works as follows:
+# 1. Check 'Eternal', 'MaxLifeSeconds' AND 'IdleTime' for element-attribute-caused removal
+# 2. Check 'MaxMemoryIdleTime' for cache-attribute-caused removal
+jcs.region.UserFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.UserFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.UserFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.UserFolderCache.elementattributes.IsEternal=false
+jcs.region.UserFolderCache.elementattributes.MaxLifeSeconds=300
+jcs.region.UserFolderCache.elementattributes.IdleTime=180
+jcs.region.UserFolderCache.elementattributes.IsSpool=false
+jcs.region.UserFolderCache.elementattributes.IsRemote=false
+jcs.region.UserFolderCache.elementattributes.IsLateral=false
+EOF
+}
+  grep jcs.region.MailAccount $pfile >/dev/null || {
+cat<<EOF >> $pfile
+# Pre-defined cache region for mail account
+jcs.region.MailAccount=LTCP
+jcs.region.MailAccount.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.MailAccount.cacheattributes.MaxObjects=1000
+jcs.region.MailAccount.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.MailAccount.cacheattributes.UseMemoryShrinker=true
+jcs.region.MailAccount.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.MailAccount.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.MailAccount.cacheattributes.MaxSpoolPerRun=500
+jcs.region.MailAccount.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.MailAccount.elementattributes.IsEternal=false
+jcs.region.MailAccount.elementattributes.MaxLifeSeconds=300
+jcs.region.MailAccount.elementattributes.IdleTime=180
+jcs.region.MailAccount.elementattributes.IsSpool=false
+jcs.region.MailAccount.elementattributes.IsRemote=false
+jcs.region.MailAccount.elementattributes.IsLateral=false
+EOF
+}
+
+  # SoftwareChange_Request-125
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/server.properties
+  if ! ox_exists_property PUBLISH_REVOKE $pfile; then
+      ox_set_property PUBLISH_REVOKE "" $pfile
+  fi
+
+  # SoftwareChange_Request-109 / SoftwareChange_Request-104
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/calendar.properties
+  if ! ox_exists_property com.openexchange.calendar.undefinedstatusconflict $pfile; then
+      ox_set_property com.openexchange.calendar.undefinedstatusconflict true $pfile
+  fi
+  if ! ox_exists_property com.openexchange.calendar.seriesconflictlimit $pfile; then
+      ox_set_property com.openexchange.calendar.seriesconflictlimit true $pfile
+  fi
+
   # SoftwareChange_Request-84
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/TidyConfiguration.properties
@@ -456,14 +656,6 @@ case "$1" in
         exit 1
     ;;
 esac
-
-touch /tmp/ox_chown_tmp_$$
-chgrp open-xchange /tmp/ox_chown_tmp_$$ 2>/dev/null ||
-	addgroup --system open-xchange
-chown open-xchange /tmp/ox_chown_tmp_$$ 2>/dev/null || 
-	adduser --system --home /opt/open-xchange --no-create-home --disabled-password \
-		--ingroup open-xchange open-xchange
-rm -f /tmp/ox_chown_tmp_$$
 
 chmod 750 /var/log/open-xchange
 chown open-xchange: /var/log/open-xchange

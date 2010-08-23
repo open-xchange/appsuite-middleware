@@ -148,6 +148,22 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-371
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
+   jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+   jopts=${jopts//\"/}
+   if ! echo $jopts | grep "MaxPermSize" > /dev/null; then
+      ox_set_property JAVA_XTRAOPTS \""$jopts -XX:MaxPermSize=128M"\" $pfile
+   fi
+
+   # SoftwareChange_Request-354
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/mail.properties
+   if ! ox_exists_property com.openexchange.mail.addClientIPAddress $pfile; then
+      ox_set_property com.openexchange.mail.addClientIPAddress false $pfile
+   fi
+
    # SoftwareChange_Request-334
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/sessiond.properties
