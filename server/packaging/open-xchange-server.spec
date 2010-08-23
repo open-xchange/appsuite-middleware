@@ -554,6 +554,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Sun Aug 22 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16708: Removed 'final' modifier from checkFieldsBeforeConnect() method to allow overriding in concrete MAL implementations
+* Fri Aug 20 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16410: Fixed TLS connection to SMTP server
 * Thu Aug 19 2010 - marcus.klein@open-xchange.com
  - Bugfix #16700: Fixed NullPointerException if no I18nService can be found for a specific locale in messaging component.
 * Wed Aug 18 2010 - marcus.klein@open-xchange.com
