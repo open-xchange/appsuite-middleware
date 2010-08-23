@@ -72,7 +72,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
