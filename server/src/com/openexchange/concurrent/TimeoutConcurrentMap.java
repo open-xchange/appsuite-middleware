@@ -283,8 +283,7 @@ public final class TimeoutConcurrentMap<K, V> {
         if (null == vw) {
             return null;
         }
-        vw.touch();
-        return vw.value;
+        return vw.touch();
     }
 
     /**
@@ -344,12 +343,13 @@ public final class TimeoutConcurrentMap<K, V> {
             this.forceTimeout = forceTimeout;
         }
 
-        public void touch() {
+        public V touch() {
             if (forceTimeout) {
                 // Force time out; don't touch last-accessed time stamp.
-                return;
+                return value;
             }
             lastAccessed = System.currentTimeMillis();
+            return value;
         }
 
     }
