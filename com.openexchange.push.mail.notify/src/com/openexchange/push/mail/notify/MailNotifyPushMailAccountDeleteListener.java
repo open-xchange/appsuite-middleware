@@ -50,6 +50,7 @@
 package com.openexchange.push.mail.notify;
 
 import java.sql.Connection;
+import java.util.Map;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.push.PushException;
@@ -68,11 +69,11 @@ public final class MailNotifyPushMailAccountDeleteListener implements MailAccoun
         super();
     }
 
-    public void onAfterMailAccountDeletion(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
         // Nothing to do
     }
 
-    public void onBeforeMailAccountDeletion(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
         if (MailNotifyPushListener.getAccountId() == id) {
             try {
                 MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
