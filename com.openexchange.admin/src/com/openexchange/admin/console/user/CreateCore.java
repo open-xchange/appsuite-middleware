@@ -143,7 +143,7 @@ public abstract class CreateCore extends UserAbstraction {
     
     private void csvParsing(final String filename, final OXUserInterface oxuser) throws FileNotFoundException, IOException, InvalidDataException {
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
-        int[] idarray = csvParsingCommon(filename, reader);
+        int[] idarray = csvParsingCommon(reader);
         int linenumber = 2;
         String [] nextLine;
         while ((nextLine = reader.readNext()) != null) {
