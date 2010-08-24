@@ -66,19 +66,24 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
  *
  */
 public abstract class BasicCommandlineOptions {
+
     private static final char dividechar = ' ';
+
     /**
      * Used when username/password credentials were not correct!
      */
     public static final int SYSEXIT_INVALID_CREDENTIALS=101;
+
     /**
      * Used when the requested context does not exists on the server!
      */
     public static final int SYSEXIT_NO_SUCH_CONTEXT=102;
+
     /**
      * Used when wrong data was sent to the server!
      */
     public static final int SYSEXIT_INVALID_DATA=103;
+
     /**
      * Used when an option is missing to execute the cmd tool!
      */
@@ -95,28 +100,28 @@ public abstract class BasicCommandlineOptions {
     public static final int SYSEXIT_SERVERSTORAGE_ERROR =106;
 
     /**
-    * Used when a remote server problem was encountered !
-    */
+     * Used when a remote server problem was encountered !
+     */
     public static final int SYSEXIT_REMOTE_ERROR =107;
 
-   /**
-    * Used when an user does not exists
-    */
+    /**
+     * Used when an user does not exists
+     */
     public static final int SYSEXIT_NO_SUCH_USER =108;
 
-   /**
-    * Used when an unknown option was passed to the cmd tool!
-    */
+    /**
+     * Used when an unknown option was passed to the cmd tool!
+     */
     public static final int SYSEXIT_ILLEGAL_OPTION_VALUE=109;
 
-   /**
-    * Used when a context already exists
-    */
+    /**
+     * Used when a context already exists
+     */
     public static final int SYSEXIT_CONTEXT_ALREADY_EXISTS=110;
 
-   /**
-    * Used when an unknown option was passed to the cmd tool!
-    */
+    /**
+     * Used when an unknown option was passed to the cmd tool!
+     */
     public static final int SYSEXIT_UNKNOWN_OPTION=111;
 
     /**
@@ -150,14 +155,14 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
 
-    private static final String []ENV_OPTIONS =
-        new String[]{ "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT",
-    "ADMIN_PASSWORD", "NEW_USER_PASSWORD"};
-    protected static String RMI_HOSTNAME           = "rmi://localhost:1099/";
-    protected static String COMMANDLINE_TIMEZONE   = "GMT";
-    protected static String COMMANDLINE_DATEFORMAT = "yyyy-MM-dd";
-    protected static String ADMIN_PASSWORD         = null;
-    protected static String NEW_USER_PASSWORD      = null;
+    private static final String[] ENV_OPTIONS = new String[] {
+        "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT", "ADMIN_PASSWORD", "NEW_USER_PASSWORD" };
+
+    protected String RMI_HOSTNAME           = "rmi://localhost:1099/";
+    protected String COMMANDLINE_TIMEZONE   = "GMT";
+    protected String COMMANDLINE_DATEFORMAT = "yyyy-MM-dd";
+    protected String ADMIN_PASSWORD         = null;
+    protected String NEW_USER_PASSWORD      = null;
 
     protected CLIOption contextOption = null;
     protected CLIOption contextNameOption = null;
@@ -169,9 +174,6 @@ public abstract class BasicCommandlineOptions {
     // Used for right error output
     protected Integer ctxid = null;
 
-    /**
-     *
-     */
     public BasicCommandlineOptions() {
         super();
         for( final String opt : ENV_OPTIONS ) {

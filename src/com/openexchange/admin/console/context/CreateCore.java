@@ -153,7 +153,7 @@ public abstract class CreateCore extends ContextAbstraction {
         oxlgn.login(auth);
         
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
-        int[] idarray = csvParsingCommon(filename, reader);
+        int[] idarray = csvParsingCommon(reader);
         int linenumber = 2;
         String [] nextLine;
         lookupRMI();
