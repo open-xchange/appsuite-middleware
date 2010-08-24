@@ -69,5 +69,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.mobileconfig,com.openexchange.mobileconfig"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.secret,com.openexchange.secret"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.admin.autocontextid,com.openexchange.admin.autocontextid"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.push.mail.notify,com.openexchange.push.mail.notify"/>
 </provider>
 </psf>
