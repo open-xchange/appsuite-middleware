@@ -21,6 +21,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.mail,
  com.openexchange.mail.dataobjects,
+ com.openexchange.mail.dataobjects.compose,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
@@ -39,7 +40,7 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker,
- com.openexchange.mail.dataobjects.compose
+ org.xml.sax
 Require-Bundle: com.openexchange.server,
  com.openexchange.common,
  com.openexchange.mobile.configuration.json
