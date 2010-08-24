@@ -66,6 +66,10 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.ContentType;
@@ -167,6 +171,70 @@ public final class OutlookFolderStorage implements FolderStorage {
      * The name of Outlook private folder.
      */
     private static final String OUTLOOK_PRIVATE_NAME = "IPM-Root";
+    
+    private static final class Key {
+
+        private final int tree;
+
+        private final int userId;
+
+        private final int contextId;
+
+        private final int hash;
+
+        public Key(final int tree, final int userId, final int contextId) {
+            super();
+            this.tree = tree;
+            this.userId = userId;
+            this.contextId = contextId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + tree;
+            result = prime * result + userId;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (tree != other.tree) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
+
+    }
+
+    private static final TimeoutConcurrentMap<Key, Future<List<SortableId>>> TCM;
+
+    static {
+        TimeoutConcurrentMap<Key, Future<List<SortableId>>> tcm;
+        try {
+            tcm = new TimeoutConcurrentMap<Key, Future<List<SortableId>>>(10, true);
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            tcm = null;
+        }
+        TCM = tcm;
+    }
 
     /**
      * The real tree identifier.
@@ -745,7 +813,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                  * Special treatment for INBOX
                  */
                 final SortableId[] inboxSubfolders =
-                    getINBOXSubfolders(treeId, folderId, storageParameters, user, user.getLocale(), contextId, tree);
+                    getINBOXSubfolders(treeId, storageParameters, user, user.getLocale(), contextId, tree);
                 final String[] subs = new String[inboxSubfolders.length];
                 for (int i = 0; i < subs.length; i++) {
                     subs[i] = inboxSubfolders[i].getId();
@@ -874,7 +942,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          * INBOX folder
          */
         if (PREPARED_FULLNAME_INBOX.equals(parentId)) {
-            return getINBOXSubfolders(treeId, parentId, storageParameters, user, locale, contextId, tree);
+            return getINBOXSubfolders(treeId, storageParameters, user, locale, contextId, tree);
         }
         /*
          * Check for private folder
@@ -969,110 +1037,133 @@ public final class OutlookFolderStorage implements FolderStorage {
         return ret;
     }
 
-    private SortableId[] getINBOXSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters, final User user, final Locale locale, final int contextId, final int tree) throws FolderException {
-        /*
-         * Get real folder storage for primary mail folder
-         */
-        final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
-        if (null == folderStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
-        }
-        final boolean started = folderStorage.startTransaction(storageParameters, false);
-        try {
-            final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(new FolderNameComparator(locale));
-            /*
-             * Add default folders: Trash, Sent, Drafts, ...
-             */
-            final Set<String> defIds;
-            {
-                defIds = new HashSet<String>(6);
-                defIds.add(folderStorage.getDefaultFolderID(user, treeId, TrashContentType.getInstance(), storageParameters));
-                defIds.add(folderStorage.getDefaultFolderID(user, treeId, DraftsContentType.getInstance(), storageParameters));
-                defIds.add(folderStorage.getDefaultFolderID(user, treeId, SentContentType.getInstance(), storageParameters));
-                defIds.add(folderStorage.getDefaultFolderID(user, treeId, SpamContentType.getInstance(), storageParameters));
-            }
-            final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
-            /*
-             * Filter those mail folders which denote a virtual one
-             */
-            final boolean[] contained;
-            {
-                final Connection con = checkReadConnection(storageParameters);
-                if (null == con) {
-                    contained =
-                        Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING);
-                } else {
-                    contained =
-                        Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING, con);
-                }
-            }
-            for (int i = 0; i < inboxSubfolders.length; i++) {
-                if (!contained[i]) {
-                    final SortableId sortableId = inboxSubfolders[i];
-                    final String id = sortableId.getId();
-                    if (!defIds.contains(id)) {
-                        final String name = sortableId.getName();
-                        if (null == name) {
-                            final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                            put2TreeMap(localizedName, id, treeMap);
-                        } else {
-                            put2TreeMap(name, id, treeMap);
+    private SortableId[] getINBOXSubfolders(final String treeId, final StorageParameters storageParameters, final User user, final Locale locale, final int contextId, final int tree) throws FolderException {
+        final Key key = new Key(tree, user.getId(), contextId);
+        Future<List<SortableId>> f = TCM.get(key);
+        if (null == f) {
+            final FutureTask<List<SortableId>> ft = new FutureTask<List<SortableId>>(new Callable<List<SortableId>>() {
+
+                public List<SortableId> call() throws FolderException {
+                    /*
+                     * Get real folder storage for primary mail folder
+                     */
+                    final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, PREPARED_FULLNAME_INBOX);
+                    if (null == folderStorage) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, PREPARED_FULLNAME_INBOX);
+                    }
+                    final boolean started = folderStorage.startTransaction(storageParameters, false);
+                    try {
+                        final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(new FolderNameComparator(locale));
+                        /*
+                         * Add default folders: Trash, Sent, Drafts, ...
+                         */
+                        final Set<String> defIds;
+                        {
+                            defIds = new HashSet<String>(6);
+                            defIds.add(folderStorage.getDefaultFolderID(user, treeId, TrashContentType.getInstance(), storageParameters));
+                            defIds.add(folderStorage.getDefaultFolderID(user, treeId, DraftsContentType.getInstance(), storageParameters));
+                            defIds.add(folderStorage.getDefaultFolderID(user, treeId, SentContentType.getInstance(), storageParameters));
+                            defIds.add(folderStorage.getDefaultFolderID(user, treeId, SpamContentType.getInstance(), storageParameters));
                         }
+                        final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
+                        /*
+                         * Filter those mail folders which denote a virtual one
+                         */
+                        final boolean[] contained;
+                        {
+                            final Connection con = checkReadConnection(storageParameters);
+                            if (null == con) {
+                                contained =
+                                    Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING);
+                            } else {
+                                contained =
+                                    Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING, con);
+                            }
+                        }
+                        for (int i = 0; i < inboxSubfolders.length; i++) {
+                            if (!contained[i]) {
+                                final SortableId sortableId = inboxSubfolders[i];
+                                final String id = sortableId.getId();
+                                if (!defIds.contains(id)) {
+                                    final String name = sortableId.getName();
+                                    if (null == name) {
+                                        final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
+                                        put2TreeMap(localizedName, id, treeMap);
+                                    } else {
+                                        put2TreeMap(name, id, treeMap);
+                                    }
+                                }
+                            }
+                        }
+                        /*
+                         * Get virtual subfolders
+                         */
+                        final List<String[]> ids;
+                        {
+                            final Connection con = checkReadConnection(storageParameters);
+                            if (null == con) {
+                                ids = Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING);
+                            } else {
+                                ids = Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING, con);
+                            }
+                        }
+                        /*
+                         * Merge them into tree map
+                         */
+                        for (final String[] idAndName : ids) {
+                            /*
+                             * Names loaded from DB have no locale-sensitive string
+                             */
+                            put2TreeMap(idAndName[1], idAndName[0], treeMap);
+                        }
+                        if (started) {
+                            folderStorage.commitTransaction(storageParameters);
+                        }
+                        /*
+                         * Compose list
+                         */
+                        final List<SortableId> sortedIDs;
+                        {
+                            final Collection<List<String>> values = treeMap.values();
+                            sortedIDs = new ArrayList<SortableId>(values.size());
+                            int i = 0;
+                            for (final List<String> list : values) {
+                                for (final String id : list) {
+                                    sortedIDs.add(new OutlookId(id, i++, null));
+                                }
+                            }
+                        }
+                        return sortedIDs;
+                    } catch (final FolderException e) {
+                        if (started) {
+                            folderStorage.rollback(storageParameters);
+                        }
+                        throw e;
+                    } catch (final Exception e) {
+                        if (started) {
+                            folderStorage.rollback(storageParameters);
+                        }
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 }
+            });
+            f = TCM.putIfAbsent(key, ft, 60);
+            if (null == f) {
+                f = ft;
+                ft.run();
             }
-            /*
-             * Get virtual subfolders
-             */
-            final List<String[]> ids;
-            {
-                final Connection con = checkReadConnection(storageParameters);
-                if (null == con) {
-                    ids = Select.getSubfolderIds(contextId, tree, user.getId(), parentId, StorageType.WORKING);
-                } else {
-                    ids = Select.getSubfolderIds(contextId, tree, user.getId(), parentId, StorageType.WORKING, con);
-                }
-            }
-            /*
-             * Merge them into tree map
-             */
-            for (final String[] idAndName : ids) {
-                /*
-                 * Names loaded from DB have no locale-sensitive string
-                 */
-                put2TreeMap(idAndName[1], idAndName[0], treeMap);
-            }
-            if (started) {
-                folderStorage.commitTransaction(storageParameters);
-            }
-            /*
-             * Compose list
-             */
-            final List<SortableId> sortedIDs;
-            {
-                final Collection<List<String>> values = treeMap.values();
-                sortedIDs = new ArrayList<SortableId>(values.size());
-                int i = 0;
-                for (final List<String> list : values) {
-                    for (final String id : list) {
-                        sortedIDs.add(new OutlookId(id, i++, null));
-                    }
-                }
-            }
-            /*
-             * Put to cache if initialized
-             */
+        }
+        try {
+            final List<SortableId> sortedIDs = f.get();
             return sortedIDs.toArray(new SortableId[sortedIDs.size()]);
-        } catch (final FolderException e) {
-            if (started) {
-                folderStorage.rollback(storageParameters);
-            }
-            throw e;
-        } catch (final Exception e) {
-            if (started) {
-                folderStorage.rollback(storageParameters);
-            }
+        } catch (final InterruptedException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof FolderException) {
+                throw (FolderException) cause;
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(cause, cause.getMessage());
         }
     }
 
