@@ -1,3 +1,9 @@
+open-xchange-subscribe-crawler (6.14.0.0-20) unstable; urgency=low
+
+  * build for PTF 2010081810000111
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Aug 2010 16:45:21 +0200
+
 open-xchange-subscribe-crawler (6.14.0.0-19) unstable; urgency=low
 
   * build for PTF 2010033110000201
