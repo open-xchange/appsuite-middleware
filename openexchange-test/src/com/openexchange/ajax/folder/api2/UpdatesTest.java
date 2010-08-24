@@ -64,7 +64,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link UpdatesTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UpdatesTest extends AbstractAJAXSession {
@@ -73,7 +73,7 @@ public class UpdatesTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link UpdatesTest}.
-     * 
+     *
      * @param name name of the test.
      */
     public UpdatesTest(final String name) {
@@ -105,13 +105,13 @@ public class UpdatesTest extends AbstractAJAXSession {
                     OCLPermission.ADMIN_PERMISSION,
                     OCLPermission.ADMIN_PERMISSION,
                     OCLPermission.ADMIN_PERMISSION);
-                fo.setPermissionsAsArray(new OCLPermission[] { oclP });                
+                fo.setPermissionsAsArray(new OCLPermission[] { oclP });
                 final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
-                final InsertResponse response = (InsertResponse) client.execute(request);
-                newId = (String) response.getResponse().getData();                
+                final InsertResponse response = client.execute(request);
+                newId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", newId);
                 response.fillObject(fo);
-                timeStamp = fo.getLastModified().getTime() - 10000;
+                timeStamp = fo.getLastModified().getTime() - 1;
             }
 
             final FolderUpdatesResponse response;
