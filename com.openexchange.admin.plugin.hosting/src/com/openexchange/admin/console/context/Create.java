@@ -85,7 +85,7 @@ public class Create extends CreateCore {
     protected void setFurtherOptions(final AdminParser parser) {
     	 parser.setExtendedOptions();
     	 ctxabs.setAddMappingOption(parser, false);
-    	 setAddAccessRightCombinationNameOption(parser, false);
+    	 setAddAccessRightCombinationNameOption(parser);
     	 setModuleAccessOptions(parser);
     	 
     }

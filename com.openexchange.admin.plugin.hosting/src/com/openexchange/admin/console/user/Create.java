@@ -101,6 +101,6 @@ public class Create extends CreateCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        setAddAccessRightCombinationNameOption(parser, false);
+        setAddAccessRightCombinationNameOption(parser);
     }
 }

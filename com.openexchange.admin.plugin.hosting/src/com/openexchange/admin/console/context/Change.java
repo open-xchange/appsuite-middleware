@@ -115,7 +115,7 @@ public class Change extends ChangeCore {
     	parser.setExtendedOptions();
         ctxabs.setAddMappingOption(parser, false);        
         ctxabs.setRemoveMappingOption(parser, false);
-        setAddAccessRightCombinationNameOption(parser, false);
+        setAddAccessRightCombinationNameOption(parser);
         setModuleAccessOptions(parser);
     }
 }

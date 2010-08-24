@@ -93,7 +93,7 @@ public class Change extends ChangeCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        setAddAccessRightCombinationNameOption(parser, false);
+        setAddAccessRightCombinationNameOption(parser);
     }
 
 }
