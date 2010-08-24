@@ -153,12 +153,16 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
     public Context postCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
         try {
             oxresell.generateCreateTimestamp(ctx);
-            oxresell.writeCustomId(ctx);
         } catch (StorageException e1) {
             throw new PluginException(e1);
         }
         applyRestrictionsPerContext(ctx);
         if (cache.isMasterAdmin(auth)) {
+            try {
+                oxresell.writeCustomId(ctx);
+            } catch (StorageException e) {
+                throw new PluginException(e);
+            }
             return ctx;
         }
         try {
@@ -170,8 +174,16 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN,
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX
                 );
+            oxresell.writeCustomId(ctx);
             oxresell.ownContextToAdmin(ctx, auth);
         } catch (final StorageException e) {
+            try {
+                // own context to subadmin; if we don't do that, the deletion
+                // in the cleanup of postCreate will deny to delete
+                oxresell.ownContextToAdmin(ctx, auth);
+            } catch (StorageException e1) {
+                throw new PluginException(e1);
+            }
             throw new PluginException(e);
         }
         return ctx;
