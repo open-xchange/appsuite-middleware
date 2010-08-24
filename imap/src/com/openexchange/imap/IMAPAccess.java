@@ -54,8 +54,8 @@ import java.net.SocketTimeoutException;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -373,8 +373,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get store
                  */
-                imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP.getName());
-                imapStore.connect(config.getServer(), config.getPort(), config.getLogin(), tmpPass);
+                imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), config.getLogin(), tmpPass);
             } catch (final MessagingException e) {
                 throw MIMEMailException.handleMessagingException(e, config, session);
             } finally {
@@ -451,15 +450,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapSession.setDebugOut(System.err);
             }
             /*
-             * Get store
-             */
-            imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP.getName());
-            /*
-             * ... and connect
+             * Get connected store
              */
             try {
-                imapStore.connect(config.getServer(), config.getPort(), login, tmpPass);
-                // final Throwable stack = new Throwable();
+                imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), login, tmpPass);
             } catch (final AuthenticationFailedException e) {
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to fasten subsequent connect trials
@@ -507,6 +501,32 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, config, session);
         }
+    }
+
+    private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
+
+    private static IMAPStore connectIMAPStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException {
+        /*
+         * Get store...
+         */
+        IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+        /*
+         * ... and connect it
+         */
+        try {
+            imapStore.connect(server, port, login, pw);
+        } catch (final AuthenticationFailedException e) {
+            /*
+             * Retry connect with AUTH=PLAIN disabled
+             */
+            imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
+            imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+            imapStore.connect(server, port, login, pw);
+        }
+        /*
+         * Done
+         */
+        return imapStore;
     }
 
     private static void checkFailedAuths(final String login, final String pass) throws AuthenticationFailedException {
