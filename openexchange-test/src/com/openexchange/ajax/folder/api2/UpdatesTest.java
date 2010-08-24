@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
+import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
@@ -87,10 +88,9 @@ public class UpdatesTest extends AbstractAJAXSession {
     }
 
     public void testUpdates() throws Throwable {
-        String newId = null;
+        int newId = -1;
         try {
-            final long timeStamp;
-
+            final Date timeStamp;
             {
                 final FolderObject fo = new FolderObject();
                 fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
@@ -108,32 +108,33 @@ public class UpdatesTest extends AbstractAJAXSession {
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
                 final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
                 final InsertResponse response = client.execute(request);
-                newId = (String) response.getResponse().getData();
-                assertNotNull("New ID must not be null!", newId);
-                response.fillObject(fo);
-                timeStamp = fo.getLastModified().getTime() - 1;
+                String tmpId = (String) response.getResponse().getData();
+                assertNotNull("New ID must not be null!", tmpId);
+                newId = Integer.parseInt(tmpId);
+                fo.setObjectID(newId);
+                timeStamp = client.execute(new GetRequest(API.OUTLOOK, fo.getObjectID())).getTimestamp();
+                fo.setLastModified(timeStamp);
             }
 
             final FolderUpdatesResponse response;
             {
                 final UpdatesRequest request =
                     new UpdatesRequest(API.OUTLOOK, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] {
-                        FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp));
+                        FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp.getTime() - 1));
                 response = client.execute(request);
             }
 
             assertNotNull(response);
 
-            final int iNewId = Integer.parseInt(newId);
             final List<FolderObject> l = response.getFolders();
             boolean found = false;
             for (final FolderObject folderObject : l) {
-                found |= (iNewId == folderObject.getObjectID());
+                found |= (newId == folderObject.getObjectID());
             }
             assertTrue("Newly created folder not contained in action=updates response.", found);
 
         } finally {
-            if (null != newId) {
+            if (newId > 0) {
                 // Delete folder
                 try {
                     final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, newId, new Date());
