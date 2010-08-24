@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,10 +57,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -69,7 +67,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.mail.MailObject;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.Template;
@@ -251,7 +248,10 @@ public class AppointmentState extends LinkableState {
 
 	private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
         Appointment.ALARM,
-        Appointment.LAST_MODIFIED
+        Appointment.LAST_MODIFIED,
+        Appointment.NOTIFICATION,
+        Appointment.RECURRENCE_TYPE,
+        Appointment.CATEGORIES
     ));
     
     public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {

@@ -1,3 +1,7 @@
+* 2010-08-24 - martin.herfurth@open-xchange.com
+
+ - Bugfix #16714: No change notifications for category changes.
+
 * 2010-08-23 - thorben.betten@open-xchange.com
 
  - Bugfix #13785: Proper calculation of modified and "deleted" folders for XML/WebDAV interface
