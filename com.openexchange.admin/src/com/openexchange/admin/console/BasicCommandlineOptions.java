@@ -312,14 +312,14 @@ public abstract class BasicCommandlineOptions {
             sb.append(column_entry);
             sb.append(",");
         }
-        if(sb.length()>0){
+        if(sb.length()>0) {
             // remove last ","
             sb.deleteCharAt(sb.length()-1);
         }
 
         // print the columns line
         System.out.println(sb.toString());
-        if (columns != null && data != null && !data.isEmpty()) {
+        if (data != null && !data.isEmpty()) {
             if (columns.size()!=data.get(0).size()) {
                 throw new InvalidDataException("Number of columnnames and number of columns in data object must be the same");
             }
@@ -444,41 +444,34 @@ public abstract class BasicCommandlineOptions {
         this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, NeededQuadState.notneeded);
     }
 
-//    protected final Option addArgName(final Option option, final String argname) {
-//        final Option retval = option;
-////        retval.setArgName(argname);
-//        return retval;
-//    }
-
-    @Deprecated
-    protected final CLIOption addDefaultArgName(final AdminParser admp,final CLIOption option) {
-//        return addArgName(option, option.getLongOpt(admp));
-        // FIXME
-        return null;
-    }
-
     protected final int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {
+        final int retval;
         if (null != test) {
-            return Integer.parseInt(test);
+            retval = Integer.parseInt(test);
         } else {
-            return defaultvalue;
+            retval = defaultvalue;
         }
+        return retval;
     }
 
     protected final String testStringAndGetStringOrDefault(final String test, final String defaultvalue) {
+        final String retval;
         if (null != test) {
-            return test;
+            retval = test;
         } else {
-            return defaultvalue;
+            retval = defaultvalue;
         }
+        return retval;
     }
 
     protected final boolean testStringAndGetBooleanOrDefault(final String test, final boolean defaultvalue) {
+        final boolean retval;
         if (null != test) {
-            return Boolean.parseBoolean(test);
+            retval = Boolean.parseBoolean(test);
         } else {
-            return defaultvalue;
+            retval = defaultvalue;
         }
+        return retval;
     }
 
     /**
@@ -490,7 +483,6 @@ public abstract class BasicCommandlineOptions {
         setAdminPassOption(admp);
     }
 
-
     protected final void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {
         setAdminUserOption(parser);
         setAdminPassOption(parser);
@@ -500,7 +492,6 @@ public abstract class BasicCommandlineOptions {
         // see http://java.sun.com/j2se/1.5.0/docs/guide/rmi/faq.html#leases
         System.gc();
         System.runFinalization();
-        //
         System.exit(exitcode);
     }
 
@@ -508,22 +499,19 @@ public abstract class BasicCommandlineOptions {
         final Context ctx = new Context();
 
         if (parser.getOptionValue(this.contextOption) != null) {
-            ctxid = Integer.parseInt((String) parser.getOptionValue(this.contextOption));
+            ctxid = Integer.valueOf((String) parser.getOptionValue(this.contextOption));
             ctx.setId(ctxid);
         }
         return ctx;
     }
 
     protected final Credentials credentialsparsing(final AdminParser parser) {
-        Credentials auth = null;
-
-        if( ADMIN_PASSWORD != null ) {
-            // use admin password as set in environment
-            auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), ADMIN_PASSWORD);
-        } else {
-            auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+        // prefer password from options
+        String password = (String) parser.getOptionValue(this.adminPassOption);
+        if (null == password && null != ADMIN_PASSWORD) {
+            password = ADMIN_PASSWORD;
         }
-        return auth;
+        return new Credentials((String) parser.getOptionValue(this.adminUserOption), password);
     }
 
     /**
@@ -559,12 +547,9 @@ public abstract class BasicCommandlineOptions {
                 sb.append(",");
             }
             sb.deleteCharAt(sb.length() - 1);
-
             return sb.toString();
-        } else {
-            return "";
         }
-
+        return "";
     }
 
     private final int longestLine(final ArrayList<ArrayList<String>> data, final String[] columnnames, final int column) throws InvalidDataException {

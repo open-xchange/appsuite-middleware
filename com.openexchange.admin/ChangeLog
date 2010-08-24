@@ -1,3 +1,7 @@
+* 2010-08-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #16576: Prefer command line password if environment password and command line password are defined.
+
 * 2010-08-10 - choeger@open-xchange.com
 
  - Bugfix #16667 - [L3] No Polish translations for default mail folders in User.properties
