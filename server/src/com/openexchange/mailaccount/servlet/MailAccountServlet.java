@@ -50,8 +50,6 @@
 package com.openexchange.mailaccount.servlet;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -145,17 +143,12 @@ public final class MailAccountServlet extends PermissionServlet {
             final String action = DataServlet.parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
             final ServerSession session = getSessionObject(httpServletRequest);
             final String data = getBody(httpServletRequest);
-            final JSONObject jsonObj;
-            try {
-                jsonObj = DataServlet.convertParameter2JSONObject(httpServletRequest);
-            } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
-                response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-                writeResponse(response, httpServletResponse);
-                return;
-            }
             /*
-             * Perform action
+             * Generate JSON object
+             */
+            final JSONObject jsonObj = DataServlet.convertParameter2JSONObject(httpServletRequest);
+            /*
+             * Pass parsed body to JSON object
              */
             final MailAccountRequest accountRequest = new MailAccountRequest(session);
             if (data.charAt(0) == '[') {
@@ -164,16 +157,6 @@ public final class MailAccountServlet extends PermissionServlet {
             } else {
                 final JSONObject jData = new JSONObject(data);
                 jsonObj.put(PARAMETER_DATA, jData);
-            }
-            /*
-             * Other parameters
-             */
-            for (final Object obj : httpServletRequest.getParameterMap().entrySet()) {
-                @SuppressWarnings("unchecked") final Map.Entry<String, String> entry = (Entry<String, String>) obj;
-                final String key = entry.getKey();
-                if (!PARAMETER_DATA.equals(key)) {
-                    jsonObj.put(key, entry.getValue());
-                }
             }
             final Object responseObj = accountRequest.action(action, jsonObj);
             response.setTimestamp(accountRequest.getTimestamp());
