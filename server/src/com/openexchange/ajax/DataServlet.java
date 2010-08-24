@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,17 +99,17 @@ public abstract class DataServlet extends PermissionServlet {
     }
 
     public static String parseMandatoryStringParameter(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
-        if (containsParameter(httpServletRequest, name)) {
-            return parseStringParameter(httpServletRequest, name);
+        if (!containsParameter(httpServletRequest, name)) {
+            throw new OXMandatoryFieldException(_missingField + name);
         }
-        throw new OXMandatoryFieldException(_missingField + name);
+        return parseStringParameter(httpServletRequest, name);
     }
 
     public static int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
-        if (containsParameter(httpServletRequest, name)) {
-            return parseIntParameter(httpServletRequest, name);
+        if (!containsParameter(httpServletRequest, name)) {
+            throw new OXMandatoryFieldException(_missingField + name);
         }
-        throw new OXMandatoryFieldException(_missingField + name);
+        return parseIntParameter(httpServletRequest, name);
     }
 
     public static int[] parsIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
@@ -135,50 +136,65 @@ public abstract class DataServlet extends PermissionServlet {
     }
 
     public static int[] parseMandatoryIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
-        if (containsParameter(httpServletRequest, name)) {
-            final String[] s = httpServletRequest.getParameterValues(name);
-
-            final int[] i = new int[s.length];
-
-            for (int a = 0; a < i.length; a++) {
-                i[a] = Integer.parseInt(s[a]);
-            }
-
-            return i;
+        if (!containsParameter(httpServletRequest, name)) {
+            throw new OXMandatoryFieldException(_missingField + name);
         }
-        throw new OXMandatoryFieldException(_missingField + name);
+        final String[] s = httpServletRequest.getParameterValues(name);
+
+        final int[] i = new int[s.length];
+
+        for (int a = 0; a < i.length; a++) {
+            i[a] = Integer.parseInt(s[a]);
+        }
+
+        return i;
     }
 
     public static Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
-        if (containsParameter(httpServletRequest, name)) {
-            return parseDateParameter(httpServletRequest, name);
+        if (!containsParameter(httpServletRequest, name)) {
+            throw new OXMandatoryFieldException(_missingField + name);
         }
-        throw new OXMandatoryFieldException(_missingField + name);
+        return parseDateParameter(httpServletRequest, name);
     }
 
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
+    /**
+     * Generates an appropriate JSON object from given request's parameters.
+     * 
+     * @param httpServletRequest The HTTP servlet request
+     * @return An appropriate JSON object
+     * @throws JSONException If a JSON error occurs
+     */
     public static JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
         final JSONObject jsonObj = new JSONObject();
-        final Enumeration<?> e = httpServletRequest.getParameterNames();
-        final StringBuilder sb = new StringBuilder();
-        while (e.hasMoreElements()) {
+        // final StringBuilder sb = new StringBuilder();
+        for (final Enumeration<?> e = httpServletRequest.getParameterNames(); e.hasMoreElements();) {
             final String name = e.nextElement().toString();
             final String value = httpServletRequest.getParameter(name);
-
             if (AJAXServlet.PARAMETER_COLUMNS.equals(name)) {
-                final String[] sa = value.split(" *, *");
-                for (int a = 0; a < sa.length; a++) {
-                    sb.append(sa[a]);
-                    sb.append(',');
+                jsonObj.put(name, SPLIT.matcher(value).replaceAll(","));
+                /*-
+                 * Previous code:
+                 * 
+                final String[] sa = SPLIT.split(value, 0);
+                final int len = sa.length;
+                if (len > 0) {
+                    sb.setLength(0);
+                    sb.append(sa[0]);
+                    for (int a = 1; a < len; a++) {
+                        sb.append(',').append(sa[a]);
+                    }
+                    jsonObj.put(name, sb.toString());
+                } else {
+                    jsonObj.put(name, "");
                 }
-
-                sb.delete(sb.length()-1, sb.length());
-
-                jsonObj.put(name, sb.toString());
-                sb.delete(0, sb.length());
+                */
             } else {
                 jsonObj.put(name, value);
             }
         }
         return jsonObj;
     }
+
 }
