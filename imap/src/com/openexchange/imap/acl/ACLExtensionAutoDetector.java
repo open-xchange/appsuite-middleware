@@ -50,7 +50,6 @@
 package com.openexchange.imap.acl;
 
 import java.net.InetSocketAddress;
-import java.util.Locale;
 import java.util.Map;
 import com.openexchange.imap.config.IMAPConfig;
 
@@ -82,6 +81,8 @@ final class ACLExtensionAutoDetector {
         return parse(imapConfig);
     }
 
+    private static final char[] RFC4314_CARACTERS_UPPER = { 'K', 'X', 'T', 'E' };
+
     private static ACLExtension parse(final IMAPConfig imapConfig) {
         /*
          * Examine CAPABILITY response
@@ -100,16 +101,18 @@ final class ACLExtensionAutoDetector {
          */
         for (final String upperName : capabilities.keySet()) {
             if (upperName.startsWith("RIGHTS=")) {
-                final int pos = upperName.indexOf('=') + 1;
-                final String allowedRights = pos < upperName.length() ? upperName.substring(pos).toLowerCase(Locale.ENGLISH) : "";
                 /*
-                 * Check if "RIGHTS=" provides any of new characters "k", "x", "t", or "e" as defined in RFC 4314
+                 * Check if RIGHTS=... capability contains right characters specified in RFC4314
                  */
-                final boolean containsRFC4314Character = containsRFC4314Character(allowedRights);
+                final int fromIndex = 6; // -> upperName.indexOf('=');
+                boolean containsRFC4314Character = false;
+                for (int i = 0; !containsRFC4314Character && i < RFC4314_CARACTERS_UPPER.length; i++) {
+                    containsRFC4314Character = (upperName.indexOf(RFC4314_CARACTERS_UPPER[i], fromIndex) >= 0);
+                }
                 if (DEBUG) {
                     LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(
                         new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
-                        "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"RIGHTS=").append(allowedRights).append(
+                        "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"").append(upperName).append(
                         "\" capability.").append("\n\tACL extension according to ").append(containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(
                         " is going to be used.\n"));
                 }
@@ -125,12 +128,11 @@ final class ACLExtensionAutoDetector {
         return new RFC2086ACLExtension();
     }
 
-    private static final char[] RFC4314_CARACTERS = { 'k', 'x', 't', 'e' };
-
-    private static boolean containsRFC4314Character(final String allowedRights) {
+    private static boolean containsRFC4314Character(final String rightsCapability) {
+        final int fromIndex = rightsCapability.indexOf('=');
         boolean found = false;
-        for (int i = 0; !found && i < RFC4314_CARACTERS.length; i++) {
-            found = (allowedRights.indexOf(RFC4314_CARACTERS[i]) >= 0);
+        for (int i = 0; !found && i < RFC4314_CARACTERS_UPPER.length; i++) {
+            found = (rightsCapability.indexOf(RFC4314_CARACTERS_UPPER[i], fromIndex) >= 0);
         }
         return found;
     }
