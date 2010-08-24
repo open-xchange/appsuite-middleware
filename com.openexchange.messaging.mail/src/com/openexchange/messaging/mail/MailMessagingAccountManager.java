@@ -173,7 +173,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             final MailAccountStorageService mass =
                 MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
 
-            mass.deleteMailAccount(account.getId(), session.getUserId(), session.getContextId());
+            mass.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
 
         } catch (final ServiceException e) {
             throw new MessagingException(e);

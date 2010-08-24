@@ -55,6 +55,7 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -118,18 +119,18 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary, final Connection con) throws MailAccountException {
-        delegate.deleteMailAccount(id, user, cid, deletePrimary, con);
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws MailAccountException {
+        delegate.deleteMailAccount(id, properties, user, cid, deletePrimary, con);
         invalidateMailAccount(id, user, cid);
     }
 
-    public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
-        delegate.deleteMailAccount(id, user, cid, deletePrimary);
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
+        delegate.deleteMailAccount(id, properties, user, cid, deletePrimary);
         invalidateMailAccount(id, user, cid);
     }
 
-    public void deleteMailAccount(final int id, final int user, final int cid) throws MailAccountException {
-        delegate.deleteMailAccount(id, user, cid);
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws MailAccountException {
+        delegate.deleteMailAccount(id, properties, user, cid);
         invalidateMailAccount(id, user, cid);
     }
 

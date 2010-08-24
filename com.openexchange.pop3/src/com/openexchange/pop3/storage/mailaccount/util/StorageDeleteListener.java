@@ -50,6 +50,7 @@
 package com.openexchange.pop3.storage.mailaccount.util;
 
 import java.sql.Connection;
+import java.util.Map;
 import com.openexchange.mail.MailException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountException;
@@ -71,11 +72,11 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
         super();
     }
 
-    public void onAfterMailAccountDeletion(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
         // Nothing to do
     }
 
-    public void onBeforeMailAccountDeletion(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
         try {
             RdbPOP3StorageProperties.dropProperties(id, user, cid, con);
             RdbPOP3StorageTrashContainer.dropTrash(id, user, cid, con);

@@ -52,6 +52,7 @@ package com.openexchange.mailaccount.servlet.request;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -251,7 +252,7 @@ public final class MailAccountRequest {
                 final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
                 if (!isUnifiedINBOXAccount(mailAccount)) {
-                    storageService.deleteMailAccount(id, session.getUserId(), session.getContextId());
+                    storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
                 }
 
                 jsonArray.put(id);
@@ -299,8 +300,8 @@ public final class MailAccountRequest {
         }
     }
 
-    private String getSecret(ServerSession session) {
-        SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
+    private String getSecret(final ServerSession session) {
+        final SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
         return secretService.getSecret(session);
     }
 

@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount.internal;
 
 import java.sql.Connection;
+import java.util.Collections;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -83,7 +84,7 @@ public class MailAccountDeleteListener implements DeleteListener {
                 final int cid = deleteEvent.getContext().getContextId();
                 final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
                 for (final MailAccount account : accounts) {
-                    storageService.deleteMailAccount(account.getId(), user, cid, true, writeCon);
+                    storageService.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), user, cid, true, writeCon);
                 }
             } catch (final ServiceException e) {
                 throw new DeleteFailedException(e);

@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
@@ -175,9 +176,9 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             // Delete the Unified INBOX account
             if (id >= 0) {
                 if (null == con) {
-                    storageService.deleteMailAccount(id, userId, contextId, false);
+                    storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false);
                 } else {
-                    storageService.deleteMailAccount(id, userId, contextId, false, con);
+                    storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false, con);
                 }
             }
         } catch (final ServiceException e) {

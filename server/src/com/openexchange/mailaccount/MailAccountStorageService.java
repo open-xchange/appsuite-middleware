@@ -51,6 +51,7 @@ package com.openexchange.mailaccount;
 
 import java.net.InetSocketAddress;
 import java.sql.Connection;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 
@@ -169,34 +170,37 @@ public interface MailAccountStorageService {
      * Deletes the mail account identified by specified ID.
      * 
      * @param id The mail account ID
+     * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
      * @param user The user ID
      * @param cid The context ID
      * @throws MailAccountException If the mail account cannot be deleted
      */
-    public void deleteMailAccount(int id, int user, int cid) throws MailAccountException;
+    public void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid) throws MailAccountException;
 
     /**
      * Deletes the mail account identified by specified ID.
      * 
      * @param id The mail account ID
+     * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
      * @param user The user ID
      * @param cid The context ID
      * @param deletePrimary <code>true</code> to delete also the primary mail account if the user is deleted.
      * @throws MailAccountException If the mail account cannot be deleted
      */
-    public void deleteMailAccount(int id, int user, int cid, boolean deletePrimary) throws MailAccountException;
+    public void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid, boolean deletePrimary) throws MailAccountException;
 
     /**
      * Deletes the mail account identified by specified ID.
      * 
      * @param id The mail account ID
+     * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
      * @param user The user ID
      * @param cid The context ID
      * @param deletePrimary <code>true</code> to delete also the primary mail account if the user is deleted.
      * @param con The connection to use
      * @throws MailAccountException If the mail account cannot be deleted
      */
-    public void deleteMailAccount(int id, int user, int cid, boolean deletePrimary, Connection con) throws MailAccountException;
+    public void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid, boolean deletePrimary, Connection con) throws MailAccountException;
 
     /**
      * Gets the mail accounts of the users whose login matches specified login.

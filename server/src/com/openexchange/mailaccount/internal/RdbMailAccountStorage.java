@@ -297,11 +297,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         super();
     }
 
-    public void deleteMailAccount(final int id, final int user, final int cid) throws MailAccountException {
-        deleteMailAccount(id, user, cid, false);
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws MailAccountException {
+        deleteMailAccount(id, properties, user, cid, false);
     }
 
-    public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_DELETE, I(user), I(cid));
         }
@@ -313,9 +313,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         try {
             con.setAutoCommit(false);
-            deleteMailAccount(id, user, cid, deletePrimary, con);
+            deleteMailAccount(id, properties, user, cid, deletePrimary, con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
@@ -324,14 +324,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    public void deleteMailAccount(final int id, final int user, final int cid, final boolean deletePrimary, final Connection con) throws MailAccountException {
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws MailAccountException {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_DELETE, I(user), I(cid));
         }
         PreparedStatement stmt = null;
         try {
             final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
-            registry.triggerOnBeforeDeletion(id, user, cid, con);
+            registry.triggerOnBeforeDeletion(id, properties, user, cid, con);
             // First delete properties
             deleteProperties(cid, user, id, con);
             deleteTransportProperties(cid, user, id, con);
@@ -347,7 +347,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(2, id);
             stmt.setLong(3, user);
             stmt.executeUpdate();
-            registry.triggerOnAfterDeletion(id, user, cid, con);
+            registry.triggerOnAfterDeletion(id, properties, user, cid, con);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {

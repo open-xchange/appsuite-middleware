@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.internal;
 
 import java.sql.Connection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
@@ -124,18 +125,18 @@ public final class DeleteListenerRegistry {
     /**
      * Triggers the {@link MailAccountDeleteListener#onBeforeMailAccountDeletion()} event for registered listeners.
      */
-    public void triggerOnBeforeDeletion(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws MailAccountException {
         for (final Iterator<MailAccountDeleteListener> iter = registry.values().iterator(); iter.hasNext();) {
-            iter.next().onBeforeMailAccountDeletion(id, user, cid, con);
+            iter.next().onBeforeMailAccountDeletion(id, properties, user, cid, con);
         }
     }
 
     /**
      * Triggers the {@link MailAccountDeleteListener#onAfterMailAccountDeletion()} event for registered listeners.
      */
-    public void triggerOnAfterDeletion(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void triggerOnAfterDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws MailAccountException {
         for (final Iterator<MailAccountDeleteListener> iter = registry.values().iterator(); iter.hasNext();) {
-            iter.next().onAfterMailAccountDeletion(id, user, cid, con);
+            iter.next().onAfterMailAccountDeletion(id, properties, user, cid, con);
         }
     }
 
