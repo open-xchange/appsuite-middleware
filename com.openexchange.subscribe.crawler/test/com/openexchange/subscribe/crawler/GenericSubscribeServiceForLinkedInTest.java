@@ -51,10 +51,9 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
 import org.ho.yaml.Yaml;
-import com.openexchange.subscribe.crawler.PagePart;
-import com.openexchange.subscribe.crawler.PagePartSequence;
-import com.openexchange.subscribe.crawler.Step;
-
+import com.openexchange.subscribe.crawler.internal.PagePart;
+import com.openexchange.subscribe.crawler.internal.PagePartSequence;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -70,55 +69,48 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("LinkedIn");
         crawler.setId("com.openexchange.subscribe.linkedin");
-        crawler.setPriority(3);
+        crawler.setCrawlerApiVersion(618);
+        crawler.setPriority(5);
+        crawler.setQuirkyCookieQuotes(true);
 
-        ArrayList<Step> listOfSteps = new ArrayList<Step>();
+        ArrayList<Step> steps = new ArrayList<Step>();
 
-        listOfSteps.add(new LoginWithHttpClientStep("Call LinkedIn with all parameters that are normally set by the login-form",
-            "https://www.linkedin.com/secure/login?session_key=USERNAME&session_password=PASSWORD&session_login=&session_rikey=&csrfToken=ajax:6545267463289092740",
-            ".*manual_redirect_link.*"));
+        steps.add(new StringByOAuthRequestStep(
+            "",
+            "",
+            "vEPBnxJvXvqf9NsBby0kZ1hcgQCM7JBO7iCjlw4KIDhw_7lwPIln7zIvtP3dbL-i",
+            "Ra7yTqolxUk_6UVpIAIsbv6kwLpIZCdNeUYxAA1n2Lnf05Dkr7D41dw-ivK-z4vA",
+            "https://api.linkedin.com/uas/oauth/requestToken",
+            // this may be api.linkedin.com instead of www.linkedin.com in the future (as originally documented by linkedin)
+            "https://www.linkedin.com/uas/oauth/authorize",
+            "https://api.linkedin.com/uas/oauth/accessToken",
+            null,
+            "email",
+            "password",
+            "http://api.linkedin.com/v1/people/~/connections:(first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url)"));
 
-        listOfSteps.add(new PageByUrlStep(
-            "Get to the no-javascript contacts list",
-            "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
-        listOfSteps.add(new AnchorsByLinkRegexStep(
-            "Get all pages that link to a connections profile",
-            "(/connectionsnojs\\?split_page=).*",
-            "(/profile\\?viewProfile=).*(goback).*", true));
-        ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
-        pageParts.add(new PagePart(
-            "(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-Z\u00e4\u00f6\u00fc\\s]*\">)",
-            "image"));
-        pageParts.add(new PagePart("(<h1 class=\"n fn\">)"));
-        pageParts.add(new PagePart("(span class=\"given-name\">)([a-zA-Z\u00e4\u00f6\u00fc]*)(</span>)", "first_name"));
-        pageParts.add(new PagePart("(span class=\"family-name\">)([a-zA-Z\u00e4\u00f6\u00fc]*)(</span>)", "last_name"));
-        pageParts.add(new PagePart("(<p class=\"title\">[\\s]*)([a-zA-Z\u00e4\u00f6\u00fc\\x20]*)([\\s]*</p>)", "title"));
-        pageParts.add(new PagePart(
-            "<dt>(Phone:|Telefon:|Tel\u00e9fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
-            "cellular_telephone1"));
-        pageParts.add(new PagePart(
-            "<dt>(Phone:|Telefon:|Tel\u00e9fono:|T.l.phone :</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
-            "telephone_home1"));
-        pageParts.add(new PagePart(
-            "<dt>(Phone:|Telefon:|Tel\u00e9fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
-            "telephone_business1"));
-        pageParts.add(new PagePart(
-            "<dt>(Address:|Adresse:|Adresse :|Direcci.n:)<\\/dt>[\\s]*<dd>[\\s]*<p>(.*\\s.*\\s.*)(<\\/dd>)",
-            "address_note"));
-        pageParts.add(new PagePart(
-            "<dt>(IM:|Mensaje instant.neo:|Messagerie instantan.e :) <\\/dt>[\\s]*<dd>[\\s]*<p>[\\s]*([^<]*)(<\\/p>)",
-            "instant_messenger1"));
+         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+         pageParts.add(new PagePart("<person>"));
+         pageParts.add(new PagePart("(<first-name>)([^<]*)(</first-name>)", "first_name"));
+         pageParts.add(new PagePart("(<last-name>)([^<]*)(</last-name>)", "last_name"));
+         pageParts.add(new PagePart("(<phone-type>work</phone-type>(?:\\s)*<phone-number>)([^<]*)(</phone-number>)", "telephone_business1"));
+         pageParts.add(new PagePart("(<phone-type>mobile</phone-type>(?:\\s)*<phone-number>)([^<]*)(</phone-number>)", "cellular_telephone1"));
+         pageParts.add(new PagePart("(<im-account-type>)([^<]*)(</im-account-type>)","instant_messenger1_type"));
+         pageParts.add(new PagePart("(<im-account-name>)([^<]*)(</im-account-name>)","instant_messenger1"));
+         
+         pageParts.add(new PagePart("(<year>)([0-9]*)(</year>)","birthday_year"));
+         pageParts.add(new PagePart("(<month>)([0-9]*)(</month>)","birthday_month_real"));
+         pageParts.add(new PagePart("(<day>)([0-9]*)(</day>)","birthday_day"));
+         pageParts.add(new PagePart("(<main-address>)([^<]*)(</main-address>)", "address_note"));
+         pageParts.add(new PagePart("(<picture-url>)([^<]*)(</picture-url>)", "image"));
+         pageParts.add(new PagePart("</person>"));
         
-        
-        pageParts.add(new PagePart("(mailto:)"+VALID_EMAIL_REGEX+"(\")", "email1"));
+         PagePartSequence sequence = new PagePartSequence(pageParts, "", "</person>");
+         steps.add(new ContactObjectsByStringAndPagePartSequenceStep(
+         "Get the information of each contact from the xml-file returned by the API",
+         sequence));
 
-        PagePartSequence sequence = new PagePartSequence(pageParts, "");
-        listOfSteps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
-            "Get the information of each contact from the individual webpages",
-            sequence));
-
-        Workflow workflow = new Workflow(listOfSteps);
-        crawler.setWorkflowString(Yaml.dump(workflow));
+        crawler.finishUp(steps);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the crawler description was updated to get the new config-files

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.crawler.internal.PagePart;
+import com.openexchange.subscribe.crawler.internal.PagePartSequence;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * {@link GenericSubscribeServiceForFacebookWebTest}
@@ -70,26 +74,33 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
         final CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
+        crawler.setCrawlerApiVersion(616);
+        // increment priority with each new version to override (=be able to update) older versions
+        crawler.setPriority(5);
+        // this crawler gets contacts
+        crawler.setModule(FolderObject.CONTACT);
+        
         final List<Step> steps = new LinkedList<Step>();
 
-        steps.add(new LoginPageByFormActionStep(
+        steps.add(new LoginPageByFormActionRegexStep(
             "Login to facebook.com",
-            "https://m.facebook.com/",
+            "http://m.facebook.com/",
             "",
             "",
-            "https://login.facebook.com/login.php?",
+            ".*login.*",
             "email",
             "pass",
-            "(\\/friends.*)",
+            "(.*friends.*)",
             1,
-            "https://m.facebook.com"));
+            "http://m.facebook.com"));
         steps.add(new PageByLinkRegexStep("click the friends-link", "\\/friends.*"));
         steps.add(new PageByLinkRegexStep("click the all-link", "\\/friends.php?.*&a.*"));
-        steps.add(new AnchorsByLinkRegexStep(
+        steps.add(new AnchorsByLinkXPathStep(
             "click all the individual friends links on all subpages.",
             "\\/friends.php?.*&a&f.*",
-            "\\/profile.php.*&id.*",
-            ".*&id=([0-9]*)&.*"));
+            "/html/body/div[4]/div[6]/table/tbody/tr[REPLACE_THIS]/td/a",
+            0,
+            17));
         final ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(<div class=\"section_title\">)([^<]*)(</div>)", "display_name"));
         pageParts.add(new PagePart("(<img src=\")(http:\\/\\/profile\\.ak\\.fbcdn\\.net[^\"]*)(\")", "image"));
@@ -107,16 +118,17 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
         steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
             "Get the info-bits from the contact-page.",
             sequence,
-            "Facebook.*(Your Profile|Dein Profil)", ".*&v=info.*"));
+            "Facebook.*(Your Profile|Dein Profil)", 
+            ".*&v=info.*"));
+        steps.add(new RemoveDuplicateContactsStep());
         final Workflow workflow = new Workflow(steps);
         
         
         final String yamlString = Yaml.dump(workflow);
         crawler.setWorkflowString(yamlString);
-        //System.out.println(yamlString);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, crawler.getDisplayName());
+        // dumpThis(crawler, crawler.getDisplayName());
     }
 }

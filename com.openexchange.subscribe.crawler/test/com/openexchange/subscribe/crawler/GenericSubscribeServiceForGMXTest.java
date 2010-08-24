@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
-import com.openexchange.subscribe.crawler.Step;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * {@link GenericSubscribeServiceForGMXTest}

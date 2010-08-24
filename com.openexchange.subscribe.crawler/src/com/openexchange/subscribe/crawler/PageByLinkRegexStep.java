@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,12 +51,15 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
  * This Step gets a page reachable via Link in the current context (WebClient)
@@ -70,6 +73,8 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
     private Exception exception;
 
     protected boolean executedSuccessfully;
+    
+    private static Log LOG = LogFactory.getLog(PageByLinkRegexStep.class);
 
     public PageByLinkRegexStep() {
         super();
@@ -86,12 +91,20 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
         try {
             for (final HtmlAnchor link : input.getAnchors()) {
                 if (link.getHrefAttribute().matches(linkRegex)) {
-                    output = link.click();                 
+                    output = link.click();
                     break;
                 }
             }
-                       
-            executedSuccessfully = true;
+            
+            if (output != null) {
+                executedSuccessfully = true;                 
+            } else {
+                LOG.error("The expected link was not on this page. Expectation was something matching this: "+ linkRegex);
+                for (final HtmlAnchor link : input.getAnchors()) {
+                    LOG.debug("Available Link : " + link.getHrefAttribute());
+                }               
+            }
+            
         } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final MalformedURLException e) {

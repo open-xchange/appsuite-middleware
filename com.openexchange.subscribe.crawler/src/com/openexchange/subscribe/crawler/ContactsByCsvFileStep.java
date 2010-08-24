@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,9 +56,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contact.ContactUtil;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.Mappings;
 import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
@@ -68,99 +69,87 @@ import com.openexchange.tools.versit.converter.ConverterException;
  */
 public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage> {
 
-	private boolean ignoreFirstLine;
+    private boolean ignoreFirstLine;
 
-	private Map<Integer, String> fieldMapping;
+    private Map<Integer, String> fieldMapping;
 
-	private static final Log LOG = LogFactory
-			.getLog(ContactsByCsvFileStep.class);
+    private static final Log LOG = LogFactory.getLog(ContactsByCsvFileStep.class);
 
-	public ContactsByCsvFileStep() {
-		super();
-	}
+    public ContactsByCsvFileStep() {
+        super();
+    }
 
-	public ContactsByCsvFileStep(final String description,
-			final boolean ignoreFirstLine,
-			final Map<Integer, String> fieldMapping) {
-		this.description = description;
-		this.ignoreFirstLine = ignoreFirstLine;
-		this.fieldMapping = fieldMapping;
-	}
+    public ContactsByCsvFileStep(final String description, final boolean ignoreFirstLine, final Map<Integer, String> fieldMapping) {
+        this.description = description;
+        this.ignoreFirstLine = ignoreFirstLine;
+        this.fieldMapping = fieldMapping;
+    }
 
-	@Override
-	public void execute(final WebClient webClient) throws SubscriptionException {
-		final Vector<Contact> contactObjects = new Vector<Contact>();
-		if (input != null) {
-			String page = input.getWebResponse().getContentAsString();
-			int counter = 0;
-			while (page.contains("\n")) {
-				final int endOfLine = page.indexOf("\n");
-				Contact contact = null;
-				if (!(ignoreFirstLine && counter == 0)) {
-					final HashMap<String, String> resultMap = new HashMap<String, String>();
-					final String line = page.substring(0, endOfLine);
-					final String[] fields = line.split("\",\"");
+    @Override
+    public void execute(final WebClient webClient) {
+        final Vector<Contact> contactObjects = new Vector<Contact>();
+        if (input != null) {
+            String page = input.getWebResponse().getContentAsString();
+            int counter = 0;
+            while (page.contains("\n")) {
+                final int endOfLine = page.indexOf("\n");
+                Contact contact = null;
+                if (!(ignoreFirstLine && counter == 0)) {
+                    final HashMap<String, String> resultMap = new HashMap<String, String>();
+                    final String line = page.substring(0, endOfLine);
+                    final String[] fields = line.split("\",\"");
 
-					int fieldCounter = 0;
-					for (String field : fields) {
-						field = field.replaceAll("\"", "");
-						// if there is a mapping for this value in the cvs-file
-						if (fieldMapping.containsKey(fieldCounter)
-								&& !field.equals("")) {
-							resultMap
-									.put(fieldMapping.get(fieldCounter), field);
-						}
+                    int fieldCounter = 0;
+                    for (String field : fields) {
+                        field = field.replaceAll("\"", "");
+                        // if there is a mapping for this value in the cvs-file
+                        if (fieldMapping.containsKey(fieldCounter) && !field.equals("")) {
+                            resultMap.put(fieldMapping.get(fieldCounter), field);
+                        }
 
-						fieldCounter++;
-					}
+                        fieldCounter++;
+                    }
 
-					try {
-						contact = Mappings.translateMapToContact(resultMap);
-					} catch (final ConverterException e) {
-						LOG.error(e.getMessage()
-								+ " for Context : "
-								+ workflow.getSubscription().getContext()
-										.getContextId() + ", User : "
-								+ workflow.getSubscription().getUserId()
-								+ ", Folder : "
-								+ workflow.getSubscription().getFolderId()
-								+ ".");
+                    try {
+                        contact = Mappings.translateMapToContact(resultMap);
+                    } catch (final ConverterException e) {
+                        LOG.error(e.getMessage() + " for Context : " + workflow.getSubscription().getContext().getContextId() + ", User : " + workflow.getSubscription().getUserId() + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
 
-						exception = e;
-					}
+                        exception = e;
+                    }
 
-				}
+                }
 
-				page = page.substring(endOfLine + 1);
-				counter++;
-				if (contact != null) {
-					ContactUtil.generateDisplayName(contact);
-					contactObjects.add(contact);
-				}
+                page = page.substring(endOfLine + 1);
+                counter++;
+                if (contact != null) {
+                    ContactUtil.generateDisplayName(contact);
+                    contactObjects.add(contact);
+                }
 
-			}
-		}
-		executedSuccessfully = true;
-		output = new Contact[contactObjects.size()];
-		for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
-			output[i] = contactObjects.get(i);
-		}
-	}
+            }
+        }
+        executedSuccessfully = true;
+        output = new Contact[contactObjects.size()];
+        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
+            output[i] = contactObjects.get(i);
+        }
+    }
 
-	public boolean getIgnoreFirstLine() {
-		return ignoreFirstLine;
-	}
+    public boolean getIgnoreFirstLine() {
+        return ignoreFirstLine;
+    }
 
-	public void setIgnoreFirstLine(final boolean ignoreFirstLine) {
-		this.ignoreFirstLine = ignoreFirstLine;
-	}
+    public void setIgnoreFirstLine(final boolean ignoreFirstLine) {
+        this.ignoreFirstLine = ignoreFirstLine;
+    }
 
-	public Map<Integer, String> getFields() {
-		return fieldMapping;
-	}
+    public Map<Integer, String> getFields() {
+        return fieldMapping;
+    }
 
-	public void setFields(final Map<Integer, String> fields) {
-		fieldMapping = fields;
-	}
+    public void setFields(final Map<Integer, String> fields) {
+        fieldMapping = fields;
+    }
 
 }

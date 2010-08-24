@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,8 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -95,6 +97,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 
         String pageString = input.getWebResponse().getContentAsString();
+        LOG.debug("The page to scan for vCards is : " + pageString);
 
         while (pageString.contains("BEGIN:VCARD")) {
             final int beginIndex = pageString.indexOf("BEGIN:VCARD");

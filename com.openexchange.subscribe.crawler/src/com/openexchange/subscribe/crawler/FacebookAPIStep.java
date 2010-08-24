@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,6 +68,8 @@ import com.facebook.api.schema.UsersGetInfoResponse;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.LoginStep;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -231,7 +233,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                     try {
                         OXContainerConverter.loadImageFromURL(contact, user.getPic().getValue());
                     } catch (final ConverterException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("No valid picture could be found at this URL : " + user.getPic().getValue());
                     }
                 }
                 contactObjects.add(contact);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,6 +61,10 @@ import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
+import com.openexchange.subscribe.crawler.internal.Mappings;
+import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.converter.ConverterException;
 
@@ -78,6 +82,8 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     private String titleExceptionsRegex, linkToTargetPage;
 
     private static final Log LOG = LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
+    
+    private boolean addPagesTogether;
 
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts) {
         this.description = description;
@@ -92,6 +98,14 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         this.titleExceptionsRegex = titleExceptionsRegex;
         this.linkToTargetPage = linkToTargetPage;
     }
+    
+    public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts, final String titleExceptionsRegex, final String linkToTargetPage, boolean addPagesTogether) {
+        this.description = description;
+        this.pageParts = pageParts;
+        this.titleExceptionsRegex = titleExceptionsRegex;
+        this.linkToTargetPage = linkToTargetPage;
+        this.addPagesTogether = addPagesTogether;
+    }
 
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep() {
         titleExceptionsRegex = "";
@@ -102,20 +116,32 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     public void execute(final WebClient webClient) throws SubscriptionException {
         final List<Contact> contactObjects = new ArrayList<Contact>();
         // final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+        HtmlPage debugPage = null;
         for (final HtmlAnchor anchor : input) {
             try {
                 HtmlPage page = anchor.click();
+                String additionalPageString = "";
+                if (isDebuggingEnabled()){
+                    debugPage = page;
+                }
                 // in case the reached page is not yet the one with (all) the contact info and there is one more link to click
                 if (!linkToTargetPage.equals("")){
                    final PageByLinkRegexStep step = new PageByLinkRegexStep("", linkToTargetPage);
                    step.setInput(page);
                    step.execute(webClient);
-                   page = step.getOutput();
+                   // sometimes additional Information is on a linked page. If that is the case this subpage needs to be added
+                   if (! addPagesTogether){
+                       page = step.getOutput();
+                   } else {
+                       additionalPageString = step.getOutput().getWebResponse().getContentAsString();
+                   }
                 }
                 final String titleText = page.getTitleText();
                 if (null != titleText && !titleText.matches(titleExceptionsRegex)){
-                    final String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
+                    String pageAsString = page.getWebResponse().getContentAsString() + additionalPageString;
+                    final String pageString = StringEscapeUtils.unescapeHtml(pageAsString);                
                     pageParts.setPage(pageString);
+                    LOG.debug("Page evaluated is : "+pageString);
                     final HashMap<String, String> map = pageParts.retrieveInformation();
     
                     final Contact contact = Mappings.translateMapToContact(map);
@@ -138,9 +164,11 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             }
             executedSuccessfully = true;
         }
-        if (input.isEmpty()) {
+
+        if (input == null || input.isEmpty()){
             executedSuccessfully = true;
         }
+        
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
 
     }
@@ -175,6 +203,16 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     
     public void setLinkToTargetPage(final String linkToTargetPage) {
         this.linkToTargetPage = linkToTargetPage;
+    }
+
+    
+    public boolean isAddPagesTogether() {
+        return addPagesTogether;
+    }
+
+    
+    public void setAddPagesTogether(boolean addPagesTogether) {
+        this.addPagesTogether = addPagesTogether;
     }
 
     

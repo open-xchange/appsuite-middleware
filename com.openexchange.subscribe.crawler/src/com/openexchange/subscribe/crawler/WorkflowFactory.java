@@ -54,6 +54,7 @@ import java.io.FileNotFoundException;
 import org.ho.yaml.Yaml;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * Gets a text input and creates Workflow

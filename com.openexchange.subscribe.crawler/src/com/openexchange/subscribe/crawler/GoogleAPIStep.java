@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,6 +77,8 @@ import com.google.gdata.util.ServiceException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * {@link GoogleAPIStep}
@@ -236,7 +238,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                 }   
                 for (final Im im : entry.getImAddresses()) {
                     if (im.getProtocol() != null) {
-                        final String regex = "[^#]*#([a-zA-Z������]*)";
+                        final String regex = "[^#]*#([a-zA-Z\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc]*)";
                         final Pattern pattern = Pattern.compile(regex);
                         final Matcher matcher = pattern.matcher(im.getProtocol());
                         if (matcher.matches()){

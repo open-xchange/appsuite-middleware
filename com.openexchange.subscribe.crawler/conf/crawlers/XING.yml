@@ -6,6 +6,7 @@ workflowString: |
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageStep
       baseUrl: "https://www.xing.com"
+      description: Login to www.xing.com
       linkAvailableAfterLogin: /app/contact
       nameOfLoginForm: loginform
       nameOfPasswordField: login_password
@@ -15,6 +16,7 @@ workflowString: |
       url: "https://www.xing.com"
       username: ""
     - !com.openexchange.subscribe.crawler.TextPagesByLinkStep
+      description: Get all vcards as text pages
       linkpart: /app/contact?op=vcard;scr_id
       offset: 10
       urlAfterOffset: ""

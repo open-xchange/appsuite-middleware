@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,42 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
 
+import java.lang.reflect.TypeVariable;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.Workflow;
 
-public abstract class AbstractStep<O,I> implements Step<O,I>{
+/**
+ * A Step in a crawling workflow
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @param <O> The Output accessible if the step executed successfully
+ * @param <I> The Input needed for the step to execute
+ */
+public interface Step<O, I>{
 
-    protected String description;
+    boolean executedSuccessfully();
 
-    protected Exception exception;
+    Exception getException();
 
-    protected boolean executedSuccessfully;
+    void execute(WebClient webClient) throws SubscriptionException;
+
+    Class inputType();
+
+    Class outputType();
     
-    protected Workflow workflow;
+    void setWorkflow(Workflow workflow);
     
-    protected O output;
+    public void setInput(I input);
     
-    protected I input;
-
-    protected AbstractStep() {
-        super();
-    }
-
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    public Exception getException() {
-        return this.exception;
-    }
+    public O getOutput();
     
-    public void setWorkflow (final Workflow workflow){
-        this.workflow = workflow;
-    }
-
-    public String getDescription() {
-        return description;
-    }
+    public boolean isDebuggingEnabled();
     
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    public abstract void execute(WebClient webClient) throws SubscriptionException;
-
-    public Class inputType() {
-        return input.getClass();
-    }
-
-    public Class outputType() {
-        return output.getClass();
-    }
-
-    public O getOutput() {
-        return output;
-    }
-
-    public void setInput(final I input) {
-        this.input = input;
-        
-    }
+    public void setDebuggingEnabled(boolean debuggingEnabled);
     
+    public TypeVariable<?>[] runEmpty();
+
 }

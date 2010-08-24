@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,39 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.gargoylesoftware.htmlunit;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.SubscriptionException;
+import org.apache.commons.httpclient.Cookie;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
- * A Step in a crawling workflow
- * 
+ * {@link CrawlerCookieSpecWithQuirkyQuotes}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @param <O> The Output accessible if the step executed successfully
- * @param <I> The Input needed for the step to execute
  */
-public interface Step<O, I>{
+public class CrawlerCookieSpecWithQuirkyQuotes extends CrawlerCookieSpec {
 
-    boolean executedSuccessfully();
-
-    Exception getException();
-
-    void execute(WebClient webClient) throws SubscriptionException;
-
-    Class inputType();
-
-    Class outputType();
+    protected static final Log LOG = LogFactory.getLog(CrawlerCookieSpecWithQuirkyQuotes.class);
     
-    void setWorkflow(Workflow workflow);
+    public CrawlerCookieSpecWithQuirkyQuotes(){
+    }
     
-    public void setInput(I input);
-    
-    public O getOutput();
-
+    // overwriting this to be able to use the quotes needed for linkedin
+    public String formatCookie(Cookie cookie) {
+        LOG.trace("enter CrawlerCookieSpecWithQuirkyQuotes.formatCookie(Cookie)");
+        if (cookie == null) {
+            throw new IllegalArgumentException("Cookie may not be null");
+        }
+        StringBuffer buf = new StringBuffer();
+        buf.append(cookie.getName());
+        buf.append("=");
+        String s = "\"" + cookie.getValue()+"\"";                        
+        //System.out.println("quirkyCookieQuotes ensabled! ");        
+        if (s != null) {
+            buf.append(s);
+        }
+        return buf.toString();
+    }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * This is NOT the preferred way to crawl Facebook. FacebookWeb delivers much more information.
@@ -68,6 +69,8 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
+        crawler.setPriority(8);
+        
         List<Step> steps = new LinkedList<Step>();
 
         steps.add(new FacebookAPIStep(

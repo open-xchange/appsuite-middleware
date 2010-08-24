@@ -61,7 +61,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
-import com.openexchange.subscribe.crawler.GenericSubscribeService;
+import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
 
 /**
  * {@link Activator}
@@ -85,8 +85,11 @@ public class Activator implements BundleActivator {
                 final GenericSubscribeService subscribeService = new GenericSubscribeService(
                     crawler.getDisplayName(),
                     crawler.getId(),
+                    crawler.getModule(),
                     crawler.getWorkflowString(), 
-                    crawler.getPriority());
+                    crawler.getPriority(),
+                    this,
+                    crawler.isJavascriptEnabled());
                 final ServiceRegistration serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
                 services.add(serviceRegistration);
             }

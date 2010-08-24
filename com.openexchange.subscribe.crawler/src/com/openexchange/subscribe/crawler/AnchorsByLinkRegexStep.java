@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,11 +55,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
  * This step takes a page and returns all pages linked from this page (as HTMLAnchors) via links, also from subpages, that fulfill a regular
@@ -80,6 +82,8 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     private ArrayList<HtmlPage> subpages;
     
     private String identifyingCriteria;
+    
+    private static Log LOG = LogFactory.getLog(AnchorsByLinkRegexStep.class);
 
     private boolean mayHaveEmptyOutput;
 
@@ -114,10 +118,11 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     }
 
     @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) {
         try {         
             // add the first page as there should always be results there
             subpages.add(input);
+            LOG.debug("Input page is : " + input.getWebResponse().getContentAsString());
             // search for subpages
             for (final HtmlAnchor link : input.getAnchors()) {
                 // get the subpages
@@ -127,7 +132,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                         subpagesHref.add(link.getHrefAttribute());
                         // remember its page for later
                         subpages.add((HtmlPage) link.click());
-
+                        LOG.debug("Subpage added : " + link.getHrefAttribute());
                     }
 
                 }
@@ -140,6 +145,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                         if (identifyingCriteria.equals("")){
                             output.add(possibleLinkToResultpage);
                             outputHref.add(possibleLinkToResultpage.getHrefAttribute());
+                            LOG.debug("Added this link to the list : " + possibleLinkToResultpage.getHrefAttribute());
                         // if differentiating by href alone is not enough to prevent double links
                         } else {
                             final Pattern pattern = Pattern.compile(identifyingCriteria);
@@ -150,6 +156,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                                     output.add(possibleLinkToResultpage);
                                     outputHref.add(possibleLinkToResultpage.getHrefAttribute());
                                     uniqueIds.add(uniqueId);
+                                    LOG.debug("Added this link to the list : " + possibleLinkToResultpage.getHrefAttribute());
                                 }
                             }
                         }
@@ -158,7 +165,13 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                 }
             }
             if (output != null && (output.size() != 0 || mayHaveEmptyOutput)) {
-                executedSuccessfully = true;
+                executedSuccessfully = true;                
+            } else {
+                LOG.error("No links matching the criteria were found.");
+                LOG.info(input.getWebResponse().getContentAsString());
+                for (HtmlAnchor link : input.getAnchors()){
+                    LOG.info("Link available on the first page : " + link.getHrefAttribute());
+                }
             }
         } catch (final FailingHttpStatusCodeException e) {
             exception = e;

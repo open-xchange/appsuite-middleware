@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,8 @@ import java.util.Vector;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -102,9 +104,11 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep<Contact[], 
             }
             executedSuccessfully = true;
         }
+        // this allows empty addressbooks (no contacts is a legitimate result if there are none)
         if (input.isEmpty()) {
             executedSuccessfully = true;
         }
+        
         output = new Contact[contactObjects.size()];
         for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
             output[i] = contactObjects.get(i);

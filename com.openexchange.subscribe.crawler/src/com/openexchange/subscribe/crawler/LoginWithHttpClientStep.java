@@ -55,94 +55,95 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
-
 import com.gargoylesoftware.htmlunit.CrawlerWebConnection;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
 import com.gargoylesoftware.htmlunit.WebResponseImpl;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
-
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
- * {@link LoginWithHttpClientStep}
+ * {@link LoginWithHttpClientStep} This step opens a single URL in HttpClient and passes this session on to the standard WebClient. This
+ * allows a login for some exotic scenarios when all parameters of the relevant login-form are passed via URL. An example for this is
+ * LinkedIn in its current (2010/03/25) incarnation.
  * 
- * This step opens a single URL in HttpClient and passes this session on to the standard WebClient.
- * This allows a login for some exotic scenarios when all parameters of the relevant login-form are passed via URL.
- * An example for this is LinkedIn in its current (2010/03/25) incarnation.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implements LoginStep {
-    
+
     private String url, regex;
-    
-    public LoginWithHttpClientStep(){
-        
+
+    public LoginWithHttpClientStep() {
+
     }
-    
-    public LoginWithHttpClientStep(String description, String url, String regex){
+
+    public LoginWithHttpClientStep(String description, String url, String regex) {
         this.description = description;
         this.url = url;
         this.regex = regex;
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
-    	MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
+        MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
         final HttpClient httpClient = new HttpClient(manager);
-        
+
         try {
             GetMethod getMethod = new GetMethod(url);
             getMethod.setFollowRedirects(true);
-            int code = httpClient.executeMethod(getMethod); 
+            int code = httpClient.executeMethod(getMethod);
+
             String page = getMethod.getResponseBodyAsString();
-            
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(page);
-            if (! matcher.find()){
-            	throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+            if (!matcher.find()) {
+                throw SubscriptionErrorMessage.INVALID_LOGIN.create();
             }
-            
-            webClient.setWebConnection(new CrawlerWebConnection(webClient) {            	
+
+            webClient.setWebConnection(new CrawlerWebConnection(webClient) {
 
                 public WebResponse getResponse(WebRequestSettings settings) throws IOException {
                     URL url = settings.getUrl();
                     GetMethod getMethod2 = new GetMethod(url.toString());
                     int statusCode = httpClient.executeMethod(getMethod2);
-                    
+
                     Header[] responseHeaders = getMethod2.getResponseHeaders();
                     List<NameValuePair> pairs = new ArrayList<NameValuePair>();
                     for (int i = 0; i < responseHeaders.length; i++) {
                         Header header = responseHeaders[i];
                         pairs.add(new NameValuePair(header.getName(), header.getValue()));
                     }
-                    
-                    WebResponseData responseData = new WebResponseData(getMethod2.getResponseBody(), statusCode, getMethod2.getStatusText(), pairs );
-                    
+
+                    WebResponseData responseData = new WebResponseData(
+                        getMethod2.getResponseBody(),
+                        statusCode,
+                        getMethod2.getStatusText(),
+                        pairs);
+
                     HttpMethod method = HttpMethod.GET;
                     long loadTime = 23;
-                    
+
                     return new WebResponseImpl(responseData, url, method, loadTime);
                 }
-                
-                public HttpClient getHttpClient (){
+
+                public HttpClient getHttpClient() {
                     return httpClient;
                 }
-                
-            });                        
-            
+
+            });
+
             executedSuccessfully = true;
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -160,23 +161,22 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
         url = url.replace("USERNAME", username);
     }
 
-    
     public String getUrl() {
         return url;
     }
 
-    
     public void setUrl(String url) {
         this.url = url;
     }
 
-	public String getRegex() {
-		return regex;
-	}
-
-	public void setRegex(String regex) {
-		this.regex = regex;
-	}
+    
+    public String getRegex() {
+        return regex;
+    }
 
     
+    public void setRegex(String regex) {
+        this.regex = regex;
+    }
+
 }
