@@ -50,6 +50,8 @@
 package com.openexchange.mailaccount.servlet;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -142,10 +144,8 @@ public final class MailAccountServlet extends PermissionServlet {
         try {
             final String action = DataServlet.parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
             final ServerSession session = getSessionObject(httpServletRequest);
-
             final String data = getBody(httpServletRequest);
-            JSONObject jsonObj;
-
+            final JSONObject jsonObj;
             try {
                 jsonObj = DataServlet.convertParameter2JSONObject(httpServletRequest);
             } catch (final JSONException e) {
@@ -154,22 +154,28 @@ public final class MailAccountServlet extends PermissionServlet {
                 writeResponse(response, httpServletResponse);
                 return;
             }
-
+            /*
+             * Perform action
+             */
             final MailAccountRequest accountRequest = new MailAccountRequest(session);
-
-            final Object responseObj;
             if (data.charAt(0) == '[') {
                 final JSONArray jData = new JSONArray(data);
-
                 jsonObj.put(PARAMETER_DATA, jData);
-
-                responseObj = accountRequest.action(action, jsonObj);
             } else {
                 final JSONObject jData = new JSONObject(data);
                 jsonObj.put(PARAMETER_DATA, jData);
-
-                responseObj = accountRequest.action(action, jsonObj);
             }
+            /*
+             * Other parameters
+             */
+            for (final Object obj : httpServletRequest.getParameterMap().entrySet()) {
+                @SuppressWarnings("unchecked") final Map.Entry<String, String> entry = (Entry<String, String>) obj;
+                final String key = entry.getKey();
+                if (!PARAMETER_DATA.equals(key)) {
+                    jsonObj.put(key, entry.getValue());
+                }
+            }
+            final Object responseObj = accountRequest.action(action, jsonObj);
             response.setTimestamp(accountRequest.getTimestamp());
             response.setData(responseObj);
         } catch (final OXMandatoryFieldException e) {
