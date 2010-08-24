@@ -180,15 +180,19 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         private final int contextId;
 
+        private final String id;
+
         private final int hash;
 
-        public Key(final int tree, final int userId, final int contextId) {
+        public Key(final String id, final int tree, final int userId, final int contextId) {
             super();
+            this.id = id;
             this.tree = tree;
             this.userId = userId;
             this.contextId = contextId;
             final int prime = 31;
             int result = 1;
+            result = prime * result + (null == id ? 0 : id.hashCode());
             result = prime * result + contextId;
             result = prime * result + tree;
             result = prime * result + userId;
@@ -209,6 +213,13 @@ public final class OutlookFolderStorage implements FolderStorage {
                 return false;
             }
             final Key other = (Key) obj;
+            if (null == id) {
+                if (null != other.id) {
+                    return false;
+                }
+            } else if (!id.equals(other.id)) {
+                return false;
+            }
             if (contextId != other.contextId) {
                 return false;
             }
@@ -1037,8 +1048,38 @@ public final class OutlookFolderStorage implements FolderStorage {
         return ret;
     }
 
+    SortableId[] getSubfolders(final String id, final String treeId, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
+        final Key key = new Key(id, Integer.parseInt(treeId), storageParameters.getUserId(), storageParameters.getContextId());
+        Future<List<SortableId>> f = TCM.get(key);
+        if (null == f) {
+            final FutureTask<List<SortableId>> ft = new FutureTask<List<SortableId>>(new Callable<List<SortableId>>() {
+
+                public List<SortableId> call() throws Exception {
+                    return Arrays.asList(folderStorage.getSubfolders(realTreeId, id, storageParameters));
+                }
+            });
+            f = TCM.putIfAbsent(key, ft, 60);
+            if (null == f) {
+                f = ft;
+                ft.run();
+            }
+        }
+        try {
+            final List<SortableId> sortedIDs = f.get();
+            return sortedIDs.toArray(new SortableId[sortedIDs.size()]);
+        } catch (final InterruptedException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof FolderException) {
+                throw (FolderException) cause;
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+        }
+    }
+
     private SortableId[] getINBOXSubfolders(final String treeId, final StorageParameters storageParameters, final User user, final Locale locale, final int contextId, final int tree) throws FolderException {
-        final Key key = new Key(tree, user.getId(), contextId);
+        final Key key = new Key(PREPARED_FULLNAME_INBOX, tree, user.getId(), contextId);
         Future<List<SortableId>> f = TCM.get(key);
         if (null == f) {
             final FutureTask<List<SortableId>> ft = new FutureTask<List<SortableId>>(new Callable<List<SortableId>>() {
@@ -1672,7 +1713,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                  */
                 final SortableId[] mailIDs;
                 try {
-                    mailIDs = folderStorage.getSubfolders(realTreeId, fullname, storageParameters);
+                    mailIDs = getSubfolders(fullname, realTreeId, folderStorage, storageParameters);
                 } catch (final FolderException e) {
                     final Throwable cause = e.getCause();
                     if (cause instanceof MailException) {
