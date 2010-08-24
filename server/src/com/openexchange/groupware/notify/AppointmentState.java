@@ -250,7 +250,8 @@ public class AppointmentState extends LinkableState {
         Appointment.ALARM,
         Appointment.LAST_MODIFIED,
         Appointment.NOTIFICATION,
-        Appointment.RECURRENCE_TYPE
+        Appointment.RECURRENCE_TYPE,
+        Appointment.CATEGORIES
     ));
     
     public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {

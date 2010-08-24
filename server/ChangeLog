@@ -1,4 +1,8 @@
-* 2010-08-17 - martin.herfurth@open-xchange.com
+* 2010-08-24 - martin.herfurth@open-xchange.com
+
+ - Bugfix #16714: No change notifications for category changes.
+
+* 2010-08-23 - martin.herfurth@open-xchange.com
 
  - Bugfix #16579: New Until for Appointment Series.
 
