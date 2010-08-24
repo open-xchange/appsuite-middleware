@@ -134,7 +134,7 @@ public final class MailFolderStorage implements FolderStorage {
         super();
     }
 
-    public void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException {
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
         // Nothing to do
     }
 
@@ -199,11 +199,11 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
         throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
     }
 
-    public void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException {
+    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             @SuppressWarnings("unchecked") final TIntObjectHashMap<MailAccess<?, ?>> accesses =
                 (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
@@ -725,7 +725,7 @@ public final class MailFolderStorage implements FolderStorage {
                 final int size = accounts.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int j = 0; j < size; j++) {
-                    list.add(new MailId(prepareFullname(accounts.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), j));
+                    list.add(new MailId(prepareFullname(accounts.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), j).setName(MailFolder.DEFAULT_FOLDER_NAME));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -797,7 +797,8 @@ public final class MailFolderStorage implements FolderStorage {
             final List<SortableId> list = new ArrayList<SortableId>(children.size());
             final int size = children.size();
             for (int j = 0; j < size; j++) {
-                list.add(new MailId(prepareFullname(mailAccess.getAccountId(), children.get(j).getFullname()), j));
+                final MailFolder tmp = children.get(j);
+                list.add(new MailId(prepareFullname(mailAccess.getAccountId(), tmp.getFullname()), j).setName(tmp.getName()));
             }
             return list.toArray(new SortableId[list.size()]);
         } catch (final MailException e) {

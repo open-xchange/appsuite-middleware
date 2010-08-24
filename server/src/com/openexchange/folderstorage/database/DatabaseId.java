@@ -62,16 +62,20 @@ public final class DatabaseId implements SortableId {
 
     private final int ordinal;
 
+    private final String name;
+
     /**
      * Initializes a new {@link DatabaseId}.
      * 
      * @param folderId The folder identifier
      * @param ordinal The ordinal
+     * @param name The name
      */
-    public DatabaseId(final int folderId, final int ordinal) {
+    public DatabaseId(final int folderId, final int ordinal, final String name) {
         super();
         this.folderId = String.valueOf(folderId);
         this.ordinal = ordinal;
+        this.name = name;
     }
 
     /**
@@ -79,11 +83,17 @@ public final class DatabaseId implements SortableId {
      * 
      * @param folderId The folder identifier
      * @param ordinal The ordinal
+     * @param name The name
      */
-    public DatabaseId(final String folderId, final int ordinal) {
+    public DatabaseId(final String folderId, final int ordinal, final String name) {
         super();
         this.folderId = folderId;
         this.ordinal = ordinal;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getId() {

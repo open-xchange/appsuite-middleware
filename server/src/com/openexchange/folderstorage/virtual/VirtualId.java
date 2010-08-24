@@ -63,16 +63,23 @@ public final class VirtualId implements SortableId {
 
     private final int ordinal;
 
+    private final String name;
+
     /**
      * Initializes a new {@link DatabaseId}.
      * 
      * @param folderId The folder identifier
      * @param ordinal The ordinal
      */
-    public VirtualId(final String folderId, final int ordinal) {
+    public VirtualId(final String folderId, final int ordinal, final String name) {
         super();
         this.folderId = folderId;
         this.ordinal = ordinal;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getId() {

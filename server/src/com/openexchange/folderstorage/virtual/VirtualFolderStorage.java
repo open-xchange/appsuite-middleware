@@ -85,11 +85,11 @@ public final class VirtualFolderStorage implements FolderStorage {
         folderType = new VirtualFolderType();
     }
 
-    public void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException {
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
         // TODO: Implement it
     }
 
-    public void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException {
+    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         // No real storage
     }
 
@@ -297,7 +297,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                 StorageType.WORKING);
         final SortableId[] ret = new SortableId[ids.length];
         for (int i = 0; i < ids.length; i++) {
-            ret[i] = new VirtualId(ids[i], i);
+            ret[i] = new VirtualId(ids[i], i, null);
         }
         return ret;
     }
@@ -357,7 +357,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         return new String[0];
     }
 
-    public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
         throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
     }
 

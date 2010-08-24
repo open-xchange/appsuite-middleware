@@ -62,6 +62,8 @@ public final class MailId implements SortableId {
 
     private final int ordinal;
 
+    private String name;
+
     /**
      * Initializes a new {@link MailId}.
      * 
@@ -72,6 +74,21 @@ public final class MailId implements SortableId {
         super();
         this.fullname = fullname;
         this.ordinal = ordinal;
+    }
+
+    /**
+     * Applies specified name.
+     * 
+     * @param name The name
+     * @return This {@link MailId} instance with new name applied
+     */
+    public MailId setName(final String name) {
+        this.name = name;
+        return this;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getId() {

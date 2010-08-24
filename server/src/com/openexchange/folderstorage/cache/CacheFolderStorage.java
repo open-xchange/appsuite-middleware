@@ -722,7 +722,7 @@ public final class CacheFolderStorage implements FolderStorage {
         } else {
             ret = new SortableId[subfolders.length];
             for (int i = 0; i < ret.length; i++) {
-                ret[i] = new CacheSortableId(subfolders[i], i);
+                ret[i] = new CacheSortableId(subfolders[i], i, null);
             }
         }
         return ret;

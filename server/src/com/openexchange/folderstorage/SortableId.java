@@ -68,6 +68,13 @@ public interface SortableId extends Comparable<SortableId> {
     String getId();
 
     /**
+     * Gets the name of the denoted folder
+     * 
+     * @return The name
+     */
+    String getName();
+
+    /**
      * Gets the priority.
      * 
      * @return The priority

@@ -964,7 +964,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
         final SortableId[] ret = new SortableId[ids.length];
         for (int i = 0; i < ids.length; i++) {
-            ret[i] = new OutlookId(ids[i], i);
+            ret[i] = new OutlookId(ids[i], i, null);
         }
         return ret;
     }
@@ -1008,10 +1008,16 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             for (int i = 0; i < inboxSubfolders.length; i++) {
                 if (!contained[i]) {
-                    final String id = inboxSubfolders[i].getId();
+                    final SortableId sortableId = inboxSubfolders[i];
+                    final String id = sortableId.getId();
                     if (!defIds.contains(id)) {
-                        final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                        put2TreeMap(localizedName, id, treeMap);
+                        final String name = sortableId.getName();
+                        if (null == name) {
+                            final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
+                            put2TreeMap(localizedName, id, treeMap);
+                        } else {
+                            put2TreeMap(name, id, treeMap);
+                        }
                     }
                 }
             }
@@ -1049,10 +1055,13 @@ public final class OutlookFolderStorage implements FolderStorage {
                 int i = 0;
                 for (final List<String> list : values) {
                     for (final String id : list) {
-                        sortedIDs.add(new OutlookId(id, i++));
+                        sortedIDs.add(new OutlookId(id, i++, null));
                     }
                 }
             }
+            /*
+             * Put to cache if initialized
+             */
             return sortedIDs.toArray(new SortableId[sortedIDs.size()]);
         } catch (final FolderException e) {
             if (started) {
@@ -1118,7 +1127,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final SortableId[] ret = new SortableId[subfolderIDs.size()];
         int i = 0;
         for (final String id : subfolderIDs) {
-            ret[i] = new OutlookId(id, i);
+            ret[i] = new OutlookId(id, i, null);
             i++;
         }
         return ret;
@@ -1159,7 +1168,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                     final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
                     for (final SortableId sortableId : ids) {
                         final String id = sortableId.getId();
-                        put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                        final String name = sortableId.getName();
+                        if (null == name) {
+                            put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                        } else {
+                            put2TreeMap(name, sortableId.getId(), treeMap);
+                        }
                     }
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
@@ -1405,7 +1419,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final int size = sortedIDs.size();
         final SortableId[] ret = new SortableId[size];
         for (int i = 0; i < size; i++) {
-            ret[i] = new OutlookId(sortedIDs.get(i), i);
+            ret[i] = new OutlookId(sortedIDs.get(i), i, null);
         }
         return ret;
     }
@@ -1595,8 +1609,16 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
                 final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
                 for (final SortableId sortableId : mailIDs) {
-                    final String id = sortableId.getId();
-                    put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                    /*
+                     * Mail folders have no locale-sensitive name
+                     */
+                    final String name = sortableId.getName();
+                    if (null == name) {
+                        final String id = sortableId.getId();
+                        put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                    } else {
+                        put2TreeMap(name, sortableId.getId(), treeMap);
+                    }
                 }
                 /*
                  * Add default folders: Trash, Sent, Drafts, ...
@@ -1630,9 +1652,15 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
                 for (int i = 0; i < inboxSubfolders.length; i++) {
                     if (!contained[i]) {
-                        final String id = inboxSubfolders[i].getId();
+                        final SortableId sortableId = inboxSubfolders[i];
+                        final String id = sortableId.getId();
                         if (defIds.contains(id)) {
-                            put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                            final String name = sortableId.getName();
+                            if (null == name) {
+                                put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                            } else {
+                                put2TreeMap(name, sortableId.getId(), treeMap);
+                            }
                         }
                     }
                 }
@@ -1652,7 +1680,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
-    }
+        
+    } // End of MailFolderCallable member class
 
     private static final class MailAccountComparator implements Comparator<MailAccount> {
 

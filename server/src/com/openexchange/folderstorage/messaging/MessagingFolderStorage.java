@@ -192,15 +192,15 @@ public final class MessagingFolderStorage implements FolderStorage {
         super();
     }
 
-    public void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException {
+    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         // TODO:
     }
 
-    public void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException {
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
         // Nothing to do
     }
 
-    public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
         throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
     }
 
@@ -710,7 +710,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int j = 0; j < size; j++) {
                     final MessagingAccount acc = accounts.get(j);
-                    list.add(new MessagingId(MessagingFolderIdentifier.getFQN(acc.getMessagingService().getId(), acc.getId(), ""), j));
+                    list.add(new MessagingId(MessagingFolderIdentifier.getFQN(acc.getMessagingService().getId(), acc.getId(), ""), j, null));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -787,7 +787,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             final List<SortableId> list = new ArrayList<SortableId>(children.size());
             final int size = children.size();
             for (int j = 0; j < size; j++) {
-                list.add(new MessagingId(MessagingFolderIdentifier.getFQN(serviceId, accountId, children.get(j).getId()), j));
+                list.add(new MessagingId(MessagingFolderIdentifier.getFQN(serviceId, accountId, children.get(j).getId()), j, null));
             }
             return list.toArray(new SortableId[list.size()]);
         } catch (final MessagingException e) {

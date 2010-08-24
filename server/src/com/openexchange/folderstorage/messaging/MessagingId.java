@@ -62,16 +62,24 @@ public final class MessagingId implements SortableId {
 
     private final int ordinal;
 
+    private final String name;
+
     /**
      * Initializes a new {@link MessagingId}.
      * 
      * @param fullname The fullname
      * @param ordinal The ordinal
+     * @param name The name
      */
-    public MessagingId(final String fullname, final int ordinal) {
+    public MessagingId(final String fullname, final int ordinal, final String name) {
         super();
         this.fullname = fullname;
         this.ordinal = ordinal;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getId() {
