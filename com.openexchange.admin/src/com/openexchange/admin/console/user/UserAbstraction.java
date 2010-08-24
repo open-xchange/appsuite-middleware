@@ -50,7 +50,6 @@
 package com.openexchange.admin.console.user;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -67,9 +66,9 @@ import java.util.Map;
 import java.util.TimeZone;
 import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -245,10 +244,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         public void setRequired(boolean required) {
             this.required = required;
         }
-
     }
     
-    private static int INITIAL_CONSTANTS_VALUE = AccessCombinations.values().length;
+    static int INITIAL_CONSTANTS_VALUE = AccessCombinations.values().length;
     
     public enum Constants implements CSVConstants {
         CONTEXTID(INITIAL_CONSTANTS_VALUE, OPT_NAME_CONTEXT_LONG, true),
@@ -981,9 +979,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Context getContext(final String[] nextLine, final int[] idarray) throws InvalidDataException, ParseException {
         final Context context = new Context();
         setValue(nextLine, idarray, Constants.CONTEXTID, new MethodStringClosure() {
-            public void callMethod(String value) throws ParseException, InvalidDataException {
+            public void callMethod(String value) throws InvalidDataException {
                 try {
-                    context.setId(Integer.parseInt(value));
+                    context.setId(Integer.valueOf(value));
                 } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + Constants.CONTEXTID.getString() + " is no integer");
                 }
@@ -993,7 +991,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return context;
     }
 
-    protected static User getUser(String[] nextLine, int[] idarray) throws InvalidDataException, ParseException {
+    protected User getUser(String[] nextLine, int[] idarray) throws InvalidDataException, ParseException {
         final User user = new User();
         setValue(nextLine, idarray, Constants.USERNAME, new MethodStringClosure() {
             public void callMethod(String value) {
@@ -1076,16 +1074,16 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         });
         setValue(nextLine, idarray, Constants.mailenabled, new MethodStringClosure() {
             public void callMethod(String value) {
-                user.setMailenabled(stringToBool(value));
+                user.setMailenabled(Boolean.valueOf(stringToBool(value)));
             }
         });
         setValue(nextLine, idarray, Constants.birthday, new MethodDateClosure() {
-            public void callMethod(Date value) throws ParseException {
+            public void callMethod(Date value) {
                 user.setBirthday(value);
             }
         });
         setValue(nextLine, idarray, Constants.anniversary, new MethodDateClosure() {
-            public void callMethod(Date value) throws ParseException {
+            public void callMethod(Date value) {
                 user.setAnniversary(value);
             }
         });
@@ -1271,7 +1269,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         });
         setValue(nextLine, idarray, Constants.password_expired, new MethodStringClosure() {
             public void callMethod(String value) {
-                user.setPassword_expired(stringToBool(value));
+                user.setPassword_expired(Boolean.valueOf(stringToBool(value)));
             }
         });
         setValue(nextLine, idarray, Constants.telephone_assistant, new MethodStringClosure() {
@@ -1584,7 +1582,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         });
         setValue(nextLine, idarray, Constants.gui_spam_filter_capabilities_enabled, new MethodStringClosure() {
             public void callMethod(String value) {
-                user.setGui_spam_filter_enabled(stringToBool(value));
+                user.setGui_spam_filter_enabled(Boolean.valueOf(stringToBool(value)));
             }
         });
         final int m2 = idarray[Constants.MAILALIAS.getIndex()];
@@ -1626,7 +1624,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
     }
 
-    private static void setValue(String[] nextLine, int[] idarray, final CSVConstants constant, final MethodDateClosure closure) throws InvalidDataException, ParseException {
+    private void setValue(String[] nextLine, int[] idarray, final CSVConstants constant, final MethodDateClosure closure) throws InvalidDataException, ParseException {
         final int i = idarray[constant.getIndex()];
         if (-1 != i) {
             if (nextLine[i].length() > 0) {
@@ -1642,16 +1640,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
     }
     
-    private static Date stringToDate(String string) throws java.text.ParseException {
+    private Date stringToDate(String string) throws java.text.ParseException {
         final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
         sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
         final Date value = sdf.parse(string);
-        if (null != value) {
-            return value;
-        } else {
-            return null;
-        }
-    
+        return value;
     }
 
     protected final void setIdOption(final AdminParser admp){
@@ -1698,7 +1691,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, NeededQuadState.notneeded); 
     }
 
-    protected void setAddAccessRightCombinationNameOption(final AdminParser parser, final boolean required) {
+    protected void setAddAccessRightCombinationNameOption(final AdminParser parser) {
         this.accessRightsCombinationName = setLongOpt(parser,OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,false);
     }
 
@@ -2343,12 +2336,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * 
      * @param parser
      * @param usr
-     * @throws InvocationTargetException 
-     * @throws IllegalAccessException 
      * @throws IllegalArgumentException 
      * @throws InvalidDataException 
      */
-    protected final void applyExtendedOptionsToUser(final AdminParser parser, final User usr) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InvalidDataException {
+    protected final void applyExtendedOptionsToUser(final AdminParser parser, final User usr) throws IllegalArgumentException, InvalidDataException {
         
         String addguival    = (String)parser.getOptionValue(this.addGUISettingOption);
         if( addguival != null ) {
@@ -3303,7 +3294,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
     }
 
-    protected final int[] csvParsingCommon(final String filename, final CSVReader reader) throws IOException, InvalidDataException {
+    protected final int[] csvParsingCommon(final CSVReader reader) throws IOException, InvalidDataException {
         String [] nextLine;
         prepareConstantsMap();
         final int[] idarray = new int[this.constantsMap.size()];
@@ -3326,5 +3317,3 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return idarray;
     }
 }
-
-
