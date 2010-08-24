@@ -59,6 +59,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
@@ -67,7 +68,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
-import com.openexchange.mail.utils.DateUtils;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link MailMessage} - Abstract super class for all {@link MailMessage} subclasses.
@@ -936,6 +937,13 @@ public abstract class MailMessage extends MailPart {
         b_subject = true;
     }
 
+    private static final MailDateFormat MAIL_DATE_FORMAT;
+
+    static {
+        MAIL_DATE_FORMAT = new MailDateFormat();
+        MAIL_DATE_FORMAT.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
+    }
+
     /**
      * Gets the sent date which corresponds to <i>Date</i> header
      * 
@@ -945,7 +953,16 @@ public abstract class MailMessage extends MailPart {
         if (!b_sentDate) {
             final String sentDateStr = getFirstHeader(MessageHeaders.HDR_DATE);
             if (sentDateStr != null) {
-                setSentDate(DateUtils.getDateRFC822(sentDateStr));
+                synchronized (MAIL_DATE_FORMAT) {
+                    try {
+                        final Date parsedDate = MAIL_DATE_FORMAT.parse(sentDateStr);
+                        if (null != parsedDate) {
+                            setSentDate(parsedDate);
+                        }
+                    } catch (final java.text.ParseException e) {
+                        LOG.warn("Date string could not be parsed: " + sentDateStr, e);
+                    }
+                }
             }
         }
         return sentDate == null ? null : new Date(sentDate.getTime());
