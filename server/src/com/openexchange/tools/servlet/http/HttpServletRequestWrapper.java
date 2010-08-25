@@ -170,8 +170,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return method;
     }
 
-    public void setPathInfo(final String path_info) {
-        pathInfo = path_info;
+    public void setPathInfo(final String pathInfo) {
+        this.pathInfo = pathInfo;
     }
 
     /*
@@ -194,8 +194,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return pathTranslated;
     }
 
-    public void setContextPath(final String context_path) {
-        contextPath = context_path;
+    public void setContextPath(final String contextPath) {
+        this.contextPath = contextPath;
     }
 
     /*
@@ -206,8 +206,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return contextPath;
     }
 
-    public void setQueryString(final String query_string) {
-        queryString = query_string;
+    public void setQueryString(final String queryString) {
+        this.queryString = queryString;
     }
 
     /*
@@ -218,8 +218,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return queryString;
     }
 
-    public void setRemoteUser(final String remote_user) {
-        remoteUser = remote_user;
+    public void setRemoteUser(final String remoteUser) {
+        this.remoteUser = remoteUser;
     }
 
     /*
@@ -280,10 +280,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
     public StringBuffer getRequestURL() {
         if (null == requestURL) {
             final StringBuilder tmp = new StringBuilder(256);
-            tmp.append(getProtocol());
-            if (isSecure()) {
-                tmp.append('s');
-            }
+            tmp.append(isSecure() ? "https" : "http");
             tmp.append("://").append(getServerName());
             if (requestURI.charAt(0) != '/') {
                 tmp.append('/');
@@ -302,8 +299,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return servletPath;
     }
 
-    public void setServletPath(final String servlet_path) {
-        servletPath = servlet_path;
+    public void setServletPath(final String servletPath) {
+        this.servletPath = servletPath;
     }
 
     /*
