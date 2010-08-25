@@ -6,6 +6,7 @@
     <property name="prefix" value="/opt/open-xchange"/>
 
 	<property name="rmi_test_host" value="localhost"/>
+    <property name="test.xml.dir" location="test-results"/>
 
     <!-- Constants -->
     <property file="META-INF/MANIFEST.MF"/>
@@ -15,7 +16,6 @@
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
     <property name="composite.name" value="open-xchange-admin-${version}"/>
 
-    <property name="test.xml.dir" value="test-results"/>
     <property name="client.jar" value="ox_admin_rmiclient.jar"/>
     <property name="cli.jar" value="ox_admin_cli.jar"/>
     <property name="logdir"  value="/var/log/open-xchange"/>
@@ -122,7 +122,6 @@
            <filter token="oxcommonbundlelib"       value="${bundlesdir}/${commonBundle}/lib"/>
     </filterset>
 
-    <property name="test.xml.dir" location="test-results"/>
 
 	<path id="rmi.classpath">
 		<fileset dir="/opt/open-xchange/lib" includes="ox_admin*"/>
