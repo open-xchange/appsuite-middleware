@@ -65,6 +65,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -511,7 +512,9 @@ public abstract class MailConfig {
             } else {
                 // Decrypt mail account's password using session password
                 try {
-                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, sessionPassword);
+                    SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
+                    String secret = secretService.getSecret(session);
+                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, secret);
                 } catch (final GeneralSecurityException e) {
                     throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(
                         e,
