@@ -6,6 +6,7 @@
     <property name="prefix" value="/opt/open-xchange"/>
 
 	<property name="rmi_test_host" value="localhost"/>
+    <property name="rmi_lib_dir" location="/opt/open-xchange/lib"/>
     <property name="test.xml.dir" location="test-results"/>
 
     <!-- Constants -->
@@ -124,7 +125,7 @@
 
 
 	<path id="rmi.classpath">
-		<fileset dir="/opt/open-xchange/lib" includes="ox_admin*"/>
+		<fileset dir="${rmi_lib_dir}" includes="ox_admin*"/>
 		<fileset dir="lib" includes="${junit}"/>
 	</path>
 
