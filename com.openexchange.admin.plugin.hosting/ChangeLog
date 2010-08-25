@@ -1,3 +1,7 @@
+* 2010-08-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #16721: NullPointerException does not occur anymore if some filestore is empty.
+
 * 2010-08-23 - choeger@open-xchange.com
 
  - SoftwareChange_Request-371: added -XX:MaxPermSize=128M in oxinstaller for
@@ -5,7 +9,7 @@
 
 * 2010-08-11 - tobias.prinz@open-xchange.com
 
- - Bugfix 16383: #listcontext is now more time efficient.
+ - Bugfix 16353: #listcontext is now more time efficient.
 
 * 2010-07-29 - tobias.prinz@open-xchange.com
 

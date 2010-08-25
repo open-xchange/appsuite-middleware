@@ -51,6 +51,8 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -64,8 +66,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.swing.DebugGraphics;
-import javax.xml.validation.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -76,10 +76,8 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.tools.arrays.Collections;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author d7
@@ -1384,7 +1382,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             updateBlockWithFilestoreUsage(block);
         }
         updateFilestoresWithUsageFromBlocks(stores, blocks);
-        for(Filestore store: stores){
+        for (Filestore store: stores){
             store.setSize(toMB(store.getSize()));
             store.setUsed(toMB(store.getUsed()));
         }
@@ -1468,17 +1466,25 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         for (FilestoreContextBlock block : blocks) {
             Collection<FilestoreInfo> infos = block.filestores.values();
             for (FilestoreInfo info : infos) {
-                int fid = info.filestoreID;
-                long usage = filestore2usage.containsKey(fid) ? filestore2usage.get(fid) : 0;
-                filestore2usage.put(fid, usage+info.usage);
-                filestore2ctxUsage.put(fid, filestore2ctxUsage.containsKey(fid) ? filestore2ctxUsage.get(fid)+1 : 1);
+                Integer fid = I(info.filestoreID);
+                long usage = filestore2usage.containsKey(fid) ? l(filestore2usage.get(fid)) : 0;
+                filestore2usage.put(fid, L(usage + info.usage));
+                filestore2ctxUsage.put(fid, I(filestore2ctxUsage.containsKey(fid) ? i(filestore2ctxUsage.get(fid)) + 1 : 1));
             }
         }
 
         for (Filestore store : stores) {
-            store.setUsed(filestore2usage.get(store.getId()));
-            store.setCurrentContexts(filestore2ctxUsage.get(store.getId()));
-            store.setReserved(getAverageFilestoreSpace() * store.getCurrentContexts());
+            Long usedBytes = filestore2usage.get(store.getId());
+            if (null == usedBytes) {
+                usedBytes = L(0);
+            }
+            store.setUsed(usedBytes);
+            Integer numContexts = filestore2ctxUsage.get(store.getId());
+            if (null == numContexts) {
+                numContexts = I(0);
+            } 
+            store.setCurrentContexts(numContexts);
+            store.setReserved(L(getAverageFilestoreSpace() * i(numContexts)));
         }
     }
 
