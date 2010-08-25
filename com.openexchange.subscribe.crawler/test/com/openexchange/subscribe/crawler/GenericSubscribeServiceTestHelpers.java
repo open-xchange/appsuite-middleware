@@ -232,7 +232,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
                     if (map.containsKey(crawlerName+"_user" + domain) && map.containsKey(crawlerName+"_password" + domain)){
                         String username = map.get(crawlerName+"_user" + domain);
                         String password = map.get(crawlerName+"_password" + domain);
-                        System.out.println("***** Testing crawler : " + crawlerName + " for domain : " + domain);
+                        System.out.println("***** (HELLO_WORLD!) Testing crawler : " + crawlerName + " for domain : " + domain);
                         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
                     }
                 }
