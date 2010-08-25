@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,9 +55,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
@@ -65,7 +67,8 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.utils.DateUtils;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link MailMessage} - Abstract super class for all {@link MailMessage} subclasses.
@@ -370,14 +373,14 @@ public abstract class MailMessage extends MailPart {
     /**
      * The color label (set through an user flag).
      */
-    private int colorLabel = COLOR_LABEL_NONE;
+    private int colorLabel;
 
     private boolean b_colorLabel;
 
     /**
      * The priority (the <code>X-Priority</code> header).
      */
-    private int priority = PRIORITY_NORMAL;
+    private int priority;
 
     private boolean b_priority;
 
@@ -428,6 +431,8 @@ public abstract class MailMessage extends MailPart {
      */
     protected MailMessage() {
         super();
+        priority = PRIORITY_NORMAL;
+        colorLabel = COLOR_LABEL_NONE;
     }
 
     /**
@@ -440,7 +445,7 @@ public abstract class MailMessage extends MailPart {
             b_from = true;
             return;
         } else if (null == from) {
-            from = new HashSet<InternetAddress>();
+            from = new LinkedHashSet<InternetAddress>();
             b_from = true;
         }
         from.add(addr);
@@ -456,7 +461,7 @@ public abstract class MailMessage extends MailPart {
             b_from = true;
             return;
         } else if (null == from) {
-            from = new HashSet<InternetAddress>();
+            from = new LinkedHashSet<InternetAddress>();
             b_from = true;
         }
         from.addAll(Arrays.asList(addrs));
@@ -507,7 +512,7 @@ public abstract class MailMessage extends MailPart {
             b_to = true;
             return;
         } else if (null == to) {
-            to = new HashSet<InternetAddress>();
+            to = new LinkedHashSet<InternetAddress>();
             b_to = true;
         }
         to.add(addr);
@@ -523,7 +528,7 @@ public abstract class MailMessage extends MailPart {
             b_to = true;
             return;
         } else if (null == to) {
-            to = new HashSet<InternetAddress>();
+            to = new LinkedHashSet<InternetAddress>();
             b_to = true;
         }
         to.addAll(Arrays.asList(addrs));
@@ -574,7 +579,7 @@ public abstract class MailMessage extends MailPart {
             b_cc = true;
             return;
         } else if (null == cc) {
-            cc = new HashSet<InternetAddress>();
+            cc = new LinkedHashSet<InternetAddress>();
             b_cc = true;
         }
         cc.add(addr);
@@ -590,7 +595,7 @@ public abstract class MailMessage extends MailPart {
             b_cc = true;
             return;
         } else if (null == cc) {
-            cc = new HashSet<InternetAddress>();
+            cc = new LinkedHashSet<InternetAddress>();
             b_cc = true;
         }
         cc.addAll(Arrays.asList(addrs));
@@ -641,7 +646,7 @@ public abstract class MailMessage extends MailPart {
             b_bcc = true;
             return;
         } else if (null == bcc) {
-            bcc = new HashSet<InternetAddress>();
+            bcc = new LinkedHashSet<InternetAddress>();
             b_bcc = true;
         }
         bcc.add(addr);
@@ -657,7 +662,7 @@ public abstract class MailMessage extends MailPart {
             b_bcc = true;
             return;
         } else if (null == bcc) {
-            bcc = new HashSet<InternetAddress>();
+            bcc = new LinkedHashSet<InternetAddress>();
             b_bcc = true;
         }
         bcc.addAll(Arrays.asList(addrs));
@@ -898,7 +903,7 @@ public abstract class MailMessage extends MailPart {
      */
     public String getSubject() {
         if (!b_subject) {
-            final String subjectStr = getFirstHeader(MessageHeaders.HDR_SUBJECT);
+            final String subjectStr = MIMEMessageUtility.checkNonAscii(getFirstHeader(MessageHeaders.HDR_SUBJECT));
             if (subjectStr != null) {
                 setSubject(decodeMultiEncodedHeader(subjectStr));
             }
@@ -932,6 +937,13 @@ public abstract class MailMessage extends MailPart {
         b_subject = true;
     }
 
+    private static final MailDateFormat MAIL_DATE_FORMAT;
+
+    static {
+        MAIL_DATE_FORMAT = new MailDateFormat();
+        MAIL_DATE_FORMAT.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
+    }
+
     /**
      * Gets the sent date which corresponds to <i>Date</i> header
      * 
@@ -941,7 +953,16 @@ public abstract class MailMessage extends MailPart {
         if (!b_sentDate) {
             final String sentDateStr = getFirstHeader(MessageHeaders.HDR_DATE);
             if (sentDateStr != null) {
-                setSentDate(DateUtils.getDateRFC822(sentDateStr));
+                synchronized (MAIL_DATE_FORMAT) {
+                    try {
+                        final Date parsedDate = MAIL_DATE_FORMAT.parse(sentDateStr);
+                        if (null != parsedDate) {
+                            setSentDate(parsedDate);
+                        }
+                    } catch (final java.text.ParseException e) {
+                        LOG.warn("Date string could not be parsed: " + sentDateStr, e);
+                    }
+                }
             }
         }
         return sentDate == null ? null : new Date(sentDate.getTime());
@@ -976,10 +997,19 @@ public abstract class MailMessage extends MailPart {
     /**
      * Gets the received date which represents the internal timestamp set by mail server on arrival.
      * 
-     * @return the received date
+     * @return The received date
      */
     public Date getReceivedDate() {
         return receivedDate == null ? null : new Date(receivedDate.getTime());
+    }
+
+    /**
+     * Gets the received date directly which represents the internal timestamp set by mail server on arrival.
+     * 
+     * @return The received date
+     */
+    public Date getReceivedDateDirect() {
+        return receivedDate;
     }
 
     /**
@@ -1063,6 +1093,9 @@ public abstract class MailMessage extends MailPart {
      */
     public String[] getUserFlags() {
         if (containsUserFlags() && (null != userFlags)) {
+            if (userFlags.isEmpty()) {
+                return EMPTY_UF;
+            }
             final int size = userFlags.size();
             final List<String> retval = new ArrayList<String>(size);
             final Iterator<HeaderName> iter = userFlags.iterator();
@@ -1075,23 +1108,23 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Gets the colorLabel
+     * Gets the color label
      * 
-     * @return the colorLabel
+     * @return the color label
      */
     public int getColorLabel() {
         return colorLabel;
     }
 
     /**
-     * @return <code>true</code> if colorLabel is set; otherwise <code>false</code>
+     * @return <code>true</code> if color label is set; otherwise <code>false</code>
      */
     public boolean containsColorLabel() {
         return b_colorLabel;
     }
 
     /**
-     * Removes the colorLabel
+     * Removes the color label
      */
     public void removeColorLabel() {
         colorLabel = COLOR_LABEL_NONE;
@@ -1099,9 +1132,9 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Sets the colorLabel
+     * Sets the color label
      * 
-     * @param colorLabel the colorLabel to set
+     * @param colorLabel the color label to set
      */
     public void setColorLabel(final int colorLabel) {
         this.colorLabel = colorLabel;
@@ -1115,9 +1148,14 @@ public abstract class MailMessage extends MailPart {
      */
     public int getPriority() {
         if (!b_priority) {
-            final String prioStr = getFirstHeader(MessageHeaders.HDR_X_PRIORITY);
-            if (prioStr != null) {
-                setPriority(MIMEMessageConverter.parsePriority(prioStr));
+            final String imp = getFirstHeader(MessageHeaders.HDR_IMPORTANCE);
+            if (imp != null) {
+                setPriority(MIMEMessageConverter.parseImportance(imp));
+            } else {
+                final String prioStr = getFirstHeader(MessageHeaders.HDR_X_PRIORITY);
+                if (prioStr != null) {
+                    setPriority(MIMEMessageConverter.parsePriority(prioStr));
+                }
             }
         }
         return priority;
@@ -1127,7 +1165,7 @@ public abstract class MailMessage extends MailPart {
      * @return <code>true</code> if priority is set; otherwise <code>false</code>
      */
     public boolean containsPriority() {
-        return b_priority || containsHeader(MessageHeaders.HDR_X_PRIORITY);
+        return b_priority || containsHeader(MessageHeaders.HDR_IMPORTANCE) || containsHeader(MessageHeaders.HDR_X_PRIORITY);
     }
 
     /**
@@ -1135,6 +1173,7 @@ public abstract class MailMessage extends MailPart {
      */
     public void removePriority() {
         priority = PRIORITY_NORMAL;
+        removeHeader(MessageHeaders.HDR_IMPORTANCE);
         removeHeader(MessageHeaders.HDR_X_PRIORITY);
         b_priority = false;
     }
@@ -1334,16 +1373,16 @@ public abstract class MailMessage extends MailPart {
     public Object clone() {
         final MailMessage clone = (MailMessage) super.clone();
         if (from != null) {
-            clone.from = new HashSet<InternetAddress>(from);
+            clone.from = new LinkedHashSet<InternetAddress>(from);
         }
         if (to != null) {
-            clone.to = new HashSet<InternetAddress>(to);
+            clone.to = new LinkedHashSet<InternetAddress>(to);
         }
         if (cc != null) {
-            clone.cc = new HashSet<InternetAddress>(cc);
+            clone.cc = new LinkedHashSet<InternetAddress>(cc);
         }
         if (bcc != null) {
-            clone.bcc = new HashSet<InternetAddress>(bcc);
+            clone.bcc = new LinkedHashSet<InternetAddress>(bcc);
         }
         if (receivedDate != null) {
             clone.receivedDate = new Date(receivedDate.getTime());
