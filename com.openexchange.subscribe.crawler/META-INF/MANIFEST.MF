@@ -112,8 +112,6 @@ Bundle-ClassPath: lib/commons-collections-3.2.1.jar,
  lib/gdata-core-1.0.jar,
  lib/google-collect-1.0-rc1.jar,
  lib/jsr305.jar,
- lib/gdata-calendar-2.0.jar,
- lib/gdata-calendar-meta-2.0.jar,
  lib/apache-mime4j-0.6.jar,
  lib/httpclient-4.0.1.jar,
  lib/httpcore-4.0.1.jar,
@@ -124,4 +122,3 @@ Bundle-ClassPath: lib/commons-collections-3.2.1.jar,
  lib/oauth-httpclient4-20100601.jar,
  lib/oauth-provider-20100601.jar,
  .
-Require-Bundle: org.apache.xerces;bundle-version="2.9.0"
