@@ -5,6 +5,8 @@
     <property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
 
+	<property name="rmi_test_host" value="localhost"/>
+
     <!-- Constants -->
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -439,7 +441,7 @@
 			<test name="com.openexchange.admin.rmi.UserTest" todir="${test.xml.dir}"/>
 			<test name="com.openexchange.admin.rmi.GroupTest" todir="${test.xml.dir}"/>
             <formatter type="xml"/>
-            <sysproperty key="rmi_test_host" value="localhost"/>
+            <sysproperty key="rmi_test_host" value="${rmi_test_host}"/>
         </junit>
     </target>
 
