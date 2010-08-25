@@ -309,6 +309,8 @@
 
     <target name="clean">
         <delete dir="classes"/>
+        <delete dir="test-classes"/>
+        <delete dir="test-results"/>
         <delete dir="doc"/>
         <delete dir="jar"/>
         <antcall target="clean-plugins"></antcall>
@@ -415,7 +417,7 @@
         </copy>
     </target>
 
-    <target name="compileTests">
+    <target name="compileTests" depends="clean">
         <mkdir dir="test-classes"/>
         <javac failonerror="true" srcdir="test/com/openexchange/admin/rmi" debug="true" destdir="test-classes">
             <classpath>
