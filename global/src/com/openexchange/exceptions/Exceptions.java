@@ -53,6 +53,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
@@ -61,6 +63,7 @@ import com.openexchange.groupware.Component;
  */
 public abstract class Exceptions<T extends AbstractOXException> {
 
+    private static final Log LOG = LogFactory.getLog(Exceptions.class);
     
     private final Map<Integer, ErrorMessage> errors = new HashMap<Integer, ErrorMessage>();
 
@@ -127,14 +130,13 @@ public abstract class Exceptions<T extends AbstractOXException> {
     public T create(final int code, final Throwable cause, final Object... args) {
         final ErrorMessage errorMessage = errors.get(Integer.valueOf(code));
         if (errorMessage == null) {
-            if(initialized) {
+            if (initialized) {
                 throw new UndeclaredErrorCodeException(code, getApplicationId(), getComponent());
-            } else {
-                System.err.println("Apparently this exception factory was not registered.: "+this);
-                setComponent(new StringComponent("???"));
-                setApplicationId("unset");
-                return create(code, cause, args);
             }
+            LOG.error("Apparently this exception factory was not registered.: " + this);
+            setComponent(new StringComponent("???"));
+            setApplicationId("unset");
+            return create(code, cause, args);
         }
         return createException(errorMessage, cause, args);
     }
