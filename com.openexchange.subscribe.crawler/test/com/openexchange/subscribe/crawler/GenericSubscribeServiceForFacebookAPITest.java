@@ -61,7 +61,7 @@ import com.openexchange.subscribe.crawler.internal.Step;
 public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeServiceTestHelpers {
 
     public void testGenericSubscribeServiceForFacebook() {
-        // insert valid credentials here
+        // insert valid credentials here        
         String username = "";
         String password = "";
 
@@ -69,7 +69,7 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
-        crawler.setPriority(8);
+        crawler.setPriority(9);
         
         List<Step> steps = new LinkedList<Step>();
 
@@ -81,7 +81,7 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
             "https://login.facebook.com/login.php?login_attempt=1",
             "email",
             "pass",
-            "(http://www.facebook.com/.*profile.*)"));
+            "(http://www.facebook.com/notifications.php)"));
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
