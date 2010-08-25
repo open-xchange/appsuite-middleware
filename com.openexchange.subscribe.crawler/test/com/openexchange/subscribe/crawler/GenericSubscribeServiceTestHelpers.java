@@ -92,16 +92,16 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     public void setUp() {
         try {
             // insert path to credentials-file here (switch for automated tests (Hudson) / local tests)
-            // map = (HashMap<String, String>) Yaml.load(getSecretsFile());
-            map = (HashMap<String, String>) Yaml.load(new File("/Users/karstenwill/Documents/open-xchange/crawler/crawlerCredentials.yml"));
+            map = (HashMap<String, String>) Yaml.load(getSecretsFile());
+            // map = (HashMap<String, String>) Yaml.load(new File("/Users/karstenwill/Documents/open-xchange/crawler/crawlerCredentials.yml"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         
         SimConfigurationService config = new SimConfigurationService();
         //test with the real crawlers (switch for automated tests (Hudson) / local tests)
-        // config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
-        config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
+        config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
+        // config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
         activator = new Activator();        
         crawlers = activator.getCrawlersFromFilesystem(config);
     }
