@@ -249,13 +249,20 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     }
 
     protected FolderObject createDefaultInfostoreFolder() throws AjaxException, IOException, SAXException, JSONException {
-        FolderObject folder = getFolderManager().generateFolder(
-            "pubsub default infostore folder "+getName(),
-            FolderObject.INFOSTORE,
-            getClient().getValues().getPrivateInfostoreFolder(),
-            getClient().getValues().getUserId());
-        getFolderManager().insertFolderOnServer(folder);
-        return folder;
+        return createDefaultInfostoreFolder(null);
+    }
+    
+    protected FolderObject createDefaultInfostoreFolder(String folderName) throws AjaxException, IOException, SAXException, JSONException {
+    	if (folderName == null) {
+    		folderName = "pubsub default infostore folder "+getName();
+    	}
+    	FolderObject folder = getFolderManager().generateFolder(
+                folderName,
+                FolderObject.INFOSTORE,
+                getClient().getValues().getPrivateInfostoreFolder(),
+                getClient().getValues().getUserId());
+            getFolderManager().insertFolderOnServer(folder);
+            return folder;
     }
 
     protected Contact createDefaultContactFolderWithOneContact() throws AjaxException, IOException, SAXException, JSONException {

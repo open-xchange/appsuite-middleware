@@ -93,6 +93,14 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
         this(folder, id, entityModule, columns);
         setDynamicColumns(dynamicColumns);
     }
+    
+    public AllPublicationsRequest(int id, List<String> columns) {
+    	this(null, id, null, columns);
+    }
+    
+    public AllPublicationsRequest(int id, String entityModule, List<String> columns) {
+    	this(null, id, entityModule, columns);
+    }
 
     public void setDynamicColumns(Map<String, List<String>> dynamicColumns) {
         this.dynamicColumns = dynamicColumns;
@@ -152,7 +160,8 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
         if( getFolder() != null)
             params.add(new Parameter("folder", getFolder()));
         
-        params.add(new Parameter("entityModule", getEntityModule()));
+        if( getEntityModule() != null)
+        	params.add(new Parameter("entityModule", getEntityModule()));
         
         if(getColumns() != null){
             params.add(new Parameter("columns", Strings.join(getColumns(), ",")));

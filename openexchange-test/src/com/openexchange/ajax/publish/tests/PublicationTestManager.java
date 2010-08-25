@@ -205,6 +205,22 @@ public class PublicationTestManager {
             return allResp.getAll();
         }
         
+        public List<JSONArray> allAction(String entityModule, int id, List<String> columns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+            AllPublicationsRequest allReq = new AllPublicationsRequest(id, entityModule, columns);
+            allReq.setFailOnError(getFailOnError());
+            AllPublicationsResponse allResp = getClient().execute(allReq);
+            lastResponse = allResp;
+            return allResp.getAll();
+        }
+        
+        public List<JSONArray> allAction(int id, List<String> columns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+            AllPublicationsRequest allReq = new AllPublicationsRequest(id, columns);
+            allReq.setFailOnError(getFailOnError());
+            AllPublicationsResponse allResp = getClient().execute(allReq);
+            lastResponse = allResp;
+            return allResp.getAll();
+        }
+        
         
         public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns, Map<String,List<String>> dynamicColumns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
             AllPublicationsRequest allReq = new AllPublicationsRequest(folder, id, entityModule, columns, dynamicColumns);

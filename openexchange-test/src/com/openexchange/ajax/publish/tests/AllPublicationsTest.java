@@ -50,23 +50,32 @@
 package com.openexchange.ajax.publish.tests;
 
 import static com.openexchange.java.Autoboxing.I;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.publish.actions.AllPublicationsRequest;
 import com.openexchange.ajax.publish.actions.AllPublicationsResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONException;
+import com.openexchange.test.TestInit;
 import com.openexchange.tools.servlet.AjaxException;
 
 
@@ -76,8 +85,7 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AllPublicationsTest extends AbstractPublicationTest {
-    
-    public AllPublicationsTest(String name) {
+	public AllPublicationsTest(String name) {
         super(name);
     }
     
@@ -151,5 +159,85 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         assertEquals("Should have same module", expected.getModule(), actual.getString(2));
         assertFalse("Should change display name", expected.getDisplayName().equals(actual.getString(3)));
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
+    }
+    
+    public void testShouldFindAllPublicationsOfUser() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException {
+    	// create folders
+    	FolderObject contactFolder = createDefaultContactFolder();
+    	String contactModule = "contacts";
+    	
+    	FolderObject infostoreFolder = createDefaultInfostoreFolder("Folder for Publication");
+    	
+    	// create and upload a new Infostore item.       
+    	InfostoreTestManager infoMgr = getInfostoreManager();
+        FolderObject infostorePublicationFolder = createDefaultInfostoreFolder("Second Folder for Publication");
+
+        DocumentMetadata data = new DocumentMetadataImpl();
+        data.setTitle("Infostore Item To Be Published");
+        data.setDescription("Infostore Item To Be Published");
+        data.setFileMIMEType("text/plain");
+        data.setFolderId(infostorePublicationFolder.getObjectID());
+        File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+
+        infoMgr.newAction(data, upload);
+    	
+    	// publish
+    	ArrayList<Publication> expectedPublications = new ArrayList<Publication>();
+    	SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+        pubMgr.setPublicationTargetDiscoveryService(discovery);
+        
+        Publication contactPublication = generatePublication(contactModule, String.valueOf(contactFolder.getObjectID()), discovery);
+        contactPublication.setDisplayName("My Contact Publication");
+        expectedPublications.add(contactPublication);
+        
+        Publication infostorePublication = generateInfostoreFolderPublication(String.valueOf(infostoreFolder.getObjectID()), discovery);
+        infostorePublication.setDisplayName("My InfostoreFolder Publication");
+        expectedPublications.add(infostorePublication);        
+
+        Publication infostoreItemPublication = generateInfostoreItemPublication(String.valueOf(data.getId()), discovery);
+        expectedPublications.add(infostoreItemPublication);
+        
+        for (Publication p : expectedPublications) {
+        	pubMgr.newAction(p);
+        	assertFalse("Precondition: Should be able to create a publication", pubMgr.getLastResponse().hasError());
+        }
+        
+        // get all publications
+        pubMgr.allAction(Integer.MAX_VALUE, Arrays.asList(new String[]{"id","entity", "entityModule", "displayName", "target"}));
+        AllPublicationsResponse resp = (AllPublicationsResponse) pubMgr.getLastResponse();
+        assertFalse("Should work", resp.hasError());
+        List<JSONArray> all = resp.getAll();
+        List<Integer> foundIds = new ArrayList<Integer>();
+        
+        for (JSONArray c : all) {
+        	int id = c.getInt(0);
+        	foundIds.add(id);
+        }
+        
+        boolean foundAllContacts = true;
+        for (Publication p : expectedPublications) {
+        	if (!foundIds.contains(p.getId())) {
+        		foundAllContacts = false;
+        	}
+        }
+        
+        assertTrue("Did not get all contact publications.", foundAllContacts);
+        
+        // get all contact publications        
+        pubMgr.allAction(contactModule, Integer.MAX_VALUE, Arrays.asList(new String[]{"id","entity", "entityModule", "displayName", "target"}));
+        resp = (AllPublicationsResponse) pubMgr.getLastResponse();
+        assertFalse("Should work", resp.hasError());
+        List<JSONArray> allContacts = resp.getAll();
+        
+        foundIds.clear();
+        
+        for (JSONArray c : allContacts) {
+        	int id = c.getInt(0);
+        	foundIds.add(id);
+        }
+        
+        assertTrue("Did not get published contact.", foundIds.contains(contactPublication.getId()));
+        
+        infoMgr.cleanUp();
     }
 }
