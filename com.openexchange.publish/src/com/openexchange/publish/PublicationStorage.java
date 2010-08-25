@@ -66,8 +66,12 @@ public interface PublicationStorage {
     public List<Publication> getPublications(Context ctx, String module, String entityId) throws PublicationException;
 
     public List<Publication> getPublications(Context ctx, String publicationTarget) throws PublicationException;
+    
+    public List<Publication> getPublicationsOfUser(Context ctx, int userId)  throws PublicationException;
+    
+    public List<Publication> getPublicationsOfUser(Context ctx, int userId, String module)  throws PublicationException;
 
-    public Publication getPublication(Context ctx, int publicationId) throws PublicationException;
+    public Publication getPublication(Context ctx, int publicationId) throws PublicationException;    
     
     public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws PublicationException;
     

@@ -130,7 +130,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
             } else if (action.equals("get")) {
                 return loadPublication(request, session);
             } else if (action.equals("all")) {
-                return loadAllPublicationsForEntity(request, session);
+                return loadAllPublications(request, session);
             } else if (action.equals("list")) {
                 return listPublications(request, session);
             } else {
@@ -168,19 +168,37 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder);
     }
 
-    private Object loadAllPublicationsForEntity(final JSONObject request, final ServerSession session) throws PublicationJSONException, JSONException, PublicationException {
-        if (!request.has("entityModule")) {
-            throw MISSING_PARAMETER.create("entityModule");
+    private Object loadAllPublications(final JSONObject request, final ServerSession session) throws PublicationJSONException, JSONException, PublicationException {
+    	final Context context = session.getContext();  
+    	final int userId = session.getUserId();
+    	boolean containsFolder = false;
+    	
+    	if (request.has("folder")) {
+    		if (!request.has("entityModule")) {
+    			throw MISSING_PARAMETER.create("entityModule");
+    		}
+    		containsFolder = true;
+        } 
+    	
+    	String module = null;    	
+    	if (request.has("entityModule")) {
+    		module = request.optString("entityModule");        	
+    	}    	
+        
+        // Check if request contains folder attribute. If not assume a request for all publications of the session user.
+    	// If module is set in this case, fetch all publications of a user in that module.
+        final List<Publication> publications;
+        if (containsFolder) {
+        	final EntityType entityType = entities.get(module);
+            if (null == entityType) {
+                throw UNKOWN_ENTITY_MODULE.create(module);
+            }
+            final String entityId = entityType.toEntityID(request);
+        	publications = loadAllPublicationsForEntity(context, entityId, module);
+        } else {
+        	publications = loadAllPublicationsForUser(context, userId, module);
         }
-        final String module = request.optString("entityModule");
-        final EntityType entityType = entities.get(module);
-        if (null == entityType) {
-            throw UNKOWN_ENTITY_MODULE.create(module);
-        }
-        final String entityId = entityType.toEntityID(request);
-        final Context context = session.getContext();
-        final List<Publication> publications = loadAllPublicationsForEntity(context, entityId, module);
-
+        
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
         final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
@@ -233,6 +251,30 @@ public class PublicationMultipleHandler implements MultipleHandler {
             return new String[] { "id", "entityId", "entityModule", "target" };
         }
         return columns.split("\\s*,\\s*");
+    }
+    
+    private List<Publication> loadAllPublicationsForUser(final Context context, int userId, String module) throws PublicationException {
+    	final List<Publication> publications = new LinkedList<Publication>();
+    	final Collection<PublicationTarget> targets = discovery.listTargets();
+        
+        for (final PublicationTarget target : targets) {
+        	Collection<Publication> allPublicationsForUser = null;
+        	
+        	if (module == null) {
+        		final PublicationService publicationService = target.getPublicationService();
+        		allPublicationsForUser = publicationService.getAllPublications(context, userId, target.getModule());
+        	} else {
+        		if (target.isResponsibleFor(module)) {
+        			final PublicationService publicationService = target.getPublicationService();
+        			allPublicationsForUser = publicationService.getAllPublications(context, userId, module);        			
+        		}        		
+        	}
+        	if (allPublicationsForUser != null) {
+                publications.addAll(allPublicationsForUser);
+        	} 
+        }
+        
+        return publications;
     }
 
     private List<Publication> loadAllPublicationsForEntity(final Context context, final String entityId, final String module) throws PublicationException {

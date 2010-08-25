@@ -59,6 +59,7 @@ public interface PublicationService {
     
     public void create(Publication publication) throws PublicationException;
     public void update(Publication publication) throws PublicationException;
+    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws PublicationException;
     public Collection<Publication> getAllPublications(Context ctx) throws PublicationException;
     public Collection<Publication> getAllPublications(Context ctx, String entityId) throws PublicationException;
     public boolean knows(Context ctx, int publicationId) throws PublicationException;

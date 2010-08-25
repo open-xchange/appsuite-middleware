@@ -135,4 +135,15 @@ public class DummyStorage implements PublicationStorage {
         
     }
 
+	public List<Publication> getPublicationsOfUser(Context ctx, int userId) throws PublicationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<Publication> getPublicationsOfUser(Context ctx, int userId,
+			String module) throws PublicationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -232,7 +232,7 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
     public void testGetAllPublicationsOfAUser() throws PublicationException{
         storage.rememberPublication(pub1);
         storage.rememberPublication(pub2);
-        List<Publication> publications = storage.getPublicationsOfUser(ctx, ctx.getContextId(), userId);
+        List<Publication> publications = storage.getPublicationsOfUser(ctx, userId);
         assertEquals("Should have two publications" , 2,  publications.size());
     }
 

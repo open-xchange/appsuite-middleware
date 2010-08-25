@@ -153,4 +153,9 @@ public class SimPublicationService implements PublicationService {
         return deletedIds;
     }
 
+	public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws PublicationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

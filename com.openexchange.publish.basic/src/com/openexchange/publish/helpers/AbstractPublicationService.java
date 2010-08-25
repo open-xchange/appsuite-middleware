@@ -119,6 +119,21 @@ public abstract class AbstractPublicationService implements PublicationService {
         afterLoad(publications);
         return publications;
     }
+    
+    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws PublicationException {
+    	List<Publication> publications;
+    	if (module == null) {
+    		publications = STORAGE.getPublicationsOfUser(ctx, userId);
+    	} else {
+    		publications = STORAGE.getPublicationsOfUser(ctx, userId, module);
+    	}
+    	
+    	for (Publication publication : publications) {
+            modifyOutgoing(publication);
+        }
+        afterLoad(publications);
+        return publications;
+    }
 
     public boolean knows(Context ctx, int publicationId) throws PublicationException {
         return load(ctx, publicationId) != null;

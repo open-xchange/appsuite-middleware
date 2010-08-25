@@ -183,11 +183,11 @@ public class PublicationSQLStorage implements PublicationStorage {
             readConnection = dbProvider.getReadConnection(ctx);
             SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)).AND(new EQUALS("entity", PLACEHOLDER)));
-
-            List<Object> values = new ArrayList<Object>();
-            values.add(I(ctx.getContextId()));
+        	
+        	List<Object> values = new ArrayList<Object>();
+        	values.add(I(ctx.getContextId()));
             values.add(module);
-            values.add(entityId);
+            values.add(entityId);          
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
@@ -247,21 +247,38 @@ public class PublicationSQLStorage implements PublicationStorage {
 
         return retval;
     }
+    
+    public List<Publication> getPublicationsOfUser(Context ctx, int userId)  throws PublicationException {
+    	return getPublicationsOfUser(ctx, userId, null);
+    }
 
-    public List<Publication> getPublicationsOfUser(Context ctx, int contextId, int userId)  throws PublicationException {
+    public List<Publication> getPublicationsOfUser(Context ctx, int userId, String module)  throws PublicationException {
         List<Publication> retval = null;
-
+        
+        int contextId = ctx.getContextId();
         Connection readConnection = null;
         ResultSet resultSet = null;
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
-                new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
+            
+            SELECT select;
+            List<Object> values = new ArrayList<Object>();;
+            if (module == null) {
+            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
+                        new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
 
-            List<Object> values = new ArrayList<Object>();
-            values.add(I(contextId));
-            values.add(I(userId));
+                values.add(I(contextId));
+                values.add(I(userId));
+            } else {
+            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
+                        new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)).AND(new EQUALS("module", PLACEHOLDER)));
+
+                values.add(I(contextId));
+                values.add(I(userId));
+                values.add(module);
+            }
+            
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
@@ -423,7 +440,7 @@ public class PublicationSQLStorage implements PublicationStorage {
     }
 
     private void deleteWhereUserID(int userid, Context context, Connection writeConnection) throws SQLException, GenericConfigStorageException, PublicationException {
-        List<Publication> publicated = getPublicationsOfUser(context, context.getContextId(), userid);
+        List<Publication> publicated = getPublicationsOfUser(context, userid);
         for(Publication pub: publicated){
             delete(pub,writeConnection);
             storageService.delete(writeConnection, context, getConfigurationId(pub));
