@@ -56,7 +56,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.groupware.contact.ContactUtil;
+//TODO: uncomment this
+//import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.Mappings;
@@ -123,7 +124,8 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage> {
                 page = page.substring(endOfLine + 1);
                 counter++;
                 if (contact != null) {
-                    ContactUtil.generateDisplayName(contact);
+                	//TODO: uncomment this
+                    //ContactUtil.generateDisplayName(contact);
                     contactObjects.add(contact);
                 }
 
