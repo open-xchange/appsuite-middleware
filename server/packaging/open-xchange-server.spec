@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -570,6 +570,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Aug 24 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16714: No change notifications for category changes.
+* Mon Aug 23 2010 - thorben.betten@open-xchange.com
+ - Bugfix #13785: Proper calculation of modified and "deleted" folders for XML/WebDAV interface
 * Sun Aug 22 2010 - thorben.betten@open-xchange.com
  - Bugfix #16708: Removed 'final' modifier from checkFieldsBeforeConnect() method to allow overriding in concrete MAL implementations
 * Fri Aug 20 2010 - thorben.betten@open-xchange.com

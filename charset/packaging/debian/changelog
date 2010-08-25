@@ -1,3 +1,9 @@
+open-xchange-charset (6.18.0.0-7) unstable; urgency=low
+
+  * first build for 6.18-rev7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 25 Aug 2010 14:23:23 +0200
+
 open-xchange-charset (6.18.0.0-6) unstable; urgency=low
 
   * first build for 6.18-rev6
