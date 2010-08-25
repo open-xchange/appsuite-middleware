@@ -52,7 +52,6 @@ package com.openexchange.publish;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
 
-
 /**
  * {@link PublicationExceptionFactory}
  *
