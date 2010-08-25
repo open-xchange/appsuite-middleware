@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,6 +65,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -265,12 +266,14 @@ public abstract class MailConfig {
          * Fetch mail account
          */
         final MailAccount mailAccount;
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
         try {
             final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             if (accountId == MailAccount.DEFAULT_ID) {
-                mailAccount = storage.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                mailAccount = storage.getDefaultMailAccount(userId, contextId);
             } else {
-                mailAccount = storage.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                mailAccount = storage.getMailAccount(accountId, userId, contextId);
             }
         } catch (final ServiceException e) {
             throw new MailException(e);
@@ -278,20 +281,16 @@ public abstract class MailConfig {
             throw new MailException(e);
         }
         mailConfig.accountId = accountId;
-        fillLoginAndPassword(
-            mailConfig,
-            session.getPassword(),
-            UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLoginInfo(),
-            mailAccount);
+        fillLoginAndPassword(mailConfig, session, UserStorage.getStorageUser(userId, contextId).getLoginInfo(), mailAccount);
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
                 throw new MailConfigException(
-                    new StringBuilder(128).append("Property \"").append("com.openexchange.mail.mailServer").append(
+                    new StringBuilder(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
                         "\" not set in mail properties").toString());
             }
-            throw new MailConfigException(new StringBuilder(128).append("Cannot determine mail server URL for user ").append(
-                session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+            throw new MailConfigException(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(
+                " in context ").append(contextId).toString());
         }
         {
             /*
@@ -380,9 +379,8 @@ public abstract class MailConfig {
      * @throws AbstractOXException If resolving user by specified pattern fails
      */
     public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws AbstractOXException {
-        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-            MailAccountStorageService.class,
-            true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         if (isDefaultAccount) {
             final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
             if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
@@ -450,15 +448,17 @@ public abstract class MailConfig {
      * @return <code>true</code> if part modifier shall be used; otherwise <code>false</code>
      */
     public static final boolean usePartModifier() {
-        if (usePartModifier == null) {
+        Boolean tmp = usePartModifier;
+        if (tmp == null) {
             synchronized (MailConfig.class) {
-                if (usePartModifier == null) {
+                tmp = usePartModifier;
+                if (tmp == null) {
                     final PartModifier pm = PartModifier.getInstance();
-                    usePartModifier = Boolean.valueOf(pm != null && !DummyPartModifier.class.isInstance(pm));
+                    tmp = usePartModifier = Boolean.valueOf(pm != null && !DummyPartModifier.class.isInstance(pm));
                 }
             }
         }
-        return usePartModifier.booleanValue();
+        return tmp.booleanValue();
     }
 
     private final static boolean isValidProtocol(final String protocol) {
@@ -487,10 +487,11 @@ public abstract class MailConfig {
      * @param mailAccount The mail account
      * @throws MailConfigException If a configuration error occurs
      */
-    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final String sessionPassword, final String userLoginInfo, final MailAccount mailAccount) throws MailConfigException {
+    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount mailAccount) throws MailConfigException {
         // Assign login
         mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
         // Assign password
+        final String sessionPassword = session.getPassword();
         if (mailAccount.isDefaultAccount()) {
             final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
             if (PasswordSource.GLOBAL.equals(cur)) {
@@ -511,9 +512,16 @@ public abstract class MailConfig {
             } else {
                 // Decrypt mail account's password using session password
                 try {
-                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, sessionPassword);
+                    SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
+                    String secret = secretService.getSecret(session);
+                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, secret);
                 } catch (final GeneralSecurityException e) {
-                    throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(e, new Object[0]));
+                    throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(
+                        e,
+                        mailConfig.login,
+                        mailAccount.getMailServer(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId())));
                 }
             }
         }
@@ -628,7 +636,8 @@ public abstract class MailConfig {
         result = prime * result + ((login == null) ? 0 : login.hashCode());
         result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + (getPort());
-        result = prime * result + ((getServer() == null) ? 0 : getServer().hashCode());
+        final String server = getServer();
+        result = prime * result + ((server == null) ? 0 : server.hashCode());
         return result;
     }
 
