@@ -69,7 +69,7 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
-        crawler.setPriority(7);
+        crawler.setPriority(9);
         
         List<Step> steps = new LinkedList<Step>();
 
@@ -81,13 +81,13 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
             "https://login.facebook.com/login.php?login_attempt=1",
             "email",
             "pass",
-            "(http://www.facebook.com/.*profile.*)"));
+            "(http://www.facebook.com/notifications.php)"));
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        dumpThis(crawler, crawler.getDisplayName());
+        // dumpThis(crawler, crawler.getDisplayName());
     }
 }
