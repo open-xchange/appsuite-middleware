@@ -146,8 +146,7 @@ public final class MailSessionEventHandler implements EventHandler {
             final String topic = event.getTopic();
             try {
                 if (TOPIC_REMOVE_SESSION.equals(topic)) {
-                    final Session session = (Session) event.getProperty(PROP_SESSION);
-                    dropSessionCaches(session);
+                    dropSessionCaches((Session) event.getProperty(PROP_SESSION));
                 } else if (TOPIC_REMOVE_CONTAINER.equals(topic)) {
                     @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
                         (Map<String, Session>) event.getProperty(PROP_CONTAINER);
