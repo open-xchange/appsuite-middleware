@@ -85,6 +85,10 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
         this(folder, columns);
         setDynamicColumns(dynamicColumns);
     }
+    
+    public AllSubscriptionsRequest(List<String> columns) {
+        this(null, columns);
+    }
 
     
     public Object getBody() throws JSONException {
@@ -97,8 +101,8 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
 
     public Parameter[] getParameters() {
         Params params = new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
-
-        params.add("folder",getFolderID());
+        if (getFolderID() != null)
+            params.add("folder",getFolderID());
         
         if (getColumns() != null) {
             params.add(getColumnsAsParameter());

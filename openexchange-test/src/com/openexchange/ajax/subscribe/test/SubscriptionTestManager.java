@@ -196,7 +196,13 @@ public class SubscriptionTestManager {
     }
     
     public JSONArray allAction(String folder, List<String> columns) throws AjaxException, IOException, SAXException, JSONException{
-        AllSubscriptionsRequest allReq = new AllSubscriptionsRequest(folder, columns);
+        AllSubscriptionsRequest allReq = null;
+        if (folder == null) {
+            allReq = new AllSubscriptionsRequest(columns);
+        } else {
+            allReq = new AllSubscriptionsRequest(folder, columns);
+        }
+        
         allReq.setFailOnError(getFailOnError());
         AllSubscriptionsResponse allResp = getClient().execute(allReq);
         lastResponse = allResp;
@@ -205,6 +211,10 @@ public class SubscriptionTestManager {
     
     public JSONArray allAction(int folder, List<String> columns) throws AjaxException, IOException, SAXException, JSONException{
         return allAction(String.valueOf(folder), columns);
+    }
+    
+    public JSONArray allAction(List<String> columns) throws AjaxException, IOException, SAXException, JSONException{
+        return allAction(null, columns);
     }
     
     public JSONArray allAction(String folder, List<String> columns, Map<String,List<String>> dynamicColumns) throws AjaxException, IOException, SAXException, JSONException{
