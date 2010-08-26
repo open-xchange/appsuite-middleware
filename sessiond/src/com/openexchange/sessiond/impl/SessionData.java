@@ -117,6 +117,11 @@ final class SessionData {
         }
     }
 
+    /**
+     * Rotates the session containers. A new slot is added to head of each queue, while the last one is removed.
+     * 
+     * @return The removed sessions
+     */
     List<SessionControl> rotate() {
         // A write access to lists
         wlock.lock();
@@ -164,7 +169,7 @@ final class SessionData {
             for (final SessionContainer container : sessionList) {
                 retval.addAll(Arrays.asList(container.removeSessionsByUser(userId, contextId)));
             }
-            for (SessionControl control : retval) {
+            for (final SessionControl control : retval) {
                 unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID());
             }
             return retval.toArray(new SessionControl[retval.size()]);
@@ -201,11 +206,11 @@ final class SessionData {
         return count;
     }
 
-    void checkAuthId(String login, String authId) throws SessiondException {
+    void checkAuthId(final String login, final String authId) throws SessiondException {
         rlock.lock();
         try {
-            for (SessionContainer container : sessionList) {
-                for (SessionControl sc : container.getSessionControls()) {
+            for (final SessionContainer container : sessionList) {
+                for (final SessionControl sc : container.getSessionControls()) {
                     if (null != authId && authId.equals(sc.getSession().getAuthId())) {
                         throw new SessiondException(Code.DUPLICATE_AUTHID, sc.getSession().getLogin(), login);
                     }
@@ -253,7 +258,7 @@ final class SessionData {
         rlock.lock();
         try {
             for (i = 0; i < sessionList.size(); i++) {
-                SessionContainer container = sessionList.get(i);
+                final SessionContainer container = sessionList.get(i);
                 if (container.containsSessionId(sessionId)) {
                     control = container.getSessionById(sessionId);
                     if (i > 0) {
@@ -276,7 +281,7 @@ final class SessionData {
             wlock.lock();
             try {
                 sessionList.get(i).removeSessionById(sessionId);
-                Session session = control.getSession();
+                final Session session = control.getSession();
                 userList.get(i).remove(session.getLoginName());
                 randomList.get(i).remove(session.getRandomToken());
             } finally {
@@ -323,7 +328,7 @@ final class SessionData {
                     final SessionControl sessionControl = container.removeSessionById(sessionId);
                     final Session session = sessionControl.getSession();
                     userList.get(i).remove(session.getLoginName());
-                    String random = session.getRandomToken();
+                    final String random = session.getRandomToken();
                     if (null != random) {
                         // If session is access through random token, random token is removed in the session.
                         randomList.get(i).remove(random);
@@ -352,16 +357,16 @@ final class SessionData {
         }
     }
 
-    void move2FirstContainer(String sessionId) {
+    void move2FirstContainer(final String sessionId) {
         wlock.lock();
         try {
             boolean movedSession = false;
             for (int i = 1; i < sessionList.size(); i++) {
-                SessionContainer container = sessionList.get(i);
+                final SessionContainer container = sessionList.get(i);
                 if (container.containsSessionId(sessionId)) {
-                    SessionControl sessionControl = container.removeSessionById(sessionId);
+                    final SessionControl sessionControl = container.removeSessionById(sessionId);
                     sessionList.getFirst().putSessionControl(sessionControl);
-                    Session session = sessionControl.getSession();
+                    final Session session = sessionControl.getSession();
                     userList.get(i).remove(session.getLoginName());
                     userList.getFirst().put(session.getLoginName(), session.getSessionID());
                     randomList.get(i).remove(session.getRandomToken());
@@ -389,7 +394,7 @@ final class SessionData {
 
     private ThreadPoolService threadPoolService;
 
-    public void addThreadPoolService(ThreadPoolService service) {
+    public void addThreadPoolService(final ThreadPoolService service) {
         this.threadPoolService = service;
     }
 
@@ -397,7 +402,7 @@ final class SessionData {
         threadPoolService = null; 
     }
 
-    private void scheduleTask2MoveSession2FirstContainer(String sessionId) {
+    private void scheduleTask2MoveSession2FirstContainer(final String sessionId) {
         final Move2FirstContainerTask task;
         tasksLock.lock();
         try {
@@ -415,7 +420,7 @@ final class SessionData {
                 public void run() {
                     try {
                         task.call();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         LOG.error("Moving session to first container failed.", e);
                     }
                 }
@@ -425,7 +430,7 @@ final class SessionData {
         }
     }
 
-    private void unscheduleTask2MoveSession2FirstContainer(String sessionId) {
+    private void unscheduleTask2MoveSession2FirstContainer(final String sessionId) {
         tasksLock.lock();
         try {
             tasks.remove(sessionId);
@@ -438,7 +443,7 @@ final class SessionData {
 
         private final String sessionId;
 
-        Move2FirstContainerTask(String sessionId) {
+        Move2FirstContainerTask(final String sessionId) {
             super();
             this.sessionId = sessionId;
         }
