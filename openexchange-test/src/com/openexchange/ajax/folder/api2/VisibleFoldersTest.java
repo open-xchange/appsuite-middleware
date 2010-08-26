@@ -65,22 +65,22 @@ import com.openexchange.test.PermissionTools;
 
 /**
  * {@link VisibleFoldersTest}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VisibleFoldersTest extends AbstractAJAXSession {
 
     private AJAXClient clientA;
-    
+
     private AJAXClient clientB;
-    
+
     private FolderObject createdPrivateFolder;
-    
+
     private FolderObject createdPublicFolder;
-    
+
     private FolderObject createdSharedFolder;
 
-    public VisibleFoldersTest(String name) {
+    public VisibleFoldersTest(final String name) {
         super(name);
     }
 
@@ -89,7 +89,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
         super.setUp();
         clientA = getClient();
         clientB = new AJAXClient(User.User2);
-        
+
         {
             createdPrivateFolder = new FolderObject();
             createdPrivateFolder.setModule(FolderObject.CALENDAR);
@@ -97,11 +97,11 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
             createdPrivateFolder.setType(FolderObject.PRIVATE);
             createdPrivateFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN));
             createdPrivateFolder.setFolderName("testPrivateCalendarFolder" + System.currentTimeMillis());
-            InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdPrivateFolder);
-            InsertResponse iResp = client.execute(iReq);
+            final InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdPrivateFolder);
+            final InsertResponse iResp = client.execute(iReq);
             iResp.fillObject(createdPrivateFolder);
         }
-        
+
         {
             createdPublicFolder = new FolderObject();
             createdPublicFolder.setModule(FolderObject.CALENDAR);
@@ -109,23 +109,27 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
             createdPublicFolder.setType(FolderObject.PUBLIC);
             createdPublicFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN));
             createdPublicFolder.setFolderName("testPublicCalendarFolder" + System.currentTimeMillis());
-            InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdPublicFolder);
-            InsertResponse iResp = client.execute(iReq);
+            final InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdPublicFolder);
+            final InsertResponse iResp = client.execute(iReq);
             iResp.fillObject(createdPublicFolder);
         }
-        
+
         {
             createdSharedFolder = new FolderObject();
             createdSharedFolder.setModule(FolderObject.CALENDAR);
             createdSharedFolder.setParentFolderID(clientB.getValues().getPrivateAppointmentFolder());
             createdSharedFolder.setType(FolderObject.PRIVATE);
-            createdSharedFolder.setPermissions(PermissionTools.P(I(clientB.getValues().getUserId()), PermissionTools.ADMIN, I(clientA.getValues().getUserId()), "arawada"));
+            createdSharedFolder.setPermissions(PermissionTools.P(
+                I(clientB.getValues().getUserId()),
+                PermissionTools.ADMIN,
+                I(clientA.getValues().getUserId()),
+                "arawada"));
             createdSharedFolder.setFolderName("testSharedCalendarFolder" + System.currentTimeMillis());
-            InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdSharedFolder);
-            InsertResponse iResp = clientB.execute(iReq);
+            final InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdSharedFolder);
+            final InsertResponse iResp = clientB.execute(iReq);
             iResp.fillObject(createdSharedFolder);
         }
-        
+
     }
 
     @Override
@@ -185,20 +189,20 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
             assertTrue("Previously created shared folder not found in shared folders.", found);
         }
     }
-    
-    public void testFindingGlobalAddressbook() throws Exception{
+
+    public void testFindingGlobalAddressbook() throws Exception {
         final VisibleFoldersRequest req = new VisibleFoldersRequest(API.OUTLOOK, "contacts");
         final VisibleFoldersResponse resp = client.execute(req);
-        Iterator<FolderObject> publicFolders = resp.getPublicFolders();
-        
+        final Iterator<FolderObject> publicFolders = resp.getPublicFolders();
+
         boolean globalAddressBookFound = false;
-        while(publicFolders.hasNext())
-            if(publicFolders.next().getObjectID() == FolderObject.SYSTEM_LDAP_FOLDER_ID)
+        while (publicFolders.hasNext()) {
+            if (publicFolders.next().getObjectID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
                 globalAddressBookFound = true;
-        
+            }
+        }
+
         assertTrue("Could not find the global address book", globalAddressBookFound);
-        
-        
     }
 
 }
