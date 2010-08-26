@@ -1542,9 +1542,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @param order The order direction (needed to possibly flip the results)
      * @return The fetched mail messages with only ID and folder ID set.
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If a mail error occurs
      */
-    private MailMessage[] performLowCostFetch(final String fullname, final MailFields lowCostFields, final OrderDirection order, final IndexRange indexRange) throws MessagingException, MailException {
+    private MailMessage[] performLowCostFetch(final String fullname, final MailFields lowCostFields, final OrderDirection order, final IndexRange indexRange) throws MessagingException {
         /*
          * Perform simple fetch
          */

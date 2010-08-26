@@ -131,8 +131,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private final IMAPConfig imapConfig;
 
-    private ACLExtension aclExtension;
-
     private Character separator;
 
     private IMAPDefaultFolderChecker checker;
