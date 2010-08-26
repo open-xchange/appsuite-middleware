@@ -255,11 +255,12 @@ public final class IMAPFolderConverter {
             /*
              * Default folder
              */
+            final int accountId = imapConfig.getAccountId();
             if ("INBOX".equals(imapFullname)) {
                 mailFolder.setDefaultFolder(true);
                 mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
-            } else if (isDefaultFoldersChecked(session, imapConfig.getAccountId())) {
-                final String[] defaultMailFolders = getDefaultMailFolders(session, imapConfig.getAccountId());
+            } else if (isDefaultFoldersChecked(session, accountId)) {
+                final String[] defaultMailFolders = getDefaultMailFolders(session, accountId);
                 for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
                     if (imapFullname.equals(defaultMailFolders[i])) {
                         mailFolder.setDefaultFolder(true);
@@ -307,7 +308,7 @@ public final class IMAPFolderConverter {
                          * This is the tricky case: Allow subfolder creation for a common imap folder but deny it for imap server's
                          * namespace folders
                          */
-                        if (checkForNamespaceFolder(imapFullname, (IMAPStore) imapFolder.getStore(), session, imapConfig.getAccountId())) {
+                        if (checkForNamespaceFolder(imapFullname, (IMAPStore) imapFolder.getStore(), session, accountId)) {
                             ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
                         } else {
                             ownPermission.setAllPermission(
@@ -373,7 +374,7 @@ public final class IMAPFolderConverter {
                 imapFolder,
                 true,
                 session,
-                imapConfig.getAccountId())) {
+                accountId)) {
                 mailFolder.setSupportsUserFlags(true);
             } else {
                 mailFolder.setSupportsUserFlags(false);
