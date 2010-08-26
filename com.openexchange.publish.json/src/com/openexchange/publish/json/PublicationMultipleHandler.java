@@ -248,7 +248,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
     private String[] getBasicColumns(final JSONObject request) {
         final String columns = request.optString("columns");
         if (columns == null || columns.equals("")) {
-            return new String[] { "id", "entityId", "entityModule", "target" };
+            return new String[] { "id", "entityId", "entityModule", "target", "enabled" };
         }
         return columns.split("\\s*,\\s*");
     }

@@ -84,8 +84,8 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
             AND(new EQUALS("user_id", I(pub1.getUserId()))).
             AND(new EQUALS("entity", pub1.getEntityId())).
             AND(new EQUALS("module", pub1.getModule())).
-            AND(new EQUALS("target_id", pub1.getTarget().getId())));
-        
+            AND(new EQUALS("target_id", pub1.getTarget().getId())).
+            AND(new EQUALS("enabled", pub1.isEnabled())));
         assertResult(new StatementBuilder().buildCommand(select));
     }
     
@@ -235,6 +235,73 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         List<Publication> publications = storage.getPublicationsOfUser(ctx, userId);
         assertEquals("Should have two publications" , 2,  publications.size());
     }
+    
+    // Enabled
+    
+    public void testChangeEnabled() throws Exception{
+        storage.rememberPublication(pub1);
+        assertTrue("Id should be greater 0", pub1.getId() > 0);
+        publicationsToDelete.add(I(pub1.getId()));
+        pub2.setId(pub1.getId());
+        pub2.setModule("newModule");
+        pub2.setEntityId("3546");
+        pub2.setEnabled(false);
+        storage.updatePublication(pub2);
+        assertEquals("Id should not changed", pub1.getId(), pub2.getId());
+        
+        SELECT select = new SELECT(ASTERISK).
+        FROM(publications).
+        WHERE(new EQUALS("id", I(pub1.getId())).
+            AND(new EQUALS("cid", I(ctx.getContextId()))).
+            AND(new EQUALS("user_id", I(pub2.getUserId()))).
+            AND(new EQUALS("entity", "3546")).
+            AND(new EQUALS("module", "newModule")).
+            AND(new EQUALS("target_id", pub2.getTarget().getId())).
+            AND(new EQUALS("enabled", false)));
+        
+        assertResult(new StatementBuilder().buildCommand(select));
 
+    }
+    
+    public void testLeaveEnabledUnchanged() throws Exception {
+        storage.rememberPublication(pub1);
+        assertTrue("Id should be greater 0", pub1.getId() > 0);
+        publicationsToDelete.add(I(pub1.getId()));
+        pub2.setId(pub1.getId());
+        pub2.setModule("newModule");
+        pub2.setEntityId("3546");
+        storage.updatePublication(pub2);
+        assertEquals("Id should not changed", pub1.getId(), pub2.getId());
+        
+        SELECT select = new SELECT(ASTERISK).
+        FROM(publications).
+        WHERE(new EQUALS("id", I(pub1.getId())).
+            AND(new EQUALS("cid", I(ctx.getContextId()))).
+            AND(new EQUALS("user_id", I(pub2.getUserId()))).
+            AND(new EQUALS("entity", "3546")).
+            AND(new EQUALS("module", "newModule")).
+            AND(new EQUALS("target_id", pub2.getTarget().getId())).
+            AND(new EQUALS("enabled", true)));
+        
+        assertResult(new StatementBuilder().buildCommand(select));
 
+    }
+    
+    public void testEnabledDefaultsToTrue() throws PublicationException {
+        storage.rememberPublication(pub2);
+        assertTrue("Id should be greater 0", pub2.getId() > 0);
+        publicationsToDelete.add(I(pub2.getId()));
+        
+        SELECT select = new SELECT(ASTERISK).
+        FROM(publications).
+        WHERE(new EQUALS("id", I(pub2.getId())).
+            AND(new EQUALS("cid", I(ctx.getContextId()))).
+            AND(new EQUALS("user_id", I(pub2.getUserId()))).
+            AND(new EQUALS("entity", "3546")).
+            AND(new EQUALS("module", "newModule")).
+            AND(new EQUALS("target_id", pub2.getTarget().getId())).
+            AND(new EQUALS("enabled", true)));
+
+    }
+    
 }

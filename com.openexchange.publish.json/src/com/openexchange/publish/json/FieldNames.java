@@ -60,6 +60,7 @@ public class FieldNames {
     public static final String ID = "id";
     public static final String ENTITY = "entity";
     public static final String ENTITY_MODULE = "entityModule";
+    public static final String ENABLED = "enabled";
     public static final String TARGET = "target";
     public static final String DISPLAYNAME= "displayName";
 

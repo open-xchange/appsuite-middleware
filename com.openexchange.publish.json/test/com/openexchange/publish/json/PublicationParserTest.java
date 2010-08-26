@@ -107,6 +107,8 @@ public class PublicationParserTest extends TestCase {
         
         object.put("com.openexchange.publish.test", config);
     
+        object.put("enabled", false);
+        
     }
     
     public void testParse() throws JSONException, PublicationException, PublicationJSONException {
@@ -124,5 +126,9 @@ public class PublicationParserTest extends TestCase {
         
         assertNotNull("config was null", config);
         assertEquals("siteName was wrong", "publication", config.get("siteName"));
+
+        assertEquals("enabled was wrong", true, publication.containsEnabled());
+        assertEquals("enabled was wrong", false, publication.isEnabled());
+    
     }
 }

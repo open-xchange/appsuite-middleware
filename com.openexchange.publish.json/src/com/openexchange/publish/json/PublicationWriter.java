@@ -52,6 +52,7 @@ package com.openexchange.publish.json;
 import static com.openexchange.publish.json.FieldNames.DISPLAYNAME;
 import static com.openexchange.publish.json.FieldNames.ENTITY;
 import static com.openexchange.publish.json.FieldNames.ENTITY_MODULE;
+import static com.openexchange.publish.json.FieldNames.ENABLED;
 import static com.openexchange.publish.json.FieldNames.ID;
 import static com.openexchange.publish.json.FieldNames.TARGET;
 import java.util.List;
@@ -87,6 +88,7 @@ public class PublicationWriter {
         object.put(ID, publication.getId());
         object.put(ENTITY, writeEntity(publication));
         object.put(ENTITY_MODULE, publication.getModule());
+        object.put(ENABLED, publication.isEnabled());
         object.put(DISPLAYNAME, publication.getDisplayName());
         String targetId = publication.getTarget().getId();
         object.put(TARGET, targetId);
@@ -133,6 +135,8 @@ public class PublicationWriter {
                 array.put(publication.getTarget().getId());
             } else if (DISPLAYNAME.equals(basicCol)) {
                 array.put(publication.getDisplayName());
+            } else if (ENABLED.equals(basicCol)) {
+                array.put(publication.isEnabled());
             } else {
                 throw PublicationJSONErrorMessage.UNKNOWN_COLUMN.create(basicCol);
             }

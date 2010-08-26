@@ -142,6 +142,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         pub1.setUserId(userId);
         pub1.setTarget(target1);
         pub1.setConfiguration(config1);
+        pub1.setEnabled(true);
         
         // Second
         FormElement formElementLogin2 = new FormElement();
@@ -212,6 +213,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getModule(), actual.getModule());
         assertEquals(expected.getUserId(), actual.getUserId());
         assertEquals(expected.getTarget(), actual.getTarget());
+        assertEquals(expected.isEnabled(), actual.isEnabled());
     }
     
     protected void assertEquals(PublicationTarget expected, PublicationTarget actual) {

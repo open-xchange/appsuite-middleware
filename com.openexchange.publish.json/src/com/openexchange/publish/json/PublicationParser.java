@@ -53,6 +53,7 @@ import static com.openexchange.publish.json.FieldNames.ENTITY;
 import static com.openexchange.publish.json.FieldNames.ENTITY_MODULE;
 import static com.openexchange.publish.json.FieldNames.ID;
 import static com.openexchange.publish.json.FieldNames.TARGET;
+import static com.openexchange.publish.json.FieldNames.ENABLED;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -111,6 +112,10 @@ public class PublicationParser {
             publication.setTarget(target);
             
             publication.setConfiguration(formParser.parse(object.getJSONObject(target.getId()), target.getFormDescription()));
+        }
+        
+        if(object.has(ENABLED)) {
+            publication.setEnabled(object.getBoolean(ENABLED));
         }
         return publication;
     }

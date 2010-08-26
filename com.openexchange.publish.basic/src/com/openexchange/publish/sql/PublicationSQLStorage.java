@@ -140,7 +140,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
+            SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
@@ -181,7 +181,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
+            SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)).AND(new EQUALS("entity", PLACEHOLDER)));
         	
         	List<Object> values = new ArrayList<Object>();
@@ -219,7 +219,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
+            SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("target_id", PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
@@ -265,13 +265,13 @@ public class PublicationSQLStorage implements PublicationStorage {
             SELECT select;
             List<Object> values = new ArrayList<Object>();;
             if (module == null) {
-            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
+            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
                         new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
 
                 values.add(I(contextId));
                 values.add(I(userId));
             } else {
-            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id").FROM(publications).WHERE(
+            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
                         new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)).AND(new EQUALS("module", PLACEHOLDER)));
 
                 values.add(I(contextId));
@@ -477,7 +477,7 @@ public class PublicationSQLStorage implements PublicationStorage {
 
         INSERT insert = new INSERT().INTO(publications).SET("id", PLACEHOLDER).SET("cid", PLACEHOLDER).SET("user_id", PLACEHOLDER).SET(
             "entity",
-            PLACEHOLDER).SET("module", PLACEHOLDER).SET("configuration_id", PLACEHOLDER).SET("target_id", PLACEHOLDER);
+            PLACEHOLDER).SET("module", PLACEHOLDER).SET("configuration_id", PLACEHOLDER).SET("target_id", PLACEHOLDER).SET("enabled", PLACEHOLDER);
 
         List<Object> values = new ArrayList<Object>();
         values.add(I(id));
@@ -487,7 +487,8 @@ public class PublicationSQLStorage implements PublicationStorage {
         values.add(publication.getModule());
         values.add(I(configId));
         values.add(publication.getTarget().getId());
-
+        values.add(publication.isEnabled());
+        
         new StatementBuilder().executeStatement(writeConnection, insert, values);
         return id;
     }
@@ -501,21 +502,26 @@ public class PublicationSQLStorage implements PublicationStorage {
         UPDATE update = new UPDATE(publications);
         List<Object> values = new ArrayList<Object>();
 
-        if (publication.getUserId() > 0) {
+        if (publication.containsUserId()) {
             update.SET("user_id", PLACEHOLDER);
             values.add(I(publication.getUserId()));
         }
-        if (publication.getEntityId() != null) {
+        if (publication.containsEntityId()) {
             update.SET("entity", PLACEHOLDER);
             values.add(publication.getEntityId());
         }
-        if (publication.getModule() != null) {
+        if (publication.containsModule()) {
             update.SET("module", PLACEHOLDER);
             values.add(publication.getModule());
         }
-        if (publication.getTarget() != null) {
+        if (publication.containsTarget()) {
             update.SET("target_id", PLACEHOLDER);
             values.add(publication.getTarget().getId());
+        }
+        
+        if (publication.containsEnabled()) {
+            update.SET("enabled", PLACEHOLDER);
+            values.add(publication.isEnabled());
         }
 
         update.WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
@@ -537,7 +543,8 @@ public class PublicationSQLStorage implements PublicationStorage {
             publication.setId(resultSet.getInt("id"));
             publication.setModule(resultSet.getString("module"));
             publication.setUserId(resultSet.getInt("user_id"));
-
+            publication.setEnabled(resultSet.getBoolean("enabled"));
+            
             Map<String, Object> content = new HashMap<String, Object>();
             storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content);
 
