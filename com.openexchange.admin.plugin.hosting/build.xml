@@ -82,6 +82,7 @@
 		<fileset dir="${rmi_lib_dir}" includes="ox_admin*"/>
 		<pathelement location="${core_tests_dir}/test-classes"/>
 		<fileset dir="${core_tests_dir}/lib" includes="${junit}"/>
+		<fileset dir="lib" includes="mysql-connector-java-5.1.6-bin.jar"/>
 	</path>
 
     <!--                    TARGETS                      -->
