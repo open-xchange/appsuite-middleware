@@ -69,11 +69,14 @@ public class SessiondServiceImpl implements SessiondService {
 
     private static final Log LOG = LogFactory.getLog(SessiondServiceImpl.class);
 
+    private final Lock migrateLock;
+
     public SessiondServiceImpl() {
         super();
+        migrateLock = new ReentrantLock();
     }
 
-    public String addSession(AddSessionParameter param) throws SessiondException {
+    public String addSession(final AddSessionParameter param) throws SessiondException {
         return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash());
     }
 
@@ -97,9 +100,7 @@ public class SessiondServiceImpl implements SessiondService {
         return SessionHandler.getUserSessions(userId, contextId).length;
     }
 
-    private final Lock migrateLock = new ReentrantLock();
-
-    public Session getSession(String sessionId) {
+    public Session getSession(final String sessionId) {
         SessionControl sessionControl = SessionHandler.getSession(sessionId);
         if (null == sessionControl) {
             // No local session found. Maybe it should be migrated.
