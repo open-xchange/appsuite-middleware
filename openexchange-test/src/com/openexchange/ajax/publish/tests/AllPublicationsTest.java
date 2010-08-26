@@ -205,7 +205,6 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         // get all publications
         pubMgr.allAction(Integer.MAX_VALUE, Arrays.asList(new String[]{"id","entity", "entityModule", "displayName", "target"}));
         AllPublicationsResponse resp = (AllPublicationsResponse) pubMgr.getLastResponse();
-        assertFalse("Error at all-request: " + resp.getException().getMessage(), resp.hasError());
         List<JSONArray> all = resp.getAll();
         List<Integer> foundIds = new ArrayList<Integer>();
         
