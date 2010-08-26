@@ -52,20 +52,15 @@ package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Vector;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -86,10 +81,17 @@ public class UtilTest extends AbstractTest {
 		return new JUnit4TestAdapter(UtilTest.class);
 	}
     
-    public static Filestore getTestFilestoreObject(String name,String url) throws Exception{
+    public static Filestore getTestFilestoreObject(String name,String relativePath) throws Exception{
         Filestore client_st = new Filestore();
         
+        String storepath = "/tmp/";
+        if(System.getProperty("rmi_test_storepath")!=null){
+            storepath = System.getProperty("rmi_test_storepath");
+        }        
         // create dir 
+        String url = "file:/" + storepath + "/" + relativePath;
+        url = url.replaceAll("//", "/");
+        System.out.println("********************** URL" + url);
         java.net.URI uri = new java.net.URI(url);
         client_st.setUrl(uri.toString());
         new java.io.File(uri.getPath()).mkdir();
@@ -447,7 +449,7 @@ public class UtilTest extends AbstractTest {
             assertTrue(true);
         }
         
-        client_st = getTestFilestoreObject("testcase_registerfilestore_disc_"+System.currentTimeMillis(),"file:/tmp/disc_"+System.currentTimeMillis());
+        client_st = getTestFilestoreObject("testcase_registerfilestore_disc_"+System.currentTimeMillis(),"disc_"+System.currentTimeMillis());
          
         client_st.setId(oxu.registerFilestore(client_st,ContextTest.DummyMasterCredentials()).getId());
         
@@ -458,7 +460,7 @@ public class UtilTest extends AbstractTest {
             assertTrue(true);
         }
         
-        Filestore[] srv_stores = oxu.listFilestore("file:/tmp/disc_*",ContextTest.DummyMasterCredentials());
+        Filestore[] srv_stores = oxu.listFilestore("*disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         boolean found_store = false;
@@ -478,11 +480,11 @@ public class UtilTest extends AbstractTest {
     public void testChangeFilestore() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
-        Filestore client_st = getTestFilestoreObject("testcase_registerfilestore_disc_"+System.currentTimeMillis(),"file:/tmp/disc_"+System.currentTimeMillis());
+        Filestore client_st = getTestFilestoreObject("testcase_registerfilestore_disc_"+System.currentTimeMillis(),"disc_"+System.currentTimeMillis());
          
         client_st.setId(oxu.registerFilestore(client_st,ContextTest.DummyMasterCredentials()).getId());
         
-        Filestore[] srv_stores = oxu.listFilestore("file:/tmp/disc_*",ContextTest.DummyMasterCredentials());
+        Filestore[] srv_stores = oxu.listFilestore("*disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         boolean found_store = false;
@@ -507,7 +509,7 @@ public class UtilTest extends AbstractTest {
         // change store on server
         oxu.changeFilestore(client_st,ContextTest.DummyMasterCredentials());
         
-        srv_stores = oxu.listFilestore("file:/tmp/disc_*",ContextTest.DummyMasterCredentials());
+        srv_stores = oxu.listFilestore("*disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         found_store = false;
@@ -528,11 +530,11 @@ public class UtilTest extends AbstractTest {
     public void testListFilestores() throws Exception {
        OXUtilInterface oxu = getUtilClient();
         
-        Filestore client_st = getTestFilestoreObject("testcase_registerfilestore_disc_"+System.currentTimeMillis(),"file:/tmp/disc_"+System.currentTimeMillis());
+        Filestore client_st = getTestFilestoreObject("testcase_registerfilestore_disc_"+System.currentTimeMillis(),"disc_"+System.currentTimeMillis());
          
         client_st.setId(oxu.registerFilestore(client_st,ContextTest.DummyMasterCredentials()).getId());
         
-        Filestore[] srv_stores = oxu.listFilestore("file:/tmp/disc_*",ContextTest.DummyMasterCredentials());
+        Filestore[] srv_stores = oxu.listFilestore("*disc_*",ContextTest.DummyMasterCredentials());
         
         assertTrue("Expected list size > 0 ",srv_stores.length>0);
     }
@@ -541,11 +543,11 @@ public class UtilTest extends AbstractTest {
     public void testUnregisterFilestore() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
-        Filestore client_st  = getTestFilestoreObject("testcase_registerfilestore_disc_"+System.currentTimeMillis(),"file:/tmp/disc_"+System.currentTimeMillis());
+        Filestore client_st  = getTestFilestoreObject("testcase_registerfilestore_disc_"+System.currentTimeMillis(),"disc_"+System.currentTimeMillis());
          
         client_st.setId(oxu.registerFilestore(client_st,ContextTest.DummyMasterCredentials()).getId());
         
-        Filestore[] srv_stores = oxu.listFilestore("file:/tmp/disc_*",ContextTest.DummyMasterCredentials());
+        Filestore[] srv_stores = oxu.listFilestore("*disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         boolean found_store = false;
@@ -564,7 +566,7 @@ public class UtilTest extends AbstractTest {
         // now unregister and search again
         oxu.unregisterFilestore(new Filestore(client_st.getId()),ContextTest.DummyMasterCredentials());
         
-        srv_stores = oxu.listFilestore("file:/tmp/disc_*",ContextTest.DummyMasterCredentials());
+        srv_stores = oxu.listFilestore("*disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         found_store = false;
