@@ -171,13 +171,13 @@ public class PublicationMultipleHandler implements MultipleHandler {
     private Object loadAllPublications(final JSONObject request, final ServerSession session) throws PublicationJSONException, JSONException, PublicationException {
     	final Context context = session.getContext();  
     	final int userId = session.getUserId();
-    	boolean containsFolder = false;
+    	boolean containsFolderOrId = false;
     	
-    	if (request.has("folder")) {
+    	if (request.has("folder") || request.has("id")) {
     		if (!request.has("entityModule")) {
     			throw MISSING_PARAMETER.create("entityModule");
     		}
-    		containsFolder = true;
+    		containsFolderOrId = true;
         } 
     	
     	String module = null;    	
@@ -188,7 +188,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         // Check if request contains folder attribute. If not assume a request for all publications of the session user.
     	// If module is set in this case, fetch all publications of a user in that module.
         final List<Publication> publications;
-        if (containsFolder) {
+        if (containsFolderOrId) {
         	final EntityType entityType = entities.get(module);
             if (null == entityType) {
                 throw UNKOWN_ENTITY_MODULE.create(module);
