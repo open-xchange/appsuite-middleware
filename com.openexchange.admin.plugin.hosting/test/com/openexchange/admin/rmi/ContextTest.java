@@ -80,7 +80,11 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class ContextTest extends AbstractTest {
 
     public static Credentials DummyMasterCredentials(){
-        return new Credentials("oxadminmaster","secret");
+        String mpw = "secret";
+        if(System.getProperty("rmi_test_masterpw")!=null){
+            mpw = System.getProperty("rmi_test_masterpw");
+        }        
+        return new Credentials("oxadminmaster",mpw);
     }
     
     public static junit.framework.Test suite() {
