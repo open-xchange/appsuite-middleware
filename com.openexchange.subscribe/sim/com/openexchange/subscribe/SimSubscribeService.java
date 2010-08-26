@@ -52,6 +52,7 @@ package com.openexchange.subscribe;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
@@ -138,6 +139,10 @@ public class SimSubscribeService implements SubscribeService {
     
     public boolean knows(Context context, int subscriptionId) {
         return true;
+    }
+
+    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException {
+        return null;
     }
 
 }

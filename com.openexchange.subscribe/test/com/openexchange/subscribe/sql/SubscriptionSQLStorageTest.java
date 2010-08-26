@@ -194,11 +194,11 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
     
     public void testGetAllSubscriptionsOfAUser() throws SubscriptionException{
         storage.rememberSubscription(subscription);
-        List<Subscription> subscriptionsOfUser = storage.getSubscriptionsOfUser(ctx, ctx.getContextId(), userId);
+        List<Subscription> subscriptionsOfUser = storage.getSubscriptionsOfUser(ctx, userId);
         assertEquals("should find one subscription", 1, subscriptionsOfUser.size());
 
         storage.rememberSubscription(subscription2);
-        subscriptionsOfUser = storage.getSubscriptionsOfUser(ctx, ctx.getContextId(), userId);
+        subscriptionsOfUser = storage.getSubscriptionsOfUser(ctx, userId);
         assertEquals("should find two subscriptions", 2, subscriptionsOfUser.size());
     }
 }

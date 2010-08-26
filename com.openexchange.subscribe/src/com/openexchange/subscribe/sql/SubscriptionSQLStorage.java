@@ -218,7 +218,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
     }
     
 
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int contextId, int userId)  throws SubscriptionException {
+    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId)  throws SubscriptionException {
         List<Subscription> retval = null;
 
         Connection readConnection = null;
@@ -231,7 +231,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             .WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
-            values.add(I(contextId));
+            values.add(I(ctx.getContextId()));
             values.add(I(userId));
 
             builder = new StatementBuilder();
@@ -493,7 +493,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
 
-            List<Subscription> subs = getSubscriptionsOfUser(ctx, ctx.getContextId(), userId);
+            List<Subscription> subs = getSubscriptionsOfUser(ctx, userId);
             for(Subscription sub: subs){
                 delete(sub, writeConnection);
             }

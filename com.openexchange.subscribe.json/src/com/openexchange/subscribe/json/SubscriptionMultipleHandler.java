@@ -130,7 +130,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             } else if (action.equals("get")) {
                 return loadSubscription(request, session);
             } else if (action.equals("all")) {
-                return loadAllSubscriptionsInFolder(request, session);
+                return loadAllSubscriptions(request, session);
             } else if (action.equals("list")) {
                 return listSubscriptions(request, session);
             } else if (action.equals("refresh")) {
@@ -209,12 +209,22 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
     }
 
-    private Object loadAllSubscriptionsInFolder(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
-        final String folderId = request.getString("folder");
+    private Object loadAllSubscriptions(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
+        String folderId = null;
+        boolean containsFolder = false;
+        if (request.has("folder")) {
+            folderId = request.getString("folder");
+            containsFolder = true;
+        }
+        
         final Context context = session.getContext();
 
         List<Subscription> allSubscriptions = null;
-        allSubscriptions = getSubscriptionsInFolder(context, folderId, secretService.getSecret(session));
+        if (containsFolder) {
+            allSubscriptions = getSubscriptionsInFolder(context, folderId, secretService.getSecret(session));
+        } else {
+            allSubscriptions = getAllSubscriptions(context, session.getUserId(), secretService.getSecret(session));
+        }       
 
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
@@ -230,6 +240,18 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder, secret);
             allSubscriptions.addAll(subscriptions);
         }
+        return allSubscriptions;
+    }
+    
+    private List<Subscription> getAllSubscriptions(final Context context, int userId, final String secret) throws AbstractOXException {
+        final List<SubscriptionSource> sources = discovery.getSources();
+        final List<Subscription> allSubscriptions = new ArrayList<Subscription>();
+        for (final SubscriptionSource subscriptionSource : sources) {
+            final SubscribeService subscribeService = subscriptionSource.getSubscribeService();
+            final Collection<Subscription> subscriptions = subscribeService.loadSubscriptions(context, userId, secret);
+            allSubscriptions.addAll(subscriptions);
+        }
+        
         return allSubscriptions;
     }
 

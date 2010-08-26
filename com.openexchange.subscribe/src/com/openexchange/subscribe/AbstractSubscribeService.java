@@ -71,6 +71,17 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public Collection<Subscription> loadSubscriptions(Context ctx, String folderId, String secret) throws AbstractOXException {
         List<Subscription> allSubscriptions = STORAGE.getSubscriptions(ctx, folderId);
+        
+        return prepareSubscriptions(allSubscriptions, secret);        
+    }
+    
+    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException {
+        List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, userId);
+        
+        return prepareSubscriptions(allSubscriptions, secret);   
+    }
+    
+    private Collection<Subscription> prepareSubscriptions(List<Subscription> allSubscriptions, String secret) throws AbstractOXException {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
         for (Subscription subscription : allSubscriptions) {
             if(subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
@@ -82,6 +93,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             modifyOutgoing(subscription);
             subscription.getConfiguration().remove("com.openexchange.crypto.secret");
         }
+        
         return subscriptions;
     }
 

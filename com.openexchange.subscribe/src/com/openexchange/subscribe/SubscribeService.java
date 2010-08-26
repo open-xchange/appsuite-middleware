@@ -65,6 +65,8 @@ public interface SubscribeService {
     public void subscribe(Subscription subscription) throws AbstractOXException;
 
     public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws AbstractOXException;
+    
+    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException;
 
     public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws AbstractOXException;
     
