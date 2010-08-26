@@ -49,6 +49,8 @@
 
 package com.openexchange.publish.microformats;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.contexts.Context;
@@ -291,6 +293,13 @@ public class OXMFPublicationServiceTest extends TestCase {
         public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException {
             return null;
         }
-        
+
+        public List<String> getBasicTemplateNames() throws TemplateException {
+            return new ArrayList<String>(0);
+        }
+
+        public List<String> getTemplateNames(ServerSession session) throws TemplateException {
+            return new ArrayList<String>(0);
+        }
     }
 }
