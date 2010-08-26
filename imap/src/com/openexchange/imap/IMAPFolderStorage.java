@@ -64,9 +64,9 @@ import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
-import javax.mail.Quota.Resource;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
+import javax.mail.Quota.Resource;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -252,11 +252,17 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                          * Merge with namespace folders
                          */
                         {
-                            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getPersonalNamespaces(
+                            final String[] personalNamespaces = NamespaceFoldersCache.getPersonalNamespaces(
                                 imapStore,
                                 true,
                                 session,
-                                accountId), subscribed, parent);
+                                accountId);
+                            if (null == personalNamespaces || 1 != personalNamespaces.length || !STR_INBOX.equals(personalNamespaces[0])) {
+                                /*
+                                 * Personal namespace(s) does not only consist of INBOX folder
+                                 */
+                                mergeWithNamespaceFolders(subfolders, personalNamespaces, subscribed, parent);
+                            }
                         }
                         {
                             mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getUserNamespaces(
@@ -316,15 +322,45 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     }
 
     private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MessagingException, MailException {
-        final Folder[] subfolders;
-        if (MailProperties.getInstance().isIgnoreSubscription() || all) {
-            subfolders = parent.list(PATTERN_ALL);
+        final boolean subscribed = !MailProperties.getInstance().isIgnoreSubscription() && !all;
+        final List<Folder> subfolders;
+        if (subscribed) {
+            subfolders = new ArrayList<Folder>(Arrays.asList(parent.listSubscribed(PATTERN_ALL)));
         } else {
-            subfolders = parent.listSubscribed(PATTERN_ALL);
+            subfolders = new ArrayList<Folder>(Arrays.asList(parent.list(PATTERN_ALL)));
         }
-        final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.length);
-        for (int i = 0; i < subfolders.length; i++) {
-            final MailFolder mo = IMAPFolderConverter.convertFolder((IMAPFolder) subfolders[i], session, imapConfig, ctx);
+        /*
+         * Merge with namespace folders if NAMESPACE capability is present
+         */
+        if (imapConfig.getImapCapabilities().hasNamespace()) {
+            {
+                mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getPersonalNamespaces(
+                    imapStore,
+                    true,
+                    session,
+                    accountId), subscribed, parent);
+            }
+            {
+                mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getUserNamespaces(
+                    imapStore,
+                    true,
+                    session,
+                    accountId), subscribed, parent);
+            }
+            {
+                mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getSharedNamespaces(
+                    imapStore,
+                    true,
+                    session,
+                    accountId), subscribed, parent);
+            }
+        }
+        /*
+         * Convert to MailFolder instances
+         */
+        final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.size());
+        for (final Folder current : subfolders) {
+            final MailFolder mo = IMAPFolderConverter.convertFolder((IMAPFolder) current, session, imapConfig, ctx);
             if (mo.exists()) {
                 list.add(mo);
             }
@@ -332,18 +368,37 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return list.toArray(new MailFolder[list.size()]);
     }
 
-    private void mergeWithNamespaceFolders(final List<Folder> subfolders, final String[] namespaces, final boolean subscribed, final IMAPFolder defaultFolder) throws MessagingException {
-        if (namespaces.length == 0) {
+    private void mergeWithNamespaceFolders(final List<Folder> subfolders, final String[] namespaces, final boolean subscribed, final IMAPFolder parent) throws MessagingException {
+        if (null == namespaces || namespaces.length == 0) {
             return;
         }
         final String[] namespaceFolders = new String[namespaces.length];
         System.arraycopy(namespaces, 0, namespaceFolders, 0, namespaces.length);
+        final char sep = parent.getSeparator();
+        final String parentFullname = parent.getFullName();
+        final boolean isRoot = (0 == parentFullname.length());
         NextNSFolder: for (int i = 0; i < namespaceFolders.length; i++) {
             final String nsFullname = namespaceFolders[i];
             if ((nsFullname == null) || (nsFullname.length() == 0)) {
                 namespaceFolders[i] = null;
                 continue NextNSFolder;
             }
+            /*
+             * Check if  namespace folder's prefix matches parent fullname ; e.g "INBOX" or "INBOX/#shared"
+             */
+            final int pos = nsFullname.lastIndexOf(sep);
+            if (pos > 0) { // Located below other folder than root
+                if (!nsFullname.substring(0, pos).equals(parentFullname)) {
+                    namespaceFolders[i] = null;
+                    continue NextNSFolder;
+                }
+            } else if (!isRoot) { // Should be located below root
+                namespaceFolders[i] = null;
+                continue NextNSFolder;
+            }
+            /*
+             * Check if already contained in passed list
+             */
             for (final Folder subfolder : subfolders) {
                 if (nsFullname.equals(subfolder.getFullName())) {
                     /*
@@ -354,14 +409,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 }
             }
         }
-        final char sep = defaultFolder.getSeparator();
         if (subscribed) {
             /*
              * Remove not-subscribed namespace folders
              */
             for (int i = 0; i < namespaceFolders.length; i++) {
                 final String nsFullname = namespaceFolders[i];
-                if (nsFullname != null && !IMAPCommandsCollection.isSubscribed(nsFullname, sep, true, defaultFolder)) {
+                if (nsFullname != null && !IMAPCommandsCollection.isSubscribed(nsFullname, sep, true, parent)) {
                     namespaceFolders[i] = null;
                 }
             }

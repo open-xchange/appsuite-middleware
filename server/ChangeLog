@@ -1,3 +1,7 @@
+* 2010-08-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #16742: Fixed folder display of namespace folders
+
 * 2010-08-25 - steffen.templin@open-xchange.com
 
  - US4027: Backend provides the possibility to get all publications of a user.
