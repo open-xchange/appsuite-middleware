@@ -235,7 +235,7 @@ public class Folder extends SessionServlet {
         try {
             actionPut(req, resp);
         } catch (final Exception e) {
-            LOG.error("doGet", e);
+            LOG.error("doPut", e);
             writeError(e.toString(), new JSONWriter(resp.getWriter()));
         }
     }
