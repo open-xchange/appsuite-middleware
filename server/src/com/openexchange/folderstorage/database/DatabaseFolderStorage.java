@@ -1242,8 +1242,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
         OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);
         if (null == ret) {
             final Connection con = getConnection(storageParameters);
-            ret = new OXFolderAccess(con, storageParameters.getContext());
-            storageParameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS, ret);
+            do {
+                ret = new OXFolderAccess(con, storageParameters.getContext());
+                if (!storageParameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS, ret)) {
+                    ret = (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);
+                }
+            } while (null == ret);
         }
         return ret;
     }
