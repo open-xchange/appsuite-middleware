@@ -103,6 +103,8 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         assertEquals("Should return the same module as sent to the server", expected.getModule(), actual.getModule());
         assertEquals("Should return the same user as sent to the server", expected.getUserId(), actual.getUserId());
         assertEquals("Should return the same target id as sent to the server", expected.getTarget().getId(), actual.getTarget().getId());
+        assertEquals("Should be enabled by default", true, actual.isEnabled());
+        
     }
 
     public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{

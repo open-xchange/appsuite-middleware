@@ -91,6 +91,7 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         orignal.setId(newResp.getId());
         
         Publication update = generatePublication(module, folderID, discovery);
+        
         update.setId(newResp.getId());
         UpdatePublicationRequest updReq = new UpdatePublicationRequest(update);
         UpdatePublicationResponse updResp = getClient().execute(updReq);
