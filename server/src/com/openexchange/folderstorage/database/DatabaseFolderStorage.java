@@ -136,16 +136,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
         // Nothing to do
     }
 
-    private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters) throws FolderException {
-        OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);
-        if (null == ret) {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
-            ret = new OXFolderAccess(con, storageParameters.getContext());
-            storageParameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS, ret);
-        }
-        return ret;
-    }
-
     public ContentType[] getSupportedContentTypes() {
         return new ContentType[] {
             TaskContentType.getInstance(), CalendarContentType.getInstance(), ContactContentType.getInstance(),
@@ -160,7 +150,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         final Connection con;
         final Boolean writable;
         try {
-            con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
+            con = getConnection(params);
             writable = getParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
         } catch (final FolderException e) {
             /*
@@ -194,7 +184,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void restore(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -219,7 +209,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -319,7 +309,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final FolderObject fo = getFolderAccess(storageParameters).getFolderObject(Integer.parseInt(folderId));
             final Session session = storageParameters.getSession();
             if (null == session) {
@@ -336,7 +326,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void deleteFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final FolderObject fo = new FolderObject();
             final int folderId = Integer.parseInt(folderIdentifier);
             fo.setObjectID(folderId);
@@ -367,7 +357,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
         final Context context = storageParameters.getContext();
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -394,7 +384,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public boolean containsForeignObjects(final User user, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final Context ctx = storageParameters.getContext();
             /*
              * A numeric folder identifier
@@ -444,7 +434,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public boolean isEmpty(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final Context ctx = storageParameters.getContext();
             /*
              * A numeric folder identifier
@@ -494,7 +484,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void updateLastModified(final long lastModified, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final Context ctx = storageParameters.getContext();
             final int folderId = getUnsignedInteger(folderIdentifier);
             if (getFolderAccess(storageParameters).getFolderLastModified(folderId).after(new Date(lastModified))) {
@@ -521,7 +511,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public Folder getFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
             final UserConfiguration userConfiguration;
@@ -682,7 +672,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
@@ -775,7 +765,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
 
             final int parentId = Integer.parseInt(parentIdentifier);
 
@@ -943,7 +933,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         final Connection con;
         final Boolean writable;
         try {
-            con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
+            con = getConnection(params);
             writable = getParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
         } catch (final FolderException e) {
             LOG.error(e.getMessage(), e);
@@ -1002,7 +992,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -1091,7 +1081,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
             final UserConfiguration userConfiguration;
@@ -1182,7 +1172,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final Context ctx = storageParameters.getContext();
 
             final Queue<FolderObject> q =
@@ -1207,7 +1197,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Connection con = getConnection(storageParameters);
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
             final UserConfiguration userConfiguration;
@@ -1247,6 +1237,20 @@ public final class DatabaseFolderStorage implements FolderStorage {
     /*-
      * ############################# HELPER METHODS #############################
      */
+
+    private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters) throws FolderException {
+        OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);
+        if (null == ret) {
+            final Connection con = getConnection(storageParameters);
+            ret = new OXFolderAccess(con, storageParameters.getContext());
+            storageParameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS, ret);
+        }
+        return ret;
+    }
+
+    private static Connection getConnection(final StorageParameters storageParameters) throws FolderException {
+        return getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+    }
 
     private static <T> T getParameter(final Class<T> clazz, final String name, final StorageParameters parameters) throws FolderException {
         final Object obj = parameters.getParameter(DatabaseFolderType.getInstance(), name);
