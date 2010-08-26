@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="openexchange-test" default="default" basedir=".">
 
     <!-- Customizable values -->
@@ -39,7 +40,7 @@
 
     <target name="compile-common">
         <mkdir dir="${build}"/>
-        <javac srcdir="${src.common}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII">
+        <javac srcdir="${src.common}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath>
                 <path refid="project.classpath"/>
             </classpath>
