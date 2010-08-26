@@ -261,7 +261,7 @@ public final class IMAPFolderConverter {
             } else if (isDefaultFoldersChecked(session, imapConfig.getAccountId())) {
                 final String[] defaultMailFolders = getDefaultMailFolders(session, imapConfig.getAccountId());
                 for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
-                    if (mailFolder.getFullname().equals(defaultMailFolders[i])) {
+                    if (imapFullname.equals(defaultMailFolders[i])) {
                         mailFolder.setDefaultFolder(true);
                         mailFolder.setDefaultFolderType(TYPES[i]);
                     }
