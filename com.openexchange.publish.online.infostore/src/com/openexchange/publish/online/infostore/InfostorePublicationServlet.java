@@ -157,7 +157,7 @@ public class InfostorePublicationServlet extends HttpServlet {
             final Context ctx = getContext(path);
             final String secret = getSecret(path);
             final Publication publication = getPublication(secret, ctx);
-            if(publication == null) {
+            if(publication == null || !publication.isEnabled()) {
                 resp.getWriter().println("Not Found");
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;

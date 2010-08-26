@@ -129,7 +129,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         try {
             final Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
             final Publication publication = infostorePublisher.getPublication(ctx, args.get(SITE));
-            if (publication == null) {
+            if (publication == null || !publication.isEnabled()) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 resp.getWriter().println("Don't know site " + args.get(SITE));
                 return;
