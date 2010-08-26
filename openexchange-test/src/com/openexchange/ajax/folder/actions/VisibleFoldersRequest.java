@@ -56,26 +56,39 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link VisibleFoldersRequest}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersResponse> {
 
     private static final int[] DEFAULT_COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.TYPE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
-        FolderObject.CREATED_BY };
+        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.TYPE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS,
+        FolderObject.STANDARD_FOLDER, FolderObject.CREATED_BY };
 
     private final String contentType;
 
     private final int[] columns;
 
-    public VisibleFoldersRequest(API api, String contentType, int[] columns) {
+    /**
+     * Initializes a new {@link VisibleFoldersRequest}.
+     * 
+     * @param api The API version to use
+     * @param contentType The content type as a string; e.g. "calendar", "contacts", or "tasks"
+     * @param columns The columns which shall be available in returned folder objects
+     */
+    public VisibleFoldersRequest(final API api, final String contentType, final int[] columns) {
         super(api);
         this.contentType = contentType;
         this.columns = columns;
     }
 
-    public VisibleFoldersRequest(API api, String contentType) {
+    /**
+     * Initializes a new {@link VisibleFoldersRequest} with default columns.
+     * 
+     * @param api The API version to use
+     * @param contentType The content type as a string; e.g. "calendar", "contacts", or "tasks"
+     */
+    public VisibleFoldersRequest(final API api, final String contentType) {
         this(api, contentType, DEFAULT_COLUMNS);
     }
 
@@ -88,7 +101,7 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
     }
 
     @Override
-    protected void addParameters(List<Parameter> params) {
+    protected void addParameters(final List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "allVisible"));
         params.add(new Parameter(Folder.PARAMETER_CONTENT_TYPE, contentType));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
