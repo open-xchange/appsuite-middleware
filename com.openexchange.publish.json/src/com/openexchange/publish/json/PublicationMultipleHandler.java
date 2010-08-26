@@ -183,7 +183,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
     	String module = null;    	
     	if (request.has("entityModule")) {
     		module = request.optString("entityModule");        	
-    	}    	
+    	}
         
         // Check if request contains folder attribute. If not assume a request for all publications of the session user.
     	// If module is set in this case, fetch all publications of a user in that module.
@@ -248,7 +248,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
     private String[] getBasicColumns(final JSONObject request) {
         final String columns = request.optString("columns");
         if (columns == null || columns.equals("")) {
-            return new String[] { "id", "entityId", "entityModule", "target", "enabled" };
+            return new String[] { "id", "entity", "entityModule", "target", "enabled" };
         }
         return columns.split("\\s*,\\s*");
     }
