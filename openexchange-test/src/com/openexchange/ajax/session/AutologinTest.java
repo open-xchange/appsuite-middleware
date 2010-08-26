@@ -82,6 +82,10 @@ public class AutologinTest extends AbstractLoginTest {
         }
 
         assertEquals(sessionID, rawResponse.getString("session"));
+        
+        inModule("quota"); call("filestore", "session", sessionID); // Send some request.
+        
+        assertNoError();
     }
 
     public void testRetrieveSessionIDForCertainClient() throws Exception {
