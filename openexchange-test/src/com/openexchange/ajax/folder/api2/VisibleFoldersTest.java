@@ -51,6 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
+import java.util.LinkedList;
+import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -61,7 +63,10 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.CombinedIterator;
 import com.openexchange.test.PermissionTools;
+import com.openexchange.tools.iterator.CombinedSearchIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link VisibleFoldersTest}
@@ -184,6 +189,21 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
             }
             assertTrue("Previously created shared folder not found in shared folders.", found);
         }
+    }
+    
+    public void testFindingGlobalAddressbook() throws Exception{
+        final VisibleFoldersRequest req = new VisibleFoldersRequest(API.OUTLOOK, "contacts");
+        final VisibleFoldersResponse resp = client.execute(req);
+        Iterator<FolderObject> publicFolders = resp.getPublicFolders();
+        
+        boolean globalAddressBookFound = false;
+        while(publicFolders.hasNext())
+            if(publicFolders.next().getObjectID() == FolderObject.SYSTEM_LDAP_FOLDER_ID)
+                globalAddressBookFound = true;
+        
+        assertTrue("Could not find the global address book", globalAddressBookFound);
+        
+        
     }
 
 }
