@@ -55,6 +55,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -208,6 +212,48 @@ public class TemplateServiceImpl implements TemplateService {
 
     public void setInfostoreHelper(OXInfostoreHelper helper) {
         this.infostore = helper;
+    }
+
+    public List<String> getBasicTemplateNames() throws TemplateException {
+        String templatePath = config.getProperty(PATH_PROPERTY);
+        File templateDir = new File(templatePath);
+        if(!templateDir.isDirectory() || !templateDir.exists()) {
+            return new ArrayList<String>(0);
+        }
+        
+        File[] files = templateDir.listFiles();
+        if(files == null) {
+            return new ArrayList<String>(0);
+        }
+        Set<String> names = new HashSet<String>();
+        for (File file : files) {
+            if(file.isFile() && file.canRead()) {
+                names.add(file.getName());
+            }
+        }
+        return new ArrayList<String>(names);
+    }
+
+    public List<String> getTemplateNames(ServerSession session) throws TemplateException {
+        Set<String> names = new HashSet<String>();
+        names.addAll(getBasicTemplateNames());
+        if(!isUserTemplatingEnabled(session)) {
+            return new ArrayList<String>(names);
+        }
+        
+        try {
+            FolderObject globalTemplateFolder = folders.getGlobalTemplateFolder(session);
+            FolderObject privateTemplateFolder = folders.getPrivateTemplateFolder(session);
+            
+            names.addAll(infostore.getNames(session, globalTemplateFolder));
+            names.addAll(infostore.getNames(session, privateTemplateFolder));
+            
+            
+        } catch (AbstractOXException e) {
+            throw new TemplateException(e);
+        }
+        
+        return new ArrayList<String>(names);
     }
 
 }

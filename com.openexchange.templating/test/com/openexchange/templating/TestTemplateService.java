@@ -50,7 +50,9 @@
 package com.openexchange.templating;
 
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exceptions.StringComponent;
@@ -262,5 +264,38 @@ public class TestTemplateService extends TestCase {
         templateService.loadTemplate("user-template", "test-template", sessionWithoutInfostore);
         assertTrue(called[0]);
         
+    }
+    
+    public void testListBasicTemplates() throws TemplateException {
+        List<String> names = templateService.getBasicTemplateNames();
+        assertEquals(1, names.size());
+        assertEquals("test-template", names.get(0));
+    }
+    
+    public void testListTemplates() throws TemplateException {
+        SimBuilder oxfolderHelperBuilder = new SimBuilder();
+        oxfolderHelperBuilder.expectCall("getGlobalTemplateFolder", session).andReturn(globalTemplateFolder);
+        oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(privateTemplateFolder);
+        
+        SimBuilder infostoreBuilder = new SimBuilder();
+        infostoreBuilder.expectCall("getNames", session, globalTemplateFolder).andReturn(Arrays.asList("global1" , "global2"));
+        infostoreBuilder.expectCall("getNames", session, privateTemplateFolder).andReturn(Arrays.asList("private1" , "private2"));
+        
+        templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
+        templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
+    
+        List<String> templateNames = templateService.getTemplateNames(session);
+        
+        assertEquals(5, templateNames.size());
+        
+        assertTrue(templateNames.contains("global1"));
+        assertTrue(templateNames.contains("global2"));
+        assertTrue(templateNames.contains("private1"));
+        assertTrue(templateNames.contains("private2"));
+        assertTrue(templateNames.contains("test-template"));
+        
+        oxfolderHelperBuilder.assertAllWereCalled();
+        infostoreBuilder.assertAllWereCalled();
+    
     }
 }

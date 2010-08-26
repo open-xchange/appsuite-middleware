@@ -49,6 +49,7 @@
 
 package com.openexchange.templating;
 
+import java.util.List;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -61,4 +62,7 @@ public interface TemplateService {
     
     public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException;
     
+    public List<String> getBasicTemplateNames() throws TemplateException;
+    
+    public List<String> getTemplateNames(ServerSession session) throws TemplateException;
 }

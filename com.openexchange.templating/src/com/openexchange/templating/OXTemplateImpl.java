@@ -59,7 +59,7 @@ import freemarker.template.Template;
 public class OXTemplateImpl implements OXTemplate{
 
     private Template template;
-
+   
     public Template getTemplate() {
         return template;
     }
