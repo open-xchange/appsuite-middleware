@@ -63,24 +63,27 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.resource.ResourceException;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.user.UserService;
 
 /**
  * Servlet for writing free busy information.
@@ -137,41 +140,15 @@ public class freebusy extends HttpServlet {
             return;
         }
 
-        User user = null;
-        try {
-            // TODO Replace with UserService
-            user = UserStorage.getInstance().searchUser(mailAddress, context);
-        } catch (final LdapException e) {
-            LOG.debug("User '" + mailAddress + "' not found.");
-        }
-        Resource resource = null;
-        try {
-            // TODO Replace with ResourceService
-            if (null == user) {
-                final Resource[] resources = ResourceStorage.getInstance().searchResourcesByMail(mailAddress, context);
-                if (1 == resources.length) {
-                    resource = resources[0];
-                }
-            }
-        } catch (final LdapException e) {
-            LOG.error("Resource '" + mailAddress + "' not found.");
-        }
-        final int principalId;
-        final int type;
-        if (null != user) {
-            type = Participant.USER;
-            principalId = user.getId();
-        } else if (null != resource) {
-            type = Participant.RESOURCE;
-            principalId = resource.getIdentifier();
-        } else {
+        Participant participant = findParticipant(context, mailAddress);
+        if (null == participant) {
             response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to resolve mail address to a user or a resource.");
             return;
         }
-        
+
         response.setContentType("text/calendar");
         final PrintWriter printWriter = response.getWriter();
-        writeVCalendar(context, start, end, mailAddress, principalId, type, printWriter);
+        writeVCalendar(context, start, end, mailAddress, participant.getIdentifier(), participant.getType(), printWriter);
     }
 
     private String getMailAddress(final HttpServletRequest request) {
@@ -224,12 +201,14 @@ public class freebusy extends HttpServlet {
             LOG.error("Unable to parse context identifier.", e);
             return null;
         }
-        // TODO Replace with ContextService
-        final ContextStorage service = ContextStorage.getInstance();
-        final Context context;
+        Context context;
         try {
+            ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
             context = service.getContext(contextId);
-        } catch (final ContextException e) {
+        } catch (ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } catch (ContextException e) {
             LOG.error("Can not load context.", e);
             return null;
         }
@@ -311,5 +290,38 @@ public class freebusy extends HttpServlet {
         pw.print(format.format(appointment.getStartDate()));
         pw.print('/');
         pw.println(format.format(appointment.getEndDate()));
+    }
+
+    private Participant findParticipant(Context ctx, String mailAddress) {
+        User user = null;
+        try {
+            UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+            user = service.searchUser(mailAddress, ctx);
+        } catch (ServiceException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (UserException e) {
+            LOG.debug("User '" + mailAddress + "' not found.");
+        }
+
+        Resource resource = null;
+        try {
+            ResourceService service = ServerServiceRegistry.getInstance().getService(ResourceService.class, true);
+            final Resource[] resources = service.searchResourcesByMail(mailAddress, ctx);
+            if (1 == resources.length) {
+                resource = resources[0];
+            }
+        } catch (ServiceException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (ResourceException e) {
+            LOG.error("Resource '" + mailAddress + "' not found.");
+        }
+
+        Participant retval = null;
+        if (null != resource && (user == null || !user.getMail().equals(mailAddress))) {
+            retval = new ResourceParticipant(resource.getIdentifier());
+        } else if (null != user) {
+            retval = new UserParticipant(user.getId());
+        }
+        return retval;
     }
 }

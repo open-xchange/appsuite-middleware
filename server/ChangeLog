@@ -1,3 +1,8 @@
+* 2010-08-26 - marcus.klein@open-xchange.com
+
+ - Bugfix #16455: Implemented a more sophisticated search for a participant when using freebusy interface. Resources are now preferred if a
+   user has the same mail address as alias.
+
 * 2010-08-26 - thorben.betten@open-xchange.com
 
  - Bugfix #16742: Fixed folder display of namespace folders
