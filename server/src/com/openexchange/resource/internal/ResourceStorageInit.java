@@ -50,9 +50,12 @@
 package com.openexchange.resource.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ResourceStorageInit} - The {@link Initialization initialization} for resource storage.
@@ -61,38 +64,33 @@ import com.openexchange.server.Initialization;
  */
 public final class ResourceStorageInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ResourceStorageInit.class);
+    private static final Log LOG = LogFactory.getLog(ResourceStorageInit.class);
 
     private static final ResourceStorageInit SINGLETON = new ResourceStorageInit();
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    /**
-     * @return The singleton instance.
-     */
     public static ResourceStorageInit getInstance() {
         return SINGLETON;
     }
 
-    /**
-     * Initializes a new {@link ResourceStorageInit}
-     */
     private ResourceStorageInit() {
         super();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() {
         if (!initialized.compareAndSet(false, true)) {
             LOG.warn("Duplicate resource storage start-up");
         }
         ResourceStorage.setInstance(new RdbResourceStorage());
+        ServerServiceRegistry.getInstance().addService(ResourceService.class, ResourceServiceImpl.getInstance());
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() {
         if (!initialized.compareAndSet(true, false)) {
             LOG.warn("Duplicate resource storage shut-down");
         }
+        ServerServiceRegistry.getInstance().removeService(ResourceService.class);
         ResourceStorage.releaseInstance();
     }
-
 }
