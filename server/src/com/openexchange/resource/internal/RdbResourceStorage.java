@@ -317,7 +317,7 @@ public class RdbResourceStorage extends ResourceStorage {
         return groups.toArray(new ResourceGroup[groups.size()]);
     }
 
-    private static final String SQL_SELECT_RESOURCE2 = "SELECT id,identifier,displayName,mail,available,description,lastModified " + "FROM resource WHERE cid = ? AND (identifier LIKE ? OR displayName LIKE ?)";
+    private static final String SQL_SELECT_RESOURCE2 = "SELECT id,identifier,displayName,mail,available,description,lastModified FROM resource WHERE cid = ? AND (identifier LIKE ? OR displayName LIKE ?)";
 
     @Override
     public Resource[] searchResources(final String pattern, final Context context) throws LdapException {
@@ -348,7 +348,7 @@ public class RdbResourceStorage extends ResourceStorage {
         return resources.toArray(new Resource[resources.size()]);
     }
 
-    private static final String SQL_SELECT_RESOURCE4 = "SELECT id,identifier,displayName,mail,available,description,lastModified " + "FROM resource WHERE cid = ? AND mail LIKE ?";
+    private static final String SQL_SELECT_RESOURCE4 = "SELECT id,identifier,displayName,mail,available,description,lastModified FROM resource WHERE cid = ? AND mail LIKE ?";
 
     @Override
     public Resource[] searchResourcesByMail(final String pattern, final Context context) throws LdapException {
