@@ -57,8 +57,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.imap.ACLPermission;
 import com.openexchange.imap.IMAPCommandsCollection;
@@ -80,7 +78,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.ParsingException;
@@ -197,10 +194,15 @@ public final class IMAPFolderConverter {
             // Convert non-root folder
             final IMAPMailFolder mailFolder = new IMAPMailFolder();
             mailFolder.setRootFolder(false);
-            final boolean exists = imapFolder.exists();
+            final boolean exists = imapFolder.exists(); // Fires: LIST "" INBOX/sub1
             mailFolder.setExists(exists);
             mailFolder.setSeparator(imapFolder.getSeparator());
             final String imapFullname = imapFolder.getFullName();
+            
+            //System.out.println("Conversion triggered by: " + Thread.currentThread().getName() + " for " + imapFullname);
+            //new Throwable().printStackTrace(System.out);
+            
+            
             if (exists) {
                 String[] attrs;
                 try {
@@ -257,12 +259,9 @@ public final class IMAPFolderConverter {
                 mailFolder.setDefaultFolder(true);
                 mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
             } else if (isDefaultFoldersChecked(session, imapConfig.getAccountId())) {
-                final int len =
-                    UserSettingMailStorage.getInstance().getUserSettingMail(
-                        session.getUserId(),
-                        ContextStorage.getStorageContext(session.getContextId())).isSpamEnabled() ? 6 : 4;
-                for (int i = 0; (i < len) && !mailFolder.isDefaultFolder(); i++) {
-                    if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session, imapConfig.getAccountId()))) {
+                final String[] defaultMailFolders = getDefaultMailFolders(session, imapConfig.getAccountId());
+                for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
+                    if (mailFolder.getFullname().equals(defaultMailFolders[i])) {
                         mailFolder.setDefaultFolder(true);
                         mailFolder.setDefaultFolderType(TYPES[i]);
                     }
@@ -340,25 +339,10 @@ public final class IMAPFolderConverter {
              * Set message counts for total, new, unread, and deleted
              */
             if (selectable && imapConfig.getACLExtension().canRead(ownRights)) {
-                try {
-                    mailFolder.setMessageCount(imapFolder.getMessageCount());
-                    mailFolder.setNewMessageCount(imapFolder.getNewMessageCount());
-                    mailFolder.setUnreadMessageCount(imapFolder.getUnreadMessageCount());
-                } catch (final MessagingException e) {
-                    final Exception nested = e.getNextException();
-                    if (nested instanceof ParsingException && nested.getMessage().indexOf("STATUS") != -1) {
-                        /*
-                         * Parsing of STATUS response failed
-                         */
-                        final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
-                        mailFolder.setMessageCount(status[0]);
-                        mailFolder.setNewMessageCount(status[1]);
-                        mailFolder.setUnreadMessageCount(status[2]);
-                    } else {
-                        // Re-throw
-                        throw e;
-                    }
-                }
+                final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
+                mailFolder.setMessageCount(status[0]);
+                mailFolder.setNewMessageCount(status[1]);
+                mailFolder.setUnreadMessageCount(status[2]);
                 mailFolder.setDeletedMessageCount(imapFolder.getDeletedMessageCount());
             } else {
                 mailFolder.setMessageCount(-1);
@@ -397,8 +381,6 @@ public final class IMAPFolderConverter {
             return mailFolder;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
-        } catch (final ContextException e) {
-            throw new IMAPException(e);
         }
     }
 
@@ -522,6 +504,10 @@ public final class IMAPFolderConverter {
         final String[] arr =
             MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
         return arr == null ? null : arr[index];
+    }
+
+    private static String[] getDefaultMailFolders(final Session session, final int accountId) {
+        return MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
     }
 
     /**
