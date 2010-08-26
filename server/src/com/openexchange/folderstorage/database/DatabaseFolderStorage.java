@@ -136,11 +136,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
         // Nothing to do
     }
 
-    private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters, final FolderType folderType) {
-        OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(folderType, DatabaseParameterConstants.PARAM_ACCESS);
+    private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters) throws FolderException {
+        OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);
         if (null == ret) {
-            ret = new OXFolderAccess(storageParameters.getContext());
-            storageParameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_ACCESS, ret);
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            ret = new OXFolderAccess(con, storageParameters.getContext());
+            storageParameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS, ret);
         }
         return ret;
     }
@@ -256,7 +257,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     /*
                      * Determine folder type by examining parent folder
                      */
-                    createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters, getFolderType()));
+                    createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters));
                 } else {
                     createMe.setType(getTypeByFolderType(t));
                 }
@@ -295,7 +296,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
-    private static int getFolderType(final int folderIdArg, final StorageParameters storageParameters, final FolderType folderType) throws OXException {
+    private static int getFolderType(final int folderIdArg, final StorageParameters storageParameters) throws OXException, FolderException {
         int type = -1;
         int folderId = folderIdArg;
         /*
@@ -311,7 +312,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } else if (folderId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
             type = FolderObject.PROJECT;
         } else {
-            type = getFolderAccess(storageParameters, folderType).getFolderType(folderId);
+            type = getFolderAccess(storageParameters).getFolderType(folderId);
         }
         return type;
     }
@@ -319,7 +320,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
-            final FolderObject fo = getFolderAccess(storageParameters, getFolderType()).getFolderObject(Integer.parseInt(folderId));
+            final FolderObject fo = getFolderAccess(storageParameters).getFolderObject(Integer.parseInt(folderId));
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -433,8 +434,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * A non-virtual database folder
                  */
-                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
-                return getFolderAccess(storageParameters, getFolderType()).containsForeignObjects(fo, storageParameters.getSession(), ctx);
+                final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
+                return folderAccess.containsForeignObjects(folderAccess.getFolderObject(folderId), storageParameters.getSession(), ctx);
             }
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -483,8 +484,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * A non-virtual database folder
                  */
-                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
-                return getFolderAccess(storageParameters, getFolderType()).isEmpty(fo, storageParameters.getSession(), ctx);
+                final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
+                return folderAccess.isEmpty(folderAccess.getFolderObject(folderId), storageParameters.getSession(), ctx);
             }
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -496,7 +497,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final Context ctx = storageParameters.getContext();
             final int folderId = getUnsignedInteger(folderIdentifier);
-            if (getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(new Date(lastModified))) {
+            if (getFolderAccess(storageParameters).getFolderLastModified(folderId).after(new Date(lastModified))) {
                 throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
             }
             OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
@@ -559,8 +560,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         /*
                          * A non-virtual database folder
                          */
-                        final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
-
+                        final FolderObject fo = getFolderAccess(storageParameters).getFolderObject(folderId);
                         if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
                             /*
                              * The system shared folder
@@ -707,6 +707,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         iterator.remove();
                     }
                 }
+            } else if (FolderObject.PUBLIC == iType && FolderObject.CONTACT == iModule) {
+                /*
+                 * Add global address book manually
+                 */
+                final FolderObject gab = getFolderAccess(storageParameters).getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                gab.setFolderName(new StringHelper(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
+                list.add(gab);
             }
             /*
              * Localize folder names
@@ -1007,7 +1014,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             {
                 final Date clientLastModified = storageParameters.getTimeStamp();
-                if (null != clientLastModified && getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(
+                if (null != clientLastModified && getFolderAccess(storageParameters).getFolderLastModified(folderId).after(
                     clientLastModified)) {
                     throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
                 }
@@ -1036,7 +1043,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             {
                 final String parentId = folder.getParentID();
                 if (null == parentId) {
-                    updateMe.setParentFolderID(getFolderAccess(storageParameters, getFolderType()).getFolderObject(folderId).getParentFolderID());
+                    updateMe.setParentFolderID(getFolderAccess(storageParameters).getFolderObject(folderId).getParentFolderID());
                 } else {
                     updateMe.setParentFolderID(Integer.parseInt(parentId));
                 }
