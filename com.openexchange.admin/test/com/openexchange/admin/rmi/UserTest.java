@@ -739,6 +739,7 @@ public class UserTest extends AbstractTest {
     private HashSet<String> getNotNullableFields() {
         final HashSet<String> notallowed = new HashSet<String>();
         notallowed.add("setEmail1");
+        notallowed.add("setFolderTree");
         notallowed.add("setDefaultSenderAddress");
         notallowed.add("setId");
         final String[] mandatoryMembersCreate = new User().getMandatoryMembersCreate();
@@ -793,8 +794,15 @@ public class UserTest extends AbstractTest {
         
         // # mail attribs must be combined in a change #
         notallowed.add("setEmail1");
+        notallowed.add("setFolderTree");
         notallowed.add("setPrimaryEmail");
         notallowed.add("setDefaultSenderAddress");
+        notallowed.add("setMail_folder_drafts_name"); 
+        notallowed.add("setMail_folder_sent_name");
+        notallowed.add("setMail_folder_spam_name");
+        notallowed.add("setMail_folder_trash_name");
+        notallowed.add("setMail_folder_confirmed_ham_name");
+        notallowed.add("setMail_folder_confirmed_spam_name");
         // #                                                                     #
         
         notallowed.add("setId"); // we cannot change the id of a user, is a mandatory field for a change
@@ -817,7 +825,7 @@ public class UserTest extends AbstractTest {
                     if( map_obj.getMethodName().equals("setLanguage") ) {
                         map_obj.getSetter().invoke(tmp_usr, "fr_FR");
                     } else if(map_obj.getMethodName().toLowerCase().contains("mail")) {
-                        getChangedEmailAddress(oldvalue, "_singlechange");
+                        map_obj.getSetter().invoke(tmp_usr,getChangedEmailAddress(oldvalue, "_singlechange"));
                     } else {
                         map_obj.getSetter().invoke(tmp_usr, oldvalue+"_singlechange");
                     }
