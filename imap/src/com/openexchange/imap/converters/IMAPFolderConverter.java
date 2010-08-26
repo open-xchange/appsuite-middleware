@@ -501,12 +501,6 @@ public final class IMAPFolderConverter {
         return (b != null) && b.booleanValue();
     }
 
-    private static String getDefaultMailFolder(final int index, final Session session, final int accountId) {
-        final String[] arr =
-            MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
-        return arr == null ? null : arr[index];
-    }
-
     private static String[] getDefaultMailFolders(final Session session, final int accountId) {
         return MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
     }
