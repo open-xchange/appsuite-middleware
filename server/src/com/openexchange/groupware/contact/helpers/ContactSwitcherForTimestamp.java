@@ -77,7 +77,7 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 )
 public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDelegate {
 
-    protected static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForSimpleDateFormat.class);
+    protected static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForTimestamp.class);
 
     protected Object[] makeDate(final Object... objects) throws NumberFormatException {
         if (objects[1] instanceof String) {
