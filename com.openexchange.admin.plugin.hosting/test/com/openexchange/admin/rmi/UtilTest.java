@@ -91,7 +91,6 @@ public class UtilTest extends AbstractTest {
         // create dir 
         String url = "file:/" + storepath + "/" + relativePath;
         url = url.replaceAll("//", "/");
-        System.out.println("********************** URL" + url);
         java.net.URI uri = new java.net.URI(url);
         client_st.setUrl(uri.toString());
         new java.io.File(uri.getPath()).mkdir();
