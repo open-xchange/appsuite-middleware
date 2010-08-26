@@ -311,7 +311,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
     private String[] getBasicColumns(final JSONObject request) {
         final String columns = request.optString("columns");
         if (columns == null || columns.equals("")) {
-            return new String[] { "id", "folder", "source", "displayName" };
+            return new String[] { "id", "folder", "source", "displayName", "enabled" };
         }
         return columns.split("\\s*,\\s*");
     }
