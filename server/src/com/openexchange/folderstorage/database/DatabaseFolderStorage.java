@@ -384,7 +384,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public boolean containsForeignObjects(final User user, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
-            final Connection con = getConnection(storageParameters);
+            // final Connection con = getConnection(storageParameters);
             final Context ctx = storageParameters.getContext();
             /*
              * A numeric folder identifier
