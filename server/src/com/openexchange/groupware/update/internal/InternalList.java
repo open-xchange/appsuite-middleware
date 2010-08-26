@@ -327,7 +327,7 @@ public final class InternalList {
 
         // Adds a column to the table user_setting_server named folderTree to store the selected folder tree.
         new com.openexchange.groupware.update.tasks.FolderTreeSelectionTask(),
-        
+
         // Repairs appointments where the number of attachments does not match the real amount of attachments.
         new com.openexchange.groupware.update.tasks.AttachmentCountUpdateTask(),
 
@@ -337,15 +337,15 @@ public final class InternalList {
         // Currently users contacts are created with the display name attribute filed. Outlook primarily uses the fileAs attribute. This
         // task copies the display name to fileAs if that is empty.
         new com.openexchange.groupware.update.tasks.AddFileAsForUserContacts(),
-        
+
         // Extend field "reason" for participants.
         new com.openexchange.groupware.update.tasks.ParticipantCommentFieldLength(),
-        
+
         //new table for linking several appointments (from different sources) together that represent the same person
         new com.openexchange.groupware.update.tasks.AggregatingContactTableService()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure
-        // new com.openexchange.folderstorage.virtual.VirtualTreeMigrationTask()        
+        // new com.openexchange.folderstorage.virtual.VirtualTreeMigrationTask()
     };
 }
