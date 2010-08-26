@@ -109,7 +109,11 @@ public class UtilTest extends AbstractTest {
         client_db.setLogin("openexchange");
         client_db.setMaster(true);
         client_db.setMaxUnits(1000);
-        client_db.setPassword("secret");
+        String dbpw = "secret";
+        if(System.getProperty("rmi_test_dbpw")!=null){
+            dbpw = System.getProperty("rmi_test_dbpw");
+        }        
+        client_db.setPassword(dbpw);
         client_db.setPoolHardLimit(20);
         client_db.setPoolInitial(2);
         client_db.setPoolMax(100);

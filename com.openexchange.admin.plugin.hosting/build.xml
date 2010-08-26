@@ -7,6 +7,7 @@
 
 	<property name="rmi_test_host" value="localhost"/>
 	<property name="rmi_test_dbhost" value="localhost"/>
+	<property name="rmi_test_dbpw" value="secret"/>
 	<property name="rmi_test_masterpw" value="secret"/>
     <property name="rmi_lib_dir" location="/opt/open-xchange/lib"/>
     <property name="core_tests_dir" location="../open-xchange-admin"/>
@@ -245,6 +246,7 @@
             <formatter type="xml"/>
             <sysproperty key="rmi_test_host" value="${rmi_test_host}"/>
             <sysproperty key="rmi_test_dbhost" value="${rmi_test_dbhost}"/>
+            <sysproperty key="rmi_test_dbpw" value="${rmi_test_dbpw}"/>
             <sysproperty key="rmi_test_masterpw" value="${rmi_test_masterpw}"/>
         </junit>
     </target>
