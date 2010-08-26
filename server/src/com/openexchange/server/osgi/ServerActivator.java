@@ -121,7 +121,6 @@ import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.osgi.InfostoreActivator;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -158,7 +157,6 @@ import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.search.SearchException;
 import com.openexchange.search.SearchExceptionFactory;
 import com.openexchange.search.SearchService;
@@ -480,10 +478,14 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(CharsetProvider.class.getName(), new CustomCharsetProvider(), null));
         registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
         registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
-        registrationList.add(context.registerService(ResourceService.class.getName(), ResourceServiceImpl.getInstance(), null));
-        registrationList.add(context.registerService(UserService.class.getName(), ServerServiceRegistry.getInstance().getService(
-            UserService.class,
-            true), null));
+        registrationList.add(context.registerService(
+            ResourceService.class.getName(),
+            ServerServiceRegistry.getInstance().getService(ResourceService.class, true),
+            null));
+        registrationList.add(context.registerService(
+            UserService.class.getName(),
+            ServerServiceRegistry.getInstance().getService(UserService.class, true),
+            null));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registrationList.add(context.registerService(
             UserConfigurationService.class.getName(),
