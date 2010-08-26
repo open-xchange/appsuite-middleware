@@ -77,6 +77,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
         subscription = new Subscription();
         subscription.setFolderId("12");
         subscription.setId(2);
+        subscription.setEnabled(false);
         subscription.setDisplayName("mySubscription");
 
         SubscriptionSource source = new SubscriptionSource();
@@ -102,11 +103,11 @@ public class SubscriptionJSONWriterTest extends TestCase {
                 .isObject()
                 .hasKey("id").withValue(2)
                 .hasKey("folder").withValue("12")
+                .hasKey("enabled").withValue(false)
                 .hasKey("displayName").withValue("mySubscription")
                 .hasKey("source").withValue("com.openexchange.subscribe.test1")
                 .hasKey("com.openexchange.subscribe.test1").withValueObject()
                 .hasKey("username").withValue("My Username")
-                .hasKey("password").withValue("xxxxxxxx")
                 .hasNoMoreKeys()
                 .hasNoMoreKeys();
 
@@ -115,7 +116,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
     public void testWriteArray() throws SubscriptionJSONException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
-        String[] basicCols = new String[] { "id", "source", "displayName" };
+        String[] basicCols = new String[] { "id", "source", "displayName", "enabled" };
         specialCols.put("com.openexchange.subscribe.test1", new String[] { "username" });
 
         JSONArray array = new SubscriptionJSONWriter().writeArray(
@@ -126,7 +127,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
         JSONAssertion assertion = 
             new JSONAssertion()
-                .isArray().withValues(2, "com.openexchange.subscribe.test1", "mySubscription", "My Username");
+                .isArray().withValues(2, "com.openexchange.subscribe.test1", "mySubscription", false, "My Username");
 
         assertValidates(assertion, array);
     }

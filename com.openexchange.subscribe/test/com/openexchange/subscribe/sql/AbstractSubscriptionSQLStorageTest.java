@@ -142,7 +142,8 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         subscription.setUserId(userId);
         subscription.setSource(subscriptionSource);
         subscription.setConfiguration(configuration);
-
+        subscription.setEnabled(true);
+        
         // Second
         FormElement formElementLogin2 = new FormElement();
         formElementLogin2.setName("login2");
@@ -180,6 +181,7 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         subscription2.setUserId(userId);
         subscription2.setSource(subscriptionSource2);
         subscription2.setConfiguration(configuration2);
+        subscription2.setEnabled(false);
 
         SimSubscriptionSourceDiscoveryService discoveryService = new SimSubscriptionSourceDiscoveryService();
         discoveryService.addSource(subscriptionSource);
@@ -237,6 +239,7 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getUserId(), actual.getUserId());
         assertEquals(expected.getSource(), actual.getSource());
         assertEquals(expected.getDescription(), actual.getDescription());
+        assertEquals(expected.isEnabled(), actual.isEnabled());
     }
 
     protected void assertEquals(SubscriptionSource expected, SubscriptionSource actual) {

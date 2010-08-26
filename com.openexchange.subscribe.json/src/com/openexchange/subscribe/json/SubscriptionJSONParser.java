@@ -86,6 +86,9 @@ public class SubscriptionJSONParser {
         if(object.has("folder")) {
             subscription.setFolderId(object.getString("folder"));
         }
+        if(object.has("enabled")) {
+            subscription.setEnabled(object.getBoolean("enabled"));
+        }
         SubscriptionSource source = discovery.getSource(object.getString("source"));
         subscription.setSource(source);
         if(source != null) {

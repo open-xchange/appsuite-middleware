@@ -82,7 +82,8 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
             AND(new EQUALS("user_id", I(userId))).
             AND(new EQUALS("source_id", "com.openexchange.subscribe.test.basic2")).
             AND(new EQUALS("folder_id", folderId)).
-            AND(new EQUALS("last_update", L(lastUpdate))));
+            AND(new EQUALS("last_update", L(lastUpdate))).
+            AND(new EQUALS("enabled", false)));
         
         assertResult(new StatementBuilder().buildCommand(select));
     }
@@ -146,7 +147,8 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
             AND(new EQUALS("user_id", I(userId))).
             AND(new EQUALS("source_id", "com.openexchange.subscribe.test.basic2")).
             AND(new EQUALS("folder_id", subscription2.getFolderId())).
-            AND(new EQUALS("last_update", L(subscription2.getLastUpdate()))));
+            AND(new EQUALS("last_update", L(subscription2.getLastUpdate()))).
+            AND(new EQUALS("enabled", false)));
         
         assertResult(new StatementBuilder().buildCommand(select));
     }

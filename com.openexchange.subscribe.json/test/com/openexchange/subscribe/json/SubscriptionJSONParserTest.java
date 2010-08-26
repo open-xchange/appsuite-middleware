@@ -76,6 +76,7 @@ public class SubscriptionJSONParserTest extends TestCase {
         object = new JSONObject();
         object.put("id", 2);
         object.put("folder" , 12);
+        object.put("enabled", false);
         object.put("source", SOURCE_NAME);
         
         JSONObject config = new JSONObject();
@@ -101,6 +102,7 @@ public class SubscriptionJSONParserTest extends TestCase {
         assertEquals("Got wrong folder", "12", subscription.getFolderId());
         assertNotNull("Got wrong subscription source", subscription.getSource());
         assertEquals("Got wrong subscription source", SOURCE_NAME, subscription.getSource().getId());
+        assertEquals("Got wrong enablement", false, subscription.isEnabled());
         
         Map<String, Object> configuration = subscription.getConfiguration();
     

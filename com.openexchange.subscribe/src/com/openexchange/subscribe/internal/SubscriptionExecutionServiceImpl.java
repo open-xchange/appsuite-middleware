@@ -51,6 +51,8 @@ package com.openexchange.subscribe.internal;
 
 import java.util.Collection;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
@@ -73,6 +75,8 @@ import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURC
  */
 public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService {
 
+    private static final Log LOG = LogFactory.getLog(SubscriptionExecutionServiceImpl.class);
+    
     private SubscriptionSourceDiscoveryService discoverer;
 
     private Collection<FolderUpdaterService> folderUpdaters;
@@ -134,13 +138,18 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     public void executeSubscriptions(List<Subscription> subscriptionsToRefresh) throws AbstractOXException {
         for (Subscription subscription : subscriptionsToRefresh) {
-            SubscriptionSource source = subscription.getSource();
-            if(source == null) {
-                throw INACTIVE_SOURCE.create();
+            if(!subscription.isEnabled()) {
+                LOG.debug("Skipping subscription "+subscription.getDisplayName()+" because it is disabled");
+                
+            } else {
+                SubscriptionSource source = subscription.getSource();
+                if(source == null) {
+                    throw INACTIVE_SOURCE.create();
+                }
+                SubscribeService subscribeService = source.getSubscribeService();
+                Collection data = subscribeService.getContent(subscription);
+                storeData(data, subscription);
             }
-            SubscribeService subscribeService = source.getSubscribeService();
-            Collection data = subscribeService.getContent(subscription);
-            storeData(data, subscription);
         }
     }
 }

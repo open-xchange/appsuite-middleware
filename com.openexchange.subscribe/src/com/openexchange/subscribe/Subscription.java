@@ -74,6 +74,8 @@ public class Subscription {
     private Map<String, Object> configuration = new HashMap<String, Object>();
 
     private String displayName;
+    
+    private Boolean enabled;
 
     
     public String getFolderId() {
@@ -98,6 +100,10 @@ public class Subscription {
         setFolderId(String.valueOf(folderId));
     }
     
+    public boolean containsFolderId() {
+        return getFolderId() != null;
+    }
+    
     public Context getContext() {
         return context;
     }
@@ -114,12 +120,20 @@ public class Subscription {
         this.userId = userId;
     }
 
+    public boolean containsUserId() {
+        return getUserId() > 0;
+    }
+    
     public long getLastUpdate() {
         return lastUpdate;
     }
 
     public void setLastUpdate(long lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public boolean containsLastUpdate() {
+        return getLastUpdate() > 0;
     }
 
     public Map<String, Object> getConfiguration() {
@@ -136,6 +150,10 @@ public class Subscription {
 
     public SubscriptionSource getSource() {
         return source;
+    }
+    
+    public boolean containsSource() {
+        return getSource() != null;
     }
 
     public DynamicFormDescription getDescription() {
@@ -157,5 +175,20 @@ public class Subscription {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+    
+    public boolean isEnabled() {
+        return enabled == null ? true : enabled;
+    }
+    
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+    
+    public boolean containsEnabled() {
+        return enabled != null;
+    }
+
+
+
 
 }

@@ -80,11 +80,14 @@ public class SubscriptionJSONWriter {
     private static final String DISPLAYNAME = "displayName";
 
     private static final String SOURCE = "source";
+    
+    private static final String ENABLED = "enabled";
 
     public JSONObject write(Subscription subscription, DynamicFormDescription form, String urlPrefix) throws JSONException, SubscriptionJSONException {
         JSONObject object = new JSONObject();
         object.put(ID, subscription.getId());
         object.put(FOLDER, subscription.getFolderId());
+        object.put(ENABLED, subscription.isEnabled());
         object.put(DISPLAYNAME, subscription.getDisplayName());
         object.put(SOURCE, subscription.getSource().getId());
         writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form, urlPrefix);
@@ -133,6 +136,8 @@ public class SubscriptionJSONWriter {
                 array.put(subscription.getSource().getId());
             } else if (DISPLAYNAME.equals(basicCol)) {
                 array.put(subscription.getDisplayName());
+            } else if (ENABLED.equals(basicCol)) {
+                array.put(subscription.isEnabled());
             } else {
                 SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.throwException(basicCol);
             }
