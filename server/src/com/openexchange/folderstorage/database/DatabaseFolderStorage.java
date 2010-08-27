@@ -709,7 +709,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         if (s instanceof ServerSession) {
                             userConfiguration = ((ServerSession) s).getUserConfiguration();
                         } else {
-                            userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                            userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
                         }
                     }
                     if (gab.isVisible(userId, userConfiguration)) {
