@@ -851,7 +851,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Sets if this user is able to user USM.
+     * Sets if this user is able to use USM.
      */
     public void setUSM(final boolean usm) {
         setPermission(usm, USM);
