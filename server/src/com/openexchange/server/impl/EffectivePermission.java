@@ -49,6 +49,7 @@
 
 package com.openexchange.server.impl;
 
+import java.util.Arrays;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -185,7 +186,7 @@ public class EffectivePermission extends OCLPermission {
         if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
-			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+			} else if (isPublicFolder()) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
 					return superFolderPermission > READ_FOLDER ? READ_FOLDER : superFolderPermission;
 				}
@@ -208,7 +209,7 @@ public class EffectivePermission extends OCLPermission {
         if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
-			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+			} else if (isPublicFolder()) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
 					return superReadPermission > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : superReadPermission;
 				}
@@ -230,7 +231,7 @@ public class EffectivePermission extends OCLPermission {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
-			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+			} else if (isPublicFolder()) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
 					return NO_PERMISSIONS;
 				}
@@ -252,7 +253,7 @@ public class EffectivePermission extends OCLPermission {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
-			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+			} else if (isPublicFolder()) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
 					return NO_PERMISSIONS;
 					/*
@@ -279,13 +280,20 @@ public class EffectivePermission extends OCLPermission {
 		super.setEntity(entity);
 	}
 
-	@Override
-	public void setFuid(final int fuid) {
-		underlyingPerm = null;
-		super.setFuid(fuid);
-	}
+    @Override
+    public void setFuid(final int fuid) {
+        underlyingPerm = null;
+        super.setFuid(fuid);
+    }
 
-	private final boolean validateUserConfig() {
+    private static final int[] SYSTEM_PUBLIC_FOLDERS = {
+        FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_GLOBAL_FOLDER_ID, FolderObject.SYSTEM_LDAP_FOLDER_ID };
+
+    private boolean isPublicFolder() {
+        return ((folderType == FolderObject.PUBLIC) || (Arrays.binarySearch(SYSTEM_PUBLIC_FOLDERS, getFuid())) >= 0);
+    }
+
+    private final boolean validateUserConfig() {
 		if (userConfigAlreadyValidated) {
 			return userConfigIsValid;
 		}
