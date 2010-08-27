@@ -288,6 +288,7 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
             columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
             columnnames.add(UserAbstraction.OPT_ACCESS_USM);
+            columnnames.add(UserAbstraction.OPT_ACCESS_OLOX20);
             columnnames.add(UserAbstraction.OPT_DISABLE_GAB);
             columnnames.add(UserAbstraction.OPT_ACCESS_PUBLIC_FOLDER_EDITABLE);
 
@@ -352,6 +353,7 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.isPublication()));
             datarow.add(String.valueOf(access.isActiveSync()));
             datarow.add(String.valueOf(access.isUSM()));
+            datarow.add(String.valueOf(access.isOLOX20()));
             datarow.add(String.valueOf(access.isGlobalAddressBookDisabled()));
             datarow.add(String.valueOf(access.isPublicFolderEditable()));
             data.add(datarow);
@@ -360,12 +362,12 @@ public abstract class ListCore extends UserAbstraction {
         doCSVOutput(columnnames, data);
     }
 
-    private String userattributestostring(Map<String, Map<String, String>> dynamicAttributes) {
+    private String userattributestostring(final Map<String, Map<String, String>> dynamicAttributes) {
         if(dynamicAttributes.size() == 0) {
             return "";
         }
-        StringBuilder builder = new StringBuilder(128);
-        for(Map.Entry<String, Map<String, String>> namespaced : dynamicAttributes.entrySet()) {
+        final StringBuilder builder = new StringBuilder(128);
+        for(final Map.Entry<String, Map<String, String>> namespaced : dynamicAttributes.entrySet()) {
             builder.append(namespaced.getKey()).append("=[").append(maptostring(namespaced.getValue())).append("],");
         }
         builder.deleteCharAt(builder.length()-1);
