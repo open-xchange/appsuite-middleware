@@ -632,6 +632,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     } else {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
                     }
+                    /*
+                     * Apply ACLs if supported by IMAP server
+                     */
                     if (imapConfig.isSupportsACLs() && toCreate.containsPermissions()) {
                         final ACL[] initialACLs = getACLSafe(createMe);
                         if (initialACLs != null) {
