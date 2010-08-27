@@ -332,10 +332,7 @@ public class EffectivePermission extends OCLPermission {
 
 	@Override
 	public boolean isFolderVisible() {
-		if (isFolderAdmin()) {
-			return true;
-		}
-		return (getFolderPermission() >= READ_FOLDER);
+	    return (isFolderAdmin() || (getFolderPermission() >= READ_FOLDER));
 	}
 
 	@Override
