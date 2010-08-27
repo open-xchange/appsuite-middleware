@@ -103,6 +103,10 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // Indicates a deactivated user
     public static final String USER_NOT_ACTIVE_MSG = "User is not activated.";
 
+    // Indicates whether indicated client is allowed to perform a login
+    // E.g. 'Client "OLOX20" is not activated.'
+    public static final String CLIENT_DENIED_MSG = "Client \"%1$s\" is not activated.";
+
     /**
      * Prevent instantiation.
      */
