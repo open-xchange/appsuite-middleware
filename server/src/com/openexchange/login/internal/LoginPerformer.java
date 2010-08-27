@@ -58,6 +58,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.service.Authentication;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -65,10 +66,12 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.login.LoginResult;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
+import com.openexchange.login.LoginResult;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -134,6 +137,8 @@ public final class LoginPerformer {
             } else {
                 throw LoginExceptionCodes.USER_NOT_ACTIVE.create();
             }
+            // Check if indicated client is allowed to perform a login
+            checkClient(request, user, ctx);
             // Create session
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
             final String sessionId = sessiondService.addSession(new AddSessionParameter() {
@@ -165,19 +170,19 @@ public final class LoginPerformer {
             retval.setSession(sessiondService.getSession(sessionId));
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             logLoginRequest(request, retval);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } catch (final LoginException e) {
             logLoginRequest(request, retval);
             throw e;
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             logLoginRequest(request, retval);
             throw new LoginException(e);
-        } catch (UserException e) {
+        } catch (final UserException e) {
             logLoginRequest(request, retval);
             throw new LoginException(e);
-        } catch (SessiondException e) {
+        } catch (final SessiondException e) {
             logLoginRequest(request, retval);
             throw new LoginException(e);
         }
@@ -185,7 +190,30 @@ public final class LoginPerformer {
         return retval;
     }
 
-    private Context findContext(String contextInfo) throws ContextException {
+    private void checkClient(final LoginRequest request, final User user, final Context ctx) throws LoginException {
+        try {
+            final String client = request.getClient();
+            /*
+             * Check for OLOX v2.0
+             */
+            if ("USM-JSON".equalsIgnoreCase(client)) {
+                final UserConfigurationStorage ucs = UserConfigurationStorage.getInstance();
+                final UserConfiguration userConfiguration = ucs.getUserConfiguration(user.getId(), user.getGroups(), ctx);
+                if (!userConfiguration.hasOLOX20()) {
+                    /*
+                     * Deny login for OLOX v2.0 client since disabled as per user configuration
+                     */
+                    throw LoginExceptionCodes.CLIENT_DENIED.create(client);
+                }
+            }
+        } catch (final LoginException e) {
+            throw e;
+        } catch (final AbstractOXException e) {
+            throw new LoginException(e);
+        }
+    }
+
+    private Context findContext(final String contextInfo) throws ContextException {
         final ContextStorage contextStor = ContextStorage.getInstance();
         final int contextId = contextStor.getContextId(contextInfo);
         if (ContextStorage.NOT_FOUND == contextId) {
@@ -198,11 +226,11 @@ public final class LoginPerformer {
         return context;
     }
 
-    private User findUser(Context ctx, String userInfo) throws UserException {
+    private User findUser(final Context ctx, final String userInfo) throws UserException {
         final UserStorage us = UserStorage.getInstance();
         final User u;
         try {
-            int userId = us.getUserId(userInfo, ctx);
+            final int userId = us.getUserId(userInfo, ctx);
             u = us.getUser(userId, ctx);
         } catch (final LdapException e) {
             throw new UserException(e);
@@ -221,7 +249,7 @@ public final class LoginPerformer {
         final SessiondService sessiondService;
         try {
             sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         }
         final Session session = sessiondService.getSession(sessionId);
@@ -293,7 +321,7 @@ public final class LoginPerformer {
         }
     }
 
-    static void logError(LoginException e) {
+    static void logError(final LoginException e) {
         switch (e.getCategory()) {
         case USER_INPUT:
             LOG.debug(e.getMessage(), e);
@@ -303,8 +331,8 @@ public final class LoginPerformer {
         }
     }
 
-    private static void logLoginRequest(LoginRequest request, LoginResult result) {
-        StringBuilder sb = new StringBuilder();
+    private static void logLoginRequest(final LoginRequest request, final LoginResult result) {
+        final StringBuilder sb = new StringBuilder();
         sb.append("Login:");
         sb.append(request.getLogin());
         sb.append(" IP:");
@@ -319,7 +347,7 @@ public final class LoginPerformer {
         sb.append(request.getVersion());
         sb.append(") Interface:");
         sb.append(request.getInterface().toString());
-        Context ctx = result.getContext();
+        final Context ctx = result.getContext();
         if (null != ctx) {
             sb.append(" Context:");
             sb.append(ctx.getContextId());
@@ -327,7 +355,7 @@ public final class LoginPerformer {
             sb.append(Strings.join(ctx.getLoginInfo(), ","));
             sb.append(')');
         }
-        User user = result.getUser();
+        final User user = result.getUser();
         if (null != user) {
             sb.append(" User:");
             sb.append(user.getId());
@@ -335,7 +363,7 @@ public final class LoginPerformer {
             sb.append(user.getLoginInfo());
             sb.append(')');
         }
-        Session session = result.getSession();
+        final Session session = result.getSession();
         if (null != session) {
             sb.append(" Session:");
             sb.append(session.getSessionID());
@@ -345,22 +373,22 @@ public final class LoginPerformer {
         LOG.info(sb.toString());
     }
 
-    private static void logLogout(LoginResult result) {
-        StringBuilder sb = new StringBuilder();
+    private static void logLogout(final LoginResult result) {
+        final StringBuilder sb = new StringBuilder();
         sb.append("Logout ");
-        Context ctx = result.getContext();
+        final Context ctx = result.getContext();
         sb.append(" Context:");
         sb.append(ctx.getContextId());
         sb.append('(');
         sb.append(Strings.join(ctx.getLoginInfo(), ","));
         sb.append(')');
-        User user = result.getUser();
+        final User user = result.getUser();
         sb.append(" User:");
         sb.append(user.getId());
         sb.append('(');
         sb.append(user.getLoginInfo());
         sb.append(')');
-        Session session = result.getSession();
+        final Session session = result.getSession();
         sb.append(" Session:");
         sb.append(session.getSessionID());
         LOG.info(sb.toString());
