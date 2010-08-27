@@ -125,6 +125,8 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     public static final int USM = 1 << 26;
 
+    public static final int OLOX20 = 1 << 27;
+
     /*-
      * Field members
      */
@@ -842,7 +844,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Cheks if this user configuration indicates that the user may use USM.
+     * Checks if this user configuration indicates that the user may use USM.
      */
     public boolean hasUSM() {
         return hasPermission(USM);
@@ -853,6 +855,20 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public void setUSM(final boolean usm) {
         setPermission(usm, USM);
+    }
+
+    /**
+     * Checks if this user configuration indicates that the user may use OLOX2.0.
+     */
+    public boolean hasOLOX20() {
+        return hasPermission(OLOX20);
+    }
+
+    /**
+     * Sets if this user is able to user OLOX2.0.
+     */
+    public void setOLOX20(final boolean olox20) {
+        setPermission(olox20, OLOX20);
     }
 
     /**
