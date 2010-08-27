@@ -97,7 +97,7 @@ public class NewPublicationRequest extends AbstractPublicationRequest<NewPublica
         return new AbstractAJAXParser<NewPublicationResponse>(isFailOnError()) {
 
             @Override
-            protected NewPublicationResponse createResponse(final Response response) throws JSONException {
+            protected NewPublicationResponse createResponse(final Response response) {
                 return new NewPublicationResponse(response);
             }
         };

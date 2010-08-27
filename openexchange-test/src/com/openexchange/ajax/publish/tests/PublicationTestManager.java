@@ -77,7 +77,6 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -91,7 +90,7 @@ public class PublicationTestManager {
 
         private Set<Integer> createdItems;
 
-        private boolean failOnError;
+        private boolean failOnError = true;
 
         private AJAXClient client;
 

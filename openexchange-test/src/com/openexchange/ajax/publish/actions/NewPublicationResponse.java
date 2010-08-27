@@ -49,23 +49,20 @@
 
 package com.openexchange.ajax.publish.actions;
 
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-
 
 /**
  * {@link NewPublicationResponse}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class NewPublicationResponse extends AbstractPublicationResponse{
+public class NewPublicationResponse extends AbstractPublicationResponse {
 
     public NewPublicationResponse(Response response) {
         super(response);
     }
     
-    public int getId() throws JSONException{
+    public int getId() {
         return ((Integer) getData()).intValue();
     }
-
 }

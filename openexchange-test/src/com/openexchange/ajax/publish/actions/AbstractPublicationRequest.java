@@ -52,7 +52,6 @@ package com.openexchange.ajax.publish.actions;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link AbstractPublicationRequest}
  *
@@ -61,17 +60,14 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 public abstract class AbstractPublicationRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     private boolean failOnError;
-    
-    
+
     public String getServletPath() {
         return "/ajax/publications";
     }
 
-
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
-
 
     public boolean isFailOnError() {
         return failOnError;
