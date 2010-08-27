@@ -490,9 +490,10 @@ public interface OXContextInterface extends Remote {
     public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException ;
     
     /**
-     * Determines whether a context already exists. Does not use any authentication.
-     * @param ctx
-     * @return
+     * Determines whether a context already exists.
+     * @param ctx The context we're interested in
+     * @param auth Credentials for authenticating against the server.
+     * @return Whether the given context exists or not
      */
- //   public boolean checkExists(final Context ctx);
+    public boolean checkExists(Context ctx, Credentials auth) throws InvalidDataException, StorageException, InvalidCredentialsException;
 }

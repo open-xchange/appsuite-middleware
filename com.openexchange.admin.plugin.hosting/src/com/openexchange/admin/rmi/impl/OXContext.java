@@ -1110,10 +1110,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return oxtool.getAdminForContext(ctx);
     }
 
-//    public boolean checkExists(Context ctx) throws InvalidDataException, StorageException {
-//        if(ctx == null)
-//            throw new InvalidDataException("Given context is invalid");
-//
-//        return tool.existsContext(ctx);
-//    }
+    public boolean checkExists(Context ctx, Credentials auth) throws InvalidDataException, StorageException, InvalidCredentialsException {
+        new BasicAuthenticator(context).doAuthentication(auth);
+        
+        if(ctx == null)
+            throw new InvalidDataException("Given context is invalid");
+
+        return tool.existsContext(ctx);
+    }
 }
