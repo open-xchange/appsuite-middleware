@@ -124,6 +124,8 @@ public class UserModuleAccess implements Serializable {
 
     private boolean USM = true;
 
+    private boolean OLOX20 = true;
+
     private boolean GlobalAddressBookDisabled = false;
 
     private boolean PublicFolderEditable = true;
@@ -522,6 +524,14 @@ public class UserModuleAccess implements Serializable {
 
     public void setUSM(final boolean val) {
         this.USM = val;
+    }
+
+    public boolean isOLOX20() {
+        return OLOX20;
+    }
+
+    public void setOLOX20(final boolean val) {
+        this.OLOX20 = val;
     }
 
     public boolean isGlobalAddressBookDisabled() {
