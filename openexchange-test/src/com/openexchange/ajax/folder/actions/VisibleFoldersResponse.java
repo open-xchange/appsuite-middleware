@@ -91,24 +91,24 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
     private List<List<Object[]>> parseResponse() throws JSONException {
         final JSONObject object = (JSONObject) getResponse().getData();
         List<List<Object[]>> ret = new ArrayList<List<Object[]>>(3);
-        /*
-         * Parse private folders 
-         */
+        // Parse private folders 
         final Object[][] privateArray = parseData(object.getJSONArray("private"));
         ret.add(Collections.unmodifiableList(Arrays.asList(privateArray)));
-        /*
-         * Parse public folders 
-         */
-        final Object[][] publicArray = parseData(object.getJSONArray("public"));
-        ret.add(Collections.unmodifiableList(Arrays.asList(publicArray)));
-        /*
-         * Parse shared folders 
-         */
-        final Object[][] sharedArray = parseData(object.getJSONArray("shared"));
-        ret.add(Collections.unmodifiableList(Arrays.asList(sharedArray)));
-        /*
-         * Return
-         */
+        // Parse public folders 
+        if (object.has("public")) {
+            final Object[][] publicArray = parseData(object.getJSONArray("public"));
+            ret.add(Collections.unmodifiableList(Arrays.asList(publicArray)));
+        } else {
+            ret.add(Collections.<Object[]>emptyList());
+        }
+        // Parse shared folders
+        if (object.has("shared")) {
+            final Object[][] sharedArray = parseData(object.getJSONArray("shared"));
+            ret.add(Collections.unmodifiableList(Arrays.asList(sharedArray)));
+        } else {
+            ret.add(Collections.<Object[]>emptyList());
+        }
+        // Return
         return ret;
     }
     
