@@ -104,11 +104,9 @@ public final class LoginPerformer {
     }
 
     /**
-     * Performs the login for specified credentials.
+     * Performs the login for specified login request.
      * 
-     * @param login The login string
-     * @param password The password string
-     * @param remoteAddress The Internet Protocol (IP) address of the client
+     * @param request The login request
      * @return The login providing login information
      * @throws LoginException If login fails
      */
