@@ -368,16 +368,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmtdelattribute.setInt(1, contextId);
                 stmtdelattribute.setInt(2, userId);
                 
-                for(Map.Entry<String, Map<String, String>> ns : usrdata.getUserAttributes().entrySet()) {
-                    String namespace = ns.getKey();
-                    for(Map.Entry<String, String> pair : ns.getValue().entrySet()) {
-                        String name = namespace+"/"+pair.getKey();
-                        String value = pair.getValue();
+                for(final Map.Entry<String, Map<String, String>> ns : usrdata.getUserAttributes().entrySet()) {
+                    final String namespace = ns.getKey();
+                    for(final Map.Entry<String, String> pair : ns.getValue().entrySet()) {
+                        final String name = namespace+"/"+pair.getKey();
+                        final String value = pair.getValue();
                         if(value != null) {
                             stmtupdateattribute.setString(1, value);
                             stmtupdateattribute.setString(4, name);
                             
-                            int changedRows = stmtupdateattribute.executeUpdate();
+                            final int changedRows = stmtupdateattribute.executeUpdate();
                             if(changedRows == 0) {
                                 stmtinsertattribute.setString(1, value);
                                 stmtinsertattribute.setString(4, name);
@@ -725,7 +725,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("Error", e);
             rollback(con);
             throw new StorageException(e);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             log.error(e.getMessage(), e);
             rollback(con);
             throw new StorageException(e.toString());
@@ -950,16 +950,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 final ArrayList<MethodAndNames> methodlist = getGetters(theMethods);
 
-                StringBuilder contactInsert = new StringBuilder("INSERT INTO prg_contacts (cid,userid,creating_date,created_from,changing_date,changed_from,fid,intfield01,field90,");
-                StringBuilder placeHolders = new StringBuilder();
-                List<Method> methodlist2 = new ArrayList<Method>();
-                for (MethodAndNames methodandname : methodlist) {
+                final StringBuilder contactInsert = new StringBuilder("INSERT INTO prg_contacts (cid,userid,creating_date,created_from,changing_date,changed_from,fid,intfield01,field90,");
+                final StringBuilder placeHolders = new StringBuilder();
+                final List<Method> methodlist2 = new ArrayList<Method>();
+                for (final MethodAndNames methodandname : methodlist) {
                     // First we have to check which return value we have. We have to distinguish four types.
-                    Method method = methodandname.getMethod();
-                    String methodName = methodandname.getName();
-                    Class<?> returnType = method.getReturnType();
+                    final Method method = methodandname.getMethod();
+                    final String methodName = methodandname.getName();
+                    final Class<?> returnType = method.getReturnType();
                     if (String.class.equals(returnType)) {
-                        String result = (String) method.invoke(usrdata, (Object[]) null);
+                        final String result = (String) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
                             contactInsert.append(Mapper.method2field.get(methodName));
                             contactInsert.append(",");
@@ -967,7 +967,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             methodlist2.add(method);
                         }
                     } else if (Integer.class.equals(returnType)) {
-                        int result = i((Integer) method.invoke(usrdata, (Object[]) null));
+                        final int result = i((Integer) method.invoke(usrdata, (Object[]) null));
                         if (-1 != result) {
                             contactInsert.append(Mapper.method2field.get(methodName));
                             contactInsert.append(",");
@@ -980,7 +980,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         placeHolders.append("?,");
                         methodlist2.add(method);
                     } else if (Date.class.equals(returnType)) {
-                        Date result = (Date) method.invoke(usrdata, (Object[]) null);
+                        final Date result = (Date) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
                             contactInsert.append(Mapper.method2field.get(methodName));
                             contactInsert.append(",");
@@ -1006,17 +1006,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(pos++, contactId);
                 stmt.setString(pos++, usrdata.getDisplay_name());
 
-                for (Method method : methodlist2) {
-                    Class<?> returntype = method.getReturnType();
+                for (final Method method : methodlist2) {
+                    final Class<?> returntype = method.getReturnType();
                     if (String.class.equals(returntype)) {
-                        String result = (String) method.invoke(usrdata, (Object[]) null);
+                        final String result = (String) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
                             stmt.setString(pos++, result);
                         } else {
                             stmt.setNull(pos++, java.sql.Types.VARCHAR);
                         }
                     } else if (Integer.class.equals(returntype)) {
-                        int result = i((Integer) method.invoke(usrdata, (Object[]) null));
+                        final int result = i((Integer) method.invoke(usrdata, (Object[]) null));
                         if (-1 != result) {
                             stmt.setInt(pos++, result);
                         } else {
@@ -1026,7 +1026,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         final boolean result = b((Boolean) method.invoke(usrdata, (Object[]) null));
                         stmt.setBoolean(pos++, result);
                     } else if (Date.class.equals(returntype)) {
-                        Date result = (Date) method.invoke(usrdata, (Object[]) null);
+                        final Date result = (Date) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
                             stmt.setTimestamp(pos++, new Timestamp(result.getTime()));
                         } else {
@@ -1201,7 +1201,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final OXException e) {
             log.error("OX Error", e);
             throw new StorageException(e.toString());
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.toString());
         } catch (final NoSuchAlgorithmException e) {
@@ -1231,18 +1231,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void insertDynamicAttributes(Connection write_ox_con, int cid, int userId, Map<String, Map<String, String>> dynamicValues) throws SQLException {
+    private void insertDynamicAttributes(final Connection write_ox_con, final int cid, final int userId, final Map<String, Map<String, String>> dynamicValues) throws SQLException {
         PreparedStatement stmt = null;
         
         try {
             stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value) VALUES (?, ?, ?, ?)");
             stmt.setInt(1, cid);
             stmt.setInt(2, userId);
-            for(Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
-                String namespace = namespaced.getKey();
-                for(Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
-                    String name = namespace + "/" + pair.getKey();
-                    String value = pair.getValue();
+            for(final Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
+                final String namespace = namespaced.getKey();
+                for(final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+                    final String name = namespace + "/" + pair.getKey();
+                    final String value = pair.getValue();
                     stmt.setString(3, name);
                     stmt.setString(4, value);
                     stmt.executeUpdate();
@@ -1309,11 +1309,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void storeFolderTree(Context ctx, Connection con, User user, int userId) throws SettingException {
+    private void storeFolderTree(final Context ctx, final Connection con, final User user, final int userId) throws SettingException {
         if (!user.isFolderTreeSet()) {
             return;
         }
-        Integer folderTree = user.getFolderTree();
+        final Integer folderTree = user.getFolderTree();
         if (null == folderTree) {
             return;
         }
@@ -1713,13 +1713,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmtuserattributes.setInt(2, user_id);
                 rs = stmtuserattributes.executeQuery();
                 while (rs.next()) {
-                    String name = rs.getString("name");
-                    String value = rs.getString("value");
+                    final String name = rs.getString("name");
+                    final String value = rs.getString("value");
 
                     if(ALIAS.equals(name)) {
                         newuser.addAlias(value);
                     } else if (isDynamicAttribute(name)) {
-                        String[] namespaced = parseDynamicAttribute(name);
+                        final String[] namespaced = parseDynamicAttribute(name);
                         newuser.setUserAttribute(namespaced[0], namespaced[1], value);
                     }
                 }
@@ -1796,18 +1796,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * Returns a String[] with retval[0] being the namespace and retval[1] being the name
      * @throws StorageException 
      */
-    private String[] parseDynamicAttribute(String name) throws StorageException {
-        int pos = name.indexOf('/');
+    private String[] parseDynamicAttribute(final String name) throws StorageException {
+        final int pos = name.indexOf('/');
         if(pos == -1) {
             throw new StorageException("Could not parse dynamic attribute name: "+name);
         }
-        String[] parsed = new String[2];
+        final String[] parsed = new String[2];
         parsed[0] = name.substring(0, pos);
         parsed[1] = name.substring(pos+1);
         return parsed;
     }
 
-    private boolean isDynamicAttribute(String name) {
+    private boolean isDynamicAttribute(final String name) {
         return name.indexOf('/') >= 0;
     }
 
@@ -2005,44 +2005,44 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void changeModuleAccess(Context ctx, int[] userIds, UserModuleAccess moduleAccess) throws StorageException {
+    public void changeModuleAccess(final Context ctx, final int[] userIds, final UserModuleAccess moduleAccess) throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForContext(i(ctx.getId()));
-        } catch (PoolException e) {
+        } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         }
         try {
             con.setAutoCommit(false);
             // Loop through the int[] and change the module access rights for each user
-            for (int userId : userIds) {
+            for (final int userId : userIds) {
                 // first get all groups the user is in
-                int[] groupsForUser = getGroupsForUser(ctx, userId, con);
+                final int[] groupsForUser = getGroupsForUser(ctx, userId, con);
                 // update last modified column
                 changeLastModified(userId, ctx, con);
                 myChangeInsertModuleAccess(ctx, userId, moduleAccess, false, con, groupsForUser);
             }
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error", e);
             rollback(con);
             throw new StorageException(e.toString());
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             rollback(con);
             throw e;
         } finally {
             try {
                 cache.pushConnectionForContext(i(ctx.getId()), con);
-            } catch (PoolException e) {
+            } catch (final PoolException e) {
                 log.error("Pool Error pushing ox write connection to pool!", e);
             }
         }
     }
 
     @Override
-    public void changeModuleAccess(Context ctx, int userId, UserModuleAccess moduleAccess) throws StorageException {
+    public void changeModuleAccess(final Context ctx, final int userId, final UserModuleAccess moduleAccess) throws StorageException {
         changeModuleAccess(ctx, new int[] { userId }, moduleAccess);
     }
 
@@ -2083,6 +2083,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setSubscription(user.hasPermission(UserConfiguration.SUBSCRIPTION));
             acc.setActiveSync(user.hasPermission(UserConfiguration.ACTIVE_SYNC));
             acc.setUSM(user.hasPermission(UserConfiguration.USM));
+            acc.setOLOX20(user.hasPermission(UserConfiguration.OLOX20));
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
             acc.setGlobalAddressBookDisabled(adminHelper.isGlobalAddressBookDisabled(ctx.getId().intValue(), user_id, read_ox_con));
             acc.setPublicFolderEditable(adminHelper.isPublicFolderEditable(ctx.getId().intValue(), user_id, read_ox_con));
@@ -2375,7 +2376,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void myChangeInsertModuleAccess(Context ctx, int userId, UserModuleAccess access, boolean insert, Connection writeCon, int[] groups) throws StorageException {
+    private void myChangeInsertModuleAccess(final Context ctx, final int userId, final UserModuleAccess access, final boolean insert, final Connection writeCon, final int[] groups) throws StorageException {
         checkForIllegalCombination(access);
         try {
             final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(userId, groups, ctx.getId().intValue(), writeCon);
@@ -2406,6 +2407,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setPublication(access.isPublication());
             user.setActiveSync(access.isActiveSync());
             user.setUSM(access.isUSM());
+            user.setOLOX20(access.isOLOX20());
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
             adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
@@ -2413,28 +2415,28 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert, writeCon);
             if (!insert) {
-                com.openexchange.groupware.contexts.Context gwCtx = ContextStorage.getInstance().getContext(ctx.getId().intValue());
+                final com.openexchange.groupware.contexts.Context gwCtx = ContextStorage.getInstance().getContext(ctx.getId().intValue());
                 UserConfigurationStorage.getInstance().removeUserConfiguration(user.getUserId(), gwCtx);
             }
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             log.error("DBPooling Error", e);
             throw new StorageException(e.toString());
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             log.error("Context Error", e);
             throw new StorageException(e.toString());
-        } catch (UserConfigurationException e) {
+        } catch (final UserConfigurationException e) {
             log.error("UserConfiguration Error", e);
             throw new StorageException(e.toString());
-        } catch (OXException e) {
+        } catch (final OXException e) {
             log.error("UserConfiguration Error", e);
             throw new StorageException(e.toString());
         }
     }
 
-    private void checkForIllegalCombination(UserModuleAccess access) throws StorageException {
+    private void checkForIllegalCombination(final UserModuleAccess access) throws StorageException {
         if (access.isGlobalAddressBookDisabled()) {
             // At least Outlook does not work if global address book is not available. All other groupware functionality gets useless.
             if (access.getEditPublicFolders()) {
