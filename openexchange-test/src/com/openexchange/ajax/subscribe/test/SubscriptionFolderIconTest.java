@@ -50,12 +50,14 @@
 package com.openexchange.ajax.subscribe.test;
 
 import java.util.Date;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetResponse;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -147,15 +149,15 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
     public void testShouldSetTheIconViaList() throws Exception {
         // check negative
         fMgr.listFoldersOnServer(folder.getParentFolderID(), new int[] { FLAG_SUBSCRIBED });
-        AbstractAJAXResponse response = fMgr.getLastResponse();
+        AbstractColumnsResponse response = (AbstractColumnsResponse) fMgr.getLastResponse();
         JSONArray folders = (JSONArray) response.getData();
         assertTrue("Should return at least one folder", folders.length() > 0);
         boolean found = false;
         for (int i = 0; i < folders.length(); i++) {
             JSONArray subfolder = folders.getJSONArray(i);
-            int id = subfolder.getInt(1); // note: this work only as long as we have this stupid "oh, I'll add the folder id anyways"
+            int id = subfolder.getInt(response.getColumnPos(FolderObject.OBJECT_ID)); // note: this work only as long as we have this stupid "oh, I'll add the folder id anyways"
                                           // feature in that request
-            boolean published = subfolder.getBoolean(0);
+            boolean published = subfolder.getBoolean(response.getColumnPos(FLAG_SUBSCRIBED));
             if (id == folder.getObjectID()) {
                 found = true;
                 assertFalse("Folder " + id + " should not be published already", published);
@@ -168,15 +170,15 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
 
         // check positive
         fMgr.listFoldersOnServer(folder.getParentFolderID(), new int[] { FLAG_SUBSCRIBED });
-        response = fMgr.getLastResponse();
+        response = (AbstractColumnsResponse) fMgr.getLastResponse();
         folders = (JSONArray) response.getData();
         assertTrue("Should return at least one folder", folders.length() > 0);
         found = false;
         for (int i = 0; i < folders.length(); i++) {
             JSONArray subfolder = folders.getJSONArray(i);
-            int id = subfolder.getInt(1); // note: this work only as long as we have this stupid "oh, I'll add the folder id anyways"
+            int id = subfolder.getInt(response.getColumnPos(FolderObject.OBJECT_ID)); // note: this work only as long as we have this stupid "oh, I'll add the folder id anyways"
                                           // feature in that request
-            boolean published = subfolder.getBoolean(0);
+            boolean published = subfolder.getBoolean(response.getColumnPos(FLAG_SUBSCRIBED));
             if (id == folder.getObjectID()) {
                 found = true;
                 assertTrue("Folder " + id + " should not published", published);

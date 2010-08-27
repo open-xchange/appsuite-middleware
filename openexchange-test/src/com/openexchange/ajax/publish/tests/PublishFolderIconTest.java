@@ -50,13 +50,15 @@
 package com.openexchange.ajax.publish.tests;
 
 import java.util.Date;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.groupware.container.CalendarObject;
@@ -138,14 +140,14 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
     public void testShouldSetTheIconViaList() throws Exception {
         // check negative
         fMgr.listFoldersOnServer(folder.getParentFolderID(), new int[] { 3010 });
-        AbstractAJAXResponse response = fMgr.getLastResponse();
+        AbstractColumnsResponse response = (AbstractColumnsResponse) fMgr.getLastResponse();
         JSONArray folders = (JSONArray) response.getData();
         assertTrue("Should return at least one folder", folders.length() > 0);
         boolean found = false;
         for(int i = 0; i < folders.length(); i++){
             JSONArray subfolder = folders.getJSONArray(i);
-            int id = subfolder.getInt(1); //note: this work only as long as we have this stupid "oh, I'll add the folder id anyways" feature in that request
-            boolean published = subfolder.getBoolean(0);
+            int id = subfolder.getInt(response.getColumnPos(FolderObject.OBJECT_ID)); //note: this work only as long as we have this stupid "oh, I'll add the folder id anyways" feature in that request
+            boolean published = subfolder.getBoolean(response.getColumnPos(3010));
             if(id == folder.getObjectID()){
                 found = true;
                 assertFalse("Folder "+id+" should not be published already", published);
@@ -158,14 +160,14 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
 
         // check positive
         fMgr.listFoldersOnServer(folder.getParentFolderID(), new int[] { 3010 });
-        response = fMgr.getLastResponse();
+        response = (AbstractColumnsResponse) fMgr.getLastResponse();
         folders = (JSONArray) response.getData();
         assertTrue("Should return at least one folder", folders.length() > 0);
         found = false;
         for(int i = 0; i < folders.length(); i++){
             JSONArray subfolder = folders.getJSONArray(i);
-            int id = subfolder.getInt(1); //note: this work only as long as we have this stupid "oh, I'll add the folder id anyways" feature in that request
-            boolean published = subfolder.getBoolean(0);
+            int id = subfolder.getInt(response.getColumnPos(FolderObject.OBJECT_ID)); //note: this work only as long as we have this stupid "oh, I'll add the folder id anyways" feature in that request
+            boolean published = subfolder.getBoolean(response.getColumnPos(3010));
             if(id == folder.getObjectID()){
                 found = true;
                 assertTrue("Folder "+id+" should not published", published);
