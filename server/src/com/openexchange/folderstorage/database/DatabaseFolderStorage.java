@@ -697,13 +697,30 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         iterator.remove();
                     }
                 }
-            } else if (FolderObject.PUBLIC == iType && FolderObject.CONTACT == iModule) {
-                /*
-                 * Add global address book manually
-                 */
-                final FolderObject gab = getFolderAccess(storageParameters).getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-                gab.setFolderName(new StringHelper(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
-                list.add(gab);
+            } else if (FolderObject.PUBLIC == iType && FolderObject.CONTACT == iModule ) {
+                try {
+                    /*
+                     * Add global address book manually
+                     */
+                    final FolderObject gab = getFolderAccess(storageParameters).getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                    final UserConfiguration userConfiguration;
+                    {
+                        final Session s = storageParameters.getSession();
+                        if (s instanceof ServerSession) {
+                            userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        } else {
+                            userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        }
+                    }
+                    if (gab.isVisible(userId, userConfiguration)) {
+                        gab.setFolderName(new StringHelper(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
+                        list.add(gab);
+                    }
+                } catch (final DBPoolingException e) {
+                    throw new FolderException(e);
+                } catch (final SQLException e) {
+                    throw new FolderException(new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage()));
+                }
             }
             /*
              * Localize folder names
