@@ -495,5 +495,5 @@ public interface OXContextInterface extends Remote {
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not
      */
-    public boolean checkExists(Context ctx, Credentials auth) throws InvalidDataException, StorageException, InvalidCredentialsException;
+    public boolean checkExists(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
 }

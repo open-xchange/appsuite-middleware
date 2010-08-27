@@ -1110,7 +1110,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return oxtool.getAdminForContext(ctx);
     }
 
-    public boolean checkExists(Context ctx, Credentials auth) throws InvalidDataException, StorageException, InvalidCredentialsException {
+    public boolean checkExists(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         new BasicAuthenticator(context).doAuthentication(auth);
         
         if(ctx == null)
