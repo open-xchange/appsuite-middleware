@@ -121,7 +121,7 @@ public final class ConfigTree {
                 child = actual.getElement(path[0]);
             }
             if (null == child) {
-                StringBuilder sb = new StringBuilder(path[0]);
+                final StringBuilder sb = new StringBuilder(path[0]);
                 Setting parent = actual;
                 while (null != parent) {
                     sb.insert(0, '/');
@@ -292,6 +292,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.SpamButton.class,
             com.openexchange.groupware.settings.tree.modules.mail.VCard.class,
             com.openexchange.groupware.settings.tree.modules.mailaccount.Module.class,
+            com.openexchange.groupware.settings.tree.modules.olox20.Module.class,
             com.openexchange.groupware.settings.tree.modules.passwordchange.Module.class,
             com.openexchange.groupware.settings.tree.modules.personaldata.Module.class,
             com.openexchange.groupware.settings.tree.modules.personaldata.InternalUserEditEnabled.class,
