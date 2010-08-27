@@ -488,4 +488,11 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException Thrown when an error in a subsystem occurred.
      */
     public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException ;
+    
+    /**
+     * Determines whether a context already exists. Does not use any authentication.
+     * @param ctx
+     * @return
+     */
+ //   public boolean checkExists(final Context ctx);
 }
