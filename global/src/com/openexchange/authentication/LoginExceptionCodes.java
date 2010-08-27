@@ -52,6 +52,7 @@ package com.openexchange.authentication;
 import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_LOCKED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT_READY_YET_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.CLASS_NOT_FOUND_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENIED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.DATABASE_DOWN_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.INSTANTIATION_FAILED_MSG;
@@ -125,7 +126,11 @@ public enum LoginExceptionCodes implements OXErrorMessage {
     /**
      * User is not activated.
      */
-    USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.PERMISSION, 13);
+    USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.PERMISSION, 13),
+    /**
+     * Client "%1$s" is not activated.
+     */
+    CLIENT_DENIED(CLIENT_DENIED_MSG, Category.USER_CONFIGURATION, 14);
 
     /**
      * Message of the exception.
