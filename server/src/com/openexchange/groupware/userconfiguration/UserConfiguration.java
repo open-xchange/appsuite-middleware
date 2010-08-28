@@ -929,6 +929,12 @@ public final class UserConfiguration implements Serializable, Cloneable {
         setPermission(editPassword, EDIT_PASSWORD);
     }
 
+    /**
+     * Checks if this user configuration enabled specified permission bit.
+     * 
+     * @param permission The permission bit to check
+     * @return <code>true</code> if this user configuration enabled specified permission bit; otherwise <code>false</code>
+     */
     public boolean hasPermission(final int permission) {
         return (permissionBits & permission) == permission;
     }
