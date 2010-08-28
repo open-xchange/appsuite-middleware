@@ -47,31 +47,31 @@
  *
  */
 
-package com.openexchange.groupware.contact;
+package com.openexchange.api2;
 
+import java.util.List;
+import java.util.UUID;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactUnificationState;
+import com.openexchange.groupware.container.Contact;
 
 /**
+ * {@link FinalContactInterface}
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public enum ContactUnificationState {
-    RED(1),        //user decided two contacts are not refering to the same person 
-    GREEN(2),      //user stated that two contacts represent the same person
-    UNDEFINED(0);  
-    
-    private int num;
-    
-    ContactUnificationState(int num){
-        this.num = num;
-    }
-    
-    public int getNumber(){
-        return num;
-    }
-    
-    public static ContactUnificationState getByNumber(int num){
-        for(ContactUnificationState state: values())
-            if(state.getNumber() == num)
-                return state;
-        return null;
-    }
+public interface FinalContactInterface extends ContactInterface {
+
+    public abstract void setUnificationStateForContacts(Contact aggregator, Contact contributor, ContactUnificationState state);
+
+    public abstract void associateTwoContacts(Contact aggregator, Contact contributor) throws OXException;
+
+    public abstract void separateTwoContacts(Contact aggregator, Contact contributor) throws OXException;
+
+    public abstract List<UUID> getAssociatedContacts(Contact contact) throws OXException;
+
+    public abstract ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException;
+
+    public abstract Contact getContactByUUID(UUID uuid) throws OXException;
+
 }

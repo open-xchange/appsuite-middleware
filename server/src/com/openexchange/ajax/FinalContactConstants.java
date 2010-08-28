@@ -47,31 +47,37 @@
  *
  */
 
-package com.openexchange.groupware.contact;
+package com.openexchange.ajax;
 
 
 /**
+ * {@link FinalContactConstants}
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public enum ContactUnificationState {
-    RED(1),        //user decided two contacts are not refering to the same person 
-    GREEN(2),      //user stated that two contacts represent the same person
-    UNDEFINED(0);  
+public enum FinalContactConstants {
+    ACTION_ASSOCIATE("associate"),
+    ACTION_DISSOCIATE("dissociate"),
+    ACTION_GET_BY_UUID("getByUuid"),
+    ACTION_GET_ASSOCIATED("getAssociated"),
+    ACTION_GET_ASSOCIATION("getAssociationBetween"),
+    PARAMETER_UUID("uuid"),
+    PARAMETER_UUID1("uuid1"),
+    PARAMETER_UUID2("uuid2"),
+    PARAMETER_FOLDER_ID1("folder1"),
+    PARAMETER_FOLDER_ID2("folder2"),
+    PARAMETER_CONTACT_ID1("id1"),
+    PARAMETER_CONTACT_ID2("id2");
     
-    private int num;
-    
-    ContactUnificationState(int num){
-        this.num = num;
+    private String name;
+
+    private FinalContactConstants(String name) {
+        this.name = name;
     }
     
-    public int getNumber(){
-        return num;
+    public String getName(){
+        return this.name;
     }
-    
-    public static ContactUnificationState getByNumber(int num){
-        for(ContactUnificationState state: values())
-            if(state.getNumber() == num)
-                return state;
-        return null;
-    }
+
+
 }

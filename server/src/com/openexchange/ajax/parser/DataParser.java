@@ -390,6 +390,18 @@ public abstract class DataParser {
         }
         return s;
     }
+    
+    public static UUID parseUUID(final JSONObject jsonObj, final String name) throws OXJSONException, AjaxException {
+        final String tmp = parseString(jsonObj, name);
+        if (tmp == null) {
+            return null;
+        }
+        try {
+            return UUID.fromString(tmp);
+        } catch (final IllegalArgumentException exc) {
+            return null;
+        }
+    }
 
     public static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
         if (!jsonObj.has(name)) {

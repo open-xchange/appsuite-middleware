@@ -191,16 +191,6 @@ public interface ContactInterface {
      */
     public SearchIterator<Contact> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
 
-    public Contact getContactByUUID(String uuid) throws OXException;
-    
-    public List<Contact> getAssociatedContacts(Contact contact) throws OXException;
-    
-    public void associateTwoContacts(Contact master, Contact slave) throws OXException;
-    
-    public void separateTwoContacts(Contact master, Contact slave) throws OXException;
-    
-    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException;
-    
     /**
      * Gets the folder ID.
      * 

@@ -53,7 +53,9 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -61,6 +63,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.FinalContactConstants;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -70,6 +73,7 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
+import com.openexchange.api2.FinalContactInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
@@ -83,6 +87,7 @@ import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
+import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -181,9 +186,85 @@ public class ContactRequest {
             return actionSearch(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
             return actionCopy(jsonObject);
+        } else if (action.equalsIgnoreCase(FinalContactConstants.ACTION_ASSOCIATE.getName())) {
+            return actionAssociate(jsonObject);
+        } else if (action.equalsIgnoreCase(FinalContactConstants.ACTION_DISSOCIATE.getName())) {
+            return actionDissociate(jsonObject);
+        } else if (action.equalsIgnoreCase(FinalContactConstants.ACTION_GET_ASSOCIATED.getName())) {
+            return actionGetAssociated(jsonObject);
+        } else if (action.equalsIgnoreCase(FinalContactConstants.ACTION_GET_ASSOCIATION.getName())) {
+            return actionGetAssociation(jsonObject);
+        } else if (action.equalsIgnoreCase(FinalContactConstants.ACTION_GET_BY_UUID.getName())) {
+            return actionGetByUid(jsonObject);
         } else {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
+    }
+
+
+    public JSONValue actionGetByUid(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
+        final FinalContactInterface contactInterface = getFinalContactInterface();
+        
+        Contact contactObj = getFinalContact(contactInterface, jsonObj);
+        
+        final TimeZone tz;
+        final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+        tz = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        
+        final ContactWriter contactwriter = new ContactWriter(tz);
+
+        final JSONObject jsonResponseObject = new JSONObject();
+        contactwriter.writeContact(contactObj, jsonResponseObject, session);
+
+        timestamp = contactObj.getLastModified();
+
+        return jsonResponseObject;
+    }
+
+    public JSONValue actionGetAssociation(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
+        final FinalContactInterface contactInterface = getFinalContactInterface();
+        Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
+        
+        ContactUnificationState association = contactInterface.getAssociationBetween(twoContacts[0], twoContacts[1]);
+        JSONObject ret = new JSONObject().put("state", association.getNumber());
+        return ret;
+    }
+
+    private JSONValue actionGetAssociated(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
+        final FinalContactInterface contactInterface = getFinalContactInterface();
+        Contact contact  = getFinalContact(contactInterface, jsonObject);
+        
+        final TimeZone tz;
+        final String timeZoneId = DataParser.parseString(jsonObject, AJAXServlet.PARAMETER_TIMEZONE);
+        tz = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        
+        List<UUID> associatedContacts = contactInterface.getAssociatedContacts(contact);
+        
+        JSONArray ret = new JSONArray();
+        
+        for(UUID associate: associatedContacts){
+            ret.put(associate.toString());
+        }
+        
+        return ret;
+    }
+
+    private JSONValue actionDissociate(JSONObject jsonObject) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException {
+        final FinalContactInterface contactInterface = getFinalContactInterface();
+        Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
+        
+        contactInterface.separateTwoContacts(twoContacts[0], twoContacts[1]);
+        
+        return null;
+    }
+
+    private JSONValue actionAssociate(JSONObject jsonObject) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException {
+        final FinalContactInterface contactInterface = getFinalContactInterface();
+        Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
+        
+        contactInterface.associateTwoContacts(twoContacts[0], twoContacts[1]);
+        
+        return null;
     }
 
     public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
@@ -710,6 +791,8 @@ public class ContactRequest {
         timestamp = contactObj.getLastModified();
         return jsonResponseObject;
     }
+    
+
 
     private static void copyLinks(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {
         /*
@@ -848,5 +931,51 @@ public class ContactRequest {
         System.arraycopy(columns, 0, internalColumns, 0, columns.length);
         internalColumns[columns.length] = DataObject.LAST_MODIFIED;
         return internalColumns;
+    }
+    
+    
+    protected FinalContactInterface getFinalContactInterface() throws OXException, AjaxException {
+        final ContactInterface contactInterfaceTemp = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+            FolderObject.SYSTEM_LDAP_FOLDER_ID,
+            session);
+        if(! (contactInterfaceTemp instanceof FinalContactInterface))
+            throw new AjaxException(AjaxException.Code.UnknownAction, FinalContactConstants.ACTION_GET_BY_UUID.getName());
+        return (FinalContactInterface) contactInterfaceTemp;
+    }
+    
+    protected Contact[] getTwoFinalContacts(FinalContactInterface contactInterface, JSONObject jsonObject) throws OXJSONException, AjaxException, OXException{
+        UUID uuid1 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID1.getName());
+        UUID uuid2 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID2.getName());
+        Contact c1, c2;
+        if( uuid1 == null){
+            int fid1 = DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_FOLDER_ID1.getName());
+            int id1 =  DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_CONTACT_ID1.getName());
+            c1 = contactInterface.getObjectById(id1, fid1);
+
+        } else {
+            c1 = contactInterface.getContactByUUID(uuid1);
+        } 
+        if( uuid2 == null){
+            int fid2 = DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_FOLDER_ID2.getName());
+            int id2 =  DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_CONTACT_ID2.getName());
+            c2 = contactInterface.getObjectById(id2, fid2);
+        } else {
+            c2 = contactInterface.getContactByUUID(uuid2);
+        }
+        return new Contact[]{c1,c2};
+    }
+    
+    protected Contact getFinalContact(FinalContactInterface contactInterface, JSONObject jsonObject) throws OXJSONException, AjaxException, OXException{
+        UUID uuid = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID.getName());
+        Contact c;
+        if( uuid == null){
+            int fid = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_FOLDERID);
+            int id =  DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
+            c = contactInterface.getObjectById(id, fid);
+
+        } else {
+            c = contactInterface.getContactByUUID(uuid);
+        } 
+        return c;
     }
 }
