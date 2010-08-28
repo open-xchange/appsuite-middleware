@@ -56,10 +56,6 @@ import com.openexchange.test.ContactTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- */
-/**
- * {@link ManagedContactTests}
- *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ManagedContactTests extends AbstractAJAXSession {

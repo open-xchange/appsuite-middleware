@@ -97,19 +97,19 @@ import com.openexchange.tools.servlet.OXJSONException;
  */
 public class ContactTestManager implements TestManager {
 
-    private boolean failOnError;
+    protected boolean failOnError;
 
-    private List<Contact> createdEntities;
+    protected List<Contact> createdEntities;
 
-    private AJAXClient client;
+    protected AJAXClient client;
 
-    private ContactParser contactParser;
+    protected ContactParser contactParser;
 
-    private TimeZone timeZone;
+    protected TimeZone timeZone;
 
-    private Throwable lastException;
+    protected Throwable lastException;
 
-    private AbstractAJAXResponse lastResponse;
+    protected AbstractAJAXResponse lastResponse;
 
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
@@ -364,7 +364,7 @@ public class ContactTestManager implements TestManager {
         return contactArray;
     }
 
-    private void doExceptionHandling(Exception exception, String action) {
+    protected void doExceptionHandling(Exception exception, String action) {
         try {
             lastException = exception;
             throw exception;
