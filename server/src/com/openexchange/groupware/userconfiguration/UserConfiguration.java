@@ -71,60 +71,144 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     private static final transient Log LOG = LogFactory.getLog(UserConfiguration.class);
 
+    /**
+     * The permission bit for mail access.
+     */
     public static final int WEBMAIL = 1;
 
+    /**
+     * The permission bit for calendar access.
+     */
     public static final int CALENDAR = 1 << 1;
 
+    /**
+     * The permission bit for contacts access.
+     */
     public static final int CONTACTS = 1 << 2;
 
+    /**
+     * The permission bit for tasks access.
+     */
     public static final int TASKS = 1 << 3;
 
+    /**
+     * The permission bit for infostore access.
+     */
     public static final int INFOSTORE = 1 << 4;
 
+    /**
+     * The permission bit for projects access.
+     */
     public static final int PROJECTS = 1 << 5;
 
+    /**
+     * The permission bit for forum access.
+     */
     public static final int FORUM = 1 << 6;
 
+    /**
+     * The permission bit for pinboard access.
+     */
     public static final int PINBOARD_WRITE_ACCESS = 1 << 7;
 
+    /**
+     * The permission bit for WebDAV/XML access.
+     */
     public static final int WEBDAV_XML = 1 << 8;
 
+    /**
+     * The permission bit for WebDAV access.
+     */
     public static final int WEBDAV = 1 << 9;
 
+    /**
+     * The permission bit for iCal access.
+     */
     public static final int ICAL = 1 << 10;
 
+    /**
+     * The permission bit for vCard access.
+     */
     public static final int VCARD = 1 << 11;
 
+    /**
+     * The permission bit for RSS bookmarks access.
+     */
     public static final int RSS_BOOKMARKS = 1 << 12;
 
+    /**
+     * The permission bit for RSS portal access.
+     */
     public static final int RSS_PORTAL = 1 << 13;
 
+    /**
+     * The permission bit for mobility access.
+     */
     public static final int MOBILITY = 1 << 14;
 
+    /**
+     * The permission bit whether write access to public folders is granted.
+     */
     public static final int EDIT_PUBLIC_FOLDERS = 1 << 15;
 
+    /**
+     * The permission bit whether shared folders are accessible.
+     */
     public static final int READ_CREATE_SHARED_FOLDERS = 1 << 16;
 
+    /**
+     * The permission bit if tasks may be delegated.
+     */
     public static final int DELEGATE_TASKS = 1 << 17;
 
+    /**
+     * The permission bit whether groups may be modified.
+     */
     public static final int EDIT_GROUP = 1 << 18;
 
+    /**
+     * The permission bit for whether resources may be modified.
+     */
     public static final int EDIT_RESOURCE = 1 << 19;
 
+    /**
+     * The permission bit for whether password may be changed.
+     */
     public static final int EDIT_PASSWORD = 1 << 20;
 
+    /**
+     * The permission bit whether email addresses shall be collected.
+     */
     public static final int COLLECT_EMAIL_ADDRESSES = 1 << 21;
 
+    /**
+     * The permission bit for multiple mail account access.
+     */
     public static final int MULTIPLE_MAIL_ACCOUNTS = 1 << 22;
 
+    /**
+     * The permission bit for subscription access.
+     */
     public static final int SUBSCRIPTION = 1 << 23;
 
+    /**
+     * The permission bit for publication access.
+     */
     public static final int PUBLICATION = 1 << 24;
 
+    /**
+     * The permission bit for active sync access.
+     */
     public static final int ACTIVE_SYNC = 1 << 25;
 
+    /**
+     * The permission bit for USM access.
+     */
     public static final int USM = 1 << 26;
 
+    /**
+     * The permission bit for OLOX v2.0 access.
+     */
     public static final int OLOX20 = 1 << 27;
 
     /*-
