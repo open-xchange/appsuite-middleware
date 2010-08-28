@@ -371,14 +371,16 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                     /*
                      * Check for access rights and subscribed status dependent on parameter "all"
                      */
-                    final Permission subfolderPermission;
-                    if (null == getSession()) {
-                        subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                    } else {
-                        subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                    }
-                    if (subfolderPermission.isVisible() && (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders()))) {
-                        visibleSubfolderIds.add(id);
+                    if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
+                        final Permission subfolderPermission;
+                        if (null == getSession()) {
+                            subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
+                        } else {
+                            subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
+                        }
+                        if (subfolderPermission.isVisible()) {
+                            visibleSubfolderIds.add(id);
+                        }
                     }
                 }
             }
