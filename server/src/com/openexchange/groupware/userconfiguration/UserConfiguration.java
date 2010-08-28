@@ -1014,7 +1014,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Checks if this user configuration enabled specified permission bit.
+     * Checks if this user configuration enables specified permission bit.
      * 
      * @param permission The permission bit to check
      * @return <code>true</code> if this user configuration enabled specified permission bit; otherwise <code>false</code>
