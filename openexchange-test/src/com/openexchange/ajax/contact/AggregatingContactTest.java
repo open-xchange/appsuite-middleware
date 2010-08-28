@@ -100,7 +100,7 @@ public class AggregatingContactTest extends AbstractAJAXSession{
         
         for(Contact c: new Contact[]{aggregator,contributor}){
             c.setParentFolderID(folder.getObjectID());
-            c.setSurName("MŸller");
+            c.setSurName("Mueller");
             c.setGivenName("Michael");
             c.setBirthday(new Date());
             c.setEmail1("m.mueller@host.invalid");
