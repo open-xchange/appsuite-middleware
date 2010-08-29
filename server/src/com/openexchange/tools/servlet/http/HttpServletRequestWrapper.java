@@ -217,15 +217,41 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return requestURI;
     }
 
+    /**
+     * Default port for HTTP.
+     */
+    private static final int PORT_HTTP = 80;
+
+    /**
+     * Default port for HTTPS.
+     */
+    private static final int PORT_HTTPS = 443;
+
     public StringBuffer getRequestURL() {
         if (null == requestURL) {
             final StringBuilder tmp = new StringBuilder(256);
-            tmp.append(isSecure() ? "https" : "http");
-            tmp.append("://").append(getServerName());
-            if (requestURI.charAt(0) != '/') {
-                tmp.append('/');
+            if (isSecure()) {
+                tmp.append("https://").append(getServerName());
+                final int port = getServerPort();
+                if (port != PORT_HTTPS) {
+                    tmp.append(':').append(port);
+                }
+            } else {
+                tmp.append("http://").append(getServerName());
+                final int port = getServerPort();
+                if (port != PORT_HTTP) {
+                    tmp.append(':').append(port);
+                }
             }
-            tmp.append(getRequestURI());
+            /*
+             * Append request URI
+             */
+            if (null != requestURI) {
+                if (requestURI.charAt(0) != '/') {
+                    tmp.append('/');
+                }
+                tmp.append(requestURI);
+            }
             requestURL = tmp.toString();
         }
         return new StringBuffer(requestURL);
