@@ -116,10 +116,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.ajpRequestHandler = ajpRequestHandler;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getAuthType()
-     */
     public String getAuthType() {
         return authType;
     }
@@ -129,10 +125,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         System.arraycopy(cookies, 0, this.cookies, 0, cookies.length);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getCookies()
-     */
     public Cookie[] getCookies() {
         if (cookies == null) {
             return null;
@@ -142,18 +134,10 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return retval;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getDateHeader(java.lang.String)
-     */
     public long getDateHeader(final String name) {
         return containsHeader(name) ? getDateValueFromHeaderField(getHeader(name)) : -1;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getIntHeader(java.lang.String)
-     */
     public int getIntHeader(final String name) {
         return containsHeader(name) ? Integer.parseInt(getHeader(name)) : -1;
     }
@@ -162,10 +146,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.method = method;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getMethod()
-     */
     public String getMethod() {
         return method;
     }
@@ -174,10 +154,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.pathInfo = pathInfo;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getPathInfo()
-     */
     public String getPathInfo() {
         return pathInfo;
     }
@@ -186,10 +162,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         pathTranslated = path_translated;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getPathTranslated()
-     */
     public String getPathTranslated() {
         return pathTranslated;
     }
@@ -198,10 +170,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.contextPath = contextPath;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getContextPath()
-     */
     public String getContextPath() {
         return contextPath;
     }
@@ -210,10 +178,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.queryString = queryString;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getQueryString()
-     */
     public String getQueryString() {
         return queryString;
     }
@@ -222,18 +186,10 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.remoteUser = remoteUser;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getRemoteUser()
-     */
     public String getRemoteUser() {
         return remoteUser;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#isUserInRole(java.lang.String)
-     */
     public boolean isUserInRole(final String role) {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
@@ -241,10 +197,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
-     */
     public java.security.Principal getUserPrincipal() {
         return userPrincipal;
     }
@@ -323,10 +275,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return session;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getSession()
-     */
     public HttpSession getSession() {
         return getSession(true);
     }
@@ -335,18 +283,10 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.session = (HttpSessionWrapper) session;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdValid()
-     */
     public boolean isRequestedSessionIdValid() {
         return !HttpSessionManagement.isHttpSessionExpired(session);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromCookie()
-     */
     public boolean isRequestedSessionIdFromCookie() {
         return requestedSessionIdFromCookie;
     }
@@ -355,18 +295,10 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.requestedSessionIdFromCookie = requestedSessionIdFromCookie;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromURL()
-     */
     public boolean isRequestedSessionIdFromURL() {
         return requestedSessionIdFromURL;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromUrl()
-     */
     public boolean isRequestedSessionIdFromUrl() {
         return requestedSessionIdFromURL;
     }
