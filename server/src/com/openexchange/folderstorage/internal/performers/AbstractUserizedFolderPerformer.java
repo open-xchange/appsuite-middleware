@@ -359,29 +359,33 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             final int length = subfolders.length;
             if (length > 0) {
                 /*
-                 * Check until first visible subfolder found
+                 * Check until a visible subfolder is found in case of a global folder
                  */
-                for (int i = 0; visibleSubfolderIds.isEmpty() && i < length; i++) {
-                    final String id = subfolders[i];
-                    final FolderStorage tmp = getOpenedStorage(id, treeId, storageParameters, openedStorages);
-                    /*
-                     * Get subfolder from appropriate storage
-                     */
-                    final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
-                    /*
-                     * Check for access rights and subscribed status dependent on parameter "all"
-                     */
-                    if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                        final Permission subfolderPermission;
-                        if (null == getSession()) {
-                            subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                        } else {
-                            subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                        }
-                        if (subfolderPermission.isVisible()) {
-                            visibleSubfolderIds.add(id);
+                if (folder.isGlobalID()) {
+                    for (int i = 0; visibleSubfolderIds.isEmpty() && i < length; i++) {
+                        final String id = subfolders[i];
+                        final FolderStorage tmp = getOpenedStorage(id, treeId, storageParameters, openedStorages);
+                        /*
+                         * Get subfolder from appropriate storage
+                         */
+                        final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
+                        /*
+                         * Check for access rights and subscribed status dependent on parameter "all"
+                         */
+                        if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
+                            final Permission subfolderPermission;
+                            if (null == getSession()) {
+                                subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
+                            } else {
+                                subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
+                            }
+                            if (subfolderPermission.isVisible()) {
+                                visibleSubfolderIds.add(id);
+                            }
                         }
                     }
+                } else if (all || folder.hasSubscribedSubfolders()) { // User-only folder
+                    visibleSubfolderIds.add("dummyId");
                 }
             }
         }
