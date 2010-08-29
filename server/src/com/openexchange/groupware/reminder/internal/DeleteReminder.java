@@ -69,13 +69,13 @@ import com.openexchange.groupware.reminder.ReminderException.Code;
  */
 public class DeleteReminder {
 
-    private static final ReminderStorage storage = ReminderStorage.getInstance();
+    private static final ReminderStorage STORAGE = ReminderStorage.getInstance();
 
-    private Context ctx;
+    private final Context ctx;
 
     private final ReminderObject reminder;
 
-    public DeleteReminder(Context ctx, ReminderObject reminder) {
+    public DeleteReminder(final Context ctx, final ReminderObject reminder) {
         super();
         this.ctx = ctx;
         this.reminder = reminder;
@@ -85,16 +85,16 @@ public class DeleteReminder {
         final Connection con;
         try {
             con = Database.get(ctx, true);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new ReminderException(e);
         }
         try {
             con.setAutoCommit(false);
             delete(con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (ReminderException e) {
+        } catch (final ReminderException e) {
             rollback(con);
             throw e;
         } finally {
@@ -103,11 +103,11 @@ public class DeleteReminder {
         }
     }
 
-    private void delete(Connection con) throws ReminderException {
+    private void delete(final Connection con) throws ReminderException {
         try {
-            storage.deleteReminder(con, ctx.getContextId(), reminder.getObjectId());
+            STORAGE.deleteReminder(con, ctx.getContextId(), reminder.getObjectId());
             TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(ctx, con, reminder.getTargetId(), reminder.getUser());
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new ReminderException(e);
         }
     }

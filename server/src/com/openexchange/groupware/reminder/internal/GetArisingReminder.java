@@ -81,7 +81,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 public class GetArisingReminder {
 
     private static final Log LOG = LogFactory.getLog(GetArisingReminder.class);
-    private static final ReminderStorage storage = ReminderStorage.getInstance();
+    private static final ReminderStorage STORAGE = ReminderStorage.getInstance();
 
     private final Session session;
     private final Context ctx;
@@ -97,7 +97,7 @@ public class GetArisingReminder {
     }
 
     public SearchIterator<ReminderObject> loadWithIterator() throws ReminderException {
-        ReminderObject[] reminders = storage.selectReminder(ctx, user, end);
+        ReminderObject[] reminders = STORAGE.selectReminder(ctx, user, end);
         reminders = removeAppointments(reminders);
         return new ArrayIterator<ReminderObject>(reminders);
     }
@@ -118,7 +118,7 @@ public class GetArisingReminder {
                 try {
                     appointment = appointmentSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
                 } catch (final OXObjectNotFoundException e) {
-                    storage.deleteReminder(ctx, reminder);
+                    STORAGE.deleteReminder(ctx, reminder);
                     continue;
                 } catch (final OXException e) {
                     final ReminderException re = new ReminderException(e);
