@@ -88,7 +88,7 @@ public class GetArisingReminder {
     private final User user;
     private final Date end;
 
-    public GetArisingReminder(Session session, Context ctx, User user, Date end) {
+    public GetArisingReminder(final Session session, final Context ctx, final User user, final Date end) {
         super();
         this.session = session;
         this.ctx = ctx;
@@ -102,35 +102,36 @@ public class GetArisingReminder {
         return new ArrayIterator<ReminderObject>(reminders);
     }
 
-    public ReminderObject[] removeAppointments(ReminderObject[] reminders) throws ReminderException {
+    public ReminderObject[] removeAppointments(final ReminderObject[] reminders) throws ReminderException {
         AppointmentSqlFactoryService factoryService;
         try {
             factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             throw new ReminderException(e);
         }
-        AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
-        List<ReminderObject> retval = new ArrayList<ReminderObject>(reminders.length);
-        for (ReminderObject reminder : reminders) {
+        final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
+        final List<ReminderObject> retval = new ArrayList<ReminderObject>(reminders.length);
+        final Date now = new Date();
+        for (final ReminderObject reminder : reminders) {
             if (Types.APPOINTMENT == reminder.getModule()) {
                 final CalendarDataObject appointment;
                 try {
                     appointment = appointmentSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
-                } catch (OXObjectNotFoundException e) {
+                } catch (final OXObjectNotFoundException e) {
                     storage.deleteReminder(ctx, reminder);
                     continue;
-                } catch (OXException e) {
-                    ReminderException re = new ReminderException(e);
+                } catch (final OXException e) {
+                    final ReminderException re = new ReminderException(e);
                     LOG.error(re.getMessage(), re);
                     continue;
-                } catch (SQLException e) {
-                    ReminderException re = new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+                } catch (final SQLException e) {
+                    final ReminderException re = new ReminderException(Code.SQL_ERROR, e, e.getMessage());
                     LOG.error(re.getMessage(), re);
                     continue;
                 }
-                if (appointment.containsUntil() && appointment.getUntil().after(new Date())) {
+                if (appointment.containsUntil() && appointment.getUntil().after(now)) {
                     retval.add(reminder);
-                } else if (appointment.getEndDate().after(new Date())) {
+                } else if (appointment.getEndDate().after(now)) {
                     retval.add(reminder);
                 } else {
                     new DeleteReminder(ctx, reminder).perform();
@@ -141,4 +142,5 @@ public class GetArisingReminder {
         }
         return retval.toArray(new ReminderObject[retval.size()]);
     }
+
 }
