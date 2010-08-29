@@ -253,30 +253,18 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.userPrincipal = userPrincipal;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getRequestedSessionId()
-     */
     public String getRequestedSessionId() {
         return session.getId();
     }
 
-    public void setRequestURI(final String request_uri) {
-        requestURI = request_uri;
+    public void setRequestURI(final String requestURI) {
+        this.requestURI = requestURI;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getRequestURI()
-     */
     public String getRequestURI() {
         return requestURI;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getRequestURL()
-     */
     public StringBuffer getRequestURL() {
         if (null == requestURL) {
             final StringBuilder tmp = new StringBuilder(256);
@@ -291,10 +279,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return new StringBuffer(requestURL);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getServletPath()
-     */
     public String getServletPath() {
         return servletPath;
     }
@@ -303,10 +287,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.servletPath = servletPath;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
-     */
     public HttpSession getSession(final boolean create) {
         if (session != null) {
             return session;
