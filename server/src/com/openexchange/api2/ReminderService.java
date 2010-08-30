@@ -123,6 +123,19 @@ public interface ReminderService {
      */
     SearchIterator<ReminderObject> getArisingReminder(Session session, Context ctx, User user, Date end) throws OXException;
 
+    /**
+     * Updates the alarm of specified reminder.
+     * 
+     * @param reminder The reminder with all fields and new alarm date set
+     * @param session The session
+     * @param ctx The context
+     * @param user The user
+     * @param tz The time zone
+     * @param timestamp The time stamp
+     * @throws OXException If alarm of reminder cannot be updated
+     */
+    public void remindAgain(ReminderObject reminder, Session session, Context ctx, Date timestamp) throws OXException;
+
     public SearchIterator listModifiedReminder(int userId, Date lastModified) throws OXException;
 
 }

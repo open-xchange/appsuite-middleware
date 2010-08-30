@@ -116,7 +116,11 @@ public class ReminderException extends OXException {
         /** SQL Problem: %1$s. */
         SQL_ERROR("SQL Problem: \"%1$s\"", 13, Category.CODE_ERROR),
         /** No target service is registered for module %1$d. */
-        NO_TARGET_SERVICE("No target service is registered for module %1$d.", 14, Category.CODE_ERROR);
+        NO_TARGET_SERVICE("No target service is registered for module %1$d.", 14, Category.CODE_ERROR),
+        /**
+         * Unexpected error: %1$s
+         */
+        UNEXPECTED_ERROR("Unexpected error: %1$s", 15, Category.CODE_ERROR);
 
         /**
          * Message of the exception.

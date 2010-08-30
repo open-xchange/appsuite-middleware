@@ -79,6 +79,7 @@ import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -148,6 +149,8 @@ public final class ReminderRequest {
             return actionUpdates(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_RANGE)) {
             return actionRange(jsonObject);
+        } else if (action.equalsIgnoreCase("remindAgain")) {
+            return actionRemindAgain(jsonObject);
         } else {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
@@ -235,6 +238,48 @@ public final class ReminderRequest {
                 it.close();
             }
         }
+    }
+
+    private JSONObject actionRemindAgain(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+        timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
+        final int reminderId = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
+        final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObject, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? getTimeZone(userObj.getTimeZone()) : getTimeZone(timeZoneId);
+        }
+        /*
+         * Load reminder by identifier
+         */
+        final ReminderService reminderSql = new ReminderHandler(session.getContext());
+        final ReminderObject reminder = reminderSql.loadReminder(reminderId);
+        /*
+         * Check module permission
+         */
+        if (!hasModulePermission(reminder)) {
+            throw new ReminderException(ReminderException.Code.UNEXPECTED_ERROR, "No module permission.");
+        }
+        /*
+         * Parse new reminder date
+         */
+        final Date alarm = DataParser.parseTime(jsonObject, "alarm", tz);
+        if (null == alarm) {
+            throw new ReminderException(ReminderException.Code.MANDATORY_FIELD_ALARM);
+        }
+        reminder.setDate(alarm);
+        /*
+         * Trigger action
+         */
+        reminderSql.remindAgain(reminder, session, session.getContext(), timestamp);
+        timestamp = reminder.getLastModified();
+        /*
+         * Write updated reminder
+         */
+        final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
+        final JSONObject jsonReminderObj = new JSONObject();
+        reminderWriter.writeObject(reminder, jsonReminderObj);
+        return jsonReminderObj;
     }
 
     private JSONArray actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
@@ -353,7 +398,7 @@ public final class ReminderRequest {
         final RecurringResultsInterface recurringResults;
         try {
             // Until is always set to 00:00:00 UTC so we have to recalculate it to get the last occurrence too.
-            long end_mod = calendarDataObject.getEndDate().getTime() % Constants.MILLI_DAY;
+            final long end_mod = calendarDataObject.getEndDate().getTime() % Constants.MILLI_DAY;
             Date until = null;
             until = new Date(calendarDataObject.getUntil().getTime() + end_mod);
             
