@@ -115,7 +115,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         AJAXClient myClient = getClient();
         NewPublicationResponse newResp = myClient.execute(newReq);
-        assertFalse("Precondition: Should be able to create a publication", newResp.hasError());
+        assertFalse("Precondition: Should be able to create a publication: "+newResp.getException(), newResp.hasError());
         expected.setId(newResp.getId());
 
         //retrieve publications
@@ -166,11 +166,11 @@ public class AllPublicationsTest extends AbstractPublicationTest {
     	FolderObject contactFolder = createDefaultContactFolder();
     	String contactModule = "contacts";
     	
-    	FolderObject infostoreFolder = createDefaultInfostoreFolder("Folder for Publication");
+    	FolderObject infostoreFolder = createDefaultInfostoreFolder("Folder for Publication-"+System.currentTimeMillis());
     	
     	// create and upload a new Infostore item.       
     	InfostoreTestManager infoMgr = getInfostoreManager();
-        FolderObject infostorePublicationFolder = createDefaultInfostoreFolder("Second Folder for Publication");
+        FolderObject infostorePublicationFolder = createDefaultInfostoreFolder("Second Folder for Publication-"+System.currentTimeMillis());
 
         DocumentMetadata data = new DocumentMetadataImpl();
         data.setTitle("Infostore Item To Be Published");
@@ -203,7 +203,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         }
         
         // get all publications
-        pubMgr.allAction(Integer.MAX_VALUE, Arrays.asList(new String[] {"id", "entity", "entityModule", "displayName", "target"}));
+        pubMgr.allAction(Arrays.asList(new String[] {"id", "entity", "entityModule", "displayName", "target"}));
         AllPublicationsResponse resp = (AllPublicationsResponse) pubMgr.getLastResponse();
         List<JSONArray> all = resp.getAll();
         List<Integer> foundIds = new ArrayList<Integer>();
@@ -223,7 +223,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         assertTrue("Did not get all contact publications.", foundAllContacts);
         
         // get all contact publications        
-        pubMgr.allAction(contactModule, Integer.MAX_VALUE, Arrays.asList(new String[]{"id","entity", "entityModule", "displayName", "target"}));
+        pubMgr.allAction(contactModule, -1, Arrays.asList(new String[]{"id","entity", "entityModule", "displayName", "target"}));
         resp = (AllPublicationsResponse) pubMgr.getLastResponse();
         assertFalse("Should work", resp.hasError());
         List<JSONArray> allContacts = resp.getAll();

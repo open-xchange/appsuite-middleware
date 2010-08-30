@@ -160,7 +160,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         PublicationTarget target = generateMicroformatTarget(form, type);
 
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put("siteName", "publication");
+        config.put("siteName", "publication-"+System.currentTimeMillis());
         config.put("protected", Boolean.valueOf(true));
 
         discovery.addTarget(target);
@@ -240,7 +240,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
 
     protected FolderObject createDefaultContactFolder() throws AjaxException, IOException, SAXException, JSONException {
         FolderObject folder = getFolderManager().generateFolder(
-            "pubsub default contact folder",
+            "pubsub default contact folder "+System.currentTimeMillis(),
             FolderObject.CONTACT,
             getClient().getValues().getPrivateContactFolder(),
             getClient().getValues().getUserId());
@@ -254,7 +254,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     
     protected FolderObject createDefaultInfostoreFolder(String folderName) throws AjaxException, IOException, SAXException, JSONException {
     	if (folderName == null) {
-    		folderName = "pubsub default infostore folder "+getName();
+    		folderName = "pubsub default infostore folder "+getName()+"-"+System.currentTimeMillis();
     	}
     	FolderObject folder = getFolderManager().generateFolder(
                 folderName,

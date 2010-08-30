@@ -94,8 +94,8 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
         setDynamicColumns(dynamicColumns);
     }
     
-    public AllPublicationsRequest(int id, List<String> columns) {
-    	this(null, id, null, columns);
+    public AllPublicationsRequest(List<String> columns) {
+    	this(null, -1, null, columns);
     }
     
     public AllPublicationsRequest(int id, String entityModule, List<String> columns) {

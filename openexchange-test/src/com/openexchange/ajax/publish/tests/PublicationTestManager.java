@@ -212,8 +212,8 @@ public class PublicationTestManager {
             return allResp.getAll();
         }
         
-        public List<JSONArray> allAction(int id, List<String> columns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
-            AllPublicationsRequest allReq = new AllPublicationsRequest(id, columns);
+        public List<JSONArray> allAction(List<String> columns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+            AllPublicationsRequest allReq = new AllPublicationsRequest(columns);
             allReq.setFailOnError(getFailOnError());
             AllPublicationsResponse allResp = getClient().execute(allReq);
             lastResponse = allResp;
@@ -239,8 +239,11 @@ public class PublicationTestManager {
 
         
         public void cleanUp() throws AjaxException, IOException, SAXException, JSONException {
+            boolean failOnError2 = getFailOnError();
+            setFailOnError(false);
             if(createdItems.size() > 0)
                 deleteAction(createdItems);
+            setFailOnError(failOnError2);
         }
 
 }
