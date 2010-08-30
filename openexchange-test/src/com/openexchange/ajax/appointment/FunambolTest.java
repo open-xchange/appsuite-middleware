@@ -51,8 +51,6 @@ package com.openexchange.ajax.appointment;
 
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -68,9 +66,6 @@ import com.openexchange.groupware.container.Appointment;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class FunambolTest extends AbstractAJAXSession {
-
-    private static final Log LOG = LogFactory.getLog(FunambolTest.class);
-    private static final int MAX_DIFFERENCE = 1000; // 1 second
 
     private AJAXClient client;
     private int folderId;
@@ -102,6 +97,8 @@ public final class FunambolTest extends AbstractAJAXSession {
     }
 
     public void testAppointmentCreationTime() throws Throwable {
+        final Date timeBeforeCreation = client.getValues().getServerTime();
+
         final CommonInsertResponse insertResponse = client.execute(new InsertRequest(appointment, timeZone));
         insertResponse.fillObject(appointment);
         final GetResponse response = client.execute(new GetRequest(appointment));
@@ -109,10 +106,9 @@ public final class FunambolTest extends AbstractAJAXSession {
         final Date creationDate = reload.getCreationDate();
 
         // This request is responded even faster than creating an appointment. Therefore this must be the second request.
-        final Date serverTime = client.getValues().getServerTime();
+        final Date timeAfterCreation = client.getValues().getServerTime();
 
-        final long difference = Math.abs(serverTime.getTime() - creationDate.getTime());
-        LOG.debug("Time difference: " + difference);
-        assertTrue("Too big time difference: ", difference < MAX_DIFFERENCE);
+        assertTrue("Appointment creation time is not after time request before creation.", creationDate.after(timeBeforeCreation));
+        assertTrue("Appointment creation time is not before time request after creation.", creationDate.before(timeAfterCreation));
     }
 }
