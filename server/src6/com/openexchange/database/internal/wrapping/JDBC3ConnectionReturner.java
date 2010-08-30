@@ -95,7 +95,7 @@ public abstract class JDBC3ConnectionReturner implements Connection {
         delegate.clearWarnings();
     }
 
-    public void close() throws SQLException {
+    public void close() {
         ReplicationMonitor.backAndIncrementTransaction(pools, assign, delegate, noTimeout, write, usedAsRead);
     }
 

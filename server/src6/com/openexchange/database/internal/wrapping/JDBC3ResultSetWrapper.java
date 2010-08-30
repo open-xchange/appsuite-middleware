@@ -150,10 +150,12 @@ public abstract class JDBC3ResultSetWrapper implements ResultSet {
         return delegate.getBigDecimal(columnName);
     }
 
+    @Deprecated
     public BigDecimal getBigDecimal(final int columnIndex, final int scale) throws SQLException {
         return delegate.getBigDecimal(columnIndex, scale);
     }
 
+    @Deprecated
     public BigDecimal getBigDecimal(final String columnName, final int scale) throws SQLException {
         return delegate.getBigDecimal(columnName, scale);
     }
@@ -318,7 +320,7 @@ public abstract class JDBC3ResultSetWrapper implements ResultSet {
         return delegate.getShort(columnName);
     }
 
-    public JDBC3StatementWrapper getStatement() throws SQLException {
+    public JDBC3StatementWrapper getStatement() {
         return stmt;
     }
 
@@ -374,10 +376,12 @@ public abstract class JDBC3ResultSetWrapper implements ResultSet {
         return delegate.getURL(columnName);
     }
 
+    @Deprecated
     public InputStream getUnicodeStream(final int columnIndex) throws SQLException {
         return delegate.getUnicodeStream(columnIndex);
     }
 
+    @Deprecated
     public InputStream getUnicodeStream(final String columnName) throws SQLException {
         return delegate.getUnicodeStream(columnName);
     }

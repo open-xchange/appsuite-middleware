@@ -138,7 +138,7 @@ public abstract class JDBC3StatementWrapper implements Statement {
         return delegate.executeUpdate(sql, columnNames);
     }
 
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() {
         return con;
     }
 

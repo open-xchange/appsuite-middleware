@@ -231,6 +231,7 @@ public abstract class JDBC3PreparedStatementWrapper extends JDBC3StatementWrappe
         delegate.setURL(parameterIndex, x);
     }
 
+    @Deprecated
     public void setUnicodeStream(final int parameterIndex, final InputStream x, final int length) throws SQLException {
         delegate.setUnicodeStream(parameterIndex, x, length);
     }
