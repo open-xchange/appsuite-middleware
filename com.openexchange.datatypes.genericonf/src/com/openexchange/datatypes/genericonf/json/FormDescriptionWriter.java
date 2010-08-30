@@ -49,11 +49,13 @@
 
 package com.openexchange.datatypes.genericonf.json;
 
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.FormElement.Widget;
 import com.openexchange.i18n.Translator;
 
 /**
@@ -70,6 +72,8 @@ public class FormDescriptionWriter {
     public static final String DISPLAY_NAME = "displayName";
 
     private static final String MANDATORY = "mandatory";
+    
+    private static final String OPTIONS = "options";
 
     private static final String DEFAULT_VALUE = "defaultValue";
 
@@ -97,7 +101,21 @@ public class FormDescriptionWriter {
 
     public JSONObject write(FormElement formElement) throws JSONException {
         JSONObject object = new JSONObject();
-        object.put(WIDGET, formElement.getWidget().getKeyword());
+        if (formElement.getWidget() != Widget.CUSTOM) {
+            object.put(WIDGET, formElement.getWidget().getKeyword());
+        } else {
+            object.put(WIDGET, formElement.getCustomWidget());
+        }
+        
+        Map<String, String> options = formElement.getOptions();
+        if(options != null && !options.isEmpty()) {
+            JSONObject jsonOptions = new JSONObject();
+            for (Map.Entry<String, String> entry : options.entrySet())  {
+                jsonOptions.put(entry.getKey(),  entry.getValue());
+            }
+            object.put(OPTIONS, jsonOptions);
+        }
+        
         object.put(NAME, formElement.getName());
         object.put(DISPLAY_NAME, translator.translate(formElement.getDisplayName()));
         object.put(MANDATORY, formElement.isMandatory());

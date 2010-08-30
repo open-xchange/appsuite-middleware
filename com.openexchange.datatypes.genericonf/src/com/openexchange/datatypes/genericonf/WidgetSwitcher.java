@@ -63,5 +63,6 @@ public interface WidgetSwitcher {
     Object checkbox(Object...args);
     Object link(Object...args);
     Object text(Object...args);
+    Object custom(Object...args);
 
 }

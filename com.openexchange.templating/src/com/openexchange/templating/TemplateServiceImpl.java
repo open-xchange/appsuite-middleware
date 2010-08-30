@@ -76,6 +76,7 @@ import freemarker.template.Template;
 public class TemplateServiceImpl implements TemplateService {
 
     public static final String PATH_PROPERTY = "com.openexchange.templating.path";
+
     public static final String USER_TEMPLATING_PROPERTY = "com.openexchange.templating.usertemplating";
 
     private ConfigurationService config;
@@ -122,36 +123,36 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException {
-        if(isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
+        if (isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
             return loadTemplate(defaultTemplateName);
         }
         try {
             FolderObject folder = folders.getPrivateTemplateFolder(session);
             FolderObject privateFolder = folder;
             boolean global = false;
-            
-            if(null == folder) {
+
+            if (null == folder) {
                 folder = folders.getGlobalTemplateFolder(session);
                 global = true;
             }
             String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
 
-            if(templateText != null) {
+            if (templateText != null) {
                 OXTemplateImpl template = new OXTemplateImpl();
                 template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
                 return template;
             }
-            
-            if(templateText == null && ! global) {
+
+            if (templateText == null && !global) {
                 folder = folders.getGlobalTemplateFolder(session);
                 global = true;
-            
+
                 templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
             }
-            
-            if(templateText == null) {
+
+            if (templateText == null) {
                 templateText = loadFromFileSystem(defaultTemplateName);
-                if(privateFolder == null) {
+                if (privateFolder == null) {
                     folder = folders.createPrivateTemplateFolder(session);
                     privateFolder = folder;
                 }
@@ -168,7 +169,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     private boolean isUserTemplatingEnabled(ServerSession session) {
-        return "true".equalsIgnoreCase(config.getProperty(USER_TEMPLATING_PROPERTY,"true")) && session.getUserConfiguration().hasInfostore();
+        return "true".equalsIgnoreCase(config.getProperty(USER_TEMPLATING_PROPERTY, "true")) && session.getUserConfiguration().hasInfostore();
     }
 
     private boolean isEmpty(String templateName) {
@@ -178,21 +179,21 @@ public class TemplateServiceImpl implements TemplateService {
     protected String loadFromFileSystem(String defaultTemplateName) throws TemplateException {
         File templateFile = getTemplateFile(defaultTemplateName);
         if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
-            return "Unfilled Template."; 
+            return "Unfilled Template.";
         }
         BufferedReader reader = null;
         try {
             StringBuilder builder = new StringBuilder();
             reader = new BufferedReader(new FileReader(templateFile));
             String line = null;
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 builder.append(line).append("\n");
             }
             return builder.toString();
         } catch (IOException e) {
             throw IOException.create(e);
         } finally {
-            if(reader != null) {
+            if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
@@ -217,17 +218,17 @@ public class TemplateServiceImpl implements TemplateService {
     public List<String> getBasicTemplateNames() throws TemplateException {
         String templatePath = config.getProperty(PATH_PROPERTY);
         File templateDir = new File(templatePath);
-        if(!templateDir.isDirectory() || !templateDir.exists()) {
+        if (!templateDir.isDirectory() || !templateDir.exists()) {
             return new ArrayList<String>(0);
         }
-        
+
         File[] files = templateDir.listFiles();
-        if(files == null) {
+        if (files == null) {
             return new ArrayList<String>(0);
         }
         Set<String> names = new HashSet<String>();
         for (File file : files) {
-            if(file.isFile() && file.canRead()) {
+            if (file.isFile() && file.canRead()) {
                 names.add(file.getName());
             }
         }
@@ -237,22 +238,25 @@ public class TemplateServiceImpl implements TemplateService {
     public List<String> getTemplateNames(ServerSession session) throws TemplateException {
         Set<String> names = new HashSet<String>();
         names.addAll(getBasicTemplateNames());
-        if(!isUserTemplatingEnabled(session)) {
+        if (!isUserTemplatingEnabled(session)) {
             return new ArrayList<String>(names);
         }
-        
+
         try {
             FolderObject globalTemplateFolder = folders.getGlobalTemplateFolder(session);
             FolderObject privateTemplateFolder = folders.getPrivateTemplateFolder(session);
-            
-            names.addAll(infostore.getNames(session, globalTemplateFolder));
-            names.addAll(infostore.getNames(session, privateTemplateFolder));
-            
-            
+
+            if (globalTemplateFolder != null) {
+                names.addAll(infostore.getNames(session, globalTemplateFolder));
+            }
+            if (privateTemplateFolder != null) {
+                names.addAll(infostore.getNames(session, privateTemplateFolder));
+            }
+
         } catch (AbstractOXException e) {
             throw new TemplateException(e);
         }
-        
+
         return new ArrayList<String>(names);
     }
 

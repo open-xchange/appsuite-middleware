@@ -62,6 +62,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DeferredActivator} - Supports the deferred starting of a bundle which highly depends on other services.
@@ -74,7 +75,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class DeferredActivator implements BundleActivator {
+public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
 
     private final class DeferredSTC implements ServiceTrackerCustomizer {
 
@@ -402,7 +403,7 @@ public abstract class DeferredActivator implements BundleActivator {
      * @param clazz The service's class
      * @return The service obtained by service tracker or <code>null</code>
      */
-    protected final <S extends Object> S getService(final Class<? extends S> clazz) {
+    public final <S extends Object> S getService(final Class<? extends S> clazz) {
         if (null == services) {
             /*
              * Services not initialized

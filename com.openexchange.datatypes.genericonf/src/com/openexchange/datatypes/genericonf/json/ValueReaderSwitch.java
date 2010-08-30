@@ -80,4 +80,8 @@ public class ValueReaderSwitch implements WidgetSwitcher {
         return args[0];
     }
 
+    public Object custom(Object... args) {
+        return args[0];
+    }
+
 }

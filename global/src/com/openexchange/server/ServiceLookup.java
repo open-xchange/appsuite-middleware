@@ -47,70 +47,14 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.storage.impl;
+package com.openexchange.server;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 
 /**
- * {@link FromSQL}
- * 
+ * {@link ServiceLookup}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FromSQL implements WidgetSwitcher {
-
-    private SQLException exception;
-
-    public Object checkbox(Object[] args) {
-        ResultSet rs = (ResultSet) args[0];
-        String columnName = (String) args[1];
-
-        try {
-            return rs.getBoolean(columnName);
-        } catch (SQLException e) {
-            this.exception = e;
-            return null;
-        }
-    }
-
-    public Object input(Object... args) {
-        return string(args);
-    }
-
-    private Object string(Object[] args) {
-        ResultSet rs = (ResultSet) args[0];
-        String columnName = (String) args[1];
-
-        try {
-            return rs.getString(columnName);
-        } catch (SQLException e) {
-            this.exception = e;
-            return null;
-        }
-    }
-
-    public Object password(Object... args) {
-        return string(args);
-    }
-
-    public void throwException() throws SQLException {
-        if (exception != null) {
-            throw exception;
-        }
-
-    }
-
-    public Object link(Object... args) {
-        return string(args);
-    }
-
-    public Object text(Object... args) {
-        return string(args);
-    }
-
-    public Object custom(Object... args) {
-        return string(args);
-    }
-
+public interface ServiceLookup {
+    public <S extends Object> S getService(final Class<? extends S> clazz);
 }

@@ -137,6 +137,10 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
         public Object text(Object... args) {
             return args[0];
         }
+
+        public Object custom(Object... args) {
+            return null;
+        }
         
     }
 

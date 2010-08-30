@@ -53,13 +53,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ServiceRegistry} - A registry for needed services
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServiceRegistry {
+public class ServiceRegistry implements ServiceLookup {
 
     static final int DEFAULT_INITIAL_CAPACITY = 16;
 

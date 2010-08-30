@@ -49,6 +49,8 @@
 
 package com.openexchange.datatypes.genericonf;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.w3c.dom.Element;
 
 
@@ -60,7 +62,7 @@ import org.w3c.dom.Element;
 public class FormElement {
 
     public static enum Widget {
-        INPUT("input"), PASSWORD("password"), CHECKBOX("checkbox"), LINK("link"), TEXT("text");
+        INPUT("input"), PASSWORD("password"), CHECKBOX("checkbox"), LINK("link"), TEXT("text"), CUSTOM("custom");
 
         private String keyword;
 
@@ -85,6 +87,8 @@ public class FormElement {
                 return switcher.link(args);
             case TEXT:
                 return switcher.text(args);
+            case CUSTOM:
+                return switcher.custom(args);
             default:
                 throw new IllegalArgumentException("Didn't understand "+this.getKeyword());
             }
@@ -112,7 +116,6 @@ public class FormElement {
             }
             return null;
         }
-
     }
 
     private String name;
@@ -121,10 +124,14 @@ public class FormElement {
 
     private Widget widget;
 
+    private String customWidget;
+    
     private Object defaultValue;
 
     private boolean mandatory;
 
+    private Map<String, String> options = new HashMap<String, String>();
+    
     public String getName() {
         return name;
     }
@@ -143,6 +150,14 @@ public class FormElement {
 
     public Widget getWidget() {
         return widget;
+    }
+    
+    public String getCustomWidget() {
+        return customWidget;
+    }
+    
+    public void setCustomWidget(String customWidget) {
+        this.customWidget = customWidget;
     }
 
     public void setWidget(Widget widget) {
@@ -163,6 +178,25 @@ public class FormElement {
 
     public void setMandatory(boolean mandatory) {
         this.mandatory = mandatory;
+    }
+    
+    public FormElement setOption(String optionName, String value) {
+        options.put(optionName, value);
+        return this;
+    }
+    
+    public FormElement removeOption(String optionName) {
+        options.remove(optionName);
+        return this;
+    }
+    
+    public FormElement clearOptions() {
+        options.clear();
+        return this;
+    }
+    
+    public Map<String, String> getOptions() {
+        return options;
     }
     
     public String toString() {
@@ -224,9 +258,21 @@ public class FormElement {
         return checkbox(name, displayName, true, null);
     }
     
+    public static FormElement custom(String widget, String name, String displayName, boolean mandatory, String defaultValue) {
+        FormElement formElement = formElement(name, displayName, mandatory, defaultValue);
+        formElement.setWidget(Widget.CUSTOM);
+        formElement.setCustomWidget(widget);
+        return formElement;
+    }
+
+    public static FormElement custom(String widget, String name, String displayName) {
+        return custom(widget, name, displayName, true, null);
+    }
+
+    
+    
     public Object doSwitch(WidgetSwitcher switcher, Object...args) {
         return widget.doSwitch(switcher, args);
     }
-
 
 }
