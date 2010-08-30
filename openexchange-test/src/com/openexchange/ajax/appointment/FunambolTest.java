@@ -103,7 +103,7 @@ public final class FunambolTest extends AbstractAJAXSession {
         insertResponse.fillObject(appointment);
         final GetResponse response = client.execute(new GetRequest(appointment));
         final Appointment reload = response.getAppointment(timeZone);
-        final Date creationDate = reload.getCreationDate();
+        final Date creationDate = reload.getLastModified(); // reload.getCreationDate() does not have milliseconds.
 
         // This request is responded even faster than creating an appointment. Therefore this must be the second request.
         final Date timeAfterCreation = client.getValues().getServerTime();
