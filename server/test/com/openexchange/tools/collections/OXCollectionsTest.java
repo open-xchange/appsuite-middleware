@@ -49,14 +49,28 @@
 
 package com.openexchange.tools.collections;
 
-public class OXCollections {
+import java.util.ArrayList;
+import java.util.List;
+import junit.framework.TestCase;
 
-    // Don't generics wonderfully increase readability?
-    public static <L, C> L inject(L list, final Iterable<C> iterable, final Injector<L, C> injector) {
-        L retval = list;
-        for (final C component : iterable) {
-            retval = injector.inject(list, component);
-        }
-        return retval;
+/**
+ * {@link OXCollectionsTest}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class OXCollectionsTest extends TestCase {
+
+    public OXCollectionsTest(String name) {
+        super(name);
+    }
+
+    public void testInject() {
+        OXCollections.inject(new ArrayList<String>(), new ArrayList<String>(), new Injector<List<String>, String>() {
+
+            public List<String> inject(final List<String> list, final String element) {
+                list.add(new StringBuilder(element).reverse().toString());
+                return list;
+            }
+        });
     }
 }

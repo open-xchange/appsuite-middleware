@@ -50,6 +50,7 @@
 package com.openexchange;
 
 import com.openexchange.ajax.parser.TaskLastModifiedTest;
+import com.openexchange.tools.collections.OXCollectionsTest;
 import com.openexchange.tools.iterator.SearchIteratorDelegatorTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -69,6 +70,7 @@ public class UnitTests {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(TaskLastModifiedTest.class);
         tests.addTestSuite(SearchIteratorDelegatorTest.class);
+        tests.addTestSuite(OXCollectionsTest.class);
         return tests;
     }
 }
