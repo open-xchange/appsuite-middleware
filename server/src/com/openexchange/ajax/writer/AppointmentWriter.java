@@ -58,6 +58,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -153,6 +154,8 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (appointmentObject.containsRecurrenceType()) {
             writeRecurrenceParameter(appointmentObject, jsonObj);
+        } else {
+            writeParameter(CalendarFields.RECURRENCE_TYPE, Appointment.NO_RECURRENCE, jsonObj);
         }
         if (appointmentObject.containsRecurrenceID()) {
             writeParameter(AppointmentFields.RECURRENCE_ID, appointmentObject.getRecurrenceID(), jsonObj);

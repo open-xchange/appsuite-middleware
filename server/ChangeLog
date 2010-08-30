@@ -1,3 +1,7 @@
+* 2010-08-30 - martin.herfurth@open-xchange.com
+
+ - Bugfix #16548: Reccurrence type 0 for normal appointments.
+ 
 * 2010-08-26 - marcus.klein@open-xchange.com
 
  - Bugfix #16455: Implemented a more sophisticated search for a participant when using freebusy interface. Resources are now preferred if a
