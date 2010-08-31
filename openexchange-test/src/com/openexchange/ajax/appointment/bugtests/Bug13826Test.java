@@ -93,7 +93,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         userId = getClient().getValues().getUserId();
         sourceFolderId = getClient().getValues().getPrivateAppointmentFolder();
         OCLPermission ocl = ocl(userId, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        folder = Create.folder(sourceFolderId, "Folder to test bug 13826", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl);
+        folder = Create.folder(sourceFolderId, "Folder to test bug 13826" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl);
         CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
         response.fillObject(folder);
         targetFolderId = folder.getObjectID();
