@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 import com.openexchange.api2.OXException;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.ContentType;
@@ -310,7 +311,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getConnection(storageParameters);
-            final FolderObject fo = getFolderAccess(storageParameters).getFolderObject(Integer.parseInt(folderId));
+            final FolderObject fo = getFolderObject(Integer.parseInt(folderId), storageParameters.getContext(), con);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -384,7 +385,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public boolean containsForeignObjects(final User user, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
-            // final Connection con = getConnection(storageParameters);
+            final Connection con = getConnection(storageParameters);
             final Context ctx = storageParameters.getContext();
             /*
              * A numeric folder identifier
@@ -425,7 +426,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  * A non-virtual database folder
                  */
                 final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
-                return folderAccess.containsForeignObjects(folderAccess.getFolderObject(folderId), storageParameters.getSession(), ctx);
+                return folderAccess.containsForeignObjects(getFolderObject(folderId, ctx, con), storageParameters.getSession(), ctx);
             }
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -475,7 +476,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  * A non-virtual database folder
                  */
                 final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
-                return folderAccess.isEmpty(folderAccess.getFolderObject(folderId), storageParameters.getSession(), ctx);
+                return folderAccess.isEmpty(getFolderObject(folderId, ctx, con), storageParameters.getSession(), ctx);
             }
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -550,7 +551,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         /*
                          * A non-virtual database folder
                          */
-                        final FolderObject fo = getFolderAccess(storageParameters).getFolderObject(folderId);
+                        final FolderObject fo = getFolderObject(folderId, ctx, con);
                         if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
                             /*
                              * The system shared folder
@@ -702,7 +703,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     /*
                      * Add global address book manually
                      */
-                    final FolderObject gab = getFolderAccess(storageParameters).getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                    final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
                     final UserConfiguration userConfiguration;
                     {
                         final Session s = storageParameters.getSession();
@@ -1050,7 +1051,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             {
                 final String parentId = folder.getParentID();
                 if (null == parentId) {
-                    updateMe.setParentFolderID(getFolderAccess(storageParameters).getFolderObject(folderId).getParentFolderID());
+                    updateMe.setParentFolderID(getFolderObject(folderId, storageParameters.getContext(), con).getParentFolderID());
                 } else {
                     updateMe.setParentFolderID(Integer.parseInt(parentId));
                 }
@@ -1254,6 +1255,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
     /*-
      * ############################# HELPER METHODS #############################
      */
+
+    private static FolderObject getFolderObject(final int folderId, final Context ctx, final Connection con) throws OXException {
+        if (!FolderCacheManager.isEnabled()) {
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+        }
+        final FolderObject fo = FolderCacheManager.getInstance().getFolderObject(folderId, ctx);
+        if (null == fo) {
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+        }
+        return fo;
+    }
 
     private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters) throws FolderException {
         OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);

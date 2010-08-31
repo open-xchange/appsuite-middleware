@@ -1,3 +1,7 @@
+* 2010-08-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #16762: No blind future use of previously passed connection
+
 * 2010-08-30 - martin.herfurth@open-xchange.com
 
  - Bugfix #16548: Reccurrence type 0 for normal appointments.

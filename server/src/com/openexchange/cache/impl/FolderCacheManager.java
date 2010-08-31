@@ -52,6 +52,8 @@ package com.openexchange.cache.impl;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
@@ -76,6 +78,7 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderCacheManager} - Holds a cache for instances of {@link FolderObject}
@@ -246,7 +249,50 @@ public final class FolderCacheManager {
             }
 
             public FolderObject load() throws AbstractOXException {
-                return loadFolderObjectInternal(objectId, ctx, readConArg);
+                /*
+                 * Future use of connection is highly unsafe
+                 */
+                if (checkConnection()) {
+                    /*
+                     * Connection still active
+                     */
+                    return loadFolderObjectInternal(objectId, ctx, readConArg);
+                }
+                /*
+                 * Connection either null or closed in the meantime
+                 */
+                return loadFolderObjectInternal(objectId, ctx, null);
+            }
+
+            private boolean checkConnection() {
+                if (null == readConArg) {
+                    return false;
+                }
+                try {
+                    if (readConArg.isClosed()) {
+                        return false;
+                    }
+                    /*
+                     * Check if active through dummy SELECT statement
+                     */
+                    Statement stmt = null;
+                    ResultSet result = null;
+                    try {
+                        stmt = readConArg.createStatement();
+                        result = stmt.executeQuery("SELECT 1 AS test");
+                        if (result.next()) {
+                            return result.getInt(1) == 1;
+                        }
+                        return false;
+                    } finally {
+                        DBUtils.closeSQLStuff(result, stmt);
+                    }
+                } catch (final Exception e) {
+                    /*
+                     * Something went wrong
+                     */
+                    return false;
+                }
             }
         };
         try {
@@ -279,7 +325,7 @@ public final class FolderCacheManager {
         }
         cacheLock.lock();
         try {
-            Object tmp = folderCache.get(getCacheKey(ctx.getContextId(), objectId));
+            final Object tmp = folderCache.get(getCacheKey(ctx.getContextId(), objectId));
             // Refresher uses Condition objects to prevent multiple threads loading same folder.
             if (tmp != null && tmp instanceof FolderObject) {
                 return ((FolderObject) tmp).clone();
@@ -314,10 +360,10 @@ public final class FolderCacheManager {
                 return loadFolderObjectInternal(folderId, ctx, readCon);
             }
         };
-        CacheKey key = getCacheKey(ctx.getContextId(), folderId);
+        final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
         cacheLock.lock();
         try {
-            Object tmp = folderCache.get(key);
+            final Object tmp = folderCache.get(key);
             if (tmp instanceof FolderObject) {
                 folderCache.remove(key);
             }
@@ -375,7 +421,7 @@ public final class FolderCacheManager {
         final CacheKey key = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
         cacheLock.lock();
         try {
-            Object tmp = folderCache.get(key);
+            final Object tmp = folderCache.get(key);
             if (tmp instanceof FolderObject) {
                 // Already in cache
                 return ((FolderObject) tmp).clone();
@@ -459,7 +505,7 @@ public final class FolderCacheManager {
         final CacheKey key = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
         cacheLock.lock();
         try {
-            Object tmp = folderCache.get(key);
+            final Object tmp = folderCache.get(key);
             // If there is currently an object associated with this key in the region it is replaced.
             Condition cond = null;
             if (overwrite) {
@@ -509,7 +555,7 @@ public final class FolderCacheManager {
             final CacheKey cacheKey = getCacheKey(ctx.getContextId(), key);
             cacheLock.lock();
             try {
-                Object tmp = folderCache.get(cacheKey);
+                final Object tmp = folderCache.get(cacheKey);
                 if (!(tmp instanceof Condition)) {
                     folderCache.remove(cacheKey);
                 }
@@ -546,7 +592,7 @@ public final class FolderCacheManager {
         cacheLock.lock();
         try {
             for (final CacheKey cacheKey : cacheKeys) {
-                Object tmp = folderCache.get(cacheKey);
+                final Object tmp = folderCache.get(cacheKey);
                 if (!(tmp instanceof Condition)) {
                     folderCache.remove(cacheKey);
                 }
