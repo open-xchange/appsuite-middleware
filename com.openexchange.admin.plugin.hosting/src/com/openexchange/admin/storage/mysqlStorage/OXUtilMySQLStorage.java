@@ -1482,7 +1482,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             Integer numContexts = filestore2ctxUsage.get(store.getId());
             if (null == numContexts) {
                 numContexts = I(0);
-            } 
+            }
             store.setCurrentContexts(numContexts);
             store.setReserved(L(getAverageFilestoreSpace() * i(numContexts)));
         }
