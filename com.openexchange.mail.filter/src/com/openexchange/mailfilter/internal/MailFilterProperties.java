@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,19 +62,29 @@ public class MailFilterProperties {
     }
     
     public enum Values {
-        SIEVE_CREDSRC("SIEVE_CREDSRC", CredSrc.SESSION.name),
-        SIEVE_LOGIN_TYPE("SIEVE_LOGIN_TYPE", LoginTypes.GLOBAL.name),
-        SIEVE_SERVER("SIEVE_SERVER", "localhost"),
-        SIEVE_PORT("SIEVE_PORT", "2000"),
-        SCRIPT_NAME("SCRIPT_NAME", "Open-Xchange");
+        SIEVE_CREDSRC("SIEVE_CREDSRC", CredSrc.SESSION.name, true),
+        SIEVE_LOGIN_TYPE("SIEVE_LOGIN_TYPE", LoginTypes.GLOBAL.name, true),
+        SIEVE_SERVER("SIEVE_SERVER", "localhost", true),
+        SIEVE_PORT("SIEVE_PORT", "2000", true),
+        SCRIPT_NAME("SCRIPT_NAME", "Open-Xchange", true),
+        SIEVE_AUTH_ENC("SIEVE_AUTH_ENC", "UTF-8", true),
+        NON_RFC_COMPLIANT_TLS_REGEX("NON_RFC_COMPLIANT_TLS_REGEX", "^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$", true),
+        TLS("TLS", "true", true),
+        VACATION_DOMAINS("VACATION_DOMAINS", "", true),
+        SIEVE_CONNECTION_TIMEOUT("com.openexchange.mail.filter.connectionTimeout", "30000", true),
+        SIEVE_PASSWORDSRC("com.openexchange.mail.filter.passwordSource", PasswordSource.SESSION.name, false),
+        SIEVE_MASTERPASSWORD("com.openexchange.mail.filter.masterPassword", "", false);
         
         public final String property;
         
         public final String def;
         
-        private Values(final String property, final String def) {
+        public final boolean needed;
+        
+        private Values(final String property, final String def, final boolean needed) {
             this.property = property;
             this.def = def;
+            this.needed = needed;
         }
         
     }
@@ -87,6 +97,17 @@ public class MailFilterProperties {
         public final String name;
         
         private CredSrc(final String name) {
+            this.name = name;
+        }
+    }
+    
+    public enum PasswordSource {
+        SESSION("session"),
+        GLOBAL("global");
+
+        public final String name;
+        
+        private PasswordSource(final String name) {
             this.name = name;
         }
     }

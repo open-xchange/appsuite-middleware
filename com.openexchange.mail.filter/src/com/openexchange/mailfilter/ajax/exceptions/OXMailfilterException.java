@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -139,7 +139,20 @@ public class OXMailfilterException extends AbstractOXException {
         /**
          * Input string "%1$s" is not a number.
          */
-        NAN("Input string \"%1$s\" is not a number.", Category.USER_INPUT, 17);
+        NAN("Input string \"%1$s\" is not a number.", Category.USER_INPUT, 17),
+        /**
+         * The field \"%1$s\" must have a value, but is not set.
+         */
+        EMPTY_MANDATORY_FIELD("The field \"%1$s\" must have a value, but is not set", Category.USER_INPUT, 18),
+        /**
+         * The configuration requests a masterpassword but none is given in the configuration file
+         */
+        NO_MASTERPASSWORD_SET("The configuration requests a masterpassword but none is given in the configuration file", Category.CODE_ERROR, 19),
+        /**
+         * The passwordSource given in the config file is not a valid one
+         */
+        NO_VALID_PASSWORDSOURCE("The passwordSource given in the config file is not a valid one", Category.CODE_ERROR, 20);
+
 
         private final String message;
 

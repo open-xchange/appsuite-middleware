@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,9 @@ package com.openexchange.mailfilter.ajax.actions;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,9 +76,11 @@ import com.openexchange.jsieve.SieveTextFilter;
 import com.openexchange.jsieve.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mailfilter.ajax.Parameter;
@@ -323,6 +327,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final String body = request.getBody();
             final JSONObject json = new JSONObject(body);
             final Rule newrule = CONVERTER.parse(json);
+            
+            changeVacationRule(newrule);
+            
             // Now find the right position inside the array
             int position = newrule.getPosition();
             final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
@@ -452,8 +459,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         final SieveHandler sieveHandler = connectRight(credentials);
         try {
             sieveHandler.initializeConnection();
-            final String activeScript = sieveHandler.getActiveScript();
-            final String script = sieveHandler.getScript(activeScript);
+            final String activeScript = fixParsingError(sieveHandler.getActiveScript());
+            final String script = fixParsingError(sieveHandler.getScript(activeScript));
             final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
 
             final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules
@@ -469,6 +476,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uniqueid, credentials
                         .getRightUsername(), credentials.getContextString());
                 CONVERTER.parse(rightRule.getRule(), json);
+                changeVacationRule(rightRule.getRule());
             } else {
                 throw new OXMailfilterException(Code.ID_MISSING);
             }
@@ -484,8 +492,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final IOException e) {
             throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
-                    .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
+            handleParsingException(e, credentials);
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
             throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
         } catch (final ParseException e) {
@@ -591,6 +598,28 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         return new Rule2JSON2Rule();
     }
 
+    // protected so that we can test this
+    protected String getRightPassword(ConfigurationService config, final Credentials creds) throws OXMailfilterException {
+        final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
+        if (null != passwordsrc) {
+            if (MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
+                return creds.getPassword();
+            } else if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
+                final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
+                if (null != masterpassword && masterpassword.length() != 0) {
+                    return masterpassword;
+                } else {
+                    throw new OXMailfilterException(Code.NO_MASTERPASSWORD_SET);
+                }
+            } else {
+                throw new OXMailfilterException(Code.NO_VALID_PASSWORDSOURCE);
+            }
+        } else {
+            // If no property is found the old default of using the password from the session is used
+            return creds.getPassword();
+        }
+    }
+
     private SieveHandler connectRight(final Credentials creds) throws OXMailfilterException {
         final SieveHandler sieveHandler;
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
@@ -633,15 +662,22 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } else {
             throw new OXMailfilterException(Code.NO_VALID_LOGIN_TYPE);
         }
+        /*
+         * Get SIEVE_AUTH_ENC property
+         */
+        final String authEnc = config.getProperty(MailFilterProperties.Values.SIEVE_AUTH_ENC.property, MailFilterProperties.Values.SIEVE_AUTH_ENC.def);
+        /*
+         * Establish SieveHandler
+         */
         final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
         if (MailFilterProperties.CredSrc.SESSION.name.equals(credsrc)) {
             final String username = creds.getUsername();
             final String authname = creds.getAuthname();
-            final String password = creds.getPassword();
+            final String password = getRightPassword(config, creds);
             if (null != username) {
-                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port);
+                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
             } else {
-                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port);
+                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
             }
         } else if (MailFilterProperties.CredSrc.IMAP_LOGIN.name.equals(credsrc)) {
             final String authname;
@@ -658,11 +694,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 }
             }
             final String username = creds.getUsername();
-            final String password = creds.getPassword();
+            final String password = getRightPassword(config, creds);
             if (null != username) {
-                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port);
+                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
             } else {
-                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port);
+                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
             }
             } else if (MailFilterProperties.CredSrc.MAIL.name.equals(credsrc)) {
                 final String authname;
@@ -677,16 +713,39 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     }
                 }
                 final String username = creds.getUsername();
-                final String password = creds.getPassword();
+                final String password = getRightPassword(config, creds);
                 if (null != username) {
-                    sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port);
+                    sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
                 } else {
-                    sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port);
+                    sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
                 }
         } else {
             throw new OXMailfilterException(Code.NO_VALID_CREDSRC);
         }
         return sieveHandler;
+    }
+
+    private void changeVacationRule(final Rule newrule) throws SieveException {
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
+    
+        if (null != vacationdomains && 0 != vacationdomains.length()) {
+            final IfCommand ifCommand = newrule.getIfCommand();
+            if (ActionCommand.Commands.VACATION.equals(ifCommand.getActioncommands().get(0).getCommand())) {
+                final List<Object> argList = new ArrayList<Object>();
+                argList.add(Rule2JSON2Rule.createTagArg("is"));
+                argList.add(Rule2JSON2Rule.createTagArg("domain"));
+    
+                final ArrayList<String> header = new ArrayList<String>();
+                header.add("From");
+                
+                final String[] split = vacationdomains.split(",");
+                
+                argList.add(header);
+                argList.add(Arrays.asList(split));
+                ifCommand.setTestcommand(new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>()));
+            }
+        }
     }
 
     private JSONArray getActionArray(final ArrayList<String> sieve) {
@@ -770,6 +829,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         throw new OXMailfilterException(OXMailfilterException.Code.MISSING_PARAMETER, "id");
     }
 
+    private String fixParsingError(final String script) {
+        final String pattern = ":addresses\\s+:";
+        return script.replaceAll(pattern, ":addresses \"\" :");
+    }
+
     private void setUidInRule(final Rule newrule, final int uid) {
         final RuleComment name = newrule.getRuleComment();
         if (null != name) {
@@ -791,12 +855,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      */
     private void writeScript(final SieveHandler sieveHandler, final String activeScript, final String writeback)
             throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
+        final StringBuilder commandBuilder = new StringBuilder(64);
+        
         if (null != activeScript && activeScript.equals(this.scriptname)) {
-            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"));
-            sieveHandler.setScriptStatus(activeScript, true);
+            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"), commandBuilder);
+            sieveHandler.setScriptStatus(activeScript, true, commandBuilder);
         } else {
-            sieveHandler.setScript(this.scriptname, writeback.getBytes("UTF-8"));
-            sieveHandler.setScriptStatus(this.scriptname, true);
+            sieveHandler.setScript(this.scriptname, writeback.getBytes("UTF-8"), commandBuilder);
+            sieveHandler.setScriptStatus(this.scriptname, true, commandBuilder);
         }
     }
 
@@ -807,5 +873,23 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
         return msg;
     }
-
+    
+    /**
+     * The SIEVE parser is not very expressive when it comes to exceptions.
+     * This method analyses an exception message and throws a more detailed
+     * one if possible.
+     */
+    private void handleParsingException(final OXSieveHandlerException e, final Credentials credentials) throws OXMailfilterException{
+        final String message = e.toString();
+        
+        if(message.contains("unexpected SUBJECT")) {
+            throw new OXMailfilterException(Code.EMPTY_MANDATORY_FIELD, e, "ADDRESS (probably)");
+        }
+        if(message.contains("address ''")) {
+            throw new OXMailfilterException(Code.EMPTY_MANDATORY_FIELD, e, "ADDRESS");
+        }
+        
+        throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+            .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
+    }
 }
