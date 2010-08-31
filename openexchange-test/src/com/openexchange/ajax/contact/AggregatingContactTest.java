@@ -52,18 +52,23 @@ package com.openexchange.ajax.contact;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.contact.action.GetContactByUIDRequest;
+import com.openexchange.ajax.contact.action.GetResponse;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.AggregatingContactTestManager;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -155,6 +160,24 @@ public class AggregatingContactTest extends AbstractAJAXSession{
 
         associatedContacts = contactMgr.getAssociatedContacts(contributor);
         assertEquals("Should have no associated contacts", 0, associatedContacts.size());
-
+    }
+    
+    public void testSecurity() throws Exception {
+        contactMgr.associateTwoContacts(aggregator, contributor);
+        UUID aggregatorUUID = UUID.fromString( contactMgr.getAction(aggregator).getUserField20());
+        UUID contributorUUID = UUID.fromString( contactMgr.getAction(contributor).getUserField20());
+        
+        TimeZone tz = TimeZone.getDefault();
+        
+        AJAXClient client2 = new AJAXClient(User.User2);
+        GetResponse getResponse = client2.execute(new GetContactByUIDRequest(aggregatorUUID, tz));
+        AbstractOXException exception = getResponse.getException();
+        assertNotNull("Should not be able to retrieve contact", exception);
+        assertEquals("Should prohibit access", "CON-0228", exception.getErrorCode());
+        
+        getResponse = client2.execute(new GetContactByUIDRequest(contributorUUID, tz));
+        exception = getResponse.getException();
+        assertNotNull("Should not be able to retrieve other contact", getResponse.getException());
+        assertEquals("Should prohibit access", "CON-0228", exception.getErrorCode());
     }
 }

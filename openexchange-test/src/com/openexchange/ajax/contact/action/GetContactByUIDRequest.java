@@ -85,7 +85,7 @@ public class GetContactByUIDRequest extends AbstractContactRequest<GetResponse> 
         return new Params(
             AJAXServlet.PARAMETER_ACTION,
             FinalContactConstants.ACTION_GET_BY_UUID.getName(),
-            AJAXServlet.PARAMETER_UID,
+            FinalContactConstants.PARAMETER_UUID.getName(),
             String.valueOf(uid)
         ).toArray();
     }
