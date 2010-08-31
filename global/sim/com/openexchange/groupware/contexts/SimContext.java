@@ -107,4 +107,7 @@ public class SimContext implements Context {
         return false;
     }
 
+    public boolean isReadOnly() {
+        return false;
+    }
 }

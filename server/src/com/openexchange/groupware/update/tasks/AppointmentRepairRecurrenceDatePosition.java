@@ -329,5 +329,8 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         public boolean isUpdating() {
             throw new UnsupportedOperationException("isUpdating");
         }
+        public boolean isReadOnly() {
+            throw new UnsupportedOperationException("isReadOnly");
+        }
     }
 }

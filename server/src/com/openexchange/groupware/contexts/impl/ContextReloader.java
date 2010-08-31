@@ -54,19 +54,14 @@ import com.openexchange.cache.dynamic.impl.Refresher;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
+ * Context object delegator that reloads the backed delegate newly into cache if it times out.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 final class ContextReloader extends Refresher<ContextExtended> implements ContextExtended {
 
-    /**
-     * For serialization.
-     */
     private static final long serialVersionUID = -2022359916415524347L;
 
-    /**
-     * Cached delegate.
-     */
     private ContextExtended delegate;
 
     /**
@@ -78,117 +73,80 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
         this.delegate = refresh();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object obj) {
         updateDelegate();
         return delegate.equals(obj);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         updateDelegate();
         return delegate.hashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return "ContextReloader: " + delegate.toString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setUpdating(final boolean updating) {
         updateDelegate();
         delegate.setUpdating(updating);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getContextId() {
         return delegate.getContextId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getName() {
         updateDelegate();
         return delegate.getName();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getFileStorageAuth() {
         updateDelegate();
         return delegate.getFileStorageAuth();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public long getFileStorageQuota() {
         updateDelegate();
         return delegate.getFileStorageQuota();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getFilestoreId() {
         updateDelegate();
         return delegate.getFilestoreId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getFilestoreName() {
         updateDelegate();
         return delegate.getFilestoreName();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getLoginInfo() {
         updateDelegate();
         return delegate.getLoginInfo();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getMailadmin() {
         updateDelegate();
         return delegate.getMailadmin();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isEnabled() {
         updateDelegate();
         return delegate.isEnabled();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isUpdating() {
         updateDelegate();
         return delegate.isUpdating();
+    }
+
+    public boolean isReadOnly() {
+        updateDelegate();
+        return delegate.isReadOnly();
     }
 
     /**

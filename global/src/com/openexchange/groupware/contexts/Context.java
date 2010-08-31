@@ -117,6 +117,14 @@ public interface Context extends Serializable {
     boolean isUpdating();
 
     /**
+     * Contexts can be put into read only mode if the master database server is not reachable. This method indicates if currently the master
+     * is not reachable.
+     *
+     * @return <code>true</code> if the master database server is not reachable.
+     */
+    boolean isReadOnly();
+
+    /**
      * @return the context specific location inside the filestore.
      */
     String getFilestoreName();

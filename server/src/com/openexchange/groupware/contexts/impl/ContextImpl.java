@@ -57,79 +57,28 @@ package com.openexchange.groupware.contexts.impl;
  */
 public class ContextImpl implements ContextExtended {
 
-    /**
-     * UID for serialization.
-     */
     private static final long serialVersionUID = 8570995404471786200L;
 
-    /**
-     * Unique identifier of the context.
-     */
     private final int contextId;
-
-    /**
-     * Context name.
-     */
     private String name;
-
-    /**
-     * The login information of a context.
-     */
     private String[] loginInfo;
-
-    /**
-     * Unique identifier of the contexts mailadmin.
-     */
     private int mailadmin = -1;
-
-    /**
-     * Identifier of the file store.
-     */
     private int filestoreId = -1;
-
-    /**
-     * Name where to place the file storage inside the file store.
-     */
     private String filestoreName;
-
-    /**
-     * Authentication of the file storage.
-     */
     private String[] filestorageAuth;
-
-    /**
-     * Quota of the file storage.
-     */
     private long fileStorageQuota;
-
-    /**
-     * Is the context enabled.
-     */
     private boolean enabled = true;
-
-    /**
-     * Is the context being updated.
-     */
     private boolean updating = false;
+    private boolean readonly = false;
 
-    /**
-     * Default constructor.
-     * @param contextId Unique identifier.
-     */
     public ContextImpl(final int contextId) {
         this.contextId = contextId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getContextId() {
         return contextId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object obj) {
         if (!(obj instanceof ContextImpl)) {
@@ -138,145 +87,89 @@ public class ContextImpl implements ContextExtended {
         return contextId == ((ContextImpl) obj).contextId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return contextId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return "ContextImpl cid: " + contextId;
     }
 
-    /**
-     * @param name the name to set
-     */
     public void setName(final String name) {
         this.name = name;
     }
 
-    /**
-     * @return the name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getMailadmin() {
         return mailadmin;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public long getFileStorageQuota() {
         return fileStorageQuota;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isEnabled() {
         return enabled;
     }
 
-    /**
-     * @param mailadmin the mailadmin to set
-     */
     public void setMailadmin(final int mailadmin) {
         this.mailadmin = mailadmin;
     }
 
-    /**
-     * @param fileStorageQuota the fileStorageQuota to set
-     */
     public void setFileStorageQuota(final long fileStorageQuota) {
         this.fileStorageQuota = fileStorageQuota;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
     }
 
-    /**
-     * @return the filestoreId
-     */
     public int getFilestoreId() {
         return filestoreId;
     }
 
-    /**
-     * @param filestoreId the filestoreId to set
-     */
     public void setFilestoreId(final int filestoreId) {
         this.filestoreId = filestoreId;
     }
 
-    /**
-     * @return the filestoreName
-     */
     public String getFilestoreName() {
         return filestoreName;
     }
 
-    /**
-     * @param filestoreName the filestoreName to set
-     */
     public void setFilestoreName(final String filestoreName) {
         this.filestoreName = filestoreName;
     }
 
-    /**
-     * @param filestoreAuth the filestoreAuth to set
-     */
     public void setFilestoreAuth(final String[] filestoreAuth) {
         this.filestorageAuth = filestoreAuth;
     }
 
-    /**
-     * @return the filestoreAuth
-     */
     public String[] getFileStorageAuth() {
         return filestorageAuth.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getLoginInfo() {
         return loginInfo.clone();
     }
 
-    /**
-     * @param loginInfo the loginInfo to set
-     */
     public void setLoginInfo(final String[] loginInfo) {
         this.loginInfo = loginInfo.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setUpdating(final boolean updating) {
         this.updating = updating;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isUpdating() {
         return updating;
+    }
+
+    public boolean isReadOnly() {
+        return readonly;
     }
 }
