@@ -120,6 +120,9 @@ public class ServletResponseWrapper implements ServletResponse {
     private static final Pattern CONTENT_TYPE_CHARSET_PARAM = Pattern.compile("(;\\s*charset=)([^\\s|^;]+)");
 
     public void setContentType(final String contentType) {
+        if(contentType == null) {
+            return; 
+        }
         final Matcher m = CONTENT_TYPE_CHARSET_PARAM.matcher(contentType);
         if (m.find()) {
             /*
