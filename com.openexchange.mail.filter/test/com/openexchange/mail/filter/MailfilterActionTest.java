@@ -16,7 +16,7 @@ public class MailfilterActionTest extends MailfilterAction {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        Common.prepare("", "");
+        Common.prepare(null, null);
     }
 
     @After

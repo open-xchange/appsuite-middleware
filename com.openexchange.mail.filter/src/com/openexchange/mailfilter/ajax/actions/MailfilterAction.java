@@ -605,7 +605,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             return creds.getPassword();
         } else if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
             final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
-            if (masterpassword.length() != 0) {
+            if (null != masterpassword && masterpassword.length() != 0) {
                 return masterpassword;
             } else {
                 throw new OXMailfilterException(Code.NO_MASTERPASSWORD_SET);

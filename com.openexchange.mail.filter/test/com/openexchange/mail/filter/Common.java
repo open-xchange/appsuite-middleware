@@ -29,8 +29,12 @@ public class Common {
         simConfigurationService.stringProperties.put(MailFilterProperties.Values.TLS.property, "false");
         simConfigurationService.stringProperties.put(MailFilterProperties.Values.VACATION_DOMAINS.property, "");
         simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property, "30000");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, passwordSource);
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property, masterPassword);
+        if (null != passwordSource) {
+            simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, passwordSource);
+        }
+        if (null != masterPassword) {
+            simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property, masterPassword);
+        }
         MailFilterServletServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, simConfigurationService);
     }
 
