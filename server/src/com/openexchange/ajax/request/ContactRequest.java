@@ -195,14 +195,14 @@ public class ContactRequest {
         } else if (action.equalsIgnoreCase(FinalContactConstants.ACTION_GET_ASSOCIATION.getName())) {
             return actionGetAssociation(jsonObject);
         } else if (action.equalsIgnoreCase(FinalContactConstants.ACTION_GET_BY_UUID.getName())) {
-            return actionGetByUid(jsonObject);
+            return actionGetByUuid(jsonObject);
         } else {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
     }
 
 
-    public JSONValue actionGetByUid(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
+    public JSONValue actionGetByUuid(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         
         Contact contactObj = getFinalContact(contactInterface, jsonObj);
