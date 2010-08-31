@@ -50,12 +50,12 @@ package com.openexchange.mailfilter.osgi;
 
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
+import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.internal.MailFilterServletInit;
@@ -172,7 +172,8 @@ public class Activator extends DeferredActivator {
      * This method checks for a valid configfile and throws and exception if now configfile is there or one of the properties is missing
      * @throws Exception 
      */
-    private void checkConfigfile() throws Exception {
+    // protected to be able to test this
+    protected static void checkConfigfile() throws Exception {
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final Properties file = config.getFile("mailfilter.properties");
         if (file.isEmpty()) {
@@ -188,5 +189,20 @@ public class Activator extends DeferredActivator {
         } catch (final NumberFormatException e) {
             throw new Exception("Property " + MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property + " is no integer value");
         }
+        
+        final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
+        if (null != passwordsrc) {
+            if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
+                final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
+                if (masterpassword.length() == 0) {
+                    throw new OXMailfilterException(Code.NO_MASTERPASSWORD_SET);
+                }
+            } else if (!MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
+                throw new OXMailfilterException(Code.NO_VALID_PASSWORDSOURCE);
+            }
+        } else {
+            throw new OXMailfilterException(Code.NO_VALID_PASSWORDSOURCE);
+        }
+
     }
 }

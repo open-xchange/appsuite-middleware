@@ -85,7 +85,8 @@ public class SessionWrapper {
      */
     public static final String USERNAME_SESSION = "username_auth";
 
-    public class Credentials {
+    // static for tests
+    public static class Credentials {
 
         private String username;
 

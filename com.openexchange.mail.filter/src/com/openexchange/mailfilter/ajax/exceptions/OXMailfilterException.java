@@ -144,7 +144,15 @@ public class OXMailfilterException extends AbstractOXException {
          * The field \"%1$s\" must have a value, but is not set.
          */
         EMPTY_MANDATORY_FIELD("The field \"%1$s\" must have a value, but is not set", Category.USER_INPUT, 18),
-        ;
+        /**
+         * The configuration requests a masterpassword but none is given in the configuration file
+         */
+        NO_MASTERPASSWORD_SET("The configuration requests a masterpassword but none is given in the configuration file", Category.CODE_ERROR, 19),
+        /**
+         * The passwordSource given in the config file is not a valid one
+         */
+        NO_VALID_PASSWORDSOURCE("The passwordSource given in the config file is not a valid one", Category.CODE_ERROR, 20);
+
 
         private final String message;
 

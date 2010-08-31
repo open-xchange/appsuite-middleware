@@ -1,3 +1,8 @@
+* 2010-08-31 - dennis.sieben@open-xchange.com
+
+  - Added possibility to define the password source. It is now possible to
+    switch between the password from the session or a global defined one.
+
 * 2010-06-02 - dennis.sieben@open-xchange.com
 
   - Bugfix #16149: [L3] connection timeout for SieveHandler

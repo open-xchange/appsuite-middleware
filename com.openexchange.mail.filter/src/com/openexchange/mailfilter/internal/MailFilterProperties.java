@@ -71,7 +71,9 @@ public class MailFilterProperties {
         NON_RFC_COMPLIANT_TLS_REGEX("NON_RFC_COMPLIANT_TLS_REGEX", "^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$"),
         TLS("TLS", "true"),
         VACATION_DOMAINS("VACATION_DOMAINS", ""),
-        SIEVE_CONNECTION_TIMEOUT("com.openexchange.mail.filter.connectionTimeout", "30000");
+        SIEVE_CONNECTION_TIMEOUT("com.openexchange.mail.filter.connectionTimeout", "30000"),
+        SIEVE_PASSWORDSRC("com.openexchange.mail.filter.passwordSource", PasswordSource.SESSION.name),
+        SIEVE_MASTERPASSWORD("com.openexchange.mail.filter.masterPassword", "");
         
         public final String property;
         
@@ -92,6 +94,17 @@ public class MailFilterProperties {
         public final String name;
         
         private CredSrc(final String name) {
+            this.name = name;
+        }
+    }
+    
+    public enum PasswordSource {
+        SESSION("session"),
+        GLOBAL("global");
+
+        public final String name;
+        
+        private PasswordSource(final String name) {
             this.name = name;
         }
     }

@@ -598,6 +598,23 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         return new Rule2JSON2Rule();
     }
 
+    // protected so that we can test this
+    protected String getRightPassword(ConfigurationService config, final Credentials creds) throws OXMailfilterException {
+        final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
+        if (MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
+            return creds.getPassword();
+        } else if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
+            final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
+            if (masterpassword.length() != 0) {
+                return masterpassword;
+            } else {
+                throw new OXMailfilterException(Code.NO_MASTERPASSWORD_SET);
+            }
+        } else {
+            throw new OXMailfilterException(Code.NO_VALID_PASSWORDSOURCE);
+        }
+    }
+
     private SieveHandler connectRight(final Credentials creds) throws OXMailfilterException {
         final SieveHandler sieveHandler;
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
@@ -651,7 +668,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         if (MailFilterProperties.CredSrc.SESSION.name.equals(credsrc)) {
             final String username = creds.getUsername();
             final String authname = creds.getAuthname();
-            final String password = creds.getPassword();
+            final String password = getRightPassword(config, creds);
             if (null != username) {
                 sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
             } else {
@@ -672,7 +689,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 }
             }
             final String username = creds.getUsername();
-            final String password = creds.getPassword();
+            final String password = getRightPassword(config, creds);
             if (null != username) {
                 sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
             } else {
@@ -691,7 +708,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     }
                 }
                 final String username = creds.getUsername();
-                final String password = creds.getPassword();
+                final String password = getRightPassword(config, creds);
                 if (null != username) {
                     sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
                 } else {
