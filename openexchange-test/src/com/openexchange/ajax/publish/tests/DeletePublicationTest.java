@@ -124,6 +124,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
 
     public void testDeletionOfNonExistingPublicationShouldFail() throws AjaxException, IOException, SAXException, JSONException {
         // delete publication
+        pubMgr.setFailOnError(false); // We'll provoke an error on purpose
         pubMgr.deleteAction(Arrays.asList(Integer.valueOf(Integer.MAX_VALUE)));
         assertTrue("Deletion of non-existing publication should produce errors", pubMgr.getLastResponse().hasError());
     }
