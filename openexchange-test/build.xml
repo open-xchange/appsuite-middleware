@@ -48,7 +48,7 @@
     </target>
 
     <target name="compile-specific">
-         <mkdir dir="${build}"/>
+        <mkdir dir="${build}"/>
         <javac srcdir="${test.src}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath>
                 <path refid="project.classpath"/>
