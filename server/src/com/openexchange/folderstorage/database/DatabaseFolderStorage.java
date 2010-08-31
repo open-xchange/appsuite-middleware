@@ -1260,9 +1260,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
         if (!FolderCacheManager.isEnabled()) {
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
         }
-        final FolderObject fo = FolderCacheManager.getInstance().getFolderObject(folderId, ctx);
+        final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+        FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
         if (null == fo) {
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+            fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+            cacheManager.putFolderObject(fo, ctx, false, null);
         }
         return fo;
     }
