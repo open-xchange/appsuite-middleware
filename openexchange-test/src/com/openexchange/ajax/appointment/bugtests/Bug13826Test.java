@@ -117,6 +117,9 @@ public class Bug13826Test extends AbstractAJAXSession {
         updateAppointment.setObjectID(appointment.getObjectID());
         updateAppointment.setLastModified(appointment.getLastModified());
         updateAppointment.setParentFolderID(targetFolderId);
+        updateAppointment.setRecurrenceType(Appointment.DAILY);
+        updateAppointment.setInterval(1);
+        updateAppointment.setOccurrence(5);
     }
     
     public void testBug13826() throws Exception {
