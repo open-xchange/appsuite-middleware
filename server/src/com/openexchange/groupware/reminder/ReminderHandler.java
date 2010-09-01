@@ -622,8 +622,28 @@ public class ReminderHandler implements ReminderService {
     }
 
     public void remindAgain(final ReminderObject reminder, final Session session, final Context ctx, final Date timestamp) throws OXException {
-        final RemindAgain remindAgain = new RemindAgain(reminder, session, ctx, timestamp);
+        Connection readCon = null;
+        try {
+            readCon = DBPool.pickup(context);
+            remindAgain(reminder, session, ctx, timestamp, readCon);
+        } catch (final DBPoolingException exc) {
+            throw new OXException(exc);
+        } finally {
+            DBPool.closeReaderSilent(context, readCon);
+        }
+    }
+
+    public void remindAgain(final ReminderObject reminder, final Session session, final Context ctx, final Date timestamp, final Connection readCon) throws OXException {
+        final RemindAgain remindAgain = new RemindAgain(reminder, session, ctx, timestamp, this);
         remindAgain.remindAgain();
+        /*
+         * Update target
+         */
+        try {
+            TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(context, readCon, reminder.getTargetId());
+        } catch (final AbstractOXException e) {
+            throw new ReminderException(e);
+        }
     }
 
     public SearchIterator<ReminderObject> listModifiedReminder(final int userId, final Date lastModified) throws OXException {

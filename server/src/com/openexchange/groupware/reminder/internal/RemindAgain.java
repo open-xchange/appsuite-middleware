@@ -51,14 +51,11 @@ package com.openexchange.groupware.reminder.internal;
 
 import java.util.Date;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.ReminderException;
-import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.session.Session;
 
 /**
@@ -72,6 +69,7 @@ public class RemindAgain {
     private final Context ctx;
     private final ReminderObject reminder;
     private final Date timestamp;
+    private final ReminderService reminderService;
 
     /**
      * Initializes a new {@link RemindAgain}.
@@ -81,12 +79,13 @@ public class RemindAgain {
      * @param ctx The context
      * @param timestamp The client's time stamp
      */
-    public RemindAgain(final ReminderObject reminder, final Session session, final Context ctx, final Date timestamp) {
+    public RemindAgain(final ReminderObject reminder, final Session session, final Context ctx, final Date timestamp, final ReminderService reminderService) {
         super();
         this.session = session;
         this.ctx = ctx;
         this.reminder = reminder;
         this.timestamp = timestamp;
+        this.reminderService = reminderService;
     }
 
     /**
@@ -106,19 +105,26 @@ public class RemindAgain {
     }
 
     private void remindAgainTask() throws OXException {
-        final Task task = new Task();
-        task.setObjectID(reminder.getTargetId());
-        task.setParentFolderID(reminder.getFolder());
-        task.setAlarm(reminder.getDate());
         /*
-         * Update task's alarm
+         * Task module does not hold any reminder data by itself. Just change reminder data in database.
          */
-        final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
-        sqlinterface.updateTaskObject(task, reminder.getFolder(), timestamp);
+        final int taskId = reminder.getTargetId();
+        final int userId = reminder.getUser();
+        if (null == reminder.getDate()) {
+            if (reminderService.existsReminder(taskId, userId, Types.TASK)) {
+                reminderService.deleteReminder(taskId, userId, Types.TASK);
+            }
+        } else {
+            if (reminderService.existsReminder(taskId, userId, Types.TASK)) {
+                reminderService.updateReminder(reminder);
+            } else {
+                reminderService.insertReminder(reminder);
+            }
+        }
         /*
          * Load updated reminder...
          */
-        final ReminderObject updated = new ReminderHandler(ctx).loadReminder(reminder.getObjectId());
+        final ReminderObject updated = reminderService.loadReminder(reminder.getObjectId());
         /*
          * ... and apply new values to passed reminder object
          */
