@@ -62,6 +62,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.parser.ReminderParser;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -250,24 +251,33 @@ public final class ReminderRequest {
             timeZone = null == timeZoneId ? getTimeZone(userObj.getTimeZone()) : getTimeZone(timeZoneId);
         }
         /*
-         * Load reminder by identifier
+         * Parse reminder from JSON
+         */
+        final JSONObject jreminder = jsonObject.getJSONObject(AJAXServlet.PARAMETER_DATA);
+        final ReminderObject reminder = new ReminderObject();
+        new ReminderParser(tz).parse(reminder, jreminder);
+        reminder.setObjectId(reminderId);
+        /*
+         * Load storage version and check permission
          */
         final ReminderService reminderSql = new ReminderHandler(session.getContext());
-        final ReminderObject reminder = reminderSql.loadReminder(reminderId);
-        /*
-         * Check module permission
-         */
-        if (!hasModulePermission(reminder)) {
-            throw new ReminderException(ReminderException.Code.UNEXPECTED_ERROR, "No module permission.");
+        {
+            final ReminderObject storageReminder = reminderSql.loadReminder(reminder.getObjectId());
+            /*
+             * Check module permission
+             */
+            if (!hasModulePermission(storageReminder)) {
+                throw new ReminderException(ReminderException.Code.UNEXPECTED_ERROR, "No module permission.");
+            }
+            /*
+             * Set other fields
+             */
+            reminder.setModule(storageReminder.getModule());
+            reminder.setDescription(storageReminder.getDescription());
+            reminder.setFolder(storageReminder.getFolder());
+            reminder.setTargetId(storageReminder.getTargetId());
+            reminder.setUser(storageReminder.getUser());
         }
-        /*
-         * Parse new reminder date
-         */
-        final Date alarm = DataParser.parseTime(jsonObject, "alarm", tz);
-        if (null == alarm) {
-            throw new ReminderException(ReminderException.Code.MANDATORY_FIELD_ALARM);
-        }
-        reminder.setDate(alarm);
         /*
          * Trigger action
          */
