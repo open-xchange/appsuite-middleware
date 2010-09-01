@@ -50,6 +50,7 @@
 package com.openexchange.ajax.reminder;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -128,15 +129,16 @@ public class RemindAgainTest extends AbstractAJAXSession {
             ReminderObject reminderObject = reminderObj[pos];
             assertTrue("object id not found", reminderObject.getObjectId() > 0);
             assertNotNull("last modified is null", reminderObject.getLastModified());
-            assertEquals("target id is not equals", targetId, reminderObject.getTargetId());
-            assertEquals("folder id is not equals", folderId, reminderObject.getFolder());
-            assertEquals("user id is not equals", userId, reminderObject.getUser());
+            assertEquals("target id is not equal", targetId, reminderObject.getTargetId());
+            assertEquals("folder id is not equal", folderId, reminderObject.getFolder());
+            assertEquals("user id is not equal", userId, reminderObject.getUser());
             
             /*
              * Remind again
              */
             c.add(Calendar.DAY_OF_YEAR, -2); // Reminder
-            reminderObject.setDate(c.getTime());
+            final Date newAlarm = c.getTime();
+            reminderObject.setDate(newAlarm);
             Executor.execute(client, new RemindAgainRequest(reminderObject, reload.getLastModified()));
             
             c.add(Calendar.DAY_OF_YEAR, 2);
@@ -152,10 +154,10 @@ public class RemindAgainTest extends AbstractAJAXSession {
             reminderObject = reminderObj[pos];
             assertTrue("object id not found", reminderObject.getObjectId() > 0);
             assertNotNull("last modified is null", reminderObject.getLastModified());
-            assertEquals("target id is not equals", targetId, reminderObject.getTargetId());
-            assertEquals("folder id is not equals", folderId, reminderObject.getFolder());
-            assertEquals("user id is not equals", userId, reminderObject.getUser());
-            
+            assertEquals("target id is not equal", targetId, reminderObject.getTargetId());
+            assertEquals("folder id is not equal", folderId, reminderObject.getFolder());
+            assertEquals("user id is not equal", userId, reminderObject.getUser());
+            assertEquals("alarm is not equal", newAlarm.getTime(), reminderObject.getDate().getTime());
             
             
             reload = com.openexchange.ajax.task.TaskTools.get(client, new com.openexchange.ajax.task.actions.GetRequest(insertR)).getTask(timeZone);
