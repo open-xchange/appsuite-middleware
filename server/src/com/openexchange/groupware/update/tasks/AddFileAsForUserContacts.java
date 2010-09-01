@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
+import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -60,10 +62,8 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.WorkingLevel;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -82,10 +82,9 @@ public final class AddFileAsForUserContacts extends UpdateTaskAdapter {
         return new String[0];
     }
 
-    
     @Override
     public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BACKGROUND, WorkingLevel.SCHEMA);
+        return new Attributes(BACKGROUND, SCHEMA);
     }
 
     public void perform(PerformParameters params) throws AbstractOXException {
