@@ -117,16 +117,16 @@ public class RemindAgainTest extends AbstractAJAXSession {
             /*
              * Get reminder
              */
-            final ReminderObject[] reminderObj = Executor.execute(client, new RangeRequest(c.getTime())).getReminder(timeZone);
+            ReminderObject[] reminderObjs = Executor.execute(client, new RangeRequest(c.getTime())).getReminder(timeZone);
             int pos = -1;
-            for (int a = 0; a < reminderObj.length; a++) {
-                if (reminderObj[a].getTargetId() == targetId) {
+            for (int a = 0; a < reminderObjs.length; a++) {
+                if (reminderObjs[a].getTargetId() == targetId) {
                     pos = a;
                 }
             }
             
             assertTrue("reminder not found in response", (pos > -1));
-            ReminderObject reminderObject = reminderObj[pos];
+            ReminderObject reminderObject = reminderObjs[pos];
             assertTrue("object id not found", reminderObject.getObjectId() > 0);
             assertNotNull("last modified is null", reminderObject.getLastModified());
             assertEquals("target id is not equal", targetId, reminderObject.getTargetId());
@@ -142,16 +142,16 @@ public class RemindAgainTest extends AbstractAJAXSession {
             Executor.execute(client, new RemindAgainRequest(reminderObject, reload.getLastModified()));
             
             c.add(Calendar.DAY_OF_YEAR, 2);
-            final ReminderObject[] reminderObj2 = Executor.execute(client, new RangeRequest(c.getTime())).getReminder(timeZone);
+            reminderObjs = Executor.execute(client, new RangeRequest(c.getTime())).getReminder(timeZone);
             pos = -1;
-            for (int a = 0; a < reminderObj2.length; a++) {
-                if (reminderObj2[a].getTargetId() == targetId) {
+            for (int a = 0; a < reminderObjs.length; a++) {
+                if (reminderObjs[a].getTargetId() == targetId) {
                     pos = a;
                 }
             }
             
             assertTrue("reminder not found in response", (pos > -1));
-            reminderObject = reminderObj[pos];
+            reminderObject = reminderObjs[pos];
             assertTrue("object id not found", reminderObject.getObjectId() > 0);
             assertNotNull("last modified is null", reminderObject.getLastModified());
             assertEquals("target id is not equal", targetId, reminderObject.getTargetId());
