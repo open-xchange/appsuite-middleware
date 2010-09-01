@@ -256,6 +256,9 @@ public final class ReminderRequest {
         final JSONObject jreminder = jsonObject.getJSONObject(AJAXServlet.PARAMETER_DATA);
         final ReminderObject reminder = new ReminderObject();
         new ReminderParser(tz).parse(reminder, jreminder);
+        if (null == reminder.getDate()) {
+            throw new ReminderException(ReminderException.Code.MANDATORY_FIELD_ALARM);
+        }
         reminder.setObjectId(reminderId);
         /*
          * Load storage version and check permission
