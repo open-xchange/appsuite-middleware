@@ -79,6 +79,16 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-392
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
+   if ! ox_exists_property com.openexchange.mail.filter.passwordSource $pfile; then
+      ox_set_property com.openexchange.mail.filter.passwordSource session $pfile
+   fi
+   if ! ox_exists_property com.openexchange.mail.filter.masterPassword $pfile; then
+      ox_set_property com.openexchange.mail.filter.masterPassword "" $pfile
+   fi
+
    # SoftwareChange_Request-305
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
@@ -110,6 +120,7 @@ if [ ${1:-0} -eq 2 ]; then
        ox_set_property SIEVE_AUTH_ENC "UTF-8" $pfile
    fi
 
+   ox_update_permissions "/opt/open-xchange/etc/groupware/mailfilter.properties" root:open-xchange 640
 fi
 
 %files
@@ -118,7 +129,7 @@ fi
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) /opt/open-xchange/etc/groupware/mailfilter.properties
+%config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/mailfilter.properties
 %changelog
 * Wed Jun 02 2010 - dennis.sieben@open-xchange.com
   - Bugfix #16149: [L3] connection timeout for SieveHandler
