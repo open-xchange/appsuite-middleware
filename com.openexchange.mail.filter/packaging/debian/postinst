@@ -25,6 +25,16 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-392
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
+  if ! ox_exists_property com.openexchange.mail.filter.passwordSource $pfile; then
+      ox_set_property com.openexchange.mail.filter.passwordSource session $pfile
+  fi
+  if ! ox_exists_property com.openexchange.mail.filter.masterPassword $pfile; then
+      ox_set_property com.openexchange.mail.filter.masterPassword "" $pfile
+  fi
+
   # SoftwareChange_Request-305
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
@@ -59,6 +69,7 @@ postFix() {
 
 case "$1" in
     configure)
+        ox_update_permissions "/opt/open-xchange/etc/groupware/mailfilter.properties" root:open-xchange 640
         test -n "$2" && {
                 # we are in update mode, run postFix to apply fixes
                 postFix "$2"
