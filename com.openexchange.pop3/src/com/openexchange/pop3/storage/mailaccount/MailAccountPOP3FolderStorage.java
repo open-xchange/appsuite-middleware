@@ -596,6 +596,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private void prepareMailFolder(final MailFolder mailFolder) throws MailException {
         mailFolder.setFullname(stripPathFromFullname(path, mailFolder.getFullname()));
+        mailFolder.setParentFullname(stripPathFromFullname(path, mailFolder.getParentFullname()));
         mailFolder.setRootFolder(false);
         mailFolder.setDefaultFolder(false);
         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
