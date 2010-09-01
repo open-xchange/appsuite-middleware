@@ -52,8 +52,6 @@ package com.openexchange.cache.impl;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
@@ -75,10 +73,9 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderCacheManager} - Holds a cache for instances of {@link FolderObject}
@@ -239,60 +236,15 @@ public final class FolderCacheManager {
      */
     public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx, final Connection readConArg) throws OXException {
         final OXObjectFactory<FolderObject> factory = new OXObjectFactory<FolderObject>() {
-
             public Lock getCacheLock() {
                 return FolderCacheManager.this.getCacheLock();
             }
-
             public Serializable getKey() {
                 return getCacheKey(ctx.getContextId(), objectId);
             }
-
             public FolderObject load() throws AbstractOXException {
-                /*
-                 * Future use of connection is highly unsafe
-                 */
-                if (checkConnection()) {
-                    /*
-                     * Connection still active
-                     */
-                    return loadFolderObjectInternal(objectId, ctx, readConArg);
-                }
-                /*
-                 * Connection either null or closed in the meantime
-                 */
+                // Connection can not be remembered.
                 return loadFolderObjectInternal(objectId, ctx, null);
-            }
-
-            private boolean checkConnection() {
-                if (null == readConArg) {
-                    return false;
-                }
-                try {
-                    if (readConArg.isClosed()) {
-                        return false;
-                    }
-                    /*
-                     * Check if active through dummy SELECT statement
-                     */
-                    Statement stmt = null;
-                    ResultSet result = null;
-                    try {
-                        stmt = readConArg.createStatement();
-                        result = stmt.executeQuery("SELECT 1 AS test");
-                        if (result.next()) {
-                            return result.getInt(1) == 1;
-                        }
-                        return false;
-                    } finally {
-                        DBUtils.closeSQLStuff(result, stmt);
-                    }
-                } catch (final Exception e) {
-                    /*
-                     * Something went wrong
-                     */
-                    return false;
-                }
             }
         };
         try {
@@ -347,17 +299,14 @@ public final class FolderCacheManager {
      */
     public FolderObject loadFolderObject(final int folderId, final Context ctx, final Connection readCon) throws OXException {
         final OXObjectFactory<FolderObject> factory = new OXObjectFactory<FolderObject>() {
-
             public Lock getCacheLock() {
                 return FolderCacheManager.this.getCacheLock();
             }
-
             public Serializable getKey() {
                 return getCacheKey(ctx.getContextId(), folderId);
             }
-
             public FolderObject load() throws AbstractOXException {
-                return loadFolderObjectInternal(folderId, ctx, readCon);
+                return loadFolderObjectInternal(folderId, ctx, null);
             }
         };
         final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
