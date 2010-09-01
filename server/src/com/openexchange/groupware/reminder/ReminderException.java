@@ -120,7 +120,11 @@ public class ReminderException extends OXException {
         /**
          * Unexpected error: %1$s
          */
-        UNEXPECTED_ERROR("Unexpected error: %1$s", 15, Category.CODE_ERROR);
+        UNEXPECTED_ERROR("Unexpected error: %1$s", 15, Category.CODE_ERROR),
+        /**
+         * Reminder identifier is missing.
+         */
+        MANDATORY_FIELD_ID("Reminder identifier is missing.", 16, Category.CODE_ERROR);
 
         /**
          * Message of the exception.
