@@ -248,7 +248,7 @@ public final class ReminderRequest {
         final TimeZone timeZone;
         {
             final String timeZoneId = DataParser.parseString(jsonObject, AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? getTimeZone(userObj.getTimeZone()) : getTimeZone(timeZoneId);
+            timeZone = null == timeZoneId ? tz : getTimeZone(timeZoneId);
         }
         /*
          * Parse reminder from JSON
