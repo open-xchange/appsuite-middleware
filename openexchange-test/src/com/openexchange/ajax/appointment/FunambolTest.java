@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -103,12 +104,17 @@ public final class FunambolTest extends AbstractAJAXSession {
         insertResponse.fillObject(appointment);
         final GetResponse response = client.execute(new GetRequest(appointment));
         final Appointment reload = response.getAppointment(timeZone);
-        final Date creationDate = reload.getLastModified(); // reload.getCreationDate() does not have milliseconds.
+        // reload.getCreationDate() does not have milliseconds.
+        final Date lastModified = reload.getLastModified();
 
         // This request is responded even faster than creating an appointment. Therefore this must be the second request.
         final Date timeAfterCreation = client.getValues().getServerTime();
 
-        assertTrue("Appointment creation time is not after time request before creation.", creationDate.after(timeBeforeCreation));
-        assertTrue("Appointment creation time is not before time request after creation.", creationDate.before(timeAfterCreation));
+        assertTrue("Appointment creation time is not after time request before creation.", lastModified.after(timeBeforeCreation));
+        assertTrue("Appointment creation time is not before time request after creation.", lastModified.before(timeAfterCreation));
+        assertEquals(
+            "Last modified and creation date are different.",
+            L(lastModified.getTime() / 1000),
+            L(reload.getCreationDate().getTime() / 1000));
     }
 }
