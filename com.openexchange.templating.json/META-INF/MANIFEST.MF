@@ -7,12 +7,14 @@ Bundle-Activator: com.openexchange.templating.json.osgi.TemplatingJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.ajax,
+ com.openexchange.groupware,
  com.openexchange.multiple,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  com.openexchange.templating,
  com.openexchange.tools.service,
  com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
  javax.servlet,
  javax.servlet.http,
  org.json,
