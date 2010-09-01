@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.reminder.actions;
 
+import java.util.TimeZone;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.writer.ReminderWriter;
+import com.openexchange.groupware.reminder.ReminderObject;
 
 /**
- * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractReminderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
@@ -76,4 +80,12 @@ public abstract class AbstractReminderRequest<T extends AbstractAJAXResponse> im
     public String getServletPath() {
         return REMINDER_URL;
     }
+
+    protected JSONObject convert(final ReminderObject reminderObj) throws JSONException {
+        final JSONObject jsonObj = new JSONObject();
+        final ReminderWriter writer = new ReminderWriter(TimeZone.getTimeZone("UTC"));
+        writer.writeObject(reminderObj, jsonObj);
+        return jsonObj;
+    }
+
 }
