@@ -132,6 +132,7 @@ public final class ImageServlet extends HttpServlet {
             }
             final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class, true);
             String sessionId = imageService.getSessionForUID(uid);
+            String errorMsg = "Image not found";
             if(sessionId != null) {
                 Session session = sessiondService.getSession(sessionId);
                 String secret = SessionServlet.extractSecret(session.getHash(), req.getCookies());
@@ -140,20 +141,39 @@ public final class ImageServlet extends HttpServlet {
                     ImageData imageData = imageService.getImageData(session, uid);
                     if(imageData != null) {
                         outputImageData(imageData, session, resp);
+                    } else {
+                        String logMsg = "No image found for session " + sessionId + " and uid " + uid;
+                        sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
                     }
+                } else {
+                    String logMsg = "Wrong secret " + secret + " for session " + sessionId;
+                    sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
                 }
+            } else {
+                String logMsg = "No session found for uid " + uid;
+                sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
             }
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
         } catch (final SessiondException e) {
-            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
-            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            sendErrorAndLog(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, null, e.getMessage(), e);
         } catch (final DataException e) {
-            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            sendErrorAndLog(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, e.getMessage(), e);
         } catch (final ServiceException e) {
-            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
-            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            sendErrorAndLog(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, null, e.getMessage(), e);
         }
+    }
+    
+    private static void sendErrorAndLog(HttpServletResponse resp, int errorCode, String errorMsg, String logMsg, Throwable... throwable) throws IOException {
+        if (throwable != null && throwable.length > 0) {
+            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(logMsg, throwable[0]);
+        } else {
+            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(logMsg);
+        }
+        
+        if (errorMsg != null) {
+            resp.sendError(errorCode, errorMsg);
+        } else {
+            resp.sendError(errorCode);
+        }        
     }
 
     private static void outputImageData(final ImageData imageData, final Session session, final HttpServletResponse resp) throws DataException, IOException {
