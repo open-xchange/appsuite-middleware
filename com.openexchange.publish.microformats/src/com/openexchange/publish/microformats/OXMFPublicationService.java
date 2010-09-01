@@ -122,13 +122,11 @@ public class OXMFPublicationService extends AbstractPublicationService {
         form.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
         withoutInfostore.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
 
-        /* SUPHI SPECIAL BLOCK 
         FormElement templateChooser = FormElement.custom("com.openexchange.templating.templateChooser",TEMPLATE, FORM_LABEL_TEMPLATE);
         templateChooser.setOption("only", "user");
         form.add(templateChooser);
-        END SUPHI SPECIAL BLOCK */ 
         
-        form.add(FormElement.input(TEMPLATE, FORM_LABEL_TEMPLATE)); // Remove this line when SUPHI SPECIAL BLOCK is commented in.
+       // form.add(FormElement.input(TEMPLATE, FORM_LABEL_TEMPLATE)); // Remove this line when SUPHI SPECIAL BLOCK is commented in.
         // No templating without infostore
         
         form.add(FormElement.checkbox(PROTECTED, FORM_LABEL_PROTECTED, true, Boolean.TRUE));
