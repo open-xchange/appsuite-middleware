@@ -193,10 +193,20 @@ public final class TwitterConfiguration {
 
     }
 
+    /**
+     * Gets the configured consumer key.
+     * 
+     * @return The consumer key
+     */
     public static String getConsumerKey() {
         return CONSUMER_KEY.get();
     }
 
+    /**
+     * Gets the configured consumer secret.
+     * 
+     * @return The consumer secret
+     */
     public static String getConsumerSecret() {
         return CONSUMER_SECRET.get();
     }
