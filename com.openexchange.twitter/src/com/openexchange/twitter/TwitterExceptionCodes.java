@@ -71,7 +71,11 @@ public enum TwitterExceptionCodes implements OXErrorMessage {
     /**
      * Invalid property value in property "%1$s": %2$s
      */
-    INVALID_PROPERTY(TwitterExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 3);
+    INVALID_PROPERTY(TwitterExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 3),
+    /**
+     * The consumer key/consumer secret pair is missing in configuration.
+     */
+    MISSING_CONSUMER_KEY_SECRET(TwitterExceptionMessages.MISSING_CONSUMER_KEY_SECRET_MSG, Category.CODE_ERROR, 4);
 
     private final Category category;
 

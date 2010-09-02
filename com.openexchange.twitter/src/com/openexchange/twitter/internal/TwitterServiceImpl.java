@@ -87,12 +87,17 @@ public final class TwitterServiceImpl implements TwitterService {
         return new PagingImpl(new twitter4j.Paging());
     }
 
-    public TwitterAccess getOAuthTwitterAccess(final String twitterToken, final String twitterTokenSecret) {
+    public TwitterAccess getOAuthTwitterAccess(final String twitterToken, final String twitterTokenSecret) throws TwitterException {
         final OXTwitter twitter = new twitter4j.OXTwitter();
         /*
          * Insert the appropriate consumer key and consumer secret here
          */
-        twitter.setOAuthConsumer(TwitterConfiguration.getConsumerKey(), TwitterConfiguration.getConsumerSecret());
+        final String consumerKey = TwitterConfiguration.getConsumerKey();
+        final String consumerSecret = TwitterConfiguration.getConsumerSecret();
+        if (null == consumerKey || null == consumerSecret) {
+            throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
+        }
+        twitter.setOAuthConsumer(consumerKey, consumerSecret);
         final AccessToken accessToken = new AccessToken(twitterToken, twitterTokenSecret);
         twitter.setOAuthAccessToken(accessToken);
         return new TwitterAccessImpl(twitter);
@@ -104,7 +109,12 @@ public final class TwitterServiceImpl implements TwitterService {
             /*
              * Insert the appropriate consumer key and consumer secret here
              */
-            twitter.setOAuthConsumer(TwitterConfiguration.getConsumerKey(), TwitterConfiguration.getConsumerSecret());
+            final String consumerKey = TwitterConfiguration.getConsumerKey();
+            final String consumerSecret = TwitterConfiguration.getConsumerSecret();
+            if (null == consumerKey || null == consumerSecret) {
+                throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
+            }
+            twitter.setOAuthConsumer(consumerKey, consumerSecret);
             final RequestToken requestToken = twitter.getOAuthRequestToken();
             /*
              * TODO: Start parsing twitter web site and confirm using specified credentials

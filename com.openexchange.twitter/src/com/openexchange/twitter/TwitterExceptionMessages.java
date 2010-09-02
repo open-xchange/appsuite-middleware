@@ -67,6 +67,9 @@ public final class TwitterExceptionMessages implements LocalizableStrings {
     // Invalid property value in property \"%1$s\": %2$s
     public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
 
+    // The consumer key/consumer secret pair is missing in configuration.
+    public static final String MISSING_CONSUMER_KEY_SECRET_MSG = "The consumer key/consumer secret pair is missing in configuration.";
+
     /**
      * Initializes a new {@link TwitterExceptionMessages}.
      */
