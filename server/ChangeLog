@@ -1,3 +1,7 @@
+* 2010-09-02 - martin.herfurth@open-xchange.com
+
+ - Bugfix #15903: Removing of Participants.
+
 * 2010-09-02 - marcus.klein@open-xchange.com
 
  - Bugfix #16532: Update task fixes primary key on table publication and table publication_users is tried be created again. Additionally
