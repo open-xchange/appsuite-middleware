@@ -116,3 +116,41 @@ The subadmin called testadmin can only list it's own context(s):
 cid fid fname       enabled qmax qused name lmappings CustomID         Owner    
   4   3 4_ctx_store true     500     0 4              a custom id 1234 testadmin
 
+
+Using the SOAP Interface
+========================
+
+Due to the fact, that we cannot use the plugin mechanism we're using in Java to
+extend the existing objects, the APIs and objects
+
+OXContext
+OXGroup
+OXResource
+OXUser
+Context
+
+had to be wrapped into new APIs
+
+OXResellerContext
+OXResellerGroup
+OXResellerResource
+OXResellerUser
+ResellerContext
+
+and the corresponding SOAP URLs
+
+http://localhost/servlet/axis2/services/OXResellerContextService?wsdl
+http://localhost/servlet/axis2/services/OXResellerUserService?wsdl
+http://localhost/servlet/axis2/services/OXResellerGroupService?wsdl
+http://localhost/servlet/axis2/services/OXResellerResourceService?wsdl
+
+and of course the additional API to manage the subadmin accounts: 
+
+http://localhost/servlet/axis2/services/OXResellerService?wsdl
+
+That also means that the existing SOAP interfaces for the mentioned classes
+above cannot be used anymore when installing the reseller package.
+
+ResellerContext just adds some additional members to the existing Context
+object and the corresponding APIs just oberate on and return this wrapped
+class.
