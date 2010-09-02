@@ -126,7 +126,6 @@ public class OXMFPublicationService extends AbstractPublicationService {
         templateChooser.setOption("only", "user");
         form.add(templateChooser);
         
-       // form.add(FormElement.input(TEMPLATE, FORM_LABEL_TEMPLATE)); // Remove this line when SUPHI SPECIAL BLOCK is commented in.
         // No templating without infostore
         
         form.add(FormElement.checkbox(PROTECTED, FORM_LABEL_PROTECTED, true, Boolean.TRUE));
