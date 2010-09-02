@@ -535,14 +535,14 @@ public class ReminderHandler implements ReminderService {
     }
 
     public ReminderObject loadReminder( final int objectId) throws OXMandatoryFieldException, OXConflictException, OXException {
-        Connection readCon = null;
-
+        final Connection readCon;
         try {
             readCon = DBPool.pickup(context);
-
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        }
+        try {
             return loadReminder(objectId, readCon);
-        } catch (final DBPoolingException exc) {
-            throw new OXException(exc);
         } finally {
             DBPool.closeReaderSilent(context,readCon);
         }
