@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.generic;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -127,7 +126,7 @@ public class DefaultMessagingAccount implements MessagingAccount {
      * @param configuration The configuration to set
      */
     public void setConfiguration(final Map<String, Object> configuration) {
-        this.configuration = Collections.unmodifiableMap(configuration);
+        this.configuration = configuration; //Collections.unmodifiableMap(configuration);
     }
 
     /**
