@@ -674,15 +674,11 @@ public class ReminderHandler implements ReminderService {
             return new ReminderSearchIterator(context, ps, rs, readCon);
         } catch (final SearchIteratorException exc) {
             DBUtils.closeSQLStuff(rs, ps);
-            if (null != readCon) {
-                DBPool.closeReaderSilent(context, readCon);
-            }
+            DBPool.closeReaderSilent(context, readCon);
             throw new OXException(exc);
         } catch (final SQLException exc) {
             DBUtils.closeSQLStuff(rs, ps);
-            if (null != readCon) {
-                DBPool.closeReaderSilent(context, readCon);
-            }
+            DBPool.closeReaderSilent(context, readCon);
             throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
         }
     }
