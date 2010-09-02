@@ -135,7 +135,8 @@ public class Bug15903Test extends CalendarTestManagerTest {
         UserParticipant uP = new UserParticipant(firstUserId);
         userParticipants.add(uP);
         reload.setParticipants(participants);
-        reload.setUsers(userParticipants);
+        //reload.setUsers(userParticipants);
+        reload.setIgnoreConflicts(true);
         calendarMgr.update(reload);
         Appointment reloadAgain = calendarMgr.get(appointment);
 
