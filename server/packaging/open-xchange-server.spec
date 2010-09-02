@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,9 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Sep 02 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16532: Update task fixes primary key on table publication and table publication_users is tried be created again. Additionally
+   possibly wrong primary key on table subscriptions is fixed, too.
 * Tue Aug 24 2010 - martin.herfurth@open-xchange.com
  - Bugfix #16714: No change notifications for category changes.
 * Mon Aug 23 2010 - thorben.betten@open-xchange.com
