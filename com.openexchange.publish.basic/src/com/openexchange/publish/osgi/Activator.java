@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,7 +64,8 @@ public class Activator extends CompositeBundleActivator {
         new LoaderActivator(), 
         new CleanUpActivator(), 
         new CreateTableActivator(),
-        new DeleteEventListenerActivator() 
+        new FolderFieldActivator(),
+        new UpdateTaskActivator()
     };
 
     @Override

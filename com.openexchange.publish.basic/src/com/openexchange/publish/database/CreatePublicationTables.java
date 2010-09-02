@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,42 +58,51 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public class CreatePublicationTables extends AbstractCreateTableImpl {
 
+    public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT = 
+        "CREATE TABLE publication_users (" +
+            "cid INT4 UNSIGNED NOT NULL," +
+            "id INT4 UNSIGNED NOT NULL," +
+            "name VARCHAR(255) NOT NULL," +
+        	"password VARCHAR(255) NOT NULL," +
+        	"created INT8 NOT NULL DEFAULT 0," +
+        	"lastModified INT8 NOT NULL DEFAULT 0," +
+        	"PRIMARY KEY (cid,id,name)," +
+        	"FOREIGN KEY (cid,id) REFERENCES publications(cid,id)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
     @Override
     public String[] getCreateStatements() {
-        return new String[] { 
-            "CREATE TABLE publications (" 
-            + "id INT4 UNSIGNED NOT NULL," 
-            + "cid INT4 UNSIGNED NOT NULL," 
+        return new String[] {
+            "CREATE TABLE publications ("
+            + "cid INT4 UNSIGNED NOT NULL,"
+            + "id INT4 UNSIGNED NOT NULL,"
             + "user_id INT4 UNSIGNED NOT NULL,"
-            + "entity INT4 UNSIGNED NOT NULL," 
-            + "module VARCHAR(255) NOT NULL," 
-            + "configuration_id INT4 UNSIGNED NOT NULL," 
-            + "target_id VARCHAR(255) NOT NULL," 
-            + "PRIMARY KEY (cid, id)," 
-            + "FOREIGN KEY(cid, user_id) REFERENCES user(cid, id))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
-            
+            + "entity INT4 UNSIGNED NOT NULL,"
+            + "module VARCHAR(255) NOT NULL,"
+            + "configuration_id INT4 UNSIGNED NOT NULL,"
+            + "target_id VARCHAR(255) NOT NULL,"
+            + "enabled BOOLEAN DEFAULT true NOT NULL,"
+            + "created INT8 NOT NULL DEFAULT 0,"
+            + "lastModified INT8 NOT NULL DEFAULT 0,"
+            + "PRIMARY KEY (cid,id),"
+            + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id)"
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+
             "CREATE TABLE sequence_publications (" 
             + "cid INT4 UNSIGNED NOT NULL," 
             + "id INT4 UNSIGNED NOT NULL," 
-            + "PRIMARY KEY  (cid))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
+            + "PRIMARY KEY (cid)" 
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+            
+            CREATE_USER_AND_PASSWORD_CREATE_STATEMENT
         };
     }
-
 
     public String[] requiredTables() {
-        return new String[]{
-            "user"
-        };
+        return new String[] { "user" };
     }
-
 
     public String[] tablesToCreate() {
-        return new String[]{
-            "publications",
-            "sequence_publications"
-        };
+        return new String[] { "publications", "sequence_publications", "publication_users" };
     }
-
 }

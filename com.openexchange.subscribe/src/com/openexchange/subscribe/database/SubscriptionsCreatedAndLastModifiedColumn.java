@@ -47,28 +47,34 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.database;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.ExtendedColumnCreationTask;
+import com.openexchange.tools.update.Column;
 
 /**
- * {@link Activator}
+ * Adds columns for storing the time stamp of the creation and the last modification for each subscription.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class SubscriptionsCreatedAndLastModifiedColumn extends ExtendedColumnCreationTask {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
+    public SubscriptionsCreatedAndLastModifiedColumn(DatabaseService dbService) {
+        super(dbService);
+    }
+
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.groupware.update.tasks.CreateSubscribeTableTask" };
+    }
+
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    protected String getTableName() {
+        return "subscriptions";
+    }
+
+    @Override
+    protected Column[] getColumns() {
+        return new Column[] { new Column("created", "INT8 NOT NULL DEFAULT 0"), new Column("lastModified", "INT8 NOT NULL DEFAULT 0") };
     }
 }

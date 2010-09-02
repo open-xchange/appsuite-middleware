@@ -47,28 +47,33 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.publish.database;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.SimpleTableCreationTask;
 
 /**
- * {@link Activator}
+ * Creates the table publication_users that will store usernames and passwords that secure the access to publications.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class PublicationWithUsernameAndPasswordUpdateTask extends SimpleTableCreationTask {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
+    public PublicationWithUsernameAndPasswordUpdateTask(DatabaseService dbService) {
+        super(dbService);
+    }
+
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
+    }
+
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    protected String getStatement() {
+        return CreatePublicationTables.CREATE_USER_AND_PASSWORD_CREATE_STATEMENT;
+    }
+
+    @Override
+    protected String getTableName() {
+        return "publication_users";
     }
 }

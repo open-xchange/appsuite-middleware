@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,18 +49,19 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.update.Tools;
 
@@ -71,26 +72,27 @@ import com.openexchange.tools.update.Tools;
 public class CreatePublicationTablesTask implements UpdateTask {
 
     private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CreatePublicationTablesTask.class);
-    
-    private final String CREATE_TABLE_PUBLICATIONS = "CREATE TABLE publications (" +
-        "id INT4 UNSIGNED NOT NULL, " + 
-        "cid INT4 UNSIGNED NOT NULL, " +
-        "user_id INT4 UNSIGNED NOT NULL, " +
-        "entity VARCHAR(255) NOT NULL, " +
-        "module VARCHAR(255) NOT NULL, " +
-        "configuration_id INT4 UNSIGNED NOT NULL, " + 
-        "target_id VARCHAR(255) NOT NULL, " +
-        "PRIMARY KEY (id, cid), " +
-        "FOREIGN KEY (cid, user_id) REFERENCES user(cid, id)" + 
+
+    public static final String CREATE_TABLE_PUBLICATIONS =
+        "CREATE TABLE publications (" +
+        "id INT4 UNSIGNED NOT NULL," +
+        "cid INT4 UNSIGNED NOT NULL," +
+        "user_id INT4 UNSIGNED NOT NULL," +
+        "entity VARCHAR(255) NOT NULL," +
+        "module VARCHAR(255) NOT NULL," +
+        "configuration_id INT4 UNSIGNED NOT NULL," +
+        "target_id VARCHAR(255) NOT NULL," +
+        "PRIMARY KEY (cid,id)," +
+        "FOREIGN KEY (cid,user_id) REFERENCES user(cid,id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
-    private final String CREATE_TABLE_SEQUENCE_PUBLICATIONS = "CREATE TABLE sequence_publications (" +
-        "cid int4 UNSIGNED NOT NULL, " +
-        "id int4 UNSIGNED NOT NULL, " +
+
+    public static final String CREATE_TABLE_SEQUENCE_PUBLICATIONS = "CREATE TABLE sequence_publications (" +
+        "cid int4 UNSIGNED NOT NULL," +
+        "id int4 UNSIGNED NOT NULL," +
         "PRIMARY KEY (cid)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
-    private final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_publications (cid, id) VALUES (?, 0)";
+
+    private final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_publications (cid,id) VALUES (?,0)";
 
     public int addedWithVersion() {
         return 48;
@@ -100,38 +102,34 @@ public class CreatePublicationTablesTask implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        Connection con = null;
+    public void perform(Schema schema, int contextId) throws AbstractOXException {
+        final Connection con = Database.getNoTimeout(contextId, true);
         try {
-            con = Database.getNoTimeout(contextId, true);
-            if(!Tools.tableExists(con, "publications")) {
+            if (!Tools.tableExists(con, "publications")) {
                 Tools.exec(con, CREATE_TABLE_PUBLICATIONS);
             }
-            if(!Tools.tableExists(con, "sequence_publications")) {
+            if (!Tools.tableExists(con, "sequence_publications")) {
                 Tools.exec(con, CREATE_TABLE_SEQUENCE_PUBLICATIONS);
             }
-            for(final int ctxId : Tools.getContextIDs(con)) {
-                if(!Tools.hasSequenceEntry("sequence_publications", con, ctxId)) {
-                    Tools.exec(con, INSERT_IN_SEQUENCE, ctxId);
+            for (int ctxId : Tools.getContextIDs(con)) {
+                if (!Tools.hasSequenceEntry("sequence_publications", con, ctxId)) {
+                    Tools.exec(con, INSERT_IN_SEQUENCE, I(ctxId));
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw createSQLError(e);
         } finally {
-            if(con != null) {
-                Database.backNoTimeout(contextId, true, con);
-            }
+            Database.backNoTimeout(contextId, true, con);
         }
     }
-    
+
     @OXThrowsMultiple(
         category = { Category.CODE_ERROR },
         desc = { "" },
         exceptionId = { 1 },
         msg = { "A SQL error occurred while performing task CreatePublicationTablesTask: %1$s." }
     )
-    private static UpdateException createSQLError(final SQLException e) {
+    private static UpdateException createSQLError(SQLException e) {
         return EXCEPTION.create(1, e, e.getMessage());
     }
-
 }

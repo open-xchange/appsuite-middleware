@@ -47,28 +47,34 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.publish.database;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.ExtendedColumnCreationTask;
+import com.openexchange.tools.update.Column;
 
 /**
- * {@link Activator}
+ * Adds a column to publications to enable or disable each publication.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class EnabledColumn extends ExtendedColumnCreationTask {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
+    public EnabledColumn(DatabaseService dbService) {
+        super(dbService);
+    }
+
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
+    }
+
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    protected String getTableName() {
+        return "publications";
+    }
+
+    @Override
+    protected Column[] getColumns() {
+        return new Column[] { new Column("enabled", "BOOLEAN NOT NULL DEFAULT true") };
     }
 }

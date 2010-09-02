@@ -49,26 +49,53 @@
 
 package com.openexchange.subscribe.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.Arrays;
+import java.util.Collection;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.subscribe.database.EnabledColumn;
+import com.openexchange.subscribe.database.FixSubscriptionTablePrimaryKey;
+import com.openexchange.subscribe.database.SubscriptionsCreatedAndLastModifiedColumn;
 
 /**
- * {@link Activator}
+ * {@link UpdateTaskRegisterer}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private final BundleContext context;
+    private ServiceRegistration registration;
+
+    public UpdateTaskRegisterer(BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    public Object addingService(ServiceReference reference) {
+        final DatabaseService service = (DatabaseService) context.getService(reference);
+        registration = context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            public Collection<UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList(
+                    (UpdateTaskV2) new EnabledColumn(service),
+                    new SubscriptionsCreatedAndLastModifiedColumn(service),
+                    new FixSubscriptionTablePrimaryKey(service));
+            }
+        }, null);
+        return service;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        registration.unregister();
+        context.ungetService(reference);
     }
 }

@@ -47,28 +47,56 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.publish.database;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link Activator}
+ * Fixes a possibly wrong primary key on table publication. The primary key may be wrong because columns cid and id are interchanged if
+ * table publication was created by the update task.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class FixPublicationTablePrimaryKey extends UpdateTaskAdapter {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private static final String TABLE = "publications";
+    private static final String[] COLUMNS = { "cid", "id" };
+    private final DatabaseService dbService;
+
+    public FixPublicationTablePrimaryKey(DatabaseService service) {
+        super();
+        this.dbService = service;
+    }
+
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
+    }
+
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int cid = params.getContextId();
+        Connection con = dbService.getForUpdateTask(cid);
+        try {
+            con.setAutoCommit(false);
+            if (!Tools.existsPrimaryKey(con, TABLE, COLUMNS)) {
+                Tools.dropPrimaryKey(con, TABLE);
+                Tools.createPrimaryKey(con, TABLE, COLUMNS);
+            }
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            dbService.backForUpdateTask(cid, con);
+        }
     }
 }

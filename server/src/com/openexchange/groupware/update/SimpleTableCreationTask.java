@@ -47,28 +47,66 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.groupware.update;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link Activator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link SimpleTableCreationTask}
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Activator extends CompositeBundleActivator {
+public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private final DatabaseService dbService;
+
+    public SimpleTableCreationTask(DatabaseService dbService) {
+        super();
+        this.dbService = dbService;
+    }
+
+    protected abstract String getStatement();
+
+    protected abstract String getTableName();
+
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int contextId = params.getContextId();
+        final Connection con = dbService.getForUpdateTask(contextId);
+        try {
+            con.setAutoCommit(false);
+            innerPerform(con);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            dbService.backForUpdateTask(contextId, con);
+        }
+    }
+
+    protected void innerPerform(Connection con) throws SQLException {
+        if (Tools.tableExists(con, getTableName())) {
+            return;
+        }
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(getStatement());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    public DatabaseService getDbService() {
+        return dbService;
     }
 }

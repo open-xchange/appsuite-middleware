@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,23 +55,20 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.publish.database.CreatePublicationTables;
 
-
 /**
  * {@link CreateTableActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class CreateTableActivator implements BundleActivator {
 
-    private ServiceRegistration serviceRegistration;
+    ServiceRegistration registration;
 
-    public void start(BundleContext context) throws Exception {
-        serviceRegistration = context.registerService(CreateTableService.class.getName(), new CreatePublicationTables(), null);
+    public void start(final BundleContext context) throws Exception {
+        registration = context.registerService(CreateTableService.class.getName(), new CreatePublicationTables(), null);
     }
 
-    public void stop(BundleContext context) throws Exception {
-        serviceRegistration.unregister();
+    public void stop(final BundleContext context) throws Exception {
+        registration.unregister();
     }
-
 }

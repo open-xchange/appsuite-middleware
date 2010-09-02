@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,14 +53,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.update.Tools;
 
@@ -71,25 +71,25 @@ import com.openexchange.tools.update.Tools;
 public class CreateSubscribeTableTask implements UpdateTask {
 
     private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CreateSubscribeTableTask.class);
-    
+
     private final String CREATE_TABLE_SUBSCRIPTIONS = "CREATE TABLE subscriptions (" +
-        "id INT4 UNSIGNED NOT NULL, " +
-        "cid INT4 UNSIGNED NOT NULL, " +
-        "user_id INT4 UNSIGNED NOT NULL, " +
-        "configuration_id INT4 UNSIGNED NOT NULL, " +
-        "source_id VARCHAR(255) NOT NULL, " +
-        "folder_id VARCHAR(255) NOT NULL, " +
-        "last_update INT8 UNSIGNED NOT NULL, " +
-        "PRIMARY KEY (id, cid), " +
-        "FOREIGN KEY(cid, user_id) REFERENCES user(cid, id)" +
+        "cid INT4 UNSIGNED NOT NULL," +
+        "id INT4 UNSIGNED NOT NULL," +
+        "user_id INT4 UNSIGNED NOT NULL," +
+        "configuration_id INT4 UNSIGNED NOT NULL," +
+        "source_id VARCHAR(255) NOT NULL," +
+        "folder_id VARCHAR(255) NOT NULL," +
+        "last_update INT8 UNSIGNED NOT NULL," +
+        "PRIMARY KEY (cid,id)," +
+        "FOREIGN KEY (cid,user_id) REFERENCES user(cid,id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
+
     private final String CREATE_TABEL_SEQUENCE_SUBSCRIPTIONS = "CREATE TABLE sequence_subscriptions (" +
-        "cid INT4 UNSIGNED NOT NULL, " +
-        "id INT4 UNSIGNED NOT NULL, " +
+        "cid INT4 UNSIGNED NOT NULL," +
+        "id INT4 UNSIGNED NOT NULL," +
         "PRIMARY KEY (cid)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_subscriptions (cid, id) VALUES (?, 0)";
 
     public int addedWithVersion() {
@@ -123,7 +123,7 @@ public class CreateSubscribeTableTask implements UpdateTask {
             }
         }
     }
-    
+
     @OXThrowsMultiple(
         category = { Category.CODE_ERROR },
         desc = { "" },
@@ -133,5 +133,4 @@ public class CreateSubscribeTableTask implements UpdateTask {
     private static UpdateException createSQLError(final SQLException e) {
         return EXCEPTION.create(1, e, e.getMessage());
     }
-
 }
