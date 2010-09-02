@@ -1,7 +1,7 @@
 package com.openexchange.messaging;
+import java.util.Collections;
 import java.util.Map;
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingService;
+import java.util.Set;
 
 
 /*
@@ -68,6 +68,10 @@ public class SimMessagingAccount implements MessagingAccount{
 
     public Map<String, Object> getConfiguration() {
         return configuration;
+    }
+
+    public Set<String> getSecretProperties() {
+        return Collections.emptySet();
     }
 
     public String getDisplayName() {

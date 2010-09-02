@@ -51,6 +51,7 @@ package com.openexchange.messaging;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link MessagingAccount} - A messaging account.
@@ -67,6 +68,13 @@ public interface MessagingAccount extends Serializable {
      * @return The configuration as a {@link Map}
      */
     public Map<String, Object> getConfiguration();
+
+    /**
+     * Gets those properties from configuration which should be encrypted.
+     * 
+     * @return Those properties from configuration which should be encrypted
+     */
+    public Set<String> getSecretProperties();
 
     /**
      * Gets the identifier.

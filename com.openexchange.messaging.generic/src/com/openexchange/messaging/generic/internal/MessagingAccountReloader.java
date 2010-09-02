@@ -50,6 +50,7 @@
 package com.openexchange.messaging.generic.internal;
 
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
@@ -77,6 +78,10 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
     public MessagingAccountReloader(final OXObjectFactory<MessagingAccount> factory, final String regionName) throws AbstractOXException {
         super(factory, regionName);
         this.delegate = refresh();
+    }
+
+    public Set<String> getSecretProperties() {
+        return this.delegate.getSecretProperties();
     }
 
     /**
