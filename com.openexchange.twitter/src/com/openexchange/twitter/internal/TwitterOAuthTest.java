@@ -53,87 +53,36 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import twitter4j.OXTwitter;
 import twitter4j.Twitter;
-import twitter4j.http.AccessToken;
+import twitter4j.TwitterException;
 import twitter4j.http.RequestToken;
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.*;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-import com.openexchange.twitter.Paging;
-import com.openexchange.twitter.TwitterAccess;
-import com.openexchange.twitter.TwitterAccessToken;
-import com.openexchange.twitter.TwitterException;
-import com.openexchange.twitter.TwitterExceptionCodes;
-import com.openexchange.twitter.TwitterService;
+
 
 /**
- * {@link TwitterServiceImpl} - The twitter service implementation based on <a
- * href="http://repo1.maven.org/maven2/net/homeip/yusuke/twitter4j/">twitter4j</a>.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link TwitterOAuthTest}
+ *
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public final class TwitterServiceImpl implements TwitterService {
-
-    /**
-     * Initializes a new {@link TwitterServiceImpl}.
-     */
-    public TwitterServiceImpl() {
-        super();
-    }
-
-    public TwitterAccess getTwitterAccess(final String twitterId, final String password) {
-        return new TwitterAccessImpl(new twitter4j.OXTwitter(twitterId, password));
-    }
-
-    public TwitterAccess getUnauthenticatedTwitterAccess() {
-        return new TwitterAccessImpl(new twitter4j.OXTwitter());
-    }
-
-    public Paging newPaging() {
-        return new PagingImpl(new twitter4j.Paging());
-    }
-
-    public TwitterAccess getOAuthTwitterAccess(final String twitterToken, final String twitterTokenSecret) throws TwitterException {
-        final OXTwitter twitter = new twitter4j.OXTwitter();
-        /*
-         * Insert the appropriate consumer key and consumer secret here
-         */
-        final String consumerKey = TwitterConfiguration.getConsumerKey();
-        final String consumerSecret = TwitterConfiguration.getConsumerSecret();
-        if (null == consumerKey || null == consumerSecret) {
-            throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
-        }
-        twitter.setOAuthConsumer(consumerKey, consumerSecret);
-        final AccessToken accessToken = new AccessToken(twitterToken, twitterTokenSecret);
-        twitter.setOAuthAccessToken(accessToken);
-        return new TwitterAccessImpl(twitter);
-    }
-
-    public TwitterAccessToken getTwitterAccessToken(final String twitterId, final String password) throws TwitterException {
+public class TwitterOAuthTest {
+    
+    public static void main(String[] args){
+        final Twitter twitter = new Twitter();
+        
+        String twitterId = "";
+        String password = "";
+        
+        twitter.setOAuthConsumer("kZX3V4AmAWwC53yA5RjHbQ", "HvY7pVFFQSGPVu9LCoBMUhvMpS00qdtqBob99jucc");
         try {
-            final Twitter twitter = new Twitter();
-            /*
-             * Insert the appropriate consumer key and consumer secret here
-             */
-            final String consumerKey = TwitterConfiguration.getConsumerKey();
-            final String consumerSecret = TwitterConfiguration.getConsumerSecret();
-            if (null == consumerKey || null == consumerSecret) {
-                throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
-            }
-            twitter.setOAuthConsumer(consumerKey, consumerSecret);
             final RequestToken requestToken = twitter.getOAuthRequestToken();
-            /*
-             * TODO: Start parsing twitter web site and confirm using specified credentials
-             */
-            System.out.println("Open the following URL and grant access to your account:");
             System.out.println(requestToken.getAuthorizationURL());
-            System.out.print("Enter the PIN(if aviailable) or just hit enter. [PIN]:");
-
+            
+            
             String url = requestToken.getAuthorizationURL();
             String username = twitterId;            
             String nameOfUserField = "session[username_or_email]";
@@ -141,11 +90,11 @@ public final class TwitterServiceImpl implements TwitterService {
             String actionOfLoginForm = "http://twitter.com/oauth/authorize";
             Pattern patternOfPin = Pattern.compile("oauth_pin\">(?:[^0-9]*)([0-9]*)");
             int numberOfForm = 1;
-            String pin = "";
             
             try {
                 BrowserVersion browser = BrowserVersion.FIREFOX_3;
                 final WebClient webClient = new WebClient(browser);
+                // Get the page, fill in the credentials and submit the login form identified by its action
                 HtmlPage loginPage = webClient.getPage(url);
                 HtmlForm loginForm = null;
                 int numberOfFormCounter = 1;
@@ -169,40 +118,25 @@ public final class TwitterServiceImpl implements TwitterService {
                     
                     Matcher matcher = patternOfPin.matcher(pageWithPinString);
                     System.out.println(pageWithPinString);
-                    
+                    String pin = "";
                     if (matcher.find()){
                         pin = matcher.group(1);
+                        System.out.println("matched!");
                     }
+                    System.out.println("***** PIN  : " + pin);
                     
                 }
             } catch (final FailingHttpStatusCodeException e) {
-                // TODO:
+                
             } catch (final MalformedURLException e) {
-                // TODO:
+                
             } catch (final IOException e) {
-                // TODO:
-            } 
-            final AccessToken accessToken;
-            if (pin.length() > 0) {
-                accessToken = twitter.getOAuthAccessToken(requestToken, pin);
-            } else {
-                accessToken = twitter.getOAuthAccessToken(requestToken);
-            }
-            /*
-             * Return token
-             */
-            return new TwitterAccessToken() {
-
-                public String getTokenSecret() {
-                    return accessToken.getTokenSecret();
-                }
-
-                public String getToken() {
-                    return accessToken.getToken();
-                }
-            };
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                
+            }            
+            
+        } catch (TwitterException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 

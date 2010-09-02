@@ -21,3 +21,4 @@ Import-Package: com.openexchange.config,
  org.xml.sax
 Bundle-Activator: com.openexchange.twitter.osgi.TwitterActivator
 Export-Package: com.openexchange.twitter
+Require-Bundle: org.apache.xerces;bundle-version="2.9.0"
