@@ -47,53 +47,21 @@
  *
  */
 
-package com.openexchange.report;
+package com.openexchange.report.internal;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Date;
+import javax.management.MBeanException;
 
 /**
- * {@link Constants}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
  */
-public final class Constants {
-
-    private static final Log LOG = LogFactory.getLog(Constants.class);
-
-    public static final ObjectName REPORTING_NAME = initReportingName();
-    public static final ObjectName OXTENDER_MONITOR_NAME = initOxtenderMonitorName();
-
-    /**
-     * Prevent instantiation.
-     */
-    private Constants() {
-        super();
-    }
-
-    private static final ObjectName initReportingName() {
-        ObjectName retval = null;
-        try {
-            retval = new ObjectName("com.openexchange.reporting", "name", "Reporting");
-        } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (NullPointerException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return retval;
-    }
+public interface LoginCounterMBean {
     
-    private static final ObjectName initOxtenderMonitorName() {
-        ObjectName retval = null;
-        try {
-            retval = new ObjectName("com.openexchange.reporting", "name", "Login Counter");
-        } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (NullPointerException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return retval;
-    }
+    public int getNumberOfLogins(Date startDate, Date endDate) throws MBeanException;
+    
+    public void setDeviceRegex(String regex);
+    
+    public String getDeviceRegex();
+    
 }

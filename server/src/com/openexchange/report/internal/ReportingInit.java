@@ -79,6 +79,7 @@ public class ReportingInit implements Initialization {
     public void start() {
         try {
             managementService.registerMBean(Constants.REPORTING_NAME, new ReportingMBean());
+            managementService.registerMBean(Constants.OXTENDER_MONITOR_NAME, new LoginCounter());
         } catch (ManagementException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -87,6 +88,7 @@ public class ReportingInit implements Initialization {
     public void stop() {
         try {
             managementService.unregisterMBean(Constants.REPORTING_NAME);
+            managementService.unregisterMBean(Constants.OXTENDER_MONITOR_NAME);
         } catch (ManagementException e) {
             LOG.error(e.getMessage(), e);
         }
