@@ -57,6 +57,25 @@ package com.openexchange.twitter;
 public interface TwitterService {
 
     /**
+     * Gets the access token for specified user credentials.
+     * 
+     * @param twitterId The twitter id
+     * @param password The twitter password
+     * @return The access token for specified user credentials
+     * @throws TwitterException If OAuth fails
+     */
+    public TwitterAccessToken getTwitterAccessToken(String twitterId, String password) throws TwitterException;
+
+    /**
+     * Gets the OAuth twitter access instance for the authenticating user.
+     * 
+     * @param token The twitter token
+     * @param tokenSecret The twitter token secret
+     * @return The authenticated twitter access
+     */
+    public TwitterAccess getOAuthTwitterAccess(String token, String tokenSecret);
+
+    /**
      * Gets the twitter access instance for the authenticating user.
      * 
      * @param twitterId The twitter id

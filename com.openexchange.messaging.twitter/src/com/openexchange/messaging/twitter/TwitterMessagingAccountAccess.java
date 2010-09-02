@@ -49,8 +49,10 @@
 
 package com.openexchange.messaging.twitter;
 
+import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
+import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
@@ -61,6 +63,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.TwitterAccess;
+import com.openexchange.twitter.TwitterAccessToken;
 import com.openexchange.twitter.TwitterException;
 import com.openexchange.twitter.TwitterService;
 
@@ -104,9 +107,37 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
         final int accountId = account.getId();
         TwitterAccess tmp = TwitterSessionRegistry.getInstance().getSession(contextId, userId, accountId);
         if (null == tmp) {
-            final String login = (String) account.getConfiguration().get(TwitterConstants.TWITTER_LOGIN);
-            final String password = (String) account.getConfiguration().get(TwitterConstants.TWITTER_PASSWORD);
-            final TwitterAccess newTwitterAccess = twitterService.getTwitterAccess(login, password);
+            final Map<String, Object> configuration = account.getConfiguration();
+            /*
+             * Get login and password for this account
+             */
+            final String login = (String) configuration.get(TwitterConstants.TWITTER_LOGIN);
+            final String password = (String) configuration.get(TwitterConstants.TWITTER_PASSWORD);
+            /*
+             * Check existence of access token
+             */
+            String token = (String) configuration.get(TwitterConstants.TWITTER_TOKEN);
+            if (null == token) {
+                /*
+                 * Request access token and store in configuration
+                 */
+                final TwitterAccessToken accessToken;
+                try {
+                    accessToken = twitterService.getTwitterAccessToken(login, password);
+                } catch (final TwitterException e) {
+                    throw new MessagingException(e);
+                }
+                /*
+                 * Add to configuration
+                 */
+                token = accessToken.getToken();
+                configuration.put(TwitterConstants.TWITTER_TOKEN, token);
+                configuration.put(TwitterConstants.TWITTER_TOKEN_SECRET, accessToken.getTokenSecret());
+                final MessagingAccountManager accountManager = account.getMessagingService().getAccountManager();
+                accountManager.updateAccount(account, session);
+            }
+            String tokenSecret = (String) configuration.get(TwitterConstants.TWITTER_TOKEN_SECRET);
+            final TwitterAccess newTwitterAccess = twitterService.getOAuthTwitterAccess(token, tokenSecret);
             tmp = TwitterSessionRegistry.getInstance().addAccess(contextId, userId, accountId, newTwitterAccess);
             if (null == tmp) {
                 tmp = newTwitterAccess;

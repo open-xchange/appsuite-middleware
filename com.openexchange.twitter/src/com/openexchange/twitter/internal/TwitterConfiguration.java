@@ -50,6 +50,7 @@
 package com.openexchange.twitter.internal;
 
 import java.text.MessageFormat;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import twitter4j.Configuration;
 import com.openexchange.config.ConfigurationService;
@@ -60,6 +61,10 @@ import com.openexchange.config.ConfigurationService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterConfiguration {
+
+    private static final AtomicReference<String> CONSUMER_KEY = new AtomicReference<String>();
+
+    private static final AtomicReference<String> CONSUMER_SECRET = new AtomicReference<String>();
 
     /**
      * Initializes a new {@link TwitterConfiguration}.
@@ -167,9 +172,33 @@ public final class TwitterConfiguration {
                 }
             }
         }
+        {
+            final String property = configurationService.getProperty("com.openexchange.twitter.consumerKey");
+            if (null == property) {
+                log.error("Missing property \"com.openexchange.twitter.consumerKey\"");
+            } else {
+                CONSUMER_KEY.set(property);
+            }
+        }
+        {
+            final String property = configurationService.getProperty("com.openexchange.twitter.consumerSecret");
+            if (null == property) {
+                log.error("Missing property \"com.openexchange.twitter.consumerSecret\"");
+            } else {
+                CONSUMER_SECRET.set(property);
+            }
+        }
 
         Configuration.setProperty("twitter4j.source", "Open-Xchange");
-        
+
+    }
+
+    public static String getConsumerKey() {
+        return CONSUMER_KEY.get();
+    }
+
+    public static String getConsumerSecret() {
+        return CONSUMER_SECRET.get();
     }
 
     private static boolean isValidVersionString(final String version) {

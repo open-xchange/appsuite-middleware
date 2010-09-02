@@ -49,73 +49,61 @@
 
 package com.openexchange.messaging.twitter;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingAccountManager;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.session.Session;
+
 /**
- * {@link TwitterConstants} - Provides useful constants for twitter.
+ * {@link TwitterMessagingAccountManager}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterConstants {
+public final class TwitterMessagingAccountManager implements MessagingAccountManager {
+
+    private final MessagingAccountManager delegate;
 
     /**
-     * The configuration property name for login.
+     * Initializes a new {@link TwitterMessagingAccountManager}.
      */
-    public static final String TWITTER_LOGIN = "login";
-
-    /**
-     * The configuration property name for password.
-     */
-    public static final String TWITTER_PASSWORD = "password";
-
-    /**
-     * The max. length of a tweet: 140 characters.
-     */
-    public static final int MAX_TWEET_LENGTH = 140;
-
-    /**
-     * The type denoting a common twitter tweet.
-     */
-    public static final String TYPE_TWEET = "tweet";
-
-    /**
-     * The type denoting twitter retweet.
-     */
-    public static final String TYPE_RETWEET = "retweet";
-
-    /**
-     * The type denoting twitter retweet new.
-     */
-    public static final String TYPE_RETWEET_NEW = "retweetNew";
-
-    /**
-     * The type denoting twitter direct message.
-     */
-    public static final String TYPE_DIRECT_MESSAGE = "directMessage";
-
-    /**
-     * The Status-Id header.
-     */
-    public static final String HEADER_STATUS_ID = "X-Twitter-Status-Id";
-
-    /**
-     * The twitter time line length.
-     */
-    public static final int TIMELINE_LENGTH = 20;
-
-    /**
-     * The configuration property name for twitter token.
-     */
-    public static final String TWITTER_TOKEN = "twitterToken";
-
-    /**
-     * The configuration property name for twitter token secret.
-     */
-    public static final String TWITTER_TOKEN_SECRET = "twitterTokenSecret";
-
-    /**
-     * Initializes a new {@link TwitterConstants}.
-     */
-    private TwitterConstants() {
+    public TwitterMessagingAccountManager(final MessagingAccountManager delegate) {
         super();
+        this.delegate = delegate;
+    }
+
+    public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
+        return delegate.addAccount(account, session);
+    }
+
+    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
+        delegate.updateAccount(account, session);
+    }
+
+    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
+        delegate.deleteAccount(account, session);
+    }
+
+    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
+        final List<MessagingAccount> accounts = delegate.getAccounts(session);
+        if (accounts.isEmpty()) {
+            return accounts;
+        }
+        final List<MessagingAccount> ret = new ArrayList<MessagingAccount>(accounts.size());
+        final String twitterServiceId = TwitterMessagingService.getServiceId();
+        for (final MessagingAccount messagingAccount : accounts) {
+            if (twitterServiceId.equals(messagingAccount.getMessagingService().getId())) {
+                ret.add(new TwitterMessagingAccount(messagingAccount));
+            } else {
+                ret.add(messagingAccount);
+            }
+        }
+        return ret;
+    }
+
+    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
+        return new TwitterMessagingAccount(delegate.getAccount(id, session));
     }
 
 }

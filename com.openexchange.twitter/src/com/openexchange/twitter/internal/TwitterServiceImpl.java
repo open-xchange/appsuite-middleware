@@ -49,8 +49,15 @@
 
 package com.openexchange.twitter.internal;
 
+import twitter4j.OXTwitter;
+import twitter4j.Twitter;
+import twitter4j.http.AccessToken;
+import twitter4j.http.RequestToken;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.TwitterAccess;
+import com.openexchange.twitter.TwitterAccessToken;
+import com.openexchange.twitter.TwitterException;
+import com.openexchange.twitter.TwitterExceptionCodes;
 import com.openexchange.twitter.TwitterService;
 
 /**
@@ -78,6 +85,53 @@ public final class TwitterServiceImpl implements TwitterService {
 
     public Paging newPaging() {
         return new PagingImpl(new twitter4j.Paging());
+    }
+
+    public TwitterAccess getOAuthTwitterAccess(final String twitterToken, final String twitterTokenSecret) {
+        final OXTwitter twitter = new twitter4j.OXTwitter();
+        /*
+         * Insert the appropriate consumer key and consumer secret here
+         */
+        twitter.setOAuthConsumer(TwitterConfiguration.getConsumerKey(), TwitterConfiguration.getConsumerSecret());
+        final AccessToken accessToken = new AccessToken(twitterToken, twitterTokenSecret);
+        twitter.setOAuthAccessToken(accessToken);
+        return new TwitterAccessImpl(twitter);
+    }
+
+    public TwitterAccessToken getTwitterAccessToken(final String twitterId, final String password) throws TwitterException {
+        try {
+            final Twitter twitter = new Twitter();
+            /*
+             * Insert the appropriate consumer key and consumer secret here
+             */
+            twitter.setOAuthConsumer(TwitterConfiguration.getConsumerKey(), TwitterConfiguration.getConsumerSecret());
+            final RequestToken requestToken = twitter.getOAuthRequestToken();
+            /*
+             * TODO: Start parsing twitter web site and confirm using specified credentials
+             */
+            final String pin = "sdfasdfsdfasdf";
+            final AccessToken accessToken;
+            if (pin.length() > 0) {
+                accessToken = twitter.getOAuthAccessToken(requestToken, pin);
+            } else {
+                accessToken = twitter.getOAuthAccessToken(requestToken);
+            }
+            /*
+             * Return token
+             */
+            return new TwitterAccessToken() {
+
+                public String getTokenSecret() {
+                    return accessToken.getTokenSecret();
+                }
+
+                public String getToken() {
+                    return accessToken.getToken();
+                }
+            };
+        } catch (final twitter4j.TwitterException e) {
+            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
 }
