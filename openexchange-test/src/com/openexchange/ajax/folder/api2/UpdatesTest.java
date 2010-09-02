@@ -118,9 +118,8 @@ public class UpdatesTest extends AbstractAJAXSession {
 
             final FolderUpdatesResponse response;
             {
-                final UpdatesRequest request =
-                    new UpdatesRequest(API.OUTLOOK, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] {
-                        FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp.getTime() - 1));
+                final UpdatesRequest request = new UpdatesRequest(API.OUTLOOK, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] {
+                    FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp.getTime() - 1));
                 response = client.execute(request);
             }
 
