@@ -109,6 +109,12 @@ public final class TwitterServiceImpl implements TwitterService {
             /*
              * TODO: Start parsing twitter web site and confirm using specified credentials
              */
+            System.out.println("Open the following URL and grant access to your account:");
+            System.out.println(requestToken.getAuthorizationURL());
+            System.out.print("Enter the PIN(if aviailable) or just hit enter. [PIN]:");
+
+            //String pin = br.readLine();
+
             final String pin = "sdfasdfsdfasdf";
             final AccessToken accessToken;
             if (pin.length() > 0) {
