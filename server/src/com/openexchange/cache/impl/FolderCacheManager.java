@@ -251,6 +251,9 @@ public final class FolderCacheManager {
             if (!fromCache) {
                 removeFolderObject(objectId, ctx);
             }
+            if (null != readConArg) {
+                putIfAbsent(loadFolderObjectInternal(objectId, ctx, readConArg), ctx, null);
+            }
             return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, factory).clone();
         } catch (final AbstractOXException e) {
             if (e instanceof OXException) {
@@ -298,6 +301,9 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public FolderObject loadFolderObject(final int folderId, final Context ctx, final Connection readCon) throws OXException {
+        if (null != readCon) {
+            putIfAbsent(loadFolderObjectInternal(folderId, ctx, readCon), ctx, null);
+        }
         final OXObjectFactory<FolderObject> factory = new OXObjectFactory<FolderObject>() {
             public Lock getCacheLock() {
                 return FolderCacheManager.this.getCacheLock();
