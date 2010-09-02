@@ -614,12 +614,13 @@ public class ReminderHandler implements ReminderService {
             rs = ps.executeQuery();
             return new ReminderSearchIterator(context, ps, rs, con);
         } catch (final SQLException e) {
-            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } finally {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(context, con);
+            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+        } catch (final SearchIteratorException e) {
+            DBUtils.closeSQLStuff(rs, ps);
+            DBPool.closeReaderSilent(context, con);
+            throw new OXException(e);
         }
     }
 
@@ -654,13 +655,16 @@ public class ReminderHandler implements ReminderService {
     }
 
     public SearchIterator<ReminderObject> listModifiedReminder(final int userId, final Date lastModified) throws OXException {
-        Connection readCon = null;
+        final Connection readCon;
+        try {
+            readCon = DBPool.pickup(context);
+        } catch (DBPoolingException e) {
+            throw new OXException(e);
+        }
 
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            readCon = DBPool.pickup(context);
-
             ps = readCon.prepareStatement(SQL.sqlModified);
             ps.setInt(1, context.getContextId());
             ps.setInt(2, userId);
@@ -669,16 +673,17 @@ public class ReminderHandler implements ReminderService {
             rs = ps.executeQuery();
             return new ReminderSearchIterator(context, ps, rs, readCon);
         } catch (final SearchIteratorException exc) {
-            throw new OXException(exc);
-        } catch (final SQLException exc) {
-            throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
-        } catch (final DBPoolingException exc) {
-            throw new OXException(exc);
-        } finally {
             DBUtils.closeSQLStuff(rs, ps);
             if (null != readCon) {
                 DBPool.closeReaderSilent(context, readCon);
             }
+            throw new OXException(exc);
+        } catch (final SQLException exc) {
+            DBUtils.closeSQLStuff(rs, ps);
+            if (null != readCon) {
+                DBPool.closeReaderSilent(context, readCon);
+            }
+            throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
         }
     }
 
