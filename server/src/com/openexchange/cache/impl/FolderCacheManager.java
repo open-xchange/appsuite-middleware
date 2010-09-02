@@ -224,6 +224,30 @@ public final class FolderCacheManager {
     Lock getCacheLock() {
         return cacheLock;
     }
+    
+    private class FolderFactory implements OXObjectFactory<FolderObject> {
+
+        private final Context ctx;
+        private final int folderId;
+
+        FolderFactory(Context ctx, int folderId) {
+            super();
+            this.ctx = ctx;
+            this.folderId = folderId;
+        }
+
+        public Lock getCacheLock() {
+            return FolderCacheManager.this.getCacheLock();
+        }
+
+        public Serializable getKey() {
+            return getCacheKey(ctx.getContextId(), folderId);
+        }
+
+        public FolderObject load() throws AbstractOXException {
+            return loadFolderObjectInternal(folderId, ctx, null);
+        }
+    }
 
     /**
      * Fetches <code>FolderObject</code> which matches given object id. If none found or <code>fromCache</code> is not set the folder will
@@ -235,18 +259,6 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx, final Connection readConArg) throws OXException {
-        final OXObjectFactory<FolderObject> factory = new OXObjectFactory<FolderObject>() {
-            public Lock getCacheLock() {
-                return FolderCacheManager.this.getCacheLock();
-            }
-            public Serializable getKey() {
-                return getCacheKey(ctx.getContextId(), objectId);
-            }
-            public FolderObject load() throws AbstractOXException {
-                // Connection can not be remembered.
-                return loadFolderObjectInternal(objectId, ctx, null);
-            }
-        };
         try {
             if (!fromCache) {
                 removeFolderObject(objectId, ctx);
@@ -254,7 +266,7 @@ public final class FolderCacheManager {
             if (null != readConArg) {
                 putIfAbsent(loadFolderObjectInternal(objectId, ctx, readConArg), ctx, null);
             }
-            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, factory).clone();
+            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, objectId)).clone();
         } catch (final AbstractOXException e) {
             if (e instanceof OXException) {
                 throw (OXException) e;
@@ -301,17 +313,6 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public FolderObject loadFolderObject(final int folderId, final Context ctx, final Connection readCon) throws OXException {
-        final OXObjectFactory<FolderObject> factory = new OXObjectFactory<FolderObject>() {
-            public Lock getCacheLock() {
-                return FolderCacheManager.this.getCacheLock();
-            }
-            public Serializable getKey() {
-                return getCacheKey(ctx.getContextId(), folderId);
-            }
-            public FolderObject load() throws AbstractOXException {
-                return loadFolderObjectInternal(folderId, ctx, null);
-            }
-        };
         final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
         cacheLock.lock();
         try {
@@ -328,7 +329,7 @@ public final class FolderCacheManager {
             putIfAbsent(loadFolderObjectInternal(folderId, ctx, readCon), ctx, null);
         }
         try {
-            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, factory).clone();
+            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, folderId)).clone();
         } catch (final AbstractOXException e) {
             if (e instanceof OXException) {
                 throw (OXException) e;
