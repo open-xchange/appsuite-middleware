@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.twitter;
 
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
@@ -73,36 +72,23 @@ public final class TwitterMessagingAccountManager implements MessagingAccountMan
         this.delegate = delegate;
     }
 
-    public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public int addAccount(MessagingAccount account, Session session) throws MessagingException {
         return delegate.addAccount(account, session);
     }
 
-    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public void updateAccount(MessagingAccount account, Session session) throws MessagingException {
         delegate.updateAccount(account, session);
     }
 
-    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public void deleteAccount(MessagingAccount account, Session session) throws MessagingException {
         delegate.deleteAccount(account, session);
     }
 
-    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
-        final List<MessagingAccount> accounts = delegate.getAccounts(session);
-        if (accounts.isEmpty()) {
-            return accounts;
-        }
-        final List<MessagingAccount> ret = new ArrayList<MessagingAccount>(accounts.size());
-        final String twitterServiceId = TwitterMessagingService.getServiceId();
-        for (final MessagingAccount messagingAccount : accounts) {
-            if (twitterServiceId.equals(messagingAccount.getMessagingService().getId())) {
-                ret.add(new TwitterMessagingAccount(messagingAccount));
-            } else {
-                ret.add(messagingAccount);
-            }
-        }
-        return ret;
+    public List<MessagingAccount> getAccounts(Session session) throws MessagingException {
+        return delegate.getAccounts(session);
     }
 
-    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
+    public MessagingAccount getAccount(int id, Session session) throws MessagingException {
         return new TwitterMessagingAccount(delegate.getAccount(id, session));
     }
 

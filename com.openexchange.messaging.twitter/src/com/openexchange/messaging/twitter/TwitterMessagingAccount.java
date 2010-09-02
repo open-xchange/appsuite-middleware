@@ -79,7 +79,7 @@ public final class TwitterMessagingAccount implements MessagingAccount {
      * 
      * @param messagingAccount
      */
-    public TwitterMessagingAccount(final MessagingAccount messagingAccount) {
+    public TwitterMessagingAccount(MessagingAccount messagingAccount) {
         super();
         this.messagingAccount = messagingAccount;
     }
