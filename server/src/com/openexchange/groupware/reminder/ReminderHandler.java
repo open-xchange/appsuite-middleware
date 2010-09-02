@@ -567,6 +567,8 @@ public class ReminderHandler implements ReminderService {
             throw new ReminderException(Code.NOT_FOUND, I(objectId), I(contextId));
         } catch (final SQLException exc) {
             throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
+        } finally {
+            DBUtils.closeSQLStuff(ps);
         }
     }
 
@@ -601,18 +603,23 @@ public class ReminderHandler implements ReminderService {
         } catch (final DBPoolingException e) {
             throw new OXException(e);
         }
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
-            final PreparedStatement ps = con.prepareStatement(SQL.sqlListByTargetId);
+            ps = con.prepareStatement(SQL.sqlListByTargetId);
             int pos = 1;
             ps.setInt(pos++, context.getContextId());
             ps.setInt(pos++, module);
             ps.setString(pos++, String.valueOf(targetId));
-            final ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             return new ReminderSearchIterator(context, ps, rs, con);
         } catch (final SQLException e) {
             throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
         } catch (final SearchIteratorException e) {
             throw new OXException(e);
+        } finally {
+            DBUtils.closeSQLStuff(rs, ps);
+            DBPool.closeReaderSilent(context, con);
         }
     }
 
