@@ -151,6 +151,11 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                     Integer.valueOf(contextId));
             }
             final DefaultMessagingAccount account = new DefaultMessagingAccount();
+            account.setId(id);
+            {
+                final MessagingServiceRegistry registry = getService(MessagingServiceRegistry.class);
+                account.setMessagingService(registry.getMessagingService(rs.getString(2)));
+            }
             account.setDisplayName(rs.getString(3));
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
@@ -176,11 +181,6 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                     }
                 }
                 account.setConfiguration(configuration);
-            }
-            account.setId(id);
-            {
-                final MessagingServiceRegistry registry = getService(MessagingServiceRegistry.class);
-                account.setMessagingService(registry.getMessagingService(rs.getString(2)));
             }
             return account;
         } catch (final SQLException e) {
