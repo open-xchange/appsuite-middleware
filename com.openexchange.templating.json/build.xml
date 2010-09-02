@@ -21,6 +21,7 @@
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
+    <property name="templatingBundle" value="com.openexchange.templating"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -39,7 +40,7 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
-        <pathelement location="${bundlesdir}/${templatingjar}"/>
+        <pathelement location="${bundlesdir}/${templatingBundle}/${templatingjar}"/>
     </path>
 
     <!-- Compile -->
