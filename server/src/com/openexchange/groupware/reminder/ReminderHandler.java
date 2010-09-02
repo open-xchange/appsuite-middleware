@@ -69,9 +69,9 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
@@ -649,22 +649,30 @@ public class ReminderHandler implements ReminderService {
     public SearchIterator<ReminderObject> listModifiedReminder(final int userId, final Date lastModified) throws OXException {
         Connection readCon = null;
 
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             readCon = DBPool.pickup(context);
 
-            final PreparedStatement ps = readCon.prepareStatement(SQL.sqlModified);
+            ps = readCon.prepareStatement(SQL.sqlModified);
             ps.setInt(1, context.getContextId());
             ps.setInt(2, userId);
             ps.setTimestamp(3, new Timestamp(lastModified.getTime()));
 
-            final ResultSet rs = ps.executeQuery();
-                return new ReminderSearchIterator(context, ps, rs, readCon);
+            rs = ps.executeQuery();
+            return new ReminderSearchIterator(context, ps, rs, readCon);
         } catch (final SearchIteratorException exc) {
             throw new OXException(exc);
         } catch (final SQLException exc) {
             throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
         } catch (final DBPoolingException exc) {
             throw new OXException(exc);
+        } finally {
+            DBUtils.closeSQLStuff(rs, ps);
+            if (null != readCon) {
+                DBPool.closeReaderSilent(context, readCon);
+            }
         }
     }
+
 }
