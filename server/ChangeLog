@@ -1,3 +1,8 @@
+* 2010-09-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #16532: Update task fixes primary key on table publication and table publication_users is tried be created again. Additionally
+   possibly wrong primary key on table subscriptions is fixed, too.
+
 * 2010-08-31 - thorben.betten@open-xchange.com
 
  - Bugfix #16762: No blind future use of previously passed connection

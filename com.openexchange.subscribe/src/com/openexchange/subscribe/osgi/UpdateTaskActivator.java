@@ -50,25 +50,29 @@
 package com.openexchange.subscribe.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.database.DatabaseService;
 
 /**
- * {@link Activator}
+ * {@link UpdateTaskActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class UpdateTaskActivator implements BundleActivator {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private ServiceTracker tracker;
+
+    public UpdateTaskActivator() {
+        super();
+    }
+
+    public void start(BundleContext context) throws Exception {
+        tracker = new ServiceTracker(context, DatabaseService.class.getName(), new UpdateTaskRegisterer(context));
+        tracker.open();
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        tracker.close();
     }
 }

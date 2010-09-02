@@ -53,32 +53,34 @@ import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
  * Creates the tables needed for the subscription part of PubSub
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CreateSubscriptionTables extends AbstractCreateTableImpl {
 
     @Override
     public String[] getCreateStatements() {
-        return new String[]{
+        return new String[] {
             "CREATE TABLE subscriptions (" +
-            "id INT4 UNSIGNED NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
+            "id INT4 UNSIGNED NOT NULL," +
             "user_id INT4 UNSIGNED NOT NULL," +
             "configuration_id INT4 UNSIGNED NOT NULL," +
             "source_id VARCHAR(255) NOT NULL," +
             "folder_id VARCHAR(255) NOT NULL," +
             "last_update INT8 UNSIGNED NOT NULL," +
             "enabled BOOLEAN DEFAULT true NOT NULL," +
-            "PRIMARY KEY (id, cid)," +
-            "FOREIGN KEY(cid, user_id) REFERENCES user(cid, id))" +
-            "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
-            
+            "created INT8 NOT NULL DEFAULT 0," +
+            "lastModified INT8 NOT NULL DEFAULT 0," +
+            "PRIMARY KEY (cid,id)," +
+            "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
+
             "CREATE TABLE sequence_subscriptions (" +
             "cid INT4 UNSIGNED NOT NULL," +
             "id INT4 UNSIGNED NOT NULL," +
-            "PRIMARY KEY  (cid))" +
-            "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
+            "PRIMARY KEY (cid)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
         };
     }
 

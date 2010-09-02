@@ -49,18 +49,11 @@
 
 package com.openexchange.publish.osgi;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.publish.database.CreatePublicationTables;
-import com.openexchange.publish.database.EnabledColumn;
-import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTask;
 
 /**
  * {@link CreateTableActivator}
@@ -69,21 +62,13 @@ import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdat
  */
 public class CreateTableActivator implements BundleActivator {
 
-    private Stack<ServiceRegistration> registrations = new Stack<ServiceRegistration>();
+    ServiceRegistration registration;
 
     public void start(final BundleContext context) throws Exception {
-        registrations.push(context.registerService(CreateTableService.class.getName(), new CreatePublicationTables(), null));
-        
-        registrations.push(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-            public Collection<UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList((UpdateTaskV2) new PublicationWithUsernameAndPasswordUpdateTask(), (UpdateTaskV2) new EnabledColumn() );
-            }
-        }, null));
+        registration = context.registerService(CreateTableService.class.getName(), new CreatePublicationTables(), null);
     }
 
     public void stop(final BundleContext context) throws Exception {
-        while (!registrations.isEmpty()) {
-            registrations.pop().unregister();
-        }
+        registration.unregister();
     }
 }

@@ -47,28 +47,49 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.groupware.update;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link Activator}
+ * {@link ExtendedColumnCreationTask}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public abstract class ExtendedColumnCreationTask extends UpdateTaskAdapter {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private final DatabaseService dbService;
+
+    protected ExtendedColumnCreationTask(DatabaseService dbService) {
+        super();
+        this.dbService = dbService;
     }
+
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int cid = params.getContextId();
+        final Connection con = dbService.getForUpdateTask(cid);
+        try {
+            con.setAutoCommit(false);
+            Tools.checkAndAddColumns(con, getTableName(), getColumns());
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            Database.backNoTimeout(cid, true, con);
+        }
+    }
+
+    protected abstract String getTableName();
+
+    protected abstract Column[] getColumns();
 }

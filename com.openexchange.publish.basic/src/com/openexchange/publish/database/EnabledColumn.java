@@ -49,23 +49,23 @@
 
 package com.openexchange.publish.database;
 
-import com.openexchange.groupware.update.SimpleColumnCreationTask;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.ExtendedColumnCreationTask;
+import com.openexchange.tools.update.Column;
 
 /**
- * {@link EnabledColumn}
+ * Adds a column to publications to enable or disable each publication.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EnabledColumn extends SimpleColumnCreationTask{
+public class EnabledColumn extends ExtendedColumnCreationTask {
 
-    @Override
-    public String getColumnDefinition() {
-        return "enabled BOOLEAN DEFAULT true NOT NULL";
+    public EnabledColumn(DatabaseService dbService) {
+        super(dbService);
     }
 
-    @Override
-    protected String getColumnName() {
-        return "enabled";
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
     }
 
     @Override
@@ -73,7 +73,8 @@ public class EnabledColumn extends SimpleColumnCreationTask{
         return "publications";
     }
 
-    public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
+    @Override
+    protected Column[] getColumns() {
+        return new Column[] { new Column("enabled", "BOOLEAN NOT NULL DEFAULT true") };
     }
 }

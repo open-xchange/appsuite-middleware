@@ -47,28 +47,62 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.publish.database;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 
 /**
- * {@link Activator}
+ * Tries againg to create the table publication_users. The update task {@link PublicationWithUsernameAndPasswordUpdateTask} may fail due to
+ * possibly wrong primary key on table publications.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class PublicationWithUsernameAndPasswordUpdateTaskRetry extends PublicationWithUsernameAndPasswordUpdateTask {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
+    public PublicationWithUsernameAndPasswordUpdateTaskRetry(DatabaseService dbService) {
+        super(dbService);
+    }
+
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public String[] getDependencies() {
+        return new String[] { FixPublicationTablePrimaryKey.class.getName() };
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int contextId = params.getContextId();
+        final Connection con = getDbService().getForUpdateTask(contextId);
+        try {
+            con.setAutoCommit(false);
+            innerPerform(con);
+            fixExecutedTask(con);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            getDbService().backForUpdateTask(contextId, con);
+        }
+    }
+
+    private static final void fixExecutedTask(Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE updateTask SET successful=true WHERE taskName=?");
+            stmt.setString(1, PublicationWithUsernameAndPasswordUpdateTask.class.getName());
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 }

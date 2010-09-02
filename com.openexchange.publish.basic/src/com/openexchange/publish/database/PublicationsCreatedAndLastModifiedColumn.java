@@ -47,28 +47,34 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.publish.database;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.ExtendedColumnCreationTask;
+import com.openexchange.tools.update.Column;
 
 /**
- * {@link Activator}
+ * Adds columns for storing the time stamp of the creation and the last modification for each publication.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class PublicationsCreatedAndLastModifiedColumn extends ExtendedColumnCreationTask {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator(),
-        new UpdateTaskActivator()};
-    
+    public PublicationsCreatedAndLastModifiedColumn(DatabaseService dbService) {
+        super(dbService);
+    }
+
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
+    }
+
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    protected String getTableName() {
+        return "publications";
+    }
+
+    @Override
+    protected Column[] getColumns() {
+        return new Column[] { new Column("created", "INT8 NOT NULL DEFAULT 0"), new Column("lastModified", "INT8 NOT NULL DEFAULT 0") };
     }
 }

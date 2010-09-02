@@ -596,17 +596,15 @@ public final class Tools {
         }
     }
 
-    public static void addColumns(Connection con, String tableName, Column... cols) throws SQLException {
+    private static void addColumns(Connection con, String tableName, Column... cols) throws SQLException {
         StringBuffer sql = new StringBuffer("ALTER TABLE ");
         sql.append(tableName);
         for (Column column : cols) {
-            if (!columnExists(con, tableName, column.getName())) {
-                sql.append(" ADD ");
-                sql.append(column.getName());
-                sql.append(' ');
-                sql.append(column.getDefinition());
-                sql.append(',');
-            }
+            sql.append(" ADD ");
+            sql.append(column.getName());
+            sql.append(' ');
+            sql.append(column.getDefinition());
+            sql.append(',');
         }
         if (sql.charAt(sql.length() - 1) == ',') {
             sql.setLength(sql.length() - 1);

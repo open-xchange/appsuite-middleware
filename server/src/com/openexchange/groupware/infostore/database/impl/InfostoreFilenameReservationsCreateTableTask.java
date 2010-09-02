@@ -70,7 +70,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link InfostoreFilenameReservationsCreateTableTask}
+ * Creates the table infostoreReservedPaths to exclusively create path and file names through the WebDAV interface.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

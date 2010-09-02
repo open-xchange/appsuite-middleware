@@ -47,66 +47,61 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.publish.osgi;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Collection;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.publish.database.PublicationUsersCreatedAndLastModifiedColumn;
+import com.openexchange.publish.database.PublicationsCreatedAndLastModifiedColumn;
+import com.openexchange.publish.database.EnabledColumn;
+import com.openexchange.publish.database.FixPublicationTablePrimaryKey;
+import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTask;
+import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTaskRetry;
 
 /**
- * {@link SimpleTableCreationTask}
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link UpdateTaskRegisterer}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
+public class UpdateTaskRegisterer implements ServiceTrackerCustomizer {
 
-    private final DatabaseService dbService;
+    private final BundleContext context;
+    private ServiceRegistration registration;
 
-    public SimpleTableCreationTask(DatabaseService dbService) {
+    public UpdateTaskRegisterer(BundleContext context) {
         super();
-        this.dbService = dbService;
+        this.context = context;
     }
 
-    protected abstract String getStatement();
-
-    protected abstract String getTableName();
-
-    public void perform(PerformParameters params) throws AbstractOXException {
-        int contextId = params.getContextId();
-        final Connection con = dbService.getForUpdateTask(contextId);
-        try {
-            con.setAutoCommit(false);
-            innerPerform(con);
-            con.commit();
-        } catch (SQLException e) {
-            rollback(con);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
-        }
+    public Object addingService(ServiceReference reference) {
+        final DatabaseService service = (DatabaseService) context.getService(reference);
+        registration = context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            public Collection<UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList(
+                    (UpdateTaskV2) new PublicationWithUsernameAndPasswordUpdateTask(service),
+                    new EnabledColumn(service),
+                    new FixPublicationTablePrimaryKey(service),
+                    new PublicationWithUsernameAndPasswordUpdateTaskRetry(service),
+                    new PublicationsCreatedAndLastModifiedColumn(service),
+                    new PublicationUsersCreatedAndLastModifiedColumn(service));
+            }
+        }, null);
+        return service;
     }
 
-    protected void innerPerform(Connection con) throws SQLException {
-        if (Tools.tableExists(con, getTableName())) {
-            return;
-        }
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            stmt.execute(getStatement());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
     }
 
-    public DatabaseService getDbService() {
-        return dbService;
+    public void removedService(ServiceReference reference, Object service) {
+        registration.unregister();
+        context.ungetService(reference);
     }
 }

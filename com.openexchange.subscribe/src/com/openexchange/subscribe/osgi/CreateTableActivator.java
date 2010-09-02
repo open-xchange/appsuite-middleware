@@ -49,23 +49,16 @@
 
 package com.openexchange.subscribe.osgi;
 
-import java.util.Arrays;
-import java.util.Collection;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.subscribe.database.CreateSubscriptionTables;
-import com.openexchange.subscribe.database.EnabledColumn;
-
 
 /**
  * {@link CreateTableActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class CreateTableActivator implements BundleActivator {
 
@@ -73,18 +66,9 @@ public class CreateTableActivator implements BundleActivator {
 
     public void start(BundleContext context) throws Exception {
         serviceRegistration = context.registerService(CreateTableService.class.getName(), new CreateSubscriptionTables(), null);
-        
-        context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-
-            public Collection<? extends UpdateTask> getUpdateTasks() {
-                return Arrays.asList(new EnabledColumn());
-            }
-            
-        }, null);
     }
 
     public void stop(BundleContext context) throws Exception {
         serviceRegistration.unregister();
     }
-
 }

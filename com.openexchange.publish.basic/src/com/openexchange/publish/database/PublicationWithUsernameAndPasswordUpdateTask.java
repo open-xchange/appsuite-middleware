@@ -49,12 +49,19 @@
 
 package com.openexchange.publish.database;
 
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.SimpleTableCreationTask;
 
 /**
+ * Creates the table publication_users that will store usernames and passwords that secure the access to publications.
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PublicationWithUsernameAndPasswordUpdateTask extends SimpleTableCreationTask {
+
+    public PublicationWithUsernameAndPasswordUpdateTask(DatabaseService dbService) {
+        super(dbService);
+    }
 
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
