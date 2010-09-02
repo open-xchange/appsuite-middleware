@@ -49,35 +49,33 @@
 
 package twitter4j;
 
-import twitter4j.Status;
-import twitter4j.TwitterException;
-
-
 /**
  * {@link OXTwitter}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class OXTwitter extends twitter4j.Twitter{
-    
+public class OXTwitter extends twitter4j.Twitter {
+
+    private static final long serialVersionUID = -5828299325374714007L;
+
     public OXTwitter() {
         super();
     }
 
-    public OXTwitter(String id, String password, String baseURL) {
+    public OXTwitter(final String id, final String password, final String baseURL) {
         super(id, password, baseURL);
     }
 
-    public OXTwitter(String id, String password) {
+    public OXTwitter(final String id, final String password) {
         super(id, password);
     }
 
-    public OXTwitter(String baseURL) {
+    public OXTwitter(final String baseURL) {
         super(baseURL);
     }
 
-    public Status showStatusAuthenticated(long id) throws TwitterException {
-        return new Status(get(getBaseURL() + "statuses/show/" + id + ".xml",null, true), this);
+    public Status showStatusAuthenticated(final long id) throws TwitterException {
+        return new Status(get(getBaseURL() + "statuses/show/" + id + ".xml", null, true), this);
     }
-    
+
 }
