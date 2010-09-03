@@ -8,5 +8,5 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-publish-microformats
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@), open-xchange-publish (>= @OXVERSION@), open-xchange-publish-basic (>= @OXVERSION@), open-xchange-templating (>= @OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-genconf (>= @OXVERSION@), open-xchange-publish (>= @OXVERSION@), open-xchange-publish-basic (>= @OXVERSION@), open-xchange-templating (>= @OXVERSION@), open-xchange-templating-json (>= @OXVERSION@)
 Description: Publishes a set of objects in OXMF externally

@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Publishes a set of objects in OXMF externally
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-publish-basic >= @OXVERSION@ open-xchange-templating >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-publish-basic >= @OXVERSION@ open-xchange-templating >= @OXVERSION@ open-xchange-templating-json >= @OXVERSION@
 #
 
 %description
