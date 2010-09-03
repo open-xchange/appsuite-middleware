@@ -52,32 +52,22 @@ package com.openexchange.image.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.Login;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.helper.CombinedInputStream;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataProperties;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -119,7 +109,7 @@ public final class ImageServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (sessiondService == null) {

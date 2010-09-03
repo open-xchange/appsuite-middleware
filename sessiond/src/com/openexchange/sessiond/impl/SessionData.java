@@ -63,8 +63,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.exception.SessiondException;
-import com.openexchange.sessiond.exception.SessiondException.Code;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -212,7 +212,7 @@ final class SessionData {
             for (final SessionContainer container : sessionList) {
                 for (final SessionControl sc : container.getSessionControls()) {
                     if (null != authId && authId.equals(sc.getSession().getAuthId())) {
-                        throw new SessiondException(Code.DUPLICATE_AUTHID, sc.getSession().getLogin(), login);
+                        throw SessionExceptionCodes.DUPLICATE_AUTHID.create(sc.getSession().getLogin(), login);
                     }
                 }
             }
@@ -223,7 +223,7 @@ final class SessionData {
 
     SessionControl addSession(final Session session, final int lifeTime, final boolean noLimit) throws SessiondException {
         if (!noLimit && countSessions() > maxSessions) {
-            throw new SessiondException(Code.MAX_SESSION_EXCEPTION);
+            throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
         // Adding a session is a writing operation. Other threads requesting a session should be blocked.
         wlock.lock();

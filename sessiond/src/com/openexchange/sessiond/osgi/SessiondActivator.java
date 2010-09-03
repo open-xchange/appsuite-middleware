@@ -118,11 +118,7 @@ public final class SessiondActivator extends DeferredActivator {
             LOG.warn("Absent service: " + clazz.getName());
         }
         if (CacheService.class.equals(clazz)) {
-            try {
-                SessionCacheConfiguration.getInstance().stop();
-            } catch (final AbstractOXException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            SessionCacheConfiguration.getInstance().stop();
         }
         getServiceRegistry().removeService(clazz);
     }

@@ -53,7 +53,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.UUID;
-import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link DefaultSessionIdGenerator} - The default session ID generator.
@@ -74,7 +75,7 @@ public final class DefaultSessionIdGenerator extends SessionIdGenerator {
     }
 
     @Override
-    public String createRandomId() throws SessiondException {
+    public String createRandomId() {
         return UUID.randomUUID().toString();
     }
 
@@ -101,9 +102,8 @@ public final class DefaultSessionIdGenerator extends SessionIdGenerator {
                 builder.append(hex);
             }
             return builder.toString();
-        } catch (final NoSuchAlgorithmException exc) {
-            throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION, exc);
+        } catch (final NoSuchAlgorithmException e) {
+            throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e);
         }
     }
-
 }

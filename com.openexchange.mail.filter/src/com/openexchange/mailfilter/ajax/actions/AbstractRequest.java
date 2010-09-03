@@ -53,7 +53,7 @@ import com.openexchange.mailfilter.ajax.Action;
 import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.SessionWrapper.Credentials;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
-import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**

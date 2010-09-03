@@ -49,62 +49,35 @@
 
 package com.openexchange.sessiond.exception;
 
-import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessiondException;
 
 /**
  * Factory for creating session exceptions.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class SessionExceptionFactory extends AbstractOXExceptionFactory<SessiondException> {
+public class SessionExceptionFactory extends Exceptions<SessiondException> {
 
-    /**
-     * Default constructor.
-     * 
-     * @param clazz this factory is used to create exception for this class.
-     */
-    public SessionExceptionFactory(final Class<?> clazz) {
-        super(clazz);
+    private static final SessionExceptionFactory SINGLETON = new SessionExceptionFactory();
+
+    private SessionExceptionFactory() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public static final SessionExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+
     @Override
-    protected SessiondException buildException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
-        return new SessiondException(component, category, number, message, cause, msgArgs);
+    protected void knownExceptions() {
+        declareAll(SessionExceptionCodes.values());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected int getClassId() {
-        return Classes.SESSION_EXCEPTION_FACTORY;
-    }
-
-    /**
-     * Creates a session exception.
-     * 
-     * @param identifier exception identifier.
-     * @param cause nested cause.
-     * @param messageArgs arguments for the message.
-     * @return a newly created exception.
-     */
-    public SessiondException create(final int identifier, final Throwable cause, final Object... messageArgs) {
-        return super.createException(identifier, cause, messageArgs);
-    }
-
-    /**
-     * Creates a session exception.
-     * 
-     * @param identifier exception identifier.
-     * @param messageArgs arguments for the message.
-     * @return a newly created exception.
-     */
-    public SessiondException create(final int identifier, final Object... messageArgs) {
-        return create(identifier, null, messageArgs);
+    protected SessiondException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new SessiondException(message, cause, args);
     }
 }

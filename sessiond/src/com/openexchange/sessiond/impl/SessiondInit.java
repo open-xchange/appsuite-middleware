@@ -56,10 +56,10 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.cache.SessionCacheConfiguration;
 import com.openexchange.sessiond.cache.SessionCacheTimer;
-import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -107,7 +107,7 @@ public class SessiondInit implements Initialization {
                 sessiond.start();
                 started.set(true);
             } else {
-                throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
+                throw SessionExceptionCodes.SESSIOND_CONFIG_EXCEPTION.create();
             }
 
             SessionCacheConfiguration.getInstance().start();
@@ -117,7 +117,7 @@ public class SessiondInit implements Initialization {
         }
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() {
         if (!started.get()) {
             LOG.error(SessiondInit.class.getName() + " has not been started");
             return;

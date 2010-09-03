@@ -55,7 +55,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link SessionCacheConfiguration} - Configures the session cache
@@ -87,19 +88,16 @@ public final class SessionCacheConfiguration implements Initialization {
     public void start() throws AbstractOXException {
         final ConfigurationService configurationService = getServiceRegistry().getService(ConfigurationService.class);
         if (null == configurationService) {
-            throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
+            throw SessionExceptionCodes.SESSIOND_CONFIG_EXCEPTION.create();
         }
         final String cacheConfigFile = configurationService.getProperty("com.openexchange.sessiond.sessionCacheConfig");
         if (cacheConfigFile == null) {
             /*
              * Not found
              */
-            final SessiondException exc = new SessiondException(
-                SessiondException.Code.MISSING_PROPERTY,
-                null,
-                "com.openexchange.sessiond.sessionCacheConfig");
+            SessiondException e = SessionExceptionCodes.MISSING_PROPERTY.create("com.openexchange.sessiond.sessionCacheConfig");
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(128).append("Cannot setup lateral session cache: ").append(exc.getMessage()).toString(), exc);
+                LOG.warn(new StringBuilder(128).append("Cannot setup lateral session cache: ").append(e.getMessage()).toString(), e);
             }
             return;
         }
@@ -116,7 +114,7 @@ public final class SessionCacheConfiguration implements Initialization {
         }
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() {
         final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
         if (null != cacheService) {
             try {

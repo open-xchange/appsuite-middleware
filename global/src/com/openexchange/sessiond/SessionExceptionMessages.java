@@ -47,37 +47,47 @@
  *
  */
 
-package com.openexchange.authentication.exception;
+package com.openexchange.sessiond;
 
-import com.openexchange.authentication.LoginException;
-import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.exceptions.Exceptions;
+import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * The factory for creating LoginException instances.
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link SessionExceptionMessages}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class LoginExceptionFactory extends Exceptions<LoginException> {
+public final class SessionExceptionMessages implements LocalizableStrings {
 
-    private static final LoginExceptionFactory SINGLETON = new LoginExceptionFactory();
+    public static final String SESSIOND_EXCEPTION_MSG = "Sessiond Exception";
 
-    private LoginExceptionFactory() {
+    public static final String MAX_SESSION_EXCEPTION_MSG = "Max Session size reached";
+
+    public static final String SESSIOND_CONFIG_EXCEPTION_MSG = "Sessiond Config Exception";
+
+    public static final String MISSING_PROPERTY_MSG = "Missing property '%s'";
+
+    public static final String UNKNOWN_EVENT_TOPIC_MSG = "Unknown event topic %s";
+
+    public static final String PASSWORD_UPDATE_FAILED_MSG = "Password could not be changed";
+
+    public static final String MAX_SESSION_PER_USER_EXCEPTION_MSG = "Max. session size for user %1$s in context %2$s exceeded";
+
+    public static final String DUPLICATE_AUTHID_MSG = "Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s.";
+
+    public static final String SESSION_PARAMETER_MISSING_MSG = "The session parameter is missing.";
+    public static final String SESSION_PARAMETER_MISSING_HELP_MSG = "Every AJAX request must contain a parameter named session that value contains the identifier of the session cookie.";
+
+    public static final String SESSION_EXPIRED_MSG = "Your session %s expired. Please start a new browser session.";
+    public static final String SESSION_EXPIRED_HELP_MSG = "A session with the given identifier can not be found.";
+
+    public static final String CONTEXT_LOCKED_MSG = "Context is locked.";
+
+    public static final String WRONG_CLIENT_IP_MSG = "Request to server was refused. Original client IP address changed. Please try again.";
+    public static final String WRONG_CLIENT_IP_HELP_MSG = "If a session exists every request is checked for its client IP address to match the one while creating the session.";
+
+    public static final String WRONG_SESSION_SECRET_MSG = "Session secret is different. Given %1$s differs from %2$s in session.";
+
+    private SessionExceptionMessages() {
         super();
-    }
-
-    public static LoginExceptionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    @Override
-    protected LoginException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
-        return new LoginException(message, cause, args);
-    }
-
-    @Override
-    protected void knownExceptions() {
-        declareAll(LoginExceptionCodes.values());
     }
 }

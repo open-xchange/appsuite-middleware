@@ -62,8 +62,9 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link SessiondEventHandler} - A convenience SessionD {@link EventHandler event handler} which delegates incoming events to registered
@@ -157,8 +158,7 @@ public final class SessiondEventHandler implements EventHandler {
                 listener.handleContainerRemoval(sessions);
             }
         } else {
-            final SessiondException error =
-                new SessiondException(SessiondException.Code.UNKNOWN_EVENT_TOPIC, null, topic == null ? "null" : topic);
+            final SessiondException error = SessionExceptionCodes.UNKNOWN_EVENT_TOPIC.create(topic == null ? "null" : topic);
             for (final SessiondEventListener listener : listeners) {
                 listener.handleError(error);
             }

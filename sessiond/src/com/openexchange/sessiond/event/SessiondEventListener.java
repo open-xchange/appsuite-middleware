@@ -51,7 +51,7 @@ package com.openexchange.sessiond.event;
 
 import java.util.Map;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link SessiondEventListener} - The listener for sessiond events.

@@ -56,8 +56,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.exception.SessiondException;
 
 /**
  * {@link SessiondServiceImpl} - Implementation of {@link SessiondService}

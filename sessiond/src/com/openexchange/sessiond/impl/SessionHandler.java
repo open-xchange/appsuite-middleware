@@ -66,10 +66,10 @@ import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.cache.SessionCache;
-import com.openexchange.sessiond.exception.SessiondException;
-import com.openexchange.sessiond.exception.SessiondException.Code;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -111,11 +111,11 @@ public final class SessionHandler {
     /**
      * Initializes the {@link SessionHandler session handler}
      * 
-     * @param config The appropriate configuration
+     * @param newConfig The appropriate configuration
      */
-    public static void init(final SessiondConfigInterface config) {
-        SessionHandler.config = config;
-        sessionData = new SessionData(config.getNumberOfSessionContainers(), config.getMaxSessions());
+    public static void init(final SessiondConfigInterface newConfig) {
+        SessionHandler.config = newConfig;
+        sessionData = new SessionData(newConfig.getNumberOfSessionContainers(), newConfig.getMaxSessions());
         if (initialized.compareAndSet(false, true)) {
             try {
                 sessionIdGenerator = SessionIdGenerator.getInstance();
@@ -123,15 +123,15 @@ public final class SessionHandler {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
 
-            noLimit = (config.getMaxSessions() == 0);
+            noLimit = (newConfig.getMaxSessions() == 0);
 
             final TimerService timer = SessiondServiceRegistry.getServiceRegistry().getService(TimerService.class);
             if (timer != null) {
                 sessiondTimer =
                     timer.scheduleWithFixedDelay(
                         new SessiondTimer(),
-                        config.getSessionContainerTimeout(),
-                        config.getSessionContainerTimeout());
+                        newConfig.getSessionContainerTimeout(),
+                        newConfig.getSessionContainerTimeout());
             }
         }
     }
@@ -215,7 +215,7 @@ public final class SessionHandler {
         if (maxSessPerUser > 0) {
             final int count = sessionData.getNumOfUserSessions(userId, context);
             if (count >= maxSessPerUser) {
-                throw new SessiondException(Code.MAX_SESSION_PER_USER_EXCEPTION, null, I(userId), I(context.getContextId()));
+                throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(context.getContextId()));
             }
         }
     }
@@ -266,7 +266,7 @@ public final class SessionHandler {
         }
         final SessionControl sessionControl = sessionData.getSession(sessionid);
         if (null == sessionControl) {
-            throw new SessiondException(SessiondException.Code.PASSWORD_UPDATE_FAILED);
+            throw SessionExceptionCodes.PASSWORD_UPDATE_FAILED.create();
         }
         // TODO: Check permission via security service
         ((SessionImpl) sessionControl.getSession()).setPassword(newPassword);

@@ -61,8 +61,8 @@ import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.exception.SessiondException;
 
 /**
  * This class is used to deal with the fact that the mailfilter takes requests from the admin-gui and the groupware gui. So it has to deal

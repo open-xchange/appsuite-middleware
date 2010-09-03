@@ -67,8 +67,8 @@ import com.openexchange.passwordchange.mechs.SHACrypt;
 import com.openexchange.passwordchange.mechs.UnixCrypt;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.exception.SessiondException;
 
 /**
  * {@link PasswordChangeService} - Performs changing a user's password

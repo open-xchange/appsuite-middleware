@@ -71,11 +71,8 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -86,10 +83,9 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.exception.Classes;
-import com.openexchange.sessiond.exception.SessionExceptionFactory;
-import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -101,14 +97,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.SESSION_SERVLET, component = EnumComponent.SESSION)
 public abstract class SessionServlet extends AJAXServlet {
 
     private static final long serialVersionUID = -8308340875362868795L;
 
     private static final Log LOG = LogFactory.getLog(SessionServlet.class);
-
-    private static final SessionExceptionFactory EXCEPTION = new SessionExceptionFactory(SessionServlet.class);
 
     public static final String SESSION_KEY = "sessionObject";
 
@@ -167,7 +160,7 @@ public abstract class SessionServlet extends AJAXServlet {
             if (!ctx.isEnabled()) {
                 final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 sessiondCon.removeSession(sessionId);
-                throw EXCEPTION.create(4);
+                throw SessionExceptionCodes.CONTEXT_LOCKED.create();
             }
             checkIP(session, req.getRemoteAddr());
             rememberSession(req, new ServerSessionAdapter(session, ctx));
@@ -212,17 +205,11 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param actual IP address of the current request.
      * @throws SessionException if the IP addresses don't match.
      */
-    @OXThrows(
-        category = Category.PERMISSION,
-        desc = "If a session exists every request is checked for its client IP address to match the one while creating the session.",
-        exceptionId = 5,
-        msg = "Request to server was refused. Original client IP address changed. Please try again."
-    )
     public static void checkIP(final boolean checkIP, final Session session, final String actual) throws SessiondException {
         if (null == actual || (!isWhitelistedFromIPCheck(actual) && !actual.equals(session.getLocalIp()))) {
             if (checkIP) {
                 LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
-                throw EXCEPTION.create(5);
+                throw SessionExceptionCodes.WRONG_CLIENT_IP.create();
             }
             if (LOG.isDebugEnabled()) {
                 final StringBuilder sb = new StringBuilder(64);
@@ -253,12 +240,6 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the cookie identifier.
      * @throws SessionException if the cookie identifier can not be found.
      */
-    @OXThrows(
-        category = Category.CODE_ERROR,
-        desc = "Every AJAX request must contain a parameter named session that value contains the identifier of the session cookie.",
-        exceptionId = 1,
-        msg = "The session parameter is missing."
-    )
     private static String getSessionId(final ServletRequest req) throws SessiondException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
@@ -275,13 +256,10 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
                 LOG.debug(debug.toString());
             }
-            throw EXCEPTION.create(1);
+            throw SessionExceptionCodes.SESSION_PARAMETER_MISSING.create();
         }
         return retval;
     }
-
-
-
 
     /**
      * Finds appropriate local session.
@@ -291,27 +269,21 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    @OXThrowsMultiple(
-        category = { Category.TRY_AGAIN, Category.TRY_AGAIN },
-        desc = { "A session with the given identifier can not be found.", "" },
-        exceptionId = { 3, 6 },
-        msg = { "Your session %s expired. Please start a new browser session.", "Session secret is different. Given %1$s differs from %2$s in session." }
-    )
     public static Session getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
-            throw EXCEPTION.create(3, sessionId);
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
         String secret = extractSecret(session.getHash(), req.getCookies());
         
         if (secret == null || !session.getSecret().equals(secret)) {
-            throw EXCEPTION.create(6, secret, session.getSecret());
+            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
         }
         try {
             final Context context = ContextStorage.getStorageContext(session.getContextId());
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!user.isMailEnabled()) {
-                throw EXCEPTION.create(3, session.getSessionID());
+                throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
         } catch (UndeclaredThrowableException e) {
             throw new UserException(UserException.Code.USER_NOT_FOUND, e, I(session.getUserId()), I(session.getContextId()));

@@ -47,29 +47,26 @@
  *
  */
 
-package com.openexchange.sessiond.exception;
+package com.openexchange.sessiond;
+
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
- * Class identifier for building exceptions.
- * 
+ * Exception if something not works as expected with the session.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Classes {
+public class SessiondException extends AbstractOXException {
 
-    /**
-     * {@link SessionExceptionFactory}.
-     */
-    public static final int SESSION_EXCEPTION_FACTORY = 1;
+    private static final long serialVersionUID = 6320550676305333711L;
 
-    /**
-     * {@link SessionServlet}.
-     */
-    public static final int SESSION_SERVLET = 2;
+    public SessiondException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-    /**
-     * Prevent instantiation
-     */
-    private Classes() {
-        super();
+    public SessiondException(ErrorMessage message, Throwable cause, Object[] args) {
+        super(message, cause);
+        setMessageArgs(args);
     }
 }

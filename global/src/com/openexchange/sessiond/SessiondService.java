@@ -51,7 +51,6 @@ package com.openexchange.sessiond;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.exception.SessiondException;
 
 /**
  * {@link SessiondService}
