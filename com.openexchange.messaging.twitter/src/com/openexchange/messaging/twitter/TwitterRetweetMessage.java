@@ -79,6 +79,8 @@ import com.openexchange.twitter.User;
  */
 public final class TwitterRetweetMessage implements MessagingMessage {
 
+    private static final long serialVersionUID = 4916165244981260891L;
+
     private static final ContentType CONTENT_TYPE;
 
     private static final ContentDisposition CONTENT_DISPOSITION;
