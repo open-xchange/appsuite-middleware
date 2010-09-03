@@ -407,29 +407,31 @@ public final class EventQueue {
             return;
         }
         final int action = eventObj.getAction();
+        final Contact contact = (Contact) eventObj.getObject();
+        final Session session = eventObj.getSessionObject();
         switch (action) {
         case EventClient.CREATED:
-            for (int a = 0; a < contactEventList.size(); a++) {
+            for (final ContactEventInterface next : contactEventList) {
                 try {
-                    contactEventList.get(a).contactCreated((Contact) eventObj.getObject(), eventObj.getSessionObject());
+                    next.contactCreated(contact, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CHANGED:
-            for (int a = 0; a < contactEventList.size(); a++) {
+            for (final ContactEventInterface next : contactEventList) {
                 try {
-                    contactEventList.get(a).contactModified((Contact) eventObj.getObject(), eventObj.getSessionObject());
+                    next.contactModified(contact, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.DELETED:
-            for (int a = 0; a < contactEventList.size(); a++) {
+            for (final ContactEventInterface next : contactEventList) {
                 try {
-                    contactEventList.get(a).contactDeleted((Contact) eventObj.getObject(), eventObj.getSessionObject());
+                    next.contactDeleted(contact, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -445,56 +447,58 @@ public final class EventQueue {
             return;
         }
         final int action = eventObj.getAction();
+        final Task task = (Task) eventObj.getObject();
+        final Session session = eventObj.getSessionObject();
         switch (action) {
         case EventClient.CREATED:
-            for (int a = 0; a < taskEventList.size(); a++) {
+            for (final TaskEventInterface next : taskEventList) {
                 try {
-                    taskEventList.get(a).taskCreated((Task) eventObj.getObject(), eventObj.getSessionObject());
+                    next.taskCreated(task, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CHANGED:
-            for (int a = 0; a < taskEventList.size(); a++) {
+            for (final TaskEventInterface next : taskEventList) {
                 try {
-                    taskEventList.get(a).taskModified((Task) eventObj.getObject(), eventObj.getSessionObject());
+                    next.taskModified(task, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.DELETED:
-            for (int a = 0; a < taskEventList.size(); a++) {
+            for (final TaskEventInterface next : taskEventList) {
                 try {
-                    taskEventList.get(a).taskDeleted((Task) eventObj.getObject(), eventObj.getSessionObject());
+                    next.taskDeleted(task, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CONFIRM_ACCEPTED:
-            for (int a = 0; a < taskEventList.size(); a++) {
+            for (final TaskEventInterface next : taskEventList) {
                 try {
-                    taskEventList.get(a).taskAccepted((Task) eventObj.getObject(), eventObj.getSessionObject());
+                    next.taskAccepted(task, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CONFIRM_DECLINED:
-            for (int a = 0; a < taskEventList.size(); a++) {
+            for (final TaskEventInterface next : taskEventList) {
                 try {
-                    taskEventList.get(a).taskDeclined((Task) eventObj.getObject(), eventObj.getSessionObject());
+                    next.taskDeclined(task, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CONFIRM_TENTATIVE:
-            for (int a = 0; a < taskEventList.size(); a++) {
+            for (final TaskEventInterface next : taskEventList) {
                 try {
-                    taskEventList.get(a).taskTentativelyAccepted((Task) eventObj.getObject(), eventObj.getSessionObject());
+                    next.taskTentativelyAccepted(task, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -510,29 +514,31 @@ public final class EventQueue {
             return;
         }
         final int action = eventObj.getAction();
+        final FolderObject folderObject = (FolderObject) eventObj.getObject();
+        final Session session = eventObj.getSessionObject();
         switch (action) {
         case EventClient.CREATED:
-            for (int a = 0; a < folderEventList.size(); a++) {
+            for (final FolderEventInterface next : folderEventList) {
                 try {
-                    folderEventList.get(a).folderCreated((FolderObject) eventObj.getObject(), eventObj.getSessionObject());
+                    next.folderCreated(folderObject, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CHANGED:
-            for (int a = 0; a < folderEventList.size(); a++) {
+            for (final FolderEventInterface next : folderEventList) {
                 try {
-                    folderEventList.get(a).folderModified((FolderObject) eventObj.getObject(), eventObj.getSessionObject());
+                    next.folderModified(folderObject, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.DELETED:
-            for (int a = 0; a < folderEventList.size(); a++) {
+            for (final FolderEventInterface next : folderEventList) {
                 try {
-                    folderEventList.get(a).folderDeleted((FolderObject) eventObj.getObject(), eventObj.getSessionObject());
+                    next.folderDeleted(folderObject, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -548,29 +554,31 @@ public final class EventQueue {
             return;
         }
         final int action = eventObj.getAction();
+        final DocumentMetadata documentMetadata = (DocumentMetadata) eventObj.getObject();
+        final Session session = eventObj.getSessionObject();
         switch (action) {
         case EventClient.CREATED:
-            for (int a = 0; a < infostoreEventList.size(); a++) {
+            for (final InfostoreEventInterface next : infostoreEventList) {
                 try {
-                    infostoreEventList.get(a).infoitemCreated((DocumentMetadata) eventObj.getObject(), eventObj.getSessionObject());
+                    next.infoitemCreated(documentMetadata, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CHANGED:
-            for (int a = 0; a < infostoreEventList.size(); a++) {
+            for (final InfostoreEventInterface next : infostoreEventList) {
                 try {
-                    infostoreEventList.get(a).infoitemModified((DocumentMetadata) eventObj.getObject(), eventObj.getSessionObject());
+                    next.infoitemModified(documentMetadata, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.DELETED:
-            for (int a = 0; a < infostoreEventList.size(); a++) {
+            for (final InfostoreEventInterface next : infostoreEventList) {
                 try {
-                    infostoreEventList.get(a).infoitemDeleted((DocumentMetadata) eventObj.getObject(), eventObj.getSessionObject());
+                    next.infoitemDeleted(documentMetadata, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
