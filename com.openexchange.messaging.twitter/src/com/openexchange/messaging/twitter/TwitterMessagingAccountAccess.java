@@ -110,30 +110,24 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
             try {
                 final Map<String, Object> configuration = account.getConfiguration();
                 /*
-                 * Get login and password for this account
+                 * The OAuth twitter access
                  */
-                final String login = (String) configuration.get(TwitterConstants.TWITTER_LOGIN);
-                final String password = (String) configuration.get(TwitterConstants.TWITTER_PASSWORD);
+                TwitterAccess newTwitterAccess;
                 /*
-                 * Check existence of access token
+                 * Check existence of access token in current configuration
                  */
-                String token = (String) configuration.get(TwitterConstants.TWITTER_TOKEN);
-                if (null == token) {
+                final String token = (String) configuration.get(TwitterConstants.TWITTER_TOKEN);
+                final String tokenSecret = (String) configuration.get(TwitterConstants.TWITTER_TOKEN_SECRET);
+                if ((null == token || null == tokenSecret) || !testOAuthTwitterAccess((newTwitterAccess =
+                    twitterService.getOAuthTwitterAccess(token, tokenSecret)))) {
                     /*
-                     * Request access token and store in configuration
+                     * Request new access token and store in configuration
                      */
-                    final TwitterAccessToken accessToken = twitterService.getTwitterAccessToken(login, password);
-                    /*
-                     * Add to configuration
-                     */
-                    token = accessToken.getToken();
-                    configuration.put(TwitterConstants.TWITTER_TOKEN, token);
-                    configuration.put(TwitterConstants.TWITTER_TOKEN_SECRET, accessToken.getTokenSecret());
-                    final MessagingAccountManager accountManager = account.getMessagingService().getAccountManager();
-                    accountManager.updateAccount(account, session);
+                    newTwitterAccess = newAccessToken();
                 }
-                String tokenSecret = (String) configuration.get(TwitterConstants.TWITTER_TOKEN_SECRET);
-                final TwitterAccess newTwitterAccess = twitterService.getOAuthTwitterAccess(token, tokenSecret);
+                /*
+                 * Add twitter access to registry
+                 */
                 tmp = TwitterSessionRegistry.getInstance().addAccess(contextId, userId, accountId, newTwitterAccess);
                 if (null == tmp) {
                     tmp = newTwitterAccess;
@@ -143,6 +137,55 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
             }
         }
         twitterAccess = tmp;
+    }
+
+    private TwitterAccess newAccessToken() throws MessagingException, TwitterException {
+        final Map<String, Object> configuration = account.getConfiguration();
+        final String login = (String) configuration.get(TwitterConstants.TWITTER_LOGIN);
+        final String password = (String) configuration.get(TwitterConstants.TWITTER_PASSWORD);
+        /*
+         * Request access token and store in configuration
+         */
+        final TwitterAccessToken accessToken = twitterService.getTwitterAccessToken(login, password);
+        /*
+         * Add to configuration & update
+         */
+        final String token = accessToken.getToken();
+        final String tokenSecret = accessToken.getTokenSecret();
+        configuration.put(TwitterConstants.TWITTER_TOKEN, token);
+        configuration.put(TwitterConstants.TWITTER_TOKEN_SECRET, tokenSecret);
+        final MessagingAccountManager accountManager = account.getMessagingService().getAccountManager();
+        accountManager.updateAccount(account, session);
+        /*
+         * Obtain OAuth twitter access
+         */
+        final TwitterAccess newTwitterAccess = twitterService.getOAuthTwitterAccess(token, tokenSecret);
+        /*
+         * Test it
+         */
+        testOAuthTwitterAccess(newTwitterAccess);
+        /*
+         * ... and return
+         */
+        return newTwitterAccess;
+    }
+
+    private boolean testOAuthTwitterAccess(final TwitterAccess newTwitterAccess) {
+        try {
+            /*
+             * Test twitter access
+             */
+            final Paging paging = twitterService.newPaging();
+            paging.setCount(1);
+            newTwitterAccess.getFriendsTimeline(paging);
+            return true;
+        } catch (final TwitterException e) {
+            final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(TwitterMessagingAccountAccess.class);
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
+            }
+            return false;
+        }
     }
 
     public int getAccountId() {
