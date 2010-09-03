@@ -53,7 +53,9 @@ import static com.openexchange.messaging.facebook.FormStrings.FORM_LABEL_LOGIN;
 import static com.openexchange.messaging.facebook.FormStrings.FORM_LABEL_PASSWORD;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.messaging.MessagingAccountAccess;
@@ -95,6 +97,8 @@ public final class FacebookMessagingService implements MessagingService {
 
     private final DynamicFormDescription formDescription;
 
+    private final Set<String> secretProperties;
+
     /**
      * Initializes a new {@link FacebookMessagingService}.
      */
@@ -107,7 +111,12 @@ public final class FacebookMessagingService implements MessagingService {
          */
         tmpDescription.add(FormElement.input(FacebookConstants.FACEBOOK_LOGIN, FORM_LABEL_LOGIN, true, ""));
         tmpDescription.add(FormElement.password(FacebookConstants.FACEBOOK_PASSWORD, FORM_LABEL_PASSWORD, true, ""));
+        secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(FacebookConstants.FACEBOOK_PASSWORD)));
         this.formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
+    }
+
+    public Set<String> getSecretProperties() {
+        return secretProperties;
     }
 
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {

@@ -162,9 +162,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 /*
                  * Decrypt password fields for clear-text representation in account's configuration
                  */
-                final Set<String> passwordElementNames = messagingService.getSecretProperties();
-                if (!passwordElementNames.isEmpty()) {
-                    for (final String passwordElementName : passwordElementNames) {
+                final Set<String> secretPropNames = messagingService.getSecretProperties();
+                if (!secretPropNames.isEmpty()) {
+                    for (final String passwordElementName : secretPropNames) {
                         final String toDecrypt = (String) configuration.get(passwordElementName);
                         if (null != toDecrypt) {
                             try {
@@ -326,9 +326,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                  * Encrypt password fields to not having clear-text representation in database
                  */
                 final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId);
-                final Set<String> passwordElementNames = messagingService.getSecretProperties();
-                if (!passwordElementNames.isEmpty()) {
-                    for (final String passwordElementName : passwordElementNames) {
+                final Set<String> secretPropNames = messagingService.getSecretProperties();
+                if (!secretPropNames.isEmpty()) {
+                    for (final String passwordElementName : secretPropNames) {
                         final String toCrypt = (String) configuration.get(passwordElementName);
                         if (null != toCrypt) {
                             final String encrypted = encrypt(toCrypt, session);
@@ -468,9 +468,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                      * Encrypt password fields to not having clear-text representation in database
                      */
                     final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId);
-                    final Set<String> passwordElementNames = messagingService.getSecretProperties();
-                    if (!passwordElementNames.isEmpty()) {
-                        for (final String passwordElementName : passwordElementNames) {
+                    final Set<String> secretPropNames = messagingService.getSecretProperties();
+                    if (!secretPropNames.isEmpty()) {
+                        for (final String passwordElementName : secretPropNames) {
                             final String toCrypt = (String) configuration.get(passwordElementName);
                             if (null != toCrypt) {
                                 final String encrypted = encrypt(toCrypt, session);

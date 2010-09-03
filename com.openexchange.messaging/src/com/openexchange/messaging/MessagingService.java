@@ -50,6 +50,7 @@
 package com.openexchange.messaging;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.session.Session;
 
@@ -89,6 +90,13 @@ public interface MessagingService {
      * @return The form description
      */
     public DynamicFormDescription getFormDescription();
+
+    /**
+     * Gets those properties from configuration which should be encrypted.
+     * 
+     * @return Those properties from configuration which should be encrypted
+     */
+    public Set<String> getSecretProperties();
 
     /**
      * Gets the account manager for this messaging service.
