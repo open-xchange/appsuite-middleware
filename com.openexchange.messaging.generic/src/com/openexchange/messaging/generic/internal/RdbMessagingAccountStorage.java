@@ -119,7 +119,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
     }
 
     private static final String SQL_SELECT =
-        "SELECT confId, serviceId, displayName FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
+        "SELECT confId, displayName FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
     public MessagingAccount getAccount(final String serviceId, final int id, final Session session) throws MessagingException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
@@ -150,13 +150,11 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(contextId));
             }
+            final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId);
             final DefaultMessagingAccount account = new DefaultMessagingAccount();
             account.setId(id);
-            {
-                final MessagingServiceRegistry registry = getService(MessagingServiceRegistry.class);
-                account.setMessagingService(registry.getMessagingService(rs.getString(2)));
-            }
-            account.setDisplayName(rs.getString(3));
+            account.setMessagingService(messagingService);
+            account.setDisplayName(rs.getString(2));
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final Map<String, Object> configuration = new HashMap<String, Object>();
@@ -164,7 +162,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 /*
                  * Decrypt password fields for clear-text representation in account's configuration
                  */
-                final Set<String> passwordElementNames = account.getSecretProperties();
+                final Set<String> passwordElementNames = messagingService.getSecretProperties();
                 if (!passwordElementNames.isEmpty()) {
                     for (final String passwordElementName : passwordElementNames) {
                         final String toDecrypt = (String) configuration.get(passwordElementName);
@@ -327,7 +325,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 /*
                  * Encrypt password fields to not having clear-text representation in database
                  */
-                final Set<String> passwordElementNames = account.getSecretProperties();
+                final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId);
+                final Set<String> passwordElementNames = messagingService.getSecretProperties();
                 if (!passwordElementNames.isEmpty()) {
                     for (final String passwordElementName : passwordElementNames) {
                         final String toCrypt = (String) configuration.get(passwordElementName);
@@ -468,7 +467,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                     /*
                      * Encrypt password fields to not having clear-text representation in database
                      */
-                    final Set<String> passwordElementNames = account.getSecretProperties();
+                    final MessagingService messagingService = getService(MessagingServiceRegistry.class).getMessagingService(serviceId);
+                    final Set<String> passwordElementNames = messagingService.getSecretProperties();
                     if (!passwordElementNames.isEmpty()) {
                         for (final String passwordElementName : passwordElementNames) {
                             final String toCrypt = (String) configuration.get(passwordElementName);
