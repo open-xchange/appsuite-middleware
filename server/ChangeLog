@@ -2,6 +2,7 @@
 
  - Bugfix #16776: Changed twitter API to use OAuth
  - Bugfix #16786: Support of field 'image1_content_type' in all request
+ - Bugfix #16723: No appending of Href content for text-only mails
 
 * 2010-09-02 - martin.herfurth@open-xchange.com
 
