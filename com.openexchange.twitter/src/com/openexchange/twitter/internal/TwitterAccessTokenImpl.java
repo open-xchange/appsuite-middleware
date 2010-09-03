@@ -66,7 +66,7 @@ public final class TwitterAccessTokenImpl implements TwitterAccessToken {
      * 
      * @param accessToken The twitter4j access token instance
      */
-    public TwitterAccessTokenImpl(AccessToken accessToken) {
+    public TwitterAccessTokenImpl(final AccessToken accessToken) {
         super();
         this.accessToken = accessToken;
     }
