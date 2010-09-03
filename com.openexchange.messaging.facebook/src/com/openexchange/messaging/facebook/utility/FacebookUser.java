@@ -71,6 +71,15 @@ public final class FacebookUser {
     }
 
     /**
+     * Checks if this facebook user is empty.
+     * 
+     * @return <code>true</code> if this facebook user is empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return (uid <= 0) && (null == name) && (null == picSmall);
+    }
+
+    /**
      * Gets the URL to the small-sized profile picture.
      * <p>
      * The image can have a maximum width of 50px and a maximum height of 150px.
