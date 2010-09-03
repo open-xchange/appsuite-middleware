@@ -79,6 +79,10 @@ import com.openexchange.twitter.TwitterService;
  */
 public final class TwitterServiceImpl implements TwitterService {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TwitterServiceImpl.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link TwitterServiceImpl}.
      */
@@ -127,56 +131,9 @@ public final class TwitterServiceImpl implements TwitterService {
             twitter.setOAuthConsumer(consumerKey, consumerSecret);
             final RequestToken requestToken = twitter.getOAuthRequestToken();
             /*
-             * Start parsing twitter web site and confirm using specified credentials
+             * Crawl PIN
              */
-            final String url = requestToken.getAuthorizationURL();
-            final String username = twitterId;
-            final String nameOfUserField = "session[username_or_email]";
-            final String nameOfPasswordField = "session[password]";
-            final String actionOfLoginForm = "http://twitter.com/oauth/authorize";
-            final Pattern patternOfPin = Pattern.compile("oauth_pin\">(?:[^0-9]*)([0-9]*)");
-            final int numberOfForm = 1;
-            String pin = "";
-            try {
-                final BrowserVersion browser = BrowserVersion.FIREFOX_3;
-                final WebClient webClient = new WebClient(browser);
-                final HtmlPage loginPage = webClient.getPage(url);
-                HtmlForm loginForm = null;
-                int numberOfFormCounter = 1;
-                for (final HtmlForm form : loginPage.getForms()) {
-                    final Pattern pattern = Pattern.compile(actionOfLoginForm);
-                    final Matcher matcher = pattern.matcher(form.getActionAttribute());
-
-                    System.out.println("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / " + numberOfForm);
-
-                    if (matcher.matches() && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
-                        loginForm = form;
-                    }
-                    numberOfFormCounter++;
-                }
-                if (loginForm != null) {
-                    final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
-                    userfield.setValueAttribute(username);
-                    final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
-                    passwordfield.setValueAttribute(password);
-                    final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
-                    final String pageWithPinString = pageAfterLogin.getWebResponse().getContentAsString();
-
-                    final Matcher matcher = patternOfPin.matcher(pageWithPinString);
-                    System.out.println(pageWithPinString);
-
-                    if (matcher.find()) {
-                        pin = matcher.group(1);
-                    }
-
-                }
-            } catch (final FailingHttpStatusCodeException e) {
-                throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
-            } catch (final MalformedURLException e) {
-                throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
-            } catch (final IOException e) {
-                throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
-            }
+            final String pin = crawlPINFromAuthURL(twitterId, password, requestToken);
             /*
              * Obtain & return OAuth access token
              */
@@ -185,6 +142,62 @@ public final class TwitterServiceImpl implements TwitterService {
         } catch (final twitter4j.TwitterException e) {
             throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private String crawlPINFromAuthURL(final String twitterId, final String password, final RequestToken requestToken) throws TwitterException {
+        String pin = "";
+        try {
+            final BrowserVersion browser = BrowserVersion.FIREFOX_3;
+            final WebClient webClient = new WebClient(browser);
+            /*
+             * Get page from authorization URL
+             */
+            final HtmlPage loginPage = webClient.getPage(requestToken.getAuthorizationURL());
+            
+            final String actionOfLoginForm = "http://twitter.com/oauth/authorize";
+            final String nameOfUserField = "session[username_or_email]";
+            final String nameOfPasswordField = "session[password]";
+            final int numberOfForm = 1;
+            
+            HtmlForm loginForm = null;
+            int numberOfFormCounter = 1;
+            for (final HtmlForm form : loginPage.getForms()) {
+                final Pattern pattern = Pattern.compile(actionOfLoginForm);
+                final Matcher matcher = pattern.matcher(form.getActionAttribute());
+                if (DEBUG) {
+                    LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / " + numberOfForm);
+                }
+                if (matcher.matches() && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
+                    loginForm = form;
+                }
+                numberOfFormCounter++;
+            }
+            if (loginForm != null) {
+                final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
+                userfield.setValueAttribute(twitterId);
+                final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
+                passwordfield.setValueAttribute(password);
+                final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
+                final String pageWithPinString = pageAfterLogin.getWebResponse().getContentAsString();
+
+                final Pattern patternOfPin = Pattern.compile("oauth_pin\">(?:[^0-9]*)([0-9]*)");
+                final Matcher matcher = patternOfPin.matcher(pageWithPinString);
+                if (DEBUG) {
+                    LOG.debug(pageWithPinString);
+                }
+
+                if (matcher.find()) {
+                    pin = matcher.group(1);
+                }
+            }
+        } catch (final FailingHttpStatusCodeException e) {
+            throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
+        } catch (final MalformedURLException e) {
+            throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
+        } catch (final IOException e) {
+            throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
+        }
+        return pin;
     }
 
 }
