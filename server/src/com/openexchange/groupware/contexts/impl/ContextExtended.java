@@ -62,8 +62,14 @@ public interface ContextExtended extends Context {
      * Sets context's update status. This causes sessions that belong to a
      * updating context to die as fast as possible to be able to maintain these
      * contexts.
-     * @param updating - the context's update status
+     * @param updating the context's update status
      */
     void setUpdating(boolean updating);
+
+    /**
+     * Marks the context as read only. This can be used to prevent writing operations before getting a database down exception.
+     * @param readOnly the context's read only status.
+     */
+    void setReadOnly(boolean readOnly);
 
 }

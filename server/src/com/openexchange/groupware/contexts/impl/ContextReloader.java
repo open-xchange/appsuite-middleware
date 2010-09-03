@@ -95,6 +95,11 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
         delegate.setUpdating(updating);
     }
 
+    public void setReadOnly(boolean readOnly) {
+        updateDelegate();
+        delegate.setReadOnly(readOnly);
+    }
+
     public int getContextId() {
         return delegate.getContextId();
     }

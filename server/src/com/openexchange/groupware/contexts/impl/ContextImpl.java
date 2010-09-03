@@ -69,7 +69,7 @@ public class ContextImpl implements ContextExtended {
     private long fileStorageQuota;
     private boolean enabled = true;
     private boolean updating = false;
-    private boolean readonly = false;
+    private boolean readOnly = false;
 
     public ContextImpl(final int contextId) {
         this.contextId = contextId;
@@ -170,6 +170,11 @@ public class ContextImpl implements ContextExtended {
     }
 
     public boolean isReadOnly() {
-        return readonly;
+        return readOnly;
+    }
+    
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+        
     }
 }

@@ -61,8 +61,10 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -73,30 +75,19 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingContextStorage extends ContextStorage {
 
-    private static final Log LOG = LogFactory.getLog(CachingContextStorage.class);
-
+    static final Log LOG = LogFactory.getLog(CachingContextStorage.class);
     private static final String REGION_NAME = "Context";
 
+    private final Lock cacheLock;
+    private final ContextStorage persistantImpl;
     private boolean started;
 
-    private final Lock cacheLock;
-
-    private final ContextStorage persistantImpl;
-
-    /**
-     * Default constructor.
-     * @param persistantImpl implementation of the ContextStorage that does
-     * Persistent storing.
-     */
     public CachingContextStorage(final ContextStorage persistantImpl) {
         super();
         cacheLock = new ReentrantLock();
         this.persistantImpl = persistantImpl;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getContextId(final String loginInfo) throws ContextException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
@@ -127,9 +118,6 @@ public class CachingContextStorage extends ContextStorage {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ContextExtended loadContext(final int contextId) throws ContextException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
@@ -140,10 +128,17 @@ public class CachingContextStorage extends ContextStorage {
             public ContextExtended load() throws AbstractOXException {
                 final ContextExtended retval = getPersistantImpl().loadContext(contextId);
                 final Updater updater = Updater.getInstance();
-                UpdateStatus status = updater.getStatus(retval);
-                retval.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
-                if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
-                    updater.startUpdate(retval);
+                try {
+                    UpdateStatus status = updater.getStatus(retval);
+                    retval.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
+                    if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
+                        updater.startUpdate(retval);
+                    }
+                } catch (UpdateException e) {
+                    if (SchemaExceptionCodes.DATABASE_DOWN.getDetailNumber() == e.getDetailNumber()) {
+                        LOG.warn("Switching to read only mode for context " + contextId + " because master database is down.", e);
+                        retval.setReadOnly(true);
+                    }
                 }
                 return retval;
             }
@@ -164,9 +159,6 @@ public class CachingContextStorage extends ContextStorage {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<Integer> getAllContextIds() throws ContextException {
         return persistantImpl.getAllContextIds();
@@ -200,9 +192,6 @@ public class CachingContextStorage extends ContextStorage {
         started = false;
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void invalidateContext(final int contextId) throws ContextException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
@@ -225,9 +214,6 @@ public class CachingContextStorage extends ContextStorage {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);

@@ -64,39 +64,39 @@ public enum SchemaExceptionCodes implements OXErrorMessage {
     /**
      * No row found in table version in schema %1$s.
      */
-    MISSING_VERSION_ENTRY(MISSING_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 2),
+    MISSING_VERSION_ENTRY(MISSING_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 1),
     /**
      * Multiple rows found in table version in schema %1$s.
      */
-    MULTIPLE_VERSION_ENTRY(MULTIPLE_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 4),
+    MULTIPLE_VERSION_ENTRY(MULTIPLE_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 2),
     /**
      * Update conflict detected. Another process is currently updating schema %1$s.
      */
-    ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.PERMISSION, 8),
+    ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.PERMISSION, 3),
     /**
      * Locking schema %1$s failed. Lock information could not be written to database.
      */
-    LOCK_FAILED(LOCK_FAILED_MSG, Category.INTERNAL_ERROR, 9),
+    LOCK_FAILED(LOCK_FAILED_MSG, Category.INTERNAL_ERROR, 4),
     /**
      * Update conflict detected. Schema %1$s is not marked as locked.
      */
-    UPDATE_CONFLICT(UPDATE_CONFLICT_MSG, Category.INTERNAL_ERROR, 12),
+    UPDATE_CONFLICT(UPDATE_CONFLICT_MSG, Category.INTERNAL_ERROR, 5),
     /**
      * Schema %1$s could not be unlocked. Lock information could no be removed from database.
      */
-    UNLOCK_FAILED(UNLOCK_FAILED_MSG, Category.INTERNAL_ERROR, 13),
+    UNLOCK_FAILED(UNLOCK_FAILED_MSG, Category.INTERNAL_ERROR, 6),
     /**
      * A SQL problem occurred: %1$s.
      */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 14),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 7),
     /**
      * Cannot get database connection.
      */
-    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
+    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 8),
     /**
      * Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.
      */
-    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CODE_ERROR, 99);
+    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CODE_ERROR, 9);
 
     /**
      * Message of the exception.
