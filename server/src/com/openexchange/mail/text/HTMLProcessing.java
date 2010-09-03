@@ -370,7 +370,7 @@ public final class HTMLProcessing {
                 String url = m.group();
                 tmp.setLength(0);
                 final int mlen = url.length() - 1;
-                if (mlen > 0 && ')' == url.charAt(mlen)) {
+                if ((mlen > 0) && (')' == url.charAt(mlen))) {
                     /*
                      * Keep starting parenthesis if present
                      */
