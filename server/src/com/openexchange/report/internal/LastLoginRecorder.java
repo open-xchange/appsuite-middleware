@@ -87,6 +87,9 @@ public class LastLoginRecorder implements LoginHandlerService {
             return;
         }
         Context ctx = login.getContext();
+        if (ctx.isReadOnly()) {
+            return;
+        }
         User origUser = login.getUser();
         Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
         attributes.putAll(origUser.getAttributes());
