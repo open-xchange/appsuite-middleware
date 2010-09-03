@@ -1,3 +1,7 @@
+* 2010-09-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #16776: Changed twitter API to use OAuth
+
 * 2010-09-02 - martin.herfurth@open-xchange.com
 
  - Bugfix #15903: Removing of Participants.
