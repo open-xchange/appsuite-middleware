@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2010-02-18 12:25+0100\n"
+"PO-Revision-Date: 2010-07-26 15:09+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1496,4 +1496,2088 @@ msgstr "vierten"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:868
 msgid "last"
 msgstr "letzten"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:2
+msgid "Africa/Abidjan"
+msgstr "Afrika/Abidjan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:3
+msgid "Africa/Accra"
+msgstr "Afrika/Accra"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:4
+
+msgid "Africa/Addis Ababa"
+msgstr "Afrika/Addis Abeba"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:5
+msgid "Africa/Algiers"
+msgstr "Afrika/Algerien"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:6
+msgid "Africa/Asmara"
+msgstr "Afrika/Asmara"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:7
+msgid "Africa/Asmera"
+msgstr "Africa/Asmera"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:8
+msgid "Africa/Bamako"
+msgstr "Afrika/Bamako"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:9
+msgid "Africa/Bangui"
+msgstr "Afrika/Bangui"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:10
+msgid "Africa/Banjul"
+msgstr "Afrika/Banjul"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:11
+msgid "Africa/Bissau"
+msgstr "Afrika/Bissau"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:12
+msgid "Africa/Blantyre"
+msgstr "Afrika/Blantyre"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:13
+msgid "Africa/Brazzaville"
+msgstr "Afrika/Brazzaville"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:14
+msgid "Africa/Bujumbura"
+msgstr "Afrika/Bujumbura"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:15
+msgid "Africa/Cairo"
+msgstr "Afrika/Kairo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:16
+msgid "Africa/Casablanca"
+msgstr "Afrika/Casablanca"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:17
+msgid "Africa/Ceuta"
+msgstr "Afrika/Ceuta"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:18
+msgid "Africa/Conakry"
+msgstr "Afrika/Conakry"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:19
+msgid "Africa/Dakar"
+msgstr "Afrika/Dakar"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:20
+
+msgid "Africa/Dar es Salaam"
+msgstr "Afrika/Dar es Salaam"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:21
+msgid "Africa/Djibouti"
+msgstr "Afrika/Dschibuti"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:22
+msgid "Africa/Douala"
+msgstr "Afrika/Douala"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:23
+msgid "Africa/El Aaiun"
+msgstr "Afrika/El Aaiun"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:24
+msgid "Africa/Freetown"
+msgstr "Afrika/Freetown"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:25
+msgid "Africa/Gaborone"
+msgstr "Afrika/Gaborone"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:26
+msgid "Africa/Harare"
+msgstr "Afrika/Harare"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:27
+msgid "Africa/Johannesburg"
+msgstr "Afrika/Johannesburg"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:28
+msgid "Africa/Kampala"
+msgstr "Afrika/Kampala"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:29
+msgid "Africa/Khartoum"
+msgstr "Afrika/Khartoum"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:30
+msgid "Africa/Kigali"
+msgstr "Afrika/Kigali"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:31
+msgid "Africa/Kinshasa"
+msgstr "Afrika/Kinshasa"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:32
+msgid "Africa/Lagos"
+msgstr "Afrika/Lagos"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:33
+msgid "Africa/Libreville"
+msgstr "Afrika/Libreville"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:34
+msgid "Africa/Lome"
+msgstr "Afrika/Lome"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:35
+msgid "Africa/Luanda"
+msgstr "Afrika/Luanda"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:36
+msgid "Africa/Lubumbashi"
+msgstr "Afrika/Lubumbashi"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:37
+msgid "Africa/Lusaka"
+msgstr "Afrika/Lusaka"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:38
+msgid "Africa/Malabo"
+msgstr "Afrika/Malabo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:39
+msgid "Africa/Maputo"
+msgstr "Afrika/Maputo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:40
+msgid "Africa/Maseru"
+msgstr "Afrika/Maseru"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:41
+msgid "Africa/Mbabane"
+msgstr "Afrika/Mbabane"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:42
+msgid "Africa/Mogadishu"
+msgstr "Afrika/Mogadishu"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:43
+msgid "Africa/Monrovia"
+msgstr "Afrika/Monrovia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:44
+msgid "Africa/Nairobi"
+msgstr "Afrika/Nairobi"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:45
+msgid "Africa/Ndjamena"
+msgstr "Afrika/Ndjamena"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:46
+msgid "Africa/Niamey"
+msgstr "Afrika/Niamey"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:47
+msgid "Africa/Nouakchott"
+msgstr "Afrika/Nouakchott"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:48
+msgid "Africa/Ouagadougou"
+msgstr "Afrika/Ouagadougou"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:49
+msgid "Africa/Porto-Novo"
+msgstr "Afrika/Porto Novo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:50
+
+msgid "Africa/Sao Tome"
+msgstr "Africa/Sao Tome"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:51
+msgid "Africa/Timbuktu"
+msgstr "Afrika/Timbuktu"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:52
+msgid "Africa/Tripoli"
+msgstr "Afrika/Tripoli"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:53
+msgid "Africa/Tunis"
+msgstr "Afrika/Tunis"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:54
+msgid "Africa/Windhoek"
+msgstr "Afrika/Windhoek"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:55
+msgid "America/Adak"
+msgstr "Amerika/Adak"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:56
+msgid "America/Anchorage"
+msgstr "Amerika/Anchorage"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:57
+msgid "America/Anguilla"
+msgstr "Amerika/Anguilla"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:58
+msgid "America/Antigua"
+msgstr "Amerika/Antigua"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:59
+msgid "America/Araguaina"
+msgstr "Amerika/Araguaina"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:60
+
+msgid "America/Argentina/Buenos Aires"
+msgstr "Amerika/Argentinien/Buenos Aires"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:61
+msgid "America/Argentina/Catamarca"
+msgstr "Amerika/Argentinien/Catamarca"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:62
+msgid "America/Argentina/ComodRivadavia"
+msgstr "Amerika/Argentinien/ComodRivadavia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:63
+msgid "America/Argentina/Cordoba"
+msgstr "Amerika/Argentinien/Cordoba"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:64
+msgid "America/Argentina/Jujuy"
+msgstr "Amerika/Argentinien/Jujuy"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:65
+
+msgid "America/Argentina/La Rioja"
+msgstr "Amerika/Argentinien/La Rioja"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:66
+msgid "America/Argentina/Mendoza"
+msgstr "Amerika/Argentinien/Mendoza"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:67
+
+msgid "America/Argentina/Rio Gallegos"
+msgstr "Amerika/Argentinien/Rio Gallegos"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:68
+msgid "America/Argentina/Salta"
+msgstr "Amerika/Argentinien/Salta"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:69
+
+msgid "America/Argentina/San Juan"
+msgstr "Amerika/Argentinien/San Juan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:70
+
+msgid "America/Argentina/San Luis"
+msgstr "Amerika/Argentinien/San Luis"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:71
+msgid "America/Argentina/Tucuman"
+msgstr "Amerika/Argentinien/Tucuman"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:72
+msgid "America/Argentina/Ushuaia"
+msgstr "Amerika/Argentinien/Ushuaia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:73
+msgid "America/Aruba"
+msgstr "Amerika/Aruba"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:74
+msgid "America/Asuncion"
+msgstr "Amerika/Asuncion"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:75
+msgid "America/Atikokan"
+msgstr "Amerika/Atikokan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:76
+msgid "America/Atka"
+msgstr "Amerika/Atka"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:77
+msgid "America/Bahia"
+msgstr "Amerika/Bahia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:78
+msgid "America/Barbados"
+msgstr "Amerika/Barbados"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:79
+msgid "America/Belem"
+msgstr "Amerika/Belem"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:80
+msgid "America/Belize"
+msgstr "Amerika/Belize"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:81
+msgid "America/Blanc-Sablon"
+msgstr "Amerika/Blanc-Sablon"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:82
+
+msgid "America/Boa Vista"
+msgstr "Amerika/Boa Vista"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:83
+msgid "America/Bogota"
+msgstr "Amerika/Bogota"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:84
+msgid "America/Boise"
+msgstr "Amerika/Boise"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:85
+
+msgid "America/Buenos Aires"
+msgstr "Amerika/Buenos Aires"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:86
+
+msgid "America/Cambridge Bay"
+msgstr "Amerika/Cambridge Bay"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:87
+
+msgid "America/Campo Grande"
+msgstr "Amerika/Campo Grande"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:88
+msgid "America/Cancun"
+msgstr "Amerika/Cancun"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:89
+msgid "America/Caracas"
+msgstr "Amerika/Caracas"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:90
+msgid "America/Catamarca"
+msgstr "Amerika/Catamarca"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:91
+msgid "America/Cayenne"
+msgstr "Amerika/Cayenne"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:92
+msgid "America/Cayman"
+msgstr "Amerika/Cayman"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:93
+msgid "America/Chicago"
+msgstr "Amerika/Chicago"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:94
+msgid "America/Chihuahua"
+msgstr "Amerika/Chihuahua"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:95
+
+msgid "America/Coral Harbour"
+msgstr "Amerika/Coral Harbour"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:96
+msgid "America/Cordoba"
+msgstr "Amerika/Cordoba"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:97
+
+msgid "America/Costa Rica"
+msgstr "Amerika/Costa Rica"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:98
+msgid "America/Cuiaba"
+msgstr "Amerika/Cuiaba"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:99
+msgid "America/Curacao"
+msgstr "Amerika/Curacao"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:100
+msgid "America/Danmarkshavn"
+msgstr "Amerika/Danmarkshavn"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:101
+msgid "America/Dawson"
+msgstr "Amerika/Dawson"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:102
+
+msgid "America/Dawson Creek"
+msgstr "Amerika/Dawson Creek"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:103
+msgid "America/Denver"
+msgstr "Amerika/Denver"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:104
+msgid "America/Detroit"
+msgstr "Amerika/Detroit"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:105
+msgid "America/Dominica"
+msgstr "Amerika/Dominica"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:106
+msgid "America/Edmonton"
+msgstr "Amerika/Edmonton"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:107
+msgid "America/Eirunepe"
+msgstr "Amerika/Eirunepe"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:108
+
+msgid "America/El Salvador"
+msgstr "Amerika/El Salvador"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:109
+msgid "America/Ensenada"
+msgstr "Amerika/Ensenada"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:110
+
+msgid "America/Fort Wayne"
+msgstr "Amerika/Fort Wayne"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:111
+msgid "America/Fortaleza"
+msgstr "Amerika/Fortaleza"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:112
+
+msgid "America/Glace Bay"
+msgstr "Amerika/Glace Bay"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:113
+msgid "America/Godthab"
+msgstr "Amerika/Godthab"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:114
+
+msgid "America/Goose Bay"
+msgstr "Amerika/Goose Bay"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:115
+
+msgid "America/Grand Turk"
+msgstr "Amerika/Grand Turk"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:116
+msgid "America/Grenada"
+msgstr "Amerika/Grenada"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:117
+msgid "America/Guadeloupe"
+msgstr "Amerika/Guadeloupe"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:118
+msgid "America/Guatemala"
+msgstr "Amerika/Guatemala"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:119
+msgid "America/Guayaquil"
+msgstr "Amerika/Guayaquil"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:120
+msgid "America/Guyana"
+msgstr "Amerika/Guyana"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:121
+msgid "America/Halifax"
+msgstr "Amerika/Halifax"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:122
+msgid "America/Havana"
+msgstr "Amerika/Havanna"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:123
+msgid "America/Hermosillo"
+msgstr "Amerika/Hermosillo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:124
+msgid "America/Indiana/Indianapolis"
+msgstr "Amerika/Indiana/Indianapolis"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:125
+msgid "America/Indiana/Knox"
+msgstr "Amerika/Indiana/Knox"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:126
+msgid "America/Indiana/Marengo"
+msgstr "Amerika/Indiana/Marengo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:127
+msgid "America/Indiana/Petersburg"
+msgstr "Amerika/Indiana/Petersburg"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:128
+
+msgid "America/Indiana/Tell City"
+msgstr "Amerika/Indiana/Tell City"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:129
+msgid "America/Indiana/Vevay"
+msgstr "Amerika/Indiana/Vevay"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:130
+msgid "America/Indiana/Vincennes"
+msgstr "Amerika/Indiana/Vincennes"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:131
+msgid "America/Indiana/Winamac"
+msgstr "Amerika/Indiana/Winamac"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:132
+msgid "America/Indianapolis"
+msgstr "Amerika/Indianapolis"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:133
+msgid "America/Inuvik"
+msgstr "Amerika/Inuvik"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:134
+msgid "America/Iqaluit"
+msgstr "Amerika/Iqaluit"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:135
+msgid "America/Jamaica"
+msgstr "Amerika/Jamaika"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:136
+msgid "America/Jujuy"
+msgstr "Amerika/Jujuy"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:137
+msgid "America/Juneau"
+msgstr "Amerika/Juneau"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:138
+msgid "America/Kentucky/Louisville"
+msgstr "Amerika/Kentucky/Louisville"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:139
+msgid "America/Kentucky/Monticello"
+msgstr "Amerika/Kentucky/Monticello"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:140
+
+msgid "America/Knox IN"
+msgstr "Amerika/Knox IN"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:141
+
+msgid "America/La Paz"
+msgstr "Amerika/La Paz"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:142
+msgid "America/Lima"
+msgstr "Amerika/Lima"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:143
+
+msgid "America/Los Angeles"
+msgstr "Amerika/Los Angeles"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:144
+msgid "America/Louisville"
+msgstr "Amerika/Louisville"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:145
+msgid "America/Maceio"
+msgstr "Amerika/Maceio"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:146
+msgid "America/Managua"
+msgstr "Amerika/Managua"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:147
+msgid "America/Manaus"
+msgstr "Amerika/Manaus"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:148
+msgid "America/Marigot"
+msgstr "Amerika/Marigot"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:149
+msgid "America/Martinique"
+msgstr "Amerika/Martinique"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:150
+msgid "America/Mazatlan"
+msgstr "Amerika/Mazatlan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:151
+msgid "America/Mendoza"
+msgstr "Amerika/Mendoza"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:152
+msgid "America/Menominee"
+msgstr "Amerika/Menominee"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:153
+msgid "America/Merida"
+msgstr "Amerika/Merida"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:154
+
+msgid "America/Mexico City"
+msgstr "Amerika/Mexiko Stadt"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:155
+msgid "America/Miquelon"
+msgstr "Amerika/Miquelon"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:156
+msgid "America/Moncton"
+msgstr "Amerika/Moncton"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:157
+msgid "America/Monterrey"
+msgstr "Amerika/Monterrey"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:158
+msgid "America/Montevideo"
+msgstr "Amerika/Montevideo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:159
+msgid "America/Montreal"
+msgstr "Amerika/Montreal"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:160
+msgid "America/Montserrat"
+msgstr "Amerika/Montserrat"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:161
+msgid "America/Nassau"
+msgstr "Amerika/Nassau"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:162
+
+msgid "America/New York"
+msgstr "Amerika/New York"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:163
+msgid "America/Nipigon"
+msgstr "Amerika/Nipigon"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:164
+msgid "America/Nome"
+msgstr "Amerika/Nome"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:165
+msgid "America/Noronha"
+msgstr "Amerika/Noronha"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:166
+
+msgid "America/North Dakota/Center"
+msgstr "Amerika/North Dakota/Center"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:167
+
+msgid "America/North Dakota/New Salem"
+msgstr "Amerika/North Dakota/New Salem"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:168
+msgid "America/Panama"
+msgstr "Amerika/Panama"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:169
+msgid "America/Pangnirtung"
+msgstr "Amerika/Pangnirtung"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:170
+msgid "America/Paramaribo"
+msgstr "Amerika/Paramaribo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:171
+msgid "America/Phoenix"
+msgstr "Amerika/Phoenix"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:172
+msgid "America/Port-au-Prince"
+msgstr "Amerika/Port-au-Prince"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:173
+
+msgid "America/Port of Spain"
+msgstr "Amerika/Port of Spain"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:174
+
+msgid "America/Porto Acre"
+msgstr "Amerika/Porto Acre"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:175
+
+msgid "America/Porto Velho"
+msgstr "Amerika/Porto Velho"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:176
+
+msgid "America/Puerto Rico"
+msgstr "Amerika/Puerto Rico"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:177
+
+msgid "America/Rainy River"
+msgstr "Amerika/Rainy River"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:178
+
+msgid "America/Rankin Inlet"
+msgstr "Amerika/Rankin Inlet"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:179
+msgid "America/Recife"
+msgstr "Amerika/Recife"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:180
+msgid "America/Regina"
+msgstr "Amerika/Regina"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:181
+msgid "America/Resolute"
+msgstr "Amerika/Resolute"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:182
+
+msgid "America/Rio Branco"
+msgstr "Amerika/Rio Branco"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:183
+msgid "America/Rosario"
+msgstr "Amerika/Rosario"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:184
+msgid "America/Santarem"
+msgstr "Amerika/Santarem"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:185
+msgid "America/Santiago"
+msgstr "Amerika/Santiago"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:186
+
+msgid "America/Santo Domingo"
+msgstr "Amerika/Santo Domingo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:187
+
+msgid "America/Sao Paulo"
+msgstr "Amerika/Sao Paulo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:188
+msgid "America/Scoresbysund"
+msgstr "Amerika/Scoresbysund"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:189
+msgid "America/Shiprock"
+msgstr "Amerika/Shiprock"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:190
+
+msgid "America/St Barthelemy"
+msgstr "Amerika/St Barthelemy"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:191
+
+msgid "America/St Johns"
+msgstr "Amerika/St Johns"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:192
+
+msgid "America/St Kitts"
+msgstr "Amerika/St Kitts"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:193
+
+msgid "America/St Lucia"
+msgstr "Amerika/St Lucia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:194
+
+msgid "America/St Thomas"
+msgstr "Amerika/St Thomas"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:195
+
+msgid "America/St Vincent"
+msgstr "Amerika/St Vincent"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:196
+
+msgid "America/Swift Current"
+msgstr "Amerika/Swift Current"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:197
+msgid "America/Tegucigalpa"
+msgstr "Amerika/Tegucigalpa"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:198
+msgid "America/Thule"
+msgstr "Amerika/Thule"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:199
+
+msgid "America/Thunder Bay"
+msgstr "Amerika/Thunder Bay"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:200
+msgid "America/Tijuana"
+msgstr "Amerika/Tijuana"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:201
+msgid "America/Toronto"
+msgstr "Amerika/Toronto"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:202
+msgid "America/Tortola"
+msgstr "Amerika/Tortola"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:203
+msgid "America/Vancouver"
+msgstr "Amerika/Vancouver"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:204
+msgid "America/Virgin"
+msgstr "Amerika/Virgin"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:205
+msgid "America/Whitehorse"
+msgstr "Amerika/Whitehorse"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:206
+msgid "America/Winnipeg"
+msgstr "Amerika/Winnipeg"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:207
+msgid "America/Yakutat"
+msgstr "Amerika/Yakutat"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:208
+msgid "America/Yellowknife"
+msgstr "Amerika/Yellowknife"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:209
+msgid "Antarctica/Casey"
+msgstr "Antarktik/Casey"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:210
+msgid "Antarctica/Davis"
+msgstr "Antarktik/Davis"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:211
+msgid "Antarctica/DumontDUrville"
+msgstr "Antarktik/DumontDUrville"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:212
+msgid "Antarctica/Mawson"
+msgstr "Antarktik/Mawson"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:213
+msgid "Antarctica/McMurdo"
+msgstr "Antarktik/McMurdo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:214
+msgid "Antarctica/Palmer"
+msgstr "Antarktik/Palmer"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:215
+msgid "Antarctica/Rothera"
+msgstr "Antarktik/Rothera"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:216
+
+msgid "Antarctica/South Pole"
+msgstr "Antarktik/Südpol"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:217
+msgid "Antarctica/Syowa"
+msgstr "Antarktik/Syowa"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:218
+msgid "Antarctica/Vostok"
+msgstr "Antarktik/Vostok"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:219
+msgid "Arctic/Longyearbyen"
+msgstr "Arctic/Longyearbyen"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:220
+msgid "Asia/Aden"
+msgstr "Asien/Aden"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:221
+msgid "Asia/Almaty"
+msgstr "Asien/Almaty"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:222
+msgid "Asia/Amman"
+msgstr "Asien/Amman"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:223
+msgid "Asia/Anadyr"
+msgstr "Asien/Anadyr"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:224
+msgid "Asia/Aqtau"
+msgstr "Asien/Aqtau"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:225
+msgid "Asia/Aqtobe"
+msgstr "Asien/Aqtobe"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:226
+msgid "Asia/Ashgabat"
+msgstr "Asien/Ashgabat"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:227
+msgid "Asia/Ashkhabad"
+msgstr "Asia/Ashkhabad"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:228
+msgid "Asia/Baghdad"
+msgstr "Asien/Baghdad"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:229
+msgid "Asia/Bahrain"
+msgstr "Asien/Bahrain"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:230
+msgid "Asia/Baku"
+msgstr "Asien/Baku"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:231
+msgid "Asia/Bangkok"
+msgstr "Asien/Bangkok"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:232
+msgid "Asia/Beirut"
+msgstr "Asien/Beirut"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:233
+msgid "Asia/Bishkek"
+msgstr "Asien/Bishkek"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:234
+msgid "Asia/Brunei"
+msgstr "Asien/Brunei"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:235
+msgid "Asia/Calcutta"
+msgstr "Asien/Kalkutta"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:236
+msgid "Asia/Choibalsan"
+msgstr "Asien/Choibalsan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:237
+msgid "Asia/Chongqing"
+msgstr "Asien/Chongqing"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:238
+msgid "Asia/Chungking"
+msgstr "Asien/Chungking"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:239
+msgid "Asia/Colombo"
+msgstr "Asien/Colombo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:240
+msgid "Asia/Dacca"
+msgstr "Asien/Dacca"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:241
+msgid "Asia/Damascus"
+msgstr "Asien/Damaskus"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:242
+msgid "Asia/Dhaka"
+msgstr "Asien/Dhaka"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:243
+msgid "Asia/Dili"
+msgstr "Asien/Dili"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:244
+msgid "Asia/Dubai"
+msgstr "Asien/Dubai"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:245
+msgid "Asia/Dushanbe"
+msgstr "Asien/Dushanbe"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:246
+msgid "Asia/Gaza"
+msgstr "Asien/Gaza"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:247
+msgid "Asia/Harbin"
+msgstr "Asien/Harbin"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:248
+
+msgid "Asia/Ho Chi Minh"
+msgstr "Asien/Ho-Chi-Minh-Stadt"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:249
+
+msgid "Asia/Hong Kong"
+msgstr "Asien/Hongkong"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:250
+msgid "Asia/Hovd"
+msgstr "Asien/Hovd"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:251
+msgid "Asia/Irkutsk"
+msgstr "Asien/Irkutsk"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:252
+msgid "Asia/Istanbul"
+msgstr "Asien/Istanbul"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:253
+msgid "Asia/Jakarta"
+msgstr "Asien/Jakarta"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:254
+msgid "Asia/Jayapura"
+msgstr "Asien/Jayapura"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:255
+msgid "Asia/Jerusalem"
+msgstr "Asien/Jerusalem"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:256
+msgid "Asia/Kabul"
+msgstr "Asien/Kabul"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:257
+msgid "Asia/Kamchatka"
+msgstr "Asien/Kamchatka"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:258
+msgid "Asia/Karachi"
+msgstr "Asien/Karachi"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:259
+msgid "Asia/Kashgar"
+msgstr "Asien/Kashgar"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:260
+
+msgid "Asia/Kathmandu"
+msgstr "Asien/Katmandu"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:261
+msgid "Asia/Katmandu"
+msgstr "Asien/Katmandu"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:262
+msgid "Asia/Kolkata"
+msgstr "Asien/Kolkata"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:263
+msgid "Asia/Krasnoyarsk"
+msgstr "Asien/Krasnoyarsk"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:264
+
+msgid "Asia/Kuala Lumpur"
+msgstr "Asien/Kuala Lumpur"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:265
+msgid "Asia/Kuching"
+msgstr "Asien/Kuching"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:266
+msgid "Asia/Kuwait"
+msgstr "Asien/Kuwait"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:267
+msgid "Asia/Macao"
+msgstr "Asien/Macao"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:268
+msgid "Asia/Macau"
+msgstr "Asien/Macau"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:269
+msgid "Asia/Magadan"
+msgstr "Asien/Magadan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:270
+msgid "Asia/Makassar"
+msgstr "Asien/Makassar"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:271
+msgid "Asia/Manila"
+msgstr "Asien/Manila"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:272
+msgid "Asia/Muscat"
+msgstr "Asien/Muscat"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:273
+msgid "Asia/Nicosia"
+msgstr "Asien/Nicosia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:274
+msgid "Asia/Novosibirsk"
+msgstr "Asien/Nowosibirsk"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:275
+msgid "Asia/Omsk"
+msgstr "Asien/Omsk"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:276
+msgid "Asia/Oral"
+msgstr "Asien/Oral"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:277
+
+msgid "Asia/Phnom Penh"
+msgstr "Asien/Phnom Penh"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:278
+msgid "Asia/Pontianak"
+msgstr "Asien/Pontianak"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:279
+msgid "Asia/Pyongyang"
+msgstr "Asien/Pyongyang"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:280
+msgid "Asia/Qatar"
+msgstr "Asien/Katar"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:281
+msgid "Asia/Qyzylorda"
+msgstr "Asien/Qyzylorda"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:282
+msgid "Asia/Rangoon"
+msgstr "Asien/Rangoon"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:283
+msgid "Asia/Riyadh"
+msgstr "Asien/Riyadh"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:284
+msgid "Asia/Riyadh87"
+msgstr "Asien/Riyadh87"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:285
+msgid "Asia/Riyadh88"
+msgstr "Asien/Riyadh88"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:286
+msgid "Asia/Riyadh89"
+msgstr "Asien/Riyadh89"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:287
+msgid "Asia/Saigon"
+msgstr "Asien/Saigon"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:288
+msgid "Asia/Sakhalin"
+msgstr "Asien/Sakhalin"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:289
+msgid "Asia/Samarkand"
+msgstr "Asien/Samarkand"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:290
+msgid "Asia/Seoul"
+msgstr "Asien/Seoul"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:291
+msgid "Asia/Shanghai"
+msgstr "Asien/Shanghai"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:292
+msgid "Asia/Singapore"
+msgstr "Asien/Singapore"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:293
+msgid "Asia/Taipei"
+msgstr "Asien/Taipei"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:294
+msgid "Asia/Tashkent"
+msgstr "Asien/Taschkent"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:295
+msgid "Asia/Tbilisi"
+msgstr "Asien/Tbilisi"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:296
+msgid "Asia/Tehran"
+msgstr "Asien/Teheran"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:297
+
+msgid "Asia/Tel Aviv"
+msgstr "Asien/Tel Aviv"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:298
+msgid "Asia/Thimbu"
+msgstr "Asien/Thimbu"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:299
+msgid "Asia/Thimphu"
+msgstr "Asien/Thimphu"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:300
+msgid "Asia/Tokyo"
+msgstr "Asien/Tokio"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:301
+
+msgid "Asia/Ujung Pandang"
+msgstr "Asien/Ujung Pandang"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:302
+msgid "Asia/Ulaanbaatar"
+msgstr "Asien/Ulan-Bator"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:303
+
+msgid "Asia/Ulan Bator"
+msgstr "Asien/Ulan-Bator"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:304
+msgid "Asia/Urumqi"
+msgstr "Asien/Urumqi"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:305
+msgid "Asia/Vientiane"
+msgstr "Asien/Vientiane"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:306
+msgid "Asia/Vladivostok"
+msgstr "Asien/Wladiwostok"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:307
+msgid "Asia/Yakutsk"
+msgstr "Asien/Yakutsk"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:308
+msgid "Asia/Yekaterinburg"
+msgstr "Asien/Yekaterinburg"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:309
+msgid "Asia/Yerevan"
+msgstr "Asien/Yerevan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:310
+msgid "Atlantic/Azores"
+msgstr "Atlantik/Azoren"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:311
+msgid "Atlantic/Bermuda"
+msgstr "Atlantik/Bermudas"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:312
+msgid "Atlantic/Canary"
+msgstr "Atlantik/Kanaren"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:313
+
+msgid "Atlantic/Cape Verde"
+msgstr "Atlantik/Kapverden"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:314
+msgid "Atlantic/Faeroe"
+msgstr "Atlantik/Färöer"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:315
+msgid "Atlantic/Faroe"
+msgstr "Atlantik/Färöer"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:316
+
+msgid "Atlantic/Jan Mayen"
+msgstr "Atlantik/Jan Mayen"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:317
+msgid "Atlantic/Madeira"
+msgstr "Atlantik/Madeira"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:318
+msgid "Atlantic/Reykjavik"
+msgstr "Atlantik/Reykjavik"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:319
+
+msgid "Atlantic/South Georgia"
+msgstr "Atlantik/South Georgia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:320
+
+msgid "Atlantic/St Helena"
+msgstr "Atlantik/St Helena"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:321
+msgid "Atlantic/Stanley"
+msgstr "Atlantik/Stanley"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:322
+msgid "Australia/ACT"
+msgstr "Australien/ACT"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:323
+msgid "Australia/Adelaide"
+msgstr "Australien/Adelaide"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:324
+msgid "Australia/Brisbane"
+msgstr "Australien/Brisbane"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:325
+
+msgid "Australia/Broken Hill"
+msgstr "Australien/Broken Hill"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:326
+msgid "Australia/Canberra"
+msgstr "Australien/Canberra"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:327
+msgid "Australia/Currie"
+msgstr "Australien/Currie"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:328
+msgid "Australia/Darwin"
+msgstr "Australien/Darwin"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:329
+msgid "Australia/Eucla"
+msgstr "Australien/Eucla"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:330
+msgid "Australia/Hobart"
+msgstr "Australien/Hobart"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:331
+msgid "Australia/LHI"
+msgstr "Australien/LHI"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:332
+msgid "Australia/Lindeman"
+msgstr "Australien/Lindeman"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:333
+
+msgid "Australia/Lord Howe"
+msgstr "Australien/Lord Howe"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:334
+msgid "Australia/Melbourne"
+msgstr "Australien/Melbourne"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:335
+msgid "Australia/NSW"
+msgstr "Australien/NSW"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:336
+msgid "Australia/North"
+msgstr "Australien/Nord"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:337
+msgid "Australia/Perth"
+msgstr "Australien/Perth"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:338
+msgid "Australia/Queensland"
+msgstr "Australien/Queensland"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:339
+msgid "Australia/South"
+msgstr "Australien/Süd"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:340
+msgid "Australia/Sydney"
+msgstr "Australien/Sydney"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:341
+msgid "Australia/Tasmania"
+msgstr "Australien/Tasmanien"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:342
+msgid "Australia/Victoria"
+msgstr "Australien/Victoria"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:343
+msgid "Australia/West"
+msgstr "Australien/West"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:344
+msgid "Australia/Yancowinna"
+msgstr "Australien/Yancowinna"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:345
+msgid "Brazil/Acre"
+msgstr "Brasilien/Acre"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:346
+msgid "Brazil/DeNoronha"
+msgstr "Brasilien/DeNoronha"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:347
+msgid "Brazil/East"
+msgstr "Brasilien/Ost"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:348
+msgid "Brazil/West"
+msgstr "Brasilien/West"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:349
+msgid "Canada/Atlantic"
+msgstr "Kanada/Atlantik"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:350
+msgid "Canada/Central"
+msgstr "Kanada/Central"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:351
+msgid "Canada/East-Saskatchewan"
+msgstr "Kanada/Ost-Saskatchewan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:352
+msgid "Canada/Eastern"
+msgstr "Kanada/Ost"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:353
+msgid "Canada/Mountain"
+msgstr "Kanada/Mountain"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:354
+msgid "Canada/Newfoundland"
+msgstr "Kanada/Neufundland"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:355
+msgid "Canada/Pacific"
+msgstr "Kanada/Pazifik"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:356
+msgid "Canada/Saskatchewan"
+msgstr "Kanada/Saskatchewan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:357
+msgid "Canada/Yukon"
+msgstr "Kanada/Yukon"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:358
+msgid "Chile/Continental"
+msgstr "Chile/Kontinent"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:359
+msgid "Chile/EasterIsland"
+msgstr "Chile/Osterinsel"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:360
+msgid "Cuba"
+msgstr "Kuba"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:361
+msgid "Egypt"
+msgstr "Ägypten"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:362
+msgid "Eire"
+msgstr "Irland"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:363
+msgid "Europe/Amsterdam"
+msgstr "Europa/Amsterdam"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:364
+msgid "Europe/Andorra"
+msgstr "Europa/Andorra"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:365
+msgid "Europe/Athens"
+msgstr "Europa/Athen"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:366
+msgid "Europe/Belfast"
+msgstr "Europa/Belfast"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:367
+msgid "Europe/Belgrade"
+msgstr "Europa/Belgrad"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:368
+msgid "Europe/Berlin"
+msgstr "Europa/Berlin"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:369
+msgid "Europe/Bratislava"
+msgstr "Europa/Bratislava"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:370
+msgid "Europe/Brussels"
+msgstr "Europa/Brüssel"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:371
+msgid "Europe/Bucharest"
+msgstr "Europa/Bukarest"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:372
+msgid "Europe/Budapest"
+msgstr "Europa/Budapest"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:373
+msgid "Europe/Chisinau"
+msgstr "Europa/Chisinau"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:374
+msgid "Europe/Copenhagen"
+msgstr "Europa/Kopenhagen"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:375
+msgid "Europe/Dublin"
+msgstr "Europa/Dublin"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:376
+msgid "Europe/Gibraltar"
+msgstr "Europa/Gibraltar"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:377
+msgid "Europe/Guernsey"
+msgstr "Europa/Guernsey"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:378
+msgid "Europe/Helsinki"
+msgstr "Europa/Helsinki"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:379
+
+msgid "Europe/Isle of Man"
+msgstr "Europa/Isle of Man"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:380
+msgid "Europe/Istanbul"
+msgstr "Europa/Istanbul"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:381
+msgid "Europe/Jersey"
+msgstr "Europa/Jersey"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:382
+msgid "Europe/Kaliningrad"
+msgstr "Europa/Kaliningrad"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:383
+msgid "Europe/Kiev"
+msgstr "Europa/Kiew"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:384
+msgid "Europe/Lisbon"
+msgstr "Europa/Lissabon"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:385
+msgid "Europe/Ljubljana"
+msgstr "Europa/Ljubljana"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:386
+msgid "Europe/London"
+msgstr "Europa/London"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:387
+msgid "Europe/Luxembourg"
+msgstr "Europa/Luxemburg"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:388
+msgid "Europe/Madrid"
+msgstr "Europa/Madrid"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:389
+msgid "Europe/Malta"
+msgstr "Europa/Malta"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:390
+msgid "Europe/Mariehamn"
+msgstr "Europa/Mariehamn"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:391
+msgid "Europe/Minsk"
+msgstr "Europa/Minsk"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:392
+msgid "Europe/Monaco"
+msgstr "Europa/Monaco"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:393
+msgid "Europe/Moscow"
+msgstr "Europa/Moskau"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:394
+msgid "Europe/Nicosia"
+msgstr "Europa/Nicosia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:395
+msgid "Europe/Oslo"
+msgstr "Europa/Oslo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:396
+msgid "Europe/Paris"
+msgstr "Europa/Paris"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:397
+msgid "Europe/Podgorica"
+msgstr "Europa/Podgorica"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:398
+msgid "Europe/Prague"
+msgstr "Europa/Prag"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:399
+msgid "Europe/Riga"
+msgstr "Europa/Riga"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:400
+msgid "Europe/Rome"
+msgstr "Europa/Rom"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:401
+msgid "Europe/Samara"
+msgstr "Europa/Samara"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:402
+
+msgid "Europe/San Marino"
+msgstr "Europa/San Marino"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:403
+msgid "Europe/Sarajevo"
+msgstr "Europa/Sarajevo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:404
+msgid "Europe/Simferopol"
+msgstr "Europa/Simferopol"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:405
+msgid "Europe/Skopje"
+msgstr "Europa/Skopje"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:406
+msgid "Europe/Sofia"
+msgstr "Europa/Sofia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:407
+msgid "Europe/Stockholm"
+msgstr "Europa/Stockholm"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:408
+msgid "Europe/Tallinn"
+msgstr "Europa/Tallinn"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:409
+msgid "Europe/Tirane"
+msgstr "Europa/Tirane"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:410
+msgid "Europe/Tiraspol"
+msgstr "Europa/Tiraspol"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:411
+msgid "Europe/Uzhgorod"
+msgstr "Europa/Uzhgorod"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:412
+msgid "Europe/Vaduz"
+msgstr "Europa/Vaduz"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:413
+msgid "Europe/Vatican"
+msgstr "Europa/Vatikan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:414
+msgid "Europe/Vienna"
+msgstr "Europa/Wien"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:415
+msgid "Europe/Vilnius"
+msgstr "Europa/Vilnius"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:416
+msgid "Europe/Volgograd"
+msgstr "Europa/Wolgograd"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:417
+msgid "Europe/Warsaw"
+msgstr "Europa/Warschau"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:418
+msgid "Europe/Zagreb"
+msgstr "Europa/Zagreb"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:419
+msgid "Europe/Zaporozhye"
+msgstr "Europa/Zaporozhye"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:420
+msgid "Europe/Zurich"
+msgstr "Europa/Zürich"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:421
+msgid "Greenwich"
+msgstr "Greenwich"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:422
+msgid "Hongkong"
+msgstr "Hongkong"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:423
+msgid "Iceland"
+msgstr "Island"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:424
+msgid "Indian/Antananarivo"
+msgstr "Indien/Antananarivo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:425
+msgid "Indian/Chagos"
+msgstr "Indien/Chagos"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:426
+msgid "Indian/Christmas"
+msgstr "Indien/Christmas"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:427
+msgid "Indian/Cocos"
+msgstr "Indien/Cocos"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:428
+msgid "Indian/Comoro"
+msgstr "Indien/Comoro"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:429
+msgid "Indian/Kerguelen"
+msgstr "Indien/Kerguelen"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:430
+msgid "Indian/Mahe"
+msgstr "Indien/Mahe"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:431
+msgid "Indian/Maldives"
+msgstr "Indien/Malediven"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:432
+msgid "Indian/Mauritius"
+msgstr "Indien/Mauritius"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:433
+msgid "Indian/Mayotte"
+msgstr "Indien/Mayotte"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:434
+msgid "Indian/Reunion"
+msgstr "Indien/Reunion"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:435
+msgid "Iran"
+msgstr "Iran"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:436
+msgid "Israel"
+msgstr "Israel"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:437
+msgid "Jamaica"
+msgstr "Jamaika"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:438
+msgid "Japan"
+msgstr "Japan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:439
+msgid "Kwajalein"
+msgstr "Kwajalein"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:440
+msgid "Libya"
+msgstr "Libyen"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:441
+msgid "Mexico/BajaNorte"
+msgstr "Mexiko/BajaNorte"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:442
+msgid "Mexico/BajaSur"
+msgstr "Mexiko/BajaSur"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:443
+msgid "Mexico/General"
+msgstr "Mexico/General"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:444
+msgid "Mideast/Riyadh87"
+msgstr "Mittlerer Osten/Riad87"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:445
+msgid "Mideast/Riyadh88"
+msgstr "Mittlerer Osten/Riad88"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:446
+msgid "Mideast/Riyadh89"
+msgstr "Mittlerer Osten/Riad89"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:447
+msgid "Navajo"
+msgstr "Navajo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:448
+msgid "Pacific/Apia"
+msgstr "Pazifik/Apia"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:449
+msgid "Pacific/Auckland"
+msgstr "Pazifik/Auckland"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:450
+msgid "Pacific/Chatham"
+msgstr "Pazifik/Chatham"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:451
+msgid "Pacific/Easter"
+msgstr "Pazifik/Easter"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:452
+msgid "Pacific/Efate"
+msgstr "Pazifik/Efate"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:453
+msgid "Pacific/Enderbury"
+msgstr "Pazifik/Enderbury"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:454
+msgid "Pacific/Fakaofo"
+msgstr "Pazifik/Fakaofo"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:455
+msgid "Pacific/Fiji"
+msgstr "Pazifik/Fidschi"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:456
+msgid "Pacific/Funafuti"
+msgstr "Pazifik/Funafuti"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:457
+msgid "Pacific/Galapagos"
+msgstr "Pazifik/Galapagos"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:458
+msgid "Pacific/Gambier"
+msgstr "Pazifik/Gambier"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:459
+msgid "Pacific/Guadalcanal"
+msgstr "Pazifik/Guadalcanal"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:460
+msgid "Pacific/Guam"
+msgstr "Pazifik/Guam"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:461
+msgid "Pacific/Honolulu"
+msgstr "Pazifik/Honolulu"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:462
+msgid "Pacific/Johnston"
+msgstr "Pazifik/Johnston"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:463
+msgid "Pacific/Kiritimati"
+msgstr "Pazifik/Kiritimati"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:464
+msgid "Pacific/Kosrae"
+msgstr "Pazifik/Kosrae"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:465
+msgid "Pacific/Kwajalein"
+msgstr "Pazifik/Kwajalein"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:466
+msgid "Pacific/Majuro"
+msgstr "Pazifik/Majuro"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:467
+msgid "Pacific/Marquesas"
+msgstr "Pazifik/Marquesas"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:468
+msgid "Pacific/Midway"
+msgstr "Pazifik/Midway"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:469
+msgid "Pacific/Nauru"
+msgstr "Pazifik/Nauru"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:470
+msgid "Pacific/Niue"
+msgstr "Pazifik/Niue"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:471
+msgid "Pacific/Norfolk"
+msgstr "Pazifik/Norfolk"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:472
+msgid "Pacific/Noumea"
+msgstr "Pazifik/Noumea"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:473
+
+msgid "Pacific/Pago Pago"
+msgstr "Pazifik/Pago Pago"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:474
+msgid "Pacific/Palau"
+msgstr "Pazifik/Palau"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:475
+msgid "Pacific/Pitcairn"
+msgstr "Pazifik/Pitcairn"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:476
+msgid "Pacific/Ponape"
+msgstr "Pazifik/Ponape"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:477
+
+msgid "Pacific/Port Moresby"
+msgstr "Pazifik/Port Moresby"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:478
+msgid "Pacific/Rarotonga"
+msgstr "Pazifik/Rarotonga"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:479
+msgid "Pacific/Saipan"
+msgstr "Pazifik/Saipan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:480
+msgid "Pacific/Samoa"
+msgstr "Pazifik/Samoa"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:481
+msgid "Pacific/Tahiti"
+msgstr "Pazifik/Tahiti"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:482
+msgid "Pacific/Tarawa"
+msgstr "Pazifik/Tarawa"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:483
+msgid "Pacific/Tongatapu"
+msgstr "Pazifik/Tongatapu"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:484
+msgid "Pacific/Truk"
+msgstr "Pazifik/Truk"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:485
+msgid "Pacific/Wake"
+msgstr "Pazifik/Wake"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:486
+msgid "Pacific/Wallis"
+msgstr "Pazifik/Wallis"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:487
+msgid "Pacific/Yap"
+msgstr "Pazifik/Yap"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:488
+msgid "Poland"
+msgstr "Polen"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:489
+msgid "Portugal"
+msgstr "Portugal"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:490
+msgid "Singapore"
+msgstr "Singapur"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:491
+msgid "Turkey"
+msgstr "Türkei"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:492
+msgid "US/Alaska"
+msgstr "US/Alaska"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:493
+msgid "US/Aleutian"
+msgstr "US/Aleutian"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:494
+msgid "US/Arizona"
+msgstr "US/Arizona"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:495
+msgid "US/Central"
+msgstr "US/Central"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:496
+msgid "US/East-Indiana"
+msgstr "US/Ost-Indiana"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:497
+msgid "US/Eastern"
+msgstr "US/Osten"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:498
+msgid "US/Hawaii"
+msgstr "US/Hawaii"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:499
+msgid "US/Indiana-Starke"
+msgstr "US/Indiana-Starke"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:500
+msgid "US/Michigan"
+msgstr "US/Michigan"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:501
+msgid "US/Mountain"
+msgstr "US/Mountain"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:502
+msgid "US/Pacific"
+msgstr "US/Pazifik"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:503
+msgid "US/Pacific-New"
+msgstr "US/Pacific-New"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:504
+msgid "US/Samoa"
+msgstr "US/Samoa"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:505
+msgid "UTC"
+msgstr "UTC"
+
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:506
+msgid "Zulu"
+msgstr "Zulu"
 
