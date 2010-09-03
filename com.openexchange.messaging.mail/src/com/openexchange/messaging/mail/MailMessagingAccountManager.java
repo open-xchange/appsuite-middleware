@@ -94,6 +94,10 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         this.mailMessageService = mailMessageService;
     }
 
+    public MessagingAccount newAccount() throws MessagingException {
+        return new MessagingAccountImpl();
+    }
+
     public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
         try {
             final MailAccountStorageService mass =

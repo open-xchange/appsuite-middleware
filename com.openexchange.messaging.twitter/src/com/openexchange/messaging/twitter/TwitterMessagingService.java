@@ -53,7 +53,9 @@ import static com.openexchange.messaging.twitter.FormStrings.FORM_LABEL_LOGIN;
 import static com.openexchange.messaging.twitter.FormStrings.FORM_LABEL_PASSWORD;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.messaging.MessagingAccountAccess;
@@ -68,17 +70,16 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TwitterMessagingService}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingService implements MessagingService {
 
-    private static final List<MessagingAction> ACTIONS =
-        Collections.unmodifiableList(Arrays.asList(
-            new MessagingAction(TwitterConstants.TYPE_RETWEET, MessagingAction.Type.STORAGE, TwitterConstants.TYPE_TWEET),
-            new MessagingAction(TwitterConstants.TYPE_RETWEET_NEW, MessagingAction.Type.STORAGE),
-            new MessagingAction(TwitterConstants.TYPE_DIRECT_MESSAGE, MessagingAction.Type.STORAGE, TwitterConstants.TYPE_TWEET),
-            new MessagingAction(TwitterConstants.TYPE_TWEET, MessagingAction.Type.MESSAGE)));
+    private static final List<MessagingAction> ACTIONS = Collections.unmodifiableList(Arrays.asList(
+        new MessagingAction(TwitterConstants.TYPE_RETWEET, MessagingAction.Type.STORAGE, TwitterConstants.TYPE_TWEET),
+        new MessagingAction(TwitterConstants.TYPE_RETWEET_NEW, MessagingAction.Type.STORAGE),
+        new MessagingAction(TwitterConstants.TYPE_DIRECT_MESSAGE, MessagingAction.Type.STORAGE, TwitterConstants.TYPE_TWEET),
+        new MessagingAction(TwitterConstants.TYPE_TWEET, MessagingAction.Type.MESSAGE)));
 
     private static final String ID = "com.openexchange.messaging.twitter";
 
@@ -86,7 +87,7 @@ public final class TwitterMessagingService implements MessagingService {
 
     /**
      * Gets the service identifier for twitter messaging service.
-     *
+     * 
      * @return The service identifier
      */
     public static String getServiceId() {
@@ -101,6 +102,8 @@ public final class TwitterMessagingService implements MessagingService {
 
     private final DynamicFormDescription formDescription;
 
+    private final Set<String> secretProperties;
+
     /**
      * Initializes a new {@link TwitterMessagingService}.
      */
@@ -111,6 +114,15 @@ public final class TwitterMessagingService implements MessagingService {
         tmpDescription.add(FormElement.input(TwitterConstants.TWITTER_LOGIN, FORM_LABEL_LOGIN, true, ""));
         tmpDescription.add(FormElement.password(TwitterConstants.TWITTER_PASSWORD, FORM_LABEL_PASSWORD, true, ""));
         this.formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
+        secretProperties =
+            Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+                TwitterConstants.TWITTER_PASSWORD,
+                TwitterConstants.TWITTER_TOKEN,
+                TwitterConstants.TWITTER_TOKEN_SECRET)));
+    }
+
+    public Set<String> getSecretProperties() {
+        return secretProperties;
     }
 
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {

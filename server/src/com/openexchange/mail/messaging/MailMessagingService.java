@@ -50,6 +50,7 @@
 package com.openexchange.mail.messaging;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
@@ -119,6 +120,11 @@ public final class MailMessagingService implements MessagingService {
     }
 
     public DynamicFormDescription getFormDescription() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Set<String> getSecretProperties() {
         // TODO Auto-generated method stub
         return null;
     }

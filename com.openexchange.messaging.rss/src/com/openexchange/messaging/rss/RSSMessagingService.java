@@ -51,6 +51,7 @@ package com.openexchange.messaging.rss;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.messaging.MessagingAccountAccess;
@@ -96,6 +97,10 @@ public class RSSMessagingService implements MessagingService {
 
     public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) {
         return new RSSFeedOperations(accountId, session, fetcher, accountManager);
+    }
+
+    public Set<String> getSecretProperties() {
+        return Collections.emptySet();
     }
 
     public String getDisplayName() {

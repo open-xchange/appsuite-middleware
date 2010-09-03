@@ -70,6 +70,10 @@ public class SimAccountManager implements MessagingAccountManager {
     private int id;
     private List<MessagingAccount> accounts;
 
+    public MessagingAccount newAccount() throws MessagingException {
+        return new SimMessagingAccount();
+    }
+
     public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
         this.createdAccount = account;
         this.session = session;
