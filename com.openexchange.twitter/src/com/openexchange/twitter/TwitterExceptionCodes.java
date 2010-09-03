@@ -75,7 +75,11 @@ public enum TwitterExceptionCodes implements OXErrorMessage {
     /**
      * The consumer key/consumer secret pair is missing in configuration.
      */
-    MISSING_CONSUMER_KEY_SECRET(TwitterExceptionMessages.MISSING_CONSUMER_KEY_SECRET_MSG, Category.CODE_ERROR, 4);
+    MISSING_CONSUMER_KEY_SECRET(TwitterExceptionMessages.MISSING_CONSUMER_KEY_SECRET_MSG, Category.CODE_ERROR, 4),
+    /**
+     * The access token for twitter user %1$s could not be obtained.
+     */
+    ACCESS_TOKEN_FAILED(TwitterExceptionMessages.ACCESS_TOKEN_FAILED_MSG, Category.CODE_ERROR, 5);
 
     private final Category category;
 

@@ -47,37 +47,36 @@
  *
  */
 
-package com.openexchange.twitter;
+package com.openexchange.twitter.internal;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import twitter4j.http.AccessToken;
+import com.openexchange.twitter.TwitterAccessToken;
 
 /**
- * {@link TwitterExceptionMessages} - Exception messages for {@link TwitterException} that must be translated.
+ * {@link TwitterAccessTokenImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterExceptionMessages implements LocalizableStrings {
+public final class TwitterAccessTokenImpl implements TwitterAccessToken {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // Missing property: %1$s
-    public static final String MISSING_PROPERTY_MSG = "Missing property: %1$s";
-
-    // Invalid property value in property \"%1$s\": %2$s
-    public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
-
-    // The consumer key/consumer secret pair is missing in configuration.
-    public static final String MISSING_CONSUMER_KEY_SECRET_MSG = "The consumer key/consumer secret pair is missing in configuration.";
-
-    // The access token for twitter user %1$s could not be obtained.
-    public static final String ACCESS_TOKEN_FAILED_MSG = "The access token for twitter user %1$s could not be obtained.";
+    private final AccessToken accessToken;
 
     /**
-     * Initializes a new {@link TwitterExceptionMessages}.
+     * Initializes a new {@link TwitterAccessTokenImpl}.
+     * 
+     * @param accessToken The twitter4j access token instance
      */
-    private TwitterExceptionMessages() {
+    public TwitterAccessTokenImpl(AccessToken accessToken) {
         super();
+        this.accessToken = accessToken;
+    }
+
+    public String getTokenSecret() {
+        return accessToken.getTokenSecret();
+    }
+
+    public String getToken() {
+        return accessToken.getToken();
     }
 
 }
