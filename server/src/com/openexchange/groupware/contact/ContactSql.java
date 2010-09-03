@@ -120,6 +120,7 @@ public interface ContactSql {
     public String iFwriteContactImage();
     public String iFgetContactImage(int contact_id, int cid);
     public String iFgetContactImageLastModified(int id, int cid);
+    public String iFgetContactImageContentType(int id, int cid);
     public String iFgetdeleteLinkEntriesByIdsString();
     public String iFwriteContactLinkArrayInsert();
     public String iFgetFillLinkArrayString(int id, int cid);

@@ -1060,6 +1060,11 @@ public class ContactMySql implements ContactSql {
             cid).toString();
     }
 
+    public String iFgetContactImageContentType(int id, int cid) {
+        return new StringBuilder("SELECT mime_type from prg_contacts_image WHERE intfield01 = ").append(id).append(" AND cid = ").append(
+            cid).toString();
+    }
+
     public String iFgetContactImage(final int contact_id, final int cid) {
         return new StringBuilder("SELECT image1, changing_date, mime_type  from prg_contacts_image WHERE intfield01 = ").append(contact_id).append(
             " AND cid = ").append(cid).toString();

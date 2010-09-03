@@ -81,12 +81,12 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.database.PrivateFlag;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -513,8 +513,9 @@ public final class Contacts {
             final long lmd = System.currentTimeMillis();
 
             StringBuilder insert = cs.iFperformContactStorageInsert(insert_fields, insert_values, user, lmd, so.getContextId(), id);
-            if(override)
+            if(override) {
                 insert = cs.iFperformOverridingContactStorageInsert(insert_fields, insert_values, user, lmd, so.getContextId(), id);
+            }
             
             ps = writecon.prepareStatement(insert.toString());
             int counter = 1;
@@ -2167,6 +2168,26 @@ public final class Contacts {
         }
 
         return last_mod;
+    }
+
+    public static String getContactImageContentType(final int id, final int cid, final Connection readcon) throws SQLException, OXException {
+        Statement smt = null;
+        ResultSet rs = null;
+        try {
+            final ContactSql cs = new ContactMySql(null);
+            smt = readcon.createStatement();
+            rs = smt.executeQuery(cs.iFgetContactImageContentType(id, cid));
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+            return null;
+        } catch (final ContextException d) {
+            throw new ContactException(d);
+        } catch (final SQLException sxe) {
+            throw sxe;
+        } finally {
+            DBUtils.closeSQLStuff(rs, smt);
+        }
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "35", exceptionId = 35, msg = "Unable to load contact image: Context %1$d Contact %2$d")
@@ -9016,26 +9037,33 @@ public final class Contacts {
             }
 
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
-                final int t = rs.getInt(pos);
-                if (!rs.wasNull()) {
-                    co.setNumberOfImages(t);
+                try {
+                    final int t = rs.getInt(pos);
+                    if (!rs.wasNull() && (t > 0)) {
+                        final String ct = getContactImageContentType(co.getObjectID(), ctx.getContextId(), readcon);
+                        if (ct != null) {
+                            co.setImageContentType(ct);
+                        }
+                    }
+                } catch (final Exception e) {
+                    LOG.error("Image not found", e);
                 }
             }
 
             public boolean containsElement(final Contact co) {
-                return false;
+                return co.containsImageContentType();
             }
 
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
-                // false
+                if (co.containsImage1()) {
+                    ps.setInt(pos, 1);
+                } else {
+                    ps.setInt(pos, 0);
+                }
             }
 
             public boolean compare(final Contact co, final Contact original) {
                 return false;
-            }
-
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                // nix
             }
 
             public Object getData(final ResultSet rs, final int pos) throws SQLException {
