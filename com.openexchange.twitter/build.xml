@@ -25,7 +25,6 @@
 	<!-- Bundle dependencies -->
 	<property name="commonBundle" value="com.openexchange.common"/>
 	<property name="xercesBundle" value="com.openexchange.xerces.sun"/>
-	<property name="xmlBundle" value="com.openexchange.xml"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
@@ -48,7 +47,6 @@
     	<pathelement location="${bundlesdir}/${configreadjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}"/>
     	<pathelement location="${bundlesdir}/${xercesBundle}/lib/${xercesjar}"/>
-    	<pathelement location="${bundlesdir}/${xmlBundle}/lib/${staxapijar}"/>
     	<fileset refid="3rdpartyjars"/>
     </path>
 
