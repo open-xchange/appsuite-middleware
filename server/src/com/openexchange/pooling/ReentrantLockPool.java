@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
@@ -86,6 +87,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     private boolean running = true;
     private int useTimePointer;
+    private AtomicBoolean brokenCreate = new AtomicBoolean();
 
     /**
      * The longest time an object has been used.
@@ -291,6 +293,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     }
                 }
                 if (null == retval) {
+                    if (brokenCreate.get() && data.getCreating() > 0) {
+                        throw new PoolingException("Not trying to create a pooled object in broken create state.");
+                    }
                     data.addCreating();
                 }
             } finally {
@@ -302,7 +307,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 final T pooled;
                 try {
                     pooled = lifecycle.create();
+                    brokenCreate.set(false);
                 } catch (Exception e) {
+                    brokenCreate.set(true);
                     lock.lock();
                     try {
                         data.removeCreating();
