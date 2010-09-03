@@ -49,24 +49,12 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Iterator;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.pooling.ExhaustedActions;
-import com.openexchange.pooling.PoolableLifecycle;
-import com.openexchange.pooling.PooledData;
 import com.openexchange.pooling.PoolingException;
 import com.openexchange.pooling.ReentrantLockPool;
 
@@ -124,146 +112,6 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
 
     public int getNumberOfDBConnections() {
         return getPoolSize();
-    }
-
-    /**
-     * Life cycle for database connections.
-     */
-    private static class ConnectionLifecycle implements PoolableLifecycle<Connection> {
-        /**
-         * SQL command for checking the connection.
-         */
-        private static final String TEST_SELECT = "SELECT 1 AS test";
-        /**
-         * URL to the database for creating new connections.
-         */
-        private final String url;
-        /**
-         * Properties for new connections.
-         */
-        private final Properties info;
-
-        /**
-         * Time between checks if a connection still works.
-         */
-        private long checkTime = DEFAULT_CHECK_TIME;
-
-        /**
-         * Default constructor.
-         * @param url URL to the database for creating new connections.
-         * @param info Properties for new connections.
-         */
-        public ConnectionLifecycle(final String url, final Properties info) {
-            this.url = url;
-            this.info = info;
-        }
-
-        public boolean activate(final PooledData<Connection> data) {
-            final Connection con = data.getPooled();
-            boolean retval;
-            Statement stmt = null;
-            ResultSet result = null;
-            try {
-                retval = !con.isClosed();
-                if (data.getTimeDiff() > checkTime) {
-                    stmt = con.createStatement();
-                    result = stmt.executeQuery(TEST_SELECT);
-                    if (result.next()) {
-                        retval = result.getInt(1) == 1;
-                    } else {
-                        retval = false;
-                    }
-                }
-            } catch (final SQLException e) {
-                retval = false;
-            } finally {
-                closeSQLStuff(result, stmt);
-            }
-            return retval;
-        }
-
-        public Connection create() throws SQLException {
-            return DriverManager.getConnection(url, info);
-        }
-
-        public Connection createWithoutTimeout() throws SQLException {
-            final Properties withoutTimeout = new Properties();
-            withoutTimeout.putAll(info);
-            final Iterator<Object> iter = withoutTimeout.keySet().iterator();
-            while (iter.hasNext()) {
-                final Object test = iter.next();
-                if (String.class.isAssignableFrom(test.getClass()) && ((String) test).toLowerCase().endsWith("timeout")) {
-                    iter.remove();
-                }
-            }
-            return DriverManager.getConnection(url, withoutTimeout);
-        }
-
-        public boolean deactivate(final PooledData<Connection> data) {
-            boolean retval = true;
-            try {
-                retval = !data.getPooled().isClosed();
-            } catch (final SQLException e) {
-                retval = false;
-            }
-            return retval;
-        }
-
-        public void destroy(final Connection obj) {
-            try {
-                obj.close();
-            } catch (final SQLException e) {
-                LOG.debug("Problem while closing connection.", e);
-            }
-        }
-        private static void addTrace(final DBPoolingException dbe,
-            final PooledData<Connection> data) {
-            if (null != data.getTrace()) {
-                dbe.setStackTrace(data.getTrace());
-            }
-        }
-
-        public boolean validate(final PooledData<Connection> data) {
-            final Connection con = data.getPooled();
-            boolean retval = true;
-            try {
-                if (con.isClosed()) {
-                    LOG.error("Found closed connection.");
-                    retval = false;
-                } else if (!con.getAutoCommit()) {
-                    final DBPoolingException dbe = DBPoolingExceptionCodes.NO_AUTOCOMMIT.create();
-                    addTrace(dbe, data);
-                    LOG.error(dbe.getMessage(), dbe);
-                    con.rollback();
-                    con.setAutoCommit(true);
-                }
-                // Getting number of open statements.
-                final Class< ? extends Connection> connectionClass = con.getClass();
-                try {
-                    final Method method = connectionClass.getMethod("getActiveStatementCount");
-                    final int active = ((Integer) method.invoke(con, new Object[0])).intValue();
-                    if (active > 0) {
-                        final DBPoolingException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
-                        addTrace(dbe, data);
-                        LOG.error(dbe.getMessage(), dbe);
-                        retval = false;
-                    }
-                } catch (final Exception e) {
-                    LOG.error(e.getMessage(), e);
-                }
-                // Write warning if using this connection was longer than 2 seconds.
-                if (data.getTimeDiff() > 2000) {
-                    final DBPoolingException dbe = DBPoolingExceptionCodes.TOO_LONG.create(L(data.getTimeDiff()));
-                    addTrace(dbe, data);
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(dbe.getMessage(), dbe);
-                    }
-                }
-            } catch (final SQLException e) {
-                retval = false;
-            }
-            return retval;
-        }
     }
 
     public static final ReentrantLockPool.Config DEFAULT_CONFIG;
