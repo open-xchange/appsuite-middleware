@@ -127,12 +127,12 @@ public final class EventQueue {
                         shutdownLock.unlock();
                     }
                 }
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 LOG.error(t.getMessage(), t);
             }
         }
 
-        public void setScheduledTimerTask(ScheduledTimerTask scheduledTimerTask) {
+        public void setScheduledTimerTask(final ScheduledTimerTask scheduledTimerTask) {
             this.scheduledTimerTask = scheduledTimerTask;
         }
     }
@@ -234,14 +234,15 @@ public final class EventQueue {
             if (!noDelay) {
                 final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                 if (timer != null) {
-                    final EventQueueTimerTask task2schedule = new EventQueueTimerTask(
-                        ALL_EVENTS_PROCESSED,
-                        SHUTDOWN_LOCK,
-                        isFirst,
-                        queue1,
-                        queue2,
-                        shutdownComplete,
-                        shuttingDown);
+                    final EventQueueTimerTask task2schedule =
+                        new EventQueueTimerTask(
+                            ALL_EVENTS_PROCESSED,
+                            SHUTDOWN_LOCK,
+                            isFirst,
+                            queue1,
+                            queue2,
+                            shutdownComplete,
+                            shuttingDown);
                     timerTask = timer.scheduleWithFixedDelay(task2schedule, delay, delay);
                     task2schedule.setScheduledTimerTask(timerTask);
                 }
@@ -340,56 +341,54 @@ public final class EventQueue {
         final int action = eventObj.getAction();
         switch (action) {
         case EventClient.CREATED:
-            for (int a = 0; a < appointmentEventList.size(); a++) {
+            for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    appointmentEventList.get(a).appointmentCreated((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentCreated((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CHANGED:
-            for (int a = 0; a < appointmentEventList.size(); a++) {
+            for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    appointmentEventList.get(a).appointmentModified((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentModified((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.DELETED:
-            for (int a = 0; a < appointmentEventList.size(); a++) {
+            for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    appointmentEventList.get(a).appointmentDeleted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentDeleted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CONFIRM_ACCEPTED:
-            for (int a = 0; a < appointmentEventList.size(); a++) {
+            for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    appointmentEventList.get(a).appointmentAccepted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentAccepted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CONFIRM_DECLINED:
-            for (int a = 0; a < appointmentEventList.size(); a++) {
+            for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    appointmentEventList.get(a).appointmentDeclined((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentDeclined((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
             }
             break;
         case EventClient.CONFIRM_TENTATIVE:
-            for (int a = 0; a < appointmentEventList.size(); a++) {
+            for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    appointmentEventList.get(a).appointmentTentativelyAccepted(
-                        (Appointment) eventObj.getObject(),
-                        eventObj.getSessionObject());
+                    next.appointmentTentativelyAccepted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
