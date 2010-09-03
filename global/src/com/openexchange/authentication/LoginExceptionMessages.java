@@ -107,9 +107,6 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // E.g. 'Client "OLOX20" is not activated.'
     public static final String CLIENT_DENIED_MSG = "Client \"%1$s\" is not activated.";
 
-    /**
-     * Prevent instantiation.
-     */
     private LoginExceptionMessages() {
         super();
     }
