@@ -69,12 +69,13 @@ public interface TwitterService {
     /**
      * Gets the OAuth twitter access instance for the authenticating user.
      * 
-     * @param token The twitter access token
+     * @param token The twitter token
+     * @param tokenSecret The twitter token secret
      * @return The authenticated twitter access
      * @throws TwitterException If OAuth twitter access cannot be returned
      * @see #getTwitterAccessToken(String, String)
      */
-    public TwitterAccess getOAuthTwitterAccess(TwitterAccessToken token) throws TwitterException;
+    public TwitterAccess getOAuthTwitterAccess(String token, String tokenSecret) throws TwitterException;
 
     /**
      * Gets the twitter access instance for the authenticating user.

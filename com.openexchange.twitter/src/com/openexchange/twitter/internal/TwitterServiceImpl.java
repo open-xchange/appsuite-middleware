@@ -102,7 +102,7 @@ public final class TwitterServiceImpl implements TwitterService {
         return new PagingImpl(new twitter4j.Paging());
     }
 
-    public TwitterAccess getOAuthTwitterAccess(final TwitterAccessToken token) throws TwitterException {
+    public TwitterAccess getOAuthTwitterAccess(final String twitterToken, final String twitterTokenSecret) throws TwitterException {
         final OXTwitter twitter = new twitter4j.OXTwitter();
         /*
          * Insert the appropriate consumer key and consumer secret here
@@ -113,7 +113,7 @@ public final class TwitterServiceImpl implements TwitterService {
             throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
         }
         twitter.setOAuthConsumer(consumerKey, consumerSecret);
-        twitter.setOAuthAccessToken(new AccessToken(token.getToken(), token.getTokenSecret()));
+        twitter.setOAuthAccessToken(new AccessToken(twitterToken, twitterTokenSecret));
         return new TwitterAccessImpl(twitter);
     }
 
