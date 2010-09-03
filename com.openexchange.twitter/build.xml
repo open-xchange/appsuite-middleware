@@ -33,6 +33,7 @@
 	<property name="configreadjar" value="com.openexchange.configread.jar"/>
 	<property name="commonscodecjar" value="commons-codec-1.4.jar" />
 	<property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
+	<property name="commonsiojar" value="commons-io-1.4.jar" />
 
     <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -48,6 +49,7 @@
     	<pathelement location="${bundlesdir}/${configreadjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsiojar}"/>
     	<pathelement location="${bundlesdir}/${xercesBundle}/lib/${xercesjar}"/>
     	<fileset refid="3rdpartyjars"/>
     </path>
