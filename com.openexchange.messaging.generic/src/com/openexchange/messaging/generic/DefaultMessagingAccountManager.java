@@ -84,6 +84,10 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         this.serviceId = serviceId;
     }
 
+    public MessagingAccount newAccount() throws MessagingException {
+        return new DefaultMessagingAccount();
+    }
+
     public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
         return CACHE.getAccount(serviceId, id, session);
     }
