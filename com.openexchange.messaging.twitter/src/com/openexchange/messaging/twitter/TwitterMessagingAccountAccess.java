@@ -56,8 +56,6 @@ import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.session.Session;
-import com.openexchange.twitter.Paging;
-import com.openexchange.twitter.TwitterException;
 
 /**
  * {@link TwitterMessagingAccountAccess}
@@ -103,17 +101,6 @@ public final class TwitterMessagingAccountAccess extends TwitterMessagingAccess 
 
     public void connect() throws MessagingException {
         connected = true;
-    }
-
-    public boolean ping() throws MessagingException {
-        try {
-            final Paging paging = twitterService.newPaging();
-            paging.count(1);
-            twitterAccess.getFriendsTimeline(paging);
-            return true;
-        } catch (final TwitterException e) {
-            return false;
-        }
     }
 
     public boolean isConnected() {

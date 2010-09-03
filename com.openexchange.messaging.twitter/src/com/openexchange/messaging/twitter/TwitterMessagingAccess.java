@@ -181,4 +181,20 @@ public class TwitterMessagingAccess {
         }
     }
 
+    /**
+     * Pings twitter access.
+     * 
+     * @return <code>true</code> if ping was successful; otherwise <code>false</code>
+     */
+    public boolean ping() {
+        try {
+            final Paging paging = twitterService.newPaging();
+            paging.count(1);
+            twitterAccess.getFriendsTimeline(paging);
+            return true;
+        } catch (final TwitterException e) {
+            return false;
+        }
+    }
+
 }

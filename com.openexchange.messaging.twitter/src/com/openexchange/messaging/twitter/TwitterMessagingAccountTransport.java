@@ -60,7 +60,6 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.session.Session;
-import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.TwitterException;
 import com.openexchange.twitter.TwitterExceptionCodes;
 
@@ -143,17 +142,6 @@ public final class TwitterMessagingAccountTransport extends TwitterMessagingAcce
 
     public void connect() throws MessagingException {
         connected = true;
-    }
-
-    public boolean ping() throws MessagingException {
-        try {
-            final Paging paging = twitterService.newPaging();
-            paging.count(1);
-            twitterAccess.getFriendsTimeline(paging);
-            return true;
-        } catch (final TwitterException e) {
-            return false;
-        }
     }
 
     public boolean isConnected() {
