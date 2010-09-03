@@ -82,7 +82,9 @@ public interface TwitterService {
      * @param twitterId The twitter id
      * @param password The twitter password
      * @return The authenticated twitter access
+     * @deprecated Use {@link #getOAuthTwitterAccess(String, String)} instead
      */
+    @Deprecated
     public TwitterAccess getTwitterAccess(String twitterId, String password);
 
     /**
