@@ -224,13 +224,19 @@ public class MIMEMessageFiller {
      * converter; }
      */
 
-    protected final HTML2TextHandler getHTML2TextHandler() {
+    /**
+     * Gets the {@link HTML2TextHandler} instance.
+     * 
+     * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
+     * @return The {@link HTML2TextHandler} instance
+     */
+    protected final HTML2TextHandler getHTML2TextHandler(final boolean appendHref) {
         if (html2textHandler == null) {
-            html2textHandler = new HTML2TextHandler(4096, true);
+            html2textHandler = new HTML2TextHandler(4096);
             html2textHandler.setContextId(session.getContextId());
             html2textHandler.setUserId(session.getUserId());
         }
-        return html2textHandler;
+        return html2textHandler.setAppendHref(appendHref);
     }
 
     /**
@@ -282,10 +288,9 @@ public class MIMEMessageFiller {
                 final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
                 if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
                     final String encoded =
-                        MimeUtility.fold(14, MimeUtility.encodeText(
-                            c.getCompany(),
-                            MailProperties.getInstance().getDefaultMimeCharset(),
-                            null));
+                        MimeUtility.fold(
+                            14,
+                            MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
                     session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, encoded);
                     mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
                 } else {
@@ -309,10 +314,9 @@ public class MIMEMessageFiller {
         }
     }
 
-    private static final String[] SUPPRESS_HEADERS =
-        {
-            MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER,
-            MessageHeaders.HDR_X_OX_NOTIFICATION, MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_X_MAILER };
+    private static final String[] SUPPRESS_HEADERS = {
+        MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.HDR_X_OX_NOTIFICATION,
+        MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_X_MAILER };
 
     /**
      * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,
@@ -368,15 +372,15 @@ public class MIMEMessageFiller {
             }
             final List<InternetAddress> aliases;
             try {
-                UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-                User user = userService.getUser(session.getUserId(), ctx);
+                final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+                final User user = userService.getUser(session.getUserId(), ctx);
                 aliases = new ArrayList<InternetAddress>();
-                for (String alias : user.getAliases()) {
+                for (final String alias : user.getAliases()) {
                     aliases.add(new QuotedInternetAddress(alias));
                 }
-            } catch (ServiceException e) {
+            } catch (final ServiceException e) {
                 throw new MailException(e);
-            } catch (UserException e) {
+            } catch (final UserException e) {
                 throw new MailException(e);
             }
             /*
@@ -418,10 +422,9 @@ public class MIMEMessageFiller {
             } catch (final AddressException e) {
                 LOG.error("Default Reply-To address cannot be parsed", e);
                 try {
-                    mimeMessage.setHeader(MessageHeaders.HDR_REPLY_TO, MimeUtility.encodeWord(
-                        usm.getReplyToAddr(),
-                        MailProperties.getInstance().getDefaultMimeCharset(),
-                        "Q"));
+                    mimeMessage.setHeader(
+                        MessageHeaders.HDR_REPLY_TO,
+                        MimeUtility.encodeWord(usm.getReplyToAddr(), MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
                 } catch (final UnsupportedEncodingException e1) {
                     /*
                      * Cannot occur since default mime charset is supported by JVM
@@ -729,7 +732,7 @@ public class MIMEMessageFiller {
                     /*
                      * Append text content
                      */
-                    primaryMultipart.addBodyPart(createTextBodyPart(content));
+                    primaryMultipart.addBodyPart(createTextBodyPart(content, false));
                 } else {
                     /*
                      * Append html content
@@ -863,10 +866,9 @@ public class MIMEMessageFiller {
                     /*
                      * Convert html content to regular text
                      */
-                    HTMLParser.parse(
-                        getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()),
-                        getHTML2TextHandler().reset());
-                    mailText = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
+                    final HTML2TextHandler handler = getHTML2TextHandler(false).reset();
+                    HTMLParser.parse(getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()), handler);
+                    mailText = performLineFolding(handler.getText(), usm.getAutoLinebreak());
                     // mailText =
                     // performLineFolding(getConverter().convertWithQuotes
                     // ((String) mail.getContent()), false,
@@ -1021,7 +1023,7 @@ public class MIMEMessageFiller {
         /*
          * Define & add text content to first index position
          */
-        alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent), 0);
+        alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent, true), 0);
         return alternativeMultipart;
     }
 
@@ -1161,7 +1163,9 @@ public class MIMEMessageFiller {
         final String fn;
         if (null == mailPart.getFileName()) {
             String subject =
-                MIMEMessageUtility.checkNonAscii(new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(MessageHeaders.HDR_SUBJECT, null));
+                MIMEMessageUtility.checkNonAscii(new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(
+                    MessageHeaders.HDR_SUBJECT,
+                    null));
             if (null == subject || subject.length() == 0) {
                 fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
             } else {
@@ -1223,10 +1227,11 @@ public class MIMEMessageFiller {
      * Creates a body part of type <code>text/plain</code> from given HTML content
      * 
      * @param htmlContent The HTML content
+     * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
      * @return A body part of type <code>text/plain</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
      */
-    protected final BodyPart createTextBodyPart(final String htmlContent) throws MessagingException {
+    protected final BodyPart createTextBodyPart(final String htmlContent, final boolean appendHref) throws MessagingException {
         /*
          * Convert html content to regular text. First: Create a body part for text content
          */
@@ -1238,19 +1243,18 @@ public class MIMEMessageFiller {
         if (htmlContent == null || htmlContent.length() == 0) {
             textContent = "";
         } else {
-            HTMLParser.parse(
-                getConformHTML(htmlContent, MailProperties.getInstance().getDefaultMimeCharset()),
-                getHTML2TextHandler().reset());
-            textContent = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
+            final HTML2TextHandler handler = getHTML2TextHandler(appendHref).reset();
+            HTMLParser.parse(getConformHTML(htmlContent, MailProperties.getInstance().getDefaultMimeCharset()), handler);
+            textContent = performLineFolding(handler.getText(), usm.getAutoLinebreak());
         }
         text.setText(textContent, MailProperties.getInstance().getDefaultMimeCharset());
         // text.setText(performLineFolding(getConverter().convertWithQuotes(
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(
-            REPLACE_CS,
-            MailProperties.getInstance().getDefaultMimeCharset()));
+        text.setHeader(
+            MessageHeaders.HDR_CONTENT_TYPE,
+            PAT_TEXT_CT.replaceFirst(REPLACE_CS, MailProperties.getInstance().getDefaultMimeCharset()));
         return text;
     }
 
@@ -1280,7 +1284,7 @@ public class MIMEMessageFiller {
 
     /**
      * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
-	 * {@link Multipart}</code>.
+     * {@link Multipart}</code>.
      * 
      * @param htmlContent The html content whose &lt;img&gt; tags must be replaced with real content IDs
      * @param mp The parental instance of <code>{@link Multipart}</code>
@@ -1308,14 +1312,19 @@ public class MIMEMessageFiller {
                     } catch (final ManagedFileException e) {
                         if (LOG.isWarnEnabled()) {
                             tmp.setLength(0);
-                            LOG.warn(tmp.append("Image with id \"").append(id).append(
-                                "\" could not be loaded. Referenced image is skipped.").toString(), e);
+                            LOG.warn(
+                                tmp.append("Image with id \"").append(id).append("\" could not be loaded. Referenced image is skipped.").toString(),
+                                e);
                         }
                         /*
                          * Anyway, replace image tag
                          */
                         tmp.setLength(0);
-                        mr.appendLiteralReplacement(sb, m.group().replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
+                        mr.appendLiteralReplacement(
+                            sb,
+                            m.group().replaceFirst(
+                                "(?i)src=\"[^\"]*\"",
+                                "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
                         continue;
                     }
                 } else {
@@ -1332,7 +1341,11 @@ public class MIMEMessageFiller {
                          * Anyway, replace image tag
                          */
                         tmp.setLength(0);
-                        mr.appendLiteralReplacement(sb, m.group().replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
+                        mr.appendLiteralReplacement(
+                            sb,
+                            m.group().replaceFirst(
+                                "(?i)src=\"[^\"]*\"",
+                                "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
                         continue;
                     }
                     try {
@@ -1340,7 +1353,11 @@ public class MIMEMessageFiller {
                     } catch (final MailException e) {
                         if (MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getDetailNumber()) {
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(sb, m.group().replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
+                            mr.appendLiteralReplacement(
+                                sb,
+                                m.group().replaceFirst(
+                                    "(?i)src=\"[^\"]*\"",
+                                    "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
                             continue;
                         }
                         throw e;
@@ -1356,8 +1373,13 @@ public class MIMEMessageFiller {
                     msgFiller.uploadFileIDs.add(id);
                     appendBodyPart = true;
                 }
-                mr.appendLiteralReplacement(sb, m.group().replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + processLocalImage(imageProvider, id, appendBodyPart, tmp, mp) + "\""));
-                //mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp, mp)));
+                mr.appendLiteralReplacement(
+                    sb,
+                    m.group().replaceFirst(
+                        "(?i)src=\"[^\"]*\"",
+                        "src=\"cid:" + processLocalImage(imageProvider, id, appendBodyPart, tmp, mp) + "\""));
+                // mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp,
+                // mp)));
             } while (m.find());
         }
         mr.appendTail(sb);

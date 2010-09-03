@@ -132,7 +132,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     private boolean preTag;
 
-    private final boolean appendHref;
+    private boolean appendHref;
 
     private String hrefContent;
 
@@ -152,13 +152,35 @@ public final class HTML2TextHandler implements HTMLHandler {
      * Initializes a new {@link HTML2TextHandler}.
      * 
      * @param capacity The initial capacity
+     */
+    public HTML2TextHandler(final int capacity) {
+        this(capacity, false);
+    }
+
+    /**
+     * Initializes a new {@link HTML2TextHandler}.
+     * 
+     * @param capacity The initial capacity
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
-     *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be <code>Link&nbsp;[www.somewhere.com]</code>
+     *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
+     *            <code>Link&nbsp;[www.somewhere.com]</code>
      */
     public HTML2TextHandler(final int capacity, final boolean appendHref) {
         super();
         textBuilder = new StringBuilder(capacity);
         this.appendHref = appendHref;
+    }
+
+    /**
+     * Sets whether to append URLs contained in <i>href</i>s and <i>src</i>.<br>
+     * Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be <code>Link&nbsp;[www.somewhere.com]</code>
+     * 
+     * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
+     * @return This handler with behavior applied
+     */
+    public HTML2TextHandler setAppendHref(boolean appendHref) {
+        this.appendHref = appendHref;
+        return this;
     }
 
     /**
@@ -303,7 +325,8 @@ public final class HTML2TextHandler implements HTMLHandler {
                     textBuilder.append(' ').append(attributes.get(ATTR_ALT2)).append(' ');
                 }
                 if (appendHref) {
-                    final String src = attributes.containsKey(ATTR_SRC) ? attributes.get(ATTR_SRC) : (attributes.containsKey(ATTR_SRC2) ? attributes.get(ATTR_SRC2) : null);
+                    final String src =
+                        attributes.containsKey(ATTR_SRC) ? attributes.get(ATTR_SRC) : (attributes.containsKey(ATTR_SRC2) ? attributes.get(ATTR_SRC2) : null);
                     if (src != null && src.indexOf("cid:") == -1) {
                         textBuilder.append(" [").append(src).append("] ");
                     }
