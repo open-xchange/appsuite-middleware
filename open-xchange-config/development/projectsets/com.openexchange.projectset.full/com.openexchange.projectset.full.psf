@@ -71,5 +71,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.admin.autocontextid,com.openexchange.admin.autocontextid"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.push.mail.notify,com.openexchange.push.mail.notify"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.templating.json,com.openexchange.templating.json"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.mail,com.openexchange.messaging.mail"/>
 </provider>
 </psf>
