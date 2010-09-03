@@ -52,6 +52,7 @@ package com.openexchange.groupware.notify;
 import java.util.Locale;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.tools.session.ServerSession;
@@ -68,7 +69,7 @@ public final class PooledNotification implements Delayed {
      */
     private static final long MSEC_DELAY = 120000l;
 
-    private volatile long stamp;
+    private final AtomicLong stamp;
 
     private final EmailableParticipant p;
 
@@ -101,7 +102,7 @@ public final class PooledNotification implements Delayed {
      */
     public PooledNotification(final EmailableParticipant p, final String title, final State state, final Locale locale, final RenderMap renderMap, final ServerSession session, final CalendarObject obj) {
         super();
-        stamp = System.currentTimeMillis();
+        stamp = new AtomicLong(System.currentTimeMillis());
         this.p = p;
         this.state = state;
         this.locale = locale;
@@ -113,12 +114,12 @@ public final class PooledNotification implements Delayed {
     }
 
     public long getDelay(final TimeUnit unit) {
-        return unit.convert(MSEC_DELAY - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
+        return unit.convert(MSEC_DELAY - (System.currentTimeMillis() - stamp.get()), TimeUnit.MILLISECONDS);
     }
 
     public int compareTo(final Delayed o) {
-        final long thisStamp = this.stamp;
-        final long otherStamp = ((PooledNotification) o).stamp;
+        final long thisStamp = this.stamp.get();
+        final long otherStamp = ((PooledNotification) o).stamp.get();
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
     }
 
@@ -126,7 +127,7 @@ public final class PooledNotification implements Delayed {
      * Touches this pooled notification; meaning its last-accessed time stamp is set to now.
      */
     public void touch() {
-        stamp = System.currentTimeMillis();
+        stamp.set(System.currentTimeMillis());
     }
 
     /**
@@ -237,7 +238,7 @@ public final class PooledNotification implements Delayed {
      * @return The last-accessed time stamp.
      */
     public long lastAccessed() {
-        return stamp;
+        return stamp.get();
     }
 
     /**
