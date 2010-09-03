@@ -149,6 +149,10 @@ class PoolImplData<T> {
         creating--;
     }
 
+    int getCreating() {
+        return creating;
+    }
+
     /**
      * @return the number of active objects.
      */
