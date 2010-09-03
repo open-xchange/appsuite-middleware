@@ -54,7 +54,7 @@ import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
-import com.openexchange.messaging.twitter.session.TwitterSessionRegistry;
+import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
@@ -98,7 +98,7 @@ public class TwitterMessagingAccess {
         final int contextId = session.getContextId();
         final int userId = session.getUserId();
         final int accountId = account.getId();
-        TwitterAccess tmp = TwitterSessionRegistry.getInstance().getSession(contextId, userId, accountId);
+        TwitterAccess tmp = TwitterAccessRegistry.getInstance().getAccess(contextId, userId, accountId);
         if (null == tmp) {
             try {
                 final Map<String, Object> configuration = account.getConfiguration();
@@ -121,7 +121,7 @@ public class TwitterMessagingAccess {
                 /*
                  * Add twitter access to registry
                  */
-                tmp = TwitterSessionRegistry.getInstance().addAccess(contextId, userId, accountId, newTwitterAccess);
+                tmp = TwitterAccessRegistry.getInstance().addAccess(contextId, userId, accountId, newTwitterAccess);
                 if (null == tmp) {
                     tmp = newTwitterAccess;
                 }

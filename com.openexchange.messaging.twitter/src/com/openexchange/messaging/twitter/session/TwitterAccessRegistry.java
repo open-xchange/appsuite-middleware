@@ -57,30 +57,30 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.twitter.TwitterAccess;
 
 /**
- * {@link TwitterSessionRegistry}
+ * {@link TwitterAccessRegistry}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class TwitterSessionRegistry {
+public final class TwitterAccessRegistry {
 
-    private static final TwitterSessionRegistry INSTANCE = new TwitterSessionRegistry();
+    private static final TwitterAccessRegistry INSTANCE = new TwitterAccessRegistry();
 
     /**
      * Gets the registry instance.
      * 
      * @return The registry instance
      */
-    public static TwitterSessionRegistry getInstance() {
+    public static TwitterAccessRegistry getInstance() {
         return INSTANCE;
     }
 
     private final ConcurrentMap<SimpleKey, ConcurrentMap<Integer, TwitterAccess>> map;
 
     /**
-     * Initializes a new {@link TwitterSessionRegistry}.
+     * Initializes a new {@link TwitterAccessRegistry}.
      */
-    private TwitterSessionRegistry() {
+    private TwitterAccessRegistry() {
         super();
         map = new ConcurrentHashMap<SimpleKey, ConcurrentMap<Integer, TwitterAccess>>();
     }
@@ -115,7 +115,7 @@ public final class TwitterSessionRegistry {
      * @param accountId The account identifier
      * @return <code>true</code> if such a twitter access is present; otherwise <code>false</code>
      */
-    public boolean containsSession(final int contextId, final int userId, final int accountId) {
+    public boolean containsAccess(final int contextId, final int userId, final int accountId) {
         final ConcurrentMap<Integer, TwitterAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
         return null != inner && inner.containsKey(Integer.valueOf(accountId));
     }
@@ -128,7 +128,7 @@ public final class TwitterSessionRegistry {
      * @param accountId The account identifier
      * @return The twitter access or <code>null</code>
      */
-    public TwitterAccess getSession(final int contextId, final int userId, final int accountId) {
+    public TwitterAccess getAccess(final int contextId, final int userId, final int accountId) {
         final ConcurrentMap<Integer, TwitterAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
         return null == inner ? null : inner.get(Integer.valueOf(accountId));
     }
@@ -141,7 +141,7 @@ public final class TwitterSessionRegistry {
      * @param userId The user identifier
      * @return <code>true</code> if a twitter access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
-    public boolean removeSessionIfLast(final int contextId, final int userId) {
+    public boolean removeAccessIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(SessiondService.class);
         if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
             return (null != map.remove(SimpleKey.valueOf(contextId, userId)));
@@ -157,7 +157,7 @@ public final class TwitterSessionRegistry {
      * @param accountId The account identifier
      * @return <code>true</code> if a twitter access for given user-context-pair was found and purged; otherwise <code>false</code>
      */
-    public boolean purgeUserSession(final int contextId, final int userId, final int accountId) {
+    public boolean purgeUserAccess(final int contextId, final int userId, final int accountId) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
         final ConcurrentMap<Integer, TwitterAccess> inner = map.get(key);
         if (null == inner) {

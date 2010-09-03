@@ -88,7 +88,7 @@ public final class TwitterEventHandler implements EventHandler {
                  * A single session was removed
                  */
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (TwitterSessionRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                if (TwitterAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
                     LOG.debug(new StringBuilder("Twitter access removed for user ").append(session.getUserId()).append(" in context ").append(
                         session.getContextId()).toString());
                 }
@@ -102,7 +102,7 @@ public final class TwitterEventHandler implements EventHandler {
                  * For each session
                  */
                 for (final Session session : sessionContainer.values()) {
-                    if (TwitterSessionRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                    if (TwitterAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
                         LOG.debug(new StringBuilder("Twitter access removed for user ").append(session.getUserId()).append(" in context ").append(
                             session.getContextId()).toString());
                     }
