@@ -25,6 +25,16 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-394
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/ldapauth.properties
+  if ! ox_exists_property adsBind  $pfile; then
+      ox_set_property adsBind "false" $pfile
+  fi
+  if ! ox_exists_property referral $pfile; then
+      ox_set_property referral "follow" $pfile
+  fi
+
   # SoftwareChange_Request-210
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/ldapauth.properties

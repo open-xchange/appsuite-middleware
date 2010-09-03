@@ -80,6 +80,16 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-394
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/ldapauth.properties
+   if ! ox_exists_property adsBind  $pfile; then
+      ox_set_property adsBind "false" $pfile
+   fi
+   if ! ox_exists_property referral $pfile; then
+      ox_set_property referral "follow" $pfile
+   fi
+
    # SoftwareChange_Request-210
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/ldapauth.properties

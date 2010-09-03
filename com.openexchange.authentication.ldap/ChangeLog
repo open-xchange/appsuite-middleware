@@ -1,3 +1,7 @@
+* 2010-09-03 - choeger@open-xchange.com
+
+ - Added new functions adsBind and referral
+
 * 2010-02-02 - dennis.sieben@open-xchange.com
 
  - Bugfix #15309: [L3] open-xchange-authentication-ldap: multiple OUs works

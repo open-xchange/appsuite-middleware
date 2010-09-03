@@ -80,10 +80,12 @@ public class LDAPAuthentication implements AuthenticationService {
         BASE_DN("baseDN"),
         UID_ATTRIBUTE("uidAttribute"),
         LDAP_RETURN_FIELD("ldapReturnField"),
+        ADS_NAME_BIND("adsBind"),
         SUBTREE_SEARCH("subtreeSearch"),
         SEARCH_FILTER("searchFilter"),
         BIND_DN("bindDN"),
-        BIND_DN_PASSWORD("bindDNPassword");
+        BIND_DN_PASSWORD("bindDNPassword"),
+        REFERRAL("referral");
         
         public String name;
 
@@ -102,9 +104,11 @@ public class LDAPAuthentication implements AuthenticationService {
     /**
      * attribute name and base DN.
      */
-    private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword;
+    private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, referral;
 
     private boolean subtreeSearch;
+    
+    private boolean adsbind;
     
     /**
      * Default constructor.
@@ -127,6 +131,7 @@ public class LDAPAuthentication implements AuthenticationService {
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
         }
         final String returnstring = bind(uid, password);
+        LOG.info("User " + uid + " successful authenticated.");
         return new Authenticated() {
             public String getContextInfo() {
                 return splitted[0];
@@ -147,6 +152,7 @@ public class LDAPAuthentication implements AuthenticationService {
         LdapContext context = null;
         String dn = null;
         try {
+            String samAccountName = null;
             if( subtreeSearch ) {
                 // get user dn from user
                 final Properties aprops = (Properties)props.clone();
@@ -181,14 +187,49 @@ public class LDAPAuthentication implements AuthenticationService {
                 }
                 context.close();
             } else {
-                dn = uidAttribute + "=" + uid + "," + baseDN;
+                // Whether or not to use the samAccountName search
+                if (this.adsbind) {
+                    int index = uid.indexOf("\\");
+                    if (-1 != index) {
+                        samAccountName = uid.substring(index + 1);
+                    } else {
+                        samAccountName = null;
+                    }
+                    dn = uid;
+                } else {
+                    dn = uidAttribute + "=" + uid + "," + baseDN;
+                    samAccountName = null;
+                }
+
             }
             context = new InitialLdapContext(props, null);
+            context.addToEnvironment(Context.REFERRAL, referral);
             context.addToEnvironment(Context.SECURITY_PRINCIPAL, dn);
             context.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             context.reconnect(null);
             if (null != ldapReturnField && ldapReturnField.length() > 0) {
-                final Attributes userDnAttributes = context.getAttributes(dn);
+                final Attributes userDnAttributes;
+                if (this.adsbind) {
+                    final SearchControls searchControls = new SearchControls();
+                    searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                    searchControls.setCountLimit(0);
+                    searchControls.setReturningAttributes(new String[]{ldapReturnField});
+                    final NamingEnumeration<SearchResult> search;
+                    if (null == samAccountName) {
+                        search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
+                    } else {
+                        search = context.search(this.baseDN, "(sAMAccountName=" + samAccountName + ")", searchControls);
+                    }
+                    if (null != search && search.hasMoreElements()) {
+                        final SearchResult next = search.next();
+                        userDnAttributes = next.getAttributes();
+                    } else {
+                        LOG.error("No user with displayname " + uid + " found.");
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    }
+                } else {
+                    userDnAttributes = context.getAttributes(dn);
+                }
                 final Attribute attribute = userDnAttributes.get(ldapReturnField);
                 return (String) attribute.get();
             }
@@ -239,6 +280,8 @@ public class LDAPAuthentication implements AuthenticationService {
 
         this.ldapReturnField = props.getProperty(PropertyNames.LDAP_RETURN_FIELD.name);
 
+        this.adsbind = Boolean.parseBoolean(props.getProperty(PropertyNames.ADS_NAME_BIND.name));
+
         if (!props.containsKey(PropertyNames.SUBTREE_SEARCH.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.SUBTREE_SEARCH.name);
         }
@@ -251,6 +294,12 @@ public class LDAPAuthentication implements AuthenticationService {
 
         bindDN = props.getProperty(PropertyNames.BIND_DN.name);
         bindDNPassword = props.getProperty(PropertyNames.BIND_DN_PASSWORD.name);
+
+        if (!props.containsKey(PropertyNames.REFERRAL.name)) {
+            throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.REFERRAL.name);
+        }
+        referral = props.getProperty(PropertyNames.REFERRAL.name);
+
     }
 
     /**
