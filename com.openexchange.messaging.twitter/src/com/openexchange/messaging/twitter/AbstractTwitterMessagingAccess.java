@@ -65,11 +65,11 @@ import com.openexchange.twitter.TwitterService;
 
 
 /**
- * {@link TwitterMessagingAccess} - Generic access to twitter.
+ * {@link AbstractTwitterMessagingAccess} - Generic access to twitter.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TwitterMessagingAccess {
+public abstract class AbstractTwitterMessagingAccess {
     
     protected final MessagingAccount account;
 
@@ -82,11 +82,11 @@ public class TwitterMessagingAccess {
     protected boolean connected;
 
     /**
-     * Initializes a new {@link TwitterMessagingAccess}.
+     * Initializes a new {@link AbstractTwitterMessagingAccess}.
      * 
      * @throws MessagingException If initialization fails
      */
-    protected TwitterMessagingAccess(final MessagingAccount account, final Session session) throws MessagingException {
+    protected AbstractTwitterMessagingAccess(final MessagingAccount account, final Session session) throws MessagingException {
         super();
         this.session = session;
         this.account = account;
@@ -173,7 +173,7 @@ public class TwitterMessagingAccess {
             newTwitterAccess.getFriendsTimeline(paging);
             return true;
         } catch (final TwitterException e) {
-            final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(TwitterMessagingAccess.class);
+            final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(AbstractTwitterMessagingAccess.class);
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }

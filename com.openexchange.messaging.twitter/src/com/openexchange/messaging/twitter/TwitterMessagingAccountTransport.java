@@ -68,7 +68,7 @@ import com.openexchange.twitter.TwitterExceptionCodes;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterMessagingAccountTransport extends TwitterMessagingAccess implements MessagingAccountTransport {
+public final class TwitterMessagingAccountTransport extends AbstractTwitterMessagingAccess implements MessagingAccountTransport {
 
     /**
      * Initializes a new {@link TwitterMessagingAccountTransport}.

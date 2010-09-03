@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterMessagingAccountAccess extends TwitterMessagingAccess implements MessagingAccountAccess {
+public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagingAccess implements MessagingAccountAccess {
 
     private MessagingFolderAccess folderAccess;
 

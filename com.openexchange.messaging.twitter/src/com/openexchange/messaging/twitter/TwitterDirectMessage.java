@@ -78,6 +78,8 @@ import com.openexchange.twitter.User;
  */
 public final class TwitterDirectMessage implements MessagingMessage {
 
+    private static final long serialVersionUID = 5324611878535898301L;
+
     private static final ContentType CONTENT_TYPE;
 
     private static final ContentDisposition CONTENT_DISPOSITION;

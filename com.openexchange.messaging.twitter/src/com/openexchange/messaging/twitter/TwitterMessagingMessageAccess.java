@@ -282,27 +282,27 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         return retval;
     }
 
-    /**
-     * Converts specified numbers to an array of <code>String</code>.
-     * 
-     * @param longs The numbers
-     * @return An array of <code>String</code>
-     */
-    private static final String[] longs2strings(final long[] longs) {
-        if (null == longs) {
-            return null;
-        }
-        final String[] retval = new String[longs.length];
-        for (int i = 0; i < retval.length; i++) {
-            final long l = longs[i];
-            if (-1 == l) {
-                retval[i] = null;
-            } else {
-                retval[i] = String.valueOf(longs[i]);
-            }
-        }
-        return retval;
-    }
+//    /**
+//     * Converts specified numbers to an array of <code>String</code>.
+//     * 
+//     * @param longs The numbers
+//     * @return An array of <code>String</code>
+//     */
+//    private static final String[] longs2strings(final long[] longs) {
+//        if (null == longs) {
+//            return null;
+//        }
+//        final String[] retval = new String[longs.length];
+//        for (int i = 0; i < retval.length; i++) {
+//            final long l = longs[i];
+//            if (-1 == l) {
+//                retval[i] = null;
+//            } else {
+//                retval[i] = String.valueOf(longs[i]);
+//            }
+//        }
+//        return retval;
+//    }
 
     public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
         throw new UnsupportedOperationException();
