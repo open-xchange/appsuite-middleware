@@ -109,8 +109,7 @@ public final class TwitterServiceImpl implements TwitterService {
             throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
         }
         twitter.setOAuthConsumer(consumerKey, consumerSecret);
-        final AccessToken accessToken = new AccessToken(twitterToken, twitterTokenSecret);
-        twitter.setOAuthAccessToken(accessToken);
+        twitter.setOAuthAccessToken(new AccessToken(twitterToken, twitterTokenSecret));
         return new TwitterAccessImpl(twitter);
     }
 
