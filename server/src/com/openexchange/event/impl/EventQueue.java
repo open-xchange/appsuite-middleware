@@ -65,6 +65,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -338,12 +339,14 @@ public final class EventQueue {
         if (appointmentEventList.isEmpty()) {
             return;
         }
+        final Appointment appointment = (Appointment) eventObj.getObject();
+        final Session session = eventObj.getSessionObject();
         final int action = eventObj.getAction();
         switch (action) {
         case EventClient.CREATED:
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    next.appointmentCreated((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentCreated(appointment, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -352,7 +355,7 @@ public final class EventQueue {
         case EventClient.CHANGED:
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    next.appointmentModified((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentModified(appointment, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -361,7 +364,7 @@ public final class EventQueue {
         case EventClient.DELETED:
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    next.appointmentDeleted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentDeleted(appointment, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -370,7 +373,7 @@ public final class EventQueue {
         case EventClient.CONFIRM_ACCEPTED:
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    next.appointmentAccepted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentAccepted(appointment, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -379,7 +382,7 @@ public final class EventQueue {
         case EventClient.CONFIRM_DECLINED:
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    next.appointmentDeclined((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentDeclined(appointment, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
@@ -388,7 +391,7 @@ public final class EventQueue {
         case EventClient.CONFIRM_TENTATIVE:
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
-                    next.appointmentTentativelyAccepted((Appointment) eventObj.getObject(), eventObj.getSessionObject());
+                    next.appointmentTentativelyAccepted(appointment, session);
                 } catch (final Throwable t) {
                     LOG.error(t.getMessage(), t);
                 }
