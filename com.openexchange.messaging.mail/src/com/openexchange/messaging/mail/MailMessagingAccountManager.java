@@ -58,9 +58,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.context.ContextService;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.datatypes.genericonf.FormElement.Widget;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.mailaccount.Attribute;
@@ -591,27 +588,6 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
 
         public void addParameter2Config(final String name, final Object value) {
             map.put(name, value);
-        }
-
-        public Set<String> getSecretProperties() {
-            return getPasswordElementNames(messagingService.getFormDescription());
-        }
-
-        /**
-         * Gets the names of those {@link FormElement} associated with given identifier's messaging service which indicate to be of type
-         * {@link Widget#PASSWORD password}.
-         * 
-         * @param serviceId The service identifier
-         * @return The password field names
-         */
-        private static Set<String> getPasswordElementNames(final DynamicFormDescription formDescription) {
-            final Set<String> retval = new HashSet<String>(2);
-            for (final FormElement formElement : formDescription) {
-                if (Widget.PASSWORD.equals(formElement.getWidget())) {
-                    retval.add(formElement.getName());
-                }
-            }
-            return retval;
         }
 
         public Map<String, Object> getConfiguration() {

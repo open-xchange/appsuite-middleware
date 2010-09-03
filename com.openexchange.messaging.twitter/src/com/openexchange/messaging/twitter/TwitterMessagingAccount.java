@@ -49,11 +49,7 @@
 
 package com.openexchange.messaging.twitter;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
 
@@ -66,12 +62,6 @@ public final class TwitterMessagingAccount implements MessagingAccount {
 
     private static final long serialVersionUID = 9003332908333363171L;
 
-    private static final Set<String> SECRET_PROPS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        TwitterConstants.TWITTER_LOGIN,
-        TwitterConstants.TWITTER_PASSWORD,
-        TwitterConstants.TWITTER_TOKEN,
-        TwitterConstants.TWITTER_TOKEN_SECRET)));
-
     private final MessagingAccount messagingAccount;
 
     /**
@@ -79,17 +69,13 @@ public final class TwitterMessagingAccount implements MessagingAccount {
      * 
      * @param messagingAccount
      */
-    public TwitterMessagingAccount(MessagingAccount messagingAccount) {
+    public TwitterMessagingAccount(final MessagingAccount messagingAccount) {
         super();
         this.messagingAccount = messagingAccount;
     }
 
     public Map<String, Object> getConfiguration() {
         return messagingAccount.getConfiguration();
-    }
-
-    public Set<String> getSecretProperties() {
-        return SECRET_PROPS;
     }
 
     public int getId() {
