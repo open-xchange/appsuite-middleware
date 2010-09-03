@@ -54,6 +54,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -246,6 +249,17 @@ public final class MALPollPushListener implements PushListener {
                     contextId).append(". Return immediately.").toString());
             }
             return;
+        }
+        try {
+            ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+            Context context = contextService.getContext(contextId);
+            if (context.isReadOnly()) {
+                return;
+            }
+        } catch (ServiceException e) {
+            throw new PushException(e);
+        } catch (ContextException e) {
+            throw new PushException(e);
         }
         try {
             final MailService mailService = MALPollServiceRegistry.getServiceRegistry().getService(MailService.class, true);
