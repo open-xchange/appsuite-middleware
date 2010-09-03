@@ -51,7 +51,6 @@ package com.openexchange.ajax.session;
 
 import static com.openexchange.ajax.framework.AJAXClient.User.User1;
 import static com.openexchange.ajax.framework.AJAXClient.User.User2;
-import static com.openexchange.sessiond.exception.SessiondException.Code.DUPLICATE_AUTHID;
 import java.util.Arrays;
 import junit.framework.TestCase;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -60,7 +59,8 @@ import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessiondException;
 
 /**
  * Checks if the server detects correctly a duplicate used authId.
@@ -121,7 +121,7 @@ public class DuplicateAuthIdTest extends TestCase {
             fail("Duplicate authId not detected.");
         } else {
             AbstractOXException e = response.getException();
-            SessiondException se = new SessiondException(DUPLICATE_AUTHID, login1, login2);
+            SessiondException se = SessionExceptionCodes.DUPLICATE_AUTHID.create(login1, login2);
             assertEquals("Found wrong exception.", se.getComponent(), e.getComponent());
             assertEquals("Found wrong exception.", se.getDetailNumber(), e.getDetailNumber());
             assertEquals("Found wrong exception.", se.getCategory(), e.getCategory());
