@@ -49,44 +49,26 @@
 
 package com.openexchange.messaging.twitter;
 
-import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingMessageAccess;
-import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
-import com.openexchange.messaging.twitter.session.TwitterSessionRegistry;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
-import com.openexchange.twitter.TwitterAccess;
-import com.openexchange.twitter.TwitterAccessToken;
 import com.openexchange.twitter.TwitterException;
-import com.openexchange.twitter.TwitterService;
 
 /**
  * {@link TwitterMessagingAccountAccess}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterMessagingAccountAccess implements MessagingAccountAccess {
-
-    private final MessagingAccount account;
-
-    private final TwitterService twitterService;
-
-    private final TwitterAccess twitterAccess;
-
-    private final Session session;
+public final class TwitterMessagingAccountAccess extends TwitterMessagingAccess implements MessagingAccountAccess {
 
     private MessagingFolderAccess folderAccess;
 
     private MessagingMessageAccess messageAccess;
-
-    private boolean connected;
 
     /**
      * Initializes a new {@link TwitterMessagingAccountAccess}.
@@ -94,98 +76,7 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
      * @throws MessagingException If initialization fails
      */
     public TwitterMessagingAccountAccess(final MessagingAccount account, final Session session) throws MessagingException {
-        super();
-        this.session = session;
-        this.account = account;
-        try {
-            twitterService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(TwitterService.class, true);
-        } catch (final ServiceException e) {
-            throw new MessagingException(e);
-        }
-        final int contextId = session.getContextId();
-        final int userId = session.getUserId();
-        final int accountId = account.getId();
-        TwitterAccess tmp = TwitterSessionRegistry.getInstance().getSession(contextId, userId, accountId);
-        if (null == tmp) {
-            try {
-                final Map<String, Object> configuration = account.getConfiguration();
-                /*
-                 * The OAuth twitter access
-                 */
-                TwitterAccess newTwitterAccess;
-                /*
-                 * Check existence of access token in current configuration
-                 */
-                final String token = (String) configuration.get(TwitterConstants.TWITTER_TOKEN);
-                final String tokenSecret = (String) configuration.get(TwitterConstants.TWITTER_TOKEN_SECRET);
-                if ((null == token || null == tokenSecret) || !testOAuthTwitterAccess((newTwitterAccess =
-                    twitterService.getOAuthTwitterAccess(token, tokenSecret)))) {
-                    /*
-                     * Request new access token and store in configuration
-                     */
-                    newTwitterAccess = newAccessToken();
-                }
-                /*
-                 * Add twitter access to registry
-                 */
-                tmp = TwitterSessionRegistry.getInstance().addAccess(contextId, userId, accountId, newTwitterAccess);
-                if (null == tmp) {
-                    tmp = newTwitterAccess;
-                }
-            } catch (final TwitterException e) {
-                throw new MessagingException(e);
-            }
-        }
-        twitterAccess = tmp;
-    }
-
-    private TwitterAccess newAccessToken() throws MessagingException, TwitterException {
-        final Map<String, Object> configuration = account.getConfiguration();
-        final String login = (String) configuration.get(TwitterConstants.TWITTER_LOGIN);
-        final String password = (String) configuration.get(TwitterConstants.TWITTER_PASSWORD);
-        /*
-         * Request access token and store in configuration
-         */
-        final TwitterAccessToken accessToken = twitterService.getTwitterAccessToken(login, password);
-        /*
-         * Add to configuration & update
-         */
-        final String token = accessToken.getToken();
-        final String tokenSecret = accessToken.getTokenSecret();
-        configuration.put(TwitterConstants.TWITTER_TOKEN, token);
-        configuration.put(TwitterConstants.TWITTER_TOKEN_SECRET, tokenSecret);
-        final MessagingAccountManager accountManager = account.getMessagingService().getAccountManager();
-        accountManager.updateAccount(account, session);
-        /*
-         * Obtain OAuth twitter access
-         */
-        final TwitterAccess newTwitterAccess = twitterService.getOAuthTwitterAccess(token, tokenSecret);
-        /*
-         * Test it
-         */
-        testOAuthTwitterAccess(newTwitterAccess);
-        /*
-         * ... and return
-         */
-        return newTwitterAccess;
-    }
-
-    private boolean testOAuthTwitterAccess(final TwitterAccess newTwitterAccess) {
-        try {
-            /*
-             * Test twitter access
-             */
-            final Paging paging = twitterService.newPaging();
-            paging.setCount(1);
-            newTwitterAccess.getFriendsTimeline(paging);
-            return true;
-        } catch (final TwitterException e) {
-            final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(TwitterMessagingAccountAccess.class);
-            if (logger.isDebugEnabled()) {
-                logger.debug(e.getMessage(), e);
-            }
-            return false;
-        }
+        super(account, session);
     }
 
     public int getAccountId() {

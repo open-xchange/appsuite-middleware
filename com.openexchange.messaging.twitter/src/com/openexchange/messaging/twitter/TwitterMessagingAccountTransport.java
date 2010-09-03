@@ -59,32 +59,17 @@ import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.StringContent;
-import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
-import com.openexchange.messaging.twitter.session.TwitterSessionRegistry;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
-import com.openexchange.twitter.TwitterAccess;
 import com.openexchange.twitter.TwitterException;
 import com.openexchange.twitter.TwitterExceptionCodes;
-import com.openexchange.twitter.TwitterService;
 
 /**
  * {@link TwitterMessagingAccountTransport}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterMessagingAccountTransport implements MessagingAccountTransport {
-
-    private final MessagingAccount account;
-
-    private final TwitterService twitterService;
-
-    private final TwitterAccess twitterAccess;
-
-    private final Session session;
-
-    private boolean connected;
+public final class TwitterMessagingAccountTransport extends TwitterMessagingAccess implements MessagingAccountTransport {
 
     /**
      * Initializes a new {@link TwitterMessagingAccountTransport}.
@@ -92,28 +77,7 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
      * @throws MessagingException If initialization fails
      */
     public TwitterMessagingAccountTransport(final MessagingAccount account, final Session session) throws MessagingException {
-        super();
-        this.session = session;
-        this.account = account;
-        try {
-            twitterService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(TwitterService.class, true);
-        } catch (final ServiceException e) {
-            throw new MessagingException(e);
-        }
-        final int contextId = session.getContextId();
-        final int userId = session.getUserId();
-        final int accountId = account.getId();
-        TwitterAccess tmp = TwitterSessionRegistry.getInstance().getSession(contextId, userId, accountId);
-        if (null == tmp) {
-            final String login = (String) account.getConfiguration().get(TwitterConstants.TWITTER_LOGIN);
-            final String password = (String) account.getConfiguration().get(TwitterConstants.TWITTER_PASSWORD);
-            final TwitterAccess newTwitterAccess = twitterService.getTwitterAccess(login, password);
-            tmp = TwitterSessionRegistry.getInstance().addAccess(contextId, userId, accountId, newTwitterAccess);
-            if (null == tmp) {
-                tmp = newTwitterAccess;
-            }
-        }
-        twitterAccess = tmp;
+        super(account, session);
     }
 
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
