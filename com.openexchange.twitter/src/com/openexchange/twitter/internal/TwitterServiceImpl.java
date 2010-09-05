@@ -213,6 +213,8 @@ public final class TwitterServiceImpl implements TwitterService {
                      * Assign found PIN
                      */
                     pin = matcher.group(1);
+                } else {
+                    LOG.warn("PIN not found in page content:\n" + pageWithPinString);
                 }
             }
             /*
