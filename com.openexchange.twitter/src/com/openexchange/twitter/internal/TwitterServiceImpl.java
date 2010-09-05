@@ -51,6 +51,8 @@ package com.openexchange.twitter.internal;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import twitter4j.OXTwitter;
@@ -144,7 +146,7 @@ public final class TwitterServiceImpl implements TwitterService {
         }
     }
 
-    private String crawlPINFromAuthURL(final String twitterId, final String password, final RequestToken requestToken) throws TwitterException {
+    private static String crawlPINFromAuthURL(final String twitterId, final String password, final RequestToken requestToken) throws TwitterException {
         String pin = "";
         try {
             final BrowserVersion browser = BrowserVersion.FIREFOX_3;
@@ -153,39 +155,60 @@ public final class TwitterServiceImpl implements TwitterService {
              * Get page from authorization URL
              */
             final HtmlPage loginPage = webClient.getPage(requestToken.getAuthorizationURL());
-            
+            /*
+             * Some constants
+             */
             final String actionOfLoginForm = "http://twitter.com/oauth/authorize";
             final String nameOfUserField = "session[username_or_email]";
             final String nameOfPasswordField = "session[password]";
-            final int numberOfForm = 1;
-            
+            /*
+             * Iterate page's forms and look for login form
+             */
             HtmlForm loginForm = null;
-            int numberOfFormCounter = 1;
-            for (final HtmlForm form : loginPage.getForms()) {
-                final Pattern pattern = Pattern.compile(actionOfLoginForm);
-                final Matcher matcher = pattern.matcher(form.getActionAttribute());
-                if (DEBUG) {
-                    LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / " + numberOfForm);
+            {
+                /*
+                 * The expected form index
+                 */
+                final int formIndex = 0;
+                final List<HtmlForm> forms = loginPage.getForms();
+                final Iterator<HtmlForm> iter = forms.iterator();
+                final int size = forms.size();
+                for (int i = 0; null == loginForm && i < size; i++) {
+                    final HtmlForm form = iter.next();
+                    if (DEBUG) {
+                        LOG.debug(new StringBuilder(128).append("Forms action attribute / index is : ").append(form.getActionAttribute()).append(
+                            " / ").append(i).append(", should be ").append(actionOfLoginForm).append(" / ").append(formIndex).toString());
+                    }
+                    if (formIndex == i) {
+                        if (actionOfLoginForm.equalsIgnoreCase(form.getActionAttribute()) && form.getInputsByName(nameOfUserField) != null) {
+                            loginForm = form;
+                        }
+                    }
                 }
-                if (matcher.matches() && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
-                    loginForm = form;
-                }
-                numberOfFormCounter++;
             }
+            /*
+             * Login form found?
+             */
             if (loginForm != null) {
+                /*
+                 * Fill credentials
+                 */
                 final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
                 userfield.setValueAttribute(twitterId);
                 final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
                 passwordfield.setValueAttribute(password);
-                final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
-                final String pageWithPinString = pageAfterLogin.getWebResponse().getContentAsString();
-
+                /*
+                 * Submit login form and get following page's content
+                 */
+                final String pageWithPinString = ((HtmlPage) loginForm.submit(null)).getWebResponse().getContentAsString();
+                /*
+                 * The regex to match PIN
+                 */
                 final Pattern patternOfPin = Pattern.compile("oauth_pin\">(?:[^0-9]*)([0-9]*)");
                 final Matcher matcher = patternOfPin.matcher(pageWithPinString);
                 if (DEBUG) {
                     LOG.debug(pageWithPinString);
                 }
-
                 if (matcher.find()) {
                     pin = matcher.group(1);
                 }
