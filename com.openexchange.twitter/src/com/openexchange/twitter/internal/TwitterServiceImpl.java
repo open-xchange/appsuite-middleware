@@ -147,8 +147,8 @@ public final class TwitterServiceImpl implements TwitterService {
     }
 
     private static String crawlPINFromAuthURL(final String twitterId, final String password, final RequestToken requestToken) throws TwitterException {
-        String pin = "";
         try {
+            String pin = "";
             final BrowserVersion browser = BrowserVersion.FIREFOX_3;
             final WebClient webClient = new WebClient(browser);
             /*
@@ -210,9 +210,16 @@ public final class TwitterServiceImpl implements TwitterService {
                     LOG.debug(pageWithPinString);
                 }
                 if (matcher.find()) {
+                    /*
+                     * Assign found PIN
+                     */
                     pin = matcher.group(1);
                 }
             }
+            /*
+             * Return PIN
+             */
+            return pin;
         } catch (final FailingHttpStatusCodeException e) {
             throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
         } catch (final MalformedURLException e) {
@@ -220,7 +227,6 @@ public final class TwitterServiceImpl implements TwitterService {
         } catch (final IOException e) {
             throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
         }
-        return pin;
     }
 
 }
