@@ -73,9 +73,9 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * {@link FolderCacheManager} - Holds a cache for instances of {@link FolderObject}
@@ -224,13 +224,14 @@ public final class FolderCacheManager {
     Lock getCacheLock() {
         return cacheLock;
     }
-    
+
     private class FolderFactory implements OXObjectFactory<FolderObject> {
 
         private final Context ctx;
+
         private final int folderId;
 
-        FolderFactory(Context ctx, int folderId) {
+        FolderFactory(final Context ctx, final int folderId) {
             super();
             this.ctx = ctx;
             this.folderId = folderId;
