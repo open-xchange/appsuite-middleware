@@ -8,6 +8,7 @@ BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @O
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
+BuildRequires:  open-xchange-xerces-ibm
 BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
 BuildRequires:  java-1_5_0-ibm-devel >= 1.5.0_sr9
 BuildRequires:  java-1_5_0-ibm-alsa >= 1.5.0_sr9
@@ -27,6 +28,7 @@ BuildRequires:  java-1_6_0-ibm-devel
 
 %if 0%{?rhel_version}
 # libgcj seems to be installed whether we want or not and libgcj needs cairo
+BuildRequires:  open-xchange-xerces-sun
 BuildRequires:  java-sdk-1.5.0-sun cairo
 %endif
 %if 0%{?fedora_version}
@@ -47,6 +49,13 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Twitter Bundle
 Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@
+%if 0%{?sles_version} >= 10
+Requires:   open-xchange-xerces-ibm
+Conflicts:  open-xchange-xerces-sun
+%else
+Requires:   open-xchange-xerces-sun
+Conflicts:  open-xchange-xerces-ibm
+%endif
 #
 
 %description
