@@ -259,14 +259,27 @@ public final class FolderCacheManager {
      * 
      * @throws OXException If a caching error occurs
      */
-    public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx, final Connection readConArg) throws OXException {
+    public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx, final Connection readCon) throws OXException {
+        if (null == folderCache) {
+            throw new FolderCacheNotEnabledException();
+        }
         try {
-            if (!fromCache) {
-                removeFolderObject(objectId, ctx);
+            if (fromCache) {
+                /*
+                 * Conditional put into cache: Put only if absent.
+                 */
+                if (null != readCon) {
+                    putIfAbsentInternal(new LoadingFolderProvider(objectId, ctx, readCon), ctx, null);
+                }
+            } else {
+                /*
+                 * Forced put into cache: Always put.
+                 */
+                putFolderObject(loadFolderObjectInternal(objectId, ctx, readCon), ctx, true, null);
             }
-            if (null != readConArg) {
-                putIfAbsent(loadFolderObjectInternal(objectId, ctx, readConArg), ctx, null);
-            }
+            /*
+             * Return refreshable object
+             */
             return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, objectId)).clone();
         } catch (final AbstractOXException e) {
             if (e instanceof OXException) {
@@ -375,6 +388,10 @@ public final class FolderCacheManager {
         if (!folderObj.containsObjectID()) {
             throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
         }
+        return putIfAbsentInternal(new InstanceFolderProvider(folderObj), ctx, elemAttribs);
+    }
+
+    private FolderObject putIfAbsentInternal(final FolderProvider folderObj, final Context ctx, final ElementAttributes elemAttribs) throws OXException {
         final CacheKey key = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
         cacheLock.lock();
         try {
@@ -394,9 +411,9 @@ public final class FolderCacheManager {
                 /*
                  * Put with default attributes
                  */
-                folderCache.put(key, folderObj.clone());
+                folderCache.put(key, folderObj.getFolderObject().clone());
             } else {
-                folderCache.put(key, folderObj.clone(), elemAttribs);
+                folderCache.put(key, folderObj.getFolderObject().clone(), elemAttribs);
             }
             if (null != cond) {
                 cond.signalAll();
@@ -592,4 +609,59 @@ public final class FolderCacheManager {
          */
         return folderCache.getDefaultElementAttributes();
     }
+
+    private static interface FolderProvider {
+
+        FolderObject getFolderObject() throws OXException;
+
+        int getObjectID();
+    }
+
+    private static final class InstanceFolderProvider implements FolderProvider {
+
+        private final FolderObject folderObject;
+
+        public InstanceFolderProvider(final FolderObject folderObject) {
+            super();
+            this.folderObject = folderObject;
+        }
+
+        public FolderObject getFolderObject() throws OXException {
+            return folderObject;
+        }
+
+        public int getObjectID() {
+            return folderObject.getObjectID();
+        }
+
+    }
+
+    private static final class LoadingFolderProvider implements FolderProvider {
+
+        private final Connection readCon;
+
+        private final int folderId;
+
+        private final Context ctx;
+
+        public LoadingFolderProvider(final int folderId, final Context ctx, final Connection readCon) {
+            super();
+            this.folderId = folderId;
+            this.ctx = ctx;
+            this.readCon = readCon;
+        }
+
+        public FolderObject getFolderObject() throws OXException {
+            if (folderId <= 0) {
+                throw new OXFolderNotFoundException(folderId, ctx);
+            }
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
+        }
+
+        public int getObjectID() {
+            return folderId;
+        }
+
+    }
+
 }
