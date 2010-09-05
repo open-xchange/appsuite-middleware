@@ -79,4 +79,9 @@ public final class TwitterAccessTokenImpl implements TwitterAccessToken {
         return accessToken.getToken();
     }
 
+    @Override
+    public String toString() {
+        return accessToken.toString();
+    }
+
 }
