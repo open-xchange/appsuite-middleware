@@ -146,6 +146,8 @@ public final class TwitterServiceImpl implements TwitterService {
         }
     }
 
+    private static final Pattern PATTERN_PIN = Pattern.compile("oauth_pin\">(?:[^0-9]*)([0-9]*)");
+
     private static String crawlPINFromAuthURL(final String twitterId, final String password, final RequestToken requestToken) throws TwitterException {
         try {
             String pin = "";
@@ -200,10 +202,9 @@ public final class TwitterServiceImpl implements TwitterService {
                  */
                 final String pageWithPinString = ((HtmlPage) loginForm.submit(null)).getWebResponse().getContentAsString();
                 /*
-                 * The regex to match PIN
+                 * Find PIN in page's content
                  */
-                final Pattern patternOfPin = Pattern.compile("oauth_pin\">(?:[^0-9]*)([0-9]*)");
-                final Matcher matcher = patternOfPin.matcher(pageWithPinString);
+                final Matcher matcher = PATTERN_PIN.matcher(pageWithPinString);
                 if (DEBUG) {
                     LOG.debug(pageWithPinString);
                 }
