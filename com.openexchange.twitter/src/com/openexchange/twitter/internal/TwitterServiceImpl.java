@@ -195,8 +195,8 @@ public final class TwitterServiceImpl implements TwitterService {
                 /*
                  * Fill login and password into appropriate input fields.
                  */
-                loginForm.<HtmlTextInput>getInputByName(nameOfUserField).setValueAttribute(twitterId);
-                loginForm.<HtmlPasswordInput>getInputByName(nameOfPasswordField).setValueAttribute(password);
+                loginForm.<HtmlTextInput> getInputByName(nameOfUserField).setValueAttribute(twitterId);
+                loginForm.<HtmlPasswordInput> getInputByName(nameOfPasswordField).setValueAttribute(password);
                 /*
                  * Submit login form and get following page's content
                  */
