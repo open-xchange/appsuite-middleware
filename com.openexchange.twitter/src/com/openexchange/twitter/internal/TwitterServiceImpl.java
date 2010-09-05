@@ -146,8 +146,20 @@ public final class TwitterServiceImpl implements TwitterService {
         }
     }
 
+    /**
+     * The pattern to match the PIN in page content.
+     */
     private static final Pattern PATTERN_PIN = Pattern.compile("oauth_pin\">(?:[^0-9]*)([0-9]*)");
 
+    /**
+     * Crawls the PIN from specified request token's authorization URL.
+     * 
+     * @param twitterId The twitter account name
+     * @param password The twitter account password
+     * @param requestToken The request token providing authorization URL
+     * @return The PIN from authorization URL if any found; otherwise an empty string
+     * @throws TwitterException If crawling the PIN fails
+     */
     private static String crawlPINFromAuthURL(final String twitterId, final String password, final RequestToken requestToken) throws TwitterException {
         try {
             String pin = "";
