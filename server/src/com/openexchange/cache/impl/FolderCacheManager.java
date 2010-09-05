@@ -281,10 +281,9 @@ public final class FolderCacheManager {
              * Return refreshable object
              */
             return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, objectId)).clone();
+        } catch (final OXException e) {
+            throw e;
         } catch (final AbstractOXException e) {
-            if (e instanceof OXException) {
-                throw (OXException) e;
-            }
             throw new OXException(e);
         }
     }
