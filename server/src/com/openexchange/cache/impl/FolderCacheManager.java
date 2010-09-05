@@ -295,7 +295,7 @@ public final class FolderCacheManager {
         try {
             final Object tmp = folderCache.get(getCacheKey(ctx.getContextId(), objectId));
             // Refresher uses Condition objects to prevent multiple threads loading same folder.
-            if (tmp != null && tmp instanceof FolderObject) {
+            if (tmp instanceof FolderObject) {
                 return ((FolderObject) tmp).clone();
             }
             return null;
