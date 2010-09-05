@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe;
 
+import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategyTest;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategyTest;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImplTest;
 import junit.framework.Test;
@@ -69,6 +70,7 @@ public final class UnitTests {
         final TestSuite pubSuite = new TestSuite();
 //        pubSuite.addTestSuite(SubscriptionUserDeleteListenerTest.class);
         pubSuite.addTestSuite(ContactFolderUpdaterStrategyTest.class);
+        pubSuite.addTestSuite(ContactFolderMultipleUpdaterStrategyTest.class);
         pubSuite.addTestSuite(SubscriptionExecutionServiceImplTest.class);
 //        pubSuite.addTestSuite(SubscriptionSQLStorageTest.class);
         pubSuite.addTestSuite(AbstractSubscribeServiceTest.class);

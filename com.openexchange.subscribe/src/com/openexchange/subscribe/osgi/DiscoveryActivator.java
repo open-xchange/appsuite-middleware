@@ -75,6 +75,7 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.database.SubscriptionUserDeleteListener;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 import com.openexchange.subscribe.internal.CalendarFolderUpdaterStrategy;
+import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.DocumentMetadataHolderFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
@@ -126,6 +127,7 @@ public class DiscoveryActivator implements BundleActivator {
 
         final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(1);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
+        folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
         folderUpdaters.add(new StrategyFolderUpdaterService<CalendarDataObject>(new CalendarFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<DocumentMetadataHolder>(new DocumentMetadataHolderFolderUpdaterStrategy(
             users,

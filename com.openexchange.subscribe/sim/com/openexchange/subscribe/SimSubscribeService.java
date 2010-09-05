@@ -94,7 +94,7 @@ public class SimSubscribeService implements SubscribeService {
     }
 
     public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) {
-        return null;
+        return subscriptionIds;
     }
 
     public Collection<Subscription> loadForUser(Context context, int userId) {
@@ -140,8 +140,16 @@ public class SimSubscribeService implements SubscribeService {
     public boolean knows(Context context, int subscriptionId) {
         return true;
     }
+    
+    public void setSubscriptions(List<Subscription> subscriptions){
+        this.subscriptionIds = subscriptions;
+    }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.subscribe.SubscribeService#loadSubscriptions(com.openexchange.groupware.contexts.Context, int, java.lang.String)
+     */
     public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException {
+        // TODO Auto-generated method stub
         return null;
     }
 

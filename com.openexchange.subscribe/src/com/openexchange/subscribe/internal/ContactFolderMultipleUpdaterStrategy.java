@@ -54,6 +54,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.api2.FinalContactInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
@@ -61,30 +64,50 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactUnificationState;
+
 
 /**
- * {@link ContactFolderUpdaterStrategy}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
+ * {@link ContactFolderMultipleUpdaterStrategy}
+ * This differs from ContactFolderUpdaterStrategy in 2 ways
+ * - individual fields are only written if present in the update and not filled yet. So no fields will be deleted and none will be overwritten.
+ * - aggregating relations between contacts (see {@link ContactInterface}) are respected as well as generated if appropriate 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Contact> {
-
+public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrategy<Contact> {
     private static final int SQL_INTERFACE = 1;
 
     private static final int SUBSCRIPTION = 2;
 
-    private static final int[] COMPARISON_COLUMNS = {
-        Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.BIRTHDAY, Contact.DISPLAY_NAME, Contact.EMAIL1,
-        Contact.EMAIL2, Contact.EMAIL3, Contact.USERFIELD20 };
+    // All columns need to be loaded here as we keep the original, not the update and no data may be lost
+    private static final int[] COMPARISON_COLUMNS = Contact.CONTENT_COLUMNS;
 
     public int calculateSimilarityScore(Contact original, Contact candidate, Object session) throws AbstractOXException {
         int score = 0;
         int threshhold = getThreshhold(session);
+        boolean contactsAreAbleToBeAssociated = false;
+        FinalContactInterface contactStore = (FinalContactInterface) getFromSession(SQL_INTERFACE, session);
         
-        // For the sake of simplicity we assume that equal names mean equal contacts
-        // TODO: This needs to be diversified in the form of "unique-in-context" later (if there is only one "Max Mustermann" in a folder it
-        // is unique and qualifies as identifier. If there are two "Max Mustermann" it does not.)
+        if (candidate.getUserField20() != null && !candidate.getUserField20().equals("")){
+            
+            UUID uuid = UUID.fromString(candidate.getUserField20());
+            
+            Contact contactfromUUID = contactStore.getContactByUUID(uuid);
+            
+            if (contactfromUUID != null){
+                contactsAreAbleToBeAssociated = true;
+                ContactUnificationState state = contactStore.getAssociationBetween(original, candidate);
+                // if the two contacts are associated RED already a big negative score needs to be given
+                if (state.equals(ContactUnificationState.RED)){
+                    score = -1000;
+                }
+                // if the contacts are associated GREEN already a big positive score needs to be given
+                if (state.equals(ContactUnificationState.GREEN)){
+                    score = 1000;
+                }
+            }
+        }        
         if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
             score += 5;
         }
@@ -110,6 +133,21 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         
         if( score < threshhold && original.equalsContentwise(candidate)) { //the score check is only to speed the process up
             score = threshhold + 1;
+        }
+        //before returning the score the contacts need to be associated GREEN here if the score is high enough, they are not associated already, and they are both on the system
+        if (score >= threshhold && contactsAreAbleToBeAssociated){
+            List<UUID> idsOfAlreadyAssociatedContacts = contactStore.getAssociatedContacts(original);
+            //List<Contact> associatedContacts = 
+            boolean alreadyAssociated = false;
+            for (UUID uuid : idsOfAlreadyAssociatedContacts){
+                Contact contact = contactStore.getContactByUUID(uuid);
+                if (contact.equals(candidate)){
+                    alreadyAssociated = true;
+                }
+            }
+            if (!alreadyAssociated){
+                contactStore.associateTwoContacts(original, candidate);                
+            }
         }
         return score;
     }
@@ -198,15 +236,17 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     }
 
     public void update(Contact original, Contact update, Object session) throws AbstractOXException {
-        RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
-
-        update.setParentFolderID(original.getParentFolderID());
-        update.setObjectID(original.getObjectID());
-        update.setLastModified(original.getLastModified());
-        // We need to carry over the UUID to keep existing relations
-        update.setUserField20(original.getUserField20());
-
-        contacts.updateContactObject(update, update.getParentFolderID(), update.getLastModified());
+        //This may only fill up fields NEVER overwrite them. Original should be used as base and filled up as needed
+        //ALL Content Columns need to be considered here
+        ContactSQLInterface contactStore = (ContactSQLInterface) getFromSession(SQL_INTERFACE, session);
+        int[] columns = Contact.CONTENT_COLUMNS;
+        for (int field : columns){
+            if (original.get(field) == null){
+                if (update.get(field) != null){
+                    original.set(field, update.get(field));
+                }
+            }
+        }
+        contactStore.updateContactObject(original, original.getParentFolderID(), original.getLastModified());
     }
-
 }

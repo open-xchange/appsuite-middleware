@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.internal;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -83,6 +84,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
     private SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
     private SimSubscribeService subscribeService;
     private SimFolderUpdaterService simFolderUpdaterService;
+    private Subscription subscription;
 
     @Override
     protected void setUp() throws Exception {
@@ -90,7 +92,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         SubscriptionSource source = new SubscriptionSource();
         source.setId(SOURCE_NAME);
         subscribeService = new SimSubscribeService();
-        Subscription subscription = new Subscription();
+        subscription = new Subscription();
         subscription.setContext(new SimContext(2));
         subscription.setId(12);
         subscription.setFolderId("12");
@@ -146,5 +148,60 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         //fail("Not yet implemented");
         assertTrue(true);
     }
+    
+    public void testShouldReturnSingleUpdaterIfItIsTheOnlyOnePresent() throws AbstractOXException{                        
+        assertEquals("The first Updater should be returned", simFolderUpdaterService,executionService.getFolderUpdater(subscription));
+    }
+    
+    public void testShouldReturnSingleUpdaterIfThereIsOnlyOneSubscriptionOnTheFolder() throws AbstractOXException{                
+        SimFolderUpdaterService simFolderUpdaterService2 = new SimFolderUpdaterService();
+        simFolderUpdaterService2.setHandles(true);
+        simFolderUpdaterService2.setUsesMultipleStrategy(false);
+        executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService, (FolderUpdaterService)simFolderUpdaterService2), new SimContextService()) {
+            @Override
+            protected FolderObject getFolder(SubscriptionSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
+                return null;
+            }
+        };
+        assertEquals("The first Updater should be returned", simFolderUpdaterService, executionService.getFolderUpdater(subscription));
+    }
 
+    public void testShouldReturnMultipleUpdaterIfThereAreTwoSubscriptionsOnTheFolder() throws AbstractOXException{  
+        Subscription subscription2 = new Subscription();
+        subscription.setContext(new SimContext(2));
+        subscription.setId(13);
+        subscription.setFolderId("12");
+        ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
+        subscriptions.add(subscription);
+        subscriptions.add(subscription2);
+        subscribeService.setSubscriptions(subscriptions);        
+        SimFolderUpdaterService simFolderUpdaterService2 = new SimFolderUpdaterService();
+        simFolderUpdaterService2.setHandles(true);
+        simFolderUpdaterService2.setUsesMultipleStrategy(true);
+        executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService, (FolderUpdaterService)simFolderUpdaterService2), new SimContextService()) {
+            @Override
+            protected FolderObject getFolder(SubscriptionSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
+                return null;
+            }
+        };
+        assertEquals("The second Updater should be returned", simFolderUpdaterService2, executionService.getFolderUpdater(subscription));
+    }
+    
+    public void testShouldReturnSingleUpdaterIfThereAreTwoSubscriptionsOnTheFolderButNoMultipleStrategyIsAvailable() throws AbstractOXException{  
+        Subscription subscription2 = new Subscription();
+        subscription.setContext(new SimContext(2));
+        subscription.setId(13);
+        subscription.setFolderId("12");
+        ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
+        subscriptions.add(subscription);
+        subscriptions.add(subscription2);
+        subscribeService.setSubscriptions(subscriptions);        
+        executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService), new SimContextService()) {
+            @Override
+            protected FolderObject getFolder(SubscriptionSession subscriptionSession, int contextId, int folderId) throws AbstractOXException {
+                return null;
+            }
+        };
+        assertEquals("The first Updater should be returned", simFolderUpdaterService, executionService.getFolderUpdater(subscription));
+    }
 }

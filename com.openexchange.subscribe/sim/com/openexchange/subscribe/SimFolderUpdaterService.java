@@ -66,6 +66,7 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
     private Collection data;
     private FolderObject folder;
     private boolean handles;
+    private boolean usesMultipleStrategy = false;
 
     public boolean handles(FolderObject folder) {
         this.folder = folder;
@@ -117,6 +118,15 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
         this.handles = handles;
     }
 
-    
+    /* (non-Javadoc)
+     * @see com.openexchange.subscribe.FolderUpdaterService#completelyOverwritesExistingObjects()
+     */
+    public boolean usesMultipleStrategy() {
+        return usesMultipleStrategy;
+    }
+
+    public void setUsesMultipleStrategy(boolean bool){
+        this.usesMultipleStrategy = bool;
+    }
     
 }

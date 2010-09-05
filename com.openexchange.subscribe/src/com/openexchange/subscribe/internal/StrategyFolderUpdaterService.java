@@ -69,9 +69,17 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
     private Log LOG = LogFactory.getLog(StrategyFolderUpdaterService.class);
     
     private FolderUpdaterStrategy<T> strategy;
+    
+    // a normal updater overwrites existing objects
+    private boolean usesMultipleStrategy = false;
 
     public StrategyFolderUpdaterService(FolderUpdaterStrategy<T> strategy) {
         this.strategy = strategy;
+    }
+    
+    public StrategyFolderUpdaterService(FolderUpdaterStrategy<T> strategy, boolean usesMultipleStrategy) {
+        this.strategy = strategy;
+        this.usesMultipleStrategy = usesMultipleStrategy;
     }
  
     public boolean handles(FolderObject folder) {
@@ -113,6 +121,15 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
         if(maxScore > strategy.getThreshhold(session))
             return maxElement;
        return null;
+    }
+
+    /**
+     * This attribute defines whether the Updater should:
+     * - overwrite existing objects, deleting fields not given by the update (the classic update: one subscription on one folder)
+     * - only touch fields given in the updated object (the aggregating update: multiple subscriptions on one folder) 
+     */
+    public boolean usesMultipleStrategy() {       
+        return usesMultipleStrategy;
     }
 
 }

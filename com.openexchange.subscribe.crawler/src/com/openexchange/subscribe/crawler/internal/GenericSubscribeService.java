@@ -51,11 +51,15 @@ package com.openexchange.subscribe.crawler.internal;
 
 import static com.openexchange.subscribe.crawler.internal.FormStrings.FORM_LABEL_LOGIN;
 import static com.openexchange.subscribe.crawler.internal.FormStrings.FORM_LABEL_PASSWORD;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
@@ -84,6 +88,8 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     private final Activator activator;
     
     private boolean enableJavascript;
+    
+    private int module;
 
     public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority, Activator activator, boolean enableJavascript) {
         FORM.add(FormElement.input(LOGIN, FORM_LABEL_LOGIN)).add(FormElement.password("password", FORM_LABEL_PASSWORD));
@@ -97,6 +103,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         this.workflowString = workflowString;
         this.activator = activator;
         this.enableJavascript = enableJavascript;
+        this.module = module;
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -104,7 +111,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     }
 
     public boolean handles(final int folderModule) {
-        return folderModule == FolderObject.CONTACT;
+        return folderModule == this.module;
     }
 
     public Collection getContent(final Subscription subscription) throws SubscriptionException {
@@ -113,6 +120,17 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         workflow.setSubscription(subscription);
         workflow.setEnableJavascript(enableJavascript);
         final Map<String, Object> configuration = subscription.getConfiguration();
+        // All contacts should get a UUID for aggregation
+        if (this.module == FolderObject.CONTACT){
+            List list =  Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
+            List<Contact> contacts = new ArrayList<Contact>();
+            for (Object object : list){
+                Contact contact = (Contact) object;
+                contact.setUserField20(UUID.randomUUID().toString());
+                contacts.add(contact);
+            }
+            return contacts;
+        }
         return Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
     }
 
