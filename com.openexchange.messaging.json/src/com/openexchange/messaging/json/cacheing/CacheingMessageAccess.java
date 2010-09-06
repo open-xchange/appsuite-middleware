@@ -167,7 +167,9 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
 
     private List<MessagingMessage> remember(List<MessagingMessage> messages) throws MessagingException {
         for (MessagingMessage messagingMessage : messages) {
-            remember(messagingMessage);
+            if (null != messagingMessage) {
+                remember(messagingMessage);
+            }
         }
         return messages;
     }
