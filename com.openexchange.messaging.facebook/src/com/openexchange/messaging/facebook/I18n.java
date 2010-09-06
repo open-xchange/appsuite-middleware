@@ -119,12 +119,11 @@ public final class I18n {
      * @return The translated string
      */
     public String translate(final Locale locale, final String translateMe) {
-        String retval = translateMe;
         final I18nService service = services.get(locale);
         if (null != service) {
-            retval = service.getLocalized(translateMe);
+            return service.getLocalized(translateMe);
         }
-        return retval;
+        return translateMe;
     }
 
 }
