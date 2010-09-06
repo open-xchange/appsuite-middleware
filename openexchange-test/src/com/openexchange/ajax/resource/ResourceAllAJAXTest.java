@@ -105,14 +105,6 @@ public final class ResourceAllAJAXTest extends AbstractResourceTest {
 			final int[] ids = allResponse.getIDs();
 			assertTrue("All request failed", ids != null && ids.length >= 1);
 
-            JSONArray arr = (JSONArray) allResponse.getData();
-            for(int i = 0, size = arr.length(); i < size; i++) {
-                JSONObject res = arr.optJSONObject(i);
-                assertNotNull(res);
-                assertTrue(res.has("last_modified_utc"));
-            }
-
-
 		} finally {
 			try {
 				deleteResource(id);
