@@ -49,38 +49,32 @@
 
 package com.openexchange.groupware.tx;
 
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
-public class TXExceptionFactory extends AbstractOXExceptionFactory {
-	
-	public TXExceptionFactory(final Class clazz) {
-		super(clazz);
-	}
+public class TXExceptionFactory extends Exceptions<TransactionException> {
 
-	@Override
-	protected AbstractOXException buildException(final EnumComponent component,
-			final Category category, final int number, final String message, final Throwable cause,
-			final Object... msgArgs) {
-		if(component != EnumComponent.TRANSACTION) {
-			throw new IllegalArgumentException("This factory can only build exceptions for the infostore");
-		}
-		return new TransactionException(category,number,message,cause,msgArgs);
-	}
+    private static final TXExceptionFactory SINGLETON = new TXExceptionFactory();
 
-	@Override
-	protected final int getClassId() {
-		return Classes.COM_OPENEXCHANGE_GROUPWARE_TX_TXEXCEPTIONFACTORY;
-	}
-	
-	public TransactionException create(final int id, final Object...msgArgs){
-		return (TransactionException) createException(id,msgArgs);
-	}
-	
-	public TransactionException create(final int id, final Throwable cause, final Object...msgArgs){
-		return (TransactionException) createException(id,cause, msgArgs);
-	}
+    private TXExceptionFactory() {
+        super();
+    }
 
+    public static final TXExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    @Override
+    protected void knownExceptions() {
+        declareAll(TransactionExceptionCodes.values());
+    }
+
+    @Override
+    protected TransactionException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new TransactionException(message, cause, args);
+    }
 }

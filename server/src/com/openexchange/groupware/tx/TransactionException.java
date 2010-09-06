@@ -49,47 +49,48 @@
 
 package com.openexchange.groupware.tx;
 
-import com.openexchange.api2.OXException;
+import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
-/**
- * TODO Error codes
- */
-public class TransactionException extends OXException {
+public class TransactionException extends AbstractOXException {
 
-	private static final long serialVersionUID = -8149589818960075908L;
-	private StackTraceElement[] elements;
-	
-	public TransactionException(final AbstractOXException exc) {
-		super(exc);
-	}
+    private static final long serialVersionUID = -8149589818960075908L;
+    private StackTraceElement[] elements;
+    
+    public TransactionException(final AbstractOXException exc) {
+        super(exc);
+    }
 
-	public TransactionException(final Category category, final int number, final String message, final Throwable cause, final Object...msgArgs) {
-		super(EnumComponent.TRANSACTION, category, number, message, cause);
-		setMessageArgs(msgArgs);
-	}
+    public TransactionException(final Category category, final int number, final String message, final Throwable cause, final Object...msgArgs) {
+        super(EnumComponent.TRANSACTION, category, number, message, cause);
+        setMessageArgs(msgArgs);
+    }
 
-	public TransactionException(final EnumComponent component, final String message) {
-		super(component, message);
-	}
+    public TransactionException(final EnumComponent component, final String message) {
+        super(component, message);
+    }
 
-	public TransactionException(final String arg0, final StackTraceElement[] elements) {
-		this.elements = elements;
-	}
-	
-	public StackTraceElement[] getElements() {
-		return elements;
-	}
-	
-	public void printStarterTrace(){
-		if(elements == null) {
-			System.err.println("No Stack Trace recorded");
-			return;
-		}
-		for(final StackTraceElement element : elements) {
-			System.err.println(element);
-		}
-	}
+    public TransactionException(final String arg0, final StackTraceElement[] elements) {
+        this.elements = elements;
+    }
 
+    public TransactionException(ErrorMessage message, Throwable cause, Object... args) {
+        super(message, cause);
+        setMessageArgs(args);
+    }
+
+    public StackTraceElement[] getElements() {
+        return elements;
+    }
+    
+    public void printStarterTrace(){
+        if(elements == null) {
+            System.err.println("No Stack Trace recorded");
+            return;
+        }
+        for(final StackTraceElement element : elements) {
+            System.err.println(element);
+        }
+    }
 }
