@@ -1,3 +1,8 @@
+* 2010-09-06 - choeger@open-xchange.com
+
+ - Bugfix #16812 - Updating on RHEL or SLES fails if admin modified
+ /opt/open-xchange/etc/admindaemon/User.properties
+
 * 2010-08-24 - marcus.klein@open-xchange.com
 
  - Bugfix #16576: Prefer command line password if environment password and command line password are defined.
