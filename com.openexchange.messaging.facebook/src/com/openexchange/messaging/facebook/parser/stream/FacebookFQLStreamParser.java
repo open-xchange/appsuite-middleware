@@ -365,8 +365,11 @@ public final class FacebookFQLStreamParser {
                     if (null != properties) {
                         final List<Node> streamProps = getNodesByName("stream_property", properties);
                         for (final Node streamProperty : streamProps) {
-                            messageText.append(HTML_BR).append(getNodeByName("name", streamProperty).getTextContent());
-                            messageText.append(": ").append(getNodeByName("text", streamProperty).getTextContent());
+                            final Node nameProperty = getNodeByName("name", streamProperty);
+                            if (null != nameProperty) {
+                                messageText.append(HTML_BR).append(nameProperty.getTextContent());
+                                messageText.append(": ").append(getNodeByName("text", streamProperty).getTextContent());
+                            }
                         }
                     }
                 }

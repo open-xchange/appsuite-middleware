@@ -658,7 +658,7 @@ public final class FacebookMessagingUtility {
          * Check sort field
          */
         if (null == sortField) {
-            return new Query(query, false);
+            return new Query(query.append(" LIMIT 1000"), false);
         }
         boolean containsOrderBy = false;
         final QueryAdder adder = ADDERS_STREAM.get(sortField);
@@ -669,7 +669,7 @@ public final class FacebookMessagingUtility {
                 containsOrderBy = true;
             }
         }
-        return new Query(query, containsOrderBy);
+        return new Query(query.append(" LIMIT 1000"), containsOrderBy);
     }
 
     /**
