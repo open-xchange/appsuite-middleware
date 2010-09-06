@@ -95,6 +95,10 @@ public class InsertIterator implements MapIterator<String, Object> {
             return;
         }
         PreparedStatement stmt = statementMap.get(value.getClass());
+        if (null == stmt) {
+            exception = new SQLException("Unsupported object type: " + value.getClass().getName());
+            throw new IterationBreak();
+        }
         
         try {
             stmt.setString(3, key);
