@@ -80,6 +80,8 @@ public abstract class AbstractFacebookAccess {
 
     protected static Set<String> KNOWN_FOLDER_IDS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MessagingFolder.ROOT_FULLNAME, FacebookConstants.FOLDER_WALL)));
 
+    protected final Session session;
+
     protected final MessagingAccount messagingAccount;
 
     protected final IFacebookRestClient<Object> facebookRestClient;
@@ -103,6 +105,7 @@ public abstract class AbstractFacebookAccess {
      */
     protected AbstractFacebookAccess(final IFacebookRestClient<Object> facebookRestClient, final MessagingAccount messagingAccount, final Session session, final long facebookUserId, final String facebookSession) {
         super();
+        this.session = session;
         this.messagingAccount = messagingAccount;
         this.facebookRestClient = facebookRestClient;
         id = messagingAccount.getId();

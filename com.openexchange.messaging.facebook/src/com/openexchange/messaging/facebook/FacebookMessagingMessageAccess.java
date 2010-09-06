@@ -56,6 +56,7 @@ import gnu.trove.TLongObjectHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -438,6 +439,10 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             searchTerm.addMessagingField(fieldSet);
         }
         /*
+         * Ensure "created_time" is set in Facebook messages
+         */
+        fieldSet.add(MessagingField.RECEIVED_DATE);
+        /*
          * Static fillers
          */
         final MessagingField[] daFields = fieldSet.toArray(new MessagingField[fieldSet.size()]);
@@ -449,10 +454,11 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          * Query; must not be null to determine proper number of wall posts
          */
         final Query query;
+        final QueryType queryType = QueryType.queryTypeFor(folder);
         if (EnumSet.copyOf(fieldSet).removeAll(FacebookMessagingUtility.getStreamQueryableFields())) { // Contains any
             query =
                 FacebookMessagingUtility.composeFQLStreamQueryFor(
-                    QueryType.queryTypeFor(folder),
+                    queryType,
                     daFields,
                     sortField,
                     order,
@@ -460,7 +466,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         } else {
             query =
                 FacebookMessagingUtility.composeFQLStreamQueryFor(
-                    QueryType.queryTypeFor(folder),
+                    queryType,
                     FIELDS_ID,
                     sortField,
                     order,
@@ -469,6 +475,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         final List<MessagingMessage> messages;
         final TLongObjectHashMap<List<FacebookMessagingMessage>> m;
         final TLongHashSet safetyCheck;
+        Date oldestCreatedTime = null;
         {
             final List<Object> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookRestClient);
             final int size = results.size();
@@ -484,6 +491,15 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                          * Add to list
                          */
                         messages.add(message);
+                        /*
+                         * Check date
+                         */
+                        final long receivedDate = message.getReceivedDate();
+                        if (null == oldestCreatedTime) {
+                            oldestCreatedTime = new Date(receivedDate);
+                        } else if (oldestCreatedTime.getTime() > receivedDate) {
+                            oldestCreatedTime = new Date(receivedDate);
+                        }
                     }
                 }
             } else { // Contains any
@@ -504,6 +520,15 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                             safetyCheck.add(facebookUserId);
                         }
                         l.add(message);
+                        /*
+                         * Check date
+                         */
+                        final long receivedDate = message.getReceivedDate();
+                        if (null == oldestCreatedTime) {
+                            oldestCreatedTime = new Date(receivedDate);
+                        } else if (oldestCreatedTime.getTime() > receivedDate) {
+                            oldestCreatedTime = new Date(receivedDate);
+                        }
                     }
                 }
             }
@@ -513,6 +538,12 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          */
         if (messages.isEmpty()) {
             return messages;
+        }
+        /*
+         * Store oldest timestamp
+         */
+        if (null != oldestCreatedTime) {
+            updateQueryTimestamp(queryType, oldestCreatedTime.getTime());
         }
         /*
          * Replace from with proper user name
@@ -674,6 +705,16 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
         throw new UnsupportedOperationException();
+    }
+
+    private Long getQueryTimestamp(QueryType queryType) {
+        final String tmp = (String) messagingAccount.getConfiguration().get(queryType.toString());
+        return null == tmp ? null : Long.valueOf(tmp);
+    }
+
+    private void updateQueryTimestamp(QueryType queryType, long timestamp) throws MessagingException {
+        messagingAccount.getConfiguration().put(queryType.toString(), String.valueOf(timestamp));
+        messagingAccount.getMessagingService().getAccountManager().updateAccount(messagingAccount, session);
     }
 
 }
