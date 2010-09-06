@@ -49,10 +49,9 @@
 
 package com.openexchange.datatypes.genericonf.storage;
 
+import static com.openexchange.groupware.AbstractOXException.Category.CODE_ERROR;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
-
-import static com.openexchange.groupware.AbstractOXException.Category.*;
 
 /**
  * {@link GenericConfigStorageErrorMessage}
@@ -61,7 +60,8 @@ import static com.openexchange.groupware.AbstractOXException.Category.*;
  *
  */
 public enum GenericConfigStorageErrorMessage implements OXErrorMessage {
-    SQLException(CODE_ERROR, 1, "","A SQL Error occurred: %s");
+    SQLException(CODE_ERROR, 1, "","A SQL Error occurred: %1$s"),
+    UnsupportedObjectType(CODE_ERROR, 2, "","Object type is not supported: %1$s");
 
     private Category category;
     private int errorCode;
