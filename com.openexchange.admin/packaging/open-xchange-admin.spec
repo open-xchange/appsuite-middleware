@@ -158,12 +158,12 @@ if [ ${1:-0} -eq 2 ]; then
 	  nl=
 	  vstr="SENT_MAILFOLDER TRASH_MAILFOLDER DRAFTS_MAILFOLDER SPAM_MAILFOLDER CONFIRMED_SPAM_MAILFOLDER CONFIRMED_HAM_MAILFOLDER"
 	  for pp in $vstr; do
-	      local llpp="${pp}_${ll}"
+	      llpp="${pp}_${ll}"
 	      if ! ox_exists_property $llpp $pfile; then
 		  if [ -z "$nl" ]; then
 		      echo >> $pfile
 		  fi
-		  local defv=$(ox_read_property $llpp $ofile)
+		  defv=$(ox_read_property $llpp $ofile)
 		  ox_set_property $llpp "$defv" $pfile
 		  nl=true
 	      fi
