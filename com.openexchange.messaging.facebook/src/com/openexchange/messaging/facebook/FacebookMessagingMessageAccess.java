@@ -707,12 +707,12 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw new UnsupportedOperationException();
     }
 
-    private Long getQueryTimestamp(QueryType queryType) {
+    private Long getQueryTimestamp(final QueryType queryType) {
         final String tmp = (String) messagingAccount.getConfiguration().get(queryType.toString());
         return null == tmp ? null : Long.valueOf(tmp);
     }
 
-    private void updateQueryTimestamp(QueryType queryType, long timestamp) throws MessagingException {
+    private void updateQueryTimestamp(final QueryType queryType, final long timestamp) throws MessagingException {
         messagingAccount.getConfiguration().put(queryType.toString(), String.valueOf(timestamp));
         messagingAccount.getMessagingService().getAccountManager().updateAccount(messagingAccount, session);
     }
