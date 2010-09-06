@@ -86,4 +86,8 @@ public final class ResourceFields {
      */
     public static final String AVAILABILITY = "availability";
 
+    public static final String LAST_MODIFIED = "last_modified";
+    
+    public static final String LAST_MODIFIED_UTC = "last_modified_utc";
+
 }
