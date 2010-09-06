@@ -61,6 +61,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.facebook.FacebookConfiguration;
 import com.openexchange.messaging.facebook.FacebookConstants;
@@ -162,7 +163,8 @@ public final class FacebookMessagingActivator extends DeferredActivator {
                     "com.openexchange.messaging.facebook",
                     FacebookMessagingExceptionFactory.getInstance());
 
-            trackers = new ArrayList<ServiceTracker>();
+            trackers = new ArrayList<ServiceTracker>(1);
+            trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }

@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.facebook;
 
-import static com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry.getServiceRegistry;
 import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.fireFQLQuery;
+import gnu.trove.TLongHashSet;
 import gnu.trove.TLongObjectHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,15 +59,12 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.IFacebookRestClient;
-import com.google.code.facebookapi.schema.FqlQueryResponse;
-import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAddressHeader;
@@ -87,16 +84,15 @@ import com.openexchange.messaging.facebook.parser.stream.FacebookFQLStreamParser
 import com.openexchange.messaging.facebook.parser.user.FacebookFQLUserParser;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingMessage;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
-import com.openexchange.messaging.facebook.utility.FacebookUser;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.Query;
+import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.QueryType;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.StaticFiller;
+import com.openexchange.messaging.facebook.utility.FacebookUser;
 import com.openexchange.messaging.generic.AttachmentFinderHandler;
 import com.openexchange.messaging.generic.MessageParser;
 import com.openexchange.messaging.generic.MessagingComparator;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
-import com.openexchange.user.UserService;
 
 /**
  * {@link FacebookMessagingMessageAccess}
@@ -104,29 +100,9 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class FacebookMessagingMessageAccess implements MessagingMessageAccess {
+public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess implements MessagingMessageAccess {
 
     private static final String FROM = MessagingHeader.KnownHeader.FROM.toString();
-
-    private static String EMPTY = MessagingFolder.ROOT_FULLNAME;
-
-    private final IFacebookRestClient<Object> facebookRestClient;
-
-    private final MessagingAccount messagingAccount;
-
-    private final int id;
-
-    private final int user;
-
-    private final int cid;
-
-    private final long facebookUserId;
-
-    private final String facebookSession;
-
-    private volatile String facebookUserName;
-
-    private volatile Locale userLocale;
 
     /**
      * Initializes a new {@link FacebookMessagingMessageAccess}.
@@ -138,34 +114,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
      * @param facebookSession The facebook session identifier
      */
     public FacebookMessagingMessageAccess(final IFacebookRestClient<Object> facebookRestClient, final MessagingAccount messagingAccount, final Session session, final long facebookUserId, final String facebookSession) {
-        super();
-        this.messagingAccount = messagingAccount;
-        this.facebookRestClient = facebookRestClient;
-        id = messagingAccount.getId();
-        user = session.getUserId();
-        cid = session.getContextId();
-        this.facebookUserId = facebookUserId;
-        this.facebookSession = facebookSession;
-    }
-
-    private Locale getUserLocale() throws MessagingException {
-        Locale tmp = userLocale;
-        if (null == tmp) {
-            /*
-             * Duplicate initialization isn't harmful; no "synchronized" needed
-             */
-            try {
-                final ContextService cs = getServiceRegistry().getService(ContextService.class, true);
-                userLocale = tmp = getServiceRegistry().getService(UserService.class).getUser(user, cs.getContext(cid)).getLocale();
-            } catch (final ServiceException e) {
-                throw new MessagingException(e);
-            } catch (final UserException e) {
-                throw new MessagingException(e);
-            } catch (final ContextException e) {
-                throw new MessagingException(e);
-            }
-        }
-        return tmp;
+        super(facebookRestClient, messagingAccount, session, facebookUserId, facebookSession);
     }
 
     public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
@@ -179,7 +128,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
     }
 
     public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {
-        if (!EMPTY.equals(folder)) {
+        if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folder,
                 Integer.valueOf(id),
@@ -191,7 +140,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
     }
 
     public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
-        if (!EMPTY.equals(sourceFolder)) {
+        if (!KNOWN_FOLDER_IDS.contains(sourceFolder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 sourceFolder,
                 Integer.valueOf(id),
@@ -199,7 +148,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         }
-        if (!EMPTY.equals(destFolder)) {
+        if (!KNOWN_FOLDER_IDS.contains(destFolder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 destFolder,
                 Integer.valueOf(id),
@@ -211,7 +160,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
     }
 
     public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws MessagingException {
-        if (!EMPTY.equals(folder)) {
+        if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folder,
                 Integer.valueOf(id),
@@ -237,9 +186,18 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
             /*
              * Query
              */
-            final Query query = FacebookMessagingUtility.composeFQLStreamQueryFor(FIELDS_FULL, facebookUserId);
+            final Query query =
+                FacebookMessagingUtility.composeFQLStreamQueryFor(
+                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
+                    FIELDS_FULL,
+                    facebookUserId);
             final List<Object> results = fireFQLQuery(query.getCharSequence(), facebookRestClient);
             message = FacebookFQLStreamParser.parseStreamDOMElement((Element) results.iterator().next());
+            if (null == message) {
+                /*
+                 * TODO: Handle this
+                 */
+            }
             /*
              * Add static fields
              */
@@ -266,7 +224,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
     }
 
     public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
-        if (!EMPTY.equals(folder)) {
+        if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folder,
                 Integer.valueOf(id),
@@ -292,16 +250,27 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
          */
         final Query query;
         if (fieldSet.contains(MessagingField.ID)) { // Contains post_id
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(fields, messageIds, facebookUserId);
+            query =
+                FacebookMessagingUtility.composeFQLStreamQueryFor(
+                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
+                    fields,
+                    messageIds,
+                    facebookUserId);
         } else {
             final MessagingField[] arg = new MessagingField[fields.length + 1];
             arg[0] = MessagingField.ID;
             System.arraycopy(fields, 0, arg, 1, fields.length);
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(arg, messageIds, facebookUserId);
+            query =
+                FacebookMessagingUtility.composeFQLStreamQueryFor(
+                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
+                    arg,
+                    messageIds,
+                    facebookUserId);
         }
         final List<MessagingMessage> messages;
         if (null != query) {
             final TLongObjectHashMap<List<FacebookMessagingMessage>> m;
+            final TLongHashSet safetyCheck;
             {
                 final List<Object> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookRestClient);
                 final int size = results.size();
@@ -316,27 +285,35 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);
                 if (userFieldSet.isEmpty()) {
                     m = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
+                    safetyCheck = new TLongHashSet(0);
                     for (int i = 0; i < size; i++) {
                         final FacebookMessagingMessage message = parseFromElement(staticFillers, (Element) iterator.next());
                         /*
                          * Add to list/map
                          */
-                        orderMap.put(message.getId(), message);
+                        if (null != message) {
+                            orderMap.put(message.getId(), message);
+                        }
                     }
                 } else { // Contains any
                     m = new TLongObjectHashMap<List<FacebookMessagingMessage>>(size);
+                    safetyCheck = new TLongHashSet(size);
                     for (int i = 0; i < size; i++) {
                         final FacebookMessagingMessage message = parseFromElement(staticFillers, (Element) iterator.next());
                         /*
                          * Add to list/map
                          */
-                        orderMap.put(message.getId(), message);
-                        List<FacebookMessagingMessage> l = m.get(message.getFromUserId());
-                        if (null == l) {
-                            l = new ArrayList<FacebookMessagingMessage>(4);
-                            m.put(message.getFromUserId(), l);
+                        if (null != message) {
+                            orderMap.put(message.getId(), message);
+                            final long facebookUserId = message.getFromUserId();
+                            List<FacebookMessagingMessage> l = m.get(facebookUserId);
+                            if (null == l) {
+                                l = new ArrayList<FacebookMessagingMessage>(4);
+                                m.put(facebookUserId, l);
+                                safetyCheck.add(facebookUserId);
+                            }
+                            l.add(message);
                         }
-                        l.add(message);
                     }
                 }
                 /*
@@ -361,10 +338,24 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
                 final int resSize = results.size();
                 for (int i = 0; i < resSize; i++) {
                     final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
-                    final String userIdStr = String.valueOf(facebookUser.getUid());
-                    for (final FacebookMessagingMessage message : m.get(facebookUser.getUid())) {
+                    final long facebookUserId = facebookUser.getUid();
+                    final String userIdStr = String.valueOf(facebookUserId);
+                    for (final FacebookMessagingMessage message : m.get(facebookUserId)) {
                         message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), userIdStr));
                         message.setPicture(facebookUser.getPicSmall());
+                    }
+                    /*
+                     * Remove from safety check
+                     */
+                    safetyCheck.remove(facebookUserId);
+                }
+                /*
+                 * Check if any user is missing
+                 */
+                if (!safetyCheck.isEmpty()) {
+                    final Log logger = LogFactory.getLog(FacebookMessagingMessageAccess.class);
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Information of following Facebook users are missing: " + Arrays.toString(safetyCheck.toArray()));
                     }
                 }
             }
@@ -386,14 +377,16 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
 
     private static FacebookMessagingMessage parseFromElement(final List<StaticFiller> staticFillers, final Element element) throws MessagingException {
         final FacebookMessagingMessage message = FacebookFQLStreamParser.parseStreamDOMElement(element);
-        for (final StaticFiller filler : staticFillers) {
-            filler.fill(message);
+        if (null != message) {
+            for (final StaticFiller filler : staticFillers) {
+                filler.fill(message);
+            }
         }
         return message;
     }
 
     public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
-        if (!EMPTY.equals(sourceFolder)) {
+        if (!KNOWN_FOLDER_IDS.contains(sourceFolder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 sourceFolder,
                 Integer.valueOf(id),
@@ -401,7 +394,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         }
-        if (!EMPTY.equals(destFolder)) {
+        if (!KNOWN_FOLDER_IDS.contains(destFolder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 destFolder,
                 Integer.valueOf(id),
@@ -447,7 +440,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
     }
 
     public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {
-        if (!EMPTY.equals(folder)) {
+        if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folder,
                 Integer.valueOf(id),
@@ -477,12 +470,25 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
          */
         final Query query;
         if (EnumSet.copyOf(fieldSet).removeAll(FacebookMessagingUtility.getStreamQueryableFields())) { // Contains any
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(daFields, sortField, order, facebookUserId);
+            query =
+                FacebookMessagingUtility.composeFQLStreamQueryFor(
+                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
+                    daFields,
+                    sortField,
+                    order,
+                    facebookUserId);
         } else {
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(FIELDS_ID, sortField, order, facebookUserId);
+            query =
+                FacebookMessagingUtility.composeFQLStreamQueryFor(
+                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
+                    FIELDS_ID,
+                    sortField,
+                    order,
+                    facebookUserId);
         }
         final List<MessagingMessage> messages;
         final TLongObjectHashMap<List<FacebookMessagingMessage>> m;
+        final TLongHashSet safetyCheck;
         {
             final List<Object> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookRestClient);
             final int size = results.size();
@@ -490,27 +496,35 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
             messages = new ArrayList<MessagingMessage>(size);
             if (userFieldSet.isEmpty()) {
                 m = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
+                safetyCheck = new TLongHashSet(0);
                 for (int i = 0; i < size; i++) {
                     final FacebookMessagingMessage message = parseFromElement(staticFillers, (Element) iterator.next());
-                    /*
-                     * Add to list/map
-                     */
-                    messages.add(message);
+                    if (null != message) {
+                        /*
+                         * Add to list
+                         */
+                        messages.add(message);
+                    }
                 }
             } else { // Contains any
                 m = new TLongObjectHashMap<List<FacebookMessagingMessage>>(size);
+                safetyCheck = new TLongHashSet(size);
                 for (int i = 0; i < size; i++) {
                     final FacebookMessagingMessage message = parseFromElement(staticFillers, (Element) iterator.next());
                     /*
                      * Add to list/map
                      */
-                    messages.add(message);
-                    List<FacebookMessagingMessage> l = m.get(message.getFromUserId());
-                    if (null == l) {
-                        l = new ArrayList<FacebookMessagingMessage>(4);
-                        m.put(message.getFromUserId(), l);
+                    if (null != message) {
+                        messages.add(message);
+                        final long facebookUserId = message.getFromUserId();
+                        List<FacebookMessagingMessage> l = m.get(facebookUserId);
+                        if (null == l) {
+                            l = new ArrayList<FacebookMessagingMessage>(4);
+                            m.put(facebookUserId, l);
+                            safetyCheck.add(facebookUserId);
+                        }
+                        l.add(message);
                     }
-                    l.add(message);
                 }
             }
         }
@@ -534,10 +548,24 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
             final int resSize = results.size();
             for (int i = 0; i < resSize; i++) {
                 final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
-                final String userIdStr = String.valueOf(facebookUser.getUid());
-                for (final FacebookMessagingMessage message : m.get(facebookUser.getUid())) {
+                final long facebookUserId = facebookUser.getUid();
+                final String userIdStr = String.valueOf(facebookUserId);
+                for (final FacebookMessagingMessage message : m.get(facebookUserId)) {
                     message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), userIdStr));
                     message.setPicture(facebookUser.getPicSmall());
+                }
+                /*
+                 * Remove from safety check
+                 */
+                safetyCheck.remove(facebookUserId);
+            }
+            /*
+             * Check if any user is missing
+             */
+            if (!safetyCheck.isEmpty()) {
+                final Log logger = LogFactory.getLog(FacebookMessagingMessageAccess.class);
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Information of following Facebook users are missing: " + Arrays.toString(safetyCheck.toArray()));
                 }
             }
         }
@@ -589,7 +617,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
     }
 
     public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
-        if (!EMPTY.equals(message.getFolder())) {
+        if (!KNOWN_FOLDER_IDS.contains(message.getFolder())) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 message.getFolder(),
                 Integer.valueOf(id),
@@ -598,27 +626,6 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
                 Integer.valueOf(cid));
         }
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
-    }
-
-    public String getFacebookUserName() throws MessagingException {
-        String tmp = facebookUserName;
-        if (null == tmp) {
-            synchronized (this) {
-                tmp = facebookUserName;
-                if (null == tmp) {
-                    try {
-                        final FqlQueryResponse fqr =
-                            (FqlQueryResponse) facebookRestClient.fql_query(new StringBuilder("SELECT name FROM user WHERE uid = ").append(
-                                facebookUserId).toString());
-                        facebookUserName =
-                            tmp = FacebookFQLUserParser.parseUserDOMElement((Element) fqr.getResults().iterator().next()).getName();
-                    } catch (final FacebookException e) {
-                        throw FacebookMessagingException.create(e);
-                    }
-                }
-            }
-        }
-        return tmp;
     }
 
     /**

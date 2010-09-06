@@ -47,83 +47,83 @@
  *
  */
 
-package com.openexchange.messaging.facebook.utility;
+package com.openexchange.messaging.facebook;
 
-import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
+import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link FacebookMessagingMessage} - Extends {@link MimeMessagingMessage} by facebook user identifier.
+ * {@link I18n} - Singleton for keeping references to {@link I18nService}s and for translating texts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public final class FacebookMessagingMessage extends MimeMessagingMessage {
+public final class I18n {
+
+    private static final I18n SINGLETON = new I18n();
+
+    private final ConcurrentMap<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
 
     /**
-     * Serial version UID.
+     * Initializes a new {@link I18n}.
      */
-    private static final long serialVersionUID = 5314172807807461367L;
-
-    private long fromUserId;
-
-    private String toString;
-
-    // private long postId;
-
-    /**
-     * Initializes a new {@link FacebookMessagingMessage}.
-     */
-    public FacebookMessagingMessage() {
+    private I18n() {
         super();
-        toString = "[no content]";
     }
 
     /**
-     * Sets the toString() text.
+     * Gets the instance.
      * 
-     * @param toString The toString() text
+     * @return The instance
      */
-    public void setToString(String toString) {
-        this.toString = toString;
-    }
-
-    @Override
-    public String toString() {
-        return toString;
+    public static final I18n getInstance() {
+        return SINGLETON;
     }
 
     /**
-     * Gets the <i>"From"</i> user identifier.
+     * Add specified i18n service.
      * 
-     * @return The <i>"From"</i> user identifier
+     * @param service The service to add
+     * @return <code>true</code> on successful insertion to registry; otherwise <code>false</code>
      */
-    public long getFromUserId() {
-        return fromUserId;
+    public boolean addI18nService(final I18nService service) {
+        return (null == services.putIfAbsent(service.getLocale(), service));
     }
 
     /**
-     * Sets the <i>"From"</i> user identifier.
+     * Removes specified i18n service.
      * 
-     * @param userId The <i>"From"</i> user identifier to set
+     * @param service The service to remove
      */
-    public void setFromUserId(final long userId) {
-        this.fromUserId = userId;
+    public void removeI18nService(final I18nService service) {
+        services.remove(service.getLocale());
     }
 
     /**
-     * // * Gets the post identifier. // * // * @return The post identifier //
+     * Gets the i18n service for specified locale.
+     * 
+     * @param locale The locale
+     * @return The i18n service for specified locale or <code>null</code> if absent
      */
-    // public long getPostId() {
-    // return postId;
-    // }
-    //
-    // /**
-    // * Sets the post identifier.
-    // *
-    // * @param postId The post identifier to set
-    // */
-    // public void setPostId(final long postId) {
-    // this.postId = postId;
-    // }
+    public I18nService get(final Locale locale) {
+        return services.get(locale);
+    }
+
+    /**
+     * Translates specified string to given locale.
+     * 
+     * @param locale The locale
+     * @param translateMe The string to translate
+     * @return The translated string
+     */
+    public String translate(final Locale locale, final String translateMe) {
+        String retval = translateMe;
+        final I18nService service = services.get(locale);
+        if (null != service) {
+            retval = service.getLocalized(translateMe);
+        }
+        return retval;
+    }
 
 }

@@ -76,26 +76,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
-
-    private static String EMPTY = MessagingFolder.ROOT_FULLNAME;
+public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implements MessagingFolderAccess {
 
     /**
      * The constant to return or represent an empty path.
      */
     private static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
-
-    private final int id;
-
-    private final int user;
-
-    private final int cid;
-
-    private final IFacebookRestClient<Object> facebookRestClient;
-
-    private final long facebookUserId;
-
-    private final String facebookSession;
 
     /**
      * Initializes a new {@link FacebookMessagingFolderAccess}.
@@ -107,17 +93,11 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
      * @param facebookSession The facebook session identifier
      */
     public FacebookMessagingFolderAccess(final IFacebookRestClient<Object> facebookRestClient, final MessagingAccount messagingAccount, final Session session, final long facebookUserId, final String facebookSession) {
-        super();
-        this.facebookRestClient = facebookRestClient;
-        id = messagingAccount.getId();
-        user = session.getUserId();
-        cid = session.getContextId();
-        this.facebookUserId = facebookUserId;
-        this.facebookSession = facebookSession;
+        super(facebookRestClient, messagingAccount, session, facebookUserId, facebookSession);
     }
 
     public void clearFolder(final String folderId) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -129,7 +109,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public void clearFolder(final String folderId, final boolean hardDelete) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -145,7 +125,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public String deleteFolder(final String folderId) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -157,7 +137,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public String deleteFolder(final String folderId, final boolean hardDelete) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -169,7 +149,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public boolean exists(final String folderId) throws MessagingException {
-        return (EMPTY.equals(folderId));
+        return (KNOWN_FOLDER_IDS.contains(folderId));
     }
 
     public String getConfirmedHamFolder() throws MessagingException {
@@ -185,7 +165,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public MessagingFolder getFolder(final String folderId) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -193,11 +173,11 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         }
-        return getRootFolder();
+        return MessagingFolder.ROOT_FULLNAME.equals(folderId) ? getRootFolder() : generateWallFolder();
     }
 
     public Quota getMessageQuota(final String folderId) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -210,7 +190,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -218,11 +198,11 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         }
-        return EMPTY_PATH;
+        return MessagingFolder.ROOT_FULLNAME.equals(folderId) ? EMPTY_PATH : new MessagingFolder[] { generateWallFolder() };
     }
 
     public Quota[] getQuotas(final String folder, final Type[] types) throws MessagingException {
-        if (!EMPTY.equals(folder)) {
+        if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folder,
                 Integer.valueOf(id),
@@ -238,6 +218,10 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     private static final Set<String> CAPS = Collections.emptySet();
 
     public MessagingFolder getRootFolder() throws MessagingException {
+        return generateRootFolder();
+    }
+
+    private MessagingFolder generateRootFolder() throws FacebookMessagingException {
         try {
             /*
              * The collection of users
@@ -246,48 +230,67 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
                 (UsersGetInfoResponse) facebookRestClient.users_getInfo(
                     Collections.singletonList(Long.valueOf(facebookUserId)),
                     FIELDS_WALL_COUNT);
-            /*
-             * Fill root folder
-             */
-            final DefaultMessagingFolder dmf = new DefaultMessagingFolder();
-            dmf.setId(MessagingFolder.ROOT_FULLNAME);
-            dmf.setCapabilities(CAPS);
-            dmf.setDefaultFolder(false);
-            dmf.setDefaultFolderType(MessagingFolder.DefaultFolderType.NONE);
-            dmf.setDeletedMessageCount(0);
-            dmf.setExists(true);
-            dmf.setHoldsFolders(false);
-            dmf.setHoldsMessages(true);
-            dmf.setMessageCount(response.getUser().get(0).getWallCount().intValue());
-            dmf.setName("Facebook");
-            dmf.setNewMessageCount(0);
-
-            final DefaultMessagingPermission perm = DefaultMessagingPermission.newInstance();
-            perm.setAdmin(false);
-            perm.setAllPermissions(
-                MessagingPermission.READ_FOLDER,
-                MessagingPermission.READ_ALL_OBJECTS,
-                MessagingPermission.NO_PERMISSIONS,
-                MessagingPermission.NO_PERMISSIONS);
-            perm.setEntity(user);
-            perm.setGroup(false);
-
-            dmf.setOwnPermission(perm);
-            dmf.setParentId(null);
-            {
-                final List<MessagingPermission> perms = new ArrayList<MessagingPermission>(1);
-                perms.add(perm);
-                dmf.setPermissions(perms);
-            }
-            dmf.setRootFolder(true);
-            dmf.setSubfolders(false);
-            dmf.setSubscribed(true);
-            dmf.setSubscribedSubfolders(false);
-            dmf.setUnreadMessageCount(0);
-            return dmf;
+            final DefaultMessagingFolder rootFolder =
+                generateFolder(MessagingFolder.ROOT_FULLNAME, null, "Facebook", response.getUser().get(0).getWallCount().intValue());
+            rootFolder.setHoldsFolders(true);
+            rootFolder.setSubfolders(true);
+            rootFolder.setSubscribedSubfolders(true);
+            return rootFolder;
         } catch (final FacebookException e) {
             throw FacebookMessagingException.create(e);
         }
+    }
+
+    private static final int FQL_MAX_ROW_COUNT = 50;
+
+    private MessagingFolder generateWallFolder() throws MessagingException {
+        final DefaultMessagingFolder wallFolder =
+            generateFolder(
+                "wall",
+                MessagingFolder.ROOT_FULLNAME,
+                I18n.getInstance().translate(getUserLocale(), NameStrings.NAME_WALL_FOLDER),
+                FQL_MAX_ROW_COUNT);
+        wallFolder.setRootFolder(false);
+        return wallFolder;
+    }
+
+    private DefaultMessagingFolder generateFolder(final String folderId, final String parentId, final String name, final int messageCount) {
+        final DefaultMessagingFolder dmf = new DefaultMessagingFolder();
+        dmf.setId(folderId);
+        dmf.setCapabilities(CAPS);
+        dmf.setDefaultFolder(false);
+        dmf.setDefaultFolderType(MessagingFolder.DefaultFolderType.NONE);
+        dmf.setDeletedMessageCount(0);
+        dmf.setExists(true);
+        dmf.setHoldsFolders(false);
+        dmf.setHoldsMessages(true);
+        dmf.setMessageCount(messageCount);
+        dmf.setName(name);
+        dmf.setNewMessageCount(0);
+
+        final DefaultMessagingPermission perm = DefaultMessagingPermission.newInstance();
+        perm.setAdmin(false);
+        perm.setAllPermissions(
+            MessagingPermission.READ_FOLDER,
+            MessagingPermission.READ_ALL_OBJECTS,
+            MessagingPermission.NO_PERMISSIONS,
+            MessagingPermission.NO_PERMISSIONS);
+        perm.setEntity(user);
+        perm.setGroup(false);
+
+        dmf.setOwnPermission(perm);
+        dmf.setParentId(parentId);
+        {
+            final List<MessagingPermission> perms = new ArrayList<MessagingPermission>(1);
+            perms.add(perm);
+            dmf.setPermissions(perms);
+        }
+        dmf.setRootFolder(true);
+        dmf.setSubfolders(false);
+        dmf.setSubscribed(true);
+        dmf.setSubscribedSubfolders(false);
+        dmf.setUnreadMessageCount(0);
+        return dmf;
     }
 
     public String getSentFolder() throws MessagingException {
@@ -299,7 +302,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public Quota getStorageQuota(final String folderId) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -311,7 +314,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws MessagingException {
-        if (!EMPTY.equals(parentIdentifier)) {
+        if (!KNOWN_FOLDER_IDS.contains(parentIdentifier)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 parentIdentifier,
                 Integer.valueOf(id),
@@ -319,7 +322,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         }
-        return EMPTY_PATH;
+        return MessagingFolder.ROOT_FULLNAME.equals(parentIdentifier) ? new MessagingFolder[] { generateWallFolder() } : EMPTY_PATH;
     }
 
     public String getTrashFolder() throws MessagingException {
@@ -327,7 +330,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public String moveFolder(final String folderId, final String newParentId) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -339,7 +342,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public String renameFolder(final String folderId, final String newName) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),
@@ -351,7 +354,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
     }
 
     public String updateFolder(final String folderId, final MessagingFolder toUpdate) throws MessagingException {
-        if (!EMPTY.equals(folderId)) {
+        if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId,
                 Integer.valueOf(id),

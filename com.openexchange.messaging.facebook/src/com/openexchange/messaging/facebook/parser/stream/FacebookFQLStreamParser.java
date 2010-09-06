@@ -422,10 +422,17 @@ public final class FacebookFQLStreamParser {
         /*
          * Add subject & size
          */
-        message.setHeader(new MimeStringMessagingHeader(
-            MessagingHeader.KnownHeader.SUBJECT.toString(),
-            FacebookMessagingUtility.abbreviate(messageText.toString(), 140)));
-        message.setSize(messageText.length());
+        final int size = messageText.length();
+        if (size <= 0) {
+            /*
+             * Empty message... ignore it!
+             */
+            return null;
+        }
+        message.setSize(size);
+        final String subject = FacebookMessagingUtility.abbreviate(messageText.toString(), 140);
+        message.setHeader(new MimeStringMessagingHeader(MessagingHeader.KnownHeader.SUBJECT.toString(), subject));
+        message.setToString(subject);
         /*
          * Check attachment node
          */

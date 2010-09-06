@@ -47,83 +47,21 @@
  *
  */
 
-package com.openexchange.messaging.facebook.utility;
+package com.openexchange.messaging.facebook;
 
-import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link FacebookMessagingMessage} - Extends {@link MimeMessagingMessage} by facebook user identifier.
- * 
+ * {@link NameStrings}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public final class FacebookMessagingMessage extends MimeMessagingMessage {
+public class NameStrings implements LocalizableStrings {
 
-    /**
-     * Serial version UID.
-     */
-    private static final long serialVersionUID = 5314172807807461367L;
+    // The name for the folder of a facebook account containing user's wall posts.
+    public static final String NAME_WALL_FOLDER = "Wall posts (stories on your profile).";
 
-    private long fromUserId;
-
-    private String toString;
-
-    // private long postId;
-
-    /**
-     * Initializes a new {@link FacebookMessagingMessage}.
-     */
-    public FacebookMessagingMessage() {
+    public NameStrings() {
         super();
-        toString = "[no content]";
     }
-
-    /**
-     * Sets the toString() text.
-     * 
-     * @param toString The toString() text
-     */
-    public void setToString(String toString) {
-        this.toString = toString;
-    }
-
-    @Override
-    public String toString() {
-        return toString;
-    }
-
-    /**
-     * Gets the <i>"From"</i> user identifier.
-     * 
-     * @return The <i>"From"</i> user identifier
-     */
-    public long getFromUserId() {
-        return fromUserId;
-    }
-
-    /**
-     * Sets the <i>"From"</i> user identifier.
-     * 
-     * @param userId The <i>"From"</i> user identifier to set
-     */
-    public void setFromUserId(final long userId) {
-        this.fromUserId = userId;
-    }
-
-    /**
-     * // * Gets the post identifier. // * // * @return The post identifier //
-     */
-    // public long getPostId() {
-    // return postId;
-    // }
-    //
-    // /**
-    // * Sets the post identifier.
-    // *
-    // * @param postId The post identifier to set
-    // */
-    // public void setPostId(final long postId) {
-    // this.postId = postId;
-    // }
-
 }

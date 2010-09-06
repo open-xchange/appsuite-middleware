@@ -152,7 +152,7 @@ public final class FacebookFQLUserParser {
         /*
          * Return
          */
-        return user;
+        return user.isEmpty() ? null : user;
     }
 
     /**

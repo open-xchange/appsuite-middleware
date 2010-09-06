@@ -71,6 +71,7 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.facebook.FacebookMessagingException;
+import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingMessageAccess;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
@@ -512,56 +513,80 @@ public final class FacebookMessagingUtility {
     }
 
     /**
-     * Composes the FQL stream query for given fields.
-     * 
-     * @param fields The fields
-     * @param postIds The post identifiers
-     * @param facebookUserId The facebook user identifier
-     * @return The FQL stream query or <code>null</code> if fields require no query
+     * The query type.
      */
-    public static Query composeFQLStreamQueryFor(final MessagingField[] fields, final String[] postIds, final long facebookUserId) {
-        return composeFQLStreamQueryFor0(fields, null, null, postIds, facebookUserId);
+    public static enum QueryType {
+
+        /**
+         * Retrieve a user's News Feed.
+         */
+        NEWS_FEED,
+        /**
+         * Retrieve a user's wall posts (stories on their profile).
+         */
+        WALL;
+
     }
 
     /**
      * Composes the FQL stream query for given fields.
      * 
+     * @param queryType The query type constant
+     * @param fields The fields
+     * @param postIds The post identifiers
+     * @param facebookUserId The facebook user identifier
+     * @return The FQL stream query or <code>null</code> if fields require no query
+     * @throws FacebookMessagingException If composing query fails
+     */
+    public static Query composeFQLStreamQueryFor(final QueryType queryType, final MessagingField[] fields, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+        return composeFQLStreamQueryFor0(queryType, fields, null, null, postIds, facebookUserId);
+    }
+
+    /**
+     * Composes the FQL stream query for given fields.
+     * 
+     * @param queryType The query type constant
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
      * @param order The order direction
      * @param postIds The post identifiers
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
+     * @throws FacebookMessagingException If composing query fails
      */
-    public static Query composeFQLStreamQueryFor(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) {
-        return composeFQLStreamQueryFor0(fields, sortField, order, postIds, facebookUserId);
+    public static Query composeFQLStreamQueryFor(final QueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+        return composeFQLStreamQueryFor0(queryType, fields, sortField, order, postIds, facebookUserId);
     }
 
     /**
      * Composes the FQL stream query for given fields.
      * 
+     * @param queryType The query type constant
      * @param fields The fields
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
+     * @throws FacebookMessagingException If composing query fails
      */
-    public static Query composeFQLStreamQueryFor(final MessagingField[] fields, final long facebookUserId) {
-        return composeFQLStreamQueryFor0(fields, null, null, null, facebookUserId);
+    public static Query composeFQLStreamQueryFor(final QueryType queryType, final MessagingField[] fields, final long facebookUserId) throws FacebookMessagingException {
+        return composeFQLStreamQueryFor0(queryType, fields, null, null, null, facebookUserId);
     }
 
     /**
      * Composes the FQL stream query for given fields.
      * 
+     * @param queryType The query type constant
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
      * @param order The order direction
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
+     * @throws FacebookMessagingException If composing query fails
      */
-    public static Query composeFQLStreamQueryFor(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) {
-        return composeFQLStreamQueryFor0(fields, sortField, order, null, facebookUserId);
+    public static Query composeFQLStreamQueryFor(final QueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
+        return composeFQLStreamQueryFor0(queryType, fields, sortField, order, null, facebookUserId);
     }
 
-    private static Query composeFQLStreamQueryFor0(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) {
+    private static Query composeFQLStreamQueryFor0(final QueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
         final Set<String> fieldNames = new HashSet<String>(fields.length);
         for (int i = 0; i < fields.length; i++) {
             final QueryAdder queryAdder = ADDERS_STREAM.get(fields[i]);
@@ -581,7 +606,22 @@ public final class FacebookMessagingUtility {
                 query.append(", ").append(iter.next());
             }
         }
-        query.append(" FROM stream WHERE source_id = ").append(facebookUserId);
+        /*
+         * Compose query type
+         */
+        switch (queryType) {
+        case NEWS_FEED:
+            // Retrieving the user's News Feed.
+            query.append(" FROM stream WHERE filter_key in (SELECT filter_key FROM stream_filter WHERE uid=").append(facebookUserId).append(
+            " AND type='newsfeed') AND is_hidden = 0");
+            break;
+        case WALL:
+            // Retrieve a user's wall posts (stories on their profile).
+            query.append(" FROM stream WHERE source_id = ").append(facebookUserId);
+            break;
+        default:
+            throw FacebookMessagingExceptionCodes.UNKNOWN_QUERY_TYPE.create(queryType.toString());
+        }
         if (null != postIds && 0 < postIds.length) {
             if (1 == postIds.length) {
                 query.append(" AND post_id = '").append(postIds[0]).append('\'');
