@@ -72,7 +72,6 @@ import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
-import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
@@ -187,16 +186,11 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              * Query
              */
             final Query query =
-                FacebookMessagingUtility.composeFQLStreamQueryFor(
-                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
-                    FIELDS_FULL,
-                    facebookUserId);
+                FacebookMessagingUtility.composeFQLStreamQueryFor(QueryType.queryTypeFor(folder), FIELDS_FULL, facebookUserId);
             final List<Object> results = fireFQLQuery(query.getCharSequence(), facebookRestClient);
             message = FacebookFQLStreamParser.parseStreamDOMElement((Element) results.iterator().next());
             if (null == message) {
-                /*
-                 * TODO: Handle this
-                 */
+                throw MessagingExceptionCodes.MESSAGE_NOT_FOUND.create(id, folder);
             }
             /*
              * Add static fields
@@ -250,22 +244,12 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          */
         final Query query;
         if (fieldSet.contains(MessagingField.ID)) { // Contains post_id
-            query =
-                FacebookMessagingUtility.composeFQLStreamQueryFor(
-                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
-                    fields,
-                    messageIds,
-                    facebookUserId);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(QueryType.queryTypeFor(folder), fields, messageIds, facebookUserId);
         } else {
             final MessagingField[] arg = new MessagingField[fields.length + 1];
             arg[0] = MessagingField.ID;
             System.arraycopy(fields, 0, arg, 1, fields.length);
-            query =
-                FacebookMessagingUtility.composeFQLStreamQueryFor(
-                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
-                    arg,
-                    messageIds,
-                    facebookUserId);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(QueryType.queryTypeFor(folder), arg, messageIds, facebookUserId);
         }
         final List<MessagingMessage> messages;
         if (null != query) {
@@ -472,7 +456,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         if (EnumSet.copyOf(fieldSet).removeAll(FacebookMessagingUtility.getStreamQueryableFields())) { // Contains any
             query =
                 FacebookMessagingUtility.composeFQLStreamQueryFor(
-                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
+                    QueryType.queryTypeFor(folder),
                     daFields,
                     sortField,
                     order,
@@ -480,7 +464,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         } else {
             query =
                 FacebookMessagingUtility.composeFQLStreamQueryFor(
-                    MessagingFolder.ROOT_FULLNAME.equals(folder) ? QueryType.NEWS_FEED : QueryType.WALL,
+                    QueryType.queryTypeFor(folder),
                     FIELDS_ID,
                     sortField,
                     order,

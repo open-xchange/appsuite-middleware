@@ -112,6 +112,11 @@ public final class FacebookConstants {
     public static Field CONNECTION_MANAGER_FIELD;
 
     /**
+     * The folder identifier for a user's wall posts.
+     */
+    public static final String FOLDER_WALL = "wall";
+
+    /**
      * Initializes facebook constants.
      * 
      * @throws Exception

@@ -66,10 +66,12 @@ import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
+import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
+import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingMessageAccess;
@@ -526,6 +528,21 @@ public final class FacebookMessagingUtility {
          */
         WALL;
 
+        /**
+         * Gets the query type for specified folder identifier.
+         * 
+         * @param folderId The folder identifier
+         * @return The query type or <code>null</code>
+         */
+        public static QueryType queryTypeFor(final String folderId) {
+            if (MessagingFolder.ROOT_FULLNAME.equals(folderId)) {
+                return NEWS_FEED;
+            }
+            if (FacebookConstants.FOLDER_WALL.equals(folderId)) {
+                return WALL;
+            }
+            return null;
+        }
     }
 
     /**
@@ -613,14 +630,14 @@ public final class FacebookMessagingUtility {
         case NEWS_FEED:
             // Retrieving the user's News Feed.
             query.append(" FROM stream WHERE filter_key in (SELECT filter_key FROM stream_filter WHERE uid=").append(facebookUserId).append(
-            " AND type='newsfeed') AND is_hidden = 0");
+                " AND type='newsfeed') AND is_hidden = 0");
             break;
         case WALL:
             // Retrieve a user's wall posts (stories on their profile).
             query.append(" FROM stream WHERE source_id = ").append(facebookUserId);
             break;
         default:
-            throw FacebookMessagingExceptionCodes.UNKNOWN_QUERY_TYPE.create(queryType.toString());
+            throw FacebookMessagingExceptionCodes.UNSUPPORTED_QUERY_TYPE.create(queryType.toString());
         }
         if (null != postIds && 0 < postIds.length) {
             if (1 == postIds.length) {

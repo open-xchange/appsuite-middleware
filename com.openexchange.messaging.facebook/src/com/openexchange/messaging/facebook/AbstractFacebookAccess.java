@@ -78,7 +78,7 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractFacebookAccess {
 
-    protected static Set<String> KNOWN_FOLDER_IDS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MessagingFolder.ROOT_FULLNAME, "wall")));
+    protected static Set<String> KNOWN_FOLDER_IDS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MessagingFolder.ROOT_FULLNAME, FacebookConstants.FOLDER_WALL)));
 
     protected final MessagingAccount messagingAccount;
 

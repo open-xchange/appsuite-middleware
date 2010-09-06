@@ -98,8 +98,8 @@ public final class FacebookMessagingExceptionMessages implements LocalizableStri
     // FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).
     public static final String FQL_QUERY_RESULT_MISMATCH_MSG = "FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).";
 
-    // Unknown query type: %1$s.
-    public static final String UNKNOWN_QUERY_TYPE_MSG = "Unknown query type: %1$s.";
+    // Unsupported query type: %1$s.
+    public static final String UNSUPPORTED_QUERY_TYPE_MSG = "Unsupported query type: %1$s.";
 
     /**
      * Initializes a new {@link FacebookMessagingExceptionMessages}.

@@ -112,9 +112,9 @@ public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
      */
     FQL_QUERY_RESULT_MISMATCH(FacebookMessagingExceptionMessages.FQL_QUERY_RESULT_MISMATCH_MSG, Category.CODE_ERROR, 11),
     /**
-     * Unknown query type: %1$s.
+     * Unsupported query type: %1$s.
      */
-    UNKNOWN_QUERY_TYPE(FacebookMessagingExceptionMessages.UNKNOWN_QUERY_TYPE_MSG, Category.CODE_ERROR, 12);
+    UNSUPPORTED_QUERY_TYPE(FacebookMessagingExceptionMessages.UNSUPPORTED_QUERY_TYPE_MSG, Category.CODE_ERROR, 12);
     
 
     private final Category category;

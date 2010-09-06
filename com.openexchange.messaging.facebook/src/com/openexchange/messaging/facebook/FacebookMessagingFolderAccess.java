@@ -52,7 +52,9 @@ package com.openexchange.messaging.facebook;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.IFacebookRestClient;
@@ -78,10 +80,55 @@ import com.openexchange.session.Session;
  */
 public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implements MessagingFolderAccess {
 
+    private static interface FolderInfo {
+
+        public MessagingFolder generateFolder(FacebookMessagingFolderAccess folderAccess) throws MessagingException;
+
+        public MessagingFolder[] getSubfolders(FacebookMessagingFolderAccess folderAccess) throws MessagingException;
+
+        public MessagingFolder[] getPath(FacebookMessagingFolderAccess folderAccess) throws MessagingException;
+    }
+
+    private static final Map<String, FolderInfo> FOLDER_INFO_MAP;
+
+    static {
+        final Map<String, FolderInfo> m = new HashMap<String, FolderInfo>(2);
+
+        m.put(MessagingFolder.ROOT_FULLNAME, new FolderInfo() {
+
+            public MessagingFolder generateFolder(final FacebookMessagingFolderAccess folderAccess) throws MessagingException {
+                return folderAccess.getRootFolder();
+            }
+
+            public MessagingFolder[] getSubfolders(FacebookMessagingFolderAccess folderAccess) throws MessagingException {
+                return new MessagingFolder[] { folderAccess.generateWallFolder() };
+            }
+
+            public MessagingFolder[] getPath(final FacebookMessagingFolderAccess folderAccess) throws MessagingException {
+                return EMPTY_PATH;
+            }
+        });
+        m.put(FacebookConstants.FOLDER_WALL, new FolderInfo() {
+
+            public MessagingFolder generateFolder(final FacebookMessagingFolderAccess folderAccess) throws MessagingException {
+                return folderAccess.generateWallFolder();
+            }
+
+            public MessagingFolder[] getSubfolders(FacebookMessagingFolderAccess folderAccess) throws MessagingException {
+                return EMPTY_PATH;
+            }
+
+            public MessagingFolder[] getPath(final FacebookMessagingFolderAccess folderAccess) throws MessagingException {
+                return new MessagingFolder[] { folderAccess.generateWallFolder() };
+            }
+        });
+        FOLDER_INFO_MAP = Collections.unmodifiableMap(m);
+    }
+
     /**
      * The constant to return or represent an empty path.
      */
-    private static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
+    protected static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
 
     /**
      * Initializes a new {@link FacebookMessagingFolderAccess}.
@@ -173,7 +220,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         }
-        return MessagingFolder.ROOT_FULLNAME.equals(folderId) ? getRootFolder() : generateWallFolder();
+        return FOLDER_INFO_MAP.get(folderId).generateFolder(this);
     }
 
     public Quota getMessageQuota(final String folderId) throws MessagingException {
@@ -198,7 +245,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         }
-        return MessagingFolder.ROOT_FULLNAME.equals(folderId) ? EMPTY_PATH : new MessagingFolder[] { generateWallFolder() };
+        return FOLDER_INFO_MAP.get(folderId).getPath(this);
     }
 
     public Quota[] getQuotas(final String folder, final Type[] types) throws MessagingException {
@@ -243,10 +290,10 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
 
     private static final int FQL_MAX_ROW_COUNT = 50;
 
-    private MessagingFolder generateWallFolder() throws MessagingException {
+    protected MessagingFolder generateWallFolder() throws MessagingException {
         final DefaultMessagingFolder wallFolder =
             generateFolder(
-                "wall",
+                FacebookConstants.FOLDER_WALL,
                 MessagingFolder.ROOT_FULLNAME,
                 I18n.getInstance().translate(getUserLocale(), NameStrings.NAME_WALL_FOLDER),
                 FQL_MAX_ROW_COUNT);
@@ -322,7 +369,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         }
-        return MessagingFolder.ROOT_FULLNAME.equals(parentIdentifier) ? new MessagingFolder[] { generateWallFolder() } : EMPTY_PATH;
+        return FOLDER_INFO_MAP.get(parentIdentifier).getSubfolders(this);
     }
 
     public String getTrashFolder() throws MessagingException {
