@@ -63,7 +63,8 @@ import com.openexchange.session.Session;
  */
 public class FacebookMessagingResource implements MessagingResource {
 
-    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FacebookMessagingResource.class);
+    protected static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(FacebookMessagingResource.class);
 
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -86,8 +87,9 @@ public class FacebookMessagingResource implements MessagingResource {
      * Initializes a new {@link FacebookMessagingResource}.
      * 
      * @param messagingAccount The facebook account
+     * @throws FacebookMessagingException If initialization fails
      */
-    public FacebookMessagingResource(final MessagingAccount messagingAccount, final Session session) {
+    public FacebookMessagingResource(final MessagingAccount messagingAccount, final Session session) throws FacebookMessagingException {
         super();
         this.messagingAccount = messagingAccount;
         this.session = session;

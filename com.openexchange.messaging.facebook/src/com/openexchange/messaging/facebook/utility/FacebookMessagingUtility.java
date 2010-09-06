@@ -676,6 +676,17 @@ public final class FacebookMessagingUtility {
      * Composes the FQL user query for given fields.
      * 
      * @param fields The fields
+     * @param userId The user identifier
+     * @return The FQL user query or <code>null</code> if fields require no query
+     */
+    public static Query composeFQLUserQueryFor(final MessagingField[] fields, final long userId) {
+        return composeFQLUserQueryFor0(fields, null, null, new long[] { userId });
+    }
+
+    /**
+     * Composes the FQL user query for given fields.
+     * 
+     * @param fields The fields
      * @param userIds The user identifiers
      * @return The FQL user query or <code>null</code> if fields require no query
      */

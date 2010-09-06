@@ -80,8 +80,9 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
      * 
      * @param messagingAccount The facebook account
      * @param session The session
+     * @throws FacebookMessagingException If initialization fails
      */
-    public FacebookMessagingAccountTransport(final MessagingAccount messagingAccount, final Session session) {
+    public FacebookMessagingAccountTransport(final MessagingAccount messagingAccount, final Session session) throws FacebookMessagingException {
         super(messagingAccount, session);
     }
 

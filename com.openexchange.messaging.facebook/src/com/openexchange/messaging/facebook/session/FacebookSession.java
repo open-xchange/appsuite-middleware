@@ -104,8 +104,9 @@ public final class FacebookSession {
      * @param messagingAccount The facebook messaging account providing credentials and settings
      * @param session The user session
      * @return The facebook session; either newly created or fetched from underlying registry
+     * @throws FacebookMessagingException If a Facebook session could not be created
      */
-    public static FacebookSession sessionFor(final MessagingAccount messagingAccount, final Session session) {
+    public static FacebookSession sessionFor(final MessagingAccount messagingAccount, final Session session) throws FacebookMessagingException {
         final FacebookSessionRegistry registry = FacebookSessionRegistry.getInstance();
         final int accountId = messagingAccount.getId();
         FacebookSession facebookSession = registry.getSession(session.getContextId(), session.getUserId(), accountId);
@@ -116,7 +117,20 @@ public final class FacebookSession {
                 facebookSession = newInstance;
             }
         }
-        return facebookSession.touchLastAccessed();
+        try {
+            return facebookSession.touchLastAccessed();
+        } catch (final FacebookMessagingException e) {
+            /*
+             * Create a new session
+             */
+            registry.purgeUserSession(session.getContextId(), session.getUserId(), accountId);
+            final FacebookSession newInstance = new FacebookSession(messagingAccount);
+            facebookSession = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
+            if (null == facebookSession) {
+                facebookSession = newInstance;
+            }
+            return facebookSession.touchLastAccessed();
+        }
     }
 
     /**
@@ -234,8 +248,9 @@ public final class FacebookSession {
      * Touches this session's last-accessed time stamp.
      * 
      * @return This session with last-accessed time stamp touched
+     * @throws FacebookMessagingException If this Facebook session is no longer valid
      */
-    public FacebookSession touchLastAccessed() {
+    public FacebookSession touchLastAccessed() throws FacebookMessagingException {
         if (!connected) {
             return this;
         }
@@ -250,6 +265,7 @@ public final class FacebookSession {
         } catch (final FacebookException e) {
             LOG.error(e.getMessage(), e);
             close();
+            throw FacebookMessagingExceptionCodes.COMMUNICATION_ERROR.create(e, e.getMessage());
         }
         return this;
     }
