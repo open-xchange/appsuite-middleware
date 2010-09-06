@@ -61,9 +61,7 @@ public class ResourceTest extends AbstractAJAXTest {
 	    assertEquals("Should find the same amount of resources when searching for * as for updates since day 0", numberFoundViaSearch, numberFoundViaUpdates);
         Resource[] resources3 = getUpdates(getWebConversation(), PROTOCOL + getHostName(), new Date(), getSessionId() ).toArray(new Resource[]{});
         assertEquals("Should find no resource created just now", 0, resources3.length);
-	}
-	
-	
+	}	
 	
 	
 	
