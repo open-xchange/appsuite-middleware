@@ -106,14 +106,14 @@ public abstract class Exceptions<T extends AbstractOXException> {
         errors.put(Integer.valueOf(error.getDetailNumber()), new ErrorMessage(error, component, applicationId));
     }
 
-    protected void declareAll(final OXErrorMessage[] errors) {
-        for (final OXErrorMessage error : errors) {
+    protected void declareAll(final OXErrorMessage[] newErrors) {
+        for (final OXErrorMessage error : newErrors) {
             declare(error);
         }
     }
 
-    protected void declareAll(final Iterable<OXErrorMessage> errors) {
-        for (final OXErrorMessage error : errors) {
+    protected void declareAll(final Iterable<OXErrorMessage> newErrors) {
+        for (final OXErrorMessage error : newErrors) {
             declare(error);
         }
     }
