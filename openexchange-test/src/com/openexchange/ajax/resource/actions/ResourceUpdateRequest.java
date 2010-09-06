@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Params;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.json.ResourceWriter;
 
@@ -74,6 +75,8 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 	private final JSONObject resourceJSON;
 
 	private final long clientLastModified;
+
+    private Resource resource;
 
 	/**
 	 * Initializes a new {@link ResourceUpdateRequest}
@@ -94,6 +97,7 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 		super();
 		this.failOnError = failOnError;
 		this.clientLastModified = clientLastModified;
+		this.resource = resource;
 		resourceJSON = ResourceWriter.writeResource(resource);
 	}
 
@@ -121,10 +125,11 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
 	public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
-		params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, clientLastModified));
-		return params.toArray(new Parameter[params.size()]);
+	    return new Params(
+	        AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE,
+	        AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(clientLastModified),
+	        AJAXServlet.PARAMETER_ID, String.valueOf(resource.getIdentifier()))
+	    .toArray();
 	}
 
 	/*
