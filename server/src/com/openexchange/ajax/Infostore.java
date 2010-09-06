@@ -413,6 +413,9 @@ public class Infostore extends PermissionServlet {
         } catch (final FileNotFoundException e) {
             rollback(infostore, searchEngine, res, e, ACTION_NEW, true);
             return;
+        } catch (TransactionException e) {
+            rollback(infostore, searchEngine, res, e, ACTION_NEW, true);
+            return;
         } finally {
             try {
                 infostore.finish();
@@ -488,6 +491,9 @@ public class Infostore extends PermissionServlet {
         } catch (final FileNotFoundException e) {
             rollback(infostore, null, res, e, ACTION_UPDATE, true);
             return;
+        } catch (TransactionException e) {
+            rollback(infostore, null, res, e, ACTION_UPDATE, true);
+            return;
         } finally {
             try {
                 infostore.finish();
@@ -555,6 +561,9 @@ public class Infostore extends PermissionServlet {
             rollback(infostore, searchEngine, res, t, ACTION_COPY, true);
             return;
         } catch (final FileNotFoundException e) {
+            rollback(infostore, searchEngine, res, e, ACTION_COPY, true);
+            return;
+        } catch (TransactionException e) {
             rollback(infostore, searchEngine, res, e, ACTION_COPY, true);
             return;
         } finally {

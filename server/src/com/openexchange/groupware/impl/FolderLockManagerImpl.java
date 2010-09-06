@@ -64,107 +64,110 @@ import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManagerImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implements
-		FolderLockManager {
-	
-	private final static String findLocks = "SELECT * FROM oxfolder_lock WHERE cid = ? AND ((entity = ?) OR (entity = ? AND depth = 1) OR (entity IN (%%path%%) AND depth = "+INFINITE+" ) )";
-	
-	public FolderLockManagerImpl(){
-		super("oxfolder_lock");
-	}
-	
-	public FolderLockManagerImpl(final DBProvider provider) {
-		super(provider, "oxfolder_lock");
-	}
-	
-	public List<Lock> findLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		return new ArrayList<Lock>(loadOwnLocks(Arrays.asList(Integer.valueOf(entity)), ctx, user, userConfig).get(Integer.valueOf(entity)));
-	}
-	
-	public List<FolderLock> findAllLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		return findFolderLocks(entity, ctx, user, userConfig);
-	}
+        FolderLockManager {
 
-	public List<FolderLock> findFolderLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		final FolderTreeUtil treeUtil = new FolderTreeUtilImpl(getProvider());
-		List<Integer> path = treeUtil.getPath(entity, ctx, user, userConfig);
-		final int parent = path.get(path.size()-2).intValue();
-		path = path.subList(0, path.size()-2);
-		final String query = findLocks.replaceAll("%%path%%", join(path).toString());
-		Connection readCon = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			readCon = getReadConnection(ctx);
-			stmt = readCon.prepareStatement(query);
-			set(1, stmt, null, Integer.valueOf(ctx.getContextId()), Integer.valueOf(entity), Integer.valueOf(parent));
-			rs = stmt.executeQuery();
-			final List<FolderLock> locks = new ArrayList<FolderLock>();
-			while(rs.next()) {
-				final FolderLock lock = newLock();
-				fillLock(lock, rs);
-				if(lock.getTimeout()<1) {
-				    removeLock(lock.getId(), ctx, user, userConfig);
-				    lockExpired(lock);
-				} else {
-					locks.add(lock);
-				}
-			}
-			return locks;
-		} catch (final SQLException x) {
-			throw new OXException();
-		} finally {
-			close(stmt, rs);
-			releaseReadConnection(ctx, readCon);
-		}
-	}
+    private final static String findLocks = "SELECT * FROM oxfolder_lock WHERE cid = ? AND ((entity = ?) OR (entity = ? AND depth = 1) OR (entity IN (%%path%%) AND depth = "+INFINITE+" ) )";
 
-	public Map<Integer, List<FolderLock>> loadOwnLocks(final List<Integer> entities, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		return findLocksByEntity(entities, ctx, user, userConfig);
-	}
+    public FolderLockManagerImpl(){
+        super("oxfolder_lock");
+    }
 
-	public void insertLock(final int entity, final Lock lock, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
-		createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user,userConfig, Integer.valueOf(((FolderLock) lock).getDepth()));
-	}
-	
-	public int lock(final int entity, final long timeout, final Scope scope, final Type type, final int depth, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		return createLock(entity, timeout, scope, type, ownerDesc, ctx, user, userConfig, Integer.valueOf(depth));
-	}
+    public FolderLockManagerImpl(final DBProvider provider) {
+        super(provider, "oxfolder_lock");
+    }
 
-	public void unlock(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		removeLock(id, ctx, user, userConfig);
-	}
+    public List<Lock> findLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        return new ArrayList<Lock>(loadOwnLocks(Arrays.asList(Integer.valueOf(entity)), ctx, user, userConfig).get(Integer.valueOf(entity)));
+    }
 
-	@Override
-	protected FolderLock newLock() {
-		return new FolderLock();
-	}
+    public List<FolderLock> findAllLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        return findFolderLocks(entity, ctx, user, userConfig);
+    }
 
-	@Override
-	protected void fillLock(final FolderLock lock, final ResultSet rs) throws SQLException {
-		super.fillLock(lock, rs);
-		lock.setDepth(rs.getInt("depth"));
-	}
+    public List<FolderLock> findFolderLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        final FolderTreeUtil treeUtil = new FolderTreeUtilImpl(getProvider());
+        List<Integer> path = treeUtil.getPath(entity, ctx, user, userConfig);
+        final int parent = path.get(path.size()-2).intValue();
+        path = path.subList(0, path.size()-2);
+        final String query = findLocks.replaceAll("%%path%%", join(path).toString());
+        Connection readCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            readCon = getReadConnection(ctx);
+            stmt = readCon.prepareStatement(query);
+            set(1, stmt, null, Integer.valueOf(ctx.getContextId()), Integer.valueOf(entity), Integer.valueOf(parent));
+            rs = stmt.executeQuery();
+            final List<FolderLock> locks = new ArrayList<FolderLock>();
+            while(rs.next()) {
+                final FolderLock lock = newLock();
+                fillLock(lock, rs);
+                if(lock.getTimeout()<1) {
+                    removeLock(lock.getId(), ctx, user, userConfig);
+                    lockExpired(lock);
+                } else {
+                    locks.add(lock);
+                }
+            }
+            return locks;
+        } catch (final SQLException x) {
+            throw new OXException();
+        } catch (TransactionException e) {
+            throw new OXException(e);
+        } finally {
+            close(stmt, rs);
+            releaseReadConnection(ctx, readCon);
+        }
+    }
 
-	@Override
-	protected String initAdditionalFIND_BY_ENTITY(final String findByEntity) {
-		return findByEntity.replaceAll("%%additional_fields%%", ", depth");
-	}
+    public Map<Integer, List<FolderLock>> loadOwnLocks(final List<Integer> entities, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        return findLocksByEntity(entities, ctx, user, userConfig);
+    }
 
-	@Override
-	protected String initAdditionalINSERT(String insert) {
-		insert = initAdditionalFIND_BY_ENTITY(insert);
-		return insert.replaceAll("%%additional_question_marks%%", ", ?");
-	}
-	
-	@Override
-	protected int getType(){
-		return Types.INFOSTORE;
-	}
+    public void insertLock(final int entity, final Lock lock, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
+        createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user,userConfig, Integer.valueOf(((FolderLock) lock).getDepth()));
+    }
 
-	public void removeAll(final int entity, final Context context, final User userObject, final UserConfiguration userConfiguration) throws OXException {
-		removeAllFromEntity(entity, context, userObject, userConfiguration);
-	}
+    public int lock(final int entity, final long timeout, final Scope scope, final Type type, final int depth, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        return createLock(entity, timeout, scope, type, ownerDesc, ctx, user, userConfig, Integer.valueOf(depth));
+    }
+
+    public void unlock(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        removeLock(id, ctx, user, userConfig);
+    }
+
+    @Override
+    protected FolderLock newLock() {
+        return new FolderLock();
+    }
+
+    @Override
+    protected void fillLock(final FolderLock lock, final ResultSet rs) throws SQLException {
+        super.fillLock(lock, rs);
+        lock.setDepth(rs.getInt("depth"));
+    }
+
+    @Override
+    protected String initAdditionalFIND_BY_ENTITY(final String findByEntity) {
+        return findByEntity.replaceAll("%%additional_fields%%", ", depth");
+    }
+
+    @Override
+    protected String initAdditionalINSERT(String insert) {
+        insert = initAdditionalFIND_BY_ENTITY(insert);
+        return insert.replaceAll("%%additional_question_marks%%", ", ?");
+    }
+
+    @Override
+    protected int getType(){
+        return Types.INFOSTORE;
+    }
+
+    public void removeAll(final int entity, final Context context, final User userObject, final UserConfiguration userConfiguration) throws OXException {
+        removeAllFromEntity(entity, context, userObject, userConfiguration);
+    }
 }

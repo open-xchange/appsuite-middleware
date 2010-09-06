@@ -59,238 +59,244 @@ import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentEvent;
+import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.AbstractUndoable;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.tx.UndoableAction;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 public abstract class AttachmentEventAction extends AbstractUndoable implements
-		UndoableAction {
-	
-	private List<AttachmentMetadata> attachments;
-	private Session session;
-	private Context ctx;
-	private User user;
-	private UserConfiguration userConfig;
-	private List<AttachmentListener> listeners;
-	private AttachmentBase source;
-	private DBProvider provider;
-	private long ts;
+        UndoableAction {
+
+    private List<AttachmentMetadata> attachments;
+    private Session session;
+    private Context ctx;
+    private User user;
+    private UserConfiguration userConfig;
+    private List<AttachmentListener> listeners;
+    private AttachmentBase source;
+    private DBProvider provider;
+    private long ts;
 
 
-	protected void fireAttached(final List<AttachmentMetadata> attachments, final List<AttachmentMetadata> processed, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider) throws Exception {
-		long ts = 0;
-		for(final AttachmentMetadata att : attachments) {
-			final AttachmentEventImpl event = new AttachmentEventImpl(att,att.getFolderId(),att.getAttachedId(),att.getModuleId(),user,userConfig,session,ctx,provider,source);
-			
-			try {
-				for(final AttachmentListener listener : listeners) {
-					final long mod = listener.attached(event);
-					if(mod > ts) {
-						ts = mod;
-					}
-				}	
-			} finally {
-				event.close();
-			}
-			processed.add(att);
-		}
-		this.ts = ts;
-	}
-	
-	protected void fireDetached(final List<AttachmentMetadata> m, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider) throws Exception {
-		
-		final Map<AttachmentAddress, Set<Integer>> collector = new HashMap<AttachmentAddress, Set<Integer>>();
-		for(final AttachmentMetadata attachment : m) {
-			final AttachmentAddress addr = new AttachmentAddress(attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
-			Set<Integer> ids = collector.get(addr);
-			if(ids == null) {
-				ids = new HashSet<Integer>();
-				collector.put(addr, ids);
-			}
-			ids.add(Integer.valueOf(attachment.getId()));
-		}
-		for(final Map.Entry<AttachmentAddress, Set<Integer>> entry : collector.entrySet()) {
-			long ts = 0;
-			final AttachmentAddress addr = entry.getKey();
-			final Set<Integer> ids = entry.getValue();
-			final int[] idsArr = new int[ids.size()];
-			int i = 0;
-			for(final Integer id : ids) { idsArr[i++] = id.intValue(); }
-			final AttachmentEventImpl event = new AttachmentEventImpl(idsArr,addr.folder,addr.attached,addr.module,user,userConfig,session,ctx,provider,source);
-			try {
-				for(final AttachmentListener listener : listeners) {
-					final long mod = listener.detached(event);
-					if (mod > ts) {
-						ts = mod;
-					}
-				}	
-			} finally {
-				event.close();
-			}
-			this.ts = ts;
-		}
-	}
+    protected void fireAttached(final List<AttachmentMetadata> attachments, final List<AttachmentMetadata> processed, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider) throws Exception {
+        long ts = 0;
+        for(final AttachmentMetadata att : attachments) {
+            final AttachmentEventImpl event = new AttachmentEventImpl(att,att.getFolderId(),att.getAttachedId(),att.getModuleId(),user,userConfig,session,ctx,provider,source);
 
-	public void setAttachments(final List<AttachmentMetadata> attachments) {
-		this.attachments = attachments;
-	}
-	
-	public List<AttachmentMetadata> getAttachments(){
-		return attachments;
-	}
-	
-	public void setSession(Session session) {
-	    this.session = session;
-	}
-	
-	public Session getSession() {
-	    return session;
-	}
+            try {
+                for(final AttachmentListener listener : listeners) {
+                    final long mod = listener.attached(event);
+                    if(mod > ts) {
+                        ts = mod;
+                    }
+                }
+            } finally {
+                event.close();
+            }
+            processed.add(att);
+        }
+        this.ts = ts;
+    }
 
-	public void setContext(final Context context) {
-		this.ctx = context;
-	}
-	
-	public Context getContext(){
-		return ctx;
-	}
+    protected void fireDetached(final List<AttachmentMetadata> m, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider) throws Exception {
 
-	public void setUser(final User user) {
-		this.user = user;
-	}
-	
-	public User getUser(){
-		return user;
-	}
+        final Map<AttachmentAddress, Set<Integer>> collector = new HashMap<AttachmentAddress, Set<Integer>>();
+        for(final AttachmentMetadata attachment : m) {
+            final AttachmentAddress addr = new AttachmentAddress(attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
+            Set<Integer> ids = collector.get(addr);
+            if(ids == null) {
+                ids = new HashSet<Integer>();
+                collector.put(addr, ids);
+            }
+            ids.add(Integer.valueOf(attachment.getId()));
+        }
+        for(final Map.Entry<AttachmentAddress, Set<Integer>> entry : collector.entrySet()) {
+            long ts = 0;
+            final AttachmentAddress addr = entry.getKey();
+            final Set<Integer> ids = entry.getValue();
+            final int[] idsArr = new int[ids.size()];
+            int i = 0;
+            for(final Integer id : ids) { idsArr[i++] = id.intValue(); }
+            final AttachmentEventImpl event = new AttachmentEventImpl(idsArr,addr.folder,addr.attached,addr.module,user,userConfig,session,ctx,provider,source);
+            try {
+                for(final AttachmentListener listener : listeners) {
+                    final long mod = listener.detached(event);
+                    if (mod > ts) {
+                        ts = mod;
+                    }
+                }
+            } finally {
+                event.close();
+            }
+            this.ts = ts;
+        }
+    }
 
-	public void setUserConfiguration(final UserConfiguration userConfig) {
-		this.userConfig = userConfig;
-	}
-	
-	public UserConfiguration getUserConfiguration(){
-		return userConfig;
-	}
+    public void setAttachments(final List<AttachmentMetadata> attachments) {
+        this.attachments = attachments;
+    }
 
-	public void setProvider(final DBProvider provider) {
-		this.provider = provider;
-	}
-	
-	public DBProvider getProvider(){
-		return provider;
-	}
+    public List<AttachmentMetadata> getAttachments(){
+        return attachments;
+    }
 
-	public void setAttachmentListeners(final List<AttachmentListener> listeners) {
-		this.listeners = listeners;
-	}
-	
-	public void setSource(final AttachmentBase attachmentBase) {
-		this.source = attachmentBase;
-	}
-	
-	public long getTimestamp(){
-		return ts;
-	}
-	
-	protected static final class AttachmentEventImpl implements AttachmentEvent {
+    public void setSession(Session session) {
+        this.session = session;
+    }
 
-		private AttachmentMetadata attachment;
-		private final int folderId;
-		private final int attachedId;
-		private final int moduleId;
-		private final User user;
-		private final Session session;
-		private final Context ctx;
-		private final DBProvider provider;
-		private Connection writeCon;
-		private final AttachmentBase base;
-		private int[] detached = new int[0];
-		private final UserConfiguration userConfig;
+    public Session getSession() {
+        return session;
+    }
 
-		
-		public AttachmentEventImpl(final AttachmentMetadata m, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
-			this(folderId,attachedId,moduleId,user,userConfig,session,ctx,provider,base);
-			this.attachment = m;
-		}
+    public void setContext(final Context context) {
+        this.ctx = context;
+    }
 
-		public void close() {
-			if(writeCon != null) {
-				provider.releaseWriteConnection(ctx, writeCon);
-			}
-			writeCon = null;
-		}
+    public Context getContext(){
+        return ctx;
+    }
 
-		public AttachmentEventImpl(final int folderId, final int attachedId, final int moduleId, final User user,final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
-			this.folderId = folderId;
-			this.attachedId = attachedId;
-			this.moduleId = moduleId;
-			this.user = user;
-			this.session = session;
-			this.ctx = ctx;
-			this.provider = provider;
-			this.base = base;
-			this.userConfig = userConfig;
-		}
-		
-		public AttachmentEventImpl(final int[] ids, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
-			this(folderId, attachedId, moduleId, user,userConfig, session, ctx, provider, base);
-			this.detached = ids.clone();
-		}
+    public void setUser(final User user) {
+        this.user = user;
+    }
 
-		public int[] getDetached() {
-			return detached.clone();
-		}
+    public User getUser(){
+        return user;
+    }
 
-		public AttachmentMetadata getAttachment() {
-			return attachment;
-		}
+    public void setUserConfiguration(final UserConfiguration userConfig) {
+        this.userConfig = userConfig;
+    }
 
-		public InputStream getAttachedFile() throws OXException {
-			if(attachment != null) {
-				return base.getAttachedFile(folderId, attachedId, moduleId, attachment.getId(),	ctx, user, userConfig);
-			}
-			return null;
-		}
+    public UserConfiguration getUserConfiguration(){
+        return userConfig;
+    }
 
-		public AttachmentBase getSource() {
-			return base;
-		}
+    public void setProvider(final DBProvider provider) {
+        this.provider = provider;
+    }
 
-		public Connection getWriteConnection() throws OXException {
-			if(writeCon == null) {
-				writeCon = provider.getWriteConnection(ctx);
-			}
-			return writeCon;
-		}
+    public DBProvider getProvider(){
+        return provider;
+    }
 
-		public Context getContext() {
-			return ctx;
-		}
+    public void setAttachmentListeners(final List<AttachmentListener> listeners) {
+        this.listeners = listeners;
+    }
 
-		public User getUser() {
-			return user;
-		}
-		
-		public UserConfiguration getUserConfig(){
-			return userConfig;
-		}
+    public void setSource(final AttachmentBase attachmentBase) {
+        this.source = attachmentBase;
+    }
 
-		public int getFolderId() {
-			return folderId;
-		}
+    public long getTimestamp(){
+        return ts;
+    }
 
-		public int getAttachedId() {
-			return attachedId;
-		}
+    protected static final class AttachmentEventImpl implements AttachmentEvent {
 
-		public int getModuleId() {
-			return moduleId;
-		}
+        private AttachmentMetadata attachment;
+        private final int folderId;
+        private final int attachedId;
+        private final int moduleId;
+        private final User user;
+        private final Session session;
+        private final Context ctx;
+        private final DBProvider provider;
+        private Connection writeCon;
+        private final AttachmentBase base;
+        private int[] detached = new int[0];
+        private final UserConfiguration userConfig;
+
+
+        public AttachmentEventImpl(final AttachmentMetadata m, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
+            this(folderId,attachedId,moduleId,user,userConfig,session,ctx,provider,base);
+            this.attachment = m;
+        }
+
+        public void close() {
+            if(writeCon != null) {
+                provider.releaseWriteConnection(ctx, writeCon);
+            }
+            writeCon = null;
+        }
+
+        public AttachmentEventImpl(final int folderId, final int attachedId, final int moduleId, final User user,final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
+            this.folderId = folderId;
+            this.attachedId = attachedId;
+            this.moduleId = moduleId;
+            this.user = user;
+            this.session = session;
+            this.ctx = ctx;
+            this.provider = provider;
+            this.base = base;
+            this.userConfig = userConfig;
+        }
+
+        public AttachmentEventImpl(final int[] ids, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
+            this(folderId, attachedId, moduleId, user,userConfig, session, ctx, provider, base);
+            this.detached = ids.clone();
+        }
+
+        public int[] getDetached() {
+            return detached.clone();
+        }
+
+        public AttachmentMetadata getAttachment() {
+            return attachment;
+        }
+
+        public InputStream getAttachedFile() throws OXException {
+            if(attachment != null) {
+                return base.getAttachedFile(folderId, attachedId, moduleId, attachment.getId(),    ctx, user, userConfig);
+            }
+            return null;
+        }
+
+        public AttachmentBase getSource() {
+            return base;
+        }
+
+        public Connection getWriteConnection() throws AttachmentException {
+            if (writeCon == null) {
+                try {
+                    writeCon = provider.getWriteConnection(ctx);
+                } catch (TransactionException e) {
+                    throw new AttachmentException(e);
+                }
+            }
+            return writeCon;
+        }
+
+        public Context getContext() {
+            return ctx;
+        }
+
+        public User getUser() {
+            return user;
+        }
+
+        public UserConfiguration getUserConfig(){
+            return userConfig;
+        }
+
+        public int getFolderId() {
+            return folderId;
+        }
+
+        public int getAttachedId() {
+            return attachedId;
+        }
+
+        public int getModuleId() {
+            return moduleId;
+        }
 
         /* (non-Javadoc)
          * @see com.openexchange.groupware.attach.AttachmentEvent#getSession()
@@ -298,33 +304,33 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
         public Session getSession() {
             return session;
         }
-		
-	}
-	
-	protected static final class AttachmentAddress {
-		public int attached;
-		public int folder;
-		public int module;
 
-		public AttachmentAddress(final int module, final int folder, final int attached) {
-			this.module = module;
-			this.folder = folder;
-			this.attached = attached;
-		}
-		
-		@Override
-		public int hashCode(){
-			return module+folder+attached;
-		}
-		
-		@Override
-		public boolean equals(final Object o) {
-			if (o instanceof AttachmentAddress) {
-				final AttachmentAddress attAddr = (AttachmentAddress) o;
-				return module == attAddr.module && folder == attAddr.folder && attached == attAddr.attached;
-			}
-			return false;
-		}
-	}
+    }
+
+    protected static final class AttachmentAddress {
+        public int attached;
+        public int folder;
+        public int module;
+
+        public AttachmentAddress(final int module, final int folder, final int attached) {
+            this.module = module;
+            this.folder = folder;
+            this.attached = attached;
+        }
+
+        @Override
+        public int hashCode(){
+            return module+folder+attached;
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (o instanceof AttachmentAddress) {
+                final AttachmentAddress attAddr = (AttachmentAddress) o;
+                return module == attAddr.module && folder == attAddr.folder && attached == attAddr.attached;
+            }
+            return false;
+        }
+    }
 
 }

@@ -149,7 +149,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             exceptionId = { 0,1 },
             msg = { "Could not save file to the file store.", "Attachments must contain a file." }
     )
-    public long attachToObject(final AttachmentMetadata attachment, final InputStream data, Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public long attachToObject(final AttachmentMetadata attachment, final InputStream data, Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws AttachmentException {
 
         checkMayAttach(attachment.getFolderId(),attachment.getAttachedId(),attachment.getModuleId(), ctx, user, userConfig);
 
@@ -167,8 +167,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         if(data != null) {
             try {
                 fileId = saveFile(data,attachment, ctx);
-            } catch (final OXException x) {
-                throw x;
             } catch (final AbstractOXException e) {
                 throw new AttachmentException(e);
             }
@@ -184,7 +182,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     }
 
-    public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws AttachmentException {
         checkMayDetach(folderId, objectId, moduleId, ctx, user, userConfig);
         //System.out.print("\n\n\nREMOVE: ");
         //for(int id : ids) { System.out.println(" "+id+" "); }
@@ -277,7 +275,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return new AttachmentTimedResult(new AttachmentIterator(select.toString(),columns,ctx,folderId,fetchMode,Integer.valueOf(moduleId), Integer.valueOf(attachedId), Integer.valueOf(ctx.getContextId())));
     }
 
-    public TimedResult<?> getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, AttachmentField[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
+    public TimedResult<?> getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, AttachmentField[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws AttachmentException{
         checkMayReadAttachments(folderId,attachedId, moduleId, ctx,user, userConfig);
 
         contextHolder.set(ctx);
@@ -360,7 +358,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
 
-    private long fireAttached(final AttachmentMetadata m, final User user, final UserConfiguration userConfig, Session session, final Context ctx) throws OXException {
+    private long fireAttached(final AttachmentMetadata m, final User user, final UserConfiguration userConfig, Session session, final Context ctx) throws AttachmentException {
         final FireAttachedEventAction fireAttached = new FireAttachedEventAction();
         fireAttached.setAttachments(Arrays.asList(m));
         fireAttached.setSession(session);
@@ -373,15 +371,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         try {
             perform(fireAttached, false);
             return fireAttached.getTimestamp();
-        } catch (final OXException x) {
-            throw x;
         } catch (final AbstractOXException e) {
             throw new AttachmentException(e);
         }
 
     }
 
-    private long fireDetached(final List<AttachmentMetadata> deleted, final int module, final User user, final UserConfiguration userConfig, Session session, final Context ctx) throws OXException {
+    private long fireDetached(final List<AttachmentMetadata> deleted, final int module, final User user, final UserConfiguration userConfig, Session session, final Context ctx) throws AttachmentException {
         final FireDetachedEventAction fireDetached = new FireDetachedEventAction();
         fireDetached.setAttachments(deleted);
         fireDetached.setSession(session);
@@ -394,8 +390,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         try {
             perform(fireDetached, false);
             return fireDetached.getTimestamp();
-        } catch (final OXException x) {
-            throw x;
         } catch (final AbstractOXException e) {
             throw new AttachmentException(e);
         }
@@ -426,6 +420,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         } catch (final SQLException e) {
             LOG.error("SQL Exception: ",e);
             throw EXCEPTIONS.create(17, e, I(context.getContextId()));
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         }
 
     }
@@ -471,22 +467,34 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     // Helper Methods
 
-    private void checkMayAttach(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private void checkMayAttach(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws AttachmentException {
         for(final AttachmentAuthorization authz : getAuthorizors(moduleId)){
-            authz.checkMayAttach(folderId,attachedId,user,userConfig, ctx);
+            try {
+                authz.checkMayAttach(folderId,attachedId,user,userConfig, ctx);
+            } catch (OXException e) {
+                throw new AttachmentException(e);
+            }
         }
     }
 
-    private void checkMayReadAttachments(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private void checkMayReadAttachments(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws AttachmentException {
         for(final AttachmentAuthorization authz : getAuthorizors(moduleId)){
-            authz.checkMayReadAttachments(folderId,objectId,user,userConfig, ctx);
+            try {
+                authz.checkMayReadAttachments(folderId,objectId,user,userConfig, ctx);
+            } catch (OXException e) {
+                throw new AttachmentException(e);
+            }
         }
     }
 
 
-    private void checkMayDetach(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private void checkMayDetach(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws AttachmentException {
         for(final AttachmentAuthorization authz : getAuthorizors(moduleId)){
-            authz.checkMayDetach(folderId,objectId,user,userConfig, ctx);
+            try {
+                authz.checkMayDetach(folderId,objectId,user,userConfig, ctx);
+            } catch (OXException e) {
+                throw new AttachmentException(e);
+            }
         }
     }
 
@@ -506,7 +514,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             exceptionId = 2,
             msg = "Cannot generate ID for new attachment: %s"
     )
-    private void initDefaultFields(final AttachmentMetadata attachment, final Context ctx, final User user) throws OXException {
+    private void initDefaultFields(final AttachmentMetadata attachment, final Context ctx, final User user) throws AttachmentException {
         attachment.setCreationDate(new Date());
         attachment.setCreatedBy(user.getId());
         if(attachment.getId() == NEW) {
@@ -516,6 +524,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 attachment.setId(getId(ctx,writeCon));
             } catch (final SQLException e) {
                 throw EXCEPTIONS.create(2,e);
+            } catch (TransactionException e) {
+                throw new AttachmentException(e);
             } finally {
                 releaseWriteConnection(ctx,writeCon);
             }
@@ -558,7 +568,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @OXThrows(
             category = Category.CODE_ERROR, desc = "An invalid SQL query was sent to the server", exceptionId = 3, msg = "Invalid SQL query: %s"
     )
-    private List<String> getFiles(final int[] ids, final Context ctx) throws OXException {
+    private List<String> getFiles(final int[] ids, final Context ctx) throws AttachmentException {
         final List<String> files = new ArrayList<String>();
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -583,6 +593,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 LL.log(x2);
             }
             throw EXCEPTIONS.create(3,x,DBUtils.getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx, readCon);
@@ -616,7 +628,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             exceptionId={5,6},
             msg={"The attachment you requested no longer exists. Please refresh the view.", "Invalid SQL query: %s"}
     )
-    private String findFileId(final int id, final Context ctx) throws OXException {
+    private String findFileId(final int id, final Context ctx) throws AttachmentException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Connection readCon = null;
@@ -634,6 +646,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             return rs.getString(1);
         } catch (final SQLException x) {
             throw EXCEPTIONS.create(6,x,DBUtils.getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx, readCon);
@@ -642,7 +656,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     @OXThrows(
             category=Category.INTERNAL_ERROR, desc="An error occurred while retrieving the attachments that should be deleted.", exceptionId=7, msg="Could not delete attachment.")
-    private long removeAttachments(final int folderId,final int objectId,final int moduleId,final int[] ids,Session session, final Context ctx,final User user,final UserConfiguration userConfig) throws OXException {
+    private long removeAttachments(final int folderId,final int objectId,final int moduleId,final int[] ids,Session session, final Context ctx,final User user,final UserConfiguration userConfig) throws AttachmentException {
         final TimedResult<?> tr = getAttachments(folderId, objectId, moduleId, ids, QUERIES.getFields(), ctx, user, userConfig);
         boolean found = false;
 
@@ -660,6 +674,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         } catch (final SearchIteratorException e1) {
             throw EXCEPTIONS.create(7);
+        } catch (OXException e) {
+            throw new AttachmentException(e);
         } finally {
             try {
                 iter.close();
@@ -679,8 +695,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         try {
             perform(delAction, true);
-        } catch (final OXException x) {
-            throw x;
         } catch (final AbstractOXException e1) {
             throw new AttachmentException(e1);
         }
@@ -735,6 +749,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         } catch (final SQLException e) {
             throw EXCEPTIONS.create(9,e,DBUtils.getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx,readCon);
@@ -755,6 +771,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             retval[1] = stmt.executeUpdate();
         } catch (final SQLException e) {
             throw EXCEPTIONS.create(10,e,DBUtils.getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         } finally {
             close(stmt, null);
             releaseWriteConnection(ctx, writeCon);
@@ -787,6 +805,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         } catch (final SQLException e) {
             throw EXCEPTIONS.create(11, e, DBUtils.getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx,readCon);
@@ -810,6 +830,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             retval = stmt.executeUpdate();
         } catch (final SQLException e) {
             throw EXCEPTIONS.create(12, e, DBUtils.getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         } finally {
             close(stmt,null);
             releaseWriteConnection(ctx,readCon);
@@ -817,7 +839,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return retval;
     }
 
-    private long save(final AttachmentMetadata attachment, final boolean newAttachment, Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private long save(final AttachmentMetadata attachment, final boolean newAttachment, Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws AttachmentException {
         AbstractAttachmentAction action = null;
         if(newAttachment) {
             final CreateAttachmentAction createAction = new CreateAttachmentAction();
@@ -840,8 +862,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         try {
             perform(action, true);
-        } catch (final OXException x) {
-            throw x;
         } catch (final AbstractOXException e) {
             throw new AttachmentException(e);
         }
@@ -854,7 +874,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
 
     @OXThrows(category=Category.USER_INPUT, desc="", exceptionId=18, msg="Validation failed: %s")
-    private void checkCharacters(final AttachmentMetadata attachment) throws OXException {
+    private void checkCharacters(final AttachmentMetadata attachment) throws AttachmentException {
         final StringBuilder errors = new StringBuilder();
         boolean invalid = false;
         final GetSwitch get = new GetSwitch(attachment);
@@ -879,7 +899,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             exceptionId = { 13,14 },
             msg = { "The attachment you requested no longer exists. Please refresh the view.","Invalid SQL query: %s" }
     )
-    private AttachmentMetadata loadAttachment(final int folderId, final int id, final Context ctx) throws OXException  {
+    private AttachmentMetadata loadAttachment(final int folderId, final int id, final Context ctx) throws AttachmentException {
 
         Connection readConnection = null;
         ResultSet rs = null;
@@ -899,6 +919,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         } catch (final SQLException x) {
             throw EXCEPTIONS.create(14,x,DBUtils.getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         } finally {
             close(stmt, rs);
             releaseReadConnection(ctx,readConnection);

@@ -51,10 +51,6 @@ package com.openexchange.groupware.tx;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 public class TXExceptionFactory extends Exceptions<TransactionException> {
 

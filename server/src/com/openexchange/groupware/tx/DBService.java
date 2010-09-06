@@ -60,24 +60,18 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.sql.DBUtils;
 
-@OXExceptionSource(
-        classId = Classes.COM_OPENEXCHANGE_GROUPWARE_TX_DBSERVICE,
-        component = EnumComponent.TRANSACTION
-)
-public abstract class DBService implements Service, DBProviderUser, DBProvider{
-    private RequestDBProvider provider;
+public abstract class DBService implements Service, DBProviderUser, DBProvider {
 
     private static final Log LOG = LogFactory.getLog(DBService.class);
     private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(DBService.class);
-    private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(DBService.class);
+
+    private RequestDBProvider provider;
 
     private final ThreadLocal<ThreadState> txState = new ThreadLocal<ThreadState>();
 
@@ -86,7 +80,6 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
         public boolean preferWriteCon;
         public Set<Connection> writeCons = new HashSet<Connection>();
     }
-
 
     public DBProvider getProvider() {
         return this.provider;
@@ -183,9 +176,9 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
                 failed.add(undo);
             }
         }
-        if(failed.size() != 0) {
-            final TransactionException exception = EXCEPTIONS.create(1);
-            if(LOG.isFatalEnabled()) {
+        if (failed.size() != 0) {
+            final TransactionException exception = TransactionExceptionCodes.NO_COMPLETE_ROLLBACK.create();
+            if (LOG.isFatalEnabled()) {
                 final StringBuilder explanations = new StringBuilder();
                 for(final Undoable undo : failed) {
                     explanations.append(undo.error());

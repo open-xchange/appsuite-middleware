@@ -51,7 +51,6 @@ package com.openexchange.groupware.tx;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 
 public class TransactionException extends AbstractOXException {
 
@@ -60,15 +59,6 @@ public class TransactionException extends AbstractOXException {
     
     public TransactionException(final AbstractOXException exc) {
         super(exc);
-    }
-
-    public TransactionException(final Category category, final int number, final String message, final Throwable cause, final Object...msgArgs) {
-        super(EnumComponent.TRANSACTION, category, number, message, cause);
-        setMessageArgs(msgArgs);
-    }
-
-    public TransactionException(final EnumComponent component, final String message) {
-        super(component, message);
     }
 
     public TransactionException(final String arg0, final StackTraceElement[] elements) {

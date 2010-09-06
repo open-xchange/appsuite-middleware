@@ -66,338 +66,354 @@ import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.Classes;
+import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
 @OXExceptionSource(
-		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_PROPERTYSTOREIMPL, 
-		component=EnumComponent.INFOSTORE
+        classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_PROPERTYSTOREIMPL,
+        component=EnumComponent.INFOSTORE
 )
 public class PropertyStoreImpl extends DBService implements PropertyStore {
-	
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(PropertyStoreImpl.class);
-	
-	private String INSERT = "INSERT INTO %%tablename%% (cid, id, name, namespace, value, language, xml) VALUES (?, ?, ?, ?, ?, ?, ?)";
-	private String tablename;
-	
-	public PropertyStoreImpl(final String tablename){
-		this(null,tablename);
-	}
-	
-	public PropertyStoreImpl(final DBProvider provider, final String tablename) {
-		setProvider(provider);
-		initTable(tablename);
-	}
-	
-	private void initTable(final String tablename) {
-		INSERT = INSERT.replaceAll("%%tablename%%",tablename);
-		this.tablename = tablename;
-	}
-	
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=0,
-			msg="Invalid SQL: '%s'"
-	)
-	public Map<Integer, List<WebdavProperty>> loadProperties(final List<Integer> entities, final List<WebdavProperty> properties, final Context ctx) throws OXException {
-		Connection readCon = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		StringBuilder builder = null;
-		try {
-			builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
-			builder.append(tablename);
-			builder.append(" WHERE CID = ? AND id IN (");
-			join(entities, builder);
-			builder.append(") AND (");
-			addOr(builder,properties);
-			builder.append(')');
-			
-			readCon = getReadConnection(ctx);
-			stmt = readCon.prepareStatement(builder.toString());
-			stmt.setInt(1, ctx.getContextId());
-			addOr(stmt, properties, 1);
-			
-			rs = stmt.executeQuery();
-			final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
-			while(rs.next()) {
-				List<WebdavProperty> props = retVal.get(rs.getInt(1));
-				if(props == null) {
-					props = new ArrayList<WebdavProperty>();
-					retVal.put(rs.getInt(1), props);
-				}
-				props.add(getProperty(rs));
-			}
-		
-			return retVal;
-		} catch (final SQLException e) {
-			throw EXCEPTIONS.create(0,e,builder.toString());
-		} finally {
-			close(stmt,rs);
-			releaseReadConnection(ctx, readCon);
-		}
-	}
 
-	private WebdavProperty getProperty(final ResultSet rs) throws SQLException {
-		final WebdavProperty prop = new WebdavProperty();
-		prop.setName(rs.getString("name"));
-		prop.setNamespace(rs.getString("namespace"));
-		prop.setLanguage(rs.getString("language"));
-		prop.setXML(rs.getBoolean("xml"));
-		prop.setValue(rs.getString("value"));
-		return prop;
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=1,
-			msg="Invalid SQL: '%s'"
-	)
-	public List<WebdavProperty> loadProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
-		Connection readCon = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		StringBuilder builder = null;
-		try {
-			builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
-			builder.append(tablename);
-			builder.append(" WHERE CID = ? AND id = ");
-			builder.append(entity);
-			builder.append(" AND (");
-			addOr(builder,properties);
-			builder.append(')');
-			
-			readCon = getReadConnection(ctx);
-			stmt = readCon.prepareStatement(builder.toString());
-			stmt.setInt(1, ctx.getContextId());
-			addOr(stmt, properties, 1);
-			
-			rs = stmt.executeQuery();
-			final List<WebdavProperty> props = new ArrayList<WebdavProperty>();
-			while(rs.next()) {
-				props.add(getProperty(rs));
-			}
-		
-			return props;
-		} catch (final SQLException e) {
-			throw EXCEPTIONS.create(1,e,builder.toString());
-		} finally {
-			close(stmt,rs);
-			releaseReadConnection(ctx, readCon);
-		}
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=2,
-			msg="Invalid SQL: '%s'"
-	)
-	public void saveProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
-		Connection writeCon = null;
-		PreparedStatement stmt = null;
-		try {
-			writeCon = getWriteConnection(ctx);
-			removeProperties(entity, properties, ctx, writeCon);
-			stmt = writeCon.prepareStatement(INSERT);
-			stmt.setInt(1,ctx.getContextId());
-			stmt.setInt(2, entity);
-			for(final WebdavProperty prop : properties) {
-				setValues(stmt, prop);
-				stmt.executeUpdate();
-			}
-		} catch (final SQLException e) {
-			throw EXCEPTIONS.create(2,e,getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseWriteConnection(ctx, writeCon);
-		}
-	}
+    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(PropertyStoreImpl.class);
 
-	private final void setValues(final PreparedStatement stmt, final WebdavProperty prop) throws SQLException {
-		stmt.setString(3, prop.getName());
-		stmt.setString(4, prop.getNamespace());
-		stmt.setString(5, prop.getValue());
-		stmt.setString(6, prop.getLanguage());
-		stmt.setBoolean(7, prop.isXML());
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=3,
-			msg="Invalid SQL: '%s'"
-	)
-	public List<WebdavProperty> loadAllProperties(final int entity, final Context ctx) throws OXException {
-		Connection readCon = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			final StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
-			builder.append(tablename);
-			builder.append(" WHERE CID = ? AND id = ");
-			builder.append(entity);
-			readCon = getReadConnection(ctx);
-			stmt = readCon.prepareStatement(builder.toString());
-			stmt.setInt(1, ctx.getContextId());
-			
-			rs = stmt.executeQuery();
-			final List<WebdavProperty> props = new ArrayList<WebdavProperty>();
-			while(rs.next()) {
-				props.add(getProperty(rs));
-			}
-		
-			return props;
-		} catch (final SQLException e) {
-			throw EXCEPTIONS.create(3,e,getStatement(stmt));
-		} finally {
-			close(stmt,rs);
-			releaseReadConnection(ctx, readCon);
-		}
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=4,
-			msg="Invalid SQL: '%s'"
-	)
-	public Map<Integer, List<WebdavProperty>> loadAllProperties(final List<Integer> entities, final Context ctx) throws OXException {
-		Connection readCon = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			final StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
-			builder.append(tablename);
-			builder.append(" WHERE CID = ? AND id IN (");
-			join(entities, builder);
-			builder.append(')');
-			
-			readCon = getReadConnection(ctx);
-			stmt = readCon.prepareStatement(builder.toString());
-			stmt.setInt(1, ctx.getContextId());
-			
-			rs = stmt.executeQuery();
-			final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
-			while(rs.next()) {
-				List<WebdavProperty> props = retVal.get(rs.getInt(1));
-				if(props == null) {
-					props = new ArrayList<WebdavProperty>();
-					retVal.put(rs.getInt(1), props);
-				}
-				props.add(getProperty(rs));
-			}
-		
-			return retVal;
-		} catch (final SQLException e) {
-			throw EXCEPTIONS.create(4, e, getStatement(stmt));
-		} finally {
-			close(stmt,rs);
-			releaseReadConnection(ctx, readCon);
-		}
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=5,
-			msg="Invalid SQL: '%s'"
-	)
-	public void removeAll(final List<Integer> entities, final Context ctx) throws OXException {
-		Connection writeCon = null;
-		PreparedStatement stmt = null;
-		try {
-			final StringBuilder b = new StringBuilder("DELETE FROM ");
-			b.append(tablename);
-			b.append(" WHERE cid = ");
-			b.append(ctx.getContextId());
-			b.append(" AND id IN (");
-			join(entities,b);
-			b.append(')');
-			writeCon = getWriteConnection(ctx);
-			stmt = writeCon.prepareStatement(b.toString());
-			stmt.executeUpdate();
-		} catch (final SQLException e) {
-			throw EXCEPTIONS.create(5, e, getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseWriteConnection(ctx, writeCon);
-		}
-	}
-	
-	private final void join(final List<Integer> entities, final StringBuilder b) {
-		for(final int entity : entities) {
-			b.append(entity);
-			b.append(',');
-		}
-		b.setLength(b.length()-1);
-	}
+    private String INSERT = "INSERT INTO %%tablename%% (cid, id, name, namespace, value, language, xml) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private String tablename;
 
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=6,
-			msg="Invalid SQL: '%s'"
-	)
-	public void removeProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
-		Connection writeCon = null;
-		final PreparedStatement stmt = null;
-		try {
-			writeCon = getWriteConnection(ctx);
-			removeProperties(entity, properties, ctx, writeCon);
-		} catch (final SQLException e) {
-			throw EXCEPTIONS.create(6,e,getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseWriteConnection(ctx, writeCon);
-		}
-	}
-	
-	private void removeProperties(final int entity, final List<WebdavProperty> properties, final Context ctx, final Connection writeCon) throws SQLException {
-		if(properties.isEmpty()) {
-			return;
-		}
-		PreparedStatement stmt = null;
-		final StringBuilder builder = new StringBuilder("DELETE FROM ");
-		builder.append(tablename);
-		builder.append(" WHERE cid = ? AND id = ? AND (");
-		addOr(builder,properties);
-		builder.append(')');
-		try {
-			stmt = writeCon.prepareStatement(builder.toString());
-			stmt.setInt(1, ctx.getContextId());
-			stmt.setInt(2, entity);
-			addOr(stmt, properties, 2);
-			stmt.executeUpdate();
-		} finally {
-			close(stmt, null);
-		}
-		
-	}
+    public PropertyStoreImpl(final String tablename){
+        this(null,tablename);
+    }
 
-	private final void addOr(final PreparedStatement stmt, final List<WebdavProperty> properties, int count) throws SQLException {
-		for(final WebdavProperty property : properties) {
-			stmt.setString(++count, property.getName());
-			stmt.setString(++count, property.getNamespace());
-		}
-	}
+    public PropertyStoreImpl(final DBProvider provider, final String tablename) {
+        setProvider(provider);
+        initTable(tablename);
+    }
 
-	private final void addOr(final StringBuilder builder, final List<WebdavProperty> properties) {
-		final String append = "(name = ? AND namespace = ?) OR ";
-		final int size = properties.size();
-		for(int i = 0; i < size; i++) {
-			builder.append(append);
-		}
-		builder.setLength(builder.length()-3);
-	}
+    private void initTable(final String tablename) {
+        INSERT = INSERT.replaceAll("%%tablename%%",tablename);
+        this.tablename = tablename;
+    }
 
-	public void removeAll(final int entity, final Context ctx) throws OXException {
-		removeAll(Arrays.asList(entity), ctx);
-	}
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=0,
+            msg="Invalid SQL: '%s'"
+    )
+    public Map<Integer, List<WebdavProperty>> loadProperties(final List<Integer> entities, final List<WebdavProperty> properties, final Context ctx) throws OXException {
+        Connection readCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        StringBuilder builder = null;
+        try {
+            builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
+            builder.append(tablename);
+            builder.append(" WHERE CID = ? AND id IN (");
+            join(entities, builder);
+            builder.append(") AND (");
+            addOr(builder,properties);
+            builder.append(')');
+
+            readCon = getReadConnection(ctx);
+            stmt = readCon.prepareStatement(builder.toString());
+            stmt.setInt(1, ctx.getContextId());
+            addOr(stmt, properties, 1);
+
+            rs = stmt.executeQuery();
+            final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
+            while(rs.next()) {
+                List<WebdavProperty> props = retVal.get(rs.getInt(1));
+                if(props == null) {
+                    props = new ArrayList<WebdavProperty>();
+                    retVal.put(rs.getInt(1), props);
+                }
+                props.add(getProperty(rs));
+            }
+
+            return retVal;
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(0,e,builder.toString());
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt,rs);
+            releaseReadConnection(ctx, readCon);
+        }
+    }
+
+    private WebdavProperty getProperty(final ResultSet rs) throws SQLException {
+        final WebdavProperty prop = new WebdavProperty();
+        prop.setName(rs.getString("name"));
+        prop.setNamespace(rs.getString("namespace"));
+        prop.setLanguage(rs.getString("language"));
+        prop.setXML(rs.getBoolean("xml"));
+        prop.setValue(rs.getString("value"));
+        return prop;
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=1,
+            msg="Invalid SQL: '%s'"
+    )
+    public List<WebdavProperty> loadProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
+        Connection readCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        StringBuilder builder = null;
+        try {
+            builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
+            builder.append(tablename);
+            builder.append(" WHERE CID = ? AND id = ");
+            builder.append(entity);
+            builder.append(" AND (");
+            addOr(builder,properties);
+            builder.append(')');
+
+            readCon = getReadConnection(ctx);
+            stmt = readCon.prepareStatement(builder.toString());
+            stmt.setInt(1, ctx.getContextId());
+            addOr(stmt, properties, 1);
+
+            rs = stmt.executeQuery();
+            final List<WebdavProperty> props = new ArrayList<WebdavProperty>();
+            while(rs.next()) {
+                props.add(getProperty(rs));
+            }
+
+            return props;
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(1,e,builder.toString());
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt,rs);
+            releaseReadConnection(ctx, readCon);
+        }
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=2,
+            msg="Invalid SQL: '%s'"
+    )
+    public void saveProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
+        Connection writeCon = null;
+        PreparedStatement stmt = null;
+        try {
+            writeCon = getWriteConnection(ctx);
+            removeProperties(entity, properties, ctx, writeCon);
+            stmt = writeCon.prepareStatement(INSERT);
+            stmt.setInt(1,ctx.getContextId());
+            stmt.setInt(2, entity);
+            for(final WebdavProperty prop : properties) {
+                setValues(stmt, prop);
+                stmt.executeUpdate();
+            }
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(2,e,getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseWriteConnection(ctx, writeCon);
+        }
+    }
+
+    private final void setValues(final PreparedStatement stmt, final WebdavProperty prop) throws SQLException {
+        stmt.setString(3, prop.getName());
+        stmt.setString(4, prop.getNamespace());
+        stmt.setString(5, prop.getValue());
+        stmt.setString(6, prop.getLanguage());
+        stmt.setBoolean(7, prop.isXML());
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=3,
+            msg="Invalid SQL: '%s'"
+    )
+    public List<WebdavProperty> loadAllProperties(final int entity, final Context ctx) throws OXException {
+        Connection readCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
+            builder.append(tablename);
+            builder.append(" WHERE CID = ? AND id = ");
+            builder.append(entity);
+            readCon = getReadConnection(ctx);
+            stmt = readCon.prepareStatement(builder.toString());
+            stmt.setInt(1, ctx.getContextId());
+
+            rs = stmt.executeQuery();
+            final List<WebdavProperty> props = new ArrayList<WebdavProperty>();
+            while(rs.next()) {
+                props.add(getProperty(rs));
+            }
+
+            return props;
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(3,e,getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt,rs);
+            releaseReadConnection(ctx, readCon);
+        }
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=4,
+            msg="Invalid SQL: '%s'"
+    )
+    public Map<Integer, List<WebdavProperty>> loadAllProperties(final List<Integer> entities, final Context ctx) throws OXException {
+        Connection readCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
+            builder.append(tablename);
+            builder.append(" WHERE CID = ? AND id IN (");
+            join(entities, builder);
+            builder.append(')');
+
+            readCon = getReadConnection(ctx);
+            stmt = readCon.prepareStatement(builder.toString());
+            stmt.setInt(1, ctx.getContextId());
+
+            rs = stmt.executeQuery();
+            final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
+            while(rs.next()) {
+                List<WebdavProperty> props = retVal.get(rs.getInt(1));
+                if(props == null) {
+                    props = new ArrayList<WebdavProperty>();
+                    retVal.put(rs.getInt(1), props);
+                }
+                props.add(getProperty(rs));
+            }
+
+            return retVal;
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(4, e, getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt,rs);
+            releaseReadConnection(ctx, readCon);
+        }
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=5,
+            msg="Invalid SQL: '%s'"
+    )
+    public void removeAll(final List<Integer> entities, final Context ctx) throws OXException {
+        Connection writeCon = null;
+        PreparedStatement stmt = null;
+        try {
+            final StringBuilder b = new StringBuilder("DELETE FROM ");
+            b.append(tablename);
+            b.append(" WHERE cid = ");
+            b.append(ctx.getContextId());
+            b.append(" AND id IN (");
+            join(entities,b);
+            b.append(')');
+            writeCon = getWriteConnection(ctx);
+            stmt = writeCon.prepareStatement(b.toString());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(5, e, getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseWriteConnection(ctx, writeCon);
+        }
+    }
+
+    private final void join(final List<Integer> entities, final StringBuilder b) {
+        for(final int entity : entities) {
+            b.append(entity);
+            b.append(',');
+        }
+        b.setLength(b.length()-1);
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=6,
+            msg="Invalid SQL: '%s'"
+    )
+    public void removeProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
+        Connection writeCon = null;
+        final PreparedStatement stmt = null;
+        try {
+            writeCon = getWriteConnection(ctx);
+            removeProperties(entity, properties, ctx, writeCon);
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(6,e,getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseWriteConnection(ctx, writeCon);
+        }
+    }
+
+    private void removeProperties(final int entity, final List<WebdavProperty> properties, final Context ctx, final Connection writeCon) throws SQLException {
+        if(properties.isEmpty()) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        final StringBuilder builder = new StringBuilder("DELETE FROM ");
+        builder.append(tablename);
+        builder.append(" WHERE cid = ? AND id = ? AND (");
+        addOr(builder,properties);
+        builder.append(')');
+        try {
+            stmt = writeCon.prepareStatement(builder.toString());
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, entity);
+            addOr(stmt, properties, 2);
+            stmt.executeUpdate();
+        } finally {
+            close(stmt, null);
+        }
+
+    }
+
+    private final void addOr(final PreparedStatement stmt, final List<WebdavProperty> properties, int count) throws SQLException {
+        for(final WebdavProperty property : properties) {
+            stmt.setString(++count, property.getName());
+            stmt.setString(++count, property.getNamespace());
+        }
+    }
+
+    private final void addOr(final StringBuilder builder, final List<WebdavProperty> properties) {
+        final String append = "(name = ? AND namespace = ?) OR ";
+        final int size = properties.size();
+        for(int i = 0; i < size; i++) {
+            builder.append(append);
+        }
+        builder.setLength(builder.length()-3);
+    }
+
+    public void removeAll(final int entity, final Context ctx) throws OXException {
+        removeAll(Arrays.asList(entity), ctx);
+    }
 
 }

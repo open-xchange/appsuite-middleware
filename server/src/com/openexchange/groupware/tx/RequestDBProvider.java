@@ -58,26 +58,13 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajp13.stable.AJPv13ListenerThread;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 
-@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_REQUESTDBPROVIDER, component= EnumComponent.TRANSACTION)
-
-@OXThrowsMultiple(
-        category={Category.SUBSYSTEM_OR_SERVICE_DOWN,Category.SUBSYSTEM_OR_SERVICE_DOWN,Category.SUBSYSTEM_OR_SERVICE_DOWN},
-        desc={"","",""},
-        exceptionId={0,1,2},
-        msg={"Cannot commit transaction to write DB", "Cannot rollback transaction in write DB", "Cannot finish transaction"}
-)
 public class RequestDBProvider implements DBProvider {
 
     private static final ThreadLocal<DBTransaction> txIds = new ThreadLocal<DBTransaction>();
 
     private static final Log LOG = LogFactory.getLog(RequestDBProvider.class);
-    private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(RequestDBProvider.class);
     private boolean commits = true;
 
 
@@ -188,7 +175,7 @@ public class RequestDBProvider implements DBProvider {
                 }
             }
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(0,e);
+            throw TransactionExceptionCodes.CANNOT_COMMIT.create(e);
         }
     }
 
@@ -204,7 +191,7 @@ public class RequestDBProvider implements DBProvider {
                 tx.writeConnection.rollback();
             }
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(1,e);
+            throw TransactionExceptionCodes.CANNOT_ROLLBACK.create(e);
         }
     }
     
@@ -327,7 +314,7 @@ public class RequestDBProvider implements DBProvider {
                 tx.readConnection = null;
             }
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(2,e);
+            throw TransactionExceptionCodes.CANNOT_FINISH.create(e);
         }
         txIds.set(null);
         final DBProvider prov = getProvider();

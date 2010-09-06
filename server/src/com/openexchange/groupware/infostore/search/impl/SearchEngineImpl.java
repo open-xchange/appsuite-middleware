@@ -83,6 +83,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.FolderObjectIterator;
@@ -275,7 +276,12 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
             }
         }
 
-        final Connection con = getReadConnection(ctx);
+        final Connection con;
+        try {
+            con = getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
         Statement stmt = null;
         try {
             stmt = con.createStatement();

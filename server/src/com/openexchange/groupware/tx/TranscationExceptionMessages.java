@@ -49,51 +49,22 @@
 
 package com.openexchange.groupware.tx;
 
-import gnu.trove.TLongObjectHashMap;
+/**
+ * {@link TranscationExceptionMessages}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class TranscationExceptionMessages {
 
-public abstract class AbstractService implements Service {
+    public static final String NO_COMPLETE_ROLLBACK_MSG = "This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool!";
 
-    private final TLongObjectHashMap<Object> txIds = new TLongObjectHashMap<Object>();
-    private final TLongObjectHashMap<StackTraceElement[]> startedTx = new TLongObjectHashMap<StackTraceElement[]>();
+    public static final String CANNOT_COMMIT_MSG = "Cannot commit transaction to write DB";
 
-    protected abstract Object createTransaction()throws TransactionException;
-    protected abstract void commit(Object transaction) throws TransactionException;
-    protected abstract void rollback(Object transaction)throws TransactionException;
+    public static final String CANNOT_ROLLBACK_MSG = "Cannot rollback transaction in write DB";
 
-    private static final boolean rememberStacks = false;
+    public static final String CANNOT_FINISH_MSG = "Cannot finish transaction";
 
-    public void startTransaction() throws TransactionException {
-        final long id = Thread.currentThread().getId();
-
-        if(txIds.containsKey(id)){
-            throw new TransactionException("There is already a transaction active at this moment", startedTx.get(id));
-        }
-
-        final Object txId = createTransaction();
-
-        txIds.put(id,txId);
-        if(rememberStacks) {
-            startedTx.put(id,Thread.currentThread().getStackTrace());
-        }
+    private TranscationExceptionMessages() {
+        super();
     }
-
-    public void commit() throws TransactionException{
-        commit(getActiveTransaction());
-    }
-
-    public void rollback() throws TransactionException{
-        rollback(getActiveTransaction());
-    }
-
-    protected Object getActiveTransaction(){
-        return txIds.get(Thread.currentThread().getId());
-    }
-
-    public void finish() throws TransactionException{
-        txIds.remove(Thread.currentThread().getId());
-        if(rememberStacks) {
-            startedTx.remove(Thread.currentThread().getId());
-        }
-    }
-
 }

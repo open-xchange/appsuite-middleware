@@ -68,354 +68,369 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.Classes;
+import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
-
 @OXExceptionSource(
-		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_LOCKMANAGERIMPL, 
-		component=EnumComponent.INFOSTORE
+        classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_LOCKMANAGERIMPL,
+        component=EnumComponent.INFOSTORE
 )
 public abstract class LockManagerImpl<T extends Lock> extends DBService implements LockManager{
-	
-	private static final String PAT_TABLENAME = "%%tablename%%";
 
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(LockManagerImpl.class);
-	
-	private String INSERT = "INSERT INTO %%tablename%% (entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% ) VALUES (?, ?, ?, ?, ?, ?, ?, ? %%additional_question_marks%%)";
-	private String DELETE = "DELETE FROM %%tablename%% WHERE cid = ? AND id = ? ";
-	private String REASSIGN = "UPDATE %%tablename%% SET userid = ? WHERE userid = ? and cid = ?";
-	private String FIND_BY_ENTITY = "SELECT entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
-	private String EXISTS_BY_ENTITY = "SELECT 1 FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
-	private String DELETE_BY_ENTITY = "DELETE FROM %%tablename%% WHERE cid = ? AND entity = ?";
-	private String UPDATE_BY_ID = "UPDATE %%tablename%% SET timeout = ? , scope = ?, type = ? , ownerDesc = ? %%additional_updates%% WHERE id = ? AND cid = ?";
+    private static final String PAT_TABLENAME = "%%tablename%%";
+
+    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(LockManagerImpl.class);
+
+    private String INSERT = "INSERT INTO %%tablename%% (entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% ) VALUES (?, ?, ?, ?, ?, ?, ?, ? %%additional_question_marks%%)";
+    private String DELETE = "DELETE FROM %%tablename%% WHERE cid = ? AND id = ? ";
+    private String REASSIGN = "UPDATE %%tablename%% SET userid = ? WHERE userid = ? and cid = ?";
+    private String FIND_BY_ENTITY = "SELECT entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
+    private String EXISTS_BY_ENTITY = "SELECT 1 FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
+    private String DELETE_BY_ENTITY = "DELETE FROM %%tablename%% WHERE cid = ? AND entity = ?";
+    private String UPDATE_BY_ID = "UPDATE %%tablename%% SET timeout = ? , scope = ?, type = ? , ownerDesc = ? %%additional_updates%% WHERE id = ? AND cid = ?";
 
     private List<LockExpiryListener> expiryListeners = new ArrayList<LockExpiryListener>();
-	
-	public LockManagerImpl(final String tablename) {
-		this(null, tablename);
-	}
-	
-	public LockManagerImpl(final DBProvider provider, final String tablename) {
-		setProvider(provider);
-		initTablename(tablename);
-	}
 
-	private void initTablename(final String tablename) {
-		INSERT = INSERT.replaceAll(PAT_TABLENAME, tablename);
-		INSERT = initAdditionalINSERT(INSERT);
-		DELETE = DELETE.replaceAll(PAT_TABLENAME, tablename);
-		
-		FIND_BY_ENTITY = FIND_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
-		FIND_BY_ENTITY = initAdditionalFIND_BY_ENTITY(FIND_BY_ENTITY);
-		
-		EXISTS_BY_ENTITY = EXISTS_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
-		
-		
-		DELETE_BY_ENTITY = DELETE_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
-		
-		UPDATE_BY_ID = UPDATE_BY_ID.replaceAll(PAT_TABLENAME, tablename);
-		UPDATE_BY_ID = initAdditionalUPDATE_BY_ID(UPDATE_BY_ID);
-		
-		REASSIGN = REASSIGN.replaceAll(PAT_TABLENAME, tablename);
-	}
-	
-	
-	private String initAdditionalUPDATE_BY_ID(final String query) {
-		return query.replaceAll("%%additional_updates%%","");
-	}
+    public LockManagerImpl(final String tablename) {
+        this(null, tablename);
+    }
 
-	protected String initAdditionalINSERT(final String insert) {
-		return insert.replaceAll("%%additional_fields%%","").replaceAll("%%additional_question_marks%%", "");
-	}
-	
-	protected String initAdditionalFIND_BY_ENTITY(final String findByEntity) {
-		return findByEntity.replaceAll("%%additional_fields%%", "");
-	}
-	
-	protected int getType() {
-		return com.openexchange.groupware.Types.WEBDAV; // FIXME
-	}
-	
-	protected abstract T newLock();
-	
-	protected void fillLock(final T lock, final ResultSet rs) throws SQLException {
-		lock.setId(rs.getInt("id"));
-		lock.setOwner(rs.getInt("userid"));
-		final int scopeNum = rs.getInt("scope");
-		for(final Scope scope : Scope.values()) {
-			if(scopeNum == scope.ordinal()) {
-				lock.setScope(scope);
-			}
-		}
-		lock.setType(Type.WRITE);
-		final long timeout =  (rs.getLong("timeout") - System.currentTimeMillis());
+    public LockManagerImpl(final DBProvider provider, final String tablename) {
+        setProvider(provider);
+        initTablename(tablename);
+    }
+
+    private void initTablename(final String tablename) {
+        INSERT = INSERT.replaceAll(PAT_TABLENAME, tablename);
+        INSERT = initAdditionalINSERT(INSERT);
+        DELETE = DELETE.replaceAll(PAT_TABLENAME, tablename);
+
+        FIND_BY_ENTITY = FIND_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
+        FIND_BY_ENTITY = initAdditionalFIND_BY_ENTITY(FIND_BY_ENTITY);
+
+        EXISTS_BY_ENTITY = EXISTS_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
+
+
+        DELETE_BY_ENTITY = DELETE_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
+
+        UPDATE_BY_ID = UPDATE_BY_ID.replaceAll(PAT_TABLENAME, tablename);
+        UPDATE_BY_ID = initAdditionalUPDATE_BY_ID(UPDATE_BY_ID);
+
+        REASSIGN = REASSIGN.replaceAll(PAT_TABLENAME, tablename);
+    }
+
+
+    private String initAdditionalUPDATE_BY_ID(final String query) {
+        return query.replaceAll("%%additional_updates%%","");
+    }
+
+    protected String initAdditionalINSERT(final String insert) {
+        return insert.replaceAll("%%additional_fields%%","").replaceAll("%%additional_question_marks%%", "");
+    }
+
+    protected String initAdditionalFIND_BY_ENTITY(final String findByEntity) {
+        return findByEntity.replaceAll("%%additional_fields%%", "");
+    }
+
+    protected int getType() {
+        return com.openexchange.groupware.Types.WEBDAV; // FIXME
+    }
+
+    protected abstract T newLock();
+
+    protected void fillLock(final T lock, final ResultSet rs) throws SQLException {
+        lock.setId(rs.getInt("id"));
+        lock.setOwner(rs.getInt("userid"));
+        final int scopeNum = rs.getInt("scope");
+        for(final Scope scope : Scope.values()) {
+            if(scopeNum == scope.ordinal()) {
+                lock.setScope(scope);
+            }
+        }
+        lock.setType(Type.WRITE);
+        final long timeout =  (rs.getLong("timeout") - System.currentTimeMillis());
         lock.setTimeout(timeout);
-		lock.setOwnerDescription(rs.getString("ownerDesc"));
-		lock.setEntity(rs.getInt("entity"));
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=0,
-			msg="Invalid SQL: '%s'"
-	)
-	protected int createLockForceId(final int entity, final int id, final long timeout, final Scope scope, final Type type, final String ownerDesc,
-			final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
-		Connection con = null;
-		PreparedStatement stmt = null;
-		try {
-			con = getWriteConnection(ctx);
-			stmt = con.prepareStatement(INSERT);
-			long tm = 0;
-			if(timeout != INFINITE) {
-				tm = System.currentTimeMillis()+timeout; 
-				// Previously Infinite Locks exceed long range if ms counter increased by 1 since loading
-				if(tm<0) {
-					tm = Long.MAX_VALUE;
-				}
-			} else {
-				tm = Long.MAX_VALUE;
-			}
-			set(1, stmt, additional, Integer.valueOf(entity), Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc, Integer.valueOf(ctx.getContextId()), Integer.valueOf(user.getId()), Integer.valueOf(id));
-			stmt.executeUpdate();
-			return id;
-		} catch (final SQLException x) {
-			throw EXCEPTIONS.create(0, x, getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseWriteConnection(ctx, con);
-		}
-	}
+        lock.setOwnerDescription(rs.getString("ownerDesc"));
+        lock.setEntity(rs.getInt("entity"));
+    }
 
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=1,
-			msg="Error in SQL Update"
-	)
-	protected int createLock(final int entity, final long timeout, final Scope scope, final Type type, final String ownerDesc,
-			final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
-		try {
-			return createLockForceId(entity, IDGenerator.getId(ctx, getType()), timeout, scope, type, ownerDesc, ctx, user, userConfig, additional);
-		} catch (final SQLException e) {
-			throw EXCEPTIONS.create(1,e);
-		}
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=2,
-			msg="Invalid SQL: '%s'"
-	)
-	protected void updateLock(final int lockId, final long timeout, final Scope scope, final Type type, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
-		Connection con = null;
-		PreparedStatement stmt = null;
-		try {
-			con = getWriteConnection(ctx);
-			stmt = con.prepareStatement(UPDATE_BY_ID);
-			long tm = 0;
-			if(timeout != INFINITE) {
-				tm = System.currentTimeMillis()+timeout;
-			} else {
-				tm = Long.MAX_VALUE;
-			}
-			final int index = set(1, stmt, additional, Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc);
-			set(index, stmt, null, Integer.valueOf(lockId), Integer.valueOf(ctx.getContextId()));
-			stmt.executeUpdate();
-		} catch (final SQLException x) {
-			throw EXCEPTIONS.create(2,x,getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseWriteConnection(ctx, con);
-		}
-	}
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=0,
+            msg="Invalid SQL: '%s'"
+    )
+    protected int createLockForceId(final int entity, final int id, final long timeout, final Scope scope, final Type type, final String ownerDesc,
+            final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = getWriteConnection(ctx);
+            stmt = con.prepareStatement(INSERT);
+            long tm = 0;
+            if(timeout != INFINITE) {
+                tm = System.currentTimeMillis()+timeout;
+                // Previously Infinite Locks exceed long range if ms counter increased by 1 since loading
+                if(tm<0) {
+                    tm = Long.MAX_VALUE;
+                }
+            } else {
+                tm = Long.MAX_VALUE;
+            }
+            set(1, stmt, additional, Integer.valueOf(entity), Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc, Integer.valueOf(ctx.getContextId()), Integer.valueOf(user.getId()), Integer.valueOf(id));
+            stmt.executeUpdate();
+            return id;
+        } catch (final SQLException x) {
+            throw EXCEPTIONS.create(0, x, getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseWriteConnection(ctx, con);
+        }
+    }
 
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=3,
-			msg="Invalid SQL: '%s'"
-	)
-	protected void removeLock(final int id, final Context ctx, final User user,
-			final UserConfiguration userConfig) throws OXException {
-		Connection con = null;
-		PreparedStatement stmt = null;
-		try {
-			con = getWriteConnection(ctx);
-			stmt = con.prepareStatement(DELETE);
-			set(1, stmt, null, Integer.valueOf(ctx.getContextId()), Integer.valueOf(id));
-			stmt.executeUpdate();
-		} catch (final SQLException x) {
-			throw EXCEPTIONS.create(3,x,getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseWriteConnection(ctx, con);
-		}
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=4,
-			msg="Invalid SQL: '%s'"
-	)
-	public Map<Integer,List<T>> findLocksByEntity(final List<Integer> entities, final Context ctx, final User user,
-			final UserConfiguration userConfig) throws OXException {
-		Connection con = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			final StringBuilder entityIds = new StringBuilder().append('(');
-			entityIds.append(join(entities));
-			entityIds.append(')');
-			
-			con = getReadConnection(ctx);
-			stmt = con.prepareStatement(FIND_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
-			set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
-			rs = stmt.executeQuery();
-			final Map<Integer, List<T>> locks = new HashMap<Integer, List<T>>();
-			final Set<Integer> entitySet = new HashSet<Integer>(entities);
-			
-			while(rs.next()) {
-				final int entity = rs.getInt("entity");
-				entitySet.remove(Integer.valueOf(entity));
-				List<T> lockList = locks.get(Integer.valueOf(entity));
-				if(null == lockList) {
-					lockList = new ArrayList<T>();
-					locks.put(Integer.valueOf(entity), lockList);
-				}
-				
-				final T lock = newLock();
-				fillLock(lock, rs);
-				if(lock.getTimeout()<1){
-					removeLock(lock.getId(), ctx, user, userConfig);
-					lockExpired(lock);
-				} else {
-					lockList.add(lock);
-				}
-			}
-			for(final Integer entity : entitySet) {
-				locks.put(entity, new ArrayList<T>());
-			}
-			return locks;
-		} catch (final SQLException x) {
-			throw EXCEPTIONS.create(4,x,getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseReadConnection(ctx, con);
-		}
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=7,
-			msg="Invalid SQL: '%s'"
-	)
-	public boolean existsLockForEntity(final List<Integer> entities, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		Connection con = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			final StringBuilder entityIds = new StringBuilder().append('(');
-			entityIds.append(join(entities));
-			entityIds.append(')');
-			
-			con = getReadConnection(ctx);
-			stmt = con.prepareStatement(EXISTS_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
-			set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
-			rs = stmt.executeQuery();
-			return rs.next();
-			
-		} catch (final SQLException x) {
-			throw EXCEPTIONS.create(4,x,getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseReadConnection(ctx, con);
-		}
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=5,
-			msg="Invalid SQL: '%s'"
-	)
-	public void reassign(final Context ctx, final int from, final int to) throws OXException {
-		Connection writeCon = null;
-		PreparedStatement stmt = null;
-		try {
-			writeCon = getWriteConnection(ctx);
-			stmt = writeCon.prepareStatement(REASSIGN);
-			stmt.setInt(1, to);
-			stmt.setInt(2, from);
-			stmt.setInt(3, ctx.getContextId());
-			stmt.executeUpdate();
-		} catch (final SQLException x) {
-			throw EXCEPTIONS.create(5,x,getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseWriteConnection(ctx, writeCon);
-		} 
-	}
-	
-	@OXThrows(
-			category=Category.CODE_ERROR, 
-			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
-			exceptionId=6,
-			msg="Invalid SQL: '%s'"
-	)
-	protected void removeAllFromEntity(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		Connection writeCon = null;
-		PreparedStatement stmt = null;
-		try {
-			writeCon = getWriteConnection(ctx);
-			stmt = writeCon.prepareStatement(DELETE_BY_ENTITY);
-			stmt.setInt(1, ctx.getContextId());
-			stmt.setInt(2, entity);
-			stmt.executeUpdate();
-		} catch (final SQLException x) {
-			throw EXCEPTIONS.create(6,x,getStatement(stmt));
-		} finally {
-			close(stmt, null);
-			releaseWriteConnection(ctx, writeCon);
-		}
-	}
-	
-	protected CharSequence join(final List<Integer> entities) {
-		final StringBuilder b = new StringBuilder();
-		for(final int entity : entities) { b.append(entity); b.append(", "); }
-		b.setLength(b.length()-2);
-		return b;
-	}
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=1,
+            msg="Error in SQL Update"
+    )
+    protected int createLock(final int entity, final long timeout, final Scope scope, final Type type, final String ownerDesc,
+            final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
+        try {
+            return createLockForceId(entity, IDGenerator.getId(ctx, getType()), timeout, scope, type, ownerDesc, ctx, user, userConfig, additional);
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(1,e);
+        }
+    }
 
-	protected final int set(int index, final PreparedStatement stmt, final Object[] additional, final Object...values) throws SQLException {
-		for(final Object o : values) {
-			stmt.setObject(index++,o);
-		}
-		if(null == additional) {
-			return index;
-		}
-		for(final Object o : additional) {
-			stmt.setObject(index++,o);
-		}
-		return index;
-	}
-	
-	public void addExpiryListener(LockExpiryListener listener) {
-	    expiryListeners.add( listener );
-	}
-	
-	protected void lockExpired(Lock lock) throws OXException {
-	    for (LockExpiryListener listener : expiryListeners) {
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=2,
+            msg="Invalid SQL: '%s'"
+    )
+    protected void updateLock(final int lockId, final long timeout, final Scope scope, final Type type, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = getWriteConnection(ctx);
+            stmt = con.prepareStatement(UPDATE_BY_ID);
+            long tm = 0;
+            if(timeout != INFINITE) {
+                tm = System.currentTimeMillis()+timeout;
+            } else {
+                tm = Long.MAX_VALUE;
+            }
+            final int index = set(1, stmt, additional, Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc);
+            set(index, stmt, null, Integer.valueOf(lockId), Integer.valueOf(ctx.getContextId()));
+            stmt.executeUpdate();
+        } catch (final SQLException x) {
+            throw EXCEPTIONS.create(2,x,getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseWriteConnection(ctx, con);
+        }
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=3,
+            msg="Invalid SQL: '%s'"
+    )
+    protected void removeLock(final int id, final Context ctx, final User user,
+            final UserConfiguration userConfig) throws OXException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = getWriteConnection(ctx);
+            stmt = con.prepareStatement(DELETE);
+            set(1, stmt, null, Integer.valueOf(ctx.getContextId()), Integer.valueOf(id));
+            stmt.executeUpdate();
+        } catch (final SQLException x) {
+            throw EXCEPTIONS.create(3,x,getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseWriteConnection(ctx, con);
+        }
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=4,
+            msg="Invalid SQL: '%s'"
+    )
+    public Map<Integer,List<T>> findLocksByEntity(final List<Integer> entities, final Context ctx, final User user,
+            final UserConfiguration userConfig) throws OXException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final StringBuilder entityIds = new StringBuilder().append('(');
+            entityIds.append(join(entities));
+            entityIds.append(')');
+
+            con = getReadConnection(ctx);
+            stmt = con.prepareStatement(FIND_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
+            set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
+            rs = stmt.executeQuery();
+            final Map<Integer, List<T>> locks = new HashMap<Integer, List<T>>();
+            final Set<Integer> entitySet = new HashSet<Integer>(entities);
+
+            while(rs.next()) {
+                final int entity = rs.getInt("entity");
+                entitySet.remove(Integer.valueOf(entity));
+                List<T> lockList = locks.get(Integer.valueOf(entity));
+                if(null == lockList) {
+                    lockList = new ArrayList<T>();
+                    locks.put(Integer.valueOf(entity), lockList);
+                }
+
+                final T lock = newLock();
+                fillLock(lock, rs);
+                if(lock.getTimeout()<1){
+                    removeLock(lock.getId(), ctx, user, userConfig);
+                    lockExpired(lock);
+                } else {
+                    lockList.add(lock);
+                }
+            }
+            for(final Integer entity : entitySet) {
+                locks.put(entity, new ArrayList<T>());
+            }
+            return locks;
+        } catch (final SQLException x) {
+            throw EXCEPTIONS.create(4,x,getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseReadConnection(ctx, con);
+        }
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=7,
+            msg="Invalid SQL: '%s'"
+    )
+    public boolean existsLockForEntity(final List<Integer> entities, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final StringBuilder entityIds = new StringBuilder().append('(');
+            entityIds.append(join(entities));
+            entityIds.append(')');
+
+            con = getReadConnection(ctx);
+            stmt = con.prepareStatement(EXISTS_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
+            set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
+            rs = stmt.executeQuery();
+            return rs.next();
+
+        } catch (final SQLException x) {
+            throw EXCEPTIONS.create(4,x,getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseReadConnection(ctx, con);
+        }
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=5,
+            msg="Invalid SQL: '%s'"
+    )
+    public void reassign(final Context ctx, final int from, final int to) throws OXException {
+        Connection writeCon = null;
+        PreparedStatement stmt = null;
+        try {
+            writeCon = getWriteConnection(ctx);
+            stmt = writeCon.prepareStatement(REASSIGN);
+            stmt.setInt(1, to);
+            stmt.setInt(2, from);
+            stmt.setInt(3, ctx.getContextId());
+            stmt.executeUpdate();
+        } catch (final SQLException x) {
+            throw EXCEPTIONS.create(5,x,getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseWriteConnection(ctx, writeCon);
+        }
+    }
+
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
+            exceptionId=6,
+            msg="Invalid SQL: '%s'"
+    )
+    protected void removeAllFromEntity(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        Connection writeCon = null;
+        PreparedStatement stmt = null;
+        try {
+            writeCon = getWriteConnection(ctx);
+            stmt = writeCon.prepareStatement(DELETE_BY_ENTITY);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, entity);
+            stmt.executeUpdate();
+        } catch (final SQLException x) {
+            throw EXCEPTIONS.create(6,x,getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        } finally {
+            close(stmt, null);
+            releaseWriteConnection(ctx, writeCon);
+        }
+    }
+
+    protected CharSequence join(final List<Integer> entities) {
+        final StringBuilder b = new StringBuilder();
+        for(final int entity : entities) { b.append(entity); b.append(", "); }
+        b.setLength(b.length()-2);
+        return b;
+    }
+
+    protected final int set(int index, final PreparedStatement stmt, final Object[] additional, final Object...values) throws SQLException {
+        for(final Object o : values) {
+            stmt.setObject(index++,o);
+        }
+        if(null == additional) {
+            return index;
+        }
+        for(final Object o : additional) {
+            stmt.setObject(index++,o);
+        }
+        return index;
+    }
+
+    public void addExpiryListener(LockExpiryListener listener) {
+        expiryListeners.add( listener );
+    }
+
+    protected void lockExpired(Lock lock) throws OXException {
+        for (LockExpiryListener listener : expiryListeners) {
             listener.lockExpired(lock);
         }
-	}
+    }
 
 }

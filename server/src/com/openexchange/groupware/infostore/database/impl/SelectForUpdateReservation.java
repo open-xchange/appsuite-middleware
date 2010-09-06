@@ -143,6 +143,8 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
         } catch (SQLException x) {
             rollback();
             throw x;
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             finishTransaction();
         }

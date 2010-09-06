@@ -299,6 +299,8 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             return new ResolvedImpl(current,parentId, false);
         } catch (final SQLException x) {
             throw EXCEPTIONS.create(2, x,stmt.toString());
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx,con);
@@ -385,6 +387,8 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                 try {
                     readCon = provider.getReadConnection(ctx);
                     return FolderCacheManager.getInstance().loadFolderObject(folderid, ctx, readCon);
+                } catch (TransactionException e) {
+                    throw new InfostoreException(e);
                 } finally {
                     provider.releaseReadConnection(ctx, readCon);
                 }

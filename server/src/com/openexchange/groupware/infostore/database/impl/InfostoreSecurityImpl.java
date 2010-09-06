@@ -69,6 +69,7 @@ import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBService;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.collections.Injector;
@@ -108,6 +109,8 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             final EffectivePermission isperm = new OXFolderAccess(con, ctx).getFolderPermission((int)document.getFolderId(), user.getId(), userConfig);
             //final EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
             return new EffectiveInfostorePermission(isperm, document,user);
+        } catch (TransactionException e) {
+            throw new OXException(e);
         } finally {
             releaseReadConnection(ctx, con);
         }
@@ -135,6 +138,8 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             readCon = getReadConnection(ctx);
             return new OXFolderAccess(readCon, ctx).getFolderPermission((int) folderId, user.getId(), userConfig);
             //return OXFolderTools.getEffectiveFolderOCL((int)folderId, user.getId(), user.getGroups(),ctx, userConfig, readCon);
+        } catch (TransactionException e) {
+            throw new OXException(e); 
         } finally {
             releaseReadConnection(ctx, readCon);
         }
@@ -159,6 +164,8 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
                 permissions.add(new EffectiveInfostorePermission(isperm, m,user));
             }
 
+        } catch (TransactionException e) {
+            throw new OXException(e);
         } finally {
             releaseReadConnection(ctx, con);
         }
@@ -180,6 +187,8 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         try {
             readCon = getReadConnection(ctx);
             fo = cache.getFolderObject((int)folderId, false, ctx, readCon);
+        } catch (TransactionException e) {
+            throw new OXException(e);
         } finally {
             releaseReadConnection(ctx, readCon);
         }

@@ -542,9 +542,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     commitDBTransaction();
                 } catch (final SQLException e) {
                     throw EXCEPTIONS.create(20, e);
+                } catch (TransactionException e) {
+                    throw new InfostoreException(e);
                 } finally {
                     releaseWriteConnection(sessionObj.getContext(), writeCon);
-                    finishDBTransaction();
+                    try {
+                        finishDBTransaction();
+                    } catch (TransactionException e) {
+                        throw new InfostoreException(e);
+                    }
                 }
 
                 document.setCreationDate(new Date(System.currentTimeMillis()));

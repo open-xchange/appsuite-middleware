@@ -671,15 +671,15 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             } finally {
                 try {
                     database.finish();
-                } catch (final OXException x) {
-                    LOG.error("Couldn't finish transaction: ", x);
+                } catch (final TransactionException e) {
+                    LOG.error("Couldn't finish transaction: ", e);
                 }
             }
         }
 
     }
 
-    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws OXException, IllegalAccessException, ConflictException, WebdavProtocolException {
+    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws OXException, IllegalAccessException, ConflictException, WebdavProtocolException, TransactionException {
         if ((exists || existsInDB) && !metadataChanged) {
             return;
         }
@@ -765,12 +765,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         metadata.setTitle(metadata.getFileName());
     }
 
-    private void dumpMetadataToDB() throws OXException, IllegalAccessException, ConflictException, WebdavProtocolException {
+    private void dumpMetadataToDB() throws OXException, IllegalAccessException, ConflictException, WebdavProtocolException, TransactionException {
         dumpMetadataToDB(null, false);
     }
 
     @OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The DocumentMetadata entry in the DB for the given resource could not be created. This is mostly due to someone else modifying the entry. This can also mean, that the entry has been deleted already.", exceptionId = 0, msg = "Could not delete DocumentMetadata %d. Please try again.")
-    private void deleteMetadata() throws OXException, IllegalAccessException, WebdavProtocolException {
+    private void deleteMetadata() throws OXException, IllegalAccessException, WebdavProtocolException, TransactionException {
         final ServerSession session = getSession();
         database.startTransaction();
         try {

@@ -54,6 +54,7 @@ import java.util.Arrays;
 import org.jdom.Element;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -75,7 +76,7 @@ public abstract class CalendarWriter extends CommonWriter {
         super();
     }
 
-    protected void writeCalendarElements(final CalendarObject calendarobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
+    protected void writeCalendarElements(final CalendarObject calendarobject, final Element e_prop) throws AbstractOXException, SearchIteratorException, UnsupportedEncodingException {
         addElement(CalendarFields.TITLE, calendarobject.getTitle(), e_prop);
         addElement(CalendarFields.NOTE, calendarobject.getNote(), e_prop);
 

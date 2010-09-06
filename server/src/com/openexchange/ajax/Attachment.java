@@ -535,6 +535,14 @@ public class Attachment extends PermissionServlet {
             }
             handle(res, new OXException(e), ResponseFields.ERROR);
             return;
+        } catch (TransactionException e) {
+            try {
+                ATTACHMENT_BASE.rollback();
+            } catch (final TransactionException x) {
+                LOG.error(x);
+            }
+            handle(res, e, ResponseFields.ERROR);
+            return;
         } finally {
             try {
                 ATTACHMENT_BASE.finish();

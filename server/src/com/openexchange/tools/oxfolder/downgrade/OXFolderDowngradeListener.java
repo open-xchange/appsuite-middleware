@@ -68,11 +68,13 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
+import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.StaticDBPoolProvider;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -426,15 +428,25 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             db.setCommitsTransaction(false);
         }
         db.setTransactional(true);
-        db.startTransaction();
         try {
+            db.startTransaction();
             db.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(event.getSession(), event.getContext()));
             db.commit();
         } catch (final OXException x) {
-            db.rollback();
+            try {
+                db.rollback();
+            } catch (TransactionException e) {
+                throw new InfostoreException(e);
+            }
             throw x;
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
-            db.finish();
+            try {
+                db.finish();
+            } catch (TransactionException e) {
+                throw new InfostoreException(e);
+            }
         }
     }
 

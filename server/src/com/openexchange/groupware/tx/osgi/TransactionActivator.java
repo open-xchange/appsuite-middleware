@@ -47,53 +47,32 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.groupware.tx.osgi;
 
-import gnu.trove.TLongObjectHashMap;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.tx.TXExceptionFactory;
 
-public abstract class AbstractService implements Service {
+/**
+ * {@link TransactionActivator}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class TransactionActivator implements BundleActivator {
 
-    private final TLongObjectHashMap<Object> txIds = new TLongObjectHashMap<Object>();
-    private final TLongObjectHashMap<StackTraceElement[]> startedTx = new TLongObjectHashMap<StackTraceElement[]>();
+    private ComponentRegistration registration;
 
-    protected abstract Object createTransaction()throws TransactionException;
-    protected abstract void commit(Object transaction) throws TransactionException;
-    protected abstract void rollback(Object transaction)throws TransactionException;
-
-    private static final boolean rememberStacks = false;
-
-    public void startTransaction() throws TransactionException {
-        final long id = Thread.currentThread().getId();
-
-        if(txIds.containsKey(id)){
-            throw new TransactionException("There is already a transaction active at this moment", startedTx.get(id));
-        }
-
-        final Object txId = createTransaction();
-
-        txIds.put(id,txId);
-        if(rememberStacks) {
-            startedTx.put(id,Thread.currentThread().getStackTrace());
-        }
+    public TransactionActivator() {
+        super();
     }
 
-    public void commit() throws TransactionException{
-        commit(getActiveTransaction());
+    public void start(BundleContext context) throws Exception {
+        registration = new ComponentRegistration(context, EnumComponent.TRANSACTION, "com.openexchange.groupware.tx", TXExceptionFactory.getInstance());
     }
 
-    public void rollback() throws TransactionException{
-        rollback(getActiveTransaction());
+    public void stop(BundleContext context) throws Exception {
+        registration.unregister();
     }
-
-    protected Object getActiveTransaction(){
-        return txIds.get(Thread.currentThread().getId());
-    }
-
-    public void finish() throws TransactionException{
-        txIds.remove(Thread.currentThread().getId());
-        if(rememberStacks) {
-            startedTx.remove(Thread.currentThread().getId());
-        }
-    }
-
 }

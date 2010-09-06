@@ -49,11 +49,60 @@
 
 package com.openexchange.groupware.tx;
 
-public class Classes {
-	public static final int COM_OPENEXCHANGE_GROUPWARE_TX_TXEXCEPTIONFACTORY = 0;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_TX_DBPOOLPROVIDER = 1;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_TX_DBSERVICE = 2;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_TX_ABSTRACTUNDOABLE = 3;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_TX_REQUESTDBPROVIDER = 4;
-	
+import static com.openexchange.groupware.tx.TranscationExceptionMessages.CANNOT_COMMIT_MSG;
+import static com.openexchange.groupware.tx.TranscationExceptionMessages.CANNOT_FINISH_MSG;
+import static com.openexchange.groupware.tx.TranscationExceptionMessages.CANNOT_ROLLBACK_MSG;
+import static com.openexchange.groupware.tx.TranscationExceptionMessages.NO_COMPLETE_ROLLBACK_MSG;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
+
+/**
+ * {@link TransactionExceptionCodes}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public enum TransactionExceptionCodes implements OXErrorMessage {
+
+    /** This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool! */
+    NO_COMPLETE_ROLLBACK(NO_COMPLETE_ROLLBACK_MSG, Category.CODE_ERROR, 1),
+    /** Cannot commit transaction to write DB */
+    CANNOT_COMMIT(CANNOT_COMMIT_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 400),
+    /** Cannot rollback transaction in write DB */
+    CANNOT_ROLLBACK(CANNOT_ROLLBACK_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 401),
+    /** Cannot finish transaction */
+    CANNOT_FINISH(CANNOT_FINISH_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 402);
+
+    private String message;
+    private Category category;
+    private int number;
+
+    private TransactionExceptionCodes(String message, Category category, int number) {
+        this.message = message;
+        this.category = category;
+        this.number = number;
+    }
+
+    public int getDetailNumber() {
+        return number;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getHelp() {
+        return null;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public TransactionException create(Object... args) {
+        return TXExceptionFactory.getInstance().create(this, args);
+    }
+
+    public TransactionException create(Throwable cause, Object... args) {
+        return TXExceptionFactory.getInstance().create(this, cause, args);
+    }
 }

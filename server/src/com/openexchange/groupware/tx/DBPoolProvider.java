@@ -49,63 +49,48 @@
 
 package com.openexchange.groupware.tx;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import java.sql.Connection;
-import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 
-
-@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_DBPOOLPROVIDER, component=EnumComponent.TRANSACTION)
 public class DBPoolProvider implements DBProvider {
 
-	
-	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(DBPoolProvider.class);
-	private static final Log LOG = LogFactory.getLog(DBPoolProvider.class);
-	
-	@OXThrows(category=Category.SUBSYSTEM_OR_SERVICE_DOWN, desc="The Database does not seem to be reachable. This must be fixed by the system administration", exceptionId=0, msg="Database cannot be reached.")	
-	public Connection getReadConnection(final Context ctx) throws TransactionException {
-		try {
-			final Connection readCon = DBPool.pickup(ctx);
-			return readCon;
-		} catch (final DBPoolingException e) {
-			LOG.fatal("",e);
-			throw EXCEPTIONS.create(0,e);
-		}
-	}
+    private static final Log LOG = LogFactory.getLog(DBPoolProvider.class);
 
-	public void releaseReadConnection(final Context ctx, final Connection con) {
-		if(con != null) {
-			DBPool.closeReaderSilent(ctx,con); //FIXME
-		}
-	}
+    public Connection getReadConnection(final Context ctx) throws TransactionException {
+        try {
+            final Connection readCon = DBPool.pickup(ctx);
+            return readCon;
+        } catch (final DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+            throw new TransactionException(e);
+        }
+    }
 
-	@OXThrows(category=Category.SUBSYSTEM_OR_SERVICE_DOWN, desc="The Database does not seem to be reachable. This must be fixed by the system administration", exceptionId=1, msg="Database cannot be reached.")	
-	public Connection getWriteConnection(final Context ctx) throws TransactionException {
-		try {
-			final Connection writeCon = DBPool.pickupWriteable(ctx);
-			return writeCon;
-		} catch (final DBPoolingException e) {
-			throw EXCEPTIONS.create(1,e);
-		}
-	}
+    public void releaseReadConnection(final Context ctx, final Connection con) {
+        if (con != null) {
+            DBPool.closeReaderSilent(ctx,con); //FIXME
+        }
+    }
 
-	public void releaseWriteConnection(final Context ctx, final Connection con) {
-		if(con == null) {
-			return;
-		}
-		try {
-			con.setAutoCommit(true);
-		} catch (final SQLException e) {
-			LOG.fatal("",e);
-		}
-		DBPool.closeWriterSilent(ctx,con);
-	}
+    public Connection getWriteConnection(final Context ctx) throws TransactionException {
+        try {
+            final Connection writeCon = DBPool.pickupWriteable(ctx);
+            return writeCon;
+        } catch (final DBPoolingException e) {
+            throw new TransactionException(e);
+        }
+    }
 
+    public void releaseWriteConnection(final Context ctx, final Connection con) {
+        if (con == null) {
+            return;
+        }
+        autocommit(con);
+        DBPool.closeWriterSilent(ctx,con);
+    }
 }

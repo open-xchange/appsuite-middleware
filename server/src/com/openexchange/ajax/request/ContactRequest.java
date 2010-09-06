@@ -79,6 +79,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -159,7 +160,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException, OXJSONException {
+    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, AbstractOXException, OXJSONException {
         if (!session.getUserConfiguration().hasContact()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
         }
@@ -747,7 +748,7 @@ public class ContactRequest {
         return jsonResponseArray;
     }
 
-    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, AbstractOXException, OXJSONException, AjaxException {
         timestamp = new Date(0);
 
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
@@ -859,7 +860,7 @@ public class ContactRequest {
         }
     }
 
-    private static void copyAttachments(final int folderId, Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
+    private static void copyAttachments(final int folderId, Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws AbstractOXException {
         /*
          * Copy attachments
          */

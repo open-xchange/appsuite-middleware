@@ -85,6 +85,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
@@ -94,6 +95,7 @@ import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.StaticDBPoolProvider;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.preferences.ServerUserSetting;
@@ -1695,15 +1697,19 @@ final class OXFolderManagerImpl extends OXFolderManager {
             db.setCommitsTransaction(false);
         }
         db.setTransactional(true);
-        db.startTransaction();
         try {
-            db.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(session, ctx));
-            db.commit();
-        } catch (final OXException x) {
-            db.rollback();
-            throw x;
-        } finally {
-            db.finish();
+            db.startTransaction();
+            try {
+                db.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(session, ctx));
+                db.commit();
+            } catch (final OXException x) {
+                db.rollback();
+                throw x;
+            } finally {
+                db.finish();
+            }
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         }
     }
 

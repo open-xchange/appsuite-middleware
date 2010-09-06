@@ -367,7 +367,7 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private static interface ProblemSolver {
-        public void solve(Context ctx, Set<String> problems) throws OXException ;
+        public void solve(Context ctx, Set<String> problems) throws AbstractOXException;
 
         String description();
     }
@@ -440,7 +440,7 @@ public abstract class Consistency implements ConsistencyMBean {
             this.database = database;
         }
 
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
+        public void solve(final Context ctx, final Set<String> problems) throws AbstractOXException {
             /*
             * Here we operate in two stages. First we create a dummy entry in the
             * filestore. Second we update the Entries in the database
@@ -607,7 +607,7 @@ public abstract class Consistency implements ConsistencyMBean {
                         LOG1.info("Deleted entry " + identifier + " from " +
                                 "infostore_documents.");
                     }
-                } catch (final OXException e) {
+                } catch (final AbstractOXException e) {
                     LOG1.error("", e);
                     try {
                         database.rollback();
@@ -738,7 +738,7 @@ public abstract class Consistency implements ConsistencyMBean {
                         } catch (final TransactionException e1) {
                             LOG1.debug("", e1);
                         }
-                    } catch (final OXException e) {
+                    } catch (final AbstractOXException e) {
                         LOG1.error("", e);
                         try {
                             database.rollback();

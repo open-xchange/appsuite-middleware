@@ -54,6 +54,7 @@ import java.sql.Connection;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -72,7 +73,7 @@ public interface AttachmentEvent {
 
     AttachmentBase getSource();
 
-    Connection getWriteConnection() throws OXException;
+    Connection getWriteConnection() throws AttachmentException;
     
     Session getSession();
 

@@ -236,7 +236,12 @@ public class DatabaseImpl extends DBService {
     public boolean exists(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         boolean retval = false;
 
-        final Connection con = getReadConnection(ctx);
+        final Connection con;
+        try {
+            con = getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
 
         final StringBuilder sql = new StringBuilder();
         if (version == InfostoreFacade.CURRENT_VERSION) {
@@ -298,6 +303,8 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             LOG.error("", e);
             throw EXCEPTIONS.create(1, e, getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, result);
             if (con != null) {
@@ -331,6 +338,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             LOG.error("SQLException", e);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, rs);
             releaseReadConnection(ctx, con);
@@ -358,6 +367,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             LOG.error("SQLException", e);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, rs);
             releaseReadConnection(ctx, con);
@@ -406,6 +417,8 @@ public class DatabaseImpl extends DBService {
         } catch (final FileStorageException e) {
             throw new InfostoreException(e);
         } catch (final FilestoreException e) {
+            throw new InfostoreException(e);
+        } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, result);
@@ -457,6 +470,8 @@ public class DatabaseImpl extends DBService {
                 }
             } catch (final SQLException e) {
                 throw EXCEPTIONS.create(14, e, getStatement(stmt));
+            } catch (TransactionException e) {
+                throw new InfostoreException(e);
             } finally {
                 close(stmt, result);
                 releaseReadConnection(ctx, readCon);
@@ -535,6 +550,8 @@ public class DatabaseImpl extends DBService {
             } catch (final SQLException e) {
                 LOG.error("", e);
                 throw EXCEPTIONS.create(15, e, stmt == null ? "" : stmt.toString());
+            } catch (TransactionException e) {
+                throw new InfostoreException(e);
             } finally {
                 close(stmt, null);
                 releaseWriteConnection(ctx, writeCon);
@@ -569,7 +586,12 @@ public class DatabaseImpl extends DBService {
          */
         final String documentstable = basetablename.concat("_document");
 
-        final Connection writecon = getWriteConnection(ctx);
+        final Connection writecon;
+        try {
+            writecon = getWriteConnection(ctx);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
 
         final int[] retval = new int[2];
         int version_nr = 0;
@@ -629,11 +651,21 @@ public class DatabaseImpl extends DBService {
             stmt.close();
             commitDBTransaction();
         } catch (final SQLException e) {
-            rollbackDBTransaction();
+            try {
+                rollbackDBTransaction();
+            } catch (TransactionException e1) {
+                throw new InfostoreException(e1);
+            }
             throw new OXException("Error while removing documents from table.", e);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, result);
-            finishDBTransaction();
+            try {
+                finishDBTransaction();
+            } catch (TransactionException e) {
+                throw new InfostoreException(e);
+            }
             releaseWriteConnection(ctx, writecon);
         }
         return retval;
@@ -650,7 +682,12 @@ public class DatabaseImpl extends DBService {
     private int modifyDocumentInTable(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx, final String basetablename) throws OXException {
         final String documentstable = basetablename.concat("_document");
         int retval = -1;
-        final Connection writecon = getWriteConnection(ctx);
+        final Connection writecon;
+        try {
+            writecon = getWriteConnection(ctx);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
 
         final StringBuilder select_description = new StringBuilder(
             "SELECT description FROM " + documentstable + " WHERE file_store_location=? AND cid=?");
@@ -687,11 +724,21 @@ public class DatabaseImpl extends DBService {
             stmt.close();
             commitDBTransaction();
         } catch (final SQLException e) {
-            rollbackDBTransaction();
+            try {
+                rollbackDBTransaction();
+            } catch (TransactionException e1) {
+                throw new InfostoreException(e1);
+            }
             throw new OXException("Error while getting permissions for folder.", e);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, result);
-            finishDBTransaction();
+            try {
+                finishDBTransaction();
+            } catch (TransactionException e) {
+                throw new InfostoreException(e);
+            }
             releaseWriteConnection(ctx, writecon);
         }
         return retval;
@@ -763,16 +810,30 @@ public class DatabaseImpl extends DBService {
             document.setId(infostore_id);
             commitDBTransaction();
         } catch (final SQLException e) {
-            rollbackDBTransaction();
+            try {
+                rollbackDBTransaction();
+            } catch (TransactionException e1) {
+                throw new InfostoreException(e1);
+            }
             LOG.error("", e);
             throw new OXException(e);
         } catch (final OXException e) {
-            rollbackDBTransaction();
+            try {
+                rollbackDBTransaction();
+            } catch (TransactionException e1) {
+                throw new InfostoreException(e1);
+            }
             LOG.error("", e);
             throw new OXException(e);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, null);
-            finishDBTransaction();
+            try {
+                finishDBTransaction();
+            } catch (TransactionException e) {
+                throw new InfostoreException(e);
+            }
             releaseWriteConnection(ctx, writeCon);
         }
         return retval;
@@ -827,6 +888,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             throw EXCEPTIONS.create(16, e, getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, result);
             releaseReadConnection(ctx, readCon);
@@ -921,6 +984,8 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             LOG.error("", e);
             throw EXCEPTIONS.create(17, e, stmt.toString());
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, result);
             releaseWriteConnection(ctx, writeCon);
@@ -982,12 +1047,19 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw EXCEPTIONS.create(19, e);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         }
     }
 
     public SortedSet<String> getDocumentFileStoreLocationsperContext(final Context ctx) throws OXException {
         final SortedSet<String> _strReturnArray = new TreeSet<String>();
-        final Connection con = getReadConnection(ctx);
+        Connection con;
+        try {
+            con = getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
         final StringBuilder SQL = new StringBuilder(
             "SELECT file_store_location from infostore_document where infostore_document.cid=? AND file_store_location is not null");
         PreparedStatement stmt = null;
@@ -1011,7 +1083,12 @@ public class DatabaseImpl extends DBService {
 
     public SortedSet<String> getDelDocumentFileStoreLocationsperContext(final Context ctx) throws OXException {
         final SortedSet<String> _strReturnArray = new TreeSet<String>();
-        final Connection con = getReadConnection(ctx);
+        Connection con;
+        try {
+            con = getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
         final StringBuilder SQL = new StringBuilder(
             "SELECT file_store_location from del_infostore_document where del_infostore_document.cid=? AND file_store_location is not null");
         PreparedStatement stmt = null;
@@ -1081,6 +1158,8 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw EXCEPTIONS.create(21, e);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         }
     }
 
@@ -1127,6 +1206,8 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw EXCEPTIONS.create(23, e);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         }
     }
 
@@ -1215,6 +1296,8 @@ public class DatabaseImpl extends DBService {
             throw EXCEPTIONS.create(24, e);
         } catch (final SearchIteratorException e) {
             throw EXCEPTIONS.create(25, e);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             if (FETCH.equals(Fetch.PREFETCH)) {
                 close(stmtNew, resultNew);
@@ -1250,6 +1333,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             throw EXCEPTIONS.create(26, e, getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, result);
             releaseReadConnection(ctx, con);
@@ -1260,7 +1345,12 @@ public class DatabaseImpl extends DBService {
     public int countDocumentsperContext(final Context ctx) throws OXException {
         int retval = 0;
 
-        final Connection con = getReadConnection(ctx);
+        final Connection con;
+        try {
+            con = getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
         try {
             final StringBuilder SQL = new StringBuilder("SELECT count(id) from infostore where infostore.cid=?");
             final PreparedStatement stmt = con.prepareStatement(SQL.toString());
@@ -1285,7 +1375,12 @@ public class DatabaseImpl extends DBService {
     public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         boolean retval = true;
 
-        final Connection con = getReadConnection(ctx);
+        final Connection con;
+        try {
+            con = getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -1317,7 +1412,12 @@ public class DatabaseImpl extends DBService {
     public boolean isFolderEmpty(final long folderId, final Context ctx) throws OXException {
         boolean retval = false;
 
-        final Connection con = getReadConnection(ctx);
+        final Connection con;
+        try {
+            con = getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -1370,6 +1470,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException x) {
             throw EXCEPTIONS.create(35, query.toString());
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             if (stmt != null) {
                 try {
@@ -1578,6 +1680,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             throw EXCEPTIONS.create(29, e, (query != null) ? query.toString() : "");
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             if (stmt != null) {
                 try {
@@ -2149,6 +2253,8 @@ public class DatabaseImpl extends DBService {
             return -1;
         } catch (final SQLException e) {
             throw EXCEPTIONS.create(34, e, getStatement(stmt));
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
         } finally {
             close(stmt, rs);
             if (con != null) {
