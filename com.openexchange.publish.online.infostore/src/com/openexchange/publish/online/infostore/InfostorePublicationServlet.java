@@ -207,8 +207,11 @@ public class InfostorePublicationServlet extends HttpServlet {
 
 
     private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
-        resp.setHeader("Content-Disposition", "attachment; filename=\""
-             + Helper.encodeFilename(document.getFileName(), "UTF-8", isIE(req)) + "\"");
+        String fileName = document.getFileName();
+        if(fileName != null) {
+            resp.setHeader("Content-Disposition", "attachment; filename=\""
+                + Helper.encodeFilename(fileName, "UTF-8", isIE(req)) + "\"");
+        }
     }
 
     private DocumentMetadata loadDocumentMetadata(final Publication publication) throws Exception {
