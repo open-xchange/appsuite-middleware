@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.internal;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.update.SchemaException;
 
 /**
@@ -72,7 +71,7 @@ public class SchemaExceptionFactory extends Exceptions<SchemaException>  {
 
     @Override
     protected SchemaException createException(ErrorMessage message, Throwable cause, Object... args) {
-        return new SchemaException(EnumComponent.UPDATE, message.getCategory(), message.getDetailNumber(), message.getMessage(), cause, args);
+        return new SchemaException(message, cause, args);
     }
 
     @Override
