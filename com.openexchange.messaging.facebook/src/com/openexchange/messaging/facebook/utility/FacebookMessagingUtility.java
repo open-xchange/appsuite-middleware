@@ -522,11 +522,22 @@ public final class FacebookMessagingUtility {
         /**
          * Retrieve a user's News Feed.
          */
-        NEWS_FEED,
+        NEWS_FEED("news_feed"),
         /**
          * Retrieve a user's wall posts (stories on their profile).
          */
-        WALL;
+        WALL("wall");
+
+        private final String name;
+
+        private QueryType(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
 
         /**
          * Gets the query type for specified folder identifier.
