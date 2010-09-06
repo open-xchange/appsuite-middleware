@@ -46,30 +46,34 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.consistency;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ConsistencyExceptionFactory extends AbstractOXExceptionFactory<ConsistencyException> {
-    protected ConsistencyExceptionFactory(final Class<?> clazz) {
-        super(clazz);
+public class ConsistencyExceptionFactory extends Exceptions<ConsistencyException> {
+
+    private static final ConsistencyExceptionFactory SINGLETON = new ConsistencyExceptionFactory();
+
+    private ConsistencyExceptionFactory() {
+        super();
+    }
+
+    public static final ConsistencyExceptionFactory getInstance() {
+        return SINGLETON;
     }
 
     @Override
-	protected ConsistencyException buildException(final EnumComponent component, final AbstractOXException.Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
-        if(component != EnumComponent.CONSISTENCY) {
-			throw new IllegalArgumentException("This factory can only build exceptions for the filestore consistency tool.");
-		}
-		return new ConsistencyException(category,number,message,cause,msgArgs);
+    protected void knownExceptions() {
+        declareAll(ConsistencyExceptionCodes.values());
     }
 
     @Override
-	protected int getClassId() {
-        return ConsistencyClasses.CONSISTENCY_EXCEPTION_FACTORY; 
+    protected ConsistencyException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new ConsistencyException(message, cause, args);
     }
 }

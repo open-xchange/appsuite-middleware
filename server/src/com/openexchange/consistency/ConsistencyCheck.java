@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -311,7 +312,7 @@ public class ConsistencyCheck {
             }
         }
 
-        private void listMissing() throws AbstractOXException, IOException {
+        private void listMissing() throws AbstractOXException, IOException, MalformedObjectNameException, NullPointerException {
 
             Map<Integer, List<String>> result = null;
             try {
@@ -333,7 +334,7 @@ public class ConsistencyCheck {
             print(result);
         }
 
-        private void repair() throws AbstractOXException, IOException {
+        private void repair() throws AbstractOXException, IOException, MalformedObjectNameException, NullPointerException {
             if(policies.isEmpty()) {
                 System.out.println("Nothing to be done. Please specify one or more resolver policies");
                 return;
@@ -373,7 +374,7 @@ public class ConsistencyCheck {
             }
         }
 
-        private void connect() throws IOException {
+        private void connect() throws IOException, MalformedObjectNameException, NullPointerException {
             final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"
                     + host + ":" + port + "/server");
 
@@ -381,12 +382,12 @@ public class ConsistencyCheck {
 
             final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
-            final ObjectName name = JMXToolkit.getObjectName();
+            final ObjectName name = MBeanNamer.getName();
 
             consistency = new MBeanConsistency(mbsc, name);
         }
 
-        private void listUnassigned() throws AbstractOXException, IOException {
+        private void listUnassigned() throws AbstractOXException, IOException, MalformedObjectNameException, NullPointerException {
 
             Map<Integer, List<String>> result = null;
             try {

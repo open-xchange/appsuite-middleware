@@ -57,7 +57,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
-import com.openexchange.consistency.ConsistencyInit;
 import com.openexchange.groupware.update.tools.UpdateTaskMBeanInit;
 import com.openexchange.management.ManagementService;
 import com.openexchange.report.internal.ReportingInit;
@@ -103,7 +102,6 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
                 getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true),
                 AJPv13Monitors.getListenerMonitor());
             managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
-            new ConsistencyInit().start();
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
@@ -123,7 +121,6 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             /*
              * Remove all mbeans since management service now disappears
              */
-            new ConsistencyInit().stop();
             managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));

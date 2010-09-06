@@ -46,29 +46,24 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.consistency;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * {@link ConsistencyExceptionMessages}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class JMXToolkit {
-    private static Log LOG = LogFactory.getLog(JMXToolkit.class);
-    private static ObjectName name;
+public final class ConsistencyExceptionMessages implements LocalizableStrings {
 
-    public static ObjectName getObjectName() {
-        try {
-            if (name == null) {
-                name = new ObjectName("com.openexchange.consistency.Consistency", "name", "FilestoreConsistency");
-            }
-            return name;
-        } catch (final MalformedObjectNameException e) {
-            LOG.error(e); // Shouldn't happen. The name is nice and correct.
-            return null;
-        }
+    public static final String COMMUNICATION_PROBLEM_MSG = "Error communicating with mbean in server: %s";
+
+    public static final String REGISTRATION_FAILED_MSG = "Registration of consistency MBean failed.";
+
+    public static final String UNREGISTRATION_FAILED_MSG = "Unregistration of consistency MBean failed.";
+    private ConsistencyExceptionMessages() {
+        super();
     }
 }

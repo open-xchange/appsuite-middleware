@@ -46,14 +46,23 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.consistency;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ConsistencyClasses {
+public class MBeanNamer {
 
-    public static final int CONSISTENCY_EXCEPTION_FACTORY = 1;
-    public static final int CONSISTENCY_INIT = 2;
-    public static final int MBEAN_CONSISTENCY = 3;
+    private static ObjectName name;
+
+    public static ObjectName getName() throws MalformedObjectNameException, NullPointerException {
+        if (name == null) {
+            name = new ObjectName("com.openexchange.consistency.Consistency", "name", "FilestoreConsistency");
+        }
+        return name;
+    }
 }

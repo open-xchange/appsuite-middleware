@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.consistency;
 
 import java.io.IOException;
@@ -57,19 +58,13 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
 
 /**
  * Proxy for an MBean provided ConsistencyMBean
  * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-@OXExceptionSource(classId = ConsistencyClasses.MBEAN_CONSISTENCY, component = EnumComponent.CONSISTENCY)
 final class MBeanConsistency implements ConsistencyMBean {
-
-    private static final ConsistencyExceptionFactory EXCEPTIONS = new ConsistencyExceptionFactory(MBeanConsistency.class);
 
     private final MBeanServerConnection mbsc;
     private final ObjectName name;
@@ -257,8 +252,7 @@ final class MBeanConsistency implements ConsistencyMBean {
         }
     }
 
-    @OXThrows(category = AbstractOXException.Category.INTERNAL_ERROR, desc = "", exceptionId = 1, msg = "Error communicating with mbean in server: %s")
     private void exception(final Exception e) throws ConsistencyException {
-        throw EXCEPTIONS.createException(1, e, e.getMessage());
+        throw ConsistencyExceptionCodes.COMMUNICATION_PROBLEM.create(e, e.getMessage());
     }
 }

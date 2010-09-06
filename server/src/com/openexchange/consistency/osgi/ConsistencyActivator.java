@@ -47,39 +47,38 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.consistency.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.consistency.ConsistencyExceptionFactory;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.management.ManagementService;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link ConsistencyActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class ConsistencyActivator implements BundleActivator {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
-        new com.openexchange.consistency.osgi.ConsistencyActivator()
-    };
+    private ComponentRegistration registration;
+    private ServiceTracker tracker;
 
-    public Activator() {
+    public ConsistencyActivator() {
         super();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public void start(BundleContext context) throws Exception {
+        registration = new ComponentRegistration(context, EnumComponent.CONSISTENCY, "com.openexchange.consistency", ConsistencyExceptionFactory.getInstance());
+        tracker = new ServiceTracker(context, ManagementService.class.getName(), new MBeanRegisterer(context));
+        tracker.open();
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        tracker.close();
+        registration.unregister();
     }
 }

@@ -47,39 +47,52 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.consistency;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import static com.openexchange.consistency.ConsistencyExceptionMessages.*;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link ConsistencyExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public enum ConsistencyExceptionCodes implements OXErrorMessage {
+    /** Error communicating with mbean in server: %s */
+    COMMUNICATION_PROBLEM(COMMUNICATION_PROBLEM_MSG, Category.INTERNAL_ERROR, 1),
+    /** Registration of consistency MBean failed. */
+    REGISTRATION_FAILED(REGISTRATION_FAILED_MSG, Category.SETUP_ERROR, 2),
+    /** Unregistration of consistency MBean failed. */
+    UNREGISTRATION_FAILED(UNREGISTRATION_FAILED_MSG, Category.SETUP_ERROR, 3);
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
-        new com.openexchange.consistency.osgi.ConsistencyActivator()
-    };
+    private final String message;
+    private final Category category;
+    private final int number;
 
-    public Activator() {
-        super();
+    private ConsistencyExceptionCodes(String message, Category category, int number) {
+        this.message = message;
+        this.category = category;
+        this.number = number;
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public int getDetailNumber() {
+        return number;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getHelp() {
+        return null;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public ConsistencyException create(Throwable cause, Object... args) {
+        return ConsistencyExceptionFactory.getInstance().create(this, cause, args);
     }
 }
