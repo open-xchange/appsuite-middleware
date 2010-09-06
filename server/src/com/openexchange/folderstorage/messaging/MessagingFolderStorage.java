@@ -787,7 +787,8 @@ public final class MessagingFolderStorage implements FolderStorage {
             final List<SortableId> list = new ArrayList<SortableId>(children.size());
             final int size = children.size();
             for (int j = 0; j < size; j++) {
-                list.add(new MessagingId(MessagingFolderIdentifier.getFQN(serviceId, accountId, children.get(j).getId()), j, null));
+                final MessagingFolder cur = children.get(j);
+                list.add(new MessagingId(MessagingFolderIdentifier.getFQN(serviceId, accountId, cur.getId()), j, cur.getName()));
             }
             return list.toArray(new SortableId[list.size()]);
         } catch (final MessagingException e) {
