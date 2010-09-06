@@ -597,8 +597,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          */
         if (!safetyCheck.isEmpty()) {
             final Log logger = LogFactory.getLog(FacebookMessagingMessageAccess.class);
-            if (logger.isWarnEnabled()) {
-                logger.warn("Information of following Facebook users are missing: " + Arrays.toString(safetyCheck.toArray()));
+            if (logger.isDebugEnabled()) {
+                logger.debug("Information of following Facebook users are missing: " + Arrays.toString(safetyCheck.toArray()));
             }
             for (final TLongIterator iter = safetyCheck.iterator(); iter.hasNext();) {
                 final long missingUserId = iter.next();
@@ -615,6 +615,9 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                     /*
                      * User not visible
                      */
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("FQL query delivered no result(s):\n" + userQuery.getCharSequence());
+                    }
                     final List<FacebookMessagingMessage> userMessages = m.remove(missingUserId);
                     for (final FacebookMessagingMessage fbMessagingMessage : userMessages) {
                         messages.remove(fbMessagingMessage);
