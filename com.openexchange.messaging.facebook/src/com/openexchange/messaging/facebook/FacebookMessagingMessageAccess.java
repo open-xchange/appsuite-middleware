@@ -51,6 +51,7 @@ package com.openexchange.messaging.facebook;
 
 import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.fireFQLQuery;
 import gnu.trove.TLongHashSet;
+import gnu.trove.TLongIterator;
 import gnu.trove.TLongObjectHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -336,12 +337,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 /*
                  * Check if any user is missing
                  */
-                if (!safetyCheck.isEmpty()) {
-                    final Log logger = LogFactory.getLog(FacebookMessagingMessageAccess.class);
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("Information of following Facebook users are missing: " + Arrays.toString(safetyCheck.toArray()));
-                    }
-                }
+                check(safetyCheck, userFieldSet, m, messages);
             }
         } else {
             messages = new ArrayList<MessagingMessage>(messageIds.length);
@@ -546,12 +542,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             /*
              * Check if any user is missing
              */
-            if (!safetyCheck.isEmpty()) {
-                final Log logger = LogFactory.getLog(FacebookMessagingMessageAccess.class);
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Information of following Facebook users are missing: " + Arrays.toString(safetyCheck.toArray()));
-                }
-            }
+            check(safetyCheck, userFieldSet, m, messages);
         }
         /*
          * Filter?
@@ -598,6 +589,54 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             toIndex = size;
         }
         return messages.subList(fromIndex, toIndex);
+    }
+
+    private void check(final TLongHashSet safetyCheck, final EnumSet<MessagingField> userFieldSet, final TLongObjectHashMap<List<FacebookMessagingMessage>> m, final List<MessagingMessage> messages) throws MessagingException {
+        /*
+         * Check if any user is missing
+         */
+        if (!safetyCheck.isEmpty()) {
+            final Log logger = LogFactory.getLog(FacebookMessagingMessageAccess.class);
+            if (logger.isWarnEnabled()) {
+                logger.warn("Information of following Facebook users are missing: " + Arrays.toString(safetyCheck.toArray()));
+            }
+            for (final TLongIterator iter = safetyCheck.iterator(); iter.hasNext();) {
+                final long missingUserId = iter.next();
+                /*
+                 * Remove from safety check
+                 */
+                iter.remove();
+                final Query userQuery =
+                    FacebookMessagingUtility.composeFQLUserQueryFor(
+                        userFieldSet.toArray(new MessagingField[userFieldSet.size()]),
+                        missingUserId);
+                final List<Object> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookRestClient);
+                if (results.isEmpty()) {
+                    /*
+                     * User not visible
+                     */
+                    final List<FacebookMessagingMessage> userMessages = m.remove(missingUserId);
+                    for (final FacebookMessagingMessage fbMessagingMessage : userMessages) {
+                        messages.remove(fbMessagingMessage);
+                    }
+                } else {
+                    /*
+                     * Add missing user data to appropriate messages
+                     */
+                    final Iterator<Object> iterator = results.iterator();
+                    final int resSize = results.size();
+                    for (int i = 0; i < resSize; i++) {
+                        final FacebookUser fbUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
+                        final long facebookUserId = fbUser.getUid();
+                        final String userIdStr = String.valueOf(facebookUserId);
+                        for (final FacebookMessagingMessage message : m.get(facebookUserId)) {
+                            message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, fbUser.getName(), userIdStr));
+                            message.setPicture(fbUser.getPicSmall());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
