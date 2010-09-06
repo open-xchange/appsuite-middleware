@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -107,6 +108,8 @@ public class ResourceRequest {
             return actionSearch(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
             return actionAll();
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
+            return actionUpdates(jsonObject);
         } else {
             /*
              * Look-up manage request
@@ -126,6 +129,30 @@ public class ResourceRequest {
             timestamp = result.getTimestamp();
             return result.getResultObject();
         }
+    }
+
+    private Object actionUpdates(final JSONObject jsonObj)  throws AbstractOXException, JSONException {
+        final Date lastModified = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
+        Resource[] resources = null;
+        try {
+            resources = ResourceServiceImpl.getInstance().listModified(lastModified, session.getContext());
+        } catch (final ResourceException exc) {
+            LOG.debug("Tried to find resources that were modified since "+lastModified, exc);
+        }
+
+        final JSONArray jsonResponseArray = new JSONArray();
+        long lm = 0;
+        if(resources != null){
+            for(Resource res: resources){
+                if(res.getLastModified().getTime() > lm)
+                    lm = res.getLastModified().getTime();
+                
+                jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(res));
+            }
+        }
+        timestamp = new Date(lm);
+
+        return jsonResponseArray;
     }
 
     private JSONArray actionList(final JSONObject jsonObj) throws AbstractOXException, JSONException {
