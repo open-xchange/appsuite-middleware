@@ -17,7 +17,6 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.json.ResourceFields;
 import com.openexchange.tools.URLParameter;
@@ -191,12 +190,12 @@ public class ResourceTest extends AbstractAJAXTest {
 	   
 	   private static Resource extractResource(JSONObject jObj) throws JSONException{
            Resource res = new com.openexchange.resource.Resource();
-           res.setIdentifier(jObj.getInt(ParticipantsFields.ID));
+           res.setIdentifier(jObj.getInt(ResourceFields.ID));
            if (jObj.has(ResourceFields.DISPLAY_NAME)) {
-               res.setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
+               res.setDisplayName(jObj.getString(ResourceFields.DISPLAY_NAME));
            }
            if (jObj.has(ResourceFields.LAST_MODIFIED)) {
-               res.setDisplayName(jObj.getString(ParticipantsFields.LAST_MODIFIED));
+               res.setDisplayName(jObj.getString(ResourceFields.LAST_MODIFIED));
            }
            return res;
 	   }
