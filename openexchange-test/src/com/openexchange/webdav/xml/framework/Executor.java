@@ -60,6 +60,7 @@ import org.jdom.JDOMException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 
@@ -73,11 +74,11 @@ public final class Executor {
         super();
     }
 
-    public static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
+    public static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, WebDAVRequest<T> request) throws IOException, JDOMException, AbstractOXException, TestException {
         return execute(client, WebDAVConfig.getProperty(Property.PROTOCOL) + "://" + WebDAVConfig.getProperty(Property.HOSTNAME), request);
     }
 
-    static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, String host, WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
+    static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, String host, WebDAVRequest<T> request) throws IOException, JDOMException, AbstractOXException, TestException {
         String urlString = host + request.getServletPath();
         HttpMethodBase method;
         switch (request.getMethod()) {

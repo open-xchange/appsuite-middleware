@@ -60,6 +60,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.folder.FolderTools;
 import com.openexchange.webdav.xml.user.GroupUserTools;
@@ -148,11 +149,11 @@ public class WebDAVClient {
         session = new WebDAVSession();
     }
 
-    public <T extends AbstractWebDAVResponse> T execute(final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
+    public <T extends AbstractWebDAVResponse> T execute(final WebDAVRequest<T> request) throws IOException, JDOMException, AbstractOXException, TestException {
          return Executor.execute(this, request);
     }
 
-    public <T extends AbstractWebDAVResponse> T execute(final String host, final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
+    public <T extends AbstractWebDAVResponse> T execute(final String host, final WebDAVRequest<T> request) throws IOException, JDOMException, AbstractOXException, TestException {
         if (null == host) {
             return execute(request);
         }

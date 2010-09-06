@@ -61,6 +61,7 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -121,7 +122,7 @@ public final class Bug12338Test extends AbstractWebDAVSession {
         }
 
         @Override
-        protected Element createProp() throws OXException, IOException {
+        protected Element createProp() throws AbstractOXException, IOException {
             final Element eProp = super.createProp();
             eProp.removeChild("participants", NS);
             final Element participants = new Element("participants", NS);

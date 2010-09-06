@@ -61,6 +61,7 @@ import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.AppointmentWriter;
@@ -83,7 +84,7 @@ public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
         return Method.PUT;
     }
 
-    protected Element createProp() throws OXException, IOException {
+    protected Element createProp() throws AbstractOXException, IOException {
         appointment.removeObjectID();
         final Element eProp = new Element("prop", NS_DAV);
 
@@ -96,7 +97,7 @@ public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
         return eProp;
     }
 
-    public RequestEntity getEntity() throws OXException, IOException {
+    public RequestEntity getEntity() throws AbstractOXException, IOException {
         final Document doc = RequestTools.createPropertyUpdate(createProp());
         final XMLOutputter xo = new XMLOutputter();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();

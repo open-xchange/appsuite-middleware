@@ -54,6 +54,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -149,7 +150,7 @@ public class SearchEngineTest extends TestCase {
 
     // Bug 11569
 
-    public void testSearchForPercent() throws OXException, SearchIteratorException {
+    public void testSearchForPercent() throws AbstractOXException, SearchIteratorException {
         final DocumentMetadata doc1 = createWithTitle("100%");
                                 createWithTitle("Hallo");
         
@@ -164,7 +165,7 @@ public class SearchEngineTest extends TestCase {
         assertEquals(doc1.getId(), gotDoc.getId());
     }
 
-    private DocumentMetadata createWithTitle(final String title) throws OXException {
+    private DocumentMetadata createWithTitle(final String title) throws AbstractOXException {
         final DocumentMetadata metadata = new DocumentMetadataImpl() ;
         metadata.setTitle(title);
         metadata.setFolderId(folderId);

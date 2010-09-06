@@ -9,6 +9,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -66,7 +67,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 	}
 
 
-	private int createFolderWithoutDeletePermissionForSecondUser() throws OXException {
+	private int createFolderWithoutDeletePermissionForSecondUser() throws AbstractOXException {
 		final FolderObject folder = new FolderObject();
 		folder.setFolderName("bug9555");
 		folder.setParentFolderID(folderId);
@@ -110,7 +111,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
     // Bug 11521
 
-    public void testShouldRemoveMIMETypeWhenRemovingLastVersionOfAFile() throws OXException {
+    public void testShouldRemoveMIMETypeWhenRemovingLastVersionOfAFile() throws AbstractOXException {
         DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setFolderId(folderId);
         dm.setTitle("Exists Test");

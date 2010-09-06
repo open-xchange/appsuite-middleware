@@ -55,6 +55,7 @@ import java.util.Date;
 import org.jdom.JDOMException;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.folder.actions.ListRequest;
@@ -80,11 +81,11 @@ public final class FolderTools {
         this.client = client;
     }
 
-    public FolderObject getDefaultAppointmentFolder() throws IOException, JDOMException, OXException, TestException {
+    public FolderObject getDefaultAppointmentFolder() throws IOException, JDOMException, AbstractOXException, TestException {
         return getDefaultAppointmentFolder(null);
     }
 
-    public FolderObject getDefaultAppointmentFolder(final String host) throws IOException, JDOMException, OXException, TestException {
+    public FolderObject getDefaultAppointmentFolder(final String host) throws IOException, JDOMException, AbstractOXException, TestException {
         if (null == defaultAppointmentFolder) {
             final ListRequest request = new ListRequest(new Date(0));
             final ListResponse response = client.execute(host, request);
@@ -102,11 +103,11 @@ public final class FolderTools {
         return defaultAppointmentFolder;
     }
 
-    public FolderObject getDefaultContactFolder() throws OXException, IOException, JDOMException, TestException {
+    public FolderObject getDefaultContactFolder() throws AbstractOXException, IOException, JDOMException, TestException {
         return getDefaultContactFolder(null);
     }
 
-    public FolderObject getDefaultContactFolder(String host) throws OXException, IOException, JDOMException, TestException {
+    public FolderObject getDefaultContactFolder(String host) throws AbstractOXException, IOException, JDOMException, TestException {
         if (null == defaultContactFolder) {
             final ListRequest request = new ListRequest(new Date(0));
             final ListResponse response = client.execute(host, request);

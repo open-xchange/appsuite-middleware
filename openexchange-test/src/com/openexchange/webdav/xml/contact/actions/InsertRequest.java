@@ -59,6 +59,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.ContactWriter;
@@ -78,7 +79,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
         this.contact = contact;
     }
 
-    public RequestEntity getEntity() throws OXException, IOException {
+    public RequestEntity getEntity() throws AbstractOXException, IOException {
         final Document doc = RequestTools.createPropertyUpdate(createProp());
         final XMLOutputter xo = new XMLOutputter();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -86,7 +87,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
         return new ByteArrayRequestEntity(baos.toByteArray());
     }
 
-    private Element createProp() throws OXException, IOException {
+    private Element createProp() throws AbstractOXException, IOException {
         contact.removeObjectID();
         final Element eProp = new Element("prop", NS_DAV);
 
