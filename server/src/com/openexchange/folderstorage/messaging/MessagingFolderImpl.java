@@ -71,8 +71,8 @@ import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
-import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
+import com.openexchange.messaging.MessagingPermission;
 
 /**
  * {@link MessagingFolderImpl} - A messaging folder.
@@ -154,7 +154,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
     public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final DefaultFolderFullnameProvider fullnameProvider) {
         super();
         final String fullname = messagingFolder.getId();
-        this.id = serviceId + "://" + accountId;
+        this.id = MessagingFolderIdentifier.getFQN(serviceId, accountId, fullname);
         this.name = messagingFolder.getName();
         final boolean isRootFolder = messagingFolder.isRootFolder();
         if (isRootFolder) { // Root folder
