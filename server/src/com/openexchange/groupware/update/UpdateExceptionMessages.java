@@ -76,11 +76,13 @@ public final class UpdateExceptionMessages implements LocalizableStrings {
 
     public static final String UPDATE_FAILED_MSG = "Updating schema %1$s failed. Cause: %2$s.";
 
-    public static final String FIRST_BLOCKING_MSG = "Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).";
+    public static final String BLOCKING_FIRST_MSG = "Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).";
 
     public static final String UNKNOWN_TASK_MSG = "Unknown task: %1$s.";
 
-    public UpdateExceptionMessages() {
+    public static final String COLUMN_NOT_FOUND_MSG = "Column \"%1$s\" not found in table %2$s.";
+
+    private UpdateExceptionMessages() {
         super();
     }
 }

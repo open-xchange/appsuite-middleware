@@ -57,17 +57,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -76,10 +70,6 @@ import com.openexchange.tools.sql.DBUtils;
  * determined.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(
-    classId = Classes.TASK_REMINDER_FOLDER_ZERO,
-    component = EnumComponent.UPDATE
-)
 public class TaskReminderFolderZero implements UpdateTask {
 
     private static final String SELECT_REMINDER = "SELECT cid,object_id,"
@@ -93,21 +83,9 @@ public class TaskReminderFolderZero implements UpdateTask {
 
     private static final String DELETE_REMINDER = "DELETE FROM reminder "
         + "WHERE cid=? AND object_id=?";
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(TaskReminderFolderZero
-        .class);
 
-    /**
-     * Exception factory.
-     */
-    private static final UpdateExceptionFactory EXCEPTION =
-        new UpdateExceptionFactory(TaskReminderFolderZero.class);
+    private static final Log LOG = LogFactory.getLog(TaskReminderFolderZero.class);
 
-    /**
-     * Default constructor.
-     */
     public TaskReminderFolderZero() {
         super();
     }
@@ -134,18 +112,7 @@ public class TaskReminderFolderZero implements UpdateTask {
         private int folder;
     }
     
-    /**
-     * {@inheritDoc}
-     * @throws SQLException 
-     */
-    @OXThrowsMultiple(
-        category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
-        desc = { "", "" },
-        exceptionId = { 1, 2 },
-        msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." }
-    )
-    public void perform(final Schema schema, final int contextId)
-        throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         LOG.info("Performing update task TaskReminderFolderZero.");
         final List<ReminderData> reminders = getReminder(contextId);
         final List<ReminderData> update = new ArrayList<ReminderData>();
@@ -160,21 +127,15 @@ public class TaskReminderFolderZero implements UpdateTask {
                  update.add(remind);
              }
         }
-        LOG.info("Fixing " + update.size() + " reminder and removing "
-            + remove.size() + " not fixable reminder.");
-        Connection con = null;
-        try {
-            con = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
-            throw EXCEPTION.create(1, e);
-        }
+        LOG.info("Fixing " + update.size() + " reminder and removing " + remove.size() + " not fixable reminder.");
+        Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false);
             update(con, update);
             delete(con, remove);
             con.commit();
         } catch (final SQLException e) {
-            throw EXCEPTION.create(2, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             try {
                 con.setAutoCommit(true);
@@ -186,21 +147,10 @@ public class TaskReminderFolderZero implements UpdateTask {
         LOG.info("Update task TaskReminderFolderZero all DONE.");
     }
 
-    @OXThrowsMultiple(
-        category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
-        desc = { "", "" },
-        exceptionId = { 3, 4 },
-        msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." }
-    )
     private List<ReminderData> getReminder(final int contextId)
         throws AbstractOXException {
         final List<ReminderData> retval = new ArrayList<ReminderData>();
-        Connection con = null;
-        try {
-            con = Database.get(contextId, false);
-        } catch (final DBPoolingException e) {
-            throw EXCEPTION.create(2, e);
-        }
+        Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -217,7 +167,7 @@ public class TaskReminderFolderZero implements UpdateTask {
                 retval.add(remind);
             }
         } catch (final SQLException e) {
-            throw EXCEPTION.create(4, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
             Database.back(contextId, false, con);
@@ -225,20 +175,9 @@ public class TaskReminderFolderZero implements UpdateTask {
         return retval;
     }
 
-    @OXThrowsMultiple(
-        category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
-        desc = { "", "" },
-        exceptionId = { 5, 6 },
-        msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." }
-    )
     private int findFolder(final int contextId, final int taskId,
         final int userId) throws AbstractOXException {
-        Connection con = null;
-        try {
-            con = Database.get(contextId, false);
-        } catch (final DBPoolingException e) {
-            throw EXCEPTION.create(6, e);
-        }
+        Connection con = Database.get(contextId, false);
         int retval = -1;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -252,7 +191,7 @@ public class TaskReminderFolderZero implements UpdateTask {
                 retval = result.getInt(1);
             }
         } catch (final SQLException e) {
-            throw EXCEPTION.create(5, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
             Database.back(contextId, false, con);
@@ -260,12 +199,6 @@ public class TaskReminderFolderZero implements UpdateTask {
         return retval;
     }
 
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 7 },
-        msg = { "SQL Problem: \"%s\"." }
-    )
     private int update(final Connection con, final List<ReminderData> update)
         throws AbstractOXException {
         int retval = 0;
@@ -283,7 +216,7 @@ public class TaskReminderFolderZero implements UpdateTask {
                 retval += i;
             }
         } catch (final SQLException e) {
-            throw EXCEPTION.create(7, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }
@@ -295,12 +228,6 @@ public class TaskReminderFolderZero implements UpdateTask {
         return retval;
     }
 
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 8 },
-        msg = { "SQL Problem: \"%s\"." }
-    )
     private int delete(final Connection con, final List<ReminderData> remove)
         throws AbstractOXException {
         int retval = 0;
@@ -318,7 +245,7 @@ public class TaskReminderFolderZero implements UpdateTask {
                 retval += i;
             }
         } catch (final SQLException e) {
-            throw EXCEPTION.create(8, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }

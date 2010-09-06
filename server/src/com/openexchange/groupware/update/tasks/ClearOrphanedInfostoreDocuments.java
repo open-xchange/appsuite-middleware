@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
@@ -57,13 +58,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.ForeignKeyOld;
 import com.openexchange.tools.update.Tools;
@@ -71,12 +68,9 @@ import com.openexchange.tools.update.Tools;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class ClearOrphanedInfostoreDocuments implements UpdateTask {
 
     private static final Log LOG = LogFactory.getLog(ClearOrphanedInfostoreDocuments.class);
-  private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(ClearOrphanedInfostoreDocuments.class);
-
 
     public int addedWithVersion() {
         return 26;
@@ -86,11 +80,6 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
-     @OXThrowsMultiple(category = { AbstractOXException.Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 1 },
-        msg = { "An SQL error occurred: %1$s." }
-    )
     public void perform(Schema schema, int contextId) throws AbstractOXException {
         PreparedStatement select = null;
         PreparedStatement delete = null;
@@ -148,7 +137,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
                 // IGNORE
             }
             LOG.error(e.getMessage(),e);
-            throw EXCEPTION.create(1, e.toString());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, select);
             DBUtils.closeSQLStuff(null, delete);

@@ -53,36 +53,24 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * UnboundFolderReplacementUpdateTask
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UnboundFolderReplacementUpdateTask.class);
+	private static final Log LOG = LogFactory.getLog(UnboundFolderReplacementUpdateTask.class);
 
-	private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(
-			DelFolderTreeTableUpdateTask.class);
-
-	/**
-	 * Default constructor
-	 */
 	public UnboundFolderReplacementUpdateTask() {
 		super();
 	}
@@ -119,18 +107,6 @@ public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 	private static final String SQL_UPDATE = "UPDATE " + TABLE_REPL + " AS ot SET ot.module = " + FolderObject.CONTACT
 			+ " WHERE ot.module = " + FolderObject.UNBOUND;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
-	 *      int)
-	 */
-	@OXThrowsMultiple(
-			category = { Category.CODE_ERROR },
-			desc = { "" },
-			exceptionId = { 1 },
-			msg = { "An SQL error occurred while performing task DelFolderTreeTableUpdateTask: %1$s." }
-	)
 	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
@@ -146,7 +122,7 @@ public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 				stmt = writeCon.prepareStatement(SQL_UPDATE.replaceFirst(TABLE_REPL, TABLE_BACKUP));
 				stmt.executeUpdate();
 			} catch (final SQLException e) {
-				throw EXCEPTION.create(1, e, e.getMessage());
+	            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
 			}
 
 		} finally {
@@ -155,7 +131,5 @@ public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 				Database.back(contextId, true, writeCon);
 			}
 		}
-
 	}
-
 }

@@ -57,14 +57,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -73,12 +68,9 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:choeger@open-xchange.com">Carsten Hoeger</a>
  *
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class ContactsChangedFromUpdateTask implements UpdateTask {
 
     private static final Log LOG = LogFactory.getLog(ContactsChangedFromUpdateTask.class);
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(ContactsChangedFromUpdateTask.class);
 
     /**
      * Default constructor
@@ -108,14 +100,6 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
 
     private static final String SQL_FIX = "UPDATE prg_contacts SET changed_from=created_from WHERE changed_from IS NULL"; 
 
-    /**
-     * {@inheritDoc}
-     */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 1 },
-            msg = { "An SQL error occurred while performing task ContactsChangedFromUpdateTask: %1$s." }
-    )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
@@ -129,7 +113,7 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw EXCEPTION.create(1, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.autocommit(con);
             closeSQLStuff(null, st);

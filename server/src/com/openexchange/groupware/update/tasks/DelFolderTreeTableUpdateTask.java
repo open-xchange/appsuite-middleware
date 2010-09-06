@@ -53,31 +53,25 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * DelFolderTreeTableUpdateTask
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class DelFolderTreeTableUpdateTask implements UpdateTask {
 	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(DelFolderTreeTableUpdateTask.class);
+	private static final Log LOG = LogFactory.getLog(DelFolderTreeTableUpdateTask.class);
 	
-	private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(DelFolderTreeTableUpdateTask.class);
-
 	/* (non-Javadoc)
 	 * 
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
@@ -116,7 +110,7 @@ public class DelFolderTreeTableUpdateTask implements UpdateTask {
 				stmt = writeCon.prepareStatement(SQL_MODIFY);
 				stmt.executeUpdate();
 			} catch (final SQLException e) {
-				throw EXCEPTION.create(1, e, e.getMessage());
+	            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
 			}
 		} finally {
 			closeSQLStuff(null, stmt);

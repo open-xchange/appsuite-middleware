@@ -59,28 +59,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * {@link AlterUidCollation} Alters table login2user and changes the collation of column uid to utf8_bin.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class AlterUidCollation implements UpdateTask {
 
     private static final Log LOG = LogFactory.getLog(AlterUidCollation.class);
 
     private static final String SQL = "ALTER TABLE login2user MODIFY uid VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL";
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CorrectIndexes.class);
 
     public AlterUidCollation() {
         super();
@@ -94,7 +86,6 @@ public class AlterUidCollation implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 1, msg = "An SQL error occurred: %1$s.")
     public void perform(Schema schema, int contextId) throws AbstractOXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
@@ -103,7 +94,7 @@ public class AlterUidCollation implements UpdateTask {
                 return;
             }
         } catch (SQLException e) {
-            throw EXCEPTION.create(1, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
         LOG.info("Changing collation to allow inserting '\u00e4\u00f6\u00fc' and 'aou'.");
         Statement stmt = null;
@@ -114,7 +105,7 @@ public class AlterUidCollation implements UpdateTask {
             con.commit();
         } catch (SQLException e) {
             rollback(con);
-            throw EXCEPTION.create(1, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
             autocommit(con);

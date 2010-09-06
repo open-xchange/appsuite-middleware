@@ -49,33 +49,19 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * Creates the table version and inserts a single line.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(
-        classId = Classes.UPDATE_TASK,
-        component = EnumComponent.UPDATE
-    )
 public final class CreateTableVersion implements UpdateTask {
     
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(CreateTableVersion.class);
-    
-    /**
-     * For creating exceptions.
-     */
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CreateTableVersion.class);
+    private static final Log LOG = LogFactory.getLog(CreateTableVersion.class);
     
 //    private static final String CREATE = "CREATE TABLE foobar (" +
 //            "version INT4 UNSIGNED NOT NULL," +
@@ -101,15 +87,6 @@ public final class CreateTableVersion implements UpdateTask {
         return 1;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @OXThrowsMultiple(
-            category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 1 },
-            msg = { "An SQL error occurred while performing task CreateTableVersion: %1$s." }
-    )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'CreateTableVersion' performed!");
@@ -130,7 +107,7 @@ public final class CreateTableVersion implements UpdateTask {
 //                stmt.setString(5, Server.getServerName());
 //                stmt.executeUpdate();
 //            } catch (SQLException e) {
-//                throw EXCEPTION.create(1, e, e.getMessage());
+//                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
 //            }
 //        } finally {
 //            closeSQLStuff(null, stmt);

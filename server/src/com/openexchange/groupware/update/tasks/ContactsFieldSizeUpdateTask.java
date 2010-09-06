@@ -61,17 +61,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * ContactsChangedFromUpdateTask
@@ -79,17 +76,10 @@ import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
  * @author <a href="mailto:ben.pahne@open-xchange.com">Ben Pahne</a>
  *
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-    .getLog(ContactsFieldSizeUpdateTask.class);
+    private static final Log LOG = LogFactory.getLog(ContactsFieldSizeUpdateTask.class);
 
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(ContactsFieldSizeUpdateTask.class);
-
-    /**
-     * Initializes a new {@link ContactsFieldSizeUpdateTask}
-     */
     public ContactsFieldSizeUpdateTask() {
         super();
     }
@@ -121,11 +111,6 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
         changeColumns(result.toChange, sqltable, contextId);
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 1 },
-            msg = { "SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s." }
-    )
     private Result determineResult(final String sqltable, final int contextId) throws UpdateException {
         /*
          * Create a map containing desired columns' VARCHAR size
@@ -267,7 +252,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
             }
             return new Result(toChange, toDelete);
         } catch (final SQLException e) {
-            throw EXCEPTION.create(1, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs);
             Database.back(contextId, true, writeCon);
@@ -338,11 +323,6 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
         executeAlterCommand(alterCommand, contextId);
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 2 },
-            msg = { "SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s." }
-    )
     private void executeAlterCommand(final String alterCommand, final int contextId) throws UpdateException {
         /*
          * Fetch a writable connection
@@ -361,7 +341,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
             st = writeCon.createStatement();
             st.executeUpdate(alterCommand);
         } catch (final SQLException e) {
-            throw EXCEPTION.create(2, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, st);
             Database.back(contextId, true, writeCon);

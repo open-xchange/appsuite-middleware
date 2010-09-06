@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
@@ -83,5 +84,10 @@ public class UpdateException extends AbstractOXException {
     public UpdateException(EnumComponent component, Category category, int number, String message, Throwable cause, Object[] msgArgs) {
         super(component, category, number, message, cause);
         setMessageArgs(msgArgs);
+    }
+
+    public UpdateException(ErrorMessage message, Throwable cause, Object[] args) {
+        super(message, cause);
+        setMessageArgs(args);
     }
 }

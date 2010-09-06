@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -58,30 +59,21 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
-import com.openexchange.database.DBPoolingException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * @author choeger
  * 
  */
-@OXExceptionSource(
-        classId = Classes.TASK_NEW_ADMIN_EXTENSIONS,
-        component = EnumComponent.UPDATE)
 public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(NewAdminExtensionsUpdateTask.class);
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(NewAdminExtensionsUpdateTask.class);
+    private static final Log LOG = LogFactory.getLog(NewAdminExtensionsUpdateTask.class);
 
     /*
      * (non-Javadoc)
@@ -126,16 +118,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
     private static final String NOHOME  = "/dev/null";
     private static final String NOSHELL = "/bin/false";
     private static final String SHA     = "{SHA}";    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
-     *      int)
-     */
-    @OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
-            desc = { "", "" },
-            exceptionId = { 1, 2 },
-            msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." })
+
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
@@ -144,12 +127,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         final Hashtable<String, ArrayList<String>> missingCols = missingColumns(contextId);
         final boolean deleteLastmodified = tableContainsColumn(contextId, "del_user", "lastModified");
 
-        Connection writeCon = null;
-        try {
-            writeCon = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
-            throw EXCEPTION.create(1, e);
-        }
+        Connection writeCon = Database.get(contextId, true);
         try {
             writeCon.setAutoCommit(false);
             createSequenceTables(writeCon, contextId);
@@ -160,7 +138,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
             }
             writeCon.commit();
         } catch (final SQLException e) {
-            throw EXCEPTION.create(2, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             try {
                 writeCon.setAutoCommit(true);
@@ -172,12 +150,8 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
     }
 
-    @OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
-            desc = { "", "" },
-            exceptionId = { 3, 4 },
-            msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." })
     private final Hashtable<String, ArrayList<String>> missingColumns(final int contextId) throws AbstractOXException {
-        Connection readCon = null;
+        Connection readCon = Database.get(contextId, false);
         Statement stmt = null;
         ResultSet rs = null;
 
@@ -196,11 +170,6 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
             retTables.put(table, ret);
         }
 
-        try {
-            readCon = Database.get(contextId, false);
-        } catch (final DBPoolingException e) {
-            throw EXCEPTION.create(3, e);
-        }
         try {
             stmt = readCon.createStatement();
             for(final String table : new String[]{ TABLE_USER, TABLE_GROUPS, TABLE_DEL_USER, TABLE_DEL_GROUPS } ) {
@@ -221,7 +190,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
             return retTables;
         } catch (final SQLException e) {
-            throw EXCEPTION.create(4, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             if (readCon != null) {
@@ -230,10 +199,6 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 5 },
-            msg = { "SQL Problem: \"%s\"." })
     private void createSequenceTables(final Connection con, final int contextId) throws AbstractOXException {
         PreparedStatement stmt = null;
         try {
@@ -245,16 +210,12 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                 stmt.close();
             }
         } catch (final SQLException e) {
-            throw EXCEPTION.create(5, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 6 },
-            msg = { "SQL Problem: \"%s\"." })
     private void alterTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws AbstractOXException {
         PreparedStatement stmt = null;
         try {
@@ -298,16 +259,12 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                 }
             }
         } catch (final SQLException e) {
-            throw EXCEPTION.create(6, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 7 },
-            msg = { "SQL Problem: \"%s\"." })
     private void updateTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws AbstractOXException {
         PreparedStatement stmt = null;
         try {
@@ -357,26 +314,17 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                 }
             }
         } catch (final SQLException e) {
-            throw EXCEPTION.create(7, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
-    @OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
-            desc = { "", "" },
-            exceptionId = { 8, 9 },
-            msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." })
     private final boolean tableContainsColumn(final int contextId, final String table, final String column) throws AbstractOXException {
-        Connection readCon = null;
+        Connection readCon = Database.get(contextId, false);
         Statement stmt = null;
         ResultSet rs = null;
 
-        try {
-            readCon = Database.get(contextId, false);
-        } catch (final DBPoolingException e) {
-            throw EXCEPTION.create(8, e);
-        }
         try {
             try {
                 stmt = readCon.createStatement();
@@ -391,7 +339,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                 }
                 return found;
             } catch (final SQLException e) {
-                throw EXCEPTION.create(9, e, e.getMessage());
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
         } finally {
             closeSQLStuff(rs, stmt);
@@ -401,10 +349,6 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 10 },
-            msg = { "SQL Problem: \"%s\"." })
     private void removeColumnFromTable(final Connection con, final int contextId, final String column, final String table) throws AbstractOXException {
         PreparedStatement stmt = null;
         try {
@@ -412,7 +356,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
             stmt.executeUpdate();
             stmt.close();
         } catch (final SQLException e) {
-            throw EXCEPTION.create(10, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }

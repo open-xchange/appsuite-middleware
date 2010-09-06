@@ -57,17 +57,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * {@link ContactsAddIndex4AutoCompleteSearch} - Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
@@ -75,16 +70,10 @@ import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactsAddIndex4AutoCompleteSearch.class);
 
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(ContactsAddIndex4AutoCompleteSearch.class);
-
-    /**
-     * Initializes a new {@link ContactsAddIndex4AutoCompleteSearch}.
-     */
     public ContactsAddIndex4AutoCompleteSearch() {
         super();
     }
@@ -159,8 +148,7 @@ public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task ContactsAddIndex4AutoCompleteSearch: %1$s." })
     private static UpdateException createSQLError(final SQLException e) {
-        return EXCEPTION.create(1, e, e.getMessage());
+        return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 }

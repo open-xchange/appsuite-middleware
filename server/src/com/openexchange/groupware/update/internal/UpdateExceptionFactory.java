@@ -51,15 +51,15 @@ package com.openexchange.groupware.update.internal;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 
 /**
- * Creates schema exceptions.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Factory for creating exception in the schema updater.
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class UpdateExceptionFactory extends Exceptions<UpdateException>  {
+public final class UpdateExceptionFactory extends Exceptions<UpdateException> {
 
     private static final UpdateExceptionFactory SINGLETON = new UpdateExceptionFactory();
 
@@ -67,17 +67,17 @@ public class UpdateExceptionFactory extends Exceptions<UpdateException>  {
         super();
     }
 
-    public static UpdateExceptionFactory getInstance() {
+    public static final UpdateExceptionFactory getInstance() {
         return SINGLETON;
-    }
-
-    @Override
-    protected UpdateException createException(ErrorMessage message, Throwable cause, Object... args) {
-        return new UpdateException(EnumComponent.UPDATE, message.getCategory(), message.getDetailNumber(), message.getMessage(), cause, args);
     }
 
     @Override
     protected void knownExceptions() {
         declareAll(UpdateExceptionCodes.values());
+    }
+
+    @Override
+    protected UpdateException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new UpdateException(message, cause, args);
     }
 }

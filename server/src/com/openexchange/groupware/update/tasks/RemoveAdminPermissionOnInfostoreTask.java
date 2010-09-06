@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -61,37 +62,25 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * {@link RemoveAdminPermissionOnInfostoreTask} - Removed incorrect admin permission on top level infostore folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
 
     private static final Log LOG = LogFactory.getLog(RemoveAdminPermissionOnInfostoreTask.class);
 
-    private final UpdateExceptionFactory exceptionFactory;
-
-    /**
-     * Initializes a new {@link RemoveAdminPermissionOnInfostoreTask}.
-     */
     public RemoveAdminPermissionOnInfostoreTask() {
         super();
-        exceptionFactory = new UpdateExceptionFactory(RemoveAdminPermissionOnInfostoreTask.class);
     }
 
     @Override
@@ -150,7 +139,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         }
     }
 
-    private void dropTopLevelInfostoreFolderPermissionFromAdmin(Connection con, final int contextId) throws UpdateException {
+    private void dropTopLevelInfostoreFolderPermissionFromAdmin(Connection con, final int contextId) throws UpdateException, ContextException {
         /*
          * Get context's admin
          */
@@ -175,9 +164,8 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 2 }, msg = { "Error while performing task RemoveAdminPermissionOnInfostoreTask: No context admin exists for context %1$s." })
-    private UpdateException missingAdminError(final int contextId) {
-        return exceptionFactory.create(2, Integer.valueOf(contextId));
+    private ContextException missingAdminError(final int contextId) {
+        return new ContextException(ContextException.Code.NO_MAILADMIN, I(contextId));
     }
 
     private int getMailAdmin(final Connection con, final int contextId) throws UpdateException {

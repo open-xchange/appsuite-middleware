@@ -104,9 +104,11 @@ public enum UpdateExceptionCodes implements OXErrorMessage {
     /**
      * Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).
      */
-    FIRST_BLOCKING(FIRST_BLOCKING_MSG, Category.CODE_ERROR, 23),
+    BLOCKING_FIRST(BLOCKING_FIRST_MSG, Category.CODE_ERROR, 23),
     /** Unknown task: %1$s */
-    UNKNOWN_TASK(UNKNOWN_TASK_MSG, Category.SETUP_ERROR, 24);
+    UNKNOWN_TASK(UNKNOWN_TASK_MSG, Category.SETUP_ERROR, 24),
+    /** Column "%1$s" not found in table %2$s. */
+    COLUMN_NOT_FOUND(COLUMN_NOT_FOUND_MSG, Category.CODE_ERROR, 25);
 
     final String message;
 

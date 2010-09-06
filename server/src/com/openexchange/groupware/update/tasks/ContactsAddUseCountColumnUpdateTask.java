@@ -52,32 +52,26 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class ContactsAddUseCountColumnUpdateTask implements UpdateTask {
 
     private final String ADD_COLUMN = "ALTER TABLE prg_contacts ADD COLUMN useCount INT4 UNSIGNED DEFAULT 0";
     
     private final String ADD_COLUMN_DEL = "ALTER TABLE del_contacts ADD COLUMN useCount INT4 UNSIGNED";
 
-    private final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactsAddUseCountColumnUpdateTask.class);
-
-    private final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(ContactsAddUseCountColumnUpdateTask.class);
+    private final Log LOG = LogFactory.getLog(ContactsAddUseCountColumnUpdateTask.class);
 
     public int addedWithVersion() {
         return 50;
@@ -87,7 +81,6 @@ public class ContactsAddUseCountColumnUpdateTask implements UpdateTask {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "SQL error occurred while performing task ContactsAddUseCountColumnUpdateTask: %1$s." })
     public void perform(Schema schema, int contextId) throws AbstractOXException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -103,7 +96,7 @@ public class ContactsAddUseCountColumnUpdateTask implements UpdateTask {
                 stmt.executeUpdate();
             }
         } catch (SQLException e) {
-            throw EXCEPTION.create(1, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
             if (con != null) {

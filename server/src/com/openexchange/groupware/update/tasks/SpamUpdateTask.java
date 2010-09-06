@@ -56,16 +56,13 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
@@ -75,19 +72,10 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class SpamUpdateTask implements UpdateTask {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SpamUpdateTask.class);
+	private static final Log LOG = LogFactory.getLog(SpamUpdateTask.class);
 
-	private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(SpamUpdateTask.class);
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
-	 */
 	public int addedWithVersion() {
 		return 1;
 	}
@@ -116,18 +104,6 @@ public class SpamUpdateTask implements UpdateTask {
 	
 	private static final String CONFIRMED_HAM = "confirmed_ham";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
-	 *      int)
-	 */
-	@OXThrowsMultiple(
-			category = { Category.CODE_ERROR },
-			desc = { "" },
-			exceptionId = { 1 },
-			msg = { "An SQL error occurred while performing task SpamUpdateTask: %1$s." }
-		)
 	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
@@ -148,7 +124,7 @@ public class SpamUpdateTask implements UpdateTask {
 				stmt.setString(2, UserSettingMail.STD_CONFIRMED_HAM);
 				stmt.executeUpdate();
 			} catch (final SQLException e) {
-				throw EXCEPTION.create(1, e, e.getMessage());
+	            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
 			}
 		} finally {
 			closeSQLStuff(null, stmt);
@@ -160,12 +136,6 @@ public class SpamUpdateTask implements UpdateTask {
 	
 	private static final String SQL_SELECT_ALL = "SELECT * FROM user_setting_mail";
 	
-	@OXThrowsMultiple(
-			category = { Category.CODE_ERROR },
-			desc = { "" },
-			exceptionId = { 2 },
-			msg = { "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s." }
-	)
 	private static final boolean checkExistence(final String colName, final int contextId) throws AbstractOXException {
 		Connection readCon = null;
 		Statement stmt = null;
@@ -183,7 +153,7 @@ public class SpamUpdateTask implements UpdateTask {
 				}
 				return found;
 			} catch (final SQLException e) {
-				throw EXCEPTION.create(2, e, e.getMessage());
+	            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
 			}
 		} finally {
 			closeSQLStuff(rs, stmt);

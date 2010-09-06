@@ -56,32 +56,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderAddPermColumnUpdateTask}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(FolderAddPermColumnUpdateTask.class);
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(
-            FolderAddPermColumnUpdateTask.class);
+    private static final Log LOG = LogFactory.getLog(FolderAddPermColumnUpdateTask.class);
 
     public int addedWithVersion() {
         return 28;
@@ -102,7 +93,6 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
     private static final String SQL_MODIFY4 = "ALTER TABLE del_oxfolder_permissions DROP PRIMARY KEY, ADD PRIMARY KEY(cid, fuid, permission_id, system)";
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "SQL error occurred while performing task FolderAddPermColumnUpdateTask: %1$s." })
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         if (checkColumn(contextId)) {
             if (LOG.isInfoEnabled()) {
@@ -124,7 +114,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
                     stmt = writeCon.prepareStatement(SQL_MODIFY2);
                     stmt.executeUpdate();
                 } catch (final SQLException e) {
-                    throw EXCEPTION.create(1, e, e.getMessage());
+                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             } finally {
                 closeSQLStuff(null, stmt);
@@ -153,7 +143,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
                     stmt = writeCon.prepareStatement(SQL_MODIFY4);
                     stmt.executeUpdate();
                 } catch (final SQLException e) {
-                    throw EXCEPTION.create(1, e, e.getMessage());
+                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             } finally {
                 closeSQLStuff(null, stmt);
@@ -177,7 +167,6 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
      *         <code>false</code>
      * @throws AbstractOXException
      */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 2 }, msg = { "SQL error occurred while performing task FolderAddPermColumnUpdateTask: %1$s." })
     private static final boolean checkColumn(final int contextId) throws AbstractOXException {
         Connection readCon = null;
         ResultSet rs = null;
@@ -229,7 +218,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
                 }
                 return found;
             } catch (final SQLException e) {
-                throw EXCEPTION.create(2, e, e.getMessage());
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
         } finally {
             DBUtils.closeSQLStuff(rs, null);
@@ -250,7 +239,6 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
      *         primary key properly set; otherwise <code>false</code>
      * @throws AbstractOXException
      */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 3 }, msg = { "SQL error occurred while performing task FolderAddPermColumnUpdateTask: %1$s." })
     private static final boolean checkPrimaryKey(final int contextId) throws AbstractOXException {
         Connection readCon = null;
         ResultSet rs = null;
@@ -287,7 +275,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
                 }
                 return true;
             } catch (final SQLException e) {
-                throw EXCEPTION.create(3, e, e.getMessage());
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
         } finally {
             closeSQLStuff(rs, null);

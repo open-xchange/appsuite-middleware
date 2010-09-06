@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,22 +58,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
-@OXExceptionSource(
-        classId = Classes.UPDATE_TASK,
-        component = EnumComponent.UPDATE
-    )
 public class InfostoreLongerURLFieldTask  implements UpdateTask {
 
     private final Log LOG = LogFactory.getLog(InfostoreLongerURLFieldTask.class);
-    private static final UpdateExceptionFactory EXCEPTIONS = new UpdateExceptionFactory(InfostoreLongerURLFieldTask.class);
 
     public int addedWithVersion() {
         return 12;
@@ -81,12 +73,7 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
-    @OXThrows(
-            category = AbstractOXException.Category.CODE_ERROR,
-            desc = "",
-            msg = "Error in SQL Statement",
-            exceptionId = 1
-    )
+
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
@@ -102,13 +89,9 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
             stmt = writeCon.prepareStatement("ALTER TABLE del_infostore_document MODIFY url varchar(256)");
             stmt.executeUpdate();
             writeCon.commit();
-        } catch (final SQLException x) {
-            try {
-                writeCon.rollback();
-            } catch (final SQLException x2) {
-                LOG.error("Can't execute rollback.", x2);
-            }
-            EXCEPTIONS.create(1, x);
+        } catch (final SQLException e) {
+            rollback(writeCon);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (stmt != null) {
                 try {

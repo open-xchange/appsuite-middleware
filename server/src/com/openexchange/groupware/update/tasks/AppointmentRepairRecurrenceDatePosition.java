@@ -62,21 +62,17 @@ import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarException.Code;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.calendar.OXCalendarException.Code;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -86,54 +82,27 @@ import com.openexchange.tools.sql.DBUtils;
  * position out of the appointment.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(
-        AppointmentRepairRecurrenceDatePosition.class);
+    private static final Log LOG = LogFactory.getLog(AppointmentRepairRecurrenceDatePosition.class);
 
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(
-        AppointmentRepairRecurrenceDatePosition.class);
-
-    /**
-     * Default constructor.
-     */
     public AppointmentRepairRecurrenceDatePosition() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int addedWithVersion() {
         return 23;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    private static final String findSQL = "SELECT cid,timestampfield01,"
-        + "timestampfield02,timezone,intfield01,intfield02,intfield04,"
-        + "intfield05,field06 FROM prg_dates WHERE intfield01!=intfield02 "
-        + "AND field08 IS NULL ORDER BY cid ASC";
+    private static final String findSQL = "SELECT cid,timestampfield01,timestampfield02,timezone,intfield01,intfield02,intfield04,intfield05,field06 FROM prg_dates WHERE intfield01!=intfield02 AND field08 IS NULL ORDER BY cid ASC";
 
-    /**
-     * {@inheritDoc}
-     */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 1 },
-        msg = { "An SQL error occurred: %1$s." }
-    )
-    public void perform(final Schema schema, final int contextId)
-        throws DBPoolingException, UpdateException {
+    public void perform(final Schema schema, final int contextId) throws DBPoolingException, UpdateException {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Performing update task to repair the recurrence date "
-                + "position of appointment change exceptions.");
+            LOG.info("Performing update task to repair the recurrence date position of appointment change exceptions.");
         }
         final Connection con = Database.get(contextId, true);
         PreparedStatement stmt = null;
@@ -144,48 +113,38 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             result = stmt.executeQuery();
             while (result.next()) {
                 final CalendarDataObject appointment = fillAppointment(result);
-                LOG.info("Repairing in context " + appointment.getContextID()
-                    + " appointment " + appointment.getObjectID() + ".");
+                LOG.info("Repairing in context " + appointment.getContextID() + " appointment " + appointment.getObjectID() + ".");
                 try {
                     if (!appointment.containsRecurrencePosition()) {
-                        LOG.info("Unable to repair appointment " + appointment
-                            .getObjectID() + " in context " + appointment
-                            .getContextID() + ". Recurrence position is missing.");
+                        LOG.info("Unable to repair appointment " + appointment.getObjectID() + " in context " + appointment.getContextID() + ". Recurrence position is missing.");
                         continue;
                     }
                     final long recurrence_date_position;
                     if (null != appointment.getRecurrence()) {
-                        calculateRecurrenceDatePosition(appointment, appointment
-                            .getRecurrencePosition());
-                        recurrence_date_position = appointment
-                            .getRecurrenceDatePosition().getTime();
+                        calculateRecurrenceDatePosition(appointment, appointment.getRecurrencePosition());
+                        recurrence_date_position = appointment.getRecurrenceDatePosition().getTime();
                     } else {
-                        final CalendarDataObject series = loadAppointment(con,
-                            appointment.getContext(), appointment
-                            .getRecurrenceID());
-                        calculateRecurrenceDatePosition(series, appointment
-                            .getRecurrencePosition());
-                        recurrence_date_position = series
-                            .getRecurrenceDatePosition().getTime();
+                        final CalendarDataObject series = loadAppointment(con, appointment.getContext(), appointment.getRecurrenceID());
+                        calculateRecurrenceDatePosition(series, appointment.getRecurrencePosition());
+                        recurrence_date_position = series.getRecurrenceDatePosition().getTime();
                     }
-                    writeRecurrenceDatePosition(con, appointment.getContextID(),
-                        appointment.getObjectID(), recurrence_date_position);
+                    writeRecurrenceDatePosition(con, appointment.getContextID(), appointment.getObjectID(), recurrence_date_position);
                 } catch (final UnsupportedOperationException e) {
-                    LOG.info("Unable to repair appointment " + appointment
-                        .getObjectID() + " in context " + appointment
-                        .getContextID() + ".", e);
+                    LOG.info(
+                        "Unable to repair appointment " + appointment.getObjectID() + " in context " + appointment.getContextID() + ".",
+                        e);
                     continue;
                 } catch (final OXException e) {
-                    LOG.info("Unable to repair appointment " + appointment
-                        .getObjectID() + " in context " + appointment
-                        .getContextID() + ".", e);
+                    LOG.info(
+                        "Unable to repair appointment " + appointment.getObjectID() + " in context " + appointment.getContextID() + ".",
+                        e);
                     continue;
                 }
             }
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw EXCEPTION.create(1, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.autocommit(con);
             closeSQLStuff(result, stmt);
@@ -194,13 +153,11 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             }
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("Update task to repair the recurrence date position of "
-                + "appointment change exceptions performed.");
+            LOG.info("Update task to repair the recurrence date position of appointment change exceptions performed.");
         }
     }
 
-    private void writeRecurrenceDatePosition(final Connection con, final int cid,
-        final int id, final long recurrenceDatePosition) {
+    private void writeRecurrenceDatePosition(final Connection con, final int cid, final int id, final long recurrenceDatePosition) {
         final String sql = "UPDATE prg_dates SET field08=? WHERE cid=? AND intfield01=?";
         PreparedStatement stmt = null;
         try {
@@ -219,12 +176,8 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         }
     }
 
-    private CalendarDataObject loadAppointment(final Connection con,
-        final Context ctx, final int id) throws OXObjectNotFoundException,
-        OXCalendarException {
-        final String sql = "SELECT cid,timestampfield01,timestampfield02,"
-            + "timezone,intfield01,intfield02,intfield04,intfield05,field06 "
-            + "FROM prg_dates WHERE cid=? AND intfield01=?";
+    private CalendarDataObject loadAppointment(final Connection con, final Context ctx, final int id) throws OXObjectNotFoundException, OXCalendarException {
+        final String sql = "SELECT cid,timestampfield01,timestampfield02,timezone,intfield01,intfield02,intfield04,intfield05,field06 FROM prg_dates WHERE cid=? AND intfield01=?";
         PreparedStatement stmt = null;
         ResultSet result = null;
         CalendarDataObject retval = null;
@@ -236,8 +189,10 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             if (result.next()) {
                 retval = fillAppointment(result);
             } else {
-                throw new OXObjectNotFoundException(OXObjectNotFoundException
-                    .Code.OBJECT_NOT_FOUND, EnumComponent.UPDATE, Integer.valueOf(id));
+                throw new OXObjectNotFoundException(
+                    OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
+                    EnumComponent.UPDATE,
+                    Integer.valueOf(id));
             }
         } catch (final SQLException e) {
             throw new OXCalendarException(Code.CALENDAR_SQL_ERROR, e);

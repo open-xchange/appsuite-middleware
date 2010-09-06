@@ -61,31 +61,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * This update task fixes broken folder identifier in the appointment
  * participants table that are cause by bug 12595.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class CorrectWrongAppointmentFolder implements UpdateTask {
 
     private static final Log LOG = LogFactory.getLog(CorrectWrongAppointmentFolder.class);
 
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CorrectWrongAppointmentFolder.class);
-
-    /**
-     * Default constructor.
-     */
     public CorrectWrongAppointmentFolder() {
         super();
     }
@@ -104,14 +93,6 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 1 },
-        msg = { "An SQL error occurred: %1$s." }
-    )
     public void perform(final Schema schema, final int contextId)
         throws AbstractOXException {
         final String find = "SELECT pd.cid,pd.object_id,pd.member_uid "
@@ -145,7 +126,7 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw EXCEPTION.create(1, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             autocommit(con);

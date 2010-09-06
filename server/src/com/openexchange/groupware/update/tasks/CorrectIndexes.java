@@ -60,32 +60,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class CorrectIndexes implements UpdateTask {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(CorrectIndexes.class);
 
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CorrectIndexes.class);
-
-    /**
-     * Default constructor.
-     */
     public CorrectIndexes() {
         super();
     }
@@ -104,14 +90,6 @@ public class CorrectIndexes implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 1 },
-        msg = { "An SQL error occurred: %1$s." }
-    )
     public void perform(final Schema schema, final int contextId)
         throws AbstractOXException {
         final Connection con = Database.getNoTimeout(contextId, true);
@@ -124,7 +102,7 @@ public class CorrectIndexes implements UpdateTask {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw EXCEPTION.create(1, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.backNoTimeout(contextId, true, con);

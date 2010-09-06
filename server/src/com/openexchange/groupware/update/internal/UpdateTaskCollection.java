@@ -152,7 +152,7 @@ class UpdateTaskCollection {
             retval.addAll(tasks.getBlocking());
         } else {
             if (tasks.getBlocking().size() > 0) {
-                throw UpdateExceptionCodes.FIRST_BLOCKING.create(Strings.join(tasks.getBlocking(), ","), Strings.join(tasks.getBackground(), ","));
+                throw UpdateExceptionCodes.BLOCKING_FIRST.create(Strings.join(tasks.getBlocking(), ","), Strings.join(tasks.getBackground(), ","));
             }
             retval.addAll(tasks.getBackground());
         }

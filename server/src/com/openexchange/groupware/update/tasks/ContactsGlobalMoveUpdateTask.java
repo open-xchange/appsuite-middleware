@@ -55,19 +55,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -76,17 +73,10 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * @author <a href="mailto:ben.pahne@open-xchange.com">Ben Pahne</a>
  *
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-    .getLog(ContactsGlobalMoveUpdateTask.class);
+    private static final Log LOG = LogFactory.getLog(ContactsGlobalMoveUpdateTask.class);
 
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(ContactsGlobalMoveUpdateTask.class);
-    
-    /**
-     * Default constructor
-     */
     public ContactsGlobalMoveUpdateTask() {
         super();
     }
@@ -130,12 +120,6 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
     private static final String SQL_QUERY = "SELECT created_from,cid,intfield01 FROM prg_contacts WHERE fid = "+FolderObject.SYSTEM_LDAP_FOLDER_ID+" AND userid is NULL";
 
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 1 },
-            msg = { "An SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s." }
-    )    
-    
     public void correctTable(final String sqltable, final int contextId) throws AbstractOXException {
 
         if (LOG.isInfoEnabled()) {
@@ -195,7 +179,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
                 st.close();
                 
             } catch (final SQLException e) {
-                throw EXCEPTION.create(1, e, e.getMessage());
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
         } finally {
             closeSQLStuff(resultSet, stmt);
