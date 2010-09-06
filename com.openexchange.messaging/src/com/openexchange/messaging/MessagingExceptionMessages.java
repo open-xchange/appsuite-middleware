@@ -128,6 +128,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // No attachment found with section identifier %1$s in message %2$s in folder %3$s.
     public static final String ATTACHMENT_NOT_FOUND_MSG = "No attachment found with section identifier %1$s in message %2$s in folder %3$s.";
 
+    // Message %1$s not found in folder %2$s.
+    public static final String MESSAGE_NOT_FOUND_MSG = "Message %1$s not found in folder %2$s.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */

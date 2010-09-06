@@ -152,7 +152,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * No attachment found with section identifier %1$s in message %2$s in folder %3$s.
      */
-    ATTACHMENT_NOT_FOUND(MessagingExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, Category.CODE_ERROR, 24);
+    ATTACHMENT_NOT_FOUND(MessagingExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, Category.CODE_ERROR, 24),
+    /**
+     * Message %1$s not found in folder %2$s.
+     */
+    MESSAGE_NOT_FOUND(MessagingExceptionMessages.MESSAGE_NOT_FOUND_MSG, Category.CODE_ERROR, 25);
 
     private final Category category;
 
