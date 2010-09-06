@@ -63,13 +63,14 @@ public final class I18n {
 
     private static final I18n SINGLETON = new I18n();
 
-    private final ConcurrentMap<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
+    private final ConcurrentMap<Locale, I18nService> services;
 
     /**
      * Initializes a new {@link I18n}.
      */
     private I18n() {
         super();
+        services = new ConcurrentHashMap<Locale, I18nService>();
     }
 
     /**
