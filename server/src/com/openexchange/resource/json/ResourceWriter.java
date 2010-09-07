@@ -82,6 +82,8 @@ public final class ResourceWriter {
         retval.put(ResourceFields.MAIL, resource.getMail() == null ? JSONObject.NULL : resource.getMail());
         retval.put(ResourceFields.AVAILABILITY, resource.isAvailable());
         retval.put(ResourceFields.DESCRIPTION, resource.getDescription() == null ? JSONObject.NULL : resource.getDescription());
+        retval.put(ResourceFields.LAST_MODIFIED, resource.getLastModified() == null ? JSONObject.NULL : resource.getLastModified());
+        retval.put(ResourceFields.LAST_MODIFIED_UTC, resource.getLastModified() == null ? JSONObject.NULL : resource.getLastModified());
         return retval;
     }
 
