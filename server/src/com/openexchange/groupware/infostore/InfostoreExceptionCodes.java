@@ -51,8 +51,6 @@ package com.openexchange.groupware.infostore;
 
 import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.*;
 import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -106,8 +104,12 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     NUMBER_OF_VERSIONS_FAILED(NUMBER_OF_VERSIONS_FAILED_MSG, Category.CODE_ERROR, 442, NUMBER_OF_VERSIONS_FAILED_HELP),
     /** You do not have the permissions to delete at least one of the info items. */
     NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG, Category.PERMISSION, 445, NO_DELETE_PERMISSION_HELP),
+    /** Illegal argument: Document %d contains no file */
+    DOCUMENT_CONTAINS_NO_FILE(DOCUMENT_CONTAINS_NO_FILE_MSG, Category.CODE_ERROR, 500, DOCUMENT_CONTAINS_NO_FILE_HELP),
+    /** Folder %d has two subfolders named %s. The database for context %d is not consistent. */
+    DUPLICATE_SUBFOLDER(DUPLICATE_SUBFOLDER_MSG, Category.CODE_ERROR, 501, DUPLICATE_SUBFOLDER_HELP),
     /** This folder is a virtual folder. It cannot contain documents. */
-    NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, Category.USER_INPUT, 1700, NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP);
+    NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, Category.USER_INPUT, 1700, NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP),
     ;
 
     private final String message;

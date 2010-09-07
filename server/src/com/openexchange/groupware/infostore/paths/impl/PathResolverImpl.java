@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.paths.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,17 +64,11 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
@@ -84,14 +79,9 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.webdav.protocol.WebdavPath;
 
-@OXExceptionSource(
-    classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_PATH_IMPL_PATHRESOLVERIMPL,
-    component = EnumComponent.INFOSTORE
-)
 public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     private Mode MODE;
 
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(PathResolverImpl.class);
     private static final Log LOG = LogFactory.getLog(PathResolverImpl.class);
 
     private final ThreadLocal<Map<WebdavPath,Resolved>> resolveCache = new ThreadLocal<Map<WebdavPath,Resolved>>();
@@ -115,12 +105,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         super.setProvider(provider);
         MODE = new CACHE_MODE(provider);
     }
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="A WebdavPath for a document without an attached file was requested. In WebDAV only infoitems with files are visible. This points to a problem with the cola supply for the developer and can only be fixed by R&D.",
-            exceptionId=0,
-            msg="Illegal argument: Document %d contains no file"
-    )
+
     public WebdavPath getPathForDocument(final int relativeToFolder, final int documentId,
             final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final Map<Integer, WebdavPath> cache = docPathCache.get();
@@ -132,7 +117,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
         final DocumentMetadata dm = database.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
         if(dm.getFileName() == null || dm.getFileName().equals("")) {
-            throw EXCEPTIONS.create(0, key);
+            throw InfostoreExceptionCodes.DOCUMENT_CONTAINS_NO_FILE.create(key);
         }
         final WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),ctx,user,userConfig).dup().append(dm.getFileName());
 
@@ -192,12 +177,6 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         return relative(relativeToFolder, thePath, ctx, user, userConfig);
     }
 
-    @OXThrowsMultiple(
-            category = { Category.CODE_ERROR, Category.CODE_ERROR },
-            desc = { "A folder contains two folders with the same folder name. This points to an inconsistency in the database, as the second folder by the same name should not have been created. This will certainly cause some headaches in R&D.", "A faulty SQL statement was sent to the DB. R&D must fix this." },
-            exceptionId = { 1,2 },
-            msg = { "Folder %d has two subfolders named %s. The database for context %d is not consistent.", "Incorrect SQL Query: %s" }
-    )
     public Resolved resolve(final int relativeToFolder, final WebdavPath path, final Context ctx,
             final User user, final UserConfiguration userConfig) throws OXException,
             OXObjectNotFoundException {
@@ -251,7 +230,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                         String fname = rs.getString(2);
                         if(fname.equals(component)) {
                             if( found ) {
-                                InfostoreException e = EXCEPTIONS.create(1, Integer.valueOf(parentId), component);
+                                InfostoreException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(ctx.getContextId()));
                                 LOG.warn(e.toString(), e);
                             }
                             folderid = rs.getInt(1);
@@ -274,7 +253,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                                 String name = rs.getString(2);
                                 if(name.equals(component)) {
                                     if(found) {
-                                        InfostoreException e = EXCEPTIONS.create(1, Integer.valueOf(parentId), component, ctx.getContextId());
+                                        InfostoreException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(ctx.getContextId()));
                                         LOG.warn(e.toString(), e);
                                     }
                                     found = true;
@@ -298,7 +277,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             }
             return new ResolvedImpl(current,parentId, false);
         } catch (final SQLException x) {
-            throw EXCEPTIONS.create(2, x,stmt.toString());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, stmt.toString());
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {

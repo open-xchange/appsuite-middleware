@@ -50,9 +50,6 @@
 package com.openexchange.groupware.infostore;
 
 import com.openexchange.exceptions.LocalizableStrings;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * {@link InfostoreExceptionMessages}
@@ -129,6 +126,12 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
 
     public static final String NO_DELETE_PERMISSION_MSG = "You do not have the permissions to delete at least one of the info items.";
     public static final String NO_DELETE_PERMISSION_HELP = "You do not have the permissions to delete at least one of the info items.";
+
+    public static final String DOCUMENT_CONTAINS_NO_FILE_MSG = "Illegal argument: Document %d contains no file";
+    public static final String DOCUMENT_CONTAINS_NO_FILE_HELP = "A WebdavPath for a document without an attached file was requested. In WebDAV only infoitems with files are visible. This points to a problem with the cola supply for the developer and can only be fixed by R&D.";
+
+    public static final String DUPLICATE_SUBFOLDER_MSG = "Folder %d has two subfolders named %s. The database for context %d is not consistent.";
+    public static final String DUPLICATE_SUBFOLDER_HELP = "A folder contains two folders with the same folder name. This points to an inconsistency in the database, as the second folder by the same name should not have been created. This will certainly cause some headaches in R&D.";
 
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG = "This folder is a virtual folder. It cannot contain documents.";
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP = "The folders to which this user has access, but that belong to other users, are collected in a virtual folder. This virtual folder cannot contain documents itself.";
