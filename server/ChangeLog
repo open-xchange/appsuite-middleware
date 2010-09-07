@@ -1,3 +1,7 @@
+* 2010-09-07 - choeger@open-xchange.com
+
+ - Bugfix #16815: activation and jcharset packages to use OX versioning
+
 * 2010-09-03 - marcus.klein@open-xchange.com
 
  - Bugfix #16805: Added dependency from publish microformats component to templating json interface because UI using microformats to publish
