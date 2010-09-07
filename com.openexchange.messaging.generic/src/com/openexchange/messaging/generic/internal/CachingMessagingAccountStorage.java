@@ -64,6 +64,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -214,6 +215,14 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
     public void updateAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
         delegatee.updateAccount(serviceId, account, session);
         invalidateMessagingAccount(serviceId, account.getId(), session.getUserId(), session.getContextId());
+    }
+
+    public boolean checkSecretCanDecryptStrings(MessagingService parentService, Session session, String secret) throws MessagingException {
+        return delegatee.checkSecretCanDecryptStrings(parentService, session, secret);
+    }
+
+    public void migrateToNewSecret(MessagingService parentService, String oldSecret, String newSecret, Session session) throws MessagingException {
+        delegatee.migrateToNewSecret(parentService, oldSecret, newSecret, session);
     }
 
 }

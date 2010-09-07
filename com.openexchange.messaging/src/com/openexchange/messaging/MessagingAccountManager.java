@@ -106,5 +106,24 @@ public interface MessagingAccountManager {
      * @return The messaging account.
      * @throws MessagingException If retrieval fails
      */
-    public MessagingAccount getAccount(int id, Session session) throws MessagingException;;
+    public MessagingAccount getAccount(int id, Session session) throws MessagingException;
+
+    /**
+     * Checks whether the given secret can be used to decrypt secret strings in this account.
+     *
+     * @param session The session providing needed user data
+     * @param secret The secret to use for decrypting
+     * @return true when all accounts could be decrypted, false otherwise
+     * @throws MessagingException 
+     */
+    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws MessagingException;
+
+    /**
+     * Migrates all encrypted strings from an old secret to a new one.
+     * @param oldSecret The old secret for decrypting stored secret strings
+     * @param newSecret The new secret used for encrypting the secret strings
+     * @param session The session providing needed user data
+     * @throws MessagingException 
+     */
+    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws MessagingException;
 }

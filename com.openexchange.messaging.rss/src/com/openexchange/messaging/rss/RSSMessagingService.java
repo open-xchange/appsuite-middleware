@@ -83,7 +83,7 @@ public class RSSMessagingService implements MessagingService {
         FORM_DESCRIPTION = new ReadOnlyDynamicFormDescription(fd);
     }
 
-    private final MessagingAccountManager accountManager = new DefaultMessagingAccountManager(ID);
+    private final MessagingAccountManager accountManager = new DefaultMessagingAccountManager(this);
 
     private final FeedFetcher fetcher = new HttpURLFeedFetcher(HashMapFeedInfoCache.getInstance());
 

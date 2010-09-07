@@ -150,4 +150,20 @@ public class SimAccountManager implements MessagingAccountManager {
         this.accounts = Arrays.asList(list);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.messaging.MessagingAccountManager#checkSecretCanDecryptStrings(com.openexchange.session.Session, java.lang.String)
+     */
+    public boolean checkSecretCanDecryptStrings(Session session, String secret) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.messaging.MessagingAccountManager#migrateToNewSecret(java.lang.String, java.lang.String, com.openexchange.session.Session)
+     */
+    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

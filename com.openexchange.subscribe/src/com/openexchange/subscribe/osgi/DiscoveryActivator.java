@@ -66,6 +66,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.FolderUpdaterService;
@@ -80,6 +82,7 @@ import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.DocumentMetadataHolderFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
+import com.openexchange.subscribe.secret.SubscriptionSecretHandling;
 import com.openexchange.subscribe.sql.SubscriptionSQLStorage;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -150,6 +153,11 @@ public class DiscoveryActivator implements BundleActivator {
         listener.setDiscoveryService(discoveryCollector);
         
         context.registerService(DeleteListener.class.getName(), listener, null);        
+        
+        SubscriptionSecretHandling secretHandling = new SubscriptionSecretHandling(discoveryCollector);
+        context.registerService(SecretConsistencyCheck.class.getName(), secretHandling, null);
+        context.registerService(SecretMigrator.class.getName(), secretHandling, null);
+        
     }
 
     public void stop(final BundleContext context) throws Exception {

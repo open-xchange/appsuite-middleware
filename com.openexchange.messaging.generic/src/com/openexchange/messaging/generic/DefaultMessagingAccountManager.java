@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
 import com.openexchange.session.Session;
 
@@ -74,18 +75,17 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
      */
     private final String serviceId;
 
+    private MessagingService service;
+
     /**
      * Initializes a new {@link DefaultMessagingAccountManager}.
      * 
      * @param serviceId The messaging service identifier
      */
-    public DefaultMessagingAccountManager(final String serviceId) {
+    public DefaultMessagingAccountManager(final MessagingService service) {
         super();
-        this.serviceId = serviceId;
-    }
-
-    public MessagingAccount newAccount() throws MessagingException {
-        return new DefaultMessagingAccount();
+        this.serviceId = service.getId();
+        this.service = service;
     }
 
     public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
@@ -106,6 +106,14 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
 
     public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
         CACHE.updateAccount(serviceId, account, session);
+    }
+
+    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws MessagingException {
+        return CACHE.checkSecretCanDecryptStrings(service, session, secret);
+    }
+
+    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws MessagingException {
+        CACHE.migrateToNewSecret(service, oldSecret, newSecret, session);
     }
 
 }

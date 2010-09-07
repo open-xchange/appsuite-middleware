@@ -110,8 +110,9 @@ public class PublicationParser {
         if(object.has(TARGET)) {
             PublicationTarget target = discovery.getTarget(object.getString(TARGET));
             publication.setTarget(target);
-            
-            publication.setConfiguration(formParser.parse(object.getJSONObject(target.getId()), target.getFormDescription()));
+            if(object.has(target.getId())) {
+                publication.setConfiguration(formParser.parse(object.getJSONObject(target.getId()), target.getFormDescription()));
+            }
         }
         
         if(object.has(ENABLED)) {

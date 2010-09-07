@@ -49,7 +49,10 @@
 
 package com.openexchange.subscribe;
 
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
 
 
 /**
@@ -122,6 +125,16 @@ public class SubscriptionSource {
     
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+    
+    public Set<String> getPasswordFields() {
+        Set<String> fields = new HashSet<String>();
+        for (FormElement element : getFormDescription()) {
+            if(element.getWidget() == FormElement.Widget.PASSWORD) {
+                fields.add(element.getName());
+            }
+        }
+        return fields;
     }
 
     @Override

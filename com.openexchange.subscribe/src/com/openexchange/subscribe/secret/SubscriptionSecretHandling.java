@@ -47,40 +47,64 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.subscribe.secret;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link SubscriptionSecretHandling}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface SubscribeService {
-
-    public SubscriptionSource getSubscriptionSource();
+public class SubscriptionSecretHandling implements SecretConsistencyCheck, SecretMigrator {
     
-    public boolean handles(int folderModule);
+    private SubscriptionSourceDiscoveryService discovery = null;
     
-    public void subscribe(Subscription subscription) throws AbstractOXException;
+    public SubscriptionSecretHandling(SubscriptionSourceDiscoveryService discovery) {
+        super();
+        this.discovery = discovery;
+    }
 
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws AbstractOXException;
-    
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException;
+    public boolean checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException {
+        List<SubscriptionSource> sources = discovery.getSources();
+        for (SubscriptionSource subscriptionSource : sources) {
+            Set<String> passwordFields = subscriptionSource.getPasswordFields();
+            if(passwordFields.isEmpty()) {
+                continue;
+            }
+            
+            SubscribeService subscribeService = subscriptionSource.getSubscribeService();
+            
+            if(!subscribeService.checkSecretCanDecryptPasswords(session.getContext(), session.getUser(), secret)) {
+                return false;
+            }
+            
+        }
+        return true;
+    }
 
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws AbstractOXException;
-    
-    public void unsubscribe(Subscription subscription) throws AbstractOXException;
+    public void migrate(String oldSecret, String newSecret, ServerSession session) throws AbstractOXException {
+        List<SubscriptionSource> sources = discovery.getSources();
+        for (SubscriptionSource subscriptionSource : sources) {
+            Set<String> passwordFields = subscriptionSource.getPasswordFields();
+            if(passwordFields.isEmpty()) {
+                continue;
+            }
+            
+            SubscribeService subscribeService = subscriptionSource.getSubscribeService();
+            
+            subscribeService.migrateSecret(session.getContext(), session.getUser(), oldSecret, newSecret);
+        }
+    }
 
-    public void update(Subscription subscription) throws AbstractOXException;
-
-    public Collection<?> getContent(Subscription subscription) throws SubscriptionException;
-
-    public boolean knows(Context context, int subscriptionId) throws AbstractOXException;
-
-    public boolean checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException;
-
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws SubscriptionException;
-    
 }

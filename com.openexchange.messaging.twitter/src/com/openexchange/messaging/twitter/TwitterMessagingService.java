@@ -109,7 +109,7 @@ public final class TwitterMessagingService implements MessagingService {
      */
     public TwitterMessagingService() {
         super();
-        accountManager = new DefaultMessagingAccountManager(ID);
+        accountManager = new DefaultMessagingAccountManager(this);
         final DynamicFormDescription tmpDescription = new DynamicFormDescription();
         tmpDescription.add(FormElement.input(TwitterConstants.TWITTER_LOGIN, FORM_LABEL_LOGIN, true, ""));
         tmpDescription.add(FormElement.password(TwitterConstants.TWITTER_PASSWORD, FORM_LABEL_PASSWORD, true, ""));

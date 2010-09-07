@@ -51,12 +51,15 @@ package com.openexchange.subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link AbstractSubscribeService}
@@ -71,20 +74,21 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public Collection<Subscription> loadSubscriptions(Context ctx, String folderId, String secret) throws AbstractOXException {
         List<Subscription> allSubscriptions = STORAGE.getSubscriptions(ctx, folderId);
-        
-        return prepareSubscriptions(allSubscriptions, secret);        
+
+        return prepareSubscriptions(allSubscriptions, secret);
     }
-    
+
     public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException {
         List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, userId);
-        
-        return prepareSubscriptions(allSubscriptions, secret);   
+
+        return prepareSubscriptions(allSubscriptions, secret);
     }
-    
+
     private Collection<Subscription> prepareSubscriptions(List<Subscription> allSubscriptions, String secret) throws AbstractOXException {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
         for (Subscription subscription : allSubscriptions) {
-            if(subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
+            if (subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(
+                getSubscriptionSource().getId())) {
                 subscriptions.add(subscription);
             }
         }
@@ -93,7 +97,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             modifyOutgoing(subscription);
             subscription.getConfiguration().remove("com.openexchange.crypto.secret");
         }
-        
+
         return subscriptions;
     }
 
@@ -153,7 +157,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             return;
         }
         String secret = (String) map.get("com.openexchange.crypto.secret");
-        if(secret == null) {
+        if (secret == null) {
             return;
         }
         for (String key : keys) {
@@ -176,7 +180,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             return;
         }
         String secret = (String) map.get("com.openexchange.crypto.secret");
-        if(secret == null) {
+        if (secret == null) {
             return;
         }
         for (String key : keys) {
@@ -194,4 +198,50 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         map.remove("com.openexchange.crypto.secret");
     }
 
+    public boolean checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException {
+        Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
+        if (passwordFields.isEmpty()) {
+            return true;
+        }
+        List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, user.getId());
+        for (Subscription subscription : allSubscriptions) {
+            try {
+                Map<String, Object> configuration = subscription.getConfiguration();
+                for (String passwordField : passwordFields) {
+                    String password = (String) configuration.get(passwordField);
+                    if (password != null) {
+                        CRYPTO.decrypt(password, secret);
+                    }
+                }
+            } catch (CryptoException x) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws SubscriptionException {
+        Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
+        if (passwordFields.isEmpty()) {
+            return;
+        }
+        List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, user.getId());
+        for (Subscription subscription : allSubscriptions) {
+            Map<String, Object> configuration = subscription.getConfiguration();
+            Map<String, Object> update = new HashMap<String, Object>();
+            for (String passwordField : passwordFields) {
+                String password = (String) configuration.get(passwordField);
+                if (password != null) {
+                    try {
+                        String transcriptedPassword = CRYPTO.encrypt(CRYPTO.decrypt(password, oldSecret), newSecret);
+                        update.put(passwordField, transcriptedPassword);
+                    } catch (CryptoException e) {
+                        throw new SubscriptionException(e);
+                    }
+                }
+            }
+            subscription.setConfiguration(update);
+            STORAGE.updateSubscription(subscription);
+        }
+    }
 }

@@ -104,7 +104,7 @@ public final class FacebookMessagingService implements MessagingService {
      */
     public FacebookMessagingService() {
         super();
-        accountManager = new DefaultMessagingAccountManager(ID);
+        accountManager = new DefaultMessagingAccountManager(this);
         final DynamicFormDescription tmpDescription = new DynamicFormDescription();
         /*
          * API & secret key

@@ -47,40 +47,15 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.groupware.ldap;
 
-import java.util.Collection;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link SimUser}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface SubscribeService {
+public class SimUser extends MockUser {
 
-    public SubscriptionSource getSubscriptionSource();
-    
-    public boolean handles(int folderModule);
-    
-    public void subscribe(Subscription subscription) throws AbstractOXException;
 
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws AbstractOXException;
-    
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException;
-
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws AbstractOXException;
-    
-    public void unsubscribe(Subscription subscription) throws AbstractOXException;
-
-    public void update(Subscription subscription) throws AbstractOXException;
-
-    public Collection<?> getContent(Subscription subscription) throws SubscriptionException;
-
-    public boolean knows(Context context, int subscriptionId) throws AbstractOXException;
-
-    public boolean checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException;
-
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws SubscriptionException;
-    
 }

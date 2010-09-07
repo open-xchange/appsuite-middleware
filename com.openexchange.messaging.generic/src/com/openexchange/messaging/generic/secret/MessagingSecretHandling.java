@@ -47,40 +47,47 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.messaging.generic.secret;
 
 import java.util.Collection;
+import java.util.Collections;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.messaging.MessagingAccountManager;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link MessagingSecretHandling}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface SubscribeService {
+public class MessagingSecretHandling implements SecretConsistencyCheck, SecretMigrator {
 
-    public SubscriptionSource getSubscriptionSource();
+    public boolean checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException {
+        Collection<MessagingService> messagingServices = getMessagingServices();
+        for (MessagingService messagingService : messagingServices) {
+            MessagingAccountManager accountManager = messagingService.getAccountManager();
+            if(! accountManager.checkSecretCanDecryptStrings(session, secret) ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void migrate(String oldSecret, String newSecret, ServerSession session) throws AbstractOXException {
+        Collection<MessagingService> messagingServices = getMessagingServices();
+        for (MessagingService messagingService : messagingServices) {
+            MessagingAccountManager accountManager = messagingService.getAccountManager();
+            accountManager.migrateToNewSecret(oldSecret, newSecret, session);
+        }
+    }
     
-    public boolean handles(int folderModule);
-    
-    public void subscribe(Subscription subscription) throws AbstractOXException;
+    // Override me
+    protected Collection<MessagingService> getMessagingServices() {
+        return Collections.emptyList();
+    }
 
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws AbstractOXException;
-    
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException;
-
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws AbstractOXException;
-    
-    public void unsubscribe(Subscription subscription) throws AbstractOXException;
-
-    public void update(Subscription subscription) throws AbstractOXException;
-
-    public Collection<?> getContent(Subscription subscription) throws SubscriptionException;
-
-    public boolean knows(Context context, int subscriptionId) throws AbstractOXException;
-
-    public boolean checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException;
-
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws SubscriptionException;
-    
 }

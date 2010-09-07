@@ -49,13 +49,16 @@
 
 package com.openexchange.groupware.ldap;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 public class MockUser implements User {
+
     private static final int GROUP_ALL = 0;
 
     /**
@@ -124,8 +127,7 @@ public class MockUser implements User {
     private int taskDays;
 
     /**
-     * The preferred language of this user. According to RFC 2798 and 2068 it
-     * should be something like de-de, en-gb or en.
+     * The preferred language of this user. According to RFC 2798 and 2068 it should be something like de-de, en-gb or en.
      */
     private String preferredLanguage;
 
@@ -135,8 +137,7 @@ public class MockUser implements User {
     private String displayName;
 
     /**
-     * The hashed and base64 encoded password. The default value is
-     * <code>"x"</code> to cause matches fail.
+     * The hashed and base64 encoded password. The default value is <code>"x"</code> to cause matches fail.
      */
     private String userPassword = "x";
 
@@ -165,6 +166,8 @@ public class MockUser implements User {
 
     private Locale locale;
 
+    private Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+
     public MockUser(int id) {
         super();
         this.id = id;
@@ -177,7 +180,7 @@ public class MockUser implements User {
 
     /**
      * Getter for userPassword.
-     *
+     * 
      * @return Password.
      */
     public String getUserPassword() {
@@ -186,7 +189,7 @@ public class MockUser implements User {
 
     /**
      * Getter for uid.
-     *
+     * 
      * @return User identifier.
      */
     public int getId() {
@@ -195,9 +198,8 @@ public class MockUser implements User {
 
     /**
      * Setter for userPassword.
-     *
-     * @param userPassword
-     *            Password.
+     * 
+     * @param userPassword Password.
      */
     public void setUserPassword(final String userPassword) {
         this.userPassword = userPassword;
@@ -205,7 +207,7 @@ public class MockUser implements User {
 
     /**
      * Getter for mailEnabled.
-     *
+     * 
      * @return <code>true</code> if user is enabled.
      */
     public boolean isMailEnabled() {
@@ -214,9 +216,8 @@ public class MockUser implements User {
 
     /**
      * Setter for mailEnabled.
-     *
-     * @param mailEnabled
-     *            <code>true</code> to enable user.
+     * 
+     * @param mailEnabled <code>true</code> to enable user.
      */
     public void setMailEnabled(final boolean mailEnabled) {
         this.mailEnabled = mailEnabled;
@@ -224,7 +225,7 @@ public class MockUser implements User {
 
     /**
      * Getter for shadowLastChange.
-     *
+     * 
      * @return Days since Jan 1, 1970 that password was last changed.
      */
     public int getShadowLastChange() {
@@ -233,9 +234,8 @@ public class MockUser implements User {
 
     /**
      * Setter for shadowLastChange.
-     *
-     * @param shadowLastChange
-     *            Days since Jan 1, 1970 that password was last changed.
+     * 
+     * @param shadowLastChange Days since Jan 1, 1970 that password was last changed.
      */
     public void setShadowLastChange(final int shadowLastChange) {
         this.shadowLastChange = shadowLastChange;
@@ -243,9 +243,8 @@ public class MockUser implements User {
 
     /**
      * Setter for imapServer.
-     *
-     * @param imapServer
-     *            IMAP server.
+     * 
+     * @param imapServer IMAP server.
      */
     public void setImapServer(final String imapServer) {
         this.imapServer = imapServer;
@@ -253,7 +252,7 @@ public class MockUser implements User {
 
     /**
      * Getter for imapServer.
-     *
+     * 
      * @return IMAP server.
      */
     public String getImapServer() {
@@ -262,9 +261,8 @@ public class MockUser implements User {
 
     /**
      * Setter for smtpServer.
-     *
-     * @param smtpServer
-     *            SMTP server.
+     * 
+     * @param smtpServer SMTP server.
      */
     public void setSmtpServer(final String smtpServer) {
         this.smtpServer = smtpServer;
@@ -272,7 +270,7 @@ public class MockUser implements User {
 
     /**
      * Getter for smtpServer.
-     *
+     * 
      * @return SMTP server.
      */
     public String getSmtpServer() {
@@ -281,9 +279,8 @@ public class MockUser implements User {
 
     /**
      * Setter for mailDomain.
-     *
-     * @param mailDomain
-     *            mail domain.
+     * 
+     * @param mailDomain mail domain.
      */
     public void setMailDomain(final String mailDomain) {
         this.mailDomain = mailDomain;
@@ -291,7 +288,7 @@ public class MockUser implements User {
 
     /**
      * Getter for mailDomain.
-     *
+     * 
      * @return mail domain.
      */
     public String getMailDomain() {
@@ -300,9 +297,8 @@ public class MockUser implements User {
 
     /**
      * Setter for givenName.
-     *
-     * @param givenName
-     *            given name.
+     * 
+     * @param givenName given name.
      */
     public void setGivenName(final String givenName) {
         this.givenName = givenName;
@@ -310,7 +306,7 @@ public class MockUser implements User {
 
     /**
      * Getter for givenName.
-     *
+     * 
      * @return given name.
      */
     public String getGivenName() {
@@ -319,9 +315,8 @@ public class MockUser implements User {
 
     /**
      * Setter for sure name.
-     *
-     * @param sureName
-     *            sure name.
+     * 
+     * @param sureName sure name.
      */
     public void setSurname(final String sureName) {
         this.surname = sureName;
@@ -329,7 +324,7 @@ public class MockUser implements User {
 
     /**
      * Getter for sure name.
-     *
+     * 
      * @return sure name.
      */
     public String getSurname() {
@@ -338,9 +333,8 @@ public class MockUser implements User {
 
     /**
      * Setter for mail.
-     *
-     * @param mail
-     *            Mail address.
+     * 
+     * @param mail Mail address.
      */
     public void setMail(final String mail) {
         this.mail = mail;
@@ -348,7 +342,7 @@ public class MockUser implements User {
 
     /**
      * Getter for mail.
-     *
+     * 
      * @return mail address.
      */
     public String getMail() {
@@ -359,18 +353,21 @@ public class MockUser implements User {
      * {@inheritDoc}
      */
     public String[] getAliases() {
-        return new String[]{getMail()};
+        return new String[] { getMail() };
     }
 
     public Map<String, Set<String>> getAttributes() {
-        return Collections.unmodifiableMap(new HashMap<String, Set<String>>(0));
+        return attributes ;
+    }
+
+    public void setAttribute(String key, String... values) {
+        attributes.put(key, new HashSet<String>(Arrays.asList(values)));
     }
 
     /**
      * Setter for displayName.
-     *
-     * @param displayName
-     *            Display name.
+     * 
+     * @param displayName Display name.
      */
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
@@ -378,7 +375,7 @@ public class MockUser implements User {
 
     /**
      * Getter for displayName.
-     *
+     * 
      * @return Display name.
      */
     public String getDisplayName() {
@@ -387,9 +384,8 @@ public class MockUser implements User {
 
     /**
      * Setter for timeZone.
-     *
-     * @param timeZone
-     *            Timezone.
+     * 
+     * @param timeZone Timezone.
      */
     public void setTimeZone(final String timeZone) {
         this.timeZone = timeZone;
@@ -397,7 +393,7 @@ public class MockUser implements User {
 
     /**
      * Getter for timeZone.
-     *
+     * 
      * @return Timezone.
      */
     public String getTimeZone() {
@@ -406,9 +402,8 @@ public class MockUser implements User {
 
     /**
      * Setter for appointmentDays.
-     *
-     * @param appointmentDays
-     *            Portal show appointments for this number of days.
+     * 
+     * @param appointmentDays Portal show appointments for this number of days.
      */
     public void setAppointmentDays(final int appointmentDays) {
         this.appointmentDays = appointmentDays;
@@ -416,7 +411,7 @@ public class MockUser implements User {
 
     /**
      * Getter for appointmentDays.
-     *
+     * 
      * @return Portal show appointments for this number of days.
      */
     public int getAppointmentDays() {
@@ -425,9 +420,8 @@ public class MockUser implements User {
 
     /**
      * Setter for taskDays.
-     *
-     * @param taskDays
-     *            Portal show tasks for this number of days.
+     * 
+     * @param taskDays Portal show tasks for this number of days.
      */
     public void setTaskDays(final int taskDays) {
         this.taskDays = taskDays;
@@ -435,7 +429,7 @@ public class MockUser implements User {
 
     /**
      * Getter for taskDays.
-     *
+     * 
      * @return Portal show tasks for this number of days.
      */
     public int getTaskDays() {
@@ -444,19 +438,17 @@ public class MockUser implements User {
 
     /**
      * Setter for preferredLanguage.
-     *
-     * @param preferredLanguage
-     *            Preferred language.
+     * 
+     * @param preferredLanguage Preferred language.
      */
     public void setPreferredLanguage(final String preferredLanguage) {
         this.preferredLanguage = preferredLanguage;
     }
 
     /**
-     * Getter for preferredLanguage. The preferred language of the user.
-     * According to RFC 2798 and 2068 it should be something like de-de, en-gb
-     * or en.
-     *
+     * Getter for preferredLanguage. The preferred language of the user. According to RFC 2798 and 2068 it should be something like de-de,
+     * en-gb or en.
+     * 
      * @return Preferred Language.
      */
     public String getPreferredLanguage() {
@@ -465,7 +457,7 @@ public class MockUser implements User {
 
     /**
      * Getter for groups.
-     *
+     * 
      * @return the groups this user is member of.
      */
     public int[] getGroups() {
@@ -474,9 +466,8 @@ public class MockUser implements User {
 
     /**
      * Setter for groups.
-     *
-     * @param groups
-     *            the groups this user is member of.
+     * 
+     * @param groups the groups this user is member of.
      */
     public void setGroups(final int[] groups) {
         this.groups = addAllGroupsAndUsersGroup(groups);
@@ -484,9 +475,8 @@ public class MockUser implements User {
 
     /**
      * Adds the group identifier for all groups and users.
-     *
-     * @param groups
-     *            groups of the user.
+     * 
+     * @param groups groups of the user.
      * @return groups of the user and 0 will be added if it is missing.
      */
     private static int[] addAllGroupsAndUsersGroup(final int[] groups) {
@@ -511,8 +501,7 @@ public class MockUser implements User {
     }
 
     /**
-     * @param contactId
-     *            the contactId to set
+     * @param contactId the contactId to set
      */
     public void setContactId(final int contactId) {
         this.contactId = contactId;
