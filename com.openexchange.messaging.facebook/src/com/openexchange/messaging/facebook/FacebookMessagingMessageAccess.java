@@ -205,7 +205,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             final FQLQuery query =
                 FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), FIELDS_FULL, facebookUserId);
             final List<Object> results = fireFQLQuery(query.getCharSequence(), facebookRestClient);
-            message = FacebookFQLStreamParser.parseStreamDOMElement((Element) results.iterator().next());
+            message = FacebookFQLStreamParser.parseStreamDOMElement((Element) results.iterator().next(), getUserLocale());
             if (null == message) {
                 throw MessagingExceptionCodes.MESSAGE_NOT_FOUND.create(id, folder);
             }
@@ -412,7 +412,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         } else {
             messages = new ArrayList<MessagingMessage>(messageIds.length);
             for (int i = 0; i < messageIds.length; i++) {
-                final FacebookMessagingMessage message = new FacebookMessagingMessage();
+                final FacebookMessagingMessage message = new FacebookMessagingMessage(getUserLocale());
                 for (final StaticFiller filler : staticFillers) {
                     filler.fill(message);
                 }
@@ -425,8 +425,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         return messages;
     }
 
-    private static FacebookMessagingMessage parseFromElement(final List<StaticFiller> staticFillers, final Element element) throws MessagingException {
-        final FacebookMessagingMessage message = FacebookFQLStreamParser.parseStreamDOMElement(element);
+    private FacebookMessagingMessage parseFromElement(final List<StaticFiller> staticFillers, final Element element) throws MessagingException {
+        final FacebookMessagingMessage message = FacebookFQLStreamParser.parseStreamDOMElement(element, getUserLocale());
         if (null != message) {
             for (final StaticFiller filler : staticFillers) {
                 filler.fill(message);

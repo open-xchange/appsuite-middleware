@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -187,7 +188,52 @@ public final class FacebookFQLStreamParser {
             ITEM_HANDLERS = Collections.unmodifiableMap(m);
         }
 
-        final Map<String, AttachmentHandler> m = new HashMap<String, AttachmentHandler>(4);
+        final Map<String, AttachmentHandler> m = new HashMap<String, AttachmentHandler>(8);
+        m.put("album", new AttachmentHandler() {
+
+            public void handleAttachment(NodeList attachNodes, int len, FacebookMessagingMessage message, MultipartProvider multipartProvider) throws MessagingException {
+                String name = null;
+                String href = null;
+                int flag = 0;
+                for (int i = 0; flag < 2 && i < len; i++) {
+                    final Node item = attachNodes.item(i);
+                    if ("name".equals(item.getLocalName())) {
+                        name = item.getTextContent();
+                        flag++;
+                    } else if ("href".equals(item.getLocalName())) {
+                        href = item.getTextContent();
+                        flag++;
+                    }
+                }
+                if (null != href && null != name) {
+                    final StringBuilder messageText = message.getMessageText();
+                    messageText.append(HTML_BR);
+                    final int pos = href.indexOf('?');
+                    if (pos < 0) {
+                        messageText.append(HTML_ANCHOR_START).append(href).append("'>").append(name).append(HTML_ANCHOR_END);
+                    } else {
+                        final int spos = href.indexOf("u=");
+                        final int epos = href.indexOf("&h=", spos + 2);
+                        if (epos < 0 || spos < 0) {
+                            messageText.append(HTML_ANCHOR_START).append(href).append("'>").append(name).append(HTML_ANCHOR_END);
+                        } else {
+                            /*-
+                             * Extract real URL from:
+                             * http://www.facebook.com/l.php?u=http%253A%252F%252Fwww.open-xchange.com&amp;h=f60781c95f3b41983168bbd0d0f52c95
+                             */
+                            try {
+                                messageText.append(HTML_ANCHOR_START).append(
+                                    URLDecoder.decode(URLDecoder.decode(href.substring(spos + 2, epos), "ISO-8859-1"), "ISO-8859-1")).append(
+                                    "'>").append(name).append(HTML_ANCHOR_END);
+                            } catch (final UnsupportedEncodingException e) {
+                                messageText.append(HTML_ANCHOR_START).append(href).append("'>").append(name).append(HTML_ANCHOR_END);
+                            }
+                        }
+                    }
+                }
+            }
+            
+        });
         m.put("link", new AttachmentHandler() {
 
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) {
@@ -510,14 +556,15 @@ public final class FacebookFQLStreamParser {
      * Parses given facebook stream element into a MIME message.
      * 
      * @param streamElement The facebook stream element
+     * @param locale The user's locale
      * @return The resulting MIME message
      * @throws MessagingException If parsing fails
      */
-    public static FacebookMessagingMessage parseStreamDOMElement(final Element streamElement) throws MessagingException {
+    public static FacebookMessagingMessage parseStreamDOMElement(final Element streamElement, final Locale locale) throws MessagingException {
         if (!streamElement.hasChildNodes()) {
             return null;
         }
-        final FacebookMessagingMessage message = new FacebookMessagingMessage();
+        final FacebookMessagingMessage message = new FacebookMessagingMessage(locale);
         /*
          * Iterate child nodes
          */

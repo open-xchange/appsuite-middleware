@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.facebook.utility;
 
+import java.util.Locale;
 import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
 
 /**
@@ -72,15 +73,27 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     private String toString;
 
+    private final Locale locale;
+
     // private long postId;
 
     /**
      * Initializes a new {@link FacebookMessagingMessage}.
      */
-    public FacebookMessagingMessage() {
+    public FacebookMessagingMessage(final Locale locale) {
         super();
         messageText = new StringBuilder(256);
         toString = "[no content]";
+        this.locale = locale;
+    }
+
+    /**
+     * Gets the session user's locale:
+     * 
+     * @return The locale;
+     */
+    public Locale getLocale() {
+        return locale;
     }
 
     /**
