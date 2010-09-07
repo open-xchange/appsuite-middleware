@@ -130,6 +130,9 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String NO_DELETE_PERMISSION_MSG = "You do not have the permissions to delete at least one of the info items.";
     public static final String NO_DELETE_PERMISSION_HELP = "You do not have the permissions to delete at least one of the info items.";
 
+    public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG = "This folder is a virtual folder. It cannot contain documents.";
+    public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP = "The folders to which this user has access, but that belong to other users, are collected in a virtual folder. This virtual folder cannot contain documents itself.";
+
     private InfostoreExceptionMessages() {
         super();
     }

@@ -106,6 +106,8 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     NUMBER_OF_VERSIONS_FAILED(NUMBER_OF_VERSIONS_FAILED_MSG, Category.CODE_ERROR, 442, NUMBER_OF_VERSIONS_FAILED_HELP),
     /** You do not have the permissions to delete at least one of the info items. */
     NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG, Category.PERMISSION, 445, NO_DELETE_PERMISSION_HELP),
+    /** This folder is a virtual folder. It cannot contain documents. */
+    NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, Category.USER_INPUT, 1700, NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP);
     ;
 
     private final String message;
