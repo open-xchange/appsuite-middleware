@@ -59,14 +59,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
@@ -74,13 +69,8 @@ import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.sql.DBUtils;
 
-@OXExceptionSource(
-		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_CHECKSIZESWITCH,
-		component=EnumComponent.INFOSTORE
-)
 public class CheckSizeSwitch {
-	
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(CheckSizeSwitch.class);
+
     private static final Log LOG = LogFactory.getLog(CheckSizeSwitch.class);
 
     private static Map<Metadata, Integer> SIZES = new HashMap<Metadata, Integer>();
@@ -102,20 +92,14 @@ public class CheckSizeSwitch {
         this.ctx = ctx;
     }
 
-    @OXThrows(
-			category = Category.TRUNCATED,
-			desc = "The User entered values that are to long for the database schema.",
-			exceptionId = 0,
-			msg = "Some fields have values, that are too long"
-	)
-	public static void checkSizes(final DocumentMetadata metadata, final DBProvider provider, final Context ctx) throws OXException {
-		boolean error = false;
-		
-		final CheckSizeSwitch checkSize = new CheckSizeSwitch(provider, ctx);
-		final GetSwitch get = new GetSwitch(metadata);
-		
-		final OXException x = EXCEPTIONS.create(0);
-        
+    public static void checkSizes(final DocumentMetadata metadata, final DBProvider provider, final Context ctx) throws OXException {
+        boolean error = false;
+
+        final CheckSizeSwitch checkSize = new CheckSizeSwitch(provider, ctx);
+        final GetSwitch get = new GetSwitch(metadata);
+
+        final OXException x = InfostoreExceptionCodes.TOO_LONG_VALUES.create();
+
         for(final Metadata m : Metadata.VALUES) {
             if(!FIELDS_TO_CHECK.contains(m)) {
                 continue;
@@ -134,12 +118,12 @@ public class CheckSizeSwitch {
                 error = true;
             }
         }
-		
-		if(error) {
-			throw x;
-		}
-	}
-	
+
+        if(error) {
+            throw x;
+        }
+    }
+
 
 
     public int getSize(final Metadata field) {

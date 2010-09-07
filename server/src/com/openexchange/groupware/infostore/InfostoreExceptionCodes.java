@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.infostore;
 
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.*;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.TOO_LONG_VALUES_HELP;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.TOO_LONG_VALUES_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 
@@ -59,16 +60,18 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public enum InfostoreExceptionCodes implements OXErrorMessage {
-    ;
+    TOO_LONG_VALUES(TOO_LONG_VALUES_MSG, Category.TRUNCATED, 100, TOO_LONG_VALUES_HELP);
 
     private final String message;
     private final Category category;
     private final int number;
+    private final String help;
 
-    private InfostoreExceptionCodes(String message, Category category, int number) {
+    private InfostoreExceptionCodes(String message, Category category, int number, String help) {
         this.message = message;
         this.category = category;
         this.number = number;
+        this.help = help;
     }
 
     public int getDetailNumber() {
@@ -80,10 +83,18 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     }
 
     public String getHelp() {
-        return null;
+        return help;
     }
 
     public Category getCategory() {
         return category;
+    }
+
+    public InfostoreException create(Object... args) {
+        return InfostoreExceptionFactory2.getInstance().create(this, args);
+    }
+
+    public InfostoreException create(Throwable cause, Object... args) {
+        return InfostoreExceptionFactory2.getInstance().create(this, cause, args);
     }
 }

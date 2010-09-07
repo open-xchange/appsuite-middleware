@@ -58,6 +58,9 @@ import com.openexchange.exceptions.LocalizableStrings;
  */
 public class InfostoreExceptionMessages implements LocalizableStrings {
 
+    public static final String TOO_LONG_VALUES_MSG = "Some fields have values, that are too long";
+    public static final String TOO_LONG_VALUES_HELP = "The User entered values that are to long for the database schema."; 
+
     private InfostoreExceptionMessages() {
         super();
     }
