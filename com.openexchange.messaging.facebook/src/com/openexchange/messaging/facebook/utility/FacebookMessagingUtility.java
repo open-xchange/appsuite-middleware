@@ -541,7 +541,7 @@ public final class FacebookMessagingUtility {
         }
 
         /**
-         * Gets the query type for specified folder identifier.
+         * Gets the Facebook query type for specified folder identifier.
          * 
          * @param folderId The folder identifier
          * @return The query type or <code>null</code> if no query is associated with specified folder identifier
@@ -643,11 +643,11 @@ public final class FacebookMessagingUtility {
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQuerySince(final Date timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
-        return composeFQLStreamQuerySince(timeStamp, queryType, fields, sortField, order, null, facebookUserId);
+    public static FQLQuery composeFQLStreamQueryBefore(final Date timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
+        return composeFQLStreamQueryBefore(timeStamp, queryType, fields, sortField, order, null, facebookUserId);
     }
 
-    private static FQLQuery composeFQLStreamQuerySince(final Date timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+    private static FQLQuery composeFQLStreamQueryBefore(final Date timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
         final StringBuilder query = startFQLStreamQuery(queryType, fields, facebookUserId);
         if (null == query) {
             /*
