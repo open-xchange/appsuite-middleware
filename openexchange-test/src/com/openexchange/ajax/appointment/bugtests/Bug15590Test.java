@@ -117,7 +117,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         // Delete testAppointment
         if (testAppointment != null) {
             final com.openexchange.ajax.appointment.action.DeleteRequest delApp = new com.openexchange.ajax.appointment.action.DeleteRequest(
-                testAppointment.getObjectID(), testFolder.getObjectID(), new Date());
+                testAppointment.getObjectID(), testFolder.getObjectID(), new Date(Long.MAX_VALUE));
             secondClient.execute(delApp);
         }
 
