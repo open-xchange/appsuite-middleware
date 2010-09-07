@@ -51,13 +51,17 @@ package com.openexchange.groupware.infostore.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.infostore.InfostoreExceptionFactory2;
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link InfostoreActivator}
@@ -66,19 +70,25 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
  */
 public class InfostoreActivator implements BundleActivator {
 
+    private ComponentRegistration exceptions;
+    private final Stack<ServiceRegistration> registrations = new Stack<ServiceRegistration>();
+
     public void start(BundleContext context) throws Exception {
+        exceptions = new ComponentRegistration(context, EnumComponent.INFOSTORE, "com.openexchange.groupware.infostore", InfostoreExceptionFactory2.getInstance());
+
         final InfostoreFilenameReservationsCreateTableTask task = new InfostoreFilenameReservationsCreateTableTask();
-        
-        context.registerService(CreateTableService.class.getName(), task, null);
-        context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-            public Collection<UpdateTask> getUpdateTasks() {
-                return Arrays.asList(((UpdateTask) task));
+        registrations.push(context.registerService(CreateTableService.class.getName(), task, null));
+        registrations.push(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            public Collection<UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList(((UpdateTaskV2) task));
             }
-        }, null);
+        }, null));
     }
 
     public void stop(BundleContext context) throws Exception {
-        // OSGi automatically takes down registered services
+        while (!registrations.empty()) {
+            registrations.pop().unregister();
+        }
+        exceptions.unregister();
     }
-
 }

@@ -49,30 +49,41 @@
 
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.*;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
-public class InfostoreException extends OXException {
+/**
+ * {@link InfostoreExceptionCodes}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public enum InfostoreExceptionCodes implements OXErrorMessage {
+    ;
 
-    private static final long serialVersionUID = -5757775872793698069L;
+    private final String message;
+    private final Category category;
+    private final int number;
 
-    public InfostoreException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-        super(EnumComponent.INFOSTORE, category, id, message,cause);
-        setMessageArgs(msgParams);
+    private InfostoreExceptionCodes(String message, Category category, int number) {
+        this.message = message;
+        this.category = category;
+        this.number = number;
     }
 
-    public InfostoreException(final Category category, final String message, final int id, final Object...msgParams){
-        this(category,id,message, null,msgParams);
+    public int getDetailNumber() {
+        return number;
     }
 
-    public InfostoreException(final AbstractOXException e) {
-        super(e);
+    public String getMessage() {
+        return message;
     }
 
-    public InfostoreException(ErrorMessage message, Throwable cause, Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    public String getHelp() {
+        return null;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 }

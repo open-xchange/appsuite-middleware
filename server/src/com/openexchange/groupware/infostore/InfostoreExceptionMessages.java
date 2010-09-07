@@ -49,30 +49,16 @@
 
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exceptions.LocalizableStrings;
 
-public class InfostoreException extends OXException {
+/**
+ * {@link InfostoreExceptionMessages}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class InfostoreExceptionMessages implements LocalizableStrings {
 
-    private static final long serialVersionUID = -5757775872793698069L;
-
-    public InfostoreException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-        super(EnumComponent.INFOSTORE, category, id, message,cause);
-        setMessageArgs(msgParams);
-    }
-
-    public InfostoreException(final Category category, final String message, final int id, final Object...msgParams){
-        this(category,id,message, null,msgParams);
-    }
-
-    public InfostoreException(final AbstractOXException e) {
-        super(e);
-    }
-
-    public InfostoreException(ErrorMessage message, Throwable cause, Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    private InfostoreExceptionMessages() {
+        super();
     }
 }

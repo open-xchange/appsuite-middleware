@@ -49,30 +49,33 @@
 
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exceptions.Exceptions;
 
-public class InfostoreException extends OXException {
+/**
+ * {@link InfostoreExceptionFactory2}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class InfostoreExceptionFactory2 extends Exceptions<InfostoreException> {
 
-    private static final long serialVersionUID = -5757775872793698069L;
+    private static final InfostoreExceptionFactory2 SINGLETON = new InfostoreExceptionFactory2();
 
-    public InfostoreException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-        super(EnumComponent.INFOSTORE, category, id, message,cause);
-        setMessageArgs(msgParams);
+    private InfostoreExceptionFactory2() {
+        super();
     }
 
-    public InfostoreException(final Category category, final String message, final int id, final Object...msgParams){
-        this(category,id,message, null,msgParams);
+    public static final InfostoreExceptionFactory2 getInstance() {
+        return SINGLETON;
     }
 
-    public InfostoreException(final AbstractOXException e) {
-        super(e);
+    @Override
+    protected void knownExceptions() {
+        declareAll(InfostoreExceptionCodes.values());
     }
 
-    public InfostoreException(ErrorMessage message, Throwable cause, Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    @Override
+    protected InfostoreException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new InfostoreException(message, cause, args);
     }
 }

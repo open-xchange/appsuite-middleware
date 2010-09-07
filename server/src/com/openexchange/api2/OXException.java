@@ -49,6 +49,7 @@
 
 package com.openexchange.api2;
 
+import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
@@ -58,72 +59,66 @@ import com.openexchange.groupware.EnumComponent;
  */
 public class OXException extends AbstractOXException {
 
-	/**
-     * For serialization.
-	 */
     private static final long serialVersionUID = -7503880425356541331L;
-
-	/**
-     * @deprecated use constructor with component, category and detailNumber.
-	 */
-    @Deprecated
-	public OXException() {
-		super();
-	}
 
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
-	@Deprecated
-	public OXException(final String message) {
-		super(message);
-	}
+    @Deprecated
+    public OXException() {
+        super();
+    }
 
-	/**
+    /**
+     * @deprecated use constructor with component, category and detailNumber.
+     */
+    @Deprecated
+    public OXException(final String message) {
+        super(message);
+    }
+
+    /**
      * Used by OXConcurrentModificationException.
      * @param component Component.
      * @param message Message.
-	 */
+     */
     protected OXException(final EnumComponent component, final String message) {
-		super(component, message);
-	}
+        super(component, message);
+    }
 
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
-	@Deprecated
-	public OXException(final String message, final Throwable cause) {
-		super(message, cause);
-	}
+    @Deprecated
+    public OXException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
-	@Deprecated
-	public OXException(final EnumComponent component, final String message,
+    @Deprecated
+    public OXException(final EnumComponent component, final String message,
         final Throwable cause) {
-		super(component, message, cause);
-	}
+        super(component, message, cause);
+    }
 
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
-	@Deprecated
-	public OXException(final Throwable cause) {
-		super(cause);
-	}
+    @Deprecated
+    public OXException(final Throwable cause) {
+        super(cause);
+    }
 
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
-	@Deprecated
-	public OXException(final EnumComponent component, final Exception exc) {
-		super(component, exc);
-	}
+    @Deprecated
+    public OXException(final EnumComponent component, final Exception exc) {
+        super(component, exc);
+    }
 
-    /**
-     * {@inheritDoc}
-	 */
     public OXException(final AbstractOXException cause) {
         super(cause);
     }
@@ -141,5 +136,9 @@ public class OXException extends AbstractOXException {
         final int number, final String message, final Throwable cause, final Object... messageArgs) {
         super(component, category, number, message, cause);
         super.setMessageArgs(messageArgs);
+    }
+
+    public OXException(ErrorMessage message, Throwable cause) {
+        super(message, cause);
     }
 }
