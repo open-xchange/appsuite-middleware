@@ -66,6 +66,8 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     private long fromUserId;
 
+    private final StringBuilder messageText;
+
     private String toString;
 
     // private long postId;
@@ -75,7 +77,28 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
      */
     public FacebookMessagingMessage() {
         super();
+        messageText = new StringBuilder(256);
         toString = "[no content]";
+    }
+
+    /**
+     * Appends specified text.
+     * <p>
+     * Text should already be HTML-escaped: '<' ==> &amp;lt
+     * 
+     * @param textContent The text to append
+     */
+    public void appendTextContent(final String textContent) {
+        messageText.append(textContent);
+    }
+
+    /**
+     * Gets the message text.
+     * 
+     * @return The message text
+     */
+    public CharSequence getMessageText() {
+        return messageText;
     }
 
     /**
