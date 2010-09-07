@@ -73,12 +73,30 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
-   # SoftwareChange_Request-325
+   # SoftwareChange_Request-325, SoftwareChange_Request-400
    # -----------------------------------------------------------------------
+   adsval=( "whenCreated" "whenChanged" )
+   oldapval=( "createTimestamp" "modifyTimestamp" )
    for i in $(find /opt/open-xchange/etc/groupware/contacts-ldap/ -maxdepth 1 -name "mapping*.properties"); do
-      oval=$(ox_read_property com.openexchange.contacts.ldap.mapping.ads.creationdate $i)
-      if [ -z "$oval" ]; then
-	  ox_set_property com.openexchange.contacts.ldap.mapping.ads.creationdate "whenCreated" $i
+      if grep "mapping.ads" $i > /dev/null; then
+        n=0
+        for v in com.openexchange.contacts.ldap.mapping.ads.creationdate com.openexchange.contacts.ldap.mapping.ads.lastmodified; do
+           oval=$(ox_read_property $v $i)
+           if [ -z "$oval" ]; then
+              ox_set_property $v ${adsval[$n]} $i
+           fi
+           n=$(( $n + 1 ))
+        done
+      fi
+      if grep "mapping.openldap" $i > /dev/null; then
+        n=0
+        for v in com.openexchange.contacts.ldap.mapping.openldap.creationdate com.openexchange.contacts.ldap.mapping.openldap.lastmodified; do
+           oval=$(ox_read_property $v $i)
+           if [ -z "$oval" ]; then
+            ox_set_property $v ${oldapval[$n]} $i
+          fi
+           n=$(( $n + 1 ))
+        done
       fi
    done
 
