@@ -58,9 +58,13 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.exceptions.ComponentRegistry;
+import com.openexchange.exceptions.impl.ComponentRegistryImpl;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondException;
+import com.openexchange.sessiond.exception.SessionExceptionFactory;
 
 /**
  * Checks if the server detects correctly a duplicate used authId.
@@ -70,19 +74,12 @@ import com.openexchange.sessiond.SessiondException;
 public class DuplicateAuthIdTest extends TestCase {
 
     private String sameAuthId;
-
     private AJAXClient client1;
-
     private String login1;
-
     private String password1;
-
     private AJAXSession session2;
-
     private AJAXClient client2;
-
     private String login2;
-
     private String password2;
 
     public DuplicateAuthIdTest(String name) {
@@ -93,6 +90,8 @@ public class DuplicateAuthIdTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         AJAXConfig.init();
+        ComponentRegistry componentRegistry = new ComponentRegistryImpl();
+        componentRegistry.registerComponent(EnumComponent.SESSION, "com.openexchange.session", SessionExceptionFactory.getInstance());
         sameAuthId = LoginTools.generateAuthId();
         final AJAXSession session1 = new AJAXSession();
         client1 = new AJAXClient(session1);
