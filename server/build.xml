@@ -288,6 +288,7 @@
         <chmod perm="755" file="${bin.install.copy.dir}/checkconsistency"/>
         <chmod perm="755" file="${bin.install.copy.dir}/checkconfigconsistency"/>
         <chmod perm="755" file="${bin.install.copy.dir}/listExecutedUpdateTasks"/>
+        <chmod perm="755" file="${bin.install.copy.dir}/logincounter"/>
         <chmod perm="755" file="${bin.install.copy.dir}/oxreport"/>
         <chmod perm="755" file="${bin.install.copy.dir}/resetversion"/>
         <chmod perm="755" file="${bin.install.copy.dir}/runupdate"/>
@@ -402,7 +403,8 @@
         <move tofile="${patch.bin.dir}/forceupdatetask" file="${patch.bin.dir}/forceupdatetask.in" overwrite="true"/>
         <move tofile="${patch.bin.dir}/restoregabdefaults" file="${patch.bin.dir}/restoregabdefaults.in" overwrite="true"/>
         <move tofile="${patch.bin.dir}/listExecutedUpdateTasks" file="${patch.bin.dir}/listExecutedUpdateTasks.in" overwrite="true"/>
-        <replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport resetversion runupdate schemasandversions listExecutedUpdateTasks forceupdatetask restoregabdefaults">
+        <move tofile="${patch.bin.dir}/logincounter" file="${patch.bin.dir}/logincounter.in" overwrite="true"/>
+        <replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport resetversion runupdate schemasandversions listExecutedUpdateTasks logincounter forceupdatetask restoregabdefaults">
             <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
