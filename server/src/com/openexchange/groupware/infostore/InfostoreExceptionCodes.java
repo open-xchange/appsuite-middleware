@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.infostore;
 
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.TOO_LONG_VALUES_HELP;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.TOO_LONG_VALUES_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.*;
 import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -60,7 +60,11 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public enum InfostoreExceptionCodes implements OXErrorMessage {
-    TOO_LONG_VALUES(TOO_LONG_VALUES_MSG, Category.TRUNCATED, 100, TOO_LONG_VALUES_HELP);
+    TOO_LONG_VALUES(TOO_LONG_VALUES_MSG, Category.TRUNCATED, 100, TOO_LONG_VALUES_HELP),
+    /** Invalid SQL Query: %s */
+    SQL_PROBLEM(INVALID_SQL_QUERY_MSG, Category.CODE_ERROR, 200, INVALID_SQL_QUERY_HELP),
+    /** Cannot pre-fetch results. */
+    PREFETCH_FAILED(PREFETCH_FAILED_MSG, Category.TRY_AGAIN, 219, PREFETCH_FAILED_HELP);
 
     private final String message;
     private final Category category;

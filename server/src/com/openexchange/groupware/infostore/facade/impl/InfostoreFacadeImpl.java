@@ -1524,11 +1524,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         } else if (isperm.canReadOwnObjects()) {
             onlyOwn = true;
         }
-        return db.countDocuments(folderId, onlyOwn, ctx, user, userConfig);
+        return db.countDocuments(folderId, onlyOwn, ctx, user);
     }
 
     public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return db.hasFolderForeignObjects(folderId, ctx, user, userConfig);
+        return db.hasFolderForeignObjects(folderId, ctx, user);
     }
 
     public boolean isFolderEmpty(final long folderId, final Context ctx) throws OXException {

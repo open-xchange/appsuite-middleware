@@ -59,7 +59,13 @@ import com.openexchange.exceptions.LocalizableStrings;
 public class InfostoreExceptionMessages implements LocalizableStrings {
 
     public static final String TOO_LONG_VALUES_MSG = "Some fields have values, that are too long";
-    public static final String TOO_LONG_VALUES_HELP = "The User entered values that are to long for the database schema."; 
+    public static final String TOO_LONG_VALUES_HELP = "The User entered values that are to long for the database schema.";
+
+    public static final String INVALID_SQL_QUERY_MSG = "Invalid SQL Query: %s";
+    public static final String INVALID_SQL_QUERY_HELP = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D";
+
+    public static final String PREFETCH_FAILED_MSG = "Cannot pre-fetch results.";
+    public static final String PREFETCH_FAILED_HELP = "Thrown when a result cannot be prefetched. This indicates a problem with the DB Connection. Have a look at the underlying SQLException";
 
     private InfostoreExceptionMessages() {
         super();
