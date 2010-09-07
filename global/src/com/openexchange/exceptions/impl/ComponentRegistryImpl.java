@@ -73,11 +73,11 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     private final Map<String, Exceptions<?>> component2exceptions = new HashMap<String, Exceptions<?>>();
 
     public synchronized void registerComponent(final Component component, final String applicationId, final Exceptions<?> exceptions) throws ComponentAlreadyRegisteredException {
-        final String conflictingApplicationId = component2app.get(component.getAbbreviation());
+        final String abbreviation = component.getAbbreviation();
+        final String conflictingApplicationId = component2app.get(abbreviation);
         if (null != conflictingApplicationId && !applicationId.equals(conflictingApplicationId)) {
             throw new ComponentAlreadyRegisteredException(component, conflictingApplicationId);
         }
-        final String abbreviation = component.getAbbreviation();
         component2app.put(abbreviation, applicationId);
 
         List<String> componentsForApp = app2components.get(applicationId);
