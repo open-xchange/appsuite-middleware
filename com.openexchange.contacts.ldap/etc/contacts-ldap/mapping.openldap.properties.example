@@ -114,5 +114,5 @@ com.openexchange.contacts.ldap.mapping.openldap.categories			=
 com.openexchange.contacts.ldap.mapping.openldap.defaultaddress			=
 com.openexchange.contacts.ldap.mapping.openldap.title				= title
 com.openexchange.contacts.ldap.mapping.openldap.position				=
-com.openexchange.contacts.ldap.mapping.openldap.lastmodified			= 
-com.openexchange.contacts.ldap.mapping.openldap.creationdate			=
+com.openexchange.contacts.ldap.mapping.openldap.lastmodified			= modifyTimestamp
+com.openexchange.contacts.ldap.mapping.openldap.creationdate			= createTimestamp

@@ -700,6 +700,9 @@ public class Mapper {
                     retval.setCreationDate(new Date(1000));
                     LOG.warn("Object: " + getter.getObjectFullName() + " has no value for creation date. Using self-defined fallback. This may lead to problems.");
                 }
+            } else {
+                retval.setCreationDate(new Date(1000));
+                LOG.warn("No creation date found in mapping file. Using self-defined fallback for object: " + getter.getObjectFullName() + ". This may lead to problems.");
             }
         }
         if (cols.contains(DataObject.LAST_MODIFIED)) {
@@ -714,6 +717,9 @@ public class Mapper {
                 } else {
                     LOG.warn("Object: " + getter.getObjectFullName() + " has no value for last modified date. Using self-defined fallback. This may lead to problems.");
                 }
+            } else {
+                retval.setLastModified(creationDate);
+                LOG.warn("No lastmodified date found in mapping file. Using self-defined fallback for object: " + getter.getObjectFullName() + ". This may lead to problems.");
             }
         }
     }
@@ -734,6 +740,9 @@ public class Mapper {
                     retval.setLastModified(new Date(1000));
                     LOG.warn("Object: " + getter.getObjectFullName() + " has no value for creation date. Using self-defined fallback. This may lead to problems.");
                 }
+            } else {
+                retval.setCreationDate(new Date(1000));
+                LOG.warn("No creation date found in mapping file. Using self-defined fallback for object: " + getter.getObjectFullName() + ". This may lead to problems.");
             }
         }
         return creationDate;

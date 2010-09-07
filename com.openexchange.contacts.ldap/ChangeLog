@@ -1,3 +1,9 @@
+* 2010-09-07 - dennis.sieben@open-xchange.com
+
+ - Bugfix #16784 - contacts-ldap does not work out of the box with openldap
+   - Fixed corresponding entries in the example mapping file
+   - Fixed fallback value for creation and lastmodified date in code
+
 * 2010-08-09 - choeger@open-xchange.com
 
  - Bugfix #16663 - [L3] contacts-ldap does not query ad for creation date but
