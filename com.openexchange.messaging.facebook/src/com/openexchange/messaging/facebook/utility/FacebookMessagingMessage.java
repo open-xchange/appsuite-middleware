@@ -102,6 +102,15 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
     }
 
     /**
+     * Gets the message text length.
+     * 
+     * @return The message text length
+     */
+    public int getMessageTextLength() {
+        return messageText.length();
+    }
+
+    /**
      * Sets the toString() text.
      * 
      * @param toString The toString() text
