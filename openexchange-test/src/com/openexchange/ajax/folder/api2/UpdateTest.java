@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.folder.actions.API;
@@ -89,13 +88,12 @@ public class UpdateTest extends AbstractAJAXSession {
     }
 
     public void testUpdatePrivate() throws Throwable {
-        String newId = null;
+        FolderObject fo = null;
         try {
-            final FolderObject fo = new FolderObject();
+            fo = new FolderObject();
             fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
             fo.setFolderName("testCalendarFolder" + System.currentTimeMillis());
             fo.setModule(FolderObject.CALENDAR);
-
             {
                 final OCLPermission oclP = new OCLPermission();
                 oclP.setEntity(client.getValues().getUserId());
@@ -108,14 +106,16 @@ public class UpdateTest extends AbstractAJAXSession {
                     OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
             }
-
+            final String newId;
             {
                 final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
-                final InsertResponse response = (InsertResponse) client.execute(request);
+                final InsertResponse response = client.execute(request);
                 newId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", newId);
             }
-
+            {
+                fo.setLastModified(client.execute(new GetRequest(API.OUTLOOK, newId)).getTimestamp());
+            }
             fo.setFolderName("testCalendarFolderRename" + System.currentTimeMillis());
             fo.setObjectID(Integer.parseInt(newId));
             {
@@ -128,7 +128,6 @@ public class UpdateTest extends AbstractAJAXSession {
                     OCLPermission.ADMIN_PERMISSION,
                     OCLPermission.ADMIN_PERMISSION,
                     OCLPermission.ADMIN_PERMISSION);
-
                 final OCLPermission oclP2 = new OCLPermission();
                 oclP2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
                 oclP2.setGroupPermission(true);
@@ -140,17 +139,14 @@ public class UpdateTest extends AbstractAJAXSession {
                     OCLPermission.NO_PERMISSIONS);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP, oclP2 });
             }
-
             {
                 final UpdateRequest updateRequest = new UpdateRequest(API.OUTLOOK, fo);
-                fo.setLastModified(new Date());
                 client.execute(updateRequest).getResponse();
             }
-
             {
-                final GetRequest request = new GetRequest(API.OUTLOOK, newId, true);
+                final GetRequest request = new GetRequest(API.OUTLOOK, newId);
                 final GetResponse response = client.execute(request);
-
+                fo.setLastModified(response.getTimestamp());
                 final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
 
                 final String name = jsonObject.getString("title");
@@ -161,12 +157,11 @@ public class UpdateTest extends AbstractAJAXSession {
                 final JSONArray permissions = jsonObject.getJSONArray("permissions");
                 assertEquals("Unexpected number of permissions.", 2, permissions.length());
             }
-
         } finally {
-            if (null != newId) {
+            if (null != fo) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, newId, new Date());
+                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, fo);
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();
