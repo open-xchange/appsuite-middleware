@@ -1,3 +1,9 @@
+open-xchange-activation (6.18.1.0-0) unstable; urgency=low
+
+  * use ox versioning
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 07 Sep 2010 09:35:54 +0200
+
 open-xchange-activation (1.1.1-37) unstable; urgency=low
 
   * first build for 6.18-rev2
