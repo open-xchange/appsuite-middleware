@@ -56,6 +56,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -119,7 +121,7 @@ public final class FacebookFQLStreamParser {
 
     private interface AttachmentHandler {
 
-        void handleAttachment(NodeList attachNodes, int len, StringBuilder messageText, MultipartProvider multipartProvider) throws MessagingException;
+        void handleAttachment(NodeList attachNodes, int len, FacebookMessagingMessage message, MultipartProvider multipartProvider) throws MessagingException;
     }
 
     private static final Map<String, ItemHandler> ITEM_HANDLERS;
@@ -142,12 +144,12 @@ public final class FacebookFQLStreamParser {
                 public void handleItem(final Node item, final FacebookMessagingMessage message) throws MessagingException {
                     // message.setHeader(MessagingHeader.KnownHeader.FROM.toString(), item.getTextContent());
                     final String content = item.getTextContent();
-                    final long fromUserId = FacebookMessagingUtility.parseUnsignedLong(null == content ? null : content.trim());
-                    if (fromUserId < 0) {
-                        org.apache.commons.logging.LogFactory.getLog(FacebookFQLStreamParser.class).warn(
+                    final long fromId = FacebookMessagingUtility.parseUnsignedLong(null == content ? null : content.trim());
+                    if (fromId < 0) {
+                        LogFactory.getLog(FacebookFQLStreamParser.class).warn(
                             new StringBuilder("Field actor_id cannot be parsed to a long: ``").append(content).append("\u00b4\u00b4").toString());
                     }
-                    message.setFromUserId(fromUserId);
+                    message.setFromId(fromId);
                 }
             });
             m.put("created_time", new ItemHandler() {
@@ -173,13 +175,22 @@ public final class FacebookFQLStreamParser {
                     }
                 }
             });
+            m.put("message", new ItemHandler() {
+
+                public void handleItem(final Node item, final FacebookMessagingMessage message) throws MessagingException {
+                    /*-
+                     * Text is already HTML-escaped: '<' ==> &lt;
+                     */
+                    message.appendTextContent(item.getTextContent());
+                }
+            });
             ITEM_HANDLERS = Collections.unmodifiableMap(m);
         }
 
         final Map<String, AttachmentHandler> m = new HashMap<String, AttachmentHandler>(4);
         m.put("link", new AttachmentHandler() {
 
-            public void handleAttachment(final NodeList attachNodes, final int len, final StringBuilder messageText, final MultipartProvider multipartProvider) {
+            public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) {
                 String name = null;
                 String href = null;
                 int flag = 0;
@@ -194,6 +205,58 @@ public final class FacebookFQLStreamParser {
                     }
                 }
                 if (null != href && null != name) {
+                    final StringBuilder messageText = message.getMessageText();
+                    messageText.append(HTML_BR);
+                    final int pos = href.indexOf('?');
+                    if (pos < 0) {
+                        messageText.append(HTML_ANCHOR_START).append(href).append("'>").append(name).append(HTML_ANCHOR_END);
+                    } else {
+                        final int spos = href.indexOf("u=");
+                        final int epos = href.indexOf("&h=", spos + 2);
+                        if (epos < 0 || spos < 0) {
+                            messageText.append(HTML_ANCHOR_START).append(href).append("'>").append(name).append(HTML_ANCHOR_END);
+                        } else {
+                            /*-
+                             * Extract real URL from:
+                             * http://www.facebook.com/l.php?u=http%253A%252F%252Fwww.open-xchange.com&amp;h=f60781c95f3b41983168bbd0d0f52c95
+                             */
+                            try {
+                                messageText.append(HTML_ANCHOR_START).append(
+                                    URLDecoder.decode(URLDecoder.decode(href.substring(spos + 2, epos), "ISO-8859-1"), "ISO-8859-1")).append(
+                                    "'>").append(name).append(HTML_ANCHOR_END);
+                            } catch (final UnsupportedEncodingException e) {
+                                messageText.append(HTML_ANCHOR_START).append(href).append("'>").append(name).append(HTML_ANCHOR_END);
+                            }
+                        }
+                    }
+                }
+            } // End of handleAttachment
+        });
+        m.put("group", new AttachmentHandler() {
+
+            public void handleAttachment(NodeList attachNodes, int len, final FacebookMessagingMessage message, MultipartProvider multipartProvider) throws MessagingException {
+                /*
+                 * A group post
+                 */
+                message.setGroup(true);
+                /*
+                 * Get group's link
+                 */
+                String name = null;
+                String href = null;
+                int flag = 0;
+                for (int i = 0; flag < 2 && i < len; i++) {
+                    final Node item = attachNodes.item(i);
+                    if ("name".equals(item.getLocalName())) {
+                        name = item.getTextContent();
+                        flag++;
+                    } else if ("href".equals(item.getLocalName())) {
+                        href = item.getTextContent();
+                        flag++;
+                    }
+                }
+                if (null != href && null != name) {
+                    final StringBuilder messageText = message.getMessageText();
                     messageText.append(HTML_BR);
                     final int pos = href.indexOf('?');
                     if (pos < 0) {
@@ -222,7 +285,7 @@ public final class FacebookFQLStreamParser {
         });
         m.put("video", new AttachmentHandler() {
 
-            public void handleAttachment(final NodeList attachNodes, final int len, final StringBuilder messageText, final MultipartProvider multipartProvider) throws MessagingException {
+            public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws MessagingException {
                 String sourceURL = null;
                 String ext = null;
                 /*
@@ -301,7 +364,7 @@ public final class FacebookFQLStreamParser {
         });
         m.put("photo", new AttachmentHandler() {
 
-            public void handleAttachment(final NodeList attachNodes, final int len, final StringBuilder messageText, final MultipartProvider multipartProvider) throws MessagingException {
+            public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws MessagingException {
                 String sourceURL = null;
                 String ext = null;
                 /*
@@ -337,6 +400,7 @@ public final class FacebookFQLStreamParser {
                     /*
                      * TODO: Add as multipart/related?!?!
                      */
+                    final StringBuilder messageText = message.getMessageText();
                     messageText.append(HTML_BR);
                     messageText.append("<img src='").append(sourceURL);
                     if (null == ext) {
@@ -347,12 +411,75 @@ public final class FacebookFQLStreamParser {
                 }
             }
         });
+        m.put("swf", new AttachmentHandler() {
+
+            public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws MessagingException {
+                String sourceURL = null;
+                /*
+                 * "media" node
+                 */
+                final Node media = getNodeByName("media", attachNodes, len);
+                if (null != media) {
+                    final Node streamMedia = getNodeByName("stream_media", media);
+                    if (null != streamMedia) {
+                        final Node swf = getNodeByName("swf", streamMedia);
+                        if (null != swf) {
+                            /*
+                             * "source_url" node
+                             */
+                            final Node src = getNodeByName("source_url", swf);
+                            if (null != src) {
+                                sourceURL = src.getTextContent();
+                            }
+                        }
+                    }
+                }
+                String nameStr = null;
+                /*
+                 * "name" node
+                 */
+                final Node name = getNodeByName("name", attachNodes, len);
+                if (null != name) {
+                    nameStr = name.getTextContent();
+                }
+                /*
+                 * Source URL present?
+                 */
+                if (null != sourceURL && null != nameStr) {
+                    final StringBuilder messageText = message.getMessageText();
+                    messageText.append(HTML_BR);
+                    final int pos = sourceURL.indexOf('?');
+                    if (pos < 0) {
+                        messageText.append(HTML_ANCHOR_START).append(sourceURL).append("'>").append(nameStr).append(HTML_ANCHOR_END);
+                    } else {
+                        final int spos = sourceURL.indexOf("u=");
+                        final int epos = sourceURL.indexOf("&h=", spos + 2);
+                        if (epos < 0 || spos < 0) {
+                            messageText.append(HTML_ANCHOR_START).append(sourceURL).append("'>").append(nameStr).append(HTML_ANCHOR_END);
+                        } else {
+                            /*-
+                             * Extract real URL from:
+                             * http://www.facebook.com/l.php?u=http%253A%252F%252Fwww.open-xchange.com&amp;h=f60781c95f3b41983168bbd0d0f52c95
+                             */
+                            try {
+                                messageText.append(HTML_ANCHOR_START).append(
+                                    URLDecoder.decode(URLDecoder.decode(sourceURL.substring(spos + 2, epos), "ISO-8859-1"), "ISO-8859-1")).append(
+                                    "'>").append(nameStr).append(HTML_ANCHOR_END);
+                            } catch (final UnsupportedEncodingException e) {
+                                messageText.append(HTML_ANCHOR_START).append(sourceURL).append("'>").append(nameStr).append(HTML_ANCHOR_END);
+                            }
+                        }
+                    }
+                }
+            }
+        });
         m.put("event", new AttachmentHandler() {
 
-            public void handleAttachment(final NodeList attachNodes, final int len, final StringBuilder messageText, final MultipartProvider multipartProvider) throws MessagingException {
+            public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws MessagingException {
 
                 final Node name = getNodeByName("name", attachNodes, len);
                 if (null != name) {
+                    final StringBuilder messageText = message.getMessageText();
                     final Node href = getNodeByName("href", attachNodes, len);
                     if (null == href) {
                         messageText.append(HTML_BR).append(name.getTextContent());
@@ -394,8 +521,8 @@ public final class FacebookFQLStreamParser {
         /*
          * Iterate child nodes
          */
+        boolean anyHandlerFound = false;
         Node attachmentNode = null;
-        final StringBuilder messageText = new StringBuilder(256);
         {
             final NodeList childNodes = streamElement.getChildNodes();
             final int len = childNodes.getLength();
@@ -405,19 +532,14 @@ public final class FacebookFQLStreamParser {
                 if (null != localName) {
                     final ItemHandler itemHandler = ITEM_HANDLERS.get(localName);
                     if (null == itemHandler) {
-                        if ("message".equals(localName)) {
-                            /*-
-                             * Text is already HTML-escaped: '<' ==> &lt;
-                             */
-                            messageText.append(item.getTextContent());
-                        } else if ("attachment".equals(localName)) {
+                        if ("attachment".equals(localName)) {
                             attachmentNode = item;
                         } else {
-                            org.apache.commons.logging.LogFactory.getLog(FacebookFQLStreamParser.class).warn(
-                                "Un-handled item: " + localName);
+                            LogFactory.getLog(FacebookFQLStreamParser.class).warn("Un-handled item: " + localName);
                         }
                     } else {
                         itemHandler.handleItem(item, message);
+                        anyHandlerFound = true;
                     }
                 }
             }
@@ -425,21 +547,18 @@ public final class FacebookFQLStreamParser {
         /*
          * Add subject & size
          */
-        final int size = messageText.length();
-        if (size <= 0) {
+        if (!anyHandlerFound && null == attachmentNode) {
             /*
              * Empty message... ignore it!
              */
+            LogFactory.getLog(FacebookFQLStreamParser.class).warn("Empty Facebook message detected:\n" + streamElement);
             return null;
         }
-        message.setSize(size);
-        final String subject = FacebookMessagingUtility.abbreviate(messageText.toString(), 140);
-        message.setHeader(new MimeStringMessagingHeader(MessagingHeader.KnownHeader.SUBJECT.toString(), subject));
-        message.setToString(subject);
         /*
          * Check attachment node
          */
         final MultipartProvider multipartProvider = new MultipartProvider();
+        boolean attachmentHandlerFound = false;
         if (null != attachmentNode && attachmentNode.hasChildNodes()) {
             final NodeList attachmentChildNodes = attachmentNode.getChildNodes();
             final int len = attachmentChildNodes.getLength();
@@ -453,33 +572,77 @@ public final class FacebookFQLStreamParser {
                         final String type = item.getTextContent();
                         final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(type);
                         if (null == attachmentHandler) {
-                            org.apache.commons.logging.LogFactory.getLog(FacebookFQLStreamParser.class).warn(
-                                "Unknown attachment type: " + type);
+                            final Log logger = LogFactory.getLog(FacebookFQLStreamParser.class);
+                            logger.warn("Unknown attachment type: " + type);
+                            logger.debug("Stream element:\n" + Utility.prettyPrintXML(streamElement));
                         } else {
-                            attachmentHandler.handleAttachment(attachmentChildNodes, len, messageText, multipartProvider);
+                            attachmentHandler.handleAttachment(attachmentChildNodes, len, message, multipartProvider);
                         }
+                        attachmentHandlerFound = true;
                         break;
                     }
                     /*
                      * A link attachment; append it to message
                      */
                     final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get("link");
-                    attachmentHandler.handleAttachment(attachmentChildNodes, len, messageText, multipartProvider);
+                    attachmentHandler.handleAttachment(attachmentChildNodes, len, message, multipartProvider);
+                    attachmentHandlerFound = true;
                     break;
                 }
             }
+            if (!attachmentHandlerFound) {
+                final Node media = getNodeByName("media", attachmentChildNodes, len);
+                if (null != media) {
+                    final Node streamMedia = getNodeByName("stream_media", media);
+                    if (null != streamMedia) {
+                        final Node type = getNodeByName("type", streamMedia);
+                        if (null != type) {
+                            final String sType = type.getTextContent();
+                            final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(sType);
+                            if (null == attachmentHandler) {
+                                final Log logger = LogFactory.getLog(FacebookFQLStreamParser.class);
+                                logger.warn("Unknown attachment type: " + sType);
+                                logger.debug("Stream element:\n" + Utility.prettyPrintXML(streamElement));
+                            } else {
+                                attachmentHandler.handleAttachment(attachmentChildNodes, len, message, multipartProvider);
+                            }
+                        }
+                    }
+                }
+            }
         }
-
+        /*
+         * Set subject & size
+         */
+        final StringBuilder messageText = message.getMessageText();
+        final int size = messageText.length();
+        /*
+         * Debug
+         */
+        if (size <= 0 && !attachmentHandlerFound) {
+            final Log logger = LogFactory.getLog(FacebookFQLStreamParser.class);
+            logger.debug("Stream element lead to empty message:\n" + Utility.prettyPrintXML(streamElement));
+        }
+        message.setSize(size);
+        final String htmlContent = messageText.toString();
+        final String subject = FacebookMessagingUtility.abbreviate(htmlContent, 140);
+        message.setHeader(new MimeStringMessagingHeader(MessagingHeader.KnownHeader.SUBJECT.toString(), subject));
+        message.setToString(subject);
+        /*
+         * Set content
+         */
         final MimeMultipartContent multipartContent = multipartProvider.getMultipartContent();
         if (null == multipartContent) {
-            message.setContent(createAlternative(messageText.toString()));
+            message.setContent(createAlternative(htmlContent));
         } else {
             final MimeMessagingBodyPart altBodyPart = new MimeMessagingBodyPart();
-            altBodyPart.setContent(createAlternative(messageText.toString()));
+            altBodyPart.setContent(createAlternative(htmlContent));
             multipartContent.addBodyPart(altBodyPart, 0);
             message.setContent(multipartContent);
         }
-
+        /*
+         * Return parsed message
+         */
         return message;
     }
 

@@ -52,7 +52,6 @@ package com.openexchange.messaging.facebook.utility;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -168,6 +167,8 @@ public final class FacebookMessagingUtility {
     private static final Map<MessagingField, QueryAdder> ADDERS_STREAM;
 
     private static final Map<MessagingField, QueryAdder> ADDERS_USER;
+
+    private static final Map<MessagingField, QueryAdder> ADDERS_GROUP;
 
     static {
         {
@@ -335,6 +336,37 @@ public final class FacebookMessagingUtility {
             });
 
             ADDERS_USER = Collections.unmodifiableMap(m);
+
+            /*
+             * ----------------------------------------------
+             */
+
+            m = new EnumMap<MessagingField, QueryAdder>(MessagingField.class);
+
+            m.put(MessagingField.FROM, new QueryAdder() {
+
+                public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("gid");
+                    fieldNames.add("name");
+                }
+
+                public String getOrderBy() {
+                    return "name";
+                }
+            });
+
+            m.put(MessagingField.PICTURE, new QueryAdder() {
+
+                public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("pic_small");
+                }
+
+                public String getOrderBy() {
+                    return null;
+                }
+            });
+
+            ADDERS_GROUP = Collections.unmodifiableMap(m);
         }
     }
 
@@ -348,12 +380,14 @@ public final class FacebookMessagingUtility {
     }
 
     /**
-     * Gets the user query-able fields.
+     * Gets the user/group query-able fields.
      * 
-     * @return The user query-able fields
+     * @return The user/group query-able fields
      */
-    public static EnumSet<MessagingField> getUserQueryableFields() {
-        return EnumSet.copyOf(ADDERS_USER.keySet());
+    public static EnumSet<MessagingField> getUserGroupQueryableFields() {
+        final EnumSet<MessagingField> ret = EnumSet.copyOf(ADDERS_USER.keySet());
+        ret.addAll(ADDERS_GROUP.keySet());
+        return ret;
     }
 
     /**
@@ -643,11 +677,11 @@ public final class FacebookMessagingUtility {
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryBefore(final Date timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
         return composeFQLStreamQueryBefore(timeStamp, queryType, fields, sortField, order, null, facebookUserId);
     }
 
-    private static FQLQuery composeFQLStreamQueryBefore(final Date timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+    private static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
         final StringBuilder query = startFQLStreamQuery(queryType, fields, facebookUserId);
         if (null == query) {
             /*
@@ -658,7 +692,7 @@ public final class FacebookMessagingUtility {
         /*
          * Add since
          */
-        query.append(" AND created_time < ").append(timeStamp.getTime());
+        query.append(" AND created_time < ").append(timeStamp);
         return finishFQLStreamQuery(sortField, order, postIds, DEFAULT_LIMIT, query);
     }
 
@@ -810,6 +844,95 @@ public final class FacebookMessagingUtility {
                     query.append('\'').append(userIds[0]).append('\'');
                     for (int i = 1; i < userIds.length; i++) {
                         query.append(',').append('\'').append(userIds[i]).append('\'');
+                    }
+                }
+                query.append(')');
+            }
+        }
+        /*
+         * Check sort field
+         */
+        if (null == sortField) {
+            return new FQLQuery(query, false);
+        }
+        boolean containsOrderBy = false;
+        final QueryAdder adder = ADDERS_STREAM.get(sortField);
+        if (null != adder) {
+            final String orderBy = adder.getOrderBy();
+            if (null != orderBy) {
+                query.append(" ORDER BY ").append(orderBy).append(OrderDirection.DESC.equals(order) ? " DESC" : " ASC");
+                containsOrderBy = true;
+            }
+        }
+        return new FQLQuery(query, containsOrderBy);
+    }
+    
+    /**
+     * Composes the FQL group query for given fields.
+     * 
+     * @param fields The fields
+     * @param groupId The group identifier
+     * @return The FQL group query or <code>null</code> if fields require no query
+     */
+    public static FQLQuery composeFQLGroupQueryFor(final MessagingField[] fields, final long groupId) {
+        return composeFQLGroupQueryFor0(fields, null, null, new long[] { groupId });
+    }
+
+    /**
+     * Composes the FQL group query for given fields.
+     * 
+     * @param fields The fields
+     * @param groupIds The group identifiers
+     * @return The FQL group query or <code>null</code> if fields require no query
+     */
+    public static FQLQuery composeFQLGroupQueryFor(final MessagingField[] fields, final long[] groupIds) {
+        return composeFQLGroupQueryFor0(fields, null, null, groupIds);
+    }
+
+    /**
+     * Composes the FQL group query for given fields.
+     * 
+     * @param fields The fields
+     * @param sortField The sort field; may be <code>null</code>
+     * @param order The order direction
+     * @param groupIds The group identifiers
+     * @return The FQL group query or <code>null</code> if fields require no query
+     */
+    public static FQLQuery composeFQLGroupQueryFor(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] groupIds) {
+        return composeFQLGroupQueryFor0(fields, sortField, order, groupIds);
+    }
+
+    private static FQLQuery composeFQLGroupQueryFor0(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] groupIds) {
+        final Set<String> fieldNames = new HashSet<String>(fields.length);
+        for (int i = 0; i < fields.length; i++) {
+            final QueryAdder queryAdder = ADDERS_GROUP.get(fields[i]);
+            if (null != queryAdder) {
+                queryAdder.add2Query(fieldNames);
+            }
+        }
+        if (fieldNames.isEmpty()) {
+            return null;
+        }
+        final int size = fieldNames.size();
+        final StringBuilder query = new StringBuilder(size << 5).append("SELECT ");
+        {
+            final Iterator<String> iter = fieldNames.iterator();
+            query.append(iter.next());
+            for (int i = 1; i < size; i++) {
+                query.append(", ").append(iter.next());
+            }
+        }
+        query.append(" FROM group WHERE");
+        if (null != groupIds && 0 < groupIds.length) {
+            if (1 == groupIds.length) {
+                query.append(" gid = '").append(groupIds[0]).append('\'');
+            } else {
+                query.append(" gid IN ");
+                query.append('(');
+                {
+                    query.append('\'').append(groupIds[0]).append('\'');
+                    for (int i = 1; i < groupIds.length; i++) {
+                        query.append(',').append('\'').append(groupIds[i]).append('\'');
                     }
                 }
                 query.append(')');
