@@ -52,6 +52,7 @@ package com.openexchange.messaging.facebook.utility;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -476,19 +477,19 @@ public final class FacebookMessagingUtility {
     /**
      * A FQL query.
      */
-    public static final class Query {
+    public static final class FQLQuery {
 
         private final CharSequence charSequence;
 
         private final boolean orderBy;
 
         /**
-         * Initializes a new {@link Query}.
+         * Initializes a new {@link FQLQuery}.
          * 
          * @param query The query character sequence
          * @param orderBy <code>true</code> if query contains <code>ORDER BY</code> clause; otherwise <code>false</code>
          */
-        public Query(final CharSequence charSequence, final boolean orderBy) {
+        public FQLQuery(final CharSequence charSequence, final boolean orderBy) {
             super();
             this.charSequence = charSequence;
             this.orderBy = orderBy;
@@ -515,9 +516,9 @@ public final class FacebookMessagingUtility {
     }
 
     /**
-     * The query type.
+     * The Facebook query type.
      */
-    public static enum QueryType {
+    public static enum FQLQueryType {
 
         /**
          * Retrieve a user's News Feed.
@@ -530,7 +531,7 @@ public final class FacebookMessagingUtility {
 
         private final String name;
 
-        private QueryType(final String name) {
+        private FQLQueryType(final String name) {
             this.name = name;
         }
 
@@ -543,9 +544,9 @@ public final class FacebookMessagingUtility {
          * Gets the query type for specified folder identifier.
          * 
          * @param folderId The folder identifier
-         * @return The query type or <code>null</code>
+         * @return The query type or <code>null</code> if no query is associated with specified folder identifier
          */
-        public static QueryType queryTypeFor(final String folderId) {
+        public static FQLQueryType queryTypeFor(final String folderId) {
             if (MessagingFolder.ROOT_FULLNAME.equals(folderId)) {
                 return NEWS_FEED;
             }
@@ -566,7 +567,7 @@ public final class FacebookMessagingUtility {
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static Query composeFQLStreamQueryFor(final QueryType queryType, final MessagingField[] fields, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final MessagingField[] fields, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
         return composeFQLStreamQueryFor0(queryType, fields, null, null, postIds, facebookUserId);
     }
 
@@ -582,7 +583,7 @@ public final class FacebookMessagingUtility {
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static Query composeFQLStreamQueryFor(final QueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
         return composeFQLStreamQueryFor0(queryType, fields, sortField, order, postIds, facebookUserId);
     }
 
@@ -595,7 +596,7 @@ public final class FacebookMessagingUtility {
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static Query composeFQLStreamQueryFor(final QueryType queryType, final MessagingField[] fields, final long facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final MessagingField[] fields, final long facebookUserId) throws FacebookMessagingException {
         return composeFQLStreamQueryFor0(queryType, fields, null, null, null, facebookUserId);
     }
 
@@ -610,11 +611,61 @@ public final class FacebookMessagingUtility {
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static Query composeFQLStreamQueryFor(final QueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
         return composeFQLStreamQueryFor0(queryType, fields, sortField, order, null, facebookUserId);
     }
 
-    private static Query composeFQLStreamQueryFor0(final QueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+    /**
+     * The default limit for a FQL query.
+     */
+    private static final int DEFAULT_LIMIT = 1000;
+
+    private static FQLQuery composeFQLStreamQueryFor0(final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+        final StringBuilder query = startFQLStreamQuery(queryType, fields, facebookUserId);
+        if (null == query) {
+            /*
+             * No fields queried
+             */
+            return null;
+        }
+        return finishFQLStreamQuery(sortField, order, postIds, DEFAULT_LIMIT, query);
+    }
+
+    /**
+     * Composes the FQL stream query for given fields considering posts created <b>before</b> given time stamp.
+     * 
+     * @param timeStamp The time stamp
+     * @param queryType The query type constant
+     * @param fields The fields
+     * @param sortField The sort field; may be <code>null</code>
+     * @param order The order direction
+     * @param facebookUserId The facebook user identifier
+     * @return The FQL stream query or <code>null</code> if fields require no query
+     * @throws FacebookMessagingException If composing query fails
+     */
+    public static FQLQuery composeFQLStreamQuerySince(final Date timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long facebookUserId) throws FacebookMessagingException {
+        return composeFQLStreamQuerySince(timeStamp, queryType, fields, sortField, order, null, facebookUserId);
+    }
+
+    private static FQLQuery composeFQLStreamQuerySince(final Date timeStamp, final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
+        final StringBuilder query = startFQLStreamQuery(queryType, fields, facebookUserId);
+        if (null == query) {
+            /*
+             * No fields queried
+             */
+            return null;
+        }
+        /*
+         * Add since
+         */
+        query.append(" AND created_time < ").append(timeStamp.getTime());
+        return finishFQLStreamQuery(sortField, order, postIds, DEFAULT_LIMIT, query);
+    }
+
+    private static StringBuilder startFQLStreamQuery(final FQLQueryType queryType, final MessagingField[] fields, final long facebookUserId) throws FacebookMessagingException {
+        /*
+         * Resolve fields to known FQL fields
+         */
         final Set<String> fieldNames = new HashSet<String>(fields.length);
         for (int i = 0; i < fields.length; i++) {
             final QueryAdder queryAdder = ADDERS_STREAM.get(fields[i]);
@@ -623,6 +674,9 @@ public final class FacebookMessagingUtility {
             }
         }
         if (fieldNames.isEmpty()) {
+            /*
+             * No field could be mapped to a known FQL field
+             */
             return null;
         }
         final int size = fieldNames.size();
@@ -650,6 +704,13 @@ public final class FacebookMessagingUtility {
         default:
             throw FacebookMessagingExceptionCodes.UNSUPPORTED_QUERY_TYPE.create(queryType.toString());
         }
+        return query;
+    }
+
+    private static FQLQuery finishFQLStreamQuery(final MessagingField sortField, final OrderDirection order, final String[] postIds, final int limit, final StringBuilder query) {
+        /*
+         * Check for identifiers
+         */
         if (null != postIds && 0 < postIds.length) {
             if (1 == postIds.length) {
                 query.append(" AND post_id = '").append(postIds[0]).append('\'');
@@ -669,7 +730,7 @@ public final class FacebookMessagingUtility {
          * Check sort field
          */
         if (null == sortField) {
-            return new Query(query.append(" LIMIT 1000"), false);
+            return new FQLQuery(query.append(" LIMIT ").append(limit), false);
         }
         boolean containsOrderBy = false;
         final QueryAdder adder = ADDERS_STREAM.get(sortField);
@@ -680,7 +741,7 @@ public final class FacebookMessagingUtility {
                 containsOrderBy = true;
             }
         }
-        return new Query(query.append(" LIMIT 1000"), containsOrderBy);
+        return new FQLQuery(query.append(" LIMIT ").append(limit), containsOrderBy);
     }
 
     /**
@@ -690,7 +751,7 @@ public final class FacebookMessagingUtility {
      * @param userId The user identifier
      * @return The FQL user query or <code>null</code> if fields require no query
      */
-    public static Query composeFQLUserQueryFor(final MessagingField[] fields, final long userId) {
+    public static FQLQuery composeFQLUserQueryFor(final MessagingField[] fields, final long userId) {
         return composeFQLUserQueryFor0(fields, null, null, new long[] { userId });
     }
 
@@ -701,7 +762,7 @@ public final class FacebookMessagingUtility {
      * @param userIds The user identifiers
      * @return The FQL user query or <code>null</code> if fields require no query
      */
-    public static Query composeFQLUserQueryFor(final MessagingField[] fields, final long[] userIds) {
+    public static FQLQuery composeFQLUserQueryFor(final MessagingField[] fields, final long[] userIds) {
         return composeFQLUserQueryFor0(fields, null, null, userIds);
     }
 
@@ -714,11 +775,11 @@ public final class FacebookMessagingUtility {
      * @param userIds The user identifiers
      * @return The FQL user query or <code>null</code> if fields require no query
      */
-    public static Query composeFQLUserQueryFor(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] userIds) {
+    public static FQLQuery composeFQLUserQueryFor(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] userIds) {
         return composeFQLUserQueryFor0(fields, sortField, order, userIds);
     }
 
-    private static Query composeFQLUserQueryFor0(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] userIds) {
+    private static FQLQuery composeFQLUserQueryFor0(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] userIds) {
         final Set<String> fieldNames = new HashSet<String>(fields.length);
         for (int i = 0; i < fields.length; i++) {
             final QueryAdder queryAdder = ADDERS_USER.get(fields[i]);
@@ -758,7 +819,7 @@ public final class FacebookMessagingUtility {
          * Check sort field
          */
         if (null == sortField) {
-            return new Query(query, false);
+            return new FQLQuery(query, false);
         }
         boolean containsOrderBy = false;
         final QueryAdder adder = ADDERS_STREAM.get(sortField);
@@ -769,7 +830,7 @@ public final class FacebookMessagingUtility {
                 containsOrderBy = true;
             }
         }
-        return new Query(query, containsOrderBy);
+        return new FQLQuery(query, containsOrderBy);
     }
 
     /**
