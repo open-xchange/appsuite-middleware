@@ -97,7 +97,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
      * 
      * @return The message text
      */
-    public CharSequence getMessageText() {
+    public StringBuilder getMessageText() {
         return messageText;
     }
 
