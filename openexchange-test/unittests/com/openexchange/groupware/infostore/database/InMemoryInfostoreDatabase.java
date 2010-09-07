@@ -123,12 +123,12 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-    public boolean exists(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public boolean exists(final int id, final int version, final Context ctx) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public DocumentMetadata getDocumentMetadata(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public DocumentMetadata getDocumentMetadata(final int id, final int version, final Context ctx) {
         throw new UnsupportedOperationException();
     }
 
@@ -143,12 +143,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-    public InputStream getDocument(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Set<Integer> removeDocuments(final Set<Integer> ids, final long date, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public InputStream getDocument(final int id, final int version, final Context ctx) {
         throw new UnsupportedOperationException();
     }
 
@@ -201,16 +196,6 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-    public List<Integer> removeVersion(final int id, final int[] versionId, final Context ctx, final User user, final UserConfiguration userConfig) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public TimedResult<?> getDocuments(final long folderId, final Metadata[] columns, final Metadata sort, final int order, final boolean onlyOwnObjects, final Context ctx, final User user, final UserConfiguration userConfig) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public SortedSet<String> getDocumentFileStoreLocationsperContext(final Context ctx) {
        final SortedSet<String> locations = new TreeSet<String>();
         for(final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
@@ -230,22 +215,17 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, final Context ctx) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, final Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, final Metadata[] columns, final Context ctx) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Delta<?> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean onlyOwnObjects, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int countDocuments(final long folderId, final boolean onlyOwnObjects, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public int countDocuments(final long folderId, final boolean onlyOwnObjects, final Context ctx, final User user) {
         throw new UnsupportedOperationException();
     }
 
@@ -255,7 +235,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-    public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user) {
         throw new UnsupportedOperationException();
     }
 
