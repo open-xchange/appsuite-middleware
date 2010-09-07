@@ -53,6 +53,7 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.SearchFields;
@@ -66,6 +67,7 @@ import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
+import com.openexchange.resource.json.ResourceWriter;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.tools.servlet.AjaxException;
@@ -131,7 +133,7 @@ public class ResourceRequest {
         }
     }
 
-    private Object actionUpdates(final JSONObject jsonObj)  throws AbstractOXException, JSONException {
+    private JSONValue actionUpdates(final JSONObject jsonObj)  throws AbstractOXException, JSONException {
         final Date lastModified = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         Resource[] resources = null;
         try {
@@ -140,19 +142,24 @@ public class ResourceRequest {
             LOG.debug("Tried to find resources that were modified since "+lastModified, exc);
         }
 
-        final JSONArray jsonResponseArray = new JSONArray();
+        final JSONArray modified = new JSONArray();
         long lm = 0;
         if(resources != null){
             for(Resource res: resources){
                 if(res.getLastModified().getTime() > lm)
                     lm = res.getLastModified().getTime();
                 
-                jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(res));
+                modified.put(ResourceWriter.writeResource(res));
             }
         }
         timestamp = new Date(lm);
 
-        return jsonResponseArray;
+        JSONObject retVal = new JSONObject();
+        retVal.put("modified", modified);
+        retVal.put("new", JSONObject.NULL);
+        retVal.put("deleted", JSONObject.NULL);
+        
+        return retVal;
     }
 
     private JSONArray actionList(final JSONObject jsonObj) throws AbstractOXException, JSONException {

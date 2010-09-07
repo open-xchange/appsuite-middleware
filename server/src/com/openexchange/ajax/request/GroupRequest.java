@@ -101,6 +101,8 @@ public class GroupRequest {
             retval = actionGet(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
             retval = actionSearch(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
+            retval = actionUpdates(jsonObject);
         } else {
             /*
              * Look-up manage request
@@ -120,6 +122,31 @@ public class GroupRequest {
             return result.getResultObject();
         }
         return retval;
+    }
+
+
+    public JSONValue actionUpdates(JSONObject jsonObject) throws JSONException, OXJSONException, AjaxException, LdapException {
+        timestamp = new Date(0);
+        final GroupStorage groupStorage = GroupStorage.getInstance();
+        Date modifiedSince = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
+        final Group[] modifiedGroups = groupStorage.listModifiedGroups(modifiedSince, session.getContext());
+        final GroupWriter groupWriter = new GroupWriter();
+        final JSONArray modified = new JSONArray();
+        long lm = 0;
+        for(Group group: modifiedGroups){
+            JSONObject temp = new JSONObject();
+            groupWriter.writeGroup(group, temp);
+            modified.put(temp);
+            lm = group.getLastModified().getTime() > lm ? group.getLastModified().getTime() : lm;
+        }
+        timestamp = new Date(lm);
+        JSONObject retVal = new JSONObject();
+        
+        retVal.put("new", JSONObject.NULL);
+        retVal.put("modified", modified);
+        retVal.put("deleted", JSONObject.NULL);
+        
+        return retVal;
     }
 
     public JSONArray actionList(final JSONObject jsonObj) throws JSONException, LdapException, OXJSONException, AjaxException {
