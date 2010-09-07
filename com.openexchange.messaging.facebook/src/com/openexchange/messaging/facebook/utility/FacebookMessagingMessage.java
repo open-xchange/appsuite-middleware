@@ -64,7 +64,9 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
      */
     private static final long serialVersionUID = 5314172807807461367L;
 
-    private long fromUserId;
+    private long fromId;
+
+    private boolean group;
 
     private final StringBuilder messageText;
 
@@ -84,7 +86,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
     /**
      * Appends specified text.
      * <p>
-     * Text should already be HTML-escaped: '<' ==> &amp;lt
+     * Text should already be HTML-escaped: '<' ==> &amp;lt;
      * 
      * @param textContent The text to append
      */
@@ -116,21 +118,39 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
     }
 
     /**
-     * Gets the <i>"From"</i> user identifier.
+     * Gets the <i>"From"</i> entity identifier.
      * 
-     * @return The <i>"From"</i> user identifier
+     * @return The <i>"From"</i> entity identifier
      */
-    public long getFromUserId() {
-        return fromUserId;
+    public long getFromId() {
+        return fromId;
     }
 
     /**
-     * Sets the <i>"From"</i> user identifier.
+     * Sets the <i>"From"</i> entity identifier.
      * 
-     * @param userId The <i>"From"</i> user identifier to set
+     * @param fromId The <i>"From"</i> entity identifier to set
      */
-    public void setFromUserId(final long userId) {
-        this.fromUserId = userId;
+    public void setFromId(final long fromId) {
+        this.fromId = fromId;
+    }
+
+    /**
+     * Checks if entity denotes a group.
+     * 
+     * @return <code>true</code> if entity denotes a group; otherwise <code>false</code>
+     */
+    public boolean isGroup() {
+        return group;
+    }
+
+    /**
+     * Sets whether entity denotes a group.
+     * 
+     * @param group <code>true</code> if entity denotes a group; otherwise <code>false</code>
+     */
+    public void setGroup(boolean group) {
+        this.group = group;
     }
 
     /**
