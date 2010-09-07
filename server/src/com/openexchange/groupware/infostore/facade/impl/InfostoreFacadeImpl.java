@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.facade.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.TLongObjectHashMap;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -69,22 +70,16 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
@@ -114,16 +109,15 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManager;
-import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
 import com.openexchange.groupware.infostore.webdav.LockManager.Scope;
 import com.openexchange.groupware.infostore.webdav.LockManager.Type;
+import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.ReuseReadConProvider;
 import com.openexchange.groupware.tx.TransactionException;
@@ -148,7 +142,6 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_FACADE_IMPL_INFOSTOREFACADEIMPL, component = EnumComponent.INFOSTORE)
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     private static final ValidationChain VALIDATION = new ValidationChain();
@@ -160,9 +153,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     private static final InfostoreFilenameReserver filenameReserver = new SelectForUpdateFilenameReserver();
 
-    private static final Log LOG = LogFactory.getLog(InfostoreFacadeImpl.class);
-
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InfostoreFacadeImpl.class);
+    static final Log LOG = LogFactory.getLog(InfostoreFacadeImpl.class);
 
     public static final InfostoreQueryCatalog QUERIES = new InfostoreQueryCatalog();
 
@@ -200,21 +191,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         try {
             return security.getInfostorePermission(id, ctx, user, userConfig).canReadObject();
         } catch (final InfostoreException x) {
-            if (x.getDetailNumber() == Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTORESECURITYIMPL * 100) {
+            if (x.getDetailNumber() == InfostoreExceptionCodes.NOT_EXIST.getDetailNumber()) {
                 return false;
             }
             throw x;
         }
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT }, desc = {
-        "The User does not have read permissions on the requested Infoitem. ", "The document could not be loaded because it doesn't exist." }, exceptionId = {
-        0, 38 }, msg = { "You do not have sufficient read permissions.", "The document you requested doesn't exist." })
     public DocumentMetadata getDocumentMetadata(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
 
         if (!infoPerm.canReadObject()) {
-            throw EXCEPTIONS.create(0);
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
 
         final List<Lock> locks = lockManager.findLocks(id, ctx, user, userConfig);
@@ -227,7 +215,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     private DocumentMetadata load(final int id, final int version, final Context ctx) throws OXException {
         final InfostoreIterator iter = InfostoreIterator.loadDocumentIterator(id, version, getProvider(), ctx);
         if (!iter.hasNext()) {
-            throw EXCEPTIONS.create(38);
+            throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
         }
         DocumentMetadata dm;
         try {
@@ -247,16 +235,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         saveDocument(document, null, sequenceNumber, modifiedColumns, sessionObj);
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = {
-        "The User does not have read permissions on the requested Infoitem. ",
-        "The file store couldn't be reached and is probably down.",
-        "The file could not be found in the file store. This means either that the file store was not available or that database and file store are inconsistent. Run the recovery tool." }, exceptionId = {
-        1, 39, 40 }, msg = {
-        "You do not have sufficient read permissions.", "The file store could not be reched", "The file could not be retrieved." })
     public InputStream getDocument(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
         if (!infoPerm.canReadObject()) {
-            throw EXCEPTIONS.create(1);
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         final DocumentMetadata dm = load(id, version, ctx);
         FileStorage fs = null;
@@ -274,7 +256,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "The user does not have sufficient write permissions to lock this infoitem.", exceptionId = 18, msg = "You need write permissions to lock a document.")
     public void lock(final int id, final long diff, final ServerSession sessionObj) throws OXException {
         final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
             id,
@@ -282,7 +263,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             getUser(sessionObj),
             getUserConfiguration(sessionObj));
         if (!infoPerm.canWriteObject()) {
-            throw EXCEPTIONS.create(18);
+            throw InfostoreExceptionCodes.WRITE_PERMS_FOR_LOCK_MISSING.create();
         }
         checkWriteLock(id, sessionObj);
         long timeout = 0;
@@ -303,7 +284,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         touch(id, sessionObj);
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "The user does not have sufficient write permissions to unlock this infoitem.", exceptionId = 17, msg = "You need write permissions to unlock a document.")
     public void unlock(final int id, final ServerSession sessionObj) throws OXException {
         final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
             id,
@@ -311,7 +291,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             getUser(sessionObj),
             getUserConfiguration(sessionObj));
         if (!infoPerm.canWriteObject()) {
-            throw EXCEPTIONS.create(17);
+            throw InfostoreExceptionCodes.WRITE_PERMS_FOR_UNLOCK_MISSING.create();
         }
         checkMayUnlock(id, sessionObj);
         lockManager.removeAll(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
@@ -358,30 +338,27 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
-    @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 13, msg = "Could not iterate result")
     private Delta<DocumentMetadata> addLocked(final Delta<DocumentMetadata> delta, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         try {
             return new LockDelta(delta, locks, ctx, user, userConfig);
         } catch (final SearchIteratorException e) {
-            throw EXCEPTIONS.create(13, e);
+            throw InfostoreExceptionCodes.ITERATE_FAILED.create(e);
         }
     }
 
-    @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 44, msg = "Could not iterate result")
     private Delta<DocumentMetadata> addNumberOfVersions(final Delta<DocumentMetadata> delta, final Context ctx) throws OXException {
         try {
             return new NumberOfVersionsDelta(delta, ctx);
         } catch (final SearchIteratorException e) {
-            throw EXCEPTIONS.create(44, e);
+            throw InfostoreExceptionCodes.ITERATE_FAILED.create(e);
         }
     }
 
-    @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 43, msg = "Could not iterate result")
     private TimedResult<DocumentMetadata> addNumberOfVersions(final TimedResult<DocumentMetadata> tr, final Context ctx) throws InfostoreException {
         try {
             return new NumberOfVersionsTimedResult(tr, ctx);
         } catch (final SearchIteratorException x) {
-            throw EXCEPTIONS.create(43, x);
+            throw InfostoreExceptionCodes.ITERATE_FAILED.create(x);
         } catch (final InfostoreException x) {
             throw x;
         } catch (final OXException e) {
@@ -389,16 +366,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
-    @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 14, msg = "Could not iterate result")
     private TimedResult<DocumentMetadata> addLocked(final TimedResult<DocumentMetadata> tr, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         try {
             return new LockTimedResult(tr, ctx, user, userConfig);
         } catch (final SearchIteratorException e) {
-            throw EXCEPTIONS.create(14);
+            throw InfostoreExceptionCodes.ITERATE_FAILED.create(e);
         }
     }
 
-    @OXThrows(category = Category.INTERNAL_ERROR, desc = "The query to cound the versions in a document failed.", exceptionId = 42, msg = "Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s")
     private DocumentMetadata addNumberOfVersions(final DocumentMetadata document, final Context ctx) throws InfostoreException {
 
         try {
@@ -417,11 +392,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw EXCEPTIONS.create(
-                42,
+            throw InfostoreExceptionCodes.NUMBER_OF_VERSIONS_FAILED.create(
                 e,
-                Integer.valueOf(document.getId()),
-                Integer.valueOf(ctx.getContextId()),
+                I(document.getId()),
+                I(ctx.getContextId()),
                 QUERIES.getNumberOfVersionsQueryForOneDocument());
         } catch (final TransactionException e) {
             throw new InfostoreException(e);
@@ -448,7 +422,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return document;
     }
 
-    private SearchIterator<DocumentMetadata> numberOfVersionsIterator(final SearchIterator<?> iter, final Context ctx) throws OXException, SearchIteratorException {
+    SearchIterator<DocumentMetadata> numberOfVersionsIterator(final SearchIterator<?> iter, final Context ctx) throws OXException, SearchIteratorException {
         final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
         while (iter.hasNext()) {
             final DocumentMetadata m = (DocumentMetadata) iter.next();
@@ -461,7 +435,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
 
-    private SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws SearchIteratorException, OXException {
+    SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws SearchIteratorException, OXException {
         final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
         while (iter.hasNext()) {
             final DocumentMetadata m = (DocumentMetadata) iter.next();
@@ -484,19 +458,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return document;
     }
 
-    @OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The infoitem was locked by some other user. Only the user that locked the item (the one that modified the entry) can modify a locked infoitem.", exceptionId = 15, msg = "This document is locked.")
     private void checkWriteLock(final DocumentMetadata document, final ServerSession sessionObj) throws OXException {
         if (document.getModifiedBy() == sessionObj.getUserId()) {
             return;
         }
 
         if (lockManager.isLocked(document.getId(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj))) {
-            throw EXCEPTIONS.create(15);
+            throw InfostoreExceptionCodes.ALREADY_LOCKED.create();
         }
 
     }
 
-    @OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The infoitem was locked by some other user. Only the user that locked the item and the creator of the item can unlock a locked infoitem.", exceptionId = 16, msg = "You cannot unlock this document.")
     private void checkMayUnlock(final int id, final ServerSession sessionObj) throws OXException {
         final DocumentMetadata document = load(id, CURRENT_VERSION, sessionObj.getContext());
         if (document.getCreatedBy() == sessionObj.getUserId() || document.getModifiedBy() == sessionObj.getUserId()) {
@@ -504,16 +476,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
         final List<Lock> locks = lockManager.findLocks(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
         if (locks.size() > 0) {
-            throw EXCEPTIONS.create(16);
+            throw InfostoreExceptionCodes.LOCKED_BY_ANOTHER.create();
         }
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.INTERNAL_ERROR }, desc = {
-        "The user may not create objects in the given folder. ", "The file store couldn't be reached.",
-        "The IDGenerator threw an SQL Exception look at that one to find out what's wrong." }, exceptionId = {
-        2, 19, 20}, msg = {
-        "You do not have sufficient permissions to create objects in this folder.", "The file store could not be reached.",
-        "Could not generate new ID."})
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
         security.checkFolderId(document.getFolderId(), sessionObj.getContext());
 
@@ -524,7 +490,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 getUser(sessionObj),
                 getUserConfiguration(sessionObj));
             if (!isperm.canCreateObjects()) {
-                throw EXCEPTIONS.create(2);
+                throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
             }
             setDefaults(document);
 
@@ -541,7 +507,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     document.setId(getId(sessionObj.getContext(), writeCon));
                     commitDBTransaction();
                 } catch (final SQLException e) {
-                    throw EXCEPTIONS.create(20, e);
+                    throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
                 } catch (TransactionException e) {
                     throw new InfostoreException(e);
                 } finally {
@@ -716,20 +682,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return retval + 1;
     }
 
-    @OXThrowsMultiple(category = {Category.USER_INPUT, Category.CODE_ERROR},
-                                desc = {"To remain consistent in WebDAV no two current versions in a given folder may contain a file with the same filename. The user must either choose a different filename, or switch the other file to a version with a different filename.", "SQL Error while reserving filename"},
-                                exceptionId = {41, 46},
-                                msg = {"Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s.", "SQL Error while reserving filename."})
     private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx) throws OXException {
 
         InfostoreFilenameReservation reservation = null;
         try {
             reservation = filenameReserver.reserveFilename(filename, folderId, id, ctx, this);
             if (reservation == null) {
-                throw EXCEPTIONS.create(41, filename, "Unknown");
+                throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(filename, "Unknown");
             }
         } catch (SQLException e) {
-            throw EXCEPTIONS.create(46, e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         }
         return reservation;
     }
@@ -749,12 +711,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return nonNull.toArray(new Metadata[nonNull.size()]);
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = {
-        "The user doesn't have the required write permissions to update the infoitem.",
-        "The user isn't allowed to create objects in the target folder when moving an infoitem.",
-        "Need delete permissions in original folder to move an item" }, exceptionId = { 3, 4, 21 }, msg = {
-        "You are not allowed to update this item.", "You are not allowed to create objects in the target folder.",
-        "You are not allowed to delete objects in the source folder, so this document cannot be moved." })
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
         try {
             final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
@@ -763,7 +719,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 getUser(sessionObj),
                 getUserConfiguration(sessionObj));
             if (!infoPerm.canWriteObject()) {
-                throw EXCEPTIONS.create(3);
+                throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
             }
             if ((Arrays.asList(modifiedColumns).contains(Metadata.FOLDER_ID_LITERAL)) && (document.getFolderId() != -1) && infoPerm.getObject().getFolderId() != document.getFolderId()) {
                 security.checkFolderId(document.getFolderId(), sessionObj.getContext());
@@ -773,11 +729,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     getUser(sessionObj),
                     getUserConfiguration(sessionObj));
                 if (!(isperm.canCreateObjects())) {
-                    throw EXCEPTIONS.create(4);
+                    throw InfostoreExceptionCodes.NO_TARGET_CREATE_PERMISSION.create();
                 }
-
                 if (!infoPerm.canDeleteObject()) {
-                    throw EXCEPTIONS.create(21);
+                    throw InfostoreExceptionCodes.NO_SOURCE_DELETE_PERMISSION.create();
                 }
             }
 
@@ -968,7 +923,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
-    @OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "Not all infoitems in the given folder could be deleted. This may be due to the infoitems being modified since the last request, or the objects might not even exist anymore or the user doesn't have enough delete permissions on certain objects.", exceptionId = 5, msg = "Could not delete all objects.")
     private void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession sessionObj, final List<DocumentMetadata> rejected) throws OXException {
         final List<DocumentMetadata> delDocs = new ArrayList<DocumentMetadata>();
         final List<DocumentMetadata> delVers = new ArrayList<DocumentMetadata>();
@@ -979,7 +933,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         for (final DocumentMetadata m : allDocuments) {
             if (m.getSequenceNumber() > date) {
                 if (rejected == null) {
-                    throw EXCEPTIONS.create(5);
+                    throw InfostoreExceptionCodes.NOT_ALL_DELETED.create();
                 }
                 rejected.add(m);
                 rejectedIds.add(Integer.valueOf(m.getId()));
@@ -1055,7 +1009,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
-    @OXThrows(category = Category.SUBSYSTEM_OR_SERVICE_DOWN, desc = "Could not remove file from file store.", exceptionId = 37, msg = "Could not remove file from file store.")
     private void removeFile(final Context context, final String filestoreLocation) throws OXException {
         if (filestoreLocation == null) {
             return;
@@ -1075,7 +1028,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "You do not have the permissions to delete at least one of the info items.", exceptionId = 45, msg = "You do not have the permissions to delete at least one of the info items.")
     public int[] removeDocument(final int[] id, final long date, final ServerSession sessionObj) throws OXException {
         final StringBuilder ids = new StringBuilder().append('(');
         for (final int i : id) {
@@ -1134,7 +1086,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 }
                 final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(p, m, getUser(sessionObj));
                 if (!infoPerm.canDeleteObject()) {
-                    throw EXCEPTIONS.create(45);
+                    throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
                 }
                 toDeleteDocs.add(m);
             }
@@ -1162,7 +1114,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return nd;
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "The user must be allowed to delete the object in order to delete a version of it.", exceptionId = 6, msg = "You do not have sufficient permission to delete this version.")
     public int[] removeVersion(final int id, final int[] versionId, final ServerSession sessionObj) throws OXException {
         if (versionId.length <= 0) {
             return versionId;
@@ -1180,7 +1131,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             getUser(sessionObj),
             getUserConfiguration(sessionObj));
         if (!infoPerm.canDeleteObject()) {
-            throw EXCEPTIONS.create(6);
+            throw InfostoreExceptionCodes.NO_DELETE_PERMISSION_FOR_VERSION.create();
         }
         final StringBuilder versions = new StringBuilder().append('(');
         final Set<Integer> versionSet = new HashSet<Integer>();
@@ -1324,13 +1275,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return getDocuments(folderId, columns, null, 0, ctx, user, userConfig);
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 7, msg = "You do not have sufficient permissions to read objects in this folder.")
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         columns = addLastModifiedIfNeeded(columns);
         boolean onlyOwn = false;
         final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
         if (isperm.getReadPermission() == EffectivePermission.NO_PERMISSIONS) {
-            throw EXCEPTIONS.create(7);
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.getReadPermission() == EffectivePermission.READ_OWN_OBJECTS) {
             onlyOwn = true;
         }
@@ -1371,11 +1321,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return getVersions(id, columns, null, 0, ctx, user, userConfig);
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 8, msg = "You do not have sufficient permissions to read objects in this folder.")
     public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
         if (!infoPerm.canReadObject()) {
-            throw EXCEPTIONS.create(8);
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         boolean addLocked = false;
         for (final Metadata m : columns) {
@@ -1395,7 +1344,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 9, msg = "You do not have sufficient permissions to read objects in this folder.")
     public TimedResult<DocumentMetadata> getDocuments(final int[] ids, Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
         try {
@@ -1410,7 +1358,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             });
         } catch (final NotAllowed na) {
-            throw EXCEPTIONS.create(9);
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         columns = addLastModifiedIfNeeded(columns);
         final InfostoreIterator iter = InfostoreIterator.list(ids, columns, getProvider(), ctx);
@@ -1432,12 +1380,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return getDelta(folderId, updateSince, columns, null, 0, ignoreDeleted, ctx, user, userConfig);
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 10, msg = "You do not have sufficient permissions to read objects in this folder.")
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException, SearchIteratorException {
         boolean onlyOwn = false;
         final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
         if (isperm.getReadPermission() == EffectivePermission.NO_PERMISSIONS) {
-            throw EXCEPTIONS.create(10);
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.getReadPermission() == EffectivePermission.READ_OWN_OBJECTS) {
             onlyOwn = true;
         }
@@ -1515,12 +1462,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return locks;
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 11, msg = "You do not have sufficient permissions to read objects in this folder.")
     public int countDocuments(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         boolean onlyOwn = false;
         final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
         if (!(isperm.canReadAllObjects()) && !(isperm.canReadOwnObjects())) {
-            throw EXCEPTIONS.create(11);
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.canReadOwnObjects()) {
             onlyOwn = true;
         }
@@ -1577,7 +1523,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         private static final long serialVersionUID = 4872889537922290831L;
 
-        public int id;
+        private final int id;
 
         public NotAllowed(final int id) {
             this.id = id;
@@ -1631,14 +1577,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    @OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = {
-        "Cannot reach the file store so some documents were not deleted.",
-        "Cannot reach the file store so some documents were not deleted. This propably means that file store and db are inconsistent. Run the recovery tool." }, exceptionId = {
-        35, 36 }, msg = {
-        "Cannot reach the file store so I cannot remove the documents.",
-        "Cannot remove file. Database and file store are probably inconsistent. Please contact an administrator to run the recovery tool." }
-
-    )
     public void commit() throws TransactionException {
         db.commit();
         ServiceMethod.COMMIT.callUnsafe(security);
@@ -1648,7 +1586,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 final QuotaFileStorage qfs = getFileStorage(ctxHolder.get());
                 for (final String id : fileIdRemoveList.get()) {
                     try {
-                        // System.out.println("REMOVE " + id);
                         qfs.deleteFile(id);
                     } catch (final FileStorageException x) {
                         throw new TransactionException(x);

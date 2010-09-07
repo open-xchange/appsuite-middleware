@@ -61,7 +61,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.StaticDBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;

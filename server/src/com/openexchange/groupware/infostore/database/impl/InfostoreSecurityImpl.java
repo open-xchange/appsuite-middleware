@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,16 +57,12 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBService;
@@ -77,29 +74,14 @@ import com.openexchange.tools.collections.OXCollections;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
-@OXExceptionSource(
-        classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTORESECURITYIMPL,
-        component=EnumComponent.INFOSTORE
-)
 public class InfostoreSecurityImpl extends DBService implements InfostoreSecurity {
 
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InfostoreSecurityImpl.class);
-
-    @OXThrows(
-            category = Category.USER_INPUT,
-            desc = "The infoitem does not exist, so the permissions cannot be loaded.",
-            exceptionId = 0,
-            msg = "The requested item does not exist."
-    )
     public EffectiveInfostorePermission getInfostorePermission(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        final List<DocumentMetadata> documentData = getFolderIdAndCreatorForDocuments(ctx.getContextId(), new int[]{id}, ctx, user, userConfig);
+        final List<DocumentMetadata> documentData = getFolderIdAndCreatorForDocuments(new int[]{id}, ctx);
         if (documentData == null || documentData.size() <= 0 || documentData.get(0) == null) {
-            throw EXCEPTIONS.create(0);
+            throw InfostoreExceptionCodes.NOT_EXIST.create();
         }
-
-
         return getInfostorePermission(documentData.get(0), ctx, user, userConfig);
-
     }
 
     public EffectiveInfostorePermission getInfostorePermission(final DocumentMetadata document, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
@@ -116,19 +98,12 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         }
     }
 
-    @OXThrows(
-            category = Category.USER_INPUT,
-            desc = "To check permissions infoitems must be loaded to find their folderId and creator.",
-            exceptionId = 1,
-            msg = "Could not load documents to check the permissions"
-    )
-    private List<DocumentMetadata> getFolderIdAndCreatorForDocuments(final int contextId, final int[] is, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private List<DocumentMetadata> getFolderIdAndCreatorForDocuments(final int[] is, final Context ctx) throws OXException {
         final InfostoreIterator iter = InfostoreIterator.list(is, new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.CREATED_BY_LITERAL}, getProvider(), ctx);
-
         try {
             return iter.asList();
         } catch (final SearchIteratorException e) {
-            throw EXCEPTIONS.create(1,e);
+            throw InfostoreExceptionCodes.COULD_NOT_LOAD.create(e);
         }
     }
 
@@ -139,7 +114,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             return new OXFolderAccess(readCon, ctx).getFolderPermission((int) folderId, user.getId(), userConfig);
             //return OXFolderTools.getEffectiveFolderOCL((int)folderId, user.getId(), user.getGroups(),ctx, userConfig, readCon);
         } catch (TransactionException e) {
-            throw new OXException(e); 
+            throw new InfostoreException(e); 
         } finally {
             releaseReadConnection(ctx, readCon);
         }
@@ -149,7 +124,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         final Map<Integer, EffectivePermission> cache = new HashMap<Integer,EffectivePermission>();
         final List<EffectiveInfostorePermission> permissions = new ArrayList<EffectiveInfostorePermission>();
         Connection con = null;
-        final List<DocumentMetadata> metadata = getFolderIdAndCreatorForDocuments(ctx.getContextId(), ids, ctx, user, userConfig);
+        final List<DocumentMetadata> metadata = getFolderIdAndCreatorForDocuments(ids, ctx);
         try {
             con = getReadConnection(ctx);
             final OXFolderAccess access = new OXFolderAccess(con, ctx);
@@ -165,7 +140,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             }
 
         } catch (TransactionException e) {
-            throw new OXException(e);
+            throw new InfostoreException(e);
         } finally {
             releaseReadConnection(ctx, con);
         }
@@ -174,12 +149,6 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
 
     }
 
-    @OXThrows(
-            category = Category.CODE_ERROR,
-            desc = "The client tries to put an infoitem into a non infoitem folder.",
-            exceptionId = 2,
-            msg = "The folder %d is not an Infostore folder"
-    )
     public void checkFolderId(final long folderId, final Context ctx) throws OXException {
         final FolderCacheManager cache = FolderCacheManager.getInstance();
         final FolderObject fo;
@@ -193,7 +162,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             releaseReadConnection(ctx, readCon);
         }
         if(fo.getModule() != FolderObject.INFOSTORE) {
-            throw EXCEPTIONS.create(2,Long.valueOf(folderId));
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
         }
     }
 }

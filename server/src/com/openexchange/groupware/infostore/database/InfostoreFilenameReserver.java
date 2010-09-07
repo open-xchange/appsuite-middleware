@@ -54,7 +54,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tx.DBProvider;
 
-
 /**
  * {@link InfostoreFilenameReserver}
  *
@@ -62,6 +61,6 @@ import com.openexchange.groupware.tx.DBProvider;
  */
 public interface InfostoreFilenameReserver {
 
-    public InfostoreFilenameReservation reserveFilename(String fileName, long folderId, int id, Context context, DBProvider provider) throws SQLException, OXException ;
+    InfostoreFilenameReservation reserveFilename(String fileName, long folderId, int id, Context context, DBProvider provider) throws SQLException, OXException;
 
 }

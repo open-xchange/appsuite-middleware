@@ -52,6 +52,7 @@ package com.openexchange.groupware.infostore;
 import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.*;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -64,7 +65,48 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     /** Invalid SQL Query: %s */
     SQL_PROBLEM(INVALID_SQL_QUERY_MSG, Category.CODE_ERROR, 200, INVALID_SQL_QUERY_HELP),
     /** Cannot pre-fetch results. */
-    PREFETCH_FAILED(PREFETCH_FAILED_MSG, Category.TRY_AGAIN, 219, PREFETCH_FAILED_HELP);
+    PREFETCH_FAILED(PREFETCH_FAILED_MSG, Category.TRY_AGAIN, 219, PREFETCH_FAILED_HELP),
+    /** The requested item does not exist. */
+    NOT_EXIST(NOT_EXIST_MSG, Category.USER_INPUT, 300, NOT_EXIST_HELP),
+    /** Could not load documents to check the permissions */
+    COULD_NOT_LOAD(COULD_NOT_LOAD_MSG, Category.USER_INPUT, 301, COULD_NOT_LOAD_HELP),
+    /** The folder %d is not an Infostore folder */
+    NOT_INFOSTORE_FOLDER(NOT_INFOSTORE_FOLDER_MSG, Category.CODE_ERROR, 302, NOT_INFOSTORE_FOLDER_HELP),
+    /** You do not have sufficient read permissions to read objects in this folder. */
+    NO_READ_PERMISSION(NO_READ_PERMISSION_MSG, Category.PERMISSION, 400, NO_READ_PERMISSION_HELP),
+    /** You do not have sufficient permissions to create objects in this folder. */
+    NO_CREATE_PERMISSION(NO_CREATE_PERMISSION_MSG, Category.PERMISSION, 402, NO_CREATE_PERMISSION_HELP),
+    /** You are not allowed to update this item. */
+    NO_WRITE_PERMISSION(NO_WRITE_PERMISSION_MSG, Category.PERMISSION, 403, NO_WRITE_PERMISSION_HELP),
+    /** You are not allowed to create objects in the target folder. */
+    NO_TARGET_CREATE_PERMISSION(NO_TARGET_CREATE_PERMISSION_MSG, Category.PERMISSION, 404, NO_TARGET_CREATE_PERMISSION_HELP),
+    /** Could not delete all objects. */
+    NOT_ALL_DELETED(NOT_ALL_DELETED_MSG, Category.CONCURRENT_MODIFICATION, 405, NOT_ALL_DELETED_HELP),
+    /** You do not have sufficient permission to delete this version. */
+    NO_DELETE_PERMISSION_FOR_VERSION(NO_DELETE_PERMISSION_FOR_VERSION_MSG, Category.PERMISSION, 406, NO_DELETE_PERMISSION_FOR_VERSION_HELP),
+    /** Could not iterate result. */
+    ITERATE_FAILED(ITERATE_FAILED_MSG, Category.CODE_ERROR, 413, ITERATE_FAILED_HELP),
+    /** This document is locked. */
+    ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.CONCURRENT_MODIFICATION, 415, ALREADY_LOCKED_HELP),
+    /** You cannot unlock this document. */
+    LOCKED_BY_ANOTHER(LOCKED_BY_ANOTHER_MSG, Category.CONCURRENT_MODIFICATION, 416, LOCKED_BY_ANOTHER_HELP),
+    /** You need write permissions to unlock a document. */
+    WRITE_PERMS_FOR_UNLOCK_MISSING(WRITE_PERMS_FOR_UNLOCK_MISSING_MSG, Category.PERMISSION, 417, WRITE_PERMS_FOR_UNLOCK_MISSING_HELP),
+    /** You need write permissions to lock a document. */
+    WRITE_PERMS_FOR_LOCK_MISSING(WRITE_PERMS_FOR_LOCK_MISSING_MSG, Category.PERMISSION, 418, WRITE_PERMS_FOR_LOCK_MISSING_HELP),
+    /** Could not generate new ID. */
+    NEW_ID_FAILED(NEW_ID_FAILED_MSG, Category.CODE_ERROR, 420, NEW_ID_FAILED_HELP),
+    /** You are not allowed to delete objects in the source folder, so this document cannot be moved. */
+    NO_SOURCE_DELETE_PERMISSION(NO_SOURCE_DELETE_PERMISSION_MSG, Category.PERMISSION, 421, NO_SOURCE_DELETE_PERMISSION_HELP),
+    /** The document you requested doesn't exist. */
+    DOCUMENT_NOT_EXIST(DOCUMENT_NOT_EXISTS_MSG, Category.USER_INPUT, 438, DOCUMENT_NOT_EXISTS_HELP),
+    /** Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s. */
+    FILENAME_NOT_UNIQUE(FILENAME_NOT_UNIQUE_MSG, Category.USER_INPUT, 441, FILENAME_NOT_UNIQUE_HELP),
+    /** Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s */
+    NUMBER_OF_VERSIONS_FAILED(NUMBER_OF_VERSIONS_FAILED_MSG, Category.CODE_ERROR, 442, NUMBER_OF_VERSIONS_FAILED_HELP),
+    /** You do not have the permissions to delete at least one of the info items. */
+    NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG, Category.PERMISSION, 445, NO_DELETE_PERMISSION_HELP),
+    ;
 
     private final String message;
     private final Category category;
