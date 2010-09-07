@@ -97,6 +97,9 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
         } catch (StorageException e) {
             log.error(e.getMessage(),e);
             throw new InvalidCredentialsException("authentication failed");
+        } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(),e);
+            throw e;
         } catch (NoSuchAlgorithmException e) {
             log.error(e.getMessage(),e);
             throw new InvalidCredentialsException("authentication failed");
