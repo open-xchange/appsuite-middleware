@@ -59,7 +59,6 @@ import javax.management.InstanceNotFoundException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
 import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -169,7 +168,7 @@ public final class LoginCounterTool {
 
     private static void printHelp() {
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("oxlogincounter", countingOptions);
+        helpFormatter.printHelp("logincounter", countingOptions);
     }
 
     static {
