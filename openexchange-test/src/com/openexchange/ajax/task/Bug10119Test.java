@@ -98,7 +98,7 @@ public class Bug10119Test extends AbstractTaskTest {
         {
             final UpdatesRequest uRequest = new UpdatesRequest(folderId, columns, 0, null, beforeInsert);
             uResponse = client.execute(uRequest);
-            assertTrue("Can't find initial inserts", uResponse.size() >= 2);
+            assertTrue("Can't find initial inserts. Only found " + uResponse.size() + " changed tasks.", uResponse.size() >= 2);
         }
         // Delete one
         {
