@@ -85,8 +85,8 @@ import com.openexchange.messaging.facebook.parser.stream.FacebookFQLStreamParser
 import com.openexchange.messaging.facebook.parser.user.FacebookFQLUserParser;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingMessage;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
-import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.Query;
-import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.QueryType;
+import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.FQLQuery;
+import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.FQLQueryType;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.StaticFiller;
 import com.openexchange.messaging.facebook.utility.FacebookUser;
 import com.openexchange.messaging.generic.AttachmentFinderHandler;
@@ -105,6 +105,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     private static final String FROM = MessagingHeader.KnownHeader.FROM.toString();
 
+    private boolean retrySafetyCheck;
+
     /**
      * Initializes a new {@link FacebookMessagingMessageAccess}.
      * 
@@ -116,6 +118,18 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
      */
     public FacebookMessagingMessageAccess(final IFacebookRestClient<Object> facebookRestClient, final MessagingAccount messagingAccount, final Session session, final long facebookUserId, final String facebookSession) {
         super(facebookRestClient, messagingAccount, session, facebookUserId, facebookSession);
+        retrySafetyCheck = false;
+    }
+
+    /**
+     * Sets whether to retry requesting failed user data.
+     * 
+     * @param retrySafetyCheck <code>true</code> to retry requesting failed user data; otherwise <code>false</code>
+     * @return This Facebook message access with new behavior applied
+     */
+    public FacebookMessagingMessageAccess setRetrySafetyCheck(boolean retrySafetyCheck) {
+        this.retrySafetyCheck = retrySafetyCheck;
+        return this;
     }
 
     public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
@@ -187,8 +201,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             /*
              * Query
              */
-            final Query query =
-                FacebookMessagingUtility.composeFQLStreamQueryFor(QueryType.queryTypeFor(folder), FIELDS_FULL, facebookUserId);
+            final FQLQuery query =
+                FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), FIELDS_FULL, facebookUserId);
             final List<Object> results = fireFQLQuery(query.getCharSequence(), facebookRestClient);
             message = FacebookFQLStreamParser.parseStreamDOMElement((Element) results.iterator().next());
             if (null == message) {
@@ -244,14 +258,15 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         /*
          * Query; Ensure post_id is contained to maintain order
          */
-        final Query query;
+        final FQLQuery query;
         if (fieldSet.contains(MessagingField.ID)) { // Contains post_id
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(QueryType.queryTypeFor(folder), fields, messageIds, facebookUserId);
+            query =
+                FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), fields, messageIds, facebookUserId);
         } else {
             final MessagingField[] arg = new MessagingField[fields.length + 1];
             arg[0] = MessagingField.ID;
             System.arraycopy(fields, 0, arg, 1, fields.length);
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(QueryType.queryTypeFor(folder), arg, messageIds, facebookUserId);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), arg, messageIds, facebookUserId);
         }
         final List<MessagingMessage> messages;
         if (null != query) {
@@ -314,7 +329,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              * Replace from with proper user name
              */
             if (!m.isEmpty()) {
-                final Query userQuery =
+                final FQLQuery userQuery =
                     FacebookMessagingUtility.composeFQLUserQueryFor(userFieldSet.toArray(new MessagingField[userFieldSet.size()]), m.keys());
                 /*
                  * Fire FQL query
@@ -326,9 +341,10 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                     final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
                     final long facebookUserId = facebookUser.getUid();
                     final String userIdStr = String.valueOf(facebookUserId);
+                    final String picSmall = facebookUser.getPicSmall();
                     for (final FacebookMessagingMessage message : m.get(facebookUserId)) {
                         message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), userIdStr));
-                        message.setPicture(facebookUser.getPicSmall());
+                        message.setPicture(picSmall);
                     }
                     /*
                      * Remove from safety check
@@ -453,24 +469,12 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         /*
          * Query; must not be null to determine proper number of wall posts
          */
-        final Query query;
-        final QueryType queryType = QueryType.queryTypeFor(folder);
+        final FQLQuery query;
+        final FQLQueryType queryType = FQLQueryType.queryTypeFor(folder);
         if (EnumSet.copyOf(fieldSet).removeAll(FacebookMessagingUtility.getStreamQueryableFields())) { // Contains any
-            query =
-                FacebookMessagingUtility.composeFQLStreamQueryFor(
-                    queryType,
-                    daFields,
-                    sortField,
-                    order,
-                    facebookUserId);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(queryType, daFields, sortField, order, facebookUserId);
         } else {
-            query =
-                FacebookMessagingUtility.composeFQLStreamQueryFor(
-                    queryType,
-                    FIELDS_ID,
-                    sortField,
-                    order,
-                    facebookUserId);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(queryType, FIELDS_ID, sortField, order, facebookUserId);
         }
         final List<MessagingMessage> messages;
         final TLongObjectHashMap<List<FacebookMessagingMessage>> m;
@@ -549,7 +553,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          * Replace from with proper user name
          */
         if (!m.isEmpty()) {
-            final Query userQuery =
+            final FQLQuery userQuery =
                 FacebookMessagingUtility.composeFQLUserQueryFor(userFieldSet.toArray(new MessagingField[userFieldSet.size()]), m.keys());
             /*
              * Fire FQL query
@@ -561,9 +565,10 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
                 final long facebookUserId = facebookUser.getUid();
                 final String userIdStr = String.valueOf(facebookUserId);
+                final String picSmall = facebookUser.getPicSmall();
                 for (final FacebookMessagingMessage message : m.get(facebookUserId)) {
                     message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), userIdStr));
-                    message.setPicture(facebookUser.getPicSmall());
+                    message.setPicture(picSmall);
                 }
                 /*
                  * Remove from safety check
@@ -631,47 +636,67 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             if (logger.isDebugEnabled()) {
                 logger.debug("Information of following Facebook users are missing: " + Arrays.toString(safetyCheck.toArray()));
             }
-            for (final TLongIterator iter = safetyCheck.iterator(); iter.hasNext();) {
-                final long missingUserId = iter.next();
-                /*
-                 * Remove from safety check
-                 */
-                iter.remove();
-                final Query userQuery =
-                    FacebookMessagingUtility.composeFQLUserQueryFor(
-                        userFieldSet.toArray(new MessagingField[userFieldSet.size()]),
-                        missingUserId);
-                final List<Object> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookRestClient);
-                if (results.isEmpty()) {
+            if (retrySafetyCheck) {
+                for (final TLongIterator iter = safetyCheck.iterator(); iter.hasNext();) {
+                    final long missingUserId = iter.next();
                     /*
-                     * User not visible
+                     * Remove from safety check
                      */
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("FQL query delivered no result(s):\n" + userQuery.getCharSequence());
-                    }
-                    final List<FacebookMessagingMessage> userMessages = m.remove(missingUserId);
-                    for (final FacebookMessagingMessage fbMessagingMessage : userMessages) {
-                        messages.remove(fbMessagingMessage);
-                    }
-                } else {
+                    iter.remove();
                     /*
-                     * Add missing user data to appropriate messages
+                     * Retry requesting user data
                      */
-                    final Iterator<Object> iterator = results.iterator();
-                    final int resSize = results.size();
-                    for (int i = 0; i < resSize; i++) {
-                        final FacebookUser fbUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
-                        final long facebookUserId = fbUser.getUid();
-                        final String userIdStr = String.valueOf(facebookUserId);
-                        for (final FacebookMessagingMessage message : m.get(facebookUserId)) {
-                            message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, fbUser.getName(), userIdStr));
-                            message.setPicture(fbUser.getPicSmall());
+                    final FQLQuery userQuery =
+                        FacebookMessagingUtility.composeFQLUserQueryFor(
+                            userFieldSet.toArray(new MessagingField[userFieldSet.size()]),
+                            missingUserId);
+                    final List<Object> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookRestClient);
+                    if (results.isEmpty()) {
+                        /*
+                         * User not visible
+                         */
+                        if (logger.isWarnEnabled()) {
+                            logger.warn("FQL query delivered no result(s):\n" + userQuery.getCharSequence());
+                        }
+                        /*
+                         * Remove corresponding messages.
+                         */
+                        messages.removeAll(m.remove(missingUserId));
+                    } else {
+                        /*
+                         * Add missing user data to appropriate messages
+                         */
+                        final Iterator<Object> iterator = results.iterator();
+                        final int resSize = results.size();
+                        for (int i = 0; i < resSize; i++) {
+                            final FacebookUser fbUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
+                            final long facebookUserId = fbUser.getUid();
+                            final String userIdStr = String.valueOf(facebookUserId);
+                            for (final FacebookMessagingMessage message : m.get(facebookUserId)) {
+                                message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, fbUser.getName(), userIdStr));
+                                message.setPicture(fbUser.getPicSmall());
+                            }
                         }
                     }
                 }
+            } else {
+                /*
+                 * No retry. Just remove corresponding messages.
+                 */
+                for (final TLongIterator iter = safetyCheck.iterator(); iter.hasNext();) {
+                    final long missingUserId = iter.next();
+                    /*
+                     * Remove from safety check
+                     */
+                    iter.remove();
+                    /*
+                     * Remove corresponding messages.
+                     */
+                    messages.removeAll(m.remove(missingUserId));
+                }
             }
         }
-    }
+    } // End of method check()
 
     public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
         if (!KNOWN_FOLDER_IDS.contains(message.getFolder())) {
@@ -707,12 +732,12 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw new UnsupportedOperationException();
     }
 
-    private Long getQueryTimestamp(final QueryType queryType) {
+    private Long getQueryTimestamp(final FQLQueryType queryType) {
         final String tmp = (String) messagingAccount.getConfiguration().get(queryType.toString());
         return null == tmp ? null : Long.valueOf(tmp);
     }
 
-    private void updateQueryTimestamp(final QueryType queryType, final long timestamp) throws MessagingException {
+    private void updateQueryTimestamp(final FQLQueryType queryType, final long timestamp) throws MessagingException {
         messagingAccount.getConfiguration().put(queryType.toString(), String.valueOf(timestamp));
         messagingAccount.getMessagingService().getAccountManager().updateAccount(messagingAccount, session);
     }
