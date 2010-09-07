@@ -483,56 +483,56 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
                 attachmentBase.attachToObject(attachment,null,MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
                 clean.add(attachment);
                 fail("Disallow failed");
-            } catch (final OXPermissionException x) {
+            } catch (final AttachmentException x) {
                 authz.assertMayAttach();
             }
 
             try {
                 attachmentBase.getAttachment(folderId,attachedId,moduleId,-1,MODE.getContext(),MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final OXPermissionException x) {
+            } catch (final AttachmentException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getAttachedFile(folderId,attachedId,moduleId,-1,MODE.getContext(),MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final OXPermissionException x) {
+            } catch (final AttachmentException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getAttachments(folderId, attachedId, moduleId, MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final OXPermissionException x) {
+            } catch (final AttachmentException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getDelta(folderId, attachedId, moduleId, 0, false, MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final OXPermissionException x) {
+            } catch (final AttachmentException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getAttachments(folderId, attachedId, moduleId, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final OXPermissionException x) {
+            } catch (final AttachmentException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getDelta(folderId, attachedId, moduleId, 0, false, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final OXPermissionException x) {
+            } catch (final AttachmentException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.detachFromObject(folderId,attachedId,moduleId,new int[]{},MODE.getSession(),MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final OXPermissionException x) {
+            } catch (final AttachmentException x) {
                 authz.assertMayDetach();
             }
 
