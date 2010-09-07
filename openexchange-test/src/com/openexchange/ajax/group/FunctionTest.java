@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.group;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.logging.Log;
@@ -118,7 +120,14 @@ public final class FunctionTest extends AbstractAJAXSession {
         JSONArray arr = (JSONArray) listResponse.getResponse().getData();
         assertContainsLastModifiedUTC(arr);
     }
+    
+    public void testUpdates() throws Exception {
+        Group[] groupsViaSearch = GroupTools.search(getClient(),new SearchRequest("*")).getGroups();
+        List<Group> groupsViaUpdates = GroupTools.updates(getClient(), new UpdatesRequest(new Date(0), false)).getModified();
+        assertEquals("Should find the same amount of groups via *-search as via updates since day 0", groupsViaSearch.length, groupsViaUpdates.size());
+    }
 
+    
     public void assertContainsLastModifiedUTC(JSONArray arr) {
         for(int i = 0, size = arr.length(); i < size; i++) {
             JSONObject entry = arr.optJSONObject(i);

@@ -47,32 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.resource;
+package com.openexchange.ajax.group.actions;
 
-import com.openexchange.ajax.ResourceTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.IOException;
+import java.util.Date;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Params;
+
 
 /**
- * Suite for the resource tests.
+ * {@link UpdatesRequest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ResourceSuite extends TestSuite {
-    
-    /**
-     * TODO add this tests to the AJAX interface test suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(ResourceAllAJAXTest.class);
-        tests.addTestSuite(ResourceDeleteAJAXTest.class);
-        tests.addTestSuite(ResourceGetAJAXTest.class);
-        tests.addTestSuite(ResourceListAJAXTest.class);
-        tests.addTestSuite(ResourceNewAJAXTest.class);
-        tests.addTestSuite(ResourceUpdateAJAXTest.class);
-        tests.addTestSuite(ResourceUpdatesAJAXTest.class);
-        tests.addTestSuite(ResourceTest.class);
-        return tests;
+public class UpdatesRequest  extends AbstractGroupRequest<UpdatesResponse>{
+
+    private boolean failOnError;
+    private Date lastModified;
+
+    public Object getBody(){
+        return null;
     }
+    
+    public UpdatesRequest(Date since, boolean failOnError){
+        this.failOnError = failOnError;
+        this.lastModified = since;
+    }
+    
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
+
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters(){
+        return new Params(
+            AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES,
+            AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(this.lastModified.getTime())
+        ).toArray();
+    }
+
+    public AbstractAJAXParser<? extends UpdatesResponse> getParser() {
+        return new AbstractAJAXParser<UpdatesResponse>(this.failOnError){
+            @Override
+            protected UpdatesResponse createResponse(Response response) {
+                return new UpdatesResponse(response);
+            }
+            
+        };
+    }
+
 }

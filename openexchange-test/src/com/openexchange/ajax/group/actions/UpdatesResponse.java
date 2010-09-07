@@ -47,32 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.resource;
+package com.openexchange.ajax.group.actions;
 
-import com.openexchange.ajax.ResourceTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.parser.GroupParser;
+import com.openexchange.group.Group;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * Suite for the resource tests.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ResourceSuite extends TestSuite {
-    
-    /**
-     * TODO add this tests to the AJAX interface test suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(ResourceAllAJAXTest.class);
-        tests.addTestSuite(ResourceDeleteAJAXTest.class);
-        tests.addTestSuite(ResourceGetAJAXTest.class);
-        tests.addTestSuite(ResourceListAJAXTest.class);
-        tests.addTestSuite(ResourceNewAJAXTest.class);
-        tests.addTestSuite(ResourceUpdateAJAXTest.class);
-        tests.addTestSuite(ResourceUpdatesAJAXTest.class);
-        tests.addTestSuite(ResourceTest.class);
-        return tests;
+public class UpdatesResponse extends AbstractAJAXResponse {
+
+    protected UpdatesResponse(Response response) {
+        super(response);
+    }
+
+    public List<Group> getModified() throws OXJSONException, JSONException {
+        return getGroups("modified");
+    }
+
+    public List<Group> getNew() throws OXJSONException, JSONException {
+        return getGroups("new");
+    }
+
+    public List<Group> getDeleted() throws OXJSONException, JSONException {
+        return getGroups("deleted");
+    }
+
+    protected List<Group> getGroups(String field) throws OXJSONException, JSONException {
+        LinkedList<Group> groups = new LinkedList<Group>();
+        JSONObject data = (JSONObject) getData();
+
+        if(data.isNull(field))
+            return new LinkedList<Group>();
+        
+        JSONArray grp = data.getJSONArray(field);
+
+        GroupParser parser = new GroupParser();
+
+        for (int i = 0, length = grp.length(); i < length; i++) {
+            Group temp = new Group();
+            parser.parse(temp, grp.getJSONObject(i));
+            groups.add(temp);
+        }
+        return groups;
     }
 }

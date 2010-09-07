@@ -68,6 +68,8 @@ import com.openexchange.ajax.group.actions.ListRequest;
 import com.openexchange.ajax.group.actions.ListResponse;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
+import com.openexchange.ajax.group.actions.UpdatesRequest;
+import com.openexchange.ajax.group.actions.UpdatesResponse;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -104,6 +106,10 @@ public final class GroupTools {
     }
 
     public static ChangeResponse change(final AJAXClient client, final ChangeRequest request) throws AjaxException, IOException, SAXException, JSONException {
+        return Executor.execute(client, request);
+    }
+    
+    public static UpdatesResponse updates(final AJAXClient client, final UpdatesRequest request) throws AjaxException, IOException, SAXException, JSONException {
         return Executor.execute(client, request);
     }
 }
