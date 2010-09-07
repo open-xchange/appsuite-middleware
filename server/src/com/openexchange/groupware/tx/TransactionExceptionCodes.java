@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.tx;
 
-import static com.openexchange.groupware.tx.TranscationExceptionMessages.CANNOT_COMMIT_MSG;
-import static com.openexchange.groupware.tx.TranscationExceptionMessages.CANNOT_FINISH_MSG;
-import static com.openexchange.groupware.tx.TranscationExceptionMessages.CANNOT_ROLLBACK_MSG;
-import static com.openexchange.groupware.tx.TranscationExceptionMessages.NO_COMPLETE_ROLLBACK_MSG;
+import static com.openexchange.groupware.tx.TransactionExceptionMessages.CANNOT_COMMIT_MSG;
+import static com.openexchange.groupware.tx.TransactionExceptionMessages.CANNOT_FINISH_MSG;
+import static com.openexchange.groupware.tx.TransactionExceptionMessages.CANNOT_ROLLBACK_MSG;
+import static com.openexchange.groupware.tx.TransactionExceptionMessages.NO_COMPLETE_ROLLBACK_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 
