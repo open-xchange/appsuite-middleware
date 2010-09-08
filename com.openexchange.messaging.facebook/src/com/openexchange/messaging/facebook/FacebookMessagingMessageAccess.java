@@ -507,7 +507,6 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         /*
          * Static fillers
          */
-        final MessagingField[] daFields = fieldSet.toArray(new MessagingField[fieldSet.size()]);
         final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStreamStaticFillers(fieldSet, this);
         if (fieldSet.contains(MessagingField.FOLDER_ID) || fieldSet.contains(MessagingField.FULL)) {
             staticFillers.add(new FacebookMessagingUtility.FolderFiller(folder));
