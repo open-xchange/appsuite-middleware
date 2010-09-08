@@ -75,18 +75,18 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_UTILS_DELUSERFOLDERDISCOVERER, component = EnumComponent.INFOSTORE)
 public class DelUserFolderDiscoverer extends DBService {
 
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(
-			DelUserFolderDiscoverer.class);
+    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(
+            DelUserFolderDiscoverer.class);
 
-	public DelUserFolderDiscoverer() {
-		super();
-	}
+    public DelUserFolderDiscoverer() {
+        super();
+    }
 
-	public DelUserFolderDiscoverer(final DBProvider provider) {
-		super(provider);
-	}
+    public DelUserFolderDiscoverer(final DBProvider provider) {
+        super(provider);
+    }
 
-	public List<FolderObject> discoverFolders(final int userId, final Context ctx) throws OXException {
+    public List<FolderObject> discoverFolders(final int userId, final Context ctx) throws OXException {
         final List<FolderObject> discovered = new ArrayList<FolderObject>();
         try {
             final User user = UserStorage.getInstance().getUser(userId, ctx);
