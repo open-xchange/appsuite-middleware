@@ -308,6 +308,10 @@ public final class FacebookSession {
             // final long d = System.currentTimeMillis() - s;
             // System.out.println("Renewal took " + d + "msec.");
             lastAccessed = System.currentTimeMillis();
+            if (DEBUG) {
+                LOG.debug(new StringBuilder("Performed dummy request to Facebook REST server to keep Facebook session (\"").append(
+                    facebookSession).append("\") alive for Facebook user ").append(login).toString());
+            }
         } catch (final FacebookException e) {
             throw FacebookMessagingException.create(e);
         }
@@ -484,7 +488,7 @@ public final class FacebookSession {
         }
     }
 
-    private static final int NUMBER_OF_FORM = 1;
+    private static final int FORM_INDEX = 0;
 
     /**
      * Logins via web page and assigns facebook REST client, facebook user identifier, and session string.
@@ -511,17 +515,19 @@ public final class FacebookSession {
             HtmlForm loginForm = null;
             final String nameOfUserField = configuration.getNameOfUserField();
             {
-                int numberOfFormCounter = 1;
                 final String actionOfLoginForm = configuration.getActionOfLoginForm();
                 final List<HtmlForm> forms =
                     webClient.<HtmlPage> getPage(
                         new StringBuilder(64).append(configuration.getLoginPageBaseURL()).append("?api_key=").append(apiKey).append("&v=").append(
                             configuration.getApiVersion()).append("&auth_token=").append(token).toString()).getForms();
-                for (final HtmlForm form : forms) {
-                    if (form.getActionAttribute().startsWith(actionOfLoginForm) && (NUMBER_OF_FORM == numberOfFormCounter) && (form.getInputsByName(nameOfUserField) != null)) {
-                        loginForm = form;
+                final int size = forms.size();
+                for (int i = 0; i < size; i++) {
+                    if (FORM_INDEX == i) {
+                        final HtmlForm form = forms.get(i);
+                        if (form.getActionAttribute().startsWith(actionOfLoginForm) && (form.getInputsByName(nameOfUserField) != null)) {
+                            loginForm = form;
+                        }
                     }
-                    numberOfFormCounter++;
                 }
             }
             /*
@@ -530,13 +536,8 @@ public final class FacebookSession {
             if (loginForm == null) {
                 throw FacebookMessagingExceptionCodes.LOGIN_FORM_NOT_FOUND.create(configuration.getLoginPageBaseURL());
             }
-            /*
-             * Fill login and password and submit form
-             */
-            final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
-            userfield.setValueAttribute(login);
-            final HtmlPasswordInput passwordfield = loginForm.getInputByName(configuration.getNameOfPasswordField());
-            passwordfield.setValueAttribute(password);
+            loginForm.<HtmlTextInput> getInputByName(nameOfUserField).setValueAttribute(login);
+            loginForm.<HtmlPasswordInput> getInputByName(configuration.getNameOfPasswordField()).setValueAttribute(password);
             final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
             /*
              * Check for proper pager after login
