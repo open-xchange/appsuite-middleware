@@ -68,68 +68,68 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 /**
  * @author francisco.laguna@open-xchange.com
- * 
+ *
  * A validation chain can be used to chain many validators together and have each one check
  * the DocumentMetadata in turn. If validation doesn't pass, an exception is thrown containing an error message.
  * The error message details for each validator the individual error messages. If more than one field is assigned
- * the same error, a list of invalid fields is prepended to the error message. 
+ * the same error, a list of invalid fields is prepended to the error message.
  */
 public class ValidationChain {
 
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(ValidationChain.class);
-	
-	private final List<InfostoreValidator> validators = new ArrayList<InfostoreValidator>();
+    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(ValidationChain.class);
 
-	public void add(final InfostoreValidator validator) {
-		validators.add(validator);
-	}
+    private final List<InfostoreValidator> validators = new ArrayList<InfostoreValidator>();
 
-	public void validate(final DocumentMetadata metadata) throws InfostoreException {
-		final StringBuilder message = new StringBuilder();
-		boolean failed = false;
-		for(final InfostoreValidator validator : validators) {
-			final DocumentMetadataValidation validation = validator.validate(metadata);
-			if(!validation.isValid()) {
-				failed = true;
-				final Map<String, List<Metadata>> errors = new HashMap<String, List<Metadata>>();
-				
-				for(final Metadata field : validation.getInvalidFields()) {
-					final String error = validation.getError(field);
-					List<Metadata> errorList = errors.get(error);
-					if(null == errorList) {
-						errorList = new ArrayList<Metadata>();
-						errors.put(error, errorList);
-					}
-					errorList.add(field);
-				}
-				
-				message.append(validator.getName()).append(": ").append('(');
-				for(final Map.Entry<String, List<Metadata>> entry : errors.entrySet()) {
-				    for(final Metadata field : entry.getValue()) {
-				        message.append(field.getName()).append(", ");
-				    }
-				    message.setLength(message.length()-2);
+    public void add(final InfostoreValidator validator) {
+        validators.add(validator);
+    }
+
+    public void validate(final DocumentMetadata metadata) throws InfostoreException {
+        final StringBuilder message = new StringBuilder();
+        boolean failed = false;
+        for(final InfostoreValidator validator : validators) {
+            final DocumentMetadataValidation validation = validator.validate(metadata);
+            if(!validation.isValid()) {
+                failed = true;
+                final Map<String, List<Metadata>> errors = new HashMap<String, List<Metadata>>();
+
+                for(final Metadata field : validation.getInvalidFields()) {
+                    final String error = validation.getError(field);
+                    List<Metadata> errorList = errors.get(error);
+                    if(null == errorList) {
+                        errorList = new ArrayList<Metadata>();
+                        errors.put(error, errorList);
+                    }
+                    errorList.add(field);
+                }
+
+                message.append(validator.getName()).append(": ").append('(');
+                for(final Map.Entry<String, List<Metadata>> entry : errors.entrySet()) {
+                    for(final Metadata field : entry.getValue()) {
+                        message.append(field.getName()).append(", ");
+                    }
+                    message.setLength(message.length()-2);
                     message.append(") ").append(entry.getKey());
                     message.append('\n');
-				}
-				/*-
-				 * 
-				 * Replaced:
-				 * 
-				for(final String error : errors.keySet()) {
-					for(final Metadata field : errors.get(error)) {
-						message.append(field.getName()).append(", ");
-					}
-					message.setLength(message.length()-2);
-					message.append(") ").append(error);
-					message.append("\n");
-				}
-				*/
-			}	
-		}
-		if(failed) {
-			throw EXCEPTIONS.create(0, message.toString());
-		}
-	}
+                }
+                /*-
+                 *
+                 * Replaced:
+                 *
+                for(final String error : errors.keySet()) {
+                    for(final Metadata field : errors.get(error)) {
+                        message.append(field.getName()).append(", ");
+                    }
+                    message.setLength(message.length()-2);
+                    message.append(") ").append(error);
+                    message.append("\n");
+                }
+                */
+            }
+        }
+        if(failed) {
+            throw EXCEPTIONS.create(0, message.toString());
+        }
+    }
 
 }
