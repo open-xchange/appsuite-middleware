@@ -80,7 +80,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String NO_READ_PERMISSION_HELP = "The user does not have read permissions on the requested Infoitem.";
 
     public static final String NO_CREATE_PERMISSION_MSG = "You do not have sufficient permissions to create objects in this folder.";
-    public static final String NO_CREATE_PERMISSION_HELP = "The user may not create objects in the given folder.";
+    public static final String NO_CREATE_PERMISSION_HELP = "The user must not create objects in the given folder.";
 
     public static final String NO_WRITE_PERMISSION_MSG = "You are not allowed to update this item.";
     public static final String NO_WRITE_PERMISSION_HELP = "The user doesn't have the required write permissions to update the infoitem.";
