@@ -122,7 +122,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String FILENAME_NOT_UNIQUE_HELP = "To remain consistent in WebDAV file versions in a given folder must not contain a file with the same filen name. The user must either choose a different file name, or rename the other file.";
 
     public static final String NUMBER_OF_VERSIONS_FAILED_MSG = "Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s";
-    public static final String NUMBER_OF_VERSIONS_FAILED_HELP = "The query to cound the versions in a document failed.";
+    public static final String NUMBER_OF_VERSIONS_FAILED_HELP = "The query to count the versions in a document failed.";
 
     public static final String NO_DELETE_PERMISSION_MSG = "You do not have the permissions to delete at least one of the info items.";
     public static final String NO_DELETE_PERMISSION_HELP = "You do not have the permissions to delete at least one of the info items.";
