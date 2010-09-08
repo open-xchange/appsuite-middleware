@@ -592,33 +592,29 @@ public final class FacebookMessagingUtility {
     }
 
     /**
-     * Composes the FQL stream query for given fields.
+     * Composes the FQL stream query for given post identifier.
      * 
-     * @param queryType The query type constant
      * @param fields The fields
-     * @param postIds The post identifiers
+     * @param postId The post identifier
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final MessagingField[] fields, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
-        return composeFQLStreamQueryFor0(queryType, fields, null, null, postIds, facebookUserId);
+    public static FQLQuery composeFQLStreamQueryFor(final MessagingField[] fields, final String postId) throws FacebookMessagingException {
+        return composeFQLStreamQueryFor0(null, fields, null, null, new String[] { postId }, -1L);
     }
 
     /**
-     * Composes the FQL stream query for given fields.
+     * Composes the FQL stream query for given post identifiers.
      * 
-     * @param queryType The query type constant
      * @param fields The fields
-     * @param sortField The sort field; may be <code>null</code>
-     * @param order The order direction
      * @param postIds The post identifiers
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws FacebookMessagingException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) throws FacebookMessagingException {
-        return composeFQLStreamQueryFor0(queryType, fields, sortField, order, postIds, facebookUserId);
+    public static FQLQuery composeFQLStreamQueryFor(final MessagingField[] fields, final String[] postIds) throws FacebookMessagingException {
+        return composeFQLStreamQueryFor0(null, fields, null, null, postIds, -1L);
     }
 
     /**
@@ -662,7 +658,7 @@ public final class FacebookMessagingUtility {
              */
             return null;
         }
-        return finishFQLStreamQuery(sortField, order, postIds, DEFAULT_LIMIT, query);
+        return finishFQLStreamQuery(sortField, order, postIds, DEFAULT_LIMIT, query, (null != queryType));
     }
 
     /**
@@ -693,7 +689,7 @@ public final class FacebookMessagingUtility {
          * Add since
          */
         query.append(" AND created_time < ").append(timeStamp);
-        return finishFQLStreamQuery(sortField, order, postIds, DEFAULT_LIMIT, query);
+        return finishFQLStreamQuery(sortField, order, postIds, DEFAULT_LIMIT, query, (null != queryType));
     }
 
     private static StringBuilder startFQLStreamQuery(final FQLQueryType queryType, final MessagingField[] fields, final long facebookUserId) throws FacebookMessagingException {
@@ -701,10 +697,16 @@ public final class FacebookMessagingUtility {
          * Resolve fields to known FQL fields
          */
         final Set<String> fieldNames = new HashSet<String>(fields.length);
-        for (int i = 0; i < fields.length; i++) {
-            final QueryAdder queryAdder = ADDERS_STREAM.get(fields[i]);
-            if (null != queryAdder) {
+        if (contains(fields, MessagingField.FULL)) {
+            for (final QueryAdder queryAdder : ADDERS_STREAM.values()) {
                 queryAdder.add2Query(fieldNames);
+            }
+        } else {
+            for (int i = 0; i < fields.length; i++) {
+                final QueryAdder queryAdder = ADDERS_STREAM.get(fields[i]);
+                if (null != queryAdder) {
+                    queryAdder.add2Query(fieldNames);
+                }
             }
         }
         if (fieldNames.isEmpty()) {
@@ -725,31 +727,38 @@ public final class FacebookMessagingUtility {
         /*
          * Compose query type
          */
-        switch (queryType) {
-        case NEWS_FEED:
-            // Retrieving the user's News Feed.
-            query.append(" FROM stream WHERE filter_key in (SELECT filter_key FROM stream_filter WHERE uid=").append(facebookUserId).append(
-                " AND type='newsfeed') AND is_hidden = 0");
-            break;
-        case WALL:
-            // Retrieve a user's wall posts (stories on their profile).
-            query.append(" FROM stream WHERE source_id = ").append(facebookUserId);
-            break;
-        default:
-            throw FacebookMessagingExceptionCodes.UNSUPPORTED_QUERY_TYPE.create(queryType.toString());
+        if (null == queryType) {
+            query.append(" FROM stream WHERE");
+        } else {
+            switch (queryType) {
+            case NEWS_FEED:
+                // Retrieving the user's News Feed.
+                query.append(" FROM stream WHERE filter_key in (SELECT filter_key FROM stream_filter WHERE uid=").append(facebookUserId).append(
+                    " AND type='newsfeed') AND is_hidden = 0");
+                break;
+            case WALL:
+                // Retrieve a user's wall posts (stories on their profile).
+                query.append(" FROM stream WHERE source_id = ").append(facebookUserId);
+                break;
+            default:
+                throw FacebookMessagingExceptionCodes.UNSUPPORTED_QUERY_TYPE.create(queryType.toString());
+            }
         }
         return query;
     }
 
-    private static FQLQuery finishFQLStreamQuery(final MessagingField sortField, final OrderDirection order, final String[] postIds, final int limit, final StringBuilder query) {
+    private static FQLQuery finishFQLStreamQuery(final MessagingField sortField, final OrderDirection order, final String[] postIds, final int limit, final StringBuilder query, final boolean prependAnd) {
         /*
          * Check for identifiers
          */
         if (null != postIds && 0 < postIds.length) {
+            if (prependAnd) {
+                query.append(" AND");
+            }
             if (1 == postIds.length) {
-                query.append(" AND post_id = '").append(postIds[0]).append('\'');
+                query.append(" post_id = '").append(postIds[0]).append('\'');
             } else {
-                query.append(" AND post_id IN ");
+                query.append(" post_id IN ");
                 query.append('(');
                 {
                     query.append('\'').append(postIds[0]).append('\'');
@@ -815,10 +824,16 @@ public final class FacebookMessagingUtility {
 
     private static FQLQuery composeFQLUserQueryFor0(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] userIds) {
         final Set<String> fieldNames = new HashSet<String>(fields.length);
-        for (int i = 0; i < fields.length; i++) {
-            final QueryAdder queryAdder = ADDERS_USER.get(fields[i]);
-            if (null != queryAdder) {
+        if (contains(fields, MessagingField.FULL)) {
+            for (final QueryAdder queryAdder : ADDERS_USER.values()) {
                 queryAdder.add2Query(fieldNames);
+            }
+        } else {
+            for (int i = 0; i < fields.length; i++) {
+                final QueryAdder queryAdder = ADDERS_USER.get(fields[i]);
+                if (null != queryAdder) {
+                    queryAdder.add2Query(fieldNames);
+                }
             }
         }
         if (fieldNames.isEmpty()) {
@@ -856,7 +871,7 @@ public final class FacebookMessagingUtility {
             return new FQLQuery(query, false);
         }
         boolean containsOrderBy = false;
-        final QueryAdder adder = ADDERS_STREAM.get(sortField);
+        final QueryAdder adder = ADDERS_USER.get(sortField);
         if (null != adder) {
             final String orderBy = adder.getOrderBy();
             if (null != orderBy) {
@@ -904,10 +919,16 @@ public final class FacebookMessagingUtility {
 
     private static FQLQuery composeFQLGroupQueryFor0(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] groupIds) {
         final Set<String> fieldNames = new HashSet<String>(fields.length);
-        for (int i = 0; i < fields.length; i++) {
-            final QueryAdder queryAdder = ADDERS_GROUP.get(fields[i]);
-            if (null != queryAdder) {
+        if (contains(fields, MessagingField.FULL)) {
+            for (final QueryAdder queryAdder : ADDERS_GROUP.values()) {
                 queryAdder.add2Query(fieldNames);
+            }
+        } else {
+            for (int i = 0; i < fields.length; i++) {
+                final QueryAdder queryAdder = ADDERS_GROUP.get(fields[i]);
+                if (null != queryAdder) {
+                    queryAdder.add2Query(fieldNames);
+                }
             }
         }
         if (fieldNames.isEmpty()) {
@@ -945,7 +966,7 @@ public final class FacebookMessagingUtility {
             return new FQLQuery(query, false);
         }
         boolean containsOrderBy = false;
-        final QueryAdder adder = ADDERS_STREAM.get(sortField);
+        final QueryAdder adder = ADDERS_GROUP.get(sortField);
         if (null != adder) {
             final String orderBy = adder.getOrderBy();
             if (null != orderBy) {
@@ -1043,6 +1064,36 @@ public final class FacebookMessagingUtility {
         }
         s.append('$');
         return (s.toString());
+    }
+
+    /**
+     * Gets the IN expression for specified <code>long</code>s ready for being used in a FQL query.
+     * 
+     * @param arr The <code>long</code>s
+     * @return The IN expression
+     */
+    public static String getInString(final long arr[]) {
+        if (arr == null || arr.length <= 0) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder(arr.length * 8);
+        sb.append('(');
+        sb.append(arr[0]);
+        for (int a = 1; a < arr.length; a++) {
+            sb.append(',');
+            sb.append(arr[a]);
+        }
+        sb.append(')');
+        return sb.toString();
+    }
+
+    private static boolean contains(final MessagingField[] fields, final MessagingField field) {
+        for (MessagingField messagingField : fields) {
+            if (field.equals(messagingField)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

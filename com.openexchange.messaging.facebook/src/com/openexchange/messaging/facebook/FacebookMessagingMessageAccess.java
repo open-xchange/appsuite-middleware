@@ -267,12 +267,12 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         final FQLQuery query;
         if (fieldSet.contains(MessagingField.ID)) { // Contains post_id
             query =
-                FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), fields, messageIds, facebookUserId);
+                FacebookMessagingUtility.composeFQLStreamQueryFor(fields, messageIds);
         } else {
             final MessagingField[] arg = new MessagingField[fields.length + 1];
             arg[0] = MessagingField.ID;
             System.arraycopy(fields, 0, arg, 1, fields.length);
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), arg, messageIds, facebookUserId);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(arg, messageIds);
         }
         final List<MessagingMessage> messages;
         if (null != query) {
