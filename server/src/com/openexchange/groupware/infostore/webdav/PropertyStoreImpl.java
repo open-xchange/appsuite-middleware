@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -60,26 +61,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
-@OXExceptionSource(
-        classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_PROPERTYSTOREIMPL,
-        component=EnumComponent.INFOSTORE
-)
 public class PropertyStoreImpl extends DBService implements PropertyStore {
-
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(PropertyStoreImpl.class);
 
     private String INSERT = "INSERT INTO %%tablename%% (cid, id, name, namespace, value, language, xml) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private String tablename;
@@ -98,27 +88,18 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         this.tablename = tablename;
     }
 
-
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=0,
-            msg="Invalid SQL: '%s'"
-    )
     public Map<Integer, List<WebdavProperty>> loadProperties(final List<Integer> entities, final List<WebdavProperty> properties, final Context ctx) throws OXException {
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        StringBuilder builder = null;
+        StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
+        builder.append(tablename);
+        builder.append(" WHERE CID = ? AND id IN (");
+        join(entities, builder);
+        builder.append(") AND (");
+        addOr(builder,properties);
+        builder.append(')');
         try {
-            builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
-            builder.append(tablename);
-            builder.append(" WHERE CID = ? AND id IN (");
-            join(entities, builder);
-            builder.append(") AND (");
-            addOr(builder,properties);
-            builder.append(')');
-
             readCon = getReadConnection(ctx);
             stmt = readCon.prepareStatement(builder.toString());
             stmt.setInt(1, ctx.getContextId());
@@ -127,17 +108,18 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             rs = stmt.executeQuery();
             final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
             while(rs.next()) {
-                List<WebdavProperty> props = retVal.get(rs.getInt(1));
+                Integer id = I(rs.getInt(1));
+                List<WebdavProperty> props = retVal.get(id);
                 if(props == null) {
                     props = new ArrayList<WebdavProperty>();
-                    retVal.put(rs.getInt(1), props);
+                    retVal.put(id, props);
                 }
                 props.add(getProperty(rs));
             }
 
             return retVal;
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(0,e,builder.toString());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, builder.toString());
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -156,26 +138,18 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         return prop;
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=1,
-            msg="Invalid SQL: '%s'"
-    )
     public List<WebdavProperty> loadProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        StringBuilder builder = null;
+        StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
+        builder.append(tablename);
+        builder.append(" WHERE CID = ? AND id = ");
+        builder.append(entity);
+        builder.append(" AND (");
+        addOr(builder,properties);
+        builder.append(')');
         try {
-            builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
-            builder.append(tablename);
-            builder.append(" WHERE CID = ? AND id = ");
-            builder.append(entity);
-            builder.append(" AND (");
-            addOr(builder,properties);
-            builder.append(')');
-
             readCon = getReadConnection(ctx);
             stmt = readCon.prepareStatement(builder.toString());
             stmt.setInt(1, ctx.getContextId());
@@ -189,7 +163,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 
             return props;
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(1,e,builder.toString());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, builder.toString());
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -198,12 +172,6 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=2,
-            msg="Invalid SQL: '%s'"
-    )
     public void saveProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
@@ -218,7 +186,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
                 stmt.executeUpdate();
             }
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(2,e,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -235,12 +203,6 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         stmt.setBoolean(7, prop.isXML());
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=3,
-            msg="Invalid SQL: '%s'"
-    )
     public List<WebdavProperty> loadAllProperties(final int entity, final Context ctx) throws OXException {
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -262,7 +224,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 
             return props;
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(3,e,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -271,12 +233,6 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=4,
-            msg="Invalid SQL: '%s'"
-    )
     public Map<Integer, List<WebdavProperty>> loadAllProperties(final List<Integer> entities, final Context ctx) throws OXException {
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -295,17 +251,18 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             rs = stmt.executeQuery();
             final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
             while(rs.next()) {
-                List<WebdavProperty> props = retVal.get(rs.getInt(1));
+                Integer id = I(rs.getInt(1));
+                List<WebdavProperty> props = retVal.get(id);
                 if(props == null) {
                     props = new ArrayList<WebdavProperty>();
-                    retVal.put(rs.getInt(1), props);
+                    retVal.put(id, props);
                 }
                 props.add(getProperty(rs));
             }
 
             return retVal;
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(4, e, getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -314,12 +271,6 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=5,
-            msg="Invalid SQL: '%s'"
-    )
     public void removeAll(final List<Integer> entities, final Context ctx) throws OXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
@@ -335,7 +286,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             stmt = writeCon.prepareStatement(b.toString());
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(5, e, getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -352,12 +303,6 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         b.setLength(b.length()-1);
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=6,
-            msg="Invalid SQL: '%s'"
-    )
     public void removeProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
         Connection writeCon = null;
         final PreparedStatement stmt = null;
@@ -365,7 +310,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             writeCon = getWriteConnection(ctx);
             removeProperties(entity, properties, ctx, writeCon);
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(6,e,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
