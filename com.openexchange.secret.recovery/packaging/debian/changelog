@@ -1,0 +1,5 @@
+open-xchange-secret-recovery (6.18.1.0-0) unstable; urgency=low
+
+  * initial version.
+
+ -- Francisco Laguna <francisco.laguna@open-xchange.com>  Wed, 4 Aug 2010 16:59:00 +0200

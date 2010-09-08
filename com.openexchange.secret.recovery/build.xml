@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="com.openexchange.subscribe" default="install" basedir=".">
+<project name="com.openexchange.secret.recovery" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
@@ -7,13 +7,14 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
+    <property name="lib.dir" value="lib"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-	<property name="version" value="${Bundle-Version}"/>
+    <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-subscribe-${version}"/>
+    <property name="composite.name" value="open-xchange-secret-recovery-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -25,38 +26,24 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
-	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="globaljar" value="com.openexchange.global.jar"/>
-    <property name="configreadjar" value="com.openexchange.configread.jar"/>
-    <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
-    <property name="genconfstorjar" value="com.openexchange.datatypes.genericonf.storage.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
-    <property name="sqljar" value="com.openexchange.sql.jar"/>
-    <property name="cryptojar" value="com.openexchange.crypto.jar"/>
-    <property name="secretjar" value="com.openexchange.secret.jar"/>
-	<property name="secretrecovjar" value="com.openexchange.secret.recovery.jar"/>
-	<property name="calendarjar" value="com.openexchange.calendar.jar"/>
-    <property name="commonjar" value="common.jar"/>
-	<property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
+    <property name="commonscodecjar" value="commons-codec-1.4.jar" />
+
+    <!-- Third party libs -->
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
-		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-    	<pathelement location="${bundlesdir}/${osgiservicesjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+        <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-        <pathelement location="${bundlesdir}/${configreadjar}"/>
-        <pathelement location="${bundlesdir}/${genconfjar}"/>
-        <pathelement location="${bundlesdir}/${genconfstorjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
-        <pathelement location="${bundlesdir}/${sqljar}"/>
-        <pathelement location="${bundlesdir}/${cryptojar}"/>
-    	<pathelement location="${bundlesdir}/${secretjar}"/>
-    	<pathelement location="${bundlesdir}/${secretrecovjar}"/>
-    	<pathelement location="${bundlesdir}/${calendarjar}"/>
+        <fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
@@ -74,6 +61,7 @@
     <target name="jar" depends="prepare,compile">
         <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
+            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
@@ -81,10 +69,10 @@
     <target name="install" depends="installJar,installConfig"/>
 
     <target name="installConfig">
-    	<mkdir dir="${destdir}/${bundle.d}"/>
-    	<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
-    	<mkdir dir="${destdir}/${adbundle.d}"/>
-    	<echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <mkdir dir="${destdir}/${adbundle.d}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
@@ -98,8 +86,8 @@
 
     <!-- Dist -->
     <target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${composite.name}"/>
         <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
@@ -110,10 +98,10 @@
             </fileset>
         </copy>
         <tar destfile="../${composite.name}.tar.gz"
-	        basedir="${dist-package}"
-    	    includes="${composite.name}/"
-         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
-    	<delete dir="${dist-package}"/>
+            basedir="${dist-package}"
+            includes="${composite.name}/"
+             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">
