@@ -60,33 +60,19 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfoDatabase;
 import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
 
-@OXExceptionSource(
-        classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFODATABASEIMPL,
-        component = EnumComponent.INFOSTORE
-)
 public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
-
-    private static final Log LOG = LogFactory.getLog(InfoDatabaseImpl.class);
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InfoDatabaseImpl.class);
 
     private static final Metadata[] INFOSTORE_FIELDS = new Metadata[]{
         Metadata.ID_LITERAL,
@@ -237,7 +223,9 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
         }
     }
 
-    public InfoDatabaseImpl(){}
+    public InfoDatabaseImpl() {
+        super();
+    }
 
     public InfoDatabaseImpl(final DBProvider provider) {
         super(provider);
@@ -272,25 +260,25 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
         executeUpdate(INSERT_INFOSTORE_DOCUMENT_WITH_FILESTORE_LOC,Table.INFOSTORE.getFields(), document, ctx, Integer.valueOf(ctx.getContextId()), filestoreLocation);
     }
 
-    public void updateDocument(final DocumentMetadata document, final Metadata[] fields, final Context ctx) throws OXException {
+    public void updateDocument(final DocumentMetadata document, final Context ctx) throws OXException {
         final StringBuilder update = new StringBuilder(buildUpdateWithoutWhere(Table.INFOSTORE));
         update.append(" WHERE id = ? and cid = ?");
         executeUpdate(update.toString(),Table.INFOSTORE.getFields(), document, ctx, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
     }
 
-    public void updateVersion(final DocumentMetadata document, final Metadata[] fields, final Context ctx) throws OXException {
+    public void updateVersion(final DocumentMetadata document, final Context ctx) throws OXException {
         final StringBuilder update = new StringBuilder(buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT));
         update.append(" WHERE id = ? and cid = ?");
         executeUpdate(update.toString(),Table.INFOSTORE_DOCUMENT.getFields(), document, ctx, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
     }
 
-    public void updateVersion(final DocumentMetadata document, final String filestoreLoc, final Metadata[] fields, final Context ctx) throws OXException {
+    public void updateVersion(final DocumentMetadata document, final String filestoreLoc, final Context ctx) throws OXException {
         final StringBuilder update = new StringBuilder(buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT,"filestore_location"));
         update.append(" WHERE id = ? and cid = ?");
         executeUpdate(update.toString(),Table.INFOSTORE_DOCUMENT.getFields(), document, ctx, filestoreLoc, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
     }
 
-    public DocumentMetadata[] findModifiedSince(final long mod, final long folderId, final Metadata[] fields, final Metadata orderBy, final boolean asc, final Context ctx) throws OXException {
+    public DocumentMetadata[] findModifiedSince(final long mod, final Metadata[] fields, final Metadata orderBy, final boolean asc, final Context ctx) throws OXException {
         final FieldChooser chooser = new DocumentWins();
         final StringBuilder where = new StringBuilder(getFieldName(chooser, Metadata.LAST_MODIFIED_LITERAL));
         where.append(" > ?");
@@ -308,10 +296,6 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
         return select(fields,where.toString(),orderBy,asc,chooser,ctx,Long.valueOf(folderId));
     }
 
-    private DocumentMetadata[] select(final Metadata[] fields, final String where, final FieldChooser chooser, final Context ctx, final Object...queryArgs) throws OXException {
-        return select(fields,where,(String)null,false,chooser,ctx,queryArgs);
-    }
-
     private DocumentMetadata[] select(final Metadata[] fields, final String where, final Metadata orderBy, final boolean asc, final FieldChooser chooser, final Context ctx, final Object...queryArgs) throws OXException {
 
         return select(fields, where,getFieldName(chooser, orderBy) , asc, chooser, ctx, queryArgs);
@@ -322,7 +306,6 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
         return t.getTablename()+'.'+m.doSwitch(t.getFieldSwitcher());
     }
 
-    @OXThrows(category=Category.CODE_ERROR, desc="An invalid SQL query was used sent to the SQL Server. This can only be fixed by R&D", exceptionId=1, msg="Invalid SQL query: %s")
     private DocumentMetadata[] select(final Metadata[] fields, final String where, final String orderBy, final boolean asc, final FieldChooser chooser, final Context ctx, final Object...queryArgs) throws OXException {
         final StringBuilder query = new StringBuilder();
         query.append("SELECT ");
@@ -355,7 +338,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
                 results.add(m);
             }
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(0,e,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -395,7 +378,6 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
         }
     }
 
-    @OXThrows(category=Category.CODE_ERROR, desc="An invalid SQL query was used sent to the SQL Server. This can only be fixed by R&D", exceptionId=0, msg="Invalid SQL query: %s")
     private final void executeUpdate(final String statement, final Metadata[] fields, final DocumentMetadata document, final Context ctx, final Object...additionals) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -405,7 +387,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
             fillStatement(stmt, fields ,document,additionals);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(0,e,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -414,7 +396,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
         }
     }
 
-    private static final class InfostoreColumnsSwitch implements MetadataSwitcher{
+    static final class InfostoreColumnsSwitch implements MetadataSwitcher{
 
         public Object categories() {
             return null;
@@ -515,7 +497,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 
     }
 
-    private static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher{
+    static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher{
 
         public Object categories() {
             return "categories";
@@ -630,7 +612,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 
     }
 
-    private static class DocumentWins implements FieldChooser {
+    static class DocumentWins implements FieldChooser {
         public Table choose(final Metadata m) {
             if(Table.INFOSTORE.getFieldSet().contains(m)) {
                 return Table.INFOSTORE;
