@@ -34,6 +34,7 @@
     <property name="commonscodecjar" value="commons-codec-1.4.jar" />
     <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
     <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
+    <property name="jsonjar" value="json.jar"/>
 
 
     <!-- Third party libs -->
@@ -52,6 +53,7 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${secretjar}"/>
         <pathelement location="${bundlesdir}/${secretrecovjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 
