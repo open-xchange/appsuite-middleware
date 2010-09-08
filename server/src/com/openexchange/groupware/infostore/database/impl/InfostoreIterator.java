@@ -49,25 +49,21 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.FieldChooser;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
@@ -78,10 +74,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
 
-@OXExceptionSource(
-    classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTOREITERATOR,
-    component = EnumComponent.INFOSTORE
-)
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
     private static final InfostoreQueryCatalog QUERIES = InfostoreFacadeImpl.QUERIES;
@@ -158,8 +150,6 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins(), filename);
     }
 
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InfostoreIterator.class);
-
     private final Object[] args;
     private final DBProvider provider;
     private final String query;
@@ -187,33 +177,23 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         this.chooser = chooser;
     }
 
-    @OXThrows(
-            category = Category.INTERNAL_ERROR,
-            desc = "Cannot close database connection",
-            exceptionId = 2,
-            msg = "Cannot close database connection"
-    )
     public void close() throws SearchIteratorException {
         if(rs == null) {
             return;
         }
         Connection con;
+        Statement stmt = null;
         try {
-            con = rs.getStatement().getConnection();
-            DBUtils.closeSQLStuff(rs, rs.getStatement());
+            stmt = rs.getStatement();
+            con = stmt.getConnection();
+            DBUtils.closeSQLStuff(rs, stmt);
             provider.releaseReadConnection(ctx, con);
             rs = null;
         } catch (final SQLException e) {
-            throw new SearchIteratorException(EXCEPTIONS.create(2));
+            throw new SearchIteratorException(InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
         }
     }
 
-    @OXThrows(
-            category = Category.TRY_AGAIN,
-            desc = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again.",
-            exceptionId = 0,
-            msg = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again."
-    )
     public boolean hasNext() {
         if(!queried) {
             query();
@@ -222,13 +202,15 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             return true;
         }
         if(initNext) {
+            Statement stmt = null;
             try {
+                stmt = rs.getStatement();
                 next = rs.next();
                 if(!next) {
                     close();
                 }
             } catch (final SQLException e) {
-                this.exception = EXCEPTIONS.create(0,e);
+                this.exception = InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
             } catch (final SearchIteratorException e) {
                 this.exception=e;
             }
@@ -250,12 +232,6 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
 
-    @OXThrows(
-            category = Category.CODE_ERROR,
-            desc = "An invalid query was sent to the database.",
-            exceptionId = 1,
-            msg = "Invalid SQL query: %s"
-    )
     private void query() {
         queried = true;
         initNext=true;
@@ -280,7 +256,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             if(con != null) {
                 provider.releaseReadConnection(ctx, con);
             }
-            this.exception = EXCEPTIONS.create(1,x, DBUtils.getStatement(stmt,query));
+            this.exception = InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt, query));
         } catch (final TransactionException e) {
             this.exception =e;
         }
@@ -290,7 +266,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return false;
     }
 
-    public DocumentMetadata next() throws SearchIteratorException, OXException {
+    public DocumentMetadata next() throws SearchIteratorException {
         hasNext();
         if(exception != null) {
             throw new SearchIteratorException(exception);
@@ -300,23 +276,19 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return getDocument();
     }
 
-    @OXThrows(
-            category = Category.TRY_AGAIN,
-            desc = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again.",
-            exceptionId = 3,
-            msg = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again."
-    )
     private DocumentMetadata getDocument() throws SearchIteratorException {
         final DocumentMetadata dm = new DocumentMetadataImpl();
         final SetSwitch set = new SetSwitch(dm);
         final StringBuilder sb = new StringBuilder(100);
         SetValues: for (final Metadata m : fields) {
             if (m == Metadata.CURRENT_VERSION_LITERAL) {
+                Statement stmt = null;
                 try {
+                    stmt = rs.getStatement();
                     dm.setIsCurrentVersion(rs.getBoolean("current_version"));
                     continue SetValues;
                 } catch (final SQLException e) {
-                    throw new SearchIteratorException(EXCEPTIONS.create(3, e));
+                    throw new SearchIteratorException(InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
                 }
             }
             final Table t = chooser.choose(m);
@@ -324,12 +296,14 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             if (colName == null) {
                 continue;
             }
+            Statement stmt = null;
             try {
+                stmt = rs.getStatement();
                 set.setValue(process(m, rs.getObject(sb.append(t.getTablename()).append('.').append(colName)
                         .toString())));
                 sb.setLength(0);
             } catch (final SQLException e) {
-                throw new SearchIteratorException(EXCEPTIONS.create(3, e));
+                throw new SearchIteratorException(InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
             }
             m.doSwitch(set);
         }
@@ -350,7 +324,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
 
-    public List<DocumentMetadata> asList() throws SearchIteratorException, OXException{
+    public List<DocumentMetadata> asList() throws SearchIteratorException {
         try {
             final List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
             while(hasNext()) {
