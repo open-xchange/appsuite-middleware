@@ -1069,7 +1069,7 @@ public final class FacebookMessagingUtility {
      * Converts specified wildcard string to a regular expression
      * 
      * @param wildcard The wildcard string to convert
-     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     * @return An appropriate regular expression ready for being used in a {@link java.util.regex.Pattern pattern}
      */
     public static String wildcardToRegex(final String wildcard) {
         final StringBuilder s = new StringBuilder(wildcard.length());
