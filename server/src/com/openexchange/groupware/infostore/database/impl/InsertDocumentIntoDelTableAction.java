@@ -63,8 +63,8 @@ import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 @OXExceptionSource(
-		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INSERTDOCUMENTINTODELTABLEACTION,
-		component = EnumComponent.INFOSTORE
+        classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INSERTDOCUMENTINTODELTABLEACTION,
+        component = EnumComponent.INFOSTORE
 )
 public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction{
     private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InsertDocumentIntoDelTableAction.class);
@@ -77,8 +77,8 @@ public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction
 
     protected void undoAction() throws AbstractOXException {
         if(getDocuments().size() == 0) {
-			return;
-		}
+            return;
+        }
         final List<DocumentMetadata> documents = getDocuments();
         final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
 
@@ -95,19 +95,19 @@ public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction
             });
         }
 
-		try {
-			doUpdates(updates);
-		} catch (final UpdateException e) {
-			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
-		}
+        try {
+            doUpdates(updates);
+        } catch (final UpdateException e) {
+            throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
+        }
     }
 
 
     @OXThrows(
-			category = AbstractOXException.Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the server",
-			exceptionId = 1,
-			msg = "Invalid SQL Query : %s")
+            category = AbstractOXException.Category.CODE_ERROR,
+            desc = "An invalid SQL Query was sent to the server",
+            exceptionId = 1,
+            msg = "Invalid SQL Query : %s")
     public void perform() throws AbstractOXException {
         if(getDocuments().size() == 0) {
             return;
@@ -141,10 +141,10 @@ public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction
         }
 
         try {
-			doUpdates(updates);
-		} catch (final UpdateException e) {
-			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
-		}
+            doUpdates(updates);
+        } catch (final UpdateException e) {
+            throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
+        }
     }
-    
+
 }
