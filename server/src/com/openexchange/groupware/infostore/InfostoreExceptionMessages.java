@@ -59,7 +59,7 @@ import com.openexchange.exceptions.LocalizableStrings;
 public class InfostoreExceptionMessages implements LocalizableStrings {
 
     public static final String TOO_LONG_VALUES_MSG = "Some fields have values, that are too long";
-    public static final String TOO_LONG_VALUES_HELP = "The User entered values that are to long for the database schema.";
+    public static final String TOO_LONG_VALUES_HELP = "The user entered values that are too long for the database schema.";
 
     public static final String INVALID_SQL_QUERY_MSG = "Invalid SQL Query: %s";
     public static final String INVALID_SQL_QUERY_HELP = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D";
@@ -80,7 +80,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String NO_READ_PERMISSION_HELP = "The user does not have read permissions on the requested Infoitem.";
 
     public static final String NO_CREATE_PERMISSION_MSG = "You do not have sufficient permissions to create objects in this folder.";
-    public static final String NO_CREATE_PERMISSION_HELP = "The user may not create objects in the given folder.";
+    public static final String NO_CREATE_PERMISSION_HELP = "The user must not create objects in the given folder.";
 
     public static final String NO_WRITE_PERMISSION_MSG = "You are not allowed to update this item.";
     public static final String NO_WRITE_PERMISSION_HELP = "The user doesn't have the required write permissions to update the infoitem.";
@@ -95,10 +95,10 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String NO_DELETE_PERMISSION_FOR_VERSION_HELP = "The user must be allowed to delete the object in order to delete a version of it.";
 
     public static final String ITERATE_FAILED_MSG = "Could not iterate result.";
-    public static final String ITERATE_FAILED_HELP = "The system couldn't iterate the result dataset. This can have numerous exciting causes.";
+    public static final String ITERATE_FAILED_HELP = "The system couldn't iterate the result dataset.";
 
     public static final String ALREADY_LOCKED_MSG = "This document is locked.";
-    public static final String ALREADY_LOCKED_HELP = "The infoitem was locked by some other user. Only the user that locked the item (the one that modified the entry) can modify a locked infoitem.";
+    public static final String ALREADY_LOCKED_HELP = "The infoitem was locked by some other user. Only the user that locked the item can modify a locked infoitem.";
 
     public static final String LOCKED_BY_ANOTHER_MSG = "You cannot unlock this document.";
     public static final String LOCKED_BY_ANOTHER_HELP = "The infoitem was locked by some other user. Only the user that locked the item and the creator of the item can unlock a locked infoitem.";
