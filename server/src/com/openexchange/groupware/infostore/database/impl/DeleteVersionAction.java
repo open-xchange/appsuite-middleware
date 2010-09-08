@@ -53,124 +53,79 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 
-@OXExceptionSource(
-		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_DELETEVERSIONACTION,
-		component = EnumComponent.INFOSTORE
-)
 public class DeleteVersionAction extends AbstractDocumentListAction {
 
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(DeleteVersionAction.class);
-	
-	
-	@OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the server",
-			exceptionId = 0,
-			msg = "Invalid SQL Query : %s")
-	@Override
-	protected void undoAction() throws AbstractOXException {
-		if(getDocuments().size()==0) {
-			return;
-		}
-
-
+    @Override
+    protected void undoAction() throws AbstractOXException {
+        if (getDocuments().size()==0) {
+            return;
+        }
         final List<DocumentMetadata> documents = getDocuments();
         final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
-
         final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
-
-
-		for(final DocumentMetadata doc : getDocuments()) {
-			updates.add(new Update(getQueryCatalog().getVersionInsert()) {
-
-				@Override
-				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getWritableVersionFields(),doc,Integer.valueOf(getContext().getContextId()));
-				}
-				
-			});
-		}
-		for(int j = 0; j < slices.length; j++) {
+        for (final DocumentMetadata doc : getDocuments()) {
+            updates.add(new Update(getQueryCatalog().getVersionInsert()) {
+                @Override
+                public void fillStatement() throws SQLException {
+                    fillStmt(stmt,getQueryCatalog().getWritableVersionFields(),doc,Integer.valueOf(getContext().getContextId()));
+                }
+            });
+        }
+        for (int j = 0; j < slices.length; j++) {
             updates.add(new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT, slices[j])){
-
                 @Override
                 public void fillStatement() throws SQLException {
                     stmt.setInt(1, getContext().getContextId());
                 }
-
             });
-	    }
-        
+        }
         try {
-			doUpdates(updates);
-		} catch (final UpdateException e) {
-			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
-		}
-	}
+            doUpdates(updates);
+        } catch (final UpdateException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+        }
+    }
 
-	@OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the server",
-			exceptionId = 1,
-			msg = "Invalid SQL Query : %s")
-	public void perform() throws AbstractOXException {
-		if(getDocuments().size()==0) {
-			return;
-		}
-
+    public void perform() throws AbstractOXException {
+        if (getDocuments().size()==0) {
+            return;
+        }
         final List<DocumentMetadata> documents = getDocuments();
         final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
-
         final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
-
-
-        for(int j = 0; j < slices.length; j++) {
+        for (int j = 0; j < slices.length; j++) {
             updates.add(new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT, slices[j])){
-
                 @Override
                 public void fillStatement() throws SQLException {
                     stmt.setInt(1, getContext().getContextId());
                 }
-
             });
-	    }
-		
-		for(final DocumentMetadata doc : documents) {
-			updates.add(new Update(getQueryCatalog().getDelVersionInsert()) {
-
-				@Override
-				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getWritableVersionFields(),doc,Integer.valueOf(getContext().getContextId()));
-				}
-				
-			});
-		}
-        for(int j = 0; j < slices.length; j++) {
+        }
+        for (final DocumentMetadata doc : documents) {
+            updates.add(new Update(getQueryCatalog().getDelVersionInsert()) {
+                @Override
+                public void fillStatement() throws SQLException {
+                    fillStmt(stmt,getQueryCatalog().getWritableVersionFields(),doc,Integer.valueOf(getContext().getContextId()));
+                }
+            });
+        }
+        for (int j = 0; j < slices.length; j++) {
             updates.add(new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, slices[j])){
-
                 @Override
                 public void fillStatement() throws SQLException {
                     stmt.setInt(1, getContext().getContextId());
                 }
-
             });
-	    }
-
-		try {
-			doUpdates(updates);
-		} catch (final UpdateException e) {
-			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
-		}
-		
-	}
+        }
+        try {
+            doUpdates(updates);
+        } catch (final UpdateException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+        }
+    }
 
     private int batchSize = 1000;
 
@@ -182,11 +137,8 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
         this.batchSize = batchSize;
     }
 
-
-
-
     @Override
-	protected Object[] getAdditionals(final DocumentMetadata doc) {
-		return null;
-	}
+    protected Object[] getAdditionals(final DocumentMetadata doc) {
+        return null;
+    }
 }

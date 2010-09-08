@@ -53,68 +53,47 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 
-@OXExceptionSource(
-		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_DELETEDOCUMENTACTION,
-		component = EnumComponent.INFOSTORE
-)
 public class DeleteDocumentAction extends AbstractDocumentListAction {
-
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(DeleteDocumentAction.class);
 
     private static final int batchSize = 1000;
 
-    @OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the server",
-			exceptionId = 0,
-			msg = "Invalid SQL Query : %s")
-	@Override
-	protected void undoAction() throws AbstractOXException {
-		if(getDocuments().size() == 0) {
-			return;
-		}
-		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()];
-		int i = 0;
-		for(final DocumentMetadata doc : getDocuments()) {
-			updates[i++] = new Update(getQueryCatalog().getDocumentInsert()) {
+    @Override
+    protected void undoAction() throws AbstractOXException {
+        if(getDocuments().size() == 0) {
+            return;
+        }
+        final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()];
+        int i = 0;
+        for(final DocumentMetadata doc : getDocuments()) {
+            updates[i++] = new Update(getQueryCatalog().getDocumentInsert()) {
 
-				@Override
-				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
-				}
-				
-			};
-		}
-		try {
-			doUpdates(updates);
-		} catch (final UpdateException e) {
-			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
-		}
-	}
+                @Override
+                public void fillStatement() throws SQLException {
+                    fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
+                }
 
-	@OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the server",
-			exceptionId = 1,
-			msg = "Invalid SQL Query : %s")
-	public void perform() throws AbstractOXException {
-		if(getDocuments().size() == 0) {
-			return;
-		}
+            };
+        }
+        try {
+            doUpdates(updates);
+        } catch (final UpdateException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+        }
+    }
+
+    public void perform() throws AbstractOXException {
+        if(getDocuments().size() == 0) {
+            return;
+        }
 
         final List<DocumentMetadata> documents = getDocuments();
         final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
 
         final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
-        
+
         for(int j = 0, size = slices.length; j < size; j++) {
             updates.add(new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
 
@@ -127,16 +106,16 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
         }
 
         try {
-			doUpdates(updates);
-		} catch (final UpdateException e) {
-			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
-		}
-		
-	}
+            doUpdates(updates);
+        } catch (final UpdateException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+        }
 
-	@Override
-	protected Object[] getAdditionals(final DocumentMetadata doc) {
-		return null;
-	}
+    }
+
+    @Override
+    protected Object[] getAdditionals(final DocumentMetadata doc) {
+        return null;
+    }
 
 }
