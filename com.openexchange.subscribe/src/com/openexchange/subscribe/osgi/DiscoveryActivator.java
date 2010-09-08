@@ -65,6 +65,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -82,6 +83,7 @@ import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.DocumentMetadataHolderFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
+import com.openexchange.subscribe.internal.TaskFolderUpdaterStrategy;
 import com.openexchange.subscribe.secret.SubscriptionSecretHandling;
 import com.openexchange.subscribe.sql.SubscriptionSQLStorage;
 import com.openexchange.user.UserService;
@@ -132,6 +134,7 @@ public class DiscoveryActivator implements BundleActivator {
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
         folderUpdaters.add(new StrategyFolderUpdaterService<CalendarDataObject>(new CalendarFolderUpdaterStrategy()));
+        folderUpdaters.add(new StrategyFolderUpdaterService<Task>(new TaskFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<DocumentMetadataHolder>(new DocumentMetadataHolderFolderUpdaterStrategy(
             users,
             userConfigs,
