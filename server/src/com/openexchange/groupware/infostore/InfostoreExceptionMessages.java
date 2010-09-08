@@ -107,7 +107,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String WRITE_PERMS_FOR_LOCK_MISSING_HELP = "The user does not have sufficient write permissions to lock this infoitem.";
 
     public static final String NEW_ID_FAILED_MSG = "Could not generate new ID.";
-    public static final String NEW_ID_FAILED_HELP = "The IDGenerator threw an SQL Exception look at that one to find out what's wrong.";
+    public static final String NEW_ID_FAILED_HELP = "The IDGenerator threw a SQL error.";
 
     public static final String NO_SOURCE_DELETE_PERMISSION_MSG = "You are not allowed to delete objects in the source folder, so this document cannot be moved.";
     public static final String NO_SOURCE_DELETE_PERMISSION_HELP = "Need delete permissions in original folder to move an item.";
