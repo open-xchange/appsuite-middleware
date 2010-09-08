@@ -53,21 +53,13 @@ import java.util.Date;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.URLHelper;
 
-@OXExceptionSource(
-        classId = Classes.COM_OPENEXCHANGE_AJAX_PARSERL_JSONDOCUMENTMETADATA,
-        component = EnumComponent.INFOSTORE
-)
 public class JSONDocumentMetadata implements DocumentMetadata {
 
     private static final long serialVersionUID = -5016635593135118691L;

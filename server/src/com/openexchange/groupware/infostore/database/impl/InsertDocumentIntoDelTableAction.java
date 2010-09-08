@@ -46,35 +46,29 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-@OXExceptionSource(
-        classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INSERTDOCUMENTINTODELTABLEACTION,
-        component = EnumComponent.INFOSTORE
-)
 public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction{
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InsertDocumentIntoDelTableAction.class);
 
     private static final int batchSize = 1000;
 
+    @Override
     protected Object[] getAdditionals(DocumentMetadata doc) {
         return new Object[0];
     }
 
+    @Override
     protected void undoAction() throws AbstractOXException {
         if(getDocuments().size() == 0) {
             return;
@@ -98,16 +92,10 @@ public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction
         try {
             doUpdates(updates);
         } catch (final UpdateException e) {
-            throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
     }
 
-
-    @OXThrows(
-            category = AbstractOXException.Category.CODE_ERROR,
-            desc = "An invalid SQL Query was sent to the server",
-            exceptionId = 1,
-            msg = "Invalid SQL Query : %s")
     public void perform() throws AbstractOXException {
         if(getDocuments().size() == 0) {
             return;
@@ -143,7 +131,7 @@ public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction
         try {
             doUpdates(updates);
         } catch (final UpdateException e) {
-            throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
     }
 
