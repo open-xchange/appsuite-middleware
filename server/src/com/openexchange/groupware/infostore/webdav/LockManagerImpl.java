@@ -61,30 +61,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
-@OXExceptionSource(
-        classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_LOCKMANAGERIMPL,
-        component=EnumComponent.INFOSTORE
-)
 public abstract class LockManagerImpl<T extends Lock> extends DBService implements LockManager{
 
     private static final String PAT_TABLENAME = "%%tablename%%";
-
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(LockManagerImpl.class);
 
     private String INSERT = "INSERT INTO %%tablename%% (entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% ) VALUES (?, ?, ?, ?, ?, ?, ?, ? %%additional_question_marks%%)";
     private String DELETE = "DELETE FROM %%tablename%% WHERE cid = ? AND id = ? ";
@@ -159,14 +147,8 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         lock.setEntity(rs.getInt("entity"));
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=0,
-            msg="Invalid SQL: '%s'"
-    )
     protected int createLockForceId(final int entity, final int id, final long timeout, final Scope scope, final Type type, final String ownerDesc,
-            final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
+            final Context ctx, final User user, final Object...additional) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         try {
@@ -186,7 +168,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt.executeUpdate();
             return id;
         } catch (final SQLException x) {
-            throw EXCEPTIONS.create(0, x, getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -195,28 +177,16 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=1,
-            msg="Error in SQL Update"
-    )
     protected int createLock(final int entity, final long timeout, final Scope scope, final Type type, final String ownerDesc,
-            final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
+            final Context ctx, final User user, final Object...additional) throws OXException {
         try {
-            return createLockForceId(entity, IDGenerator.getId(ctx, getType()), timeout, scope, type, ownerDesc, ctx, user, userConfig, additional);
+            return createLockForceId(entity, IDGenerator.getId(ctx, getType()), timeout, scope, type, ownerDesc, ctx, user, additional);
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(1,e);
+            throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=2,
-            msg="Invalid SQL: '%s'"
-    )
-    protected void updateLock(final int lockId, final long timeout, final Scope scope, final Type type, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
+    protected void updateLock(final int lockId, final long timeout, final Scope scope, final Type type, final String ownerDesc, final Context ctx, final Object...additional) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         try {
@@ -232,7 +202,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             set(index, stmt, null, Integer.valueOf(lockId), Integer.valueOf(ctx.getContextId()));
             stmt.executeUpdate();
         } catch (final SQLException x) {
-            throw EXCEPTIONS.create(2,x,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -241,14 +211,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=3,
-            msg="Invalid SQL: '%s'"
-    )
-    protected void removeLock(final int id, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
+    protected void removeLock(final int id, final Context ctx) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         try {
@@ -257,7 +220,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             set(1, stmt, null, Integer.valueOf(ctx.getContextId()), Integer.valueOf(id));
             stmt.executeUpdate();
         } catch (final SQLException x) {
-            throw EXCEPTIONS.create(3,x,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -266,14 +229,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=4,
-            msg="Invalid SQL: '%s'"
-    )
-    public Map<Integer,List<T>> findLocksByEntity(final List<Integer> entities, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
+    public Map<Integer,List<T>> findLocksByEntity(final List<Integer> entities, final Context ctx) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -301,7 +257,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
                 final T lock = newLock();
                 fillLock(lock, rs);
                 if(lock.getTimeout()<1){
-                    removeLock(lock.getId(), ctx, user, userConfig);
+                    removeLock(lock.getId(), ctx);
                     lockExpired(lock);
                 } else {
                     lockList.add(lock);
@@ -312,7 +268,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             }
             return locks;
         } catch (final SQLException x) {
-            throw EXCEPTIONS.create(4,x,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -321,13 +277,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=7,
-            msg="Invalid SQL: '%s'"
-    )
-    public boolean existsLockForEntity(final List<Integer> entities, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public boolean existsLockForEntity(final List<Integer> entities, final Context ctx) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -343,7 +293,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             return rs.next();
 
         } catch (final SQLException x) {
-            throw EXCEPTIONS.create(4,x,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -352,12 +302,6 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=5,
-            msg="Invalid SQL: '%s'"
-    )
     public void reassign(final Context ctx, final int from, final int to) throws OXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
@@ -369,7 +313,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt.setInt(3, ctx.getContextId());
             stmt.executeUpdate();
         } catch (final SQLException x) {
-            throw EXCEPTIONS.create(5,x,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {
@@ -378,13 +322,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         }
     }
 
-    @OXThrows(
-            category=Category.CODE_ERROR,
-            desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.",
-            exceptionId=6,
-            msg="Invalid SQL: '%s'"
-    )
-    protected void removeAllFromEntity(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    protected void removeAllFromEntity(final int entity, final Context ctx) throws OXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
         try {
@@ -394,7 +332,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt.setInt(2, entity);
             stmt.executeUpdate();
         } catch (final SQLException x) {
-            throw EXCEPTIONS.create(6,x,getStatement(stmt));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } catch (TransactionException e) {
             throw new InfostoreException(e);
         } finally {

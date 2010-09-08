@@ -74,32 +74,32 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 	}
 
 	public List<Lock> findLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		return findLocksByEntity(Arrays.asList(Integer.valueOf(entity)), ctx, user, userConfig).get(Integer.valueOf(entity));
+		return findLocksByEntity(Arrays.asList(Integer.valueOf(entity)), ctx).get(Integer.valueOf(entity));
 	}
 	
 	public boolean isLocked(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		return existsLockForEntity(Arrays.asList(new Integer[]{Integer.valueOf(entity)}), ctx, user, userConfig);
+		return existsLockForEntity(Arrays.asList(new Integer[]{Integer.valueOf(entity)}), ctx);
 	}
 
 
 	public int lock(final int entity, final long timeout, final Scope scope, final Type type, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		return createLock(entity, timeout, scope, type, ownerDesc, ctx, user, userConfig);
+		return createLock(entity, timeout, scope, type, ownerDesc, ctx, user);
 	}
 
 	public void unlock(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		removeLock(id, ctx, user, userConfig);
+		removeLock(id, ctx);
 	}
 
 	public void removeAll(final int entity, final Context context, final User userObject, final UserConfiguration userConfiguration) throws OXException {
-		removeAllFromEntity(entity,context,userObject,userConfiguration);
+		removeAllFromEntity(entity,context);
 	}
 
 	public void relock(final int lockId, final long timeout, final Scope scope, final Type write, final String owner, final Context context, final User userObject, final UserConfiguration userConfiguration) throws OXException {
-		updateLock(lockId, timeout, scope, write, owner, context, userObject, userConfiguration);
+		updateLock(lockId, timeout, scope, write, owner, context);
 	}
 
 	public void insertLock(final int entity, final Lock lock, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
-		createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user,userConfig);
+		createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user);
 	}
 
 	public void transferLocks(final Context ctx, final int from_user, final int to_user) throws OXException {

@@ -52,7 +52,6 @@ package com.openexchange.groupware.infostore;
 public class Classes {
     public static final int COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_INFOSTOREEXCEPTIONFACTORY = 0;
 
-    public static final int COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_LOCKMANAGERIMPL = 8;
     public static final int COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_PROPERTYSTOREIMPL = 9;
 
     public static final int COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFODATABASEIMPL = 10;
