@@ -186,7 +186,7 @@ public final class DBUtils {
     }
 
     public static String getStatement(final Statement stmt) {
-        return (stmt == null) ? "" : stmt.toString();
+        return stmt == null ? "" : stmt.toString();
     }
 
     public static String getStatement(final PreparedStatement stmt, final String query) {
