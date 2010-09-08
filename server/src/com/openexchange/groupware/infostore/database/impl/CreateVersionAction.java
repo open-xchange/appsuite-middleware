@@ -49,30 +49,13 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.SQLException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 
-@OXExceptionSource(
-        classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_CREATEVERSIONACTION,
-        component = EnumComponent.INFOSTORE
-)
 public class CreateVersionAction extends AbstractDocumentListAction {
-
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(CreateVersionAction.class);
-
-
-    @OXThrows(
-            category = Category.CODE_ERROR,
-            desc = "An invalid SQL Query was sent to the server",
-            exceptionId = 0,
-            msg = "Invalid SQL Query : %s")
 
     @Override
     protected void undoAction() throws AbstractOXException {
@@ -82,34 +65,26 @@ public class CreateVersionAction extends AbstractDocumentListAction {
             public void fillStatement() throws SQLException {
                 stmt.setInt(1, getContext().getContextId());
             }
-
         };
-
         try {
             doUpdates(update);
         } catch (final UpdateException e) {
-            throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
 
     }
 
-    @OXThrows(
-            category = Category.CODE_ERROR,
-            desc = "An invalid SQL Query was sent to the server",
-            exceptionId = 1,
-            msg = "Invalid SQL Query : %s")
     public void perform() throws AbstractOXException {
         assureExistence();
         try {
             doUpdates(getQueryCatalog().getVersionInsert(), getQueryCatalog().getWritableVersionFields(), getDocuments());
         } catch (final UpdateException e) {
-            throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
     }
 
     @Override
     protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return new Object[]{getContext().getContextId()};
+        return new Object[] { I(getContext().getContextId()) };
     }
-
 }
