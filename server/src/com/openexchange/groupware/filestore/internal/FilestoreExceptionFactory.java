@@ -47,67 +47,37 @@
  *
  */
 
-package com.openexchange.groupware.filestore;
+package com.openexchange.groupware.filestore.internal;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreExceptionCodes;
 
 /**
- * Factory for creating FilestoreExceptions.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link FilestoreExceptionFactory}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class FilestoreExceptionFactory extends AbstractOXExceptionFactory {
+public class FilestoreExceptionFactory extends Exceptions<FilestoreException> {
 
-    /**
-     * Default constructor.
-     * @param clazz For this class exceptions should be created.
-     */
-    public FilestoreExceptionFactory(final Class clazz) {
-        super(clazz);
+    private static final FilestoreExceptionFactory SINGLETON = new FilestoreExceptionFactory();
+
+    private FilestoreExceptionFactory() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public static final FilestoreExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+    
     @Override
-    protected AbstractOXException buildException(final EnumComponent component,
-        final Category category, final int number, final String message,
-        final Throwable cause, final Object... msgArgs) {
-        return new FilestoreException(component, category, number, message,
-            cause, msgArgs);
+    protected void knownExceptions() {
+        declareAll(FilestoreExceptionCodes.values());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected int getClassId() {
-        return Classes.FILESTORE_EXCEPTION_FACTORY;
-    }
-
-    /**
-     * Creates a filestore exception.
-     * @param identifier exception identifier.
-     * @param cause nested cause.
-     * @param messageArgs arguments for the message.
-     * @return a new filestore exception.
-     */
-    public FilestoreException create(final int identifier, final Throwable cause,
-        final Object... messageArgs) {
-        return (FilestoreException) super.createException(identifier, cause,
-            messageArgs);
-    }
-
-    /**
-     * Creates a filestore exception.
-     * @param identifier exception identifier.
-     * @param messageArgs arguments for the message.
-     * @return a new filestore exception.
-     */
-    public FilestoreException create(final int identifier,
-        final Object... messageArgs) {
-        return create(identifier, null, messageArgs);
+    protected FilestoreException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new FilestoreException(message, cause, args);
     }
 }

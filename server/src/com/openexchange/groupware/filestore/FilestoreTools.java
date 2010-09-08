@@ -52,31 +52,14 @@ package com.openexchange.groupware.filestore;
 import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 
 /**
  * Contains tools the ease the use of the filestore.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(
-    classId=Classes.FILESTORE_TOOLS,
-    component=EnumComponent.FILESTORE
-)
 public final class FilestoreTools {
 
-    /**
-     * For creating exceptions.
-     */
-    private static final FilestoreExceptionFactory EXCEPTION =
-        new FilestoreExceptionFactory(FilestoreTools.class);
-
-    /**
-     * Prevent instantiation 
-     */
     private FilestoreTools() {
         super();
     }
@@ -89,17 +72,9 @@ public final class FilestoreTools {
      * @param context Context that wants to use the file store.
      * @return read to use URI to the file store.
      */
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR, Category.SETUP_ERROR },
-        desc = { "", "" },
-        exceptionId = { 1, 2 },
-        msg = { "Wrong filestore %1$d for context %2$d needing filestore %3$d.",
-            "Problem with URI when creating context specific filestore location." }
-    )
-    public static URI createLocation(final Filestore store,
-        final Context context) throws FilestoreException {
+    public static URI createLocation(final Filestore store, final Context context) throws FilestoreException {
         if (store.getId() != context.getFilestoreId()) {
-            throw EXCEPTION.create(1, I(store.getId()), I(context.getContextId()), I(context.getFilestoreId()));
+            throw FilestoreExceptionCodes.FILESTORE_MIXUP.create(I(store.getId()), I(context.getContextId()), I(context.getFilestoreId()));
         }
         final URI uri = store.getUri();
         try {
@@ -110,7 +85,7 @@ public final class FilestoreTools {
                 uri.getQuery(),
                 uri.getFragment());
         } catch (URISyntaxException e) {
-            throw EXCEPTION.create(2, e);
+            throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, uri.toString() + '/' + context.getFilestoreName());
         }
     }
 }

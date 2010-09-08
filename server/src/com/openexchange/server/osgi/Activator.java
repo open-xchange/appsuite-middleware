@@ -67,6 +67,7 @@ public class Activator extends CompositeBundleActivator {
         new com.openexchange.groupware.tx.osgi.TransactionActivator(),
         new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
         new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
+        new com.openexchange.groupware.filestore.osgi.FilestoreActivator(),
         new com.openexchange.groupware.update.osgi.Activator(),
         new com.openexchange.groupware.reminder.osgi.Activator(),
         new com.openexchange.server.osgi.ServerActivator(),

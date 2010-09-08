@@ -47,33 +47,32 @@
  *
  */
 
-package com.openexchange.groupware.filestore;
+package com.openexchange.groupware.filestore.osgi;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.filestore.internal.FilestoreExceptionFactory;
 
 /**
- * Exception for problem in the filestore API.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link FilestoreActivator}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class FilestoreException extends AbstractOXException {
+public class FilestoreActivator implements BundleActivator {
 
-    private static final long serialVersionUID = 4503678033499557993L;
+    private ComponentRegistration registration;
 
-    public FilestoreException(final EnumComponent component, final Category category,
-        final int detailNumber, final String message, final Throwable cause,
-        final Object... messageArgs) {
-        super(component, category, detailNumber, message, cause);
-        setMessageArgs(messageArgs);
+    public FilestoreActivator() {
+        super();
     }
 
-    public FilestoreException(final AbstractOXException cause) {
-        super(cause);
+    public void start(BundleContext context) throws Exception {
+        registration = new ComponentRegistration(context, EnumComponent.FILESTORE, "com.openexchange.groupware.filestore", FilestoreExceptionFactory.getInstance());
     }
 
-    public FilestoreException(ErrorMessage message, Throwable cause, Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    public void stop(BundleContext context) throws Exception {
+        registration.unregister();
     }
 }

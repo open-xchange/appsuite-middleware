@@ -57,39 +57,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.sql.DBUtils;
 
-@OXExceptionSource(
-    classId = Classes.RDB_FILESTORE_STORAGE,
-    component = EnumComponent.FILESTORE
-)
 public class RdbFilestoreStorage extends FilestoreStorage {
-
-    /**
-     * For creating exceptions.
-     */
-    private static final FilestoreExceptionFactory EXCEPTION = new FilestoreExceptionFactory(RdbFilestoreStorage.class);
 
     private static final String SELECT = "SELECT uri, size, max_context FROM filestore WHERE id = ?";
 
     @Override
-    @OXThrowsMultiple(
-        category = { Category.SUBSYSTEM_OR_SERVICE_DOWN },
-        desc = { "" },
-        exceptionId = { 5 },
-        msg = { "Can't access DBPool" }
-    )
     public Filestore getFilestore(final int id) throws FilestoreException {
         final Connection con;
         try {
             con = DBPool.pickup();
         } catch (final DBPoolingException e) {
-            throw EXCEPTION.create(5, e);
+            throw new FilestoreException(e);
         }
         try {
             return getFilestore(con, id);
@@ -99,12 +80,6 @@ public class RdbFilestoreStorage extends FilestoreStorage {
     }
 
     @Override
-    @OXThrowsMultiple(
-        category = { Category.SETUP_ERROR, Category.SETUP_ERROR, Category.CODE_ERROR },
-        desc = { "", "", "" },
-        exceptionId = { 3, 4, 6 },
-        msg = { "Cannot find filestore with id %1$d.", "Cannot create URI from \"%1$s\".", "Got SQL Exception" }
-    )
     public Filestore getFilestore(Connection con, int id) throws FilestoreException {
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -113,7 +88,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
             stmt.setInt(1,id);
             result = stmt.executeQuery();
             if (!result.next()) {
-                throw EXCEPTION.create(3, I(id));
+                throw FilestoreExceptionCodes.NO_SUCH_FILESTORE.create(I(id));
             }
             final FilestoreImpl filestore = new FilestoreImpl();
             filestore.setId(id);
@@ -122,13 +97,13 @@ public class RdbFilestoreStorage extends FilestoreStorage {
                 tmp = result.getString("uri");
                 filestore.setUri(new URI(tmp));
             } catch (final URISyntaxException e) {
-                throw EXCEPTION.create(4, e, tmp);
+                throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, tmp);
             }
             filestore.setSize(result.getLong("size"));
             filestore.setMaxContext(result.getLong("max_context"));
             return filestore;
         } catch (SQLException e) {
-            throw EXCEPTION.create(6, e);
+            throw FilestoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
         }

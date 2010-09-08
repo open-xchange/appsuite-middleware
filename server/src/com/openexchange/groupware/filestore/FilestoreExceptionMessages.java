@@ -49,22 +49,24 @@
 
 package com.openexchange.groupware.filestore;
 
+import com.openexchange.exceptions.LocalizableStrings;
+
 /**
- * Class identifier for exception code generation.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link FilestoreExceptionMessages}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Classes {
+public class FilestoreExceptionMessages implements LocalizableStrings {
 
-    public static final int FILESTORE_EXCEPTION_FACTORY = 1;
+    public static final String FILESTORE_MIXUP_MSG = "Wrong filestore %1$d for context %2$d needing filestore %3$d.";
 
-    public static final int FILESTORE_TOOLS = 2;
+    public static final String NO_SUCH_FILESTORE_MSG = "Cannot find filestore with id %1$d.";
 
-    public static final int RDB_FILESTORE_STORAGE = 3;
+    public static final String URI_CREATION_FAILED_MSG = "Cannot create URI from \"%1$s\".";
 
-    /**
-     * Prevent instantiation
-     */
-    private Classes() {
+    public static final String SQL_PROBLEM_MSG = "SQL Problem: \"%s\".";
+
+    private FilestoreExceptionMessages() {
         super();
     }
 }

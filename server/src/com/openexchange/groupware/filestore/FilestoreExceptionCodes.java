@@ -49,31 +49,59 @@
 
 package com.openexchange.groupware.filestore;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.*;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.filestore.internal.FilestoreExceptionFactory;
 
 /**
- * Exception for problem in the filestore API.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link FilestoreExceptionCodes}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class FilestoreException extends AbstractOXException {
+public enum FilestoreExceptionCodes implements OXErrorMessage {
+    /** "Wrong filestore %1$d for context %2$d needing filestore %3$d. */
+    FILESTORE_MIXUP(FILESTORE_MIXUP_MSG, Category.CODE_ERROR, 201),
+    /** Cannot find filestore with id %1$d. */
+    NO_SUCH_FILESTORE(NO_SUCH_FILESTORE_MSG, Category.SETUP_ERROR, 303),
+    /** Cannot create URI from "%1$s". */
+    URI_CREATION_FAILED(URI_CREATION_FAILED_MSG, Category.CODE_ERROR, 304),
+    /** SQL Problem: "%s". */
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 306),
+    ;
 
-    private static final long serialVersionUID = 4503678033499557993L;
+    private final String message;
+    private final Category category;
+    private int number;
 
-    public FilestoreException(final EnumComponent component, final Category category,
-        final int detailNumber, final String message, final Throwable cause,
-        final Object... messageArgs) {
-        super(component, category, detailNumber, message, cause);
-        setMessageArgs(messageArgs);
+    private FilestoreExceptionCodes(String message, Category category, int number) {
+        this.message = message;
+        this.category = category;
+        this.number = number;
     }
 
-    public FilestoreException(final AbstractOXException cause) {
-        super(cause);
+    public int getDetailNumber() {
+        return number;
     }
 
-    public FilestoreException(ErrorMessage message, Throwable cause, Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    public String getMessage() {
+        return message;
+    }
+
+    public String getHelp() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public final FilestoreException create(Object... args) {
+        return FilestoreExceptionFactory.getInstance().create(this, args);
+    }
+
+    public final FilestoreException create(Throwable cause, Object... args) {
+        return FilestoreExceptionFactory.getInstance().create(this, cause, args);
     }
 }
