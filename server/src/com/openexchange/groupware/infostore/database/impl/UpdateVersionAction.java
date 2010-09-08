@@ -59,59 +59,58 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
-
 @OXExceptionSource(
-		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_UPDATEVERSIONACTION,
-		component = EnumComponent.INFOSTORE
+        classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_UPDATEVERSIONACTION,
+        component = EnumComponent.INFOSTORE
 )
 public class UpdateVersionAction extends AbstractDocumentUpdateAction {
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(UpdateVersionAction.class);
-	
-	@OXThrowsMultiple(
-			category = {Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION},
-			desc ={ "An invalid SQL Query was sent to the server","The document was updated in between do and undo. The Database is now probalby inconsistent."},
-			exceptionId = {0,3},
-			msg = {"Invalid SQL Query : %s","The document was updated in between do and undo. The Database is now probably inconsistent."} )
-	@Override
-	protected void undoAction() throws AbstractOXException {
-		int counter = 0;
-		try {
-			counter = doUpdates(getQueryCatalog().getVersionUpdate(getModified()), getQueryCatalog().filterForVersion(getModified()), getOldDocuments());
-		} catch (final UpdateException e) {
-			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
-		}
-		
-		
-		if(counter < 0) {
-			throw EXCEPTIONS.create(3);
-		}
-	
-	}
+    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(UpdateVersionAction.class);
 
-	@OXThrowsMultiple(
-			category = {Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION},
-			desc = {"An invalid SQL Query was sent to the server","The document could not be updated because it was modified."},
-			exceptionId = {1,2},
-			msg = {"Invalid SQL Query : %s","The document could not be updated because it was modified. Reload the view." })
-	public void perform() throws AbstractOXException {
-		int counter = 0;
-		try {
+    @OXThrowsMultiple(
+            category = {Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION},
+            desc ={ "An invalid SQL Query was sent to the server","The document was updated in between do and undo. The Database is now probalby inconsistent."},
+            exceptionId = {0,3},
+            msg = {"Invalid SQL Query : %s","The document was updated in between do and undo. The Database is now probably inconsistent."} )
+    @Override
+    protected void undoAction() throws AbstractOXException {
+        int counter = 0;
+        try {
+            counter = doUpdates(getQueryCatalog().getVersionUpdate(getModified()), getQueryCatalog().filterForVersion(getModified()), getOldDocuments());
+        } catch (final UpdateException e) {
+            throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
+        }
+
+
+        if(counter < 0) {
+            throw EXCEPTIONS.create(3);
+        }
+
+    }
+
+    @OXThrowsMultiple(
+            category = {Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION},
+            desc = {"An invalid SQL Query was sent to the server","The document could not be updated because it was modified."},
+            exceptionId = {1,2},
+            msg = {"Invalid SQL Query : %s","The document could not be updated because it was modified. Reload the view." })
+    public void perform() throws AbstractOXException {
+        int counter = 0;
+        try {
             Metadata[] fields = getQueryCatalog().filterForVersion(getModified());
             fields = getQueryCatalog().filterWritable(fields);
             counter = doUpdates(getQueryCatalog().getVersionUpdate(fields), fields, getDocuments());
-		} catch (final UpdateException e) {
-			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
-		}
-		setTimestamp(System.currentTimeMillis());
-		if(counter <= 0) {
-			throw EXCEPTIONS.create(2);
-		}
-	
-	}
+        } catch (final UpdateException e) {
+            throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
+        }
+        setTimestamp(System.currentTimeMillis());
+        if(counter <= 0) {
+            throw EXCEPTIONS.create(2);
+        }
 
-	@Override
-	protected Object[] getAdditionals(final DocumentMetadata doc) {
-		return new Object[]{getContext().getContextId(), doc.getId(), doc.getVersion(), getTimestamp()};
-	}
+    }
+
+    @Override
+    protected Object[] getAdditionals(final DocumentMetadata doc) {
+        return new Object[]{getContext().getContextId(), doc.getId(), doc.getVersion(), getTimestamp()};
+    }
 
 }
