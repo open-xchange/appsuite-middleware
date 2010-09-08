@@ -112,6 +112,10 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     PATTERN_NEEDS_MORE_CHARACTERS(PATTERN_NEEDS_MORE_CHARACTERS_MSG, Category.USER_INPUT, 602, PATTERN_NEEDS_MORE_CHARACTERS_HELP),
     /** Could not delete DocumentMetadata %d. Please try again. */
     DELETE_FAILED(DELETE_FAILED_MSG, Category.CONCURRENT_MODIFICATION, 700, DELETE_FAILED_HELP),
+    /** The document could not be updated because it was modified. Reload the view. */
+    MODIFIED_CONCURRENTLY(MODIFIED_CONCURRENTLY_MSG, Category.CONCURRENT_MODIFICATION, 1302, MODIFIED_CONCURRENTLY_HELP),
+    /** The document was updated in between do and undo. The Database is now probably inconsistent. */
+    UPDATED_BETWEEN_DO_AND_UNDO(UPDATED_BETWEEN_DO_AND_UNDO_MSG, Category.CONCURRENT_MODIFICATION, 1303, UPDATED_BETWEEN_DO_AND_UNDO_HELP),
     /** This folder is a virtual folder. It cannot contain documents. */
     NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, Category.USER_INPUT, 1700, NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP),
     ;

@@ -139,6 +139,12 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String DELETE_FAILED_MSG = "Could not delete DocumentMetadata %d. Please try again.";
     public static final String DELETE_FAILED_HELP = "The DocumentMetadata entry in the DB for the given resource could not be created. This is mostly due to someone else modifying the entry. This can also mean, that the entry has been deleted already.";
 
+    public static final String MODIFIED_CONCURRENTLY_MSG = "The document could not be updated because it was modified. Reload the view.";
+    public static final String MODIFIED_CONCURRENTLY_HELP = "The document could not be updated because it was modified.";
+
+    public static final String UPDATED_BETWEEN_DO_AND_UNDO_MSG = "The document was updated in between do and undo. The Database is now probably inconsistent.";
+    public static final String UPDATED_BETWEEN_DO_AND_UNDO_HELP = "The document was updated in between do and undo. The Database is now probalby inconsistent.";
+
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG = "This folder is a virtual folder. It cannot contain documents.";
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP = "The folders to which this user has access, but that belong to other users, are collected in a virtual folder. This virtual folder cannot contain documents itself.";
 
