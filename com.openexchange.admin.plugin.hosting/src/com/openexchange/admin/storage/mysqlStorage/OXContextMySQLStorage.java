@@ -743,12 +743,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (ServiceException e) {
             throw new StorageException(e.getMessage(), e);
         }
-        ContextSearcher[] searchers = null;
+
+       ContextSearcher[] searchers = null;
         if( additionaltable != null && sqlconjunction != null ) {
             searchers = new ContextSearcher[]{
-                new ContextSearcher(cache, "SELECT context.cid FROM context, " + additionaltable + " WHERE name LIKE ? " + sqlconjunction, sqlPattern),
-                new ContextSearcher(cache, "SELECT context.cid FROM context, " + additionaltable + " WHERE context.cid LIKE ? " + sqlconjunction, sqlPattern),
-                new ContextSearcher(cache, "SELECT context.cid FROM context, login2context, " + additionaltable + " WHERE login_info LIKE ? " + sqlconjunction, sqlPattern) };
+                new ContextSearcher(cache, "SELECT DISTINCT context.cid FROM context JOIN " + additionaltable + " ON " + additionaltable + ".cid=context.cid WHERE context.name LIKE ? " + sqlconjunction, sqlPattern),
+                new ContextSearcher(cache, "SELECT DISTINCT context.cid FROM context JOIN " + additionaltable + " ON " + additionaltable + ".cid=context.cid WHERE context.cid LIKE ? " + sqlconjunction, sqlPattern),
+                new ContextSearcher(cache, "SELECT DISTINCT login2context.cid FROM login2context JOIN " + additionaltable + " ON login2context.cid=" + additionaltable + ".cid WHERE login2context.login_info LIKE ? " + sqlconjunction, sqlPattern)
+                };
         } else {
             searchers = new ContextSearcher[]{
                 new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern),
