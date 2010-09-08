@@ -881,7 +881,7 @@ public final class FacebookMessagingUtility {
         }
         return new FQLQuery(query, containsOrderBy);
     }
-    
+
     /**
      * Composes the FQL group query for given fields.
      * 
@@ -1067,10 +1067,11 @@ public final class FacebookMessagingUtility {
     }
 
     /**
-     * Gets the IN expression for specified <code>long</code>s ready for being used in a FQL query.
+     * Gets the IN expression for specified <code>long</code>s ready for being used in a FQL query.<br>
+     * E.g.: <code>&quot;(12,13,14,15)&quot;</code> would be returned for providing array <code>[12,13,14,15]</code>.
      * 
      * @param arr The <code>long</code>s
-     * @return The IN expression
+     * @return The IN expression or <code>null</code> in case of a <code>null</code> dereference or an empty array
      */
     public static String getINString(final long arr[]) {
         if (arr == null || arr.length <= 0) {
