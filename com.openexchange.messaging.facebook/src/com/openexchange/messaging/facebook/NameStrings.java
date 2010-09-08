@@ -59,10 +59,10 @@ import com.openexchange.i18n.LocalizableStrings;
 public class NameStrings implements LocalizableStrings {
 
     // The name for the folder of a facebook account containing user's wall posts.
-    public static final String NAME_WALL_FOLDER = "Wall posts (stories on your profile).";
+    public static final String NAME_WALL_FOLDER = "Wall posts";
 
     // The name for the folder of a facebook account containing user's action links.
-    public static final String NAME_ACTION_LINKS = "Action links (the action links in your stream).";
+    public static final String NAME_ACTION_LINKS = "Action links";
 
     // The name for an album posted by a Facebook user/group
     public static final String NAME_ALBUM = "Album";

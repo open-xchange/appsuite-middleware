@@ -62,55 +62,55 @@ public final class FormStrings implements LocalizableStrings {
 
     public static final String FORM_LABEL_PASSWORD = "Password";
 
-    public static final String FORM_LABEL_CONFIRMED_HAM = "Confirmed Ham";
+    public static final String FORM_LABEL_CONFIRMED_HAM = "Confirmed ham";
 
-    public static final String FORM_LABEL_CONFIRMED_HAM_FULLNAME = "Confirmed Ham Fullname";
+    public static final String FORM_LABEL_CONFIRMED_HAM_FULLNAME = "Confirmed ham folder";
 
-    public static final String FORM_LABEL_CONFIRMED_SPAM = "Confirmed Spam";
+    public static final String FORM_LABEL_CONFIRMED_SPAM = "Confirmed spam";
 
-    public static final String FORM_LABEL_CONFIRMED_SPAM_FULLNAME = "Confirmed Spam Fullname";
+    public static final String FORM_LABEL_CONFIRMED_SPAM_FULLNAME = "Confirmed spam folder";
 
     public static final String FORM_LABEL_DRAFTS = "Drafts";
 
-    public static final String FORM_LABEL_DRAFTS_FULLNAME = "Drafts Fullname";
+    public static final String FORM_LABEL_DRAFTS_FULLNAME = "Drafts folder";
 
     public static final String FORM_LABEL_SENT = "Sent";
 
-    public static final String FORM_LABEL_SENT_FULLNAME = "Sent Fullname";
+    public static final String FORM_LABEL_SENT_FULLNAME = "Sent folder";
 
     public static final String FORM_LABEL_SPAM = "Spam";
 
-    public static final String FORM_LABEL_SPAM_FULLNAME = "Spam Fullname";
+    public static final String FORM_LABEL_SPAM_FULLNAME = "Spam folder";
 
     public static final String FORM_LABEL_TRASH = "Trash";
 
-    public static final String FORM_LABEL_TRASH_FULLNAME = "Trash Fullname";
+    public static final String FORM_LABEL_TRASH_FULLNAME = "Trash folder";
 
-    public static final String FORM_LABEL_PORT = "Mail Port";
+    public static final String FORM_LABEL_PORT = "Mail port";
 
-    public static final String FORM_LABEL_PROTOCOL = "Mail Protocol";
+    public static final String FORM_LABEL_PROTOCOL = "Mail protocol";
 
-    public static final String FORM_LABEL_SECURE = "Mail Secure";
+    public static final String FORM_LABEL_SECURE = "Secure mail connection";
 
-    public static final String FORM_LABEL_SERVER = "Mail Server";
+    public static final String FORM_LABEL_SERVER = "Mail server";
 
-    public static final String FORM_LABEL_PRIMARY_ADDRESS = "Primary Address";
+    public static final String FORM_LABEL_PRIMARY_ADDRESS = "Primary address";
 
     public static final String FORM_LABEL_PERSONAL = "Personal";
 
-    public static final String FORM_LABEL_TRANSPORT_LOGIN = "Transport Login";
+    public static final String FORM_LABEL_TRANSPORT_LOGIN = "SMTP login";
 
-    public static final String FORM_LABEL_TRANSPORT_PASSWORD = "Transport Password";
+    public static final String FORM_LABEL_TRANSPORT_PASSWORD = "SMTP password";
 
-    public static final String FORM_LABEL_TRANSPORT_PORT = "Mail Port";
+    public static final String FORM_LABEL_TRANSPORT_PORT = "SMTP port";
 
-    public static final String FORM_LABEL_TRANSPORT_PROTOCOL = "Mail Protocol";
+    public static final String FORM_LABEL_TRANSPORT_PROTOCOL = "SMTP protocol";
 
-    public static final String FORM_LABEL_TRANSPORT_SECURE = "Mail Secure";
+    public static final String FORM_LABEL_TRANSPORT_SECURE = "Secure SMTP connection";
 
-    public static final String FORM_LABEL_TRANSPORT_SERVER = "Mail Server";
+    public static final String FORM_LABEL_TRANSPORT_SERVER = "SMTP server";
 
-    public static final String FORM_LABEL_UNIFIED_MAIL_ENABLED = "Unified Mail Enabled";
+    public static final String FORM_LABEL_UNIFIED_MAIL_ENABLED = "Unified mail enabled";
 
     public FormStrings() {
         super();
