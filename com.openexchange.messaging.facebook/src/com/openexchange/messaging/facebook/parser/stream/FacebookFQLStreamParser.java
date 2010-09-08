@@ -653,6 +653,7 @@ public final class FacebookFQLStreamParser {
                             } else {
                                 attachmentHandler.handleAttachment(attachmentChildNodes, len, message, multipartProvider);
                             }
+                            attachmentHandlerFound = true;
                         }
                     }
                 }
