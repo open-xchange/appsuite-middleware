@@ -620,4 +620,13 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
 
     }
 
+    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws MessagingException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException();
+    }
+
+    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws MessagingException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException();
+    }
 }
