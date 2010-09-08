@@ -66,16 +66,11 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.SearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
@@ -98,19 +93,11 @@ import com.openexchange.tools.sql.SearchStrings;
  * SearchEngineImpl
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
-@OXExceptionSource(
-        classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_SEARCH_IMPL_SEARCHENGINEIMPL,
-        component=EnumComponent.INFOSTORE
-)
-public class SearchEngineImpl extends DBService implements SearchEngine {    
-    
-    private static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(SearchEngineImpl.class);
-    
+public class SearchEngineImpl extends DBService implements SearchEngine {
+
+    static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
     private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
-    
-    // private static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
-    
+
     private static final String[] SEARCH_FIELDS = new String[] {
         "infostore_document.title",
         "infostore_document.url",
@@ -120,15 +107,15 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         "infostore_document.file_version_comment"
     };
 
-    public SearchEngineImpl() { 
+    public SearchEngineImpl() {
         super(null);
     }
-    
+
     public SearchEngineImpl(final DBProvider provider) {
         super(provider);
         security.setProvider(provider);
     }
-    
+
     @Override
     public void setProvider(final DBProvider provider) {
         super.setProvider(provider);
@@ -137,15 +124,6 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         }
     }
 
-    @OXThrowsMultiple(
-            category={Category.CODE_ERROR, Category.TRY_AGAIN}, 
-            
-            desc={"Indicates a faulty SQL Query. Only R&D can fix this", "Thrown when a result cannot be prefetched. This indicates a problem with the DB Connection. Have a look at the underlying SQLException"}, 
-            
-            exceptionId={0,1}, 
-            
-            msg={"Incorrect SQL Query: %s", "Cannot pre-fetch results."}
-    )
     public SearchIterator<DocumentMetadata> search(String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
         List<Integer> all = new ArrayList<Integer>();
@@ -182,22 +160,22 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         } catch (final SearchIteratorException e) {
             throw new OXException(e);
         }
-        
+
         if(all.isEmpty() && own.isEmpty()) {
             return SearchIteratorAdapter.createEmptyIterator();
         }
-        
+
         final StringBuilder SQL_QUERY = new StringBuilder();
         SQL_QUERY.append(getResultFieldsSelect(cols));
         SQL_QUERY.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ")
         .append(ctx.getContextId());
         boolean needOr = false;
-        
+
         if(!all.isEmpty()) {
             SQL_QUERY.append(" AND ((infostore.folder_id IN (").append(join(all)).append("))");
             needOr = true;
         }
-        
+
         if(!own.isEmpty()) {
             if(needOr) {
                 SQL_QUERY.append(" OR ");
@@ -216,13 +194,13 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
             query = query.replace('*', '%');
             query = query.replace('?', '_');
             query = query.replaceAll("'", "\\\\'");// Escape \ twice, due to regexp parser in replaceAll
-    
+
             final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
             for (final String currentField : SEARCH_FIELDS) {
                 if (SQL_QUERY_OBJECTS.length() > 0) {
                     SQL_QUERY_OBJECTS.append(" OR ");
                 }
-                
+
                 if (containsWildcard) {
                     SQL_QUERY_OBJECTS.append(currentField);
                     SQL_QUERY_OBJECTS.append(" LIKE ('");
@@ -241,7 +219,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                 SQL_QUERY.append(") ");
             }
         }
-        
+
         if (sortedBy != null && dir != NOT_SET) {
             final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
             if ((orderColumn != null) && (orderColumn[0] != null)) {
@@ -253,10 +231,10 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                     SQL_QUERY.append(" ORDER BY ");
                     SQL_QUERY.append(orderColumn[0]);
                     SQL_QUERY.append(" ASC");
-                }                
+                }
             }
         }
-        
+
         if ((start != NOT_SET) && (end != NOT_SET)) {
             if (end >= start) {
                 SQL_QUERY.append(" LIMIT ");
@@ -287,20 +265,14 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
             stmt = con.createStatement();
             return new InfostoreSearchIterator(stmt.executeQuery(SQL_QUERY.toString()), this, cols, ctx, con, stmt);
         } catch (final SQLException e) {
-            LOG.error("",e);
-            throw EXCEPTIONS.create(0,e,SQL_QUERY.toString());
+            LOG.error(e.getMessage(), e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
         } catch (final SearchIteratorException e) {
-            LOG.error("",e);
-            throw EXCEPTIONS.create(1,e);
+            LOG.error(e.getMessage(), e);
+            throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         }
     }
 
-    @OXThrows(
-        category = Category.USER_INPUT,
-        desc = "The administrator configured a minimum length for a search pattern and the users pattern is shorter than this minimum.",
-        exceptionId = 2,
-        msg = "In order to accomplish the search, %1$d or more characters are required."
-    )
     public static void checkPatternLength(String pattern) throws InfostoreException {
         final int minimumSearchCharacters;
         try {
@@ -312,7 +284,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
             return;
         }
         if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
-            throw EXCEPTIONS.create(2, I(minimumSearchCharacters));
+            throw InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumSearchCharacters));
         }
     }
 
@@ -326,10 +298,14 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         return joined.toString();
     }
 
-    public void index(final DocumentMetadata document, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException { }
-    
-    public void unIndex0r(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException { }
-    
+    public void index(final DocumentMetadata document, final Context ctx, final User user, final UserConfiguration userConfig) {
+        // Nothing to do.
+    }
+
+    public void unIndex0r(final int id, final Context ctx, final User user, final UserConfiguration userConfig) {
+        // Nothing to do.
+    }
+
     private String[] switchMetadata2DBColumns(final Metadata[] columns) {
         final List<String> retval = new ArrayList<String>();
         for (final Metadata current : columns) {
@@ -360,10 +336,10 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         }
         return(retval.toArray(new String[0]));
     }
-    
+
     private String getResultFieldsSelect(final Metadata[] RESULT_FIELDS) {
         final String[] DB_RESULT_FIELDS = switchMetadata2DBColumns(RESULT_FIELDS);
-        
+
         final StringBuilder selectFields = new StringBuilder();
         boolean id = false;
         for (String currentField : DB_RESULT_FIELDS) {
@@ -377,7 +353,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         if (!id) {
             selectFields.append("infostore.id,");
         }
-        
+
         String retval = "";
         if (selectFields.length() > 0) {
             retval = "SELECT DISTINCT " + selectFields.toString();
@@ -385,7 +361,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         }
         return retval;
     }
-    
+
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
         private DocumentMetadata next;
@@ -396,7 +372,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         private final Connection readCon;
         private Statement stmt;
         private final List<AbstractOXException> warnings;
-        
+
         public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws SearchIteratorException {
             this.warnings =  new ArrayList<AbstractOXException>(2);
             this.rs = rs;
@@ -415,7 +391,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                 throw new SearchIteratorException(Code.SQL_ERROR,e,EnumComponent.INFOSTORE);
             }
         }
-        
+
         public boolean hasNext() {
             return next != null;
         }
@@ -445,7 +421,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
             }
         }
 
-        public void close() throws SearchIteratorException {
+        public void close() {
             next = null;
             try {
                 if (rs != null) {
@@ -455,7 +431,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
             } catch (final SQLException e) {
                 LOG.debug("",e);
             }
-            
+
             try {
                 if( stmt != null ) {
                     stmt.close();
@@ -464,14 +440,14 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
             } catch (final SQLException e) {
                 LOG.debug("",e);
             }
-            
+
             s.releaseReadConnection(ctx, readCon);
         }
-        
+
         public int size() {
             throw new UnsupportedOperationException("Mehtod size() not implemented");
         }
-        
+
         public boolean hasSize() {
             return false;
         }
@@ -487,7 +463,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         public boolean hasWarnings() {
             return !warnings.isEmpty();
         }
-        
+
         private DocumentMetadataImpl fillDocumentMetadata(final DocumentMetadataImpl retval, final Metadata[] columns, final ResultSet result) throws SQLException {
             for (int i = 0; i < columns.length; i++) {
                 FillDocumentMetadata : switch(columns[i].getId()) {
@@ -506,7 +482,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                 case Metadata.FILE_SIZE : retval.setFileSize(result.getInt(i+1)); break FillDocumentMetadata;
                 case Metadata.FILE_MIMETYPE : retval.setFileMIMEType(result.getString(i+1)); break FillDocumentMetadata;
                 case Metadata.DESCRIPTION : retval.setDescription(result.getString(i+1)); break FillDocumentMetadata;
-                case Metadata.LOCKED_UNTIL : 
+                case Metadata.LOCKED_UNTIL :
                     retval.setLockedUntil(new Date(result.getLong(i+1)));
                     if (result.wasNull()) {
                         retval.setLockedUntil(null);
@@ -521,10 +497,10 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                 }
             }
             retval.setIsCurrentVersion(true);
-            
+
             return retval;
         }
 
     }
-    
+
 }

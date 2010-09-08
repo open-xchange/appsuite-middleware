@@ -133,6 +133,9 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String DUPLICATE_SUBFOLDER_MSG = "Folder %d has two subfolders named %s. The database for context %d is not consistent.";
     public static final String DUPLICATE_SUBFOLDER_HELP = "A folder contains two folders with the same folder name. This points to an inconsistency in the database, as the second folder by the same name should not have been created. This will certainly cause some headaches in R&D.";
 
+    public static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
+    public static final String PATTERN_NEEDS_MORE_CHARACTERS_HELP = "The administrator configured a minimum length for a search pattern and the users pattern is shorter than this minimum.";
+
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG = "This folder is a virtual folder. It cannot contain documents.";
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP = "The folders to which this user has access, but that belong to other users, are collected in a virtual folder. This virtual folder cannot contain documents itself.";
 
