@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.HashSet;
@@ -59,16 +60,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.infostore.ConflictException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -86,19 +82,16 @@ import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.AbstractResource;
 
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DOCUMENTMETADATARESOURCE, component = EnumComponent.INFOSTORE)
 public class DocumentMetadataResource extends AbstractResource implements OXWebdavResource {
-
-    private final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(DocumentMetadataResource.class);
 
     private static final Log LOG = LogFactory.getLog(DocumentMetadataResource.class);
 
@@ -179,12 +172,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    protected void internalPutProperty(final WebdavProperty prop) throws WebdavProtocolException {
+    protected void internalPutProperty(final WebdavProperty prop) {
         propertyHelper.putProperty(prop);
     }
 
     @Override
-    protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
+    protected void internalRemoveProperty(final String namespace, final String name) {
         propertyHelper.removeProperty(namespace, name);
     }
 
@@ -197,7 +190,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void setCreationDate(final Date date) throws WebdavProtocolException {
+    public void setCreationDate(final Date date) {
         metadata.setCreationDate(date);
         markChanged();
         markSet(Metadata.CREATION_DATE_LITERAL);
@@ -236,7 +229,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
-    public boolean exists() throws WebdavProtocolException {
+    public boolean exists() {
         return exists;
     }
 
@@ -270,7 +263,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return metadata.getFileName();
     }
 
-    public String getETag() throws WebdavProtocolException {
+    public String getETag() {
         if (!exists && !existsInDB) {
             /*
              * try { dumpMetadataToDB(); } catch (Exception e) { throw new WebdavException(e.getMessage(), e, getUrl(),
@@ -285,7 +278,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             Integer.valueOf(metadata.getVersion()));
     }
 
-    public String getLanguage() throws WebdavProtocolException {
+    public String getLanguage() {
         return null;
     }
 
@@ -350,7 +343,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return allLocks;
     }
 
-    public String getSource() throws WebdavProtocolException {
+    public String getSource() {
         return null;
     }
 
@@ -415,30 +408,30 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
-    public void setContentType(final String type) throws WebdavProtocolException {
+    public void setContentType(final String type) {
         metadata.setFileMIMEType(type);
         markChanged();
         markSet(Metadata.FILE_MIMETYPE_LITERAL);
     }
 
-    public void setDisplayName(final String displayName) throws WebdavProtocolException {
+    public void setDisplayName(final String displayName) {
         metadata.setFileName(displayName);
         markChanged();
         markSet(Metadata.FILENAME_LITERAL);
     }
 
-    public void setLength(final Long length) throws WebdavProtocolException {
+    public void setLength(final Long length) {
         metadata.setFileSize(length.longValue());
         markChanged();
         markSet(Metadata.FILE_SIZE_LITERAL);
     }
 
-    public void setSource(final String source) throws WebdavProtocolException {
+    public void setSource(final String source) {
         // IGNORE
 
     }
 
-    public void setLanguage(final String language) throws WebdavProtocolException {
+    public void setLanguage(final String language) {
         // IGNORE
 
     }
@@ -679,7 +672,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
     }
 
-    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws OXException, IllegalAccessException, ConflictException, WebdavProtocolException, TransactionException {
+    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws OXException, WebdavProtocolException, TransactionException {
         if ((exists || existsInDB) && !metadataChanged) {
             return;
         }
@@ -750,7 +743,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         metadataChanged = false;
     }
 
-    private void touch() throws WebdavProtocolException, OXException {
+    private void touch() throws OXException {
         if (!existsInDB && !exists) {
             return;
         }
@@ -765,19 +758,18 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         metadata.setTitle(metadata.getFileName());
     }
 
-    private void dumpMetadataToDB() throws OXException, IllegalAccessException, ConflictException, WebdavProtocolException, TransactionException {
+    private void dumpMetadataToDB() throws OXException, WebdavProtocolException, TransactionException {
         dumpMetadataToDB(null, false);
     }
 
-    @OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The DocumentMetadata entry in the DB for the given resource could not be created. This is mostly due to someone else modifying the entry. This can also mean, that the entry has been deleted already.", exceptionId = 0, msg = "Could not delete DocumentMetadata %d. Please try again.")
-    private void deleteMetadata() throws OXException, IllegalAccessException, WebdavProtocolException, TransactionException {
+    private void deleteMetadata() throws OXException, TransactionException {
         final ServerSession session = getSession();
         database.startTransaction();
         try {
             final int[] nd = database.removeDocument(new int[] { id }, Long.MAX_VALUE, session);
             if (nd.length > 0) {
                 database.rollback();
-                throw EXCEPTIONS.create(0, Integer.valueOf(nd[0]));
+                throw InfostoreExceptionCodes.DELETE_FAILED.create(I(nd[0]));
             }
             database.commit();
         } catch (final OXException x) {
@@ -817,7 +809,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return super.toString() + " :" + id;
     }
 
-    private ServerSession getSession() throws WebdavProtocolException {
+    private ServerSession getSession() {
         return new ServerSessionAdapter(sessionHolder.getSessionObject(), sessionHolder.getContext());
 
     }

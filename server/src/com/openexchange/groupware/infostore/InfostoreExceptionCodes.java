@@ -110,6 +110,8 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     DUPLICATE_SUBFOLDER(DUPLICATE_SUBFOLDER_MSG, Category.CODE_ERROR, 501, DUPLICATE_SUBFOLDER_HELP),
     /** In order to accomplish the search, %1$d or more characters are required. */
     PATTERN_NEEDS_MORE_CHARACTERS(PATTERN_NEEDS_MORE_CHARACTERS_MSG, Category.USER_INPUT, 602, PATTERN_NEEDS_MORE_CHARACTERS_HELP),
+    /** Could not delete DocumentMetadata %d. Please try again. */
+    DELETE_FAILED(DELETE_FAILED_MSG, Category.CONCURRENT_MODIFICATION, 700, DELETE_FAILED_HELP),
     /** This folder is a virtual folder. It cannot contain documents. */
     NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, Category.USER_INPUT, 1700, NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP),
     ;
