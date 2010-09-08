@@ -255,4 +255,26 @@ public interface MailAccountStorageService {
      * @throws MailAccountException If transport look-up fails
      */
     public MailAccount getTransportAccountForID(int id, int user, int cid) throws MailAccountException;
+    
+    /**
+     * Checks whether the given users passwords can be decrypted with the given secret key.
+     * 
+     * @param user The user ID
+     * @param cid The context ID
+     * @param secret The secret to test
+     * @return false if the encrypted strings could not be decrypted, true otherwise
+     * @throws MailAccountException
+     */
+    public boolean checkCanDecryptPasswords(int user, int cid, String secret) throws MailAccountException;
+ 
+    /**
+     * Decodes stored encrypted strings using the old secret and encode them again using the new secret.
+     * 
+     * @param user The user ID
+     * @param cid The context ID
+     * @param oldSecret The secret used for decrypting the stored passwords
+     * @param newSecret The secret to use for encrypting the passwords again
+     * @throws MailAccountException
+     */
+    public void migratePasswords(int user, int cid, String oldSecret, String newSecret) throws MailAccountException;
 }

@@ -49,8 +49,10 @@
 
 package com.openexchange.secret.osgi;
 
+import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.impl.SessionSecretService;
 
@@ -62,7 +64,10 @@ import com.openexchange.secret.impl.SessionSecretService;
 public class SecretActivator implements BundleActivator {
 
 	public void start(final BundleContext context) throws Exception {
-	    context.registerService(SecretService.class.getName(), new SessionSecretService(), null);
+	    Hashtable<String, Object> properties = new Hashtable<String, Object>();
+	    properties.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
+	    
+	    context.registerService(SecretService.class.getName(), new SessionSecretService(), properties);
 	}
 
 	public void stop(final BundleContext context) throws Exception {

@@ -281,4 +281,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return account;
     }
 
+    public boolean checkCanDecryptPasswords(int user, int cid, String secret) throws MailAccountException {
+        return delegate.checkCanDecryptPasswords(user, cid, secret);
+    }
+
+    public void migratePasswords(int user, int cid, String oldSecret, String newSecret) throws MailAccountException {
+        delegate.migratePasswords(user, cid, oldSecret, newSecret);
+    }
+
 }

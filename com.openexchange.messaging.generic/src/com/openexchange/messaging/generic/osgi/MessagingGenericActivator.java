@@ -54,6 +54,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
@@ -66,12 +67,16 @@ import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorage
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableTask;
 import com.openexchange.messaging.generic.groupware.MessagingGenericDeleteListener;
 import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
+import com.openexchange.messaging.generic.secret.MessagingSecretHandling;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
@@ -161,6 +166,10 @@ public class MessagingGenericActivator extends DeferredActivator {
             }
 
             trackers = new ArrayList<ServiceTracker>();
+            
+            final ServiceTracker messagingServiceTracker = new ServiceTracker(context, MessagingService.class.getName(), null);
+            trackers.add(messagingServiceTracker);
+            
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
@@ -174,6 +183,32 @@ public class MessagingGenericActivator extends DeferredActivator {
             }, null));
             registrations.add(context.registerService(CreateTableService.class.getName(), createTableTask, null));
             registrations.add(context.registerService(DeleteListener.class.getName(), new MessagingGenericDeleteListener(), null));
+            
+            
+            // Secret Handling
+            
+            {
+                MessagingSecretHandling secretHandling = new MessagingSecretHandling() {
+                    @Override
+                    protected Collection<MessagingService> getMessagingServices() {
+                        Object[] objects = messagingServiceTracker.getServices();
+                        if(objects == null){
+                            return Collections.emptyList();
+                        }
+                        List<MessagingService> list = new ArrayList<MessagingService>(objects.length);
+                        for (Object o : objects) {
+                            list.add((MessagingService) o);
+                        }
+                        
+                        return list;
+                    }
+                };
+                
+                
+                registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), secretHandling, null));
+                registrations.add(context.registerService(SecretMigrator.class.getName(), secretHandling, null));
+                
+            }
             
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(MessagingGenericActivator.class).error(e.getMessage(), e);

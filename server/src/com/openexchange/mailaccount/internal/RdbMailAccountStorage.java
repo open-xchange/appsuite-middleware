@@ -86,6 +86,7 @@ import com.openexchange.mailaccount.servlet.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.servlet.fields.SetSwitch;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections.SmartIntArray;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbMailAccountStorage} - The relational database implementation of mail account storage.
@@ -139,6 +140,13 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final String UPDATE_PERSONAL2 = "UPDATE user_transport_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?";
 
+    private static final String SELECT_PASSWORD1 = "SELECT id, password FROM user_mail_account WHERE cid = ? AND user = ?";
+    private static final String SELECT_PASSWORD2 = "SELECT id, password FROM user_transport_account WHERE cid = ? AND user = ?";
+    
+    private static final String UPDATE_PASSWORD1 = "UPDATE user_mail_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
+    private static final String UPDATE_PASSWORD2 = "UPDATE user_transport_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
+    
+    
     private static void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid) throws MailAccountException {
         Connection con = null;
         try {
@@ -1404,6 +1412,128 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             isWhitespace &= Character.isWhitespace(chars[i]);
         }
         return !isWhitespace && valid;
+    }
+
+    public boolean checkCanDecryptPasswords(int user, int cid, String secret) throws MailAccountException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = Database.get(cid, false);
+            stmt = con.prepareStatement(SELECT_PASSWORD1);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, user);
+            
+            rs = stmt.executeQuery();
+            
+            while(rs.next()) {
+                String password = rs.getString(2);
+                if(password != null) {
+                    MailPasswordUtil.decrypt(password, secret);
+                }
+            }
+            
+            rs.close();
+            stmt.close();
+            
+            stmt = con.prepareStatement(SELECT_PASSWORD2);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, user);
+            
+            rs = stmt.executeQuery();
+            
+            while(rs.next()) {
+                String password = rs.getString(2);
+                if(password != null) {
+                    MailPasswordUtil.decrypt(password, secret);
+                }
+            }
+            
+        } catch (DBPoolingException e) {
+            throw new MailAccountException(e);
+        } catch (SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (GeneralSecurityException e) {
+            return false;
+        } finally {
+            if(con != null) {
+                Database.back(cid, false, con);
+            }
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        return true;
+    }
+
+    public void migratePasswords(int user, int cid, String oldSecret, String newSecret) throws MailAccountException {
+        Connection con = null;
+        PreparedStatement select = null;
+        PreparedStatement update = null;
+        ResultSet rs = null;
+        try {
+            con = Database.get(cid, false);
+            con.setAutoCommit(false);
+            update = con.prepareStatement(UPDATE_PASSWORD1);
+            update.setInt(2, cid);
+            update.setInt(4, user);
+            
+            select = con.prepareStatement(SELECT_PASSWORD1);
+            select.setInt(1, cid);
+            select.setInt(2, user);
+            
+            rs = select.executeQuery();
+            
+            while(rs.next()) {
+                String password = rs.getString(2);
+                String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                update.setString(1, transcribed);
+                update.setInt(3, rs.getInt(1));
+                update.executeUpdate();
+            }
+            
+            rs.close();
+            select.close();
+            update.close();
+
+            update = con.prepareStatement(UPDATE_PASSWORD2);
+            update.setInt(2, cid);
+            update.setInt(4, user);
+
+            select = con.prepareStatement(SELECT_PASSWORD2);
+            select.setInt(1, cid);
+            select.setInt(2, user);
+            
+            while(rs.next()) {
+                String password = rs.getString(2);
+                String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                update.setString(1, transcribed);
+                update.setInt(3, rs.getInt(1));
+                update.executeUpdate();
+            }   
+            con.commit();
+        } catch (DBPoolingException e) {
+            throw new MailAccountException(e);
+        } catch (SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (GeneralSecurityException e) {
+            throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(
+                e,
+                "",
+                "",
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        } finally {
+            if(con != null) {
+                try {
+                    con.rollback();
+                    con.setAutoCommit(true);
+                } catch (SQLException e) {
+                    // Don't care
+                }
+                Database.back(cid, false, con);
+            }
+            DBUtils.closeSQLStuff(rs, select);
+            DBUtils.closeSQLStuff(update);
+        }
     }
 
 }
