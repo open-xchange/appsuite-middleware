@@ -60,12 +60,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
@@ -217,7 +217,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 exists = false;
                 factory.removed(this);
             } catch (final InfostoreException x) {
-                if (InfostoreExceptionFactory.isPermissionException(x)) {
+                if (Category.PERMISSION == x.getCategory()) {
                     throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }
                 throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -397,7 +397,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         } catch (final WebdavProtocolException x) {
             throw x;
         } catch (final InfostoreException x) {
-            if (InfostoreExceptionFactory.isPermissionException(x)) {
+            if (Category.PERMISSION == x.getCategory()) {
                 throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
             throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -596,7 +596,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 m.doSwitch(set);
             }
         } catch (final InfostoreException x) {
-            if (InfostoreExceptionFactory.isPermissionException(x)) {
+            if (Category.PERMISSION == x.getCategory()) {
                 metadata.setId(getId());
                 metadata.setFolderId(((OXWebdavResource) parent()).getId());
                 initNameAndTitle();
@@ -627,7 +627,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             } catch (final WebdavProtocolException x) {
                 throw x;
             } catch (final InfostoreException x) {
-                if (InfostoreExceptionFactory.isPermissionException(x)) {
+                if (Category.PERMISSION == x.getCategory()) {
                     throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
                 }
                 throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -656,7 +656,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                     if (415 == iStoreException.getDetailNumber()) {
                         throw new WebdavProtocolException(getUrl(), Protocol.SC_LOCKED);
                     }
-                    if (InfostoreExceptionFactory.isPermissionException(iStoreException)) {
+                    if (Category.PERMISSION == iStoreException.getCategory()) {
                         throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
                     }
                 }

@@ -151,10 +151,10 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     }
 
     public InfostoreException create(Object... args) {
-        return InfostoreExceptionFactory2.getInstance().create(this, args);
+        return InfostoreExceptionFactory.getInstance().create(this, args);
     }
 
     public InfostoreException create(Throwable cause, Object... args) {
-        return InfostoreExceptionFactory2.getInstance().create(this, cause, args);
+        return InfostoreExceptionFactory.getInstance().create(this, cause, args);
     }
 }

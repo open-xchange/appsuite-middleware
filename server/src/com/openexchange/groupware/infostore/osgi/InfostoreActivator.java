@@ -58,7 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory2;
+import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -74,7 +74,7 @@ public class InfostoreActivator implements BundleActivator {
     private final Stack<ServiceRegistration> registrations = new Stack<ServiceRegistration>();
 
     public void start(BundleContext context) throws Exception {
-        exceptions = new ComponentRegistration(context, EnumComponent.INFOSTORE, "com.openexchange.groupware.infostore", InfostoreExceptionFactory2.getInstance());
+        exceptions = new ComponentRegistration(context, EnumComponent.INFOSTORE, "com.openexchange.groupware.infostore", InfostoreExceptionFactory.getInstance());
 
         final InfostoreFilenameReservationsCreateTableTask task = new InfostoreFilenameReservationsCreateTableTask();
         registrations.push(context.registerService(CreateTableService.class.getName(), task, null));

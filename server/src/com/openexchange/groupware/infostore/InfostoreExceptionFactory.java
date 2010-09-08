@@ -49,45 +49,33 @@
 
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
-public class InfostoreExceptionFactory extends AbstractOXExceptionFactory{
+/**
+ * {@link InfostoreExceptionFactory}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class InfostoreExceptionFactory extends Exceptions<InfostoreException> {
 
-	public InfostoreExceptionFactory(final Class clazz) {
-		super(clazz);
-	}
-	
-	private static final int CLASS = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_INFOSTOREEXCEPTIONFACTORY;
-	
-	@Override
-	protected AbstractOXException buildException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
-		if(component != EnumComponent.INFOSTORE) {
-			throw new IllegalArgumentException("This factory can only build exceptions for the infostore");
-		}
-		return new InfostoreException(category,number,message,cause,msgArgs);
-	}
-	
-	@Override
-	protected int getClassId() {
-		return CLASS;
-	}
-	
-	public InfostoreException create(final int id, final Object...msgParams) {
-		return (InfostoreException) createException(id,msgParams);
-	}
-	
-	public InfostoreException create(final int id, final Throwable cause, final Object...msgParams) {
-		return (InfostoreException) createException(id,cause, msgParams);
-	}
+    private static final InfostoreExceptionFactory SINGLETON = new InfostoreExceptionFactory();
 
-	public static boolean isPermissionException(final InfostoreException x) {
-		switch(x.getDetailNumber()) {
-		default: return false;
-		case 400: case 401: case 418: case 417: case 402: case 403: case 404: case 406: case 407: case 408: case 409: case 410: case 411: return true;
-		}
-	}
-	
+    private InfostoreExceptionFactory() {
+        super();
+    }
+
+    public static final InfostoreExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    @Override
+    protected void knownExceptions() {
+        declareAll(InfostoreExceptionCodes.values());
+    }
+
+    @Override
+    protected InfostoreException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new InfostoreException(message, cause, args);
+    }
 }
