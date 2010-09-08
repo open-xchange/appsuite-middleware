@@ -1072,7 +1072,7 @@ public final class FacebookMessagingUtility {
      * @param arr The <code>long</code>s
      * @return The IN expression
      */
-    public static String getInString(final long arr[]) {
+    public static String getINString(final long arr[]) {
         if (arr == null || arr.length <= 0) {
             return null;
         }
