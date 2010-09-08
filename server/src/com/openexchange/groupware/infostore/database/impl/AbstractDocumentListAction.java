@@ -49,26 +49,20 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.sql.DBUtils;
 
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_ABSTRACTDOCUMENTLISTACTION, component = EnumComponent.INFOSTORE)
 public abstract class AbstractDocumentListAction extends AbstractInfostoreAction {
-
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(AbstractDocumentListAction.class);
 
     private List<DocumentMetadata> documents;
 
@@ -116,7 +110,7 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
             if (end > max) {
                 end = max;
             }
-            ;
+
             final List<DocumentMetadata> slice = documents.subList(start, end);
             slices[i] = slice;
 
@@ -125,15 +119,6 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
         return slices;
     }
 
-    @OXThrowsMultiple(category = { 
-            AbstractOXException.Category.CONCURRENT_MODIFICATION, 
-            AbstractOXException.Category.CODE_ERROR }, 
-        desc = {"", "" },
-        exceptionId = { 0, 1 }, 
-        msg = {
-        "The document you want to change does not exist anymore. It was probably removed during your update.",
-        "Invalid SQL Query : %s" 
-        })
     protected void assureExistence() throws AbstractOXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
@@ -145,12 +130,11 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
                 stmt.setInt(1, document.getId());
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
-                    throw EXCEPTIONS.create(0);
+                    throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
                 }
             }
         } catch (SQLException e) {
-            String statement = (stmt != null) ? stmt.toString() : "";
-            throw EXCEPTIONS.create(1, statement);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             if (writeCon != null) {

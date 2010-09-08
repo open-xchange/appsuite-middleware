@@ -50,10 +50,6 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
@@ -64,10 +60,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_TOUCHINFOITEMSWITHEXPIREDLOCKSLISTENER, component = EnumComponent.INFOSTORE)
 public class TouchInfoitemsWithExpiredLocksListener implements LockExpiryListener {
-
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(TouchInfoitemsWithExpiredLocksListener.class);
 
     private SessionHolder sessionHolder;
 
@@ -109,11 +102,4 @@ public class TouchInfoitemsWithExpiredLocksListener implements LockExpiryListene
     public void setInfostoreFacade(InfostoreFacade infostoreFacade) {
         this.infostoreFacade = infostoreFacade;
     }
-
-    
-    public static InfostoreExceptionFactory getEXCEPTIONS() {
-        return EXCEPTIONS;
-    }
-    
-    
 }

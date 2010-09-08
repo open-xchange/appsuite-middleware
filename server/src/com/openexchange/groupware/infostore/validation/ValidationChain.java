@@ -53,18 +53,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
-
-@OXExceptionSource(classId=0, component=EnumComponent.INFOSTORE)
-
-@OXThrows(category=Category.USER_INPUT, desc="", exceptionId=0, msg="Validation failed: %s")
 
 /**
  * @author francisco.laguna@open-xchange.com
@@ -75,8 +67,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
  * the same error, a list of invalid fields is prepended to the error message.
  */
 public class ValidationChain {
-
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(ValidationChain.class);
 
     private final List<InfostoreValidator> validators = new ArrayList<InfostoreValidator>();
 
@@ -128,7 +118,7 @@ public class ValidationChain {
             }
         }
         if(failed) {
-            throw EXCEPTIONS.create(0, message.toString());
+            throw InfostoreExceptionCodes.VALIDATION_FAILED.create(message.toString());
         }
     }
 

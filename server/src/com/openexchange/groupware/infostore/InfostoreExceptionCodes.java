@@ -118,6 +118,8 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     UPDATED_BETWEEN_DO_AND_UNDO(UPDATED_BETWEEN_DO_AND_UNDO_MSG, Category.CONCURRENT_MODIFICATION, 1303, UPDATED_BETWEEN_DO_AND_UNDO_HELP),
     /** This folder is a virtual folder. It cannot contain documents. */
     NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, Category.USER_INPUT, 1700, NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP),
+    /** Validation failed: %s */
+    VALIDATION_FAILED(VALIDATION_FAILED_MSG, Category.USER_INPUT, 2100, VALIDATION_FAILED_HELP),
     ;
 
     private final String message;

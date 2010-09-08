@@ -148,6 +148,9 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG = "This folder is a virtual folder. It cannot contain documents.";
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_HELP = "The folders to which this user has access, but that belong to other users, are collected in a virtual folder. This virtual folder cannot contain documents itself.";
 
+    public static final String VALIDATION_FAILED_MSG = "Validation failed: %s";
+    public static final String VALIDATION_FAILED_HELP = "";
+
     private InfostoreExceptionMessages() {
         super();
     }
