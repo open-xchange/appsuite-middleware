@@ -81,6 +81,7 @@ import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.parser.group.FacebookFQLGroupParser;
+import com.openexchange.messaging.facebook.parser.page.FacebookFQLPageParser;
 import com.openexchange.messaging.facebook.parser.stream.FacebookFQLStreamParser;
 import com.openexchange.messaging.facebook.parser.user.FacebookFQLUserParser;
 import com.openexchange.messaging.facebook.utility.FacebookGroup;
@@ -89,10 +90,12 @@ import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.FQLQuery;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.FQLQueryType;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.StaticFiller;
+import com.openexchange.messaging.facebook.utility.FacebookPage;
 import com.openexchange.messaging.facebook.utility.FacebookUser;
 import com.openexchange.messaging.generic.AttachmentFinderHandler;
 import com.openexchange.messaging.generic.MessageParser;
 import com.openexchange.messaging.generic.MessagingComparator;
+import com.openexchange.messaging.generic.Utility;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.session.Session;
 
@@ -250,8 +253,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             return Collections.emptyList();
         }
         final EnumSet<MessagingField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
-        final EnumSet<MessagingField> userGroupFieldSet = EnumSet.copyOf(fieldSet);
-        userGroupFieldSet.retainAll(FacebookMessagingUtility.getUserGroupQueryableFields());
+        final EnumSet<MessagingField> entityFieldSet = EnumSet.copyOf(fieldSet);
+        entityFieldSet.retainAll(FacebookMessagingUtility.getEntityQueryableFields());
         /*
          * Static fillers
          */
@@ -296,7 +299,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 }
                 final Iterator<Object> iterator = results.iterator();
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);
-                if (userGroupFieldSet.isEmpty()) {
+                if (entityFieldSet.isEmpty()) {
                     mUser = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
                     mGroup = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
                     safetyCheckUser = new TLongHashSet(0);
@@ -355,7 +358,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              * Replace from with proper user name
              */
             if (!mUser.isEmpty()) {
-                final FQLQuery userQuery = FacebookMessagingUtility.composeFQLUserQueryFor(userGroupFieldSet, mUser.keys());
+                final FQLQuery userQuery = FacebookMessagingUtility.composeFQLUserQueryFor(entityFieldSet, mUser.keys());
                 /*
                  * Fire FQL query
                  */
@@ -379,13 +382,13 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 /*
                  * Check if any user is missing
                  */
-                check(safetyCheckUser, userGroupFieldSet, mUser, messages, false);
+                check(safetyCheckUser, entityFieldSet, mUser, messages, false);
             }
             /*
              * Replace from with proper group name
              */
             if (!mGroup.isEmpty()) {
-                final FQLQuery userQuery = FacebookMessagingUtility.composeFQLGroupQueryFor(userGroupFieldSet, mGroup.keys());
+                final FQLQuery userQuery = FacebookMessagingUtility.composeFQLGroupQueryFor(entityFieldSet, mGroup.keys());
                 /*
                  * Fire FQL query
                  */
@@ -409,7 +412,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 /*
                  * Check if any group is missing
                  */
-                check(safetyCheckGroup, userGroupFieldSet, mGroup, messages, true);
+                check(safetyCheckGroup, entityFieldSet, mGroup, messages, true);
             }
         }
         /*
@@ -495,8 +498,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             return Collections.emptyList();
         }
         final EnumSet<MessagingField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
-        final EnumSet<MessagingField> userGroupFieldSet = EnumSet.copyOf(fieldSet);
-        userGroupFieldSet.retainAll(FacebookMessagingUtility.getUserGroupQueryableFields());
+        final EnumSet<MessagingField> entityFieldSet = EnumSet.copyOf(fieldSet);
+        entityFieldSet.retainAll(FacebookMessagingUtility.getEntityQueryableFields());
         if (null != searchTerm) {
             searchTerm.addMessagingField(fieldSet);
         }
@@ -532,7 +535,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             final int size = results.size();
             final Iterator<Object> iterator = results.iterator();
             messages = new ArrayList<MessagingMessage>(size);
-            if (userGroupFieldSet.isEmpty()) {
+            if (entityFieldSet.isEmpty()) {
                 mUser = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
                 mGroup = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
                 safetyCheckUser = new TLongHashSet(0);
@@ -608,7 +611,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          * Replace from with proper user name
          */
         if (!mUser.isEmpty()) {
-            final FQLQuery userQuery = FacebookMessagingUtility.composeFQLUserQueryFor(userGroupFieldSet, mUser.keys());
+            final FQLQuery userQuery = FacebookMessagingUtility.composeFQLUserQueryFor(entityFieldSet, mUser.keys());
             /*
              * Fire FQL query
              */
@@ -632,13 +635,13 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             /*
              * Check if any user is missing
              */
-            check(safetyCheckUser, userGroupFieldSet, mUser, messages, false);
+            check(safetyCheckUser, entityFieldSet, mUser, messages, false);
         }
         /*
          * Replace from with proper group name
          */
         if (!mGroup.isEmpty()) {
-            final FQLQuery groupQuery = FacebookMessagingUtility.composeFQLGroupQueryFor(userGroupFieldSet, mGroup.keys());
+            final FQLQuery groupQuery = FacebookMessagingUtility.composeFQLGroupQueryFor(entityFieldSet, mGroup.keys());
             /*
              * Fire FQL query
              */
@@ -662,7 +665,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             /*
              * Check if any group is missing
              */
-            check(safetyCheckGroup, userGroupFieldSet, mGroup, messages, true);
+            check(safetyCheckGroup, entityFieldSet, mGroup, messages, true);
         }
         /*
          * Filter?
@@ -711,14 +714,36 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         return messages.subList(fromIndex, toIndex);
     }
 
-    private void check(final TLongHashSet safetyCheck, final EnumSet<MessagingField> userGroupFieldSet, final TLongObjectHashMap<List<FacebookMessagingMessage>> m, final List<MessagingMessage> messages, final boolean group) throws MessagingException {
+    private void check(final TLongHashSet safetyCheck, final EnumSet<MessagingField> entityFieldSet, final TLongObjectHashMap<List<FacebookMessagingMessage>> m, final List<MessagingMessage> messages, final boolean group) throws MessagingException {
+        if (!safetyCheck.isEmpty()) {
+            /*
+             * Check page table
+             */
+            entityFieldSet.add(MessagingField.FROM); // Ensure FROM is contained
+            final FQLQuery fqlQuery = FacebookMessagingUtility.composeFQLPageQueryFor(entityFieldSet, safetyCheck.toArray());
+            final List<Object> results = FacebookMessagingUtility.fireFQLQuery(fqlQuery.getCharSequence(), facebookRestClient);
+            if (!results.isEmpty()) {
+                final Iterator<Object> iterator = results.iterator();
+                final int resSize = results.size();
+                for (int i = 0; i < resSize; i++) {
+                    final FacebookPage fbPage = FacebookFQLPageParser.parsePageDOMElement((Element) iterator.next());
+                    final long pageId = fbPage.getPageId();
+                    safetyCheck.remove(pageId);
+                    final String groupIdStr = String.valueOf(pageId);
+                    for (final FacebookMessagingMessage message : m.get(pageId)) {
+                        message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, fbPage.getName(), groupIdStr));
+                        message.setPicture(fbPage.getPicSmall());
+                    }
+                }
+            }
+        }
         /*
-         * Check if any user is missing
+         * Check if any entity is missing
          */
         if (!safetyCheck.isEmpty()) {
             final Log logger = LogFactory.getLog(FacebookMessagingMessageAccess.class);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Information of following Facebook " + (group ? "groups" : "users") + " are missing: " + Arrays.toString(safetyCheck.toArray()));
+            if (logger.isWarnEnabled()) {
+                logger.warn("Information of following Facebook " + (group ? "groups" : "users") + " are missing: " + Arrays.toString(safetyCheck.toArray()));
             }
             if (retrySafetyCheck) {
                 for (final TLongIterator iter = safetyCheck.iterator(); iter.hasNext();) {
@@ -732,9 +757,9 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                      */
                     final FQLQuery fqlQuery;
                     if (group) {
-                        fqlQuery = FacebookMessagingUtility.composeFQLGroupQueryFor(userGroupFieldSet, missingId);
+                        fqlQuery = FacebookMessagingUtility.composeFQLGroupQueryFor(entityFieldSet, missingId);
                     } else {
-                        fqlQuery = FacebookMessagingUtility.composeFQLUserQueryFor(userGroupFieldSet, missingId);
+                        fqlQuery = FacebookMessagingUtility.composeFQLUserQueryFor(entityFieldSet, missingId);
                     }
                     final List<Object> results = FacebookMessagingUtility.fireFQLQuery(fqlQuery.getCharSequence(), facebookRestClient);
                     if (results.isEmpty()) {
@@ -790,6 +815,17 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                     /*
                      * Remove corresponding messages.
                      */
+                    
+                    {
+                        System.out.println("-- Affected Messages:");
+                        List<FacebookMessagingMessage> list = m.get(missingUserId);
+                        for (FacebookMessagingMessage fbMessagingMessage : list) {
+                            FQLQuery fqlQuery = FacebookMessagingUtility.composeFQLStreamQueryFor(SET_FULL, fbMessagingMessage.getId());
+                            final List<Object> results = FacebookMessagingUtility.fireFQLQuery(fqlQuery.getCharSequence(), facebookRestClient);
+                            System.out.println(Utility.prettyPrintXML((Element) results.get(0)));
+                        }
+                    }
+                    
                     messages.removeAll(m.remove(missingUserId));
                 }
             }

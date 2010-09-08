@@ -169,6 +169,8 @@ public final class FacebookMessagingUtility {
     private static final Map<MessagingField, QueryAdder> ADDERS_USER;
 
     private static final Map<MessagingField, QueryAdder> ADDERS_GROUP;
+    
+    private static final Map<MessagingField, QueryAdder> ADDERS_PAGE;
 
     static {
         {
@@ -393,6 +395,46 @@ public final class FacebookMessagingUtility {
             });
 
             ADDERS_GROUP = Collections.unmodifiableMap(m);
+            
+            m = new EnumMap<MessagingField, QueryAdder>(MessagingField.class);
+
+            m.put(MessagingField.FROM, new QueryAdder() {
+
+                public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("page_id");
+                    fieldNames.add("name");
+                }
+
+                public String getOrderBy() {
+                    return "name";
+                }
+            });
+
+            m.put(MessagingField.PICTURE, new QueryAdder() {
+
+                public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("pic_small");
+                }
+
+                public String getOrderBy() {
+                    return null;
+                }
+            });
+
+            m.put(MessagingField.FULL, new QueryAdder() {
+
+                public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("page_id");
+                    fieldNames.add("name");
+                    fieldNames.add("pic_small");
+                }
+
+                public String getOrderBy() {
+                    return null;
+                }
+            });
+
+            ADDERS_PAGE = Collections.unmodifiableMap(m);
         }
     }
 
@@ -410,7 +452,7 @@ public final class FacebookMessagingUtility {
      * 
      * @return The user/group query-able fields
      */
-    public static EnumSet<MessagingField> getUserGroupQueryableFields() {
+    public static EnumSet<MessagingField> getEntityQueryableFields() {
         final EnumSet<MessagingField> ret = EnumSet.copyOf(ADDERS_USER.keySet());
         ret.addAll(ADDERS_GROUP.keySet());
         return ret;
@@ -990,6 +1032,100 @@ public final class FacebookMessagingUtility {
         }
         boolean containsOrderBy = false;
         final QueryAdder adder = ADDERS_GROUP.get(sortField);
+        if (null != adder) {
+            final String orderBy = adder.getOrderBy();
+            if (null != orderBy) {
+                query.append(" ORDER BY ").append(orderBy).append(OrderDirection.DESC.equals(order) ? " DESC" : " ASC");
+                containsOrderBy = true;
+            }
+        }
+        return new FQLQuery(query, containsOrderBy);
+    }
+
+    /**
+     * Composes the FQL page query for given fields.
+     * 
+     * @param fields The fields
+     * @param groupId The page identifier
+     * @return The FQL page query or <code>null</code> if fields require no query
+     */
+    public static FQLQuery composeFQLPageQueryFor(final Collection<MessagingField> fields, final long groupId) {
+        return composeFQLPageQueryFor0(fields, null, null, new long[] { groupId });
+    }
+
+    /**
+     * Composes the FQL page query for given fields.
+     * 
+     * @param fields The fields
+     * @param groupIds The page identifiers
+     * @return The FQL page query or <code>null</code> if fields require no query
+     */
+    public static FQLQuery composeFQLPageQueryFor(final Collection<MessagingField> fields, final long[] groupIds) {
+        return composeFQLPageQueryFor0(fields, null, null, groupIds);
+    }
+
+    /**
+     * Composes the FQL page query for given fields.
+     * 
+     * @param fields The fields
+     * @param sortField The sort field; may be <code>null</code>
+     * @param order The order direction
+     * @param groupIds The page identifiers
+     * @return The FQL page query or <code>null</code> if fields require no query
+     */
+    public static FQLQuery composeFQLPageQueryFor(final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final long[] groupIds) {
+        return composeFQLPageQueryFor0(fields, sortField, order, groupIds);
+    }
+
+    private static FQLQuery composeFQLPageQueryFor0(final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final long[] groupIds) {
+        final Set<String> fieldNames = new HashSet<String>(fields.size());
+        if (fields.contains(MessagingField.FULL)) {
+            final QueryAdder queryAdder = ADDERS_PAGE.get(MessagingField.FULL);
+            queryAdder.add2Query(fieldNames);
+        } else {
+            for (final MessagingField mf : fields) {
+                final QueryAdder queryAdder = ADDERS_PAGE.get(mf);
+                if (null != queryAdder) {
+                    queryAdder.add2Query(fieldNames);
+                }
+            }
+        }
+        if (fieldNames.isEmpty()) {
+            return null;
+        }
+        final int size = fieldNames.size();
+        final StringBuilder query = new StringBuilder(size << 5).append("SELECT ");
+        {
+            final Iterator<String> iter = fieldNames.iterator();
+            query.append(iter.next());
+            for (int i = 1; i < size; i++) {
+                query.append(", ").append(iter.next());
+            }
+        }
+        query.append(" FROM page WHERE");
+        if (null != groupIds && 0 < groupIds.length) {
+            if (1 == groupIds.length) {
+                query.append(" page_id = '").append(groupIds[0]).append('\'');
+            } else {
+                query.append(" page_id IN ");
+                query.append('(');
+                {
+                    query.append('\'').append(groupIds[0]).append('\'');
+                    for (int i = 1; i < groupIds.length; i++) {
+                        query.append(',').append('\'').append(groupIds[i]).append('\'');
+                    }
+                }
+                query.append(')');
+            }
+        }
+        /*
+         * Check sort field
+         */
+        if (null == sortField) {
+            return new FQLQuery(query, false);
+        }
+        boolean containsOrderBy = false;
+        final QueryAdder adder = ADDERS_PAGE.get(sortField);
         if (null != adder) {
             final String orderBy = adder.getOrderBy();
             if (null != orderBy) {
