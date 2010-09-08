@@ -32,6 +32,8 @@
 	<property name="secretjar" value="com.openexchange.secret.jar"/>
 	<property name="secretrecovjar" value="com.openexchange.secret.recovery.jar"/>
     <property name="commonscodecjar" value="commons-codec-1.4.jar" />
+    <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+
 
     <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -42,6 +44,7 @@
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
+        <pathelement location="${bundlesdir}/${osgiservicesjar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
