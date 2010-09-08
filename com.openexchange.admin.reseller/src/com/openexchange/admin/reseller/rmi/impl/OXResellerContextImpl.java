@@ -372,7 +372,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                 return null;
             } else {
                 final ResellerAdmin adm = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(auth.getLogin(), auth.getPassword()) })[0];
-                return new SQLQueryExtension("context2subadmin", "AND ( context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId() + ")");
+                return new SQLQueryExtension("context2subadmin", "AND context2subadmin.sid=" + adm.getId());
             }
         } catch (final StorageException e) {
             throw new PluginException(e);
