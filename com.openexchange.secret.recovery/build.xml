@@ -29,6 +29,7 @@
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
+	<property name="secretjar" value="com.openexchange.secret.jar"/>
     <property name="commonscodecjar" value="commons-codec-1.4.jar" />
 
     <!-- Third party libs -->
@@ -43,6 +44,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${secretjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 
