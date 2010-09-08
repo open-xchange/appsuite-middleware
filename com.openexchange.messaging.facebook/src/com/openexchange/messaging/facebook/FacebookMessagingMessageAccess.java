@@ -270,7 +270,16 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             query = FacebookMessagingUtility.composeFQLStreamQueryFor(fieldSet, messageIds);
         }
         final List<MessagingMessage> messages;
-        if (null != query) {
+        if (null == query) {
+            messages = new ArrayList<MessagingMessage>(messageIds.length);
+            for (int i = 0; i < messageIds.length; i++) {
+                final FacebookMessagingMessage message = new FacebookMessagingMessage(getUserLocale());
+                for (final StaticFiller filler : staticFillers) {
+                    filler.fill(message);
+                }
+                messages.add(message);
+            }
+        } else {
             final TLongObjectHashMap<List<FacebookMessagingMessage>> mUser;
             final TLongObjectHashMap<List<FacebookMessagingMessage>> mGroup;
             final TLongHashSet safetyCheckUser;
@@ -401,15 +410,6 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                  * Check if any group is missing
                  */
                 check(safetyCheckGroup, userGroupFieldSet, mGroup, messages, true);
-            }
-        } else {
-            messages = new ArrayList<MessagingMessage>(messageIds.length);
-            for (int i = 0; i < messageIds.length; i++) {
-                final FacebookMessagingMessage message = new FacebookMessagingMessage(getUserLocale());
-                for (final StaticFiller filler : staticFillers) {
-                    filler.fill(message);
-                }
-                messages.add(message);
             }
         }
         /*

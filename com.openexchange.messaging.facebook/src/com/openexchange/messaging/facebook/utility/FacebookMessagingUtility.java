@@ -335,6 +335,19 @@ public final class FacebookMessagingUtility {
                 }
             });
 
+            m.put(MessagingField.FULL, new QueryAdder() {
+
+                public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("uid");
+                    fieldNames.add("name");
+                    fieldNames.add("pic_small");
+                }
+
+                public String getOrderBy() {
+                    return null;
+                }
+            });
+
             ADDERS_USER = Collections.unmodifiableMap(m);
 
             /*
@@ -358,6 +371,19 @@ public final class FacebookMessagingUtility {
             m.put(MessagingField.PICTURE, new QueryAdder() {
 
                 public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("pic_small");
+                }
+
+                public String getOrderBy() {
+                    return null;
+                }
+            });
+
+            m.put(MessagingField.FULL, new QueryAdder() {
+
+                public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("gid");
+                    fieldNames.add("name");
                     fieldNames.add("pic_small");
                 }
 
@@ -698,9 +724,8 @@ public final class FacebookMessagingUtility {
          */
         final Set<String> fieldNames = new HashSet<String>(fields.size());
         if (fields.contains(MessagingField.FULL)) {
-            for (final QueryAdder queryAdder : ADDERS_STREAM.values()) {
-                queryAdder.add2Query(fieldNames);
-            }
+            final QueryAdder queryAdder = ADDERS_STREAM.get(MessagingField.FULL);
+            queryAdder.add2Query(fieldNames);
         } else {
             for (final MessagingField mf : fields) {
                 final QueryAdder queryAdder = ADDERS_STREAM.get(mf);
@@ -825,9 +850,8 @@ public final class FacebookMessagingUtility {
     private static FQLQuery composeFQLUserQueryFor0(final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final long[] userIds) {
         final Set<String> fieldNames = new HashSet<String>(fields.size());
         if (fields.contains(MessagingField.FULL)) {
-            for (final QueryAdder queryAdder : ADDERS_USER.values()) {
-                queryAdder.add2Query(fieldNames);
-            }
+            final QueryAdder queryAdder = ADDERS_USER.get(MessagingField.FULL);
+            queryAdder.add2Query(fieldNames);
         } else {
             for (final MessagingField mf : fields) {
                 final QueryAdder queryAdder = ADDERS_USER.get(mf);
@@ -920,9 +944,8 @@ public final class FacebookMessagingUtility {
     private static FQLQuery composeFQLGroupQueryFor0(final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final long[] groupIds) {
         final Set<String> fieldNames = new HashSet<String>(fields.size());
         if (fields.contains(MessagingField.FULL)) {
-            for (final QueryAdder queryAdder : ADDERS_GROUP.values()) {
-                queryAdder.add2Query(fieldNames);
-            }
+            final QueryAdder queryAdder = ADDERS_GROUP.get(MessagingField.FULL);
+            queryAdder.add2Query(fieldNames);
         } else {
             for (final MessagingField mf : fields) {
                 final QueryAdder queryAdder = ADDERS_GROUP.get(mf);
