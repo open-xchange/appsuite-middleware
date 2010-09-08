@@ -98,7 +98,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String ITERATE_FAILED_HELP = "The system couldn't iterate the result dataset.";
 
     public static final String ALREADY_LOCKED_MSG = "This document is locked.";
-    public static final String ALREADY_LOCKED_HELP = "The infoitem was locked by some other user. Only the user that locked the item (the one that modified the entry) can modify a locked infoitem.";
+    public static final String ALREADY_LOCKED_HELP = "The infoitem was locked by some other user. Only the user that locked the item can modify a locked infoitem.";
 
     public static final String LOCKED_BY_ANOTHER_MSG = "You cannot unlock this document.";
     public static final String LOCKED_BY_ANOTHER_HELP = "The infoitem was locked by some other user. Only the user that locked the item and the creator of the item can unlock a locked infoitem.";
@@ -107,7 +107,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String WRITE_PERMS_FOR_LOCK_MISSING_HELP = "The user does not have sufficient write permissions to lock this infoitem.";
 
     public static final String NEW_ID_FAILED_MSG = "Could not generate new ID.";
-    public static final String NEW_ID_FAILED_HELP = "The IDGenerator threw an SQL Exception look at that one to find out what's wrong.";
+    public static final String NEW_ID_FAILED_HELP = "The IDGenerator threw a SQL error.";
 
     public static final String NO_SOURCE_DELETE_PERMISSION_MSG = "You are not allowed to delete objects in the source folder, so this document cannot be moved.";
     public static final String NO_SOURCE_DELETE_PERMISSION_HELP = "Need delete permissions in original folder to move an item.";
@@ -118,8 +118,8 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String DOCUMENT_NOT_EXISTS_MSG = "The document you requested doesn't exist.";
     public static final String DOCUMENT_NOT_EXISTS_HELP = "The document could not be loaded because it doesn't exist.";
 
-    public static final String FILENAME_NOT_UNIQUE_MSG = "Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s.";
-    public static final String FILENAME_NOT_UNIQUE_HELP = "To remain consistent in WebDAV no two current versions in a given folder may contain a file with the same filename. The user must either choose a different filename, or switch the other file to a version with a different filename.";
+    public static final String FILENAME_NOT_UNIQUE_MSG = "Files attached to InfoStore items must have unique names. File name: %s. The other document with this file name is %s.";
+    public static final String FILENAME_NOT_UNIQUE_HELP = "To remain consistent in WebDAV file versions in a given folder must not contain a file with the same filen name. The user must either choose a different file name, or switch the other file to a version with a different file name.";
 
     public static final String NUMBER_OF_VERSIONS_FAILED_MSG = "Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s";
     public static final String NUMBER_OF_VERSIONS_FAILED_HELP = "The query to cound the versions in a document failed.";
