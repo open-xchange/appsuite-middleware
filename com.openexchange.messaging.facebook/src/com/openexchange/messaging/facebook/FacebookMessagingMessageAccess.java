@@ -187,8 +187,6 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
-    private static final MessagingField[] FIELDS_FULL = { MessagingField.FULL };
-
     private static final EnumSet<MessagingField> SET_FULL = EnumSet.of(MessagingField.FULL);
 
     public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
@@ -203,7 +201,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              * Query
              */
             final FQLQuery query =
-                FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), FIELDS_FULL, facebookUserId);
+                FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), SET_FULL, facebookUserId);
             final List<Object> results = fireFQLQuery(query.getCharSequence(), facebookRestClient);
             message = FacebookFQLStreamParser.parseStreamDOMElement((Element) results.iterator().next(), getUserLocale());
             if (null == message) {
@@ -233,7 +231,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         return message;
     }
 
-    private static final MessagingField[] FIELDS_ID = { MessagingField.ID };
+    private static final EnumSet<MessagingField> SET_ID = EnumSet.of(MessagingField.ID);
 
     public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws MessagingException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
@@ -266,13 +264,10 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          */
         final FQLQuery query;
         if (fieldSet.contains(MessagingField.ID)) { // Contains post_id
-            query =
-                FacebookMessagingUtility.composeFQLStreamQueryFor(fields, messageIds);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(fieldSet, messageIds);
         } else {
-            final MessagingField[] arg = new MessagingField[fields.length + 1];
-            arg[0] = MessagingField.ID;
-            System.arraycopy(fields, 0, arg, 1, fields.length);
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(arg, messageIds);
+            fieldSet.add(MessagingField.ID);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(fieldSet, messageIds);
         }
         final List<MessagingMessage> messages;
         if (null != query) {
@@ -351,8 +346,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              * Replace from with proper user name
              */
             if (!mUser.isEmpty()) {
-                final FQLQuery userQuery =
-                    FacebookMessagingUtility.composeFQLUserQueryFor(userGroupFieldSet.toArray(new MessagingField[userGroupFieldSet.size()]), mUser.keys());
+                final FQLQuery userQuery = FacebookMessagingUtility.composeFQLUserQueryFor(userGroupFieldSet, mUser.keys());
                 /*
                  * Fire FQL query
                  */
@@ -382,8 +376,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              * Replace from with proper group name
              */
             if (!mGroup.isEmpty()) {
-                final FQLQuery userQuery =
-                    FacebookMessagingUtility.composeFQLGroupQueryFor(userGroupFieldSet.toArray(new MessagingField[userGroupFieldSet.size()]), mGroup.keys());
+                final FQLQuery userQuery = FacebookMessagingUtility.composeFQLGroupQueryFor(userGroupFieldSet, mGroup.keys());
                 /*
                  * Fire FQL query
                  */
@@ -515,7 +508,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          * Static fillers
          */
         final MessagingField[] daFields = fieldSet.toArray(new MessagingField[fieldSet.size()]);
-        final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStreamStaticFillers(daFields, this);
+        final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStreamStaticFillers(fieldSet, this);
         if (fieldSet.contains(MessagingField.FOLDER_ID) || fieldSet.contains(MessagingField.FULL)) {
             staticFillers.add(new FacebookMessagingUtility.FolderFiller(folder));
         }
@@ -525,9 +518,9 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         final FQLQueryType queryType = FQLQueryType.queryTypeFor(folder);
         final FQLQuery query;
         if (EnumSet.copyOf(fieldSet).removeAll(FacebookMessagingUtility.getStreamQueryableFields())) { // Contains any
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(queryType, daFields, sortField, order, facebookUserId);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(queryType, fieldSet, sortField, order, facebookUserId);
         } else {
-            query = FacebookMessagingUtility.composeFQLStreamQueryFor(queryType, FIELDS_ID, sortField, order, facebookUserId);
+            query = FacebookMessagingUtility.composeFQLStreamQueryFor(queryType, SET_ID, sortField, order, facebookUserId);
         }
         final List<MessagingMessage> messages;
         final TLongObjectHashMap<List<FacebookMessagingMessage>> mUser;
@@ -616,10 +609,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          * Replace from with proper user name
          */
         if (!mUser.isEmpty()) {
-            final FQLQuery userQuery =
-                FacebookMessagingUtility.composeFQLUserQueryFor(
-                    userGroupFieldSet.toArray(new MessagingField[userGroupFieldSet.size()]),
-                    mUser.keys());
+            final FQLQuery userQuery = FacebookMessagingUtility.composeFQLUserQueryFor(userGroupFieldSet, mUser.keys());
             /*
              * Fire FQL query
              */
@@ -649,10 +639,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          * Replace from with proper group name
          */
         if (!mGroup.isEmpty()) {
-            final FQLQuery groupQuery =
-                FacebookMessagingUtility.composeFQLGroupQueryFor(
-                    userGroupFieldSet.toArray(new MessagingField[userGroupFieldSet.size()]),
-                    mGroup.keys());
+            final FQLQuery groupQuery = FacebookMessagingUtility.composeFQLGroupQueryFor(userGroupFieldSet, mGroup.keys());
             /*
              * Fire FQL query
              */
@@ -746,15 +733,9 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                      */
                     final FQLQuery fqlQuery;
                     if (group) {
-                        fqlQuery =
-                            FacebookMessagingUtility.composeFQLGroupQueryFor(
-                                userGroupFieldSet.toArray(new MessagingField[userGroupFieldSet.size()]),
-                                missingId);
+                        fqlQuery = FacebookMessagingUtility.composeFQLGroupQueryFor(userGroupFieldSet, missingId);
                     } else {
-                        fqlQuery =
-                            FacebookMessagingUtility.composeFQLUserQueryFor(
-                                userGroupFieldSet.toArray(new MessagingField[userGroupFieldSet.size()]),
-                                missingId);
+                        fqlQuery = FacebookMessagingUtility.composeFQLUserQueryFor(userGroupFieldSet, missingId);
                     }
                     final List<Object> results = FacebookMessagingUtility.fireFQLQuery(fqlQuery.getCharSequence(), facebookRestClient);
                     if (results.isEmpty()) {
