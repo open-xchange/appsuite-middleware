@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.crawler;
 
+import java.security.GeneralSecurityException;
 import java.util.List;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
@@ -138,6 +139,14 @@ public class Workflow {
 
         // use a custom CookiePolicy to be more lenient and thereby work with more websites
         CrawlerWebConnection crawlerConnection = new CrawlerWebConnection(webClient);
+        // the same applies to SSL: Be as lenient, and thereby as compatible, as possible
+        try {
+            webClient.setUseInsecureSSL(true);
+        } catch (GeneralSecurityException e) {
+            LOG.error(e);
+        }
+        // ... and to javascript as well
+        webClient.setThrowExceptionOnScriptError(false);
         if (quirkyCookieQuotes) {crawlerConnection.setQuirkyCookieQuotes(true);}
         CookiePolicy.registerCookieSpec("crawler-special", CrawlerCookieSpec.class);
         CookiePolicy.registerCookieSpec("crawler-special-qq", CrawlerCookieSpecWithQuirkyQuotes.class);
@@ -177,6 +186,7 @@ public class Workflow {
             return (Object[]) result;
         } 
         catch (NullPointerException e) {
+            LOG.error(e);
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
         }
         finally {

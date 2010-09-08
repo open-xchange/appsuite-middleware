@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
@@ -80,7 +81,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
 
     private static final Log LOG = LogFactory.getLog(ContactObjectsByVcardFileStep.class);
 
-    private List<String> unwantedLines;
+    private List<String> unwantedLines = new ArrayList<String>();
 
     public ContactObjectsByVcardFileStep() {
 

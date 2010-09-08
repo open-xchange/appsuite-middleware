@@ -49,90 +49,73 @@
 
 package com.openexchange.subscribe.crawler;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.TimeZone;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.FrameWindow;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 
 /**
- * {@link PageByFrameNumberStep}
+ * {@link CalendarObjectsByICalFileStep}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
-    private Exception exception;
-
-    protected boolean executedSuccessfully;
+public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObject[], Page> {
     
-    private int frameNumber;
+    private static final Log LOG = LogFactory.getLog(CalendarObjectsByICalFileStep.class);
     
-    private static final Log LOG = LogFactory.getLog(PageByFrameNumberStep.class);
-
-    public PageByFrameNumberStep() {
-        super();
-        frameNumber = 0;
-    }
-
-    public PageByFrameNumberStep(final String description, final int frameNumber) {
-        this();
-        this.description = description;
-        this.frameNumber = frameNumber;
-    }
-
-    @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
-        int index = 1;
+    public CalendarObjectsByICalFileStep(){
         
-        for (FrameWindow frame : input.getFrames()){
-            if (index == frameNumber){
-                output = (HtmlPage) frame.getEnclosedPage();                
-                LOG.debug("Frame selected : " + frame.getName()+ "\n" + ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
+    }
+    
+    public void execute(WebClient webClient) {
+        ArrayList<CalendarDataObject> tempEvents = new ArrayList<CalendarDataObject>();
+        ArrayList<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
+
+        try {
+            LOG.debug("This should be an iCal-File : \n" + input.getWebResponse().getContentAsString());
+            String iCalFile = input.getWebResponse().getContentAsString();
+            ICalParser iCalParser = workflow.getActivator().getICalParser();
+                                                                
+            if (iCalParser != null) {                
+                tempEvents = (ArrayList<CalendarDataObject>) iCalParser.parseAppointments(
+                    iCalFile,
+                    TimeZone.getDefault(),
+                    new ContextImpl(23),
+                    new ArrayList<ConversionError>(),
+                    new ArrayList<ConversionWarning>());
+            } else {
+                LOG.error("No iCal-Parser found!");
             }
-            index ++;
+            events.addAll(tempEvents);
+            
+        } catch (ConversionError e) {
+            LOG.error(e.getMessage(), e);
+        } catch (FailingHttpStatusCodeException e) {
+            LOG.error(e.getMessage(), e);
+        }
+
+        output = new CalendarDataObject[events.size()];
+        for (int i = 0; i < events.size() && i < output.length; i++) {
+            output[i] = events.get(i);
         }
         executedSuccessfully = true;
     }
 
-    @Override
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    @Override
-    public Exception getException() {
-        return exception;
-    }
-
-    public boolean isExecutedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    public void setExecutedSuccessfully(final boolean executedSuccessfully) {
-        this.executedSuccessfully = executedSuccessfully;
-    }
-
-    public void setException(final Exception exception) {
-        this.exception = exception;
-    }
-
-    
-    public int getFrameNumber() {
-        return frameNumber;
-    }
-
-    
-    public void setFrameNumber(int frameNumber) {
-        this.frameNumber = frameNumber;
-    }
-    
-    
 }

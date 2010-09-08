@@ -49,90 +49,65 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.FrameWindow;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.tasks.Task;
 
 
 /**
- * {@link PageByFrameNumberStep}
+ * {@link TasksByICalFileStep}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
-    private Exception exception;
-
-    protected boolean executedSuccessfully;
+public class TasksByICalFileStep extends AbstractStep<Task[], Page> {
+private static final Log LOG = LogFactory.getLog(TasksByICalFileStep.class);
     
-    private int frameNumber;
-    
-    private static final Log LOG = LogFactory.getLog(PageByFrameNumberStep.class);
-
-    public PageByFrameNumberStep() {
-        super();
-        frameNumber = 0;
-    }
-
-    public PageByFrameNumberStep(final String description, final int frameNumber) {
-        this();
-        this.description = description;
-        this.frameNumber = frameNumber;
-    }
-
-    @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
-        int index = 1;
+    public TasksByICalFileStep(){
         
-        for (FrameWindow frame : input.getFrames()){
-            if (index == frameNumber){
-                output = (HtmlPage) frame.getEnclosedPage();                
-                LOG.debug("Frame selected : " + frame.getName()+ "\n" + ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
+    }
+    
+    public void execute(WebClient webClient) {
+        ArrayList<Task> tempTasks = new ArrayList<Task>();
+        ArrayList<Task> tasks = new ArrayList<Task>();
+
+        try {
+            LOG.debug("This should be an iCal-File : \n" + input.getWebResponse().getContentAsString());
+            String iCalFile = input.getWebResponse().getContentAsString();
+            ICalParser iCalParser = workflow.getActivator().getICalParser();
+                                                                
+            if (iCalParser != null) {                
+                tempTasks = (ArrayList<Task>) iCalParser.parseTasks(
+                    iCalFile,
+                    TimeZone.getDefault(),
+                    new ContextImpl(23),
+                    new ArrayList<ConversionError>(),
+                    new ArrayList<ConversionWarning>());
+            } else {
+                LOG.error("No iCal-Parser found!");
             }
-            index ++;
+            tasks.addAll(tempTasks);
+            
+        } catch (ConversionError e) {
+            LOG.error(e.getMessage(), e);
+        } catch (FailingHttpStatusCodeException e) {
+            LOG.error(e.getMessage(), e);
+        }
+
+        output = new Task[tasks.size()];
+        for (int i = 0; i < tasks.size() && i < output.length; i++) {
+            output[i] = tasks.get(i);
         }
         executedSuccessfully = true;
     }
-
-    @Override
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    @Override
-    public Exception getException() {
-        return exception;
-    }
-
-    public boolean isExecutedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    public void setExecutedSuccessfully(final boolean executedSuccessfully) {
-        this.executedSuccessfully = executedSuccessfully;
-    }
-
-    public void setException(final Exception exception) {
-        this.exception = exception;
-    }
-
-    
-    public int getFrameNumber() {
-        return frameNumber;
-    }
-
-    
-    public void setFrameNumber(int frameNumber) {
-        this.frameNumber = frameNumber;
-    }
-    
-    
 }

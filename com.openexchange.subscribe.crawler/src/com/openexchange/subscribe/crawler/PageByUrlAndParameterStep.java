@@ -54,85 +54,49 @@ import java.net.MalformedURLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.FrameWindow;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
-
 /**
- * {@link PageByFrameNumberStep}
- *
+ * {@link PageByUrlAndParameterStep}
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
-    private Exception exception;
+public class PageByUrlAndParameterStep extends AbstractStep<Page, String> {
 
-    protected boolean executedSuccessfully;
-    
-    private int frameNumber;
-    
-    private static final Log LOG = LogFactory.getLog(PageByFrameNumberStep.class);
+    private static final Log LOG = LogFactory.getLog(PageByUrlAndParameterStep.class);
 
-    public PageByFrameNumberStep() {
-        super();
-        frameNumber = 0;
+    private String url;
+
+    public PageByUrlAndParameterStep() {
+
     }
 
-    public PageByFrameNumberStep(final String description, final int frameNumber) {
-        this();
-        this.description = description;
-        this.frameNumber = frameNumber;
-    }
-
-    @Override
     public void execute(final WebClient webClient) throws SubscriptionException {
-        int index = 1;
-        
-        for (FrameWindow frame : input.getFrames()){
-            if (index == frameNumber){
-                output = (HtmlPage) frame.getEnclosedPage();                
-                LOG.debug("Frame selected : " + frame.getName()+ "\n" + ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
-            }
-            index ++;
+        try {
+            LOG.debug("Page to call : " + url + input);
+            output = webClient.getPage(url + input);
+            LOG.debug("Page : " + output.getWebResponse().getContentAsString());
+            // openPageInBrowser(output);
+            executedSuccessfully = true;
+        } catch (final FailingHttpStatusCodeException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (final MalformedURLException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (final IOException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
-        executedSuccessfully = true;
     }
 
-    @Override
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
+    public String getUrl() {
+        return url;
     }
 
-    @Override
-    public Exception getException() {
-        return exception;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public boolean isExecutedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    public void setExecutedSuccessfully(final boolean executedSuccessfully) {
-        this.executedSuccessfully = executedSuccessfully;
-    }
-
-    public void setException(final Exception exception) {
-        this.exception = exception;
-    }
-
-    
-    public int getFrameNumber() {
-        return frameNumber;
-    }
-
-    
-    public void setFrameNumber(int frameNumber) {
-        this.frameNumber = frameNumber;
-    }
-    
-    
 }

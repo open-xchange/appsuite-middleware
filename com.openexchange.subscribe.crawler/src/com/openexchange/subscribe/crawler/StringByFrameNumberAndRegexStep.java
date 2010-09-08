@@ -49,90 +49,72 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.FrameWindow;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
-
 /**
- * {@link PageByFrameNumberStep}
- *
+ * {@link StringByFrameNumberAndRegexStep}
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
-    private Exception exception;
+public class StringByFrameNumberAndRegexStep extends AbstractStep<String, HtmlPage> {
 
-    protected boolean executedSuccessfully;
-    
     private int frameNumber;
-    
-    private static final Log LOG = LogFactory.getLog(PageByFrameNumberStep.class);
 
-    public PageByFrameNumberStep() {
-        super();
-        frameNumber = 0;
+    private String regex;
+
+    private static final Log LOG = LogFactory.getLog(StringByFrameNumberAndRegexStep.class);
+
+    public StringByFrameNumberAndRegexStep() {
+
     }
 
-    public PageByFrameNumberStep(final String description, final int frameNumber) {
-        this();
-        this.description = description;
-        this.frameNumber = frameNumber;
-    }
-
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
+     */
     @Override
     public void execute(final WebClient webClient) throws SubscriptionException {
         int index = 1;
-        
-        for (FrameWindow frame : input.getFrames()){
-            if (index == frameNumber){
-                output = (HtmlPage) frame.getEnclosedPage();                
-                LOG.debug("Frame selected : " + frame.getName()+ "\n" + ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
+
+        for (FrameWindow frame : input.getFrames()) {
+            if (index == frameNumber) {
+                HtmlPage page = (HtmlPage) frame.getEnclosedPage();
+                String pageString = page.getWebResponse().getContentAsString();
+                LOG.debug("Frame selected : " + frame.getName() + "\n" + pageString);
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(pageString);
+                if (matcher.find()) {
+                    output = matcher.group(1);
+                    LOG.debug("String found is  : " + output);
+                    executedSuccessfully = true;
+                }
             }
-            index ++;
+            index++;
         }
-        executedSuccessfully = true;
     }
 
-    @Override
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    @Override
-    public Exception getException() {
-        return exception;
-    }
-
-    public boolean isExecutedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    public void setExecutedSuccessfully(final boolean executedSuccessfully) {
-        this.executedSuccessfully = executedSuccessfully;
-    }
-
-    public void setException(final Exception exception) {
-        this.exception = exception;
-    }
-
-    
     public int getFrameNumber() {
         return frameNumber;
     }
 
-    
     public void setFrameNumber(int frameNumber) {
         this.frameNumber = frameNumber;
     }
-    
-    
+
+    public String getRegex() {
+        return regex;
+    }
+
+    public void setRegex(String regex) {
+        this.regex = regex;
+    }
+
 }

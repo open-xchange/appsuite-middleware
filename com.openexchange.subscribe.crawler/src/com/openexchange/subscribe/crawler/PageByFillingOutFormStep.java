@@ -51,87 +51,87 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.FrameWindow;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
+import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
+import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 
 /**
- * {@link PageByFrameNumberStep}
+ * {@link PageByFillingOutFormStep}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
-    private Exception exception;
+public class PageByFillingOutFormStep extends AbstractStep<Page, HtmlPage> {
 
-    protected boolean executedSuccessfully;
+    private String actionOfForm = "";
     
-    private int frameNumber;
+    private Map<String, String> parameters = new HashMap<String, String>();
     
-    private static final Log LOG = LogFactory.getLog(PageByFrameNumberStep.class);
-
-    public PageByFrameNumberStep() {
-        super();
-        frameNumber = 0;
-    }
-
-    public PageByFrameNumberStep(final String description, final int frameNumber) {
-        this();
-        this.description = description;
-        this.frameNumber = frameNumber;
-    }
-
-    @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
-        int index = 1;
+    private static Log LOG = LogFactory.getLog(PageByFillingOutFormStep.class);
+    
+    public PageByFillingOutFormStep(){
         
-        for (FrameWindow frame : input.getFrames()){
-            if (index == frameNumber){
-                output = (HtmlPage) frame.getEnclosedPage();                
-                LOG.debug("Frame selected : " + frame.getName()+ "\n" + ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
+    }
+    
+    public void execute(final WebClient webClient) throws SubscriptionException {
+        HtmlForm theForm = null;
+        for (final HtmlForm form : input.getForms()) {
+            Pattern pattern = Pattern.compile(actionOfForm);
+            Matcher matcher = pattern.matcher(form.getActionAttribute());
+            LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + ", should be : "+ actionOfForm);
+            if (matcher.matches()) {
+                theForm = form;
             }
-            index ++;
         }
-        executedSuccessfully = true;
-    }
-
-    @Override
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    @Override
-    public Exception getException() {
-        return exception;
-    }
-
-    public boolean isExecutedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    public void setExecutedSuccessfully(final boolean executedSuccessfully) {
-        this.executedSuccessfully = executedSuccessfully;
-    }
-
-    public void setException(final Exception exception) {
-        this.exception = exception;
+        if (theForm != null){
+            try {
+                if (parameters.containsKey("HtmlSubmitInput")){
+                    HtmlSubmitInput submitInput = (HtmlSubmitInput) theForm.getElementById(parameters.get("HtmlSubmitInput"));
+                    output = theForm.submit(submitInput);
+                } else {
+                    output = theForm.submit(null);
+                }
+                LOG.debug("Page after submitting the form : \n" + output.getWebResponse().getContentAsString());
+                executedSuccessfully = true;
+            } catch (IOException e) {
+                LOG.error(e);
+            }            
+        }
     }
 
     
-    public int getFrameNumber() {
-        return frameNumber;
+    public String getActionOfForm() {
+        return actionOfForm;
     }
 
     
-    public void setFrameNumber(int frameNumber) {
-        this.frameNumber = frameNumber;
+    public void setActionOfForm(String actionOfForm) {
+        this.actionOfForm = actionOfForm;
+    }
+
+    
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
     
     

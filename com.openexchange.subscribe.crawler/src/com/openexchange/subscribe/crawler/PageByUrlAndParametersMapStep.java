@@ -51,12 +51,13 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.FrameWindow;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
@@ -64,75 +65,61 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 
 /**
- * {@link PageByFrameNumberStep}
+ * {@link PageByUrlAndParametersMapStep}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
-    private Exception exception;
-
-    protected boolean executedSuccessfully;
+public class PageByUrlAndParametersMapStep extends AbstractStep<HtmlPage, Object> {
     
-    private int frameNumber;
+    private String url;
     
-    private static final Log LOG = LogFactory.getLog(PageByFrameNumberStep.class);
-
-    public PageByFrameNumberStep() {
-        super();
-        frameNumber = 0;
-    }
-
-    public PageByFrameNumberStep(final String description, final int frameNumber) {
-        this();
-        this.description = description;
-        this.frameNumber = frameNumber;
-    }
-
-    @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
-        int index = 1;
+    private Map<String, String> parameters;
+    
+    private static final Log LOG = LogFactory.getLog(PageByUrlAndParametersMapStep.class);
+    
+    public PageByUrlAndParametersMapStep(){
         
-        for (FrameWindow frame : input.getFrames()){
-            if (index == frameNumber){
-                output = (HtmlPage) frame.getEnclosedPage();                
-                LOG.debug("Frame selected : " + frame.getName()+ "\n" + ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
+    }
+
+    public void execute(final WebClient webClient) throws SubscriptionException {
+        try {
+            URL finalUrl = new URL(url);
+            for (Map.Entry entry : parameters.entrySet()){
+               // finalUrl.
             }
-            index ++;
+            Object object = webClient.getPage(finalUrl);
+            final HtmlPage pageByUrl = (HtmlPage) object;
+            output = pageByUrl;
+            LOG.debug("Page : " + pageByUrl.getWebResponse().getContentAsString());
+            //openPageInBrowser(output);
+            executedSuccessfully = true;
+        } catch (final FailingHttpStatusCodeException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (final MalformedURLException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (final IOException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
-        executedSuccessfully = true;
-    }
-
-    @Override
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    @Override
-    public Exception getException() {
-        return exception;
-    }
-
-    public boolean isExecutedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    public void setExecutedSuccessfully(final boolean executedSuccessfully) {
-        this.executedSuccessfully = executedSuccessfully;
-    }
-
-    public void setException(final Exception exception) {
-        this.exception = exception;
     }
 
     
-    public int getFrameNumber() {
-        return frameNumber;
+    public String getUrl() {
+        return url;
     }
 
     
-    public void setFrameNumber(int frameNumber) {
-        this.frameNumber = frameNumber;
+    public void setUrl(String url) {
+        this.url = url;
     }
+
     
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
     
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
+        
 }

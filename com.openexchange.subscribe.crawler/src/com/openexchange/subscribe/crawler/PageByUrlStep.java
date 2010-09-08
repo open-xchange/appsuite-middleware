@@ -51,6 +51,8 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -70,6 +72,8 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
     private Exception exception;
 
     private boolean executedSuccessfully;
+    
+    private static final Log LOG = LogFactory.getLog(PageByUrlStep.class);
 
     public PageByUrlStep() {
 
@@ -83,8 +87,11 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
     @Override
     public void execute(final WebClient webClient) throws SubscriptionException {
         try {
-            final HtmlPage pageByUrl = webClient.getPage(url);
+            Object object = webClient.getPage(url);
+            final HtmlPage pageByUrl = (HtmlPage) object;
             output = pageByUrl;
+            LOG.debug("Page : " + pageByUrl.getWebResponse().getContentAsString());
+            //openPageInBrowser(output);
             executedSuccessfully = true;
         } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);

@@ -89,7 +89,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     
     private boolean enableJavascript;
     
-    private int module;
+    private int module = FolderObject.CONTACT;
 
     public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority, Activator activator, boolean enableJavascript) {
         FORM.add(FormElement.input(LOGIN, FORM_LABEL_LOGIN)).add(FormElement.password("password", FORM_LABEL_PASSWORD));
@@ -159,4 +159,5 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         decrypt(configuration, PASSWORD);
         subscription.setDisplayName((String) subscription.getConfiguration().get(LOGIN));
     }
+
 }
