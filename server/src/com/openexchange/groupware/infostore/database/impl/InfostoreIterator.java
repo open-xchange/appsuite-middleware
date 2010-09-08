@@ -79,288 +79,288 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
 
 @OXExceptionSource(
-	classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTOREITERATOR,
-	component = EnumComponent.INFOSTORE
+    classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTOREITERATOR,
+    component = EnumComponent.INFOSTORE
 )
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
-	
-	private static final InfostoreQueryCatalog QUERIES = InfostoreFacadeImpl.QUERIES;
-	
-	private static final Log LOG = LogFactory.getLog(InfostoreIterator.class);
-	
-	public static InfostoreIterator loadDocumentIterator(final int id, final int version, final DBProvider provider, final Context ctx) {
-		final String query = QUERIES.getSelectDocument(id, version, ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, Metadata.VALUES_ARRAY, QUERIES.getChooserForVersion(version));
-	}
-	
-	public static InfostoreIterator list(final int[] id, final Metadata[] metadata, final DBProvider provider, final Context ctx) {
-		final String query = QUERIES.getListQuery(id,metadata,new InfostoreQueryCatalog.DocumentWins(),ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
-	}
-	
-	public static InfostoreIterator documents(final long folderId, final Metadata[] metadata,final Metadata sort, final int order, final DBProvider provider, final Context ctx){
-		final String query = QUERIES.getDocumentsQuery(folderId, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
-	}
-	
-	public static InfostoreIterator documentsByCreator(final long folderId,final int userId, final Metadata[] metadata,final Metadata sort, final int order, final DBProvider provider, final Context ctx){
-		final String query = QUERIES.getDocumentsQuery(folderId,userId, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
-	}
-	
-	public static InfostoreIterator versions(final int id, final Metadata[] metadata, final Metadata sort, final int order, final DBProvider provider, final Context ctx) {
-		final String query = QUERIES.getVersionsQuery(id, metadata, sort, order, new InfostoreQueryCatalog.VersionWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.VersionWins());
-	}
-	
-	public static InfostoreIterator newDocuments(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
-		final String query = QUERIES.getNewDocumentsQuery(folderId,since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
-	}
-	
-	public static InfostoreIterator modifiedDocuments(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
-		final String query = QUERIES.getModifiedDocumentsQuery(folderId,since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());	
-	}
-	
-	public static InfostoreIterator deletedDocuments(final long folderId, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
-		final String query = QUERIES.getDeletedDocumentsQuery(folderId,since, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, new Metadata[]{Metadata.ID_LITERAL}, new InfostoreQueryCatalog.DocumentWins());
-	}
-	
-	public static InfostoreIterator newDocumentsByCreator(final long folderId,final int userId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
-		final String query = QUERIES.getNewDocumentsQuery(folderId,userId, since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
-	}
-	
-	public static InfostoreIterator modifiedDocumentsByCreator(final long folderId,final int userId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
-		final String query = QUERIES.getModifiedDocumentsQuery(folderId,userId, since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());	
-	}
-	
-	public static InfostoreIterator deletedDocumentsByCreator(final long folderId,final int userId, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
-		final String query = QUERIES.getDeletedDocumentsQuery(folderId,userId, since, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, new Metadata[]{Metadata.ID_LITERAL}, new InfostoreQueryCatalog.DocumentWins());
-	}
-	
-	public static InfostoreIterator allDocumentsWhere(final String where, final Metadata[] metadata, final DBProvider provider, final Context ctx){
-		final String query = QUERIES.getAllDocumentsQuery(where,metadata,new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
-	}
-	
-	public static InfostoreIterator allVersionsWhere(final String where, final Metadata[] metadata, final DBProvider provider, final Context ctx){
-		final String query = QUERIES.getAllVersionsQuery(where,metadata,new InfostoreQueryCatalog.VersionWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.VersionWins());	
-	}
-	
-	public static InfostoreIterator documentsByFilename(final long folderId, final String filename, final Metadata[] metadata, final DBProvider provider, final Context ctx){
-		final String query = QUERIES.getCurrentFilenameQuery(folderId,metadata,new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-		return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins(), filename);		
-	}
-	
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InfostoreIterator.class);
 
-	private final Object[] args;
-	private final DBProvider provider;
-	private final String query;
-	private boolean queried;
-	private boolean initNext;
-	private ResultSet rs;
-	private boolean next;
-	private AbstractOXException exception;
-	private final List<AbstractOXException> warnings;
+    private static final InfostoreQueryCatalog QUERIES = InfostoreFacadeImpl.QUERIES;
 
-	private final Context ctx;
+    private static final Log LOG = LogFactory.getLog(InfostoreIterator.class);
 
-	private final Metadata[] fields;
+    public static InfostoreIterator loadDocumentIterator(final int id, final int version, final DBProvider provider, final Context ctx) {
+        final String query = QUERIES.getSelectDocument(id, version, ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, Metadata.VALUES_ARRAY, QUERIES.getChooserForVersion(version));
+    }
 
-	private final FieldChooser chooser;
+    public static InfostoreIterator list(final int[] id, final Metadata[] metadata, final DBProvider provider, final Context ctx) {
+        final String query = QUERIES.getListQuery(id,metadata,new InfostoreQueryCatalog.DocumentWins(),ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
 
-	
-	protected InfostoreIterator(final String query,final DBProvider provider, final Context ctx, final Metadata[] fields, final FieldChooser chooser, final Object...args){
-		this.warnings =  new ArrayList<AbstractOXException>(2);
-		this.query = query;
-		this.provider = provider;
-		this.args = args;
-		this.ctx = ctx;
-		this.fields = fields;
-		this.chooser = chooser;
-	}
-	
-	@OXThrows(
-			category = Category.INTERNAL_ERROR,
-			desc = "Cannot close database connection",
-			exceptionId = 2,
-			msg = "Cannot close database connection"
-	)
-	public void close() throws SearchIteratorException {
-		if(rs == null) {
-			return;
-		}
-		Connection con;
-		try {
-			con = rs.getStatement().getConnection();
-			DBUtils.closeSQLStuff(rs, rs.getStatement());
-			provider.releaseReadConnection(ctx, con);
-			rs = null;
-		} catch (final SQLException e) {
-			throw new SearchIteratorException(EXCEPTIONS.create(2));
-		}
-	}
+    public static InfostoreIterator documents(final long folderId, final Metadata[] metadata,final Metadata sort, final int order, final DBProvider provider, final Context ctx){
+        final String query = QUERIES.getDocumentsQuery(folderId, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
 
-	@OXThrows(
-			category = Category.TRY_AGAIN,
-			desc = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again.",
-			exceptionId = 0,
-			msg = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again."
-	)
-	public boolean hasNext() {
-		if(!queried) {
-			query();
-		}
-		if(exception != null) {
-			return true;
-		}
-		if(initNext) {
-			try {
-				next = rs.next();
-				if(!next) {
-					close();
-				}
-			} catch (final SQLException e) {
-				this.exception = EXCEPTIONS.create(0,e);
-			} catch (final SearchIteratorException e) {
-				this.exception=e;
-			}
-		}
-		initNext = false;
-		return next;
-	}
+    public static InfostoreIterator documentsByCreator(final long folderId,final int userId, final Metadata[] metadata,final Metadata sort, final int order, final DBProvider provider, final Context ctx){
+        final String query = QUERIES.getDocumentsQuery(folderId,userId, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
 
-	public void addWarning(final AbstractOXException warning) {
-		warnings.add(warning);
-	}
+    public static InfostoreIterator versions(final int id, final Metadata[] metadata, final Metadata sort, final int order, final DBProvider provider, final Context ctx) {
+        final String query = QUERIES.getVersionsQuery(id, metadata, sort, order, new InfostoreQueryCatalog.VersionWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.VersionWins());
+    }
 
-	public AbstractOXException[] getWarnings() {
-		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
-	}
+    public static InfostoreIterator newDocuments(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
+        final String query = QUERIES.getNewDocumentsQuery(folderId,since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
 
-	public boolean hasWarnings() {
-		return !warnings.isEmpty();
-	}
-	
-	
-	@OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid query was sent to the database.",
-			exceptionId = 1,
-			msg = "Invalid SQL query: %s"
-	)
-	private void query() {
-		queried = true;
-		initNext=true;
-		Connection con = null;
-		PreparedStatement stmt = null;
-		try{
-			con = provider.getReadConnection(ctx);
-			stmt = con.prepareStatement(query);
-			int i = 1;
-			for(final Object arg : args) {
-				stmt.setObject(i++,arg);
-			}
-			if(LOG.isTraceEnabled()) {
-				LOG.trace(stmt.toString());
-			}
-			//System.out.println(stmt.toString());
-			rs = stmt.executeQuery();
-		} catch (final SQLException x) {
-			if(stmt != null) {
-				DBUtils.closeSQLStuff(null, stmt);
-			}
-			if(con != null) {
-				provider.releaseReadConnection(ctx, con);
-			}
-			this.exception = EXCEPTIONS.create(1,x, DBUtils.getStatement(stmt,query));
-		} catch (final TransactionException e) {
-			this.exception =e;
-		}
-	}
+    public static InfostoreIterator modifiedDocuments(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
+        final String query = QUERIES.getModifiedDocumentsQuery(folderId,since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
 
-	public boolean hasSize() {
-		return false;
-	}
+    public static InfostoreIterator deletedDocuments(final long folderId, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
+        final String query = QUERIES.getDeletedDocumentsQuery(folderId,since, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, new Metadata[]{Metadata.ID_LITERAL}, new InfostoreQueryCatalog.DocumentWins());
+    }
 
-	public DocumentMetadata next() throws SearchIteratorException, OXException {
-		hasNext();
-		if(exception != null) {
-			throw new SearchIteratorException(exception);
-		}
-		initNext = true;
-		
-		return getDocument();
-	}
+    public static InfostoreIterator newDocumentsByCreator(final long folderId,final int userId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
+        final String query = QUERIES.getNewDocumentsQuery(folderId,userId, since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
 
-	@OXThrows(
-			category = Category.TRY_AGAIN,
-			desc = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again.",
-			exceptionId = 3,
-			msg = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again."
-	)
-	private DocumentMetadata getDocument() throws SearchIteratorException {
-		final DocumentMetadata dm = new DocumentMetadataImpl();
-		final SetSwitch set = new SetSwitch(dm);
-		final StringBuilder sb = new StringBuilder(100);
-		SetValues: for (final Metadata m : fields) {
-			if (m == Metadata.CURRENT_VERSION_LITERAL) {
-				try {
-					dm.setIsCurrentVersion(rs.getBoolean("current_version"));
-					continue SetValues;
-				} catch (final SQLException e) {
-					throw new SearchIteratorException(EXCEPTIONS.create(3, e));
-				}
-			}
-			final Table t = chooser.choose(m);
-			final String colName = (String) m.doSwitch(t.getFieldSwitcher());
-			if (colName == null) {
-				continue;
-			}
-			try {
-				set.setValue(process(m, rs.getObject(sb.append(t.getTablename()).append('.').append(colName)
-						.toString())));
-				sb.setLength(0);
-			} catch (final SQLException e) {
-				throw new SearchIteratorException(EXCEPTIONS.create(3, e));
-			}
-			m.doSwitch(set);
-		}
-		return dm;
-	}
+    public static InfostoreIterator modifiedDocumentsByCreator(final long folderId,final int userId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
+        final String query = QUERIES.getModifiedDocumentsQuery(folderId,userId, since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
 
-	private Object process(final Metadata m, final Object object) {
-		switch(m.getId()) {
-		default : return object;
-		case Metadata.LAST_MODIFIED : case Metadata.CREATION_DATE : case Metadata.LAST_MODIFIED_UTC: return new Date(((Long)object).longValue());
-		case Metadata.MODIFIED_BY : case Metadata.CREATED_BY : case Metadata.VERSION : case Metadata.ID:case  Metadata.COLOR_LABEL:
-			return Integer.valueOf(((Long)object).intValue());
-		}
-	}
+    public static InfostoreIterator deletedDocumentsByCreator(final long folderId,final int userId, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
+        final String query = QUERIES.getDeletedDocumentsQuery(folderId,userId, since, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, new Metadata[]{Metadata.ID_LITERAL}, new InfostoreQueryCatalog.DocumentWins());
+    }
 
-	public int size() {
-		throw new UnsupportedOperationException();
-	}
-	
-	
-	public List<DocumentMetadata> asList() throws SearchIteratorException, OXException{
-		try {
-			final List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
-			while(hasNext()) {
-				result.add(next());
-			}
-			
-			return result;	
-		} finally {
-			close();
-		}
-	}
+    public static InfostoreIterator allDocumentsWhere(final String where, final Metadata[] metadata, final DBProvider provider, final Context ctx){
+        final String query = QUERIES.getAllDocumentsQuery(where,metadata,new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
+
+    public static InfostoreIterator allVersionsWhere(final String where, final Metadata[] metadata, final DBProvider provider, final Context ctx){
+        final String query = QUERIES.getAllVersionsQuery(where,metadata,new InfostoreQueryCatalog.VersionWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.VersionWins());
+    }
+
+    public static InfostoreIterator documentsByFilename(final long folderId, final String filename, final Metadata[] metadata, final DBProvider provider, final Context ctx){
+        final String query = QUERIES.getCurrentFilenameQuery(folderId,metadata,new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins(), filename);
+    }
+
+    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InfostoreIterator.class);
+
+    private final Object[] args;
+    private final DBProvider provider;
+    private final String query;
+    private boolean queried;
+    private boolean initNext;
+    private ResultSet rs;
+    private boolean next;
+    private AbstractOXException exception;
+    private final List<AbstractOXException> warnings;
+
+    private final Context ctx;
+
+    private final Metadata[] fields;
+
+    private final FieldChooser chooser;
+
+
+    protected InfostoreIterator(final String query,final DBProvider provider, final Context ctx, final Metadata[] fields, final FieldChooser chooser, final Object...args){
+        this.warnings =  new ArrayList<AbstractOXException>(2);
+        this.query = query;
+        this.provider = provider;
+        this.args = args;
+        this.ctx = ctx;
+        this.fields = fields;
+        this.chooser = chooser;
+    }
+
+    @OXThrows(
+            category = Category.INTERNAL_ERROR,
+            desc = "Cannot close database connection",
+            exceptionId = 2,
+            msg = "Cannot close database connection"
+    )
+    public void close() throws SearchIteratorException {
+        if(rs == null) {
+            return;
+        }
+        Connection con;
+        try {
+            con = rs.getStatement().getConnection();
+            DBUtils.closeSQLStuff(rs, rs.getStatement());
+            provider.releaseReadConnection(ctx, con);
+            rs = null;
+        } catch (final SQLException e) {
+            throw new SearchIteratorException(EXCEPTIONS.create(2));
+        }
+    }
+
+    @OXThrows(
+            category = Category.TRY_AGAIN,
+            desc = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again.",
+            exceptionId = 0,
+            msg = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again."
+    )
+    public boolean hasNext() {
+        if(!queried) {
+            query();
+        }
+        if(exception != null) {
+            return true;
+        }
+        if(initNext) {
+            try {
+                next = rs.next();
+                if(!next) {
+                    close();
+                }
+            } catch (final SQLException e) {
+                this.exception = EXCEPTIONS.create(0,e);
+            } catch (final SearchIteratorException e) {
+                this.exception=e;
+            }
+        }
+        initNext = false;
+        return next;
+    }
+
+    public void addWarning(final AbstractOXException warning) {
+        warnings.add(warning);
+    }
+
+    public AbstractOXException[] getWarnings() {
+        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+    }
+
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
+
+
+    @OXThrows(
+            category = Category.CODE_ERROR,
+            desc = "An invalid query was sent to the database.",
+            exceptionId = 1,
+            msg = "Invalid SQL query: %s"
+    )
+    private void query() {
+        queried = true;
+        initNext=true;
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try{
+            con = provider.getReadConnection(ctx);
+            stmt = con.prepareStatement(query);
+            int i = 1;
+            for(final Object arg : args) {
+                stmt.setObject(i++,arg);
+            }
+            if(LOG.isTraceEnabled()) {
+                LOG.trace(stmt.toString());
+            }
+            //System.out.println(stmt.toString());
+            rs = stmt.executeQuery();
+        } catch (final SQLException x) {
+            if(stmt != null) {
+                DBUtils.closeSQLStuff(null, stmt);
+            }
+            if(con != null) {
+                provider.releaseReadConnection(ctx, con);
+            }
+            this.exception = EXCEPTIONS.create(1,x, DBUtils.getStatement(stmt,query));
+        } catch (final TransactionException e) {
+            this.exception =e;
+        }
+    }
+
+    public boolean hasSize() {
+        return false;
+    }
+
+    public DocumentMetadata next() throws SearchIteratorException, OXException {
+        hasNext();
+        if(exception != null) {
+            throw new SearchIteratorException(exception);
+        }
+        initNext = true;
+
+        return getDocument();
+    }
+
+    @OXThrows(
+            category = Category.TRY_AGAIN,
+            desc = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again.",
+            exceptionId = 3,
+            msg = "Could not fetch result from result set. Probably the database may be busy or not running. Please try again."
+    )
+    private DocumentMetadata getDocument() throws SearchIteratorException {
+        final DocumentMetadata dm = new DocumentMetadataImpl();
+        final SetSwitch set = new SetSwitch(dm);
+        final StringBuilder sb = new StringBuilder(100);
+        SetValues: for (final Metadata m : fields) {
+            if (m == Metadata.CURRENT_VERSION_LITERAL) {
+                try {
+                    dm.setIsCurrentVersion(rs.getBoolean("current_version"));
+                    continue SetValues;
+                } catch (final SQLException e) {
+                    throw new SearchIteratorException(EXCEPTIONS.create(3, e));
+                }
+            }
+            final Table t = chooser.choose(m);
+            final String colName = (String) m.doSwitch(t.getFieldSwitcher());
+            if (colName == null) {
+                continue;
+            }
+            try {
+                set.setValue(process(m, rs.getObject(sb.append(t.getTablename()).append('.').append(colName)
+                        .toString())));
+                sb.setLength(0);
+            } catch (final SQLException e) {
+                throw new SearchIteratorException(EXCEPTIONS.create(3, e));
+            }
+            m.doSwitch(set);
+        }
+        return dm;
+    }
+
+    private Object process(final Metadata m, final Object object) {
+        switch(m.getId()) {
+        default : return object;
+        case Metadata.LAST_MODIFIED : case Metadata.CREATION_DATE : case Metadata.LAST_MODIFIED_UTC: return new Date(((Long)object).longValue());
+        case Metadata.MODIFIED_BY : case Metadata.CREATED_BY : case Metadata.VERSION : case Metadata.ID:case  Metadata.COLOR_LABEL:
+            return Integer.valueOf(((Long)object).intValue());
+        }
+    }
+
+    public int size() {
+        throw new UnsupportedOperationException();
+    }
+
+
+    public List<DocumentMetadata> asList() throws SearchIteratorException, OXException{
+        try {
+            final List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
+            while(hasNext()) {
+                result.add(next());
+            }
+
+            return result;
+        } finally {
+            close();
+        }
+    }
 
 }
