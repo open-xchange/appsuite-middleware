@@ -66,10 +66,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MessagingSecretHandling implements SecretConsistencyCheck, SecretMigrator {
 
-    public boolean checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException {
-        Collection<MessagingService> messagingServices = getMessagingServices();
-        for (MessagingService messagingService : messagingServices) {
-            MessagingAccountManager accountManager = messagingService.getAccountManager();
+    public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+        final Collection<MessagingService> messagingServices = getMessagingServices();
+        for (final MessagingService messagingService : messagingServices) {
+            final MessagingAccountManager accountManager = messagingService.getAccountManager();
             if(! accountManager.checkSecretCanDecryptStrings(session, secret) ) {
                 return false;
             }
@@ -77,10 +77,10 @@ public class MessagingSecretHandling implements SecretConsistencyCheck, SecretMi
         return true;
     }
 
-    public void migrate(String oldSecret, String newSecret, ServerSession session) throws AbstractOXException {
-        Collection<MessagingService> messagingServices = getMessagingServices();
-        for (MessagingService messagingService : messagingServices) {
-            MessagingAccountManager accountManager = messagingService.getAccountManager();
+    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
+        final Collection<MessagingService> messagingServices = getMessagingServices();
+        for (final MessagingService messagingService : messagingServices) {
+            final MessagingAccountManager accountManager = messagingService.getAccountManager();
             accountManager.migrateToNewSecret(oldSecret, newSecret, session);
         }
     }

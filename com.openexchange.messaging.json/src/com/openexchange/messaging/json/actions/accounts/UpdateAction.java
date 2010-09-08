@@ -69,18 +69,18 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class UpdateAction extends AbstractMessagingAccountAction {
 
-    public UpdateAction(MessagingServiceRegistry registry) {
+    public UpdateAction(final MessagingServiceRegistry registry) {
         super(registry);
     }
 
     @Override
-    protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
 
-        JSONObject data = (JSONObject) request.getData();
+        final JSONObject data = (JSONObject) request.getData();
         if(!data.has("id")) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("id");
         }
-        MessagingAccount account = parser.parse(data);
+        final MessagingAccount account = parser.parse(data);
         account.getMessagingService().getAccountManager().updateAccount(account, session);
         return new AJAXRequestResult(1);
     }

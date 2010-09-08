@@ -86,8 +86,8 @@ public class Activator extends DeferredActivator {
     private static final Log LOG = LogFactory.getLog(Activator.class);
     private static final Class<?>[] NEEDED_SERVICES = new Class[]{MessagingServiceRegistry.class, HttpService.class, CacheService.class};
     
-    private List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
-    private List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
+    private final List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
+    private final List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
     private HttpService httpService;
     private MessagingServiceRegistry registry;
     private MessagingMessageParser parser;
@@ -101,16 +101,16 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         try {
             register();
-        } catch (CacheException e) {
+        } catch (final CacheException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         if(clazz == MessagingServiceRegistry.class) {
             hide();
         }
@@ -123,7 +123,7 @@ public class Activator extends DeferredActivator {
             httpService.unregister("/ajax/messaging/service");
         }
         
-        for (ServiceRegistration registration : registrations) {
+        for (final ServiceRegistration registration : registrations) {
             registration.unregister();
         }
     }
@@ -141,12 +141,12 @@ public class Activator extends DeferredActivator {
             trackers.add(new HeaderWriterTracker(context, writer));
             trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
 
-            for (ServiceTracker tracker : trackers) {
+            for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
 
             register();
-        } catch (Exception x) {
+        } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
             throw x;
         }
@@ -171,9 +171,9 @@ public class Activator extends DeferredActivator {
             httpService.registerServlet("/ajax/messaging/account", new AccountServlet(), null, null);
             httpService.registerServlet("/ajax/messaging/message", new MessagesServlet(), null, null);
             httpService.registerServlet("/ajax/messaging/service", new ServicesServlet(), null, null);
-        } catch (ServletException e) {
+        } catch (final ServletException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NamespaceException e) {
+        } catch (final NamespaceException e) {
             LOG.error(e.getMessage(), e);
         }
 
@@ -215,13 +215,13 @@ public class Activator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            for (ServiceTracker tracker : trackers) {
+            for (final ServiceTracker tracker : trackers) {
                 tracker.close();
             }
-            for (ServiceRegistration registration : registrations) {
+            for (final ServiceRegistration registration : registrations) {
                 registration.unregister();
             }
-        } catch (Exception x) {
+        } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
             throw x;
         }

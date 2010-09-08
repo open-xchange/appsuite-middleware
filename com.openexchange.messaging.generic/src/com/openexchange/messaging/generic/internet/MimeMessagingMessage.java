@@ -117,7 +117,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      */
     public MimeMessagingMessage() {
         super(new MimeMessage(MIMEDefaultSession.getDefaultSession()), null);
-        this.mimeMessage = (MimeMessage) part;
+        mimeMessage = (MimeMessage) part;
     }
 
     /**
@@ -319,7 +319,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      *
      * @param picture The picture url
      */
-    public void setPicture(String picture) {
+    public void setPicture(final String picture) {
         this.picture = picture;
     }
 

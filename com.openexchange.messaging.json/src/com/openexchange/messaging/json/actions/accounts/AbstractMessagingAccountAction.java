@@ -75,16 +75,16 @@ public abstract class AbstractMessagingAccountAction implements AJAXActionServic
     protected MessagingAccountWriter writer;
     protected MessagingAccountParser parser;
     
-    public AbstractMessagingAccountAction(MessagingServiceRegistry registry) {
+    public AbstractMessagingAccountAction(final MessagingServiceRegistry registry) {
         this.registry = registry;
-        this.writer = new MessagingAccountWriter();
-        this.parser = new MessagingAccountParser(registry);
+        writer = new MessagingAccountWriter();
+        parser = new MessagingAccountParser(registry);
     }
     
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         try {
             return doIt(request, session);
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw MessagingExceptionCodes.JSON_ERROR.create(x,x.toString());
         }
     }

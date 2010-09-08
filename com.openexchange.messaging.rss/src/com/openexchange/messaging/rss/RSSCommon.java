@@ -64,14 +64,14 @@ public class RSSCommon {
     protected Session session;
     protected int accountId;
 
-    public RSSCommon(int accountId, Session session) {
+    public RSSCommon(final int accountId, final Session session) {
         this.accountId = accountId;
         this.session = session;
     }
     
     protected static final String EMPTY = "";
     
-    protected void checkFolder(String folder) throws MessagingException {
+    protected void checkFolder(final String folder) throws MessagingException {
         if (!EMPTY.equals(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folder,

@@ -68,18 +68,18 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class UpdatesAction extends AbstractMessagingAction {
 
-    public UpdatesAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+    public UpdatesAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
     
-    public UpdatesAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+    public UpdatesAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super(registry, writer, parser, cache);
     }
 
 
 
     @Override
-    protected AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException, IOException {
+    protected AJAXRequestResult doIt(final MessagingRequestData messagingRequestData, final ServerSession session) throws AbstractOXException, JSONException, IOException {
         return new AJAXRequestResult(new JSONArray());
     }
 

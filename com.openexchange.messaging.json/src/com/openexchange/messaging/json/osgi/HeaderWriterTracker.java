@@ -63,23 +63,23 @@ import com.openexchange.messaging.json.MessagingMessageWriter;
  */
 public class HeaderWriterTracker extends ServiceTracker {
 
-    private MessagingMessageWriter writer;
+    private final MessagingMessageWriter writer;
 
-    public HeaderWriterTracker(BundleContext context, MessagingMessageWriter writer) {
+    public HeaderWriterTracker(final BundleContext context, final MessagingMessageWriter writer) {
         super(context, MessagingHeaderWriter.class.getName(), null);
         this.writer = writer;
     }
     
     @Override
-    public Object addingService(ServiceReference reference) {
-        MessagingHeaderWriter writer = (MessagingHeaderWriter) super.addingService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final MessagingHeaderWriter writer = (MessagingHeaderWriter) super.addingService(reference);
         this.writer.addHeaderWriter(writer);
         return writer;
     }
     
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        this.writer.removeHeaderWriter((MessagingHeaderWriter) service);
+    public void removedService(final ServiceReference reference, final Object service) {
+        writer.removeHeaderWriter((MessagingHeaderWriter) service);
         super.removedService(reference, service);
     }
     

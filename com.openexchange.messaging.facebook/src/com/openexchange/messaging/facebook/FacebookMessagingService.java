@@ -112,7 +112,7 @@ public final class FacebookMessagingService implements MessagingService {
         tmpDescription.add(FormElement.input(FacebookConstants.FACEBOOK_LOGIN, FORM_LABEL_LOGIN, true, ""));
         tmpDescription.add(FormElement.password(FacebookConstants.FACEBOOK_PASSWORD, FORM_LABEL_PASSWORD, true, ""));
         secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(FacebookConstants.FACEBOOK_PASSWORD)));
-        this.formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
+        formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
 
     public Set<String> getSecretProperties() {

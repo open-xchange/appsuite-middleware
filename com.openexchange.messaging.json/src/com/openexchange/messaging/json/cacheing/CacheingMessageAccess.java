@@ -82,36 +82,36 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
     private final String folderPrefix;
     private final Session session;
 
-    public CacheingMessageAccess(MessagingMessageAccess delegate, Cache cache, String folderPrefix, Session session) {
+    public CacheingMessageAccess(final MessagingMessageAccess delegate, final Cache cache, final String folderPrefix, final Session session) {
         this.delegate = delegate;
         this.cache = cache;
         this.folderPrefix = folderPrefix;
         this.session = session;
     }
 
-    public MessagingPart getAttachment(String folder, String messageId, String sectionId) throws MessagingException {
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
         return delegate.getAttachment(folder, messageId, sectionId);
     }
 
-    public void appendMessages(String folder, MessagingMessage[] messages) throws MessagingException {
+    public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {
         delegate.appendMessages(folder, messages);
     }
 
-    public List<String> copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException {
+    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
         return delegate.copyMessages(sourceFolder, destFolder, messageIds, fast);
     }
 
-    public void deleteMessages(String folder, String[] messageIds, boolean hardDelete) throws MessagingException {
+    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws MessagingException {
         delegate.deleteMessages(folder, messageIds, hardDelete);
     }
 
-    public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException {
+    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws MessagingException {
         clear(folder);
         return remember(delegate.getAllMessages(folder, indexRange, sortField, order, addDefaultFields(fields)));
     }
 
-    private MessagingField[] addDefaultFields(MessagingField[] fields) {
-        Set<MessagingField> allFields = new HashSet<MessagingField>(Arrays.asList(fields));
+    private MessagingField[] addDefaultFields(final MessagingField[] fields) {
+        final Set<MessagingField> allFields = new HashSet<MessagingField>(Arrays.asList(fields));
         allFields.add(MessagingField.FOLDER_ID);
         allFields.add(MessagingField.ID);
         allFields.add(MessagingField.SUBJECT);
@@ -123,8 +123,8 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return allFields.toArray(new MessagingField[allFields.size()]);
     }
 
-    public MessagingMessage getMessage(String folder, String id, boolean peek) throws MessagingException {
-        MessagingMessage msg = get(folder, id);
+    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
+        final MessagingMessage msg = get(folder, id);
         if (msg != null) {
             return msg;
         }
@@ -132,12 +132,12 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return remember(delegate.getMessage(folder, id, peek));
     }
 
-    public List<MessagingMessage> getMessages(String folder, String[] messageIds, MessagingField[] fields) throws MessagingException {
-        Map<String, MessagingMessage> allMessages = new HashMap<String, MessagingMessage>();
-        List<String> idsToLoad = new LinkedList<String>();
+    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
+        final Map<String, MessagingMessage> allMessages = new HashMap<String, MessagingMessage>();
+        final List<String> idsToLoad = new LinkedList<String>();
         
-        for (String id : messageIds) {
-            MessagingMessage cached = get(folder, id);
+        for (final String id : messageIds) {
+            final MessagingMessage cached = get(folder, id);
             if(cached != null) {
                 allMessages.put(id, cached);
             } else {
@@ -146,27 +146,27 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         }
         
         if(!idsToLoad.isEmpty()) {
-            List<MessagingMessage> messages = delegate.getMessages(folder, idsToLoad.toArray(new String[idsToLoad.size()]), fields);
+            final List<MessagingMessage> messages = delegate.getMessages(folder, idsToLoad.toArray(new String[idsToLoad.size()]), fields);
             remember(messages);
             if(allMessages.isEmpty()) {
                 return remember(messages);
             }
-            for (MessagingMessage messagingMessage : messages) {
+            for (final MessagingMessage messagingMessage : messages) {
                 allMessages.put(messagingMessage.getId(), messagingMessage);
             }
             
         }
         
-        List<MessagingMessage> messages = new ArrayList<MessagingMessage>(messageIds.length);
-        for (String id : messageIds) {
+        final List<MessagingMessage> messages = new ArrayList<MessagingMessage>(messageIds.length);
+        for (final String id : messageIds) {
             messages.add(allMessages.get(id));
         }
         
         return remember(messages);
     }
 
-    private List<MessagingMessage> remember(List<MessagingMessage> messages) throws MessagingException {
-        for (MessagingMessage messagingMessage : messages) {
+    private List<MessagingMessage> remember(final List<MessagingMessage> messages) throws MessagingException {
+        for (final MessagingMessage messagingMessage : messages) {
             if (null != messagingMessage) {
                 remember(messagingMessage);
             }
@@ -174,59 +174,59 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return messages;
     }
 
-    public List<String> moveMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException {
+    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
         return delegate.moveMessages(sourceFolder, destFolder, messageIds, fast);
     }
 
-    public MessagingMessage perform(MessagingMessage message, String action) throws MessagingException {
+    public MessagingMessage perform(final MessagingMessage message, final String action) throws MessagingException {
         return delegate.perform(message, action);
     }
 
-    public MessagingMessage perform(String folder, String id, String action) throws MessagingException {
+    public MessagingMessage perform(final String folder, final String id, final String action) throws MessagingException {
         return delegate.perform(folder, id, action);
     }
 
-    public MessagingMessage perform(String action) throws MessagingException {
+    public MessagingMessage perform(final String action) throws MessagingException {
         return delegate.perform(action);
     }
 
-    public List<MessagingMessage> searchMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, SearchTerm<?> searchTerm, MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {
         return delegate.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
     }
 
-    public void updateMessage(MessagingMessage message, MessagingField[] fields) throws MessagingException {
+    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
         delegate.updateMessage(message, fields);
     }
 
-    protected MessagingMessage get(String folder, String id) {
+    protected MessagingMessage get(final String folder, final String id) {
         return (MessagingMessage) cache.getFromGroup(id, getGroupName(folder));
     }
 
-    protected MessagingMessage remember(MessagingMessage message) throws MessagingException {
-        String groupName = getGroupName(message.getFolder());
-        String key = message.getId();
+    protected MessagingMessage remember(final MessagingMessage message) throws MessagingException {
+        final String groupName = getGroupName(message.getFolder());
+        final String key = message.getId();
         
         try {
             if(key != null) {
                 cache.putInGroup(key, groupName, message);
             }
-        } catch (CacheException e) {
+        } catch (final CacheException e) {
             throw new MessagingException(e);
         }
         
         return message;
     }
 
-    protected void clear(String folderId) {
+    protected void clear(final String folderId) {
         cache.invalidateGroup(getGroupName(folderId));
         
     }
 
-    protected String getGroupName(String folderId) {
+    protected String getGroupName(final String folderId) {
         return session.getContextId()+"/"+folderPrefix+"/"+folderId;
     }
 
-    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
         return delegate.resolveContent(folder, id, referenceId);
     }
 

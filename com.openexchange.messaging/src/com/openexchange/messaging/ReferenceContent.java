@@ -71,9 +71,9 @@ public class ReferenceContent implements SimpleContent<String> {
      * 
      * @param refId The reference identifier
      */
-    public ReferenceContent(String refId) {
+    public ReferenceContent(final String refId) {
         super();
-        this.id = refId;
+        id = refId;
     }
 
     public String getData() throws MessagingException {
@@ -85,7 +85,7 @@ public class ReferenceContent implements SimpleContent<String> {
      * 
      * @param id The reference identifier
      */
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 

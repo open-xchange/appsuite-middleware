@@ -75,13 +75,13 @@ public class ReferenceContentRenderer implements MessagingContentWriter {
         return 0;
     }
 
-    public boolean handles(MessagingPart part, MessagingContent content) {
+    public boolean handles(final MessagingPart part, final MessagingContent content) {
         return ReferenceContent.class.isInstance(content);
     }
 
-    public Object write(MessagingPart part, MessagingContent content, ServerSession session, DisplayMode mode) throws MessagingException, JSONException {
-        ReferenceContent refContent = (ReferenceContent) content;
-        JSONObject object = new JSONObject();
+    public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws MessagingException, JSONException {
+        final ReferenceContent refContent = (ReferenceContent) content;
+        final JSONObject object = new JSONObject();
         object.put(REF, refContent.getId());
         return object;
     }

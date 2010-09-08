@@ -76,7 +76,7 @@ public class MessagesServlet extends MultipleAdapterServletNew {
 
     
     private static final Object RESOLVE = "resolve";
-    private List<MessagingContentDumper> dumpers = new ArrayList<MessagingContentDumper>(1) {{
+    private final List<MessagingContentDumper> dumpers = new ArrayList<MessagingContentDumper>(1) {{
         add(new BinaryContentDumper());
         // Add more as needed
     }};
@@ -86,30 +86,30 @@ public class MessagesServlet extends MultipleAdapterServletNew {
     }
     
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return true; 
     }
     
     @Override
-    protected boolean handleIndividually(String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+    protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
         if(RESOLVE.equals(action)) {
-            AJAXRequestData requestData = parseRequest(req, false);
-            MessagingRequestData request = MessagingActionFactory.INSTANCE.wrapRequest(requestData, getSessionObject(req));
+            final AJAXRequestData requestData = parseRequest(req, false);
+            final MessagingRequestData request = MessagingActionFactory.INSTANCE.wrapRequest(requestData, getSessionObject(req));
             
             try {
-                MessagingMessageAccess messageAccess = request.getMessageAccess();
+                final MessagingMessageAccess messageAccess = request.getMessageAccess();
                 
-                MessagingContent content = messageAccess.resolveContent(request.getFolderId(), request.getId(), request.getReferenceId());
+                final MessagingContent content = messageAccess.resolveContent(request.getFolderId(), request.getId(), request.getReferenceId());
                 
                 //TODO: Set Content-Type Header
-                for(MessagingContentDumper dumper : dumpers) {
+                for(final MessagingContentDumper dumper : dumpers) {
                     if(dumper.handles(content)) {
                         dumper.dump(content, resp.getOutputStream());
                     }
                 }
                 
                 
-            } catch (MessagingException e) {
+            } catch (final MessagingException e) {
                 throw new ServletException(e);
             }
             

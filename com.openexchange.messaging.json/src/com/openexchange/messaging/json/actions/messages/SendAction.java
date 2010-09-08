@@ -69,19 +69,19 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SendAction extends AbstractMessagingAction {
 
-    public SendAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+    public SendAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
     
-    public SendAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+    public SendAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super(registry, writer, parser, cache);
     }
 
 
 
     @Override
-    protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException, IOException {
-        MessagingMessage message = req.getMessage();
+    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException, IOException {
+        final MessagingMessage message = req.getMessage();
         if(message == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");
         }

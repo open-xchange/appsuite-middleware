@@ -79,21 +79,21 @@ import com.openexchange.tools.session.ServerSession;
 public class GetAction extends AbstractMessagingAction {
     private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
     
-    public GetAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+    public GetAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
     
-    public GetAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+    public GetAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super(registry, writer, parser, cache);
     }
 
 
 
     @Override
-    protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException {
         
-        MessagingMessageAccess messageAccess = req.getMessageAccess();
-        MessagingMessage message = messageAccess.getMessage(req.getFolderId(), req.getId(), req.getPeek());
+        final MessagingMessageAccess messageAccess = req.getMessageAccess();
+        final MessagingMessage message = messageAccess.getMessage(req.getFolderId(), req.getId(), req.getPeek());
         
         return new AJAXRequestResult(writer.write(message, req.getAccountAddress(), session, DISPLAY_MODE));
     }

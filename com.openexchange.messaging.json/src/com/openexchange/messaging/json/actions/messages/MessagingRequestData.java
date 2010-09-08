@@ -82,23 +82,23 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MessagingRequestData {
 
-    private AJAXRequestData request;
+    private final AJAXRequestData request;
 
-    private MessagingServiceRegistry registry;
+    private final MessagingServiceRegistry registry;
 
-    private ServerSession session;
+    private final ServerSession session;
 
-    private MessagingMessageParser parser;
+    private final MessagingMessageParser parser;
 
     private MessagingAccountAccess accountAccess;
 
-    private Cache cache;
+    private final Cache cache;
 
     private MessagingMessageAccess messageAccess;
 
-    private Collection<MessagingAccountAccess> closeables = new LinkedList<MessagingAccountAccess>();
+    private final Collection<MessagingAccountAccess> closeables = new LinkedList<MessagingAccountAccess>();
 
-    public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry, MessagingMessageParser parser, Cache cache) {
+    public MessagingRequestData(final AJAXRequestData request, final ServerSession session, final MessagingServiceRegistry registry, final MessagingMessageParser parser, final Cache cache) {
         this.request = request;
         this.registry = registry;
         this.session = session;
@@ -106,12 +106,12 @@ public class MessagingRequestData {
         this.cache = cache;
     }
 
-    public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry, MessagingMessageParser parser) {
+    public MessagingRequestData(final AJAXRequestData request, final ServerSession session, final MessagingServiceRegistry registry, final MessagingMessageParser parser) {
         this(request, session, registry, parser, null);
     }
 
-    public MessagingMessageAccess getMessageAccess(String messagingService, int account) throws MessagingException {
-        MessagingAccountAccess access = registry.getMessagingService(messagingService).getAccountAccess(account, session);
+    public MessagingMessageAccess getMessageAccess(final String messagingService, final int account) throws MessagingException {
+        final MessagingAccountAccess access = registry.getMessagingService(messagingService).getAccountAccess(account, session);
         if (!access.isConnected()) {
             access.connect();
             mustClose(access);
@@ -120,7 +120,7 @@ public class MessagingRequestData {
         return wrap(access.getMessageAccess(), messagingService, account);
     }
 
-    private void mustClose(MessagingAccountAccess access) {
+    private void mustClose(final MessagingAccountAccess access) {
         closeables.add(access);
     }
 
@@ -133,7 +133,7 @@ public class MessagingRequestData {
         if (messageAccess != null) {
             return messageAccess;
         }
-        MessagingMessageAccess access = getAccountAccess().getMessageAccess();
+        final MessagingMessageAccess access = getAccountAccess().getMessageAccess();
         return messageAccess = wrap(access, getMessagingServiceId(), getAccountID());
     }
 
@@ -163,15 +163,15 @@ public class MessagingRequestData {
         }
     }
 
-    private void missingParameter(String string) throws MessagingException {
+    private void missingParameter(final String string) throws MessagingException {
         throw MessagingExceptionCodes.MISSING_PARAMETER.create(string);
     }
 
     /**
      * Tries to retrieve the value of a given parameter, failing with a MessagingException if the parameter was not sent.
      */
-    public String requireParameter(String string) throws MessagingException {
-        String parameter = request.getParameter(string);
+    public String requireParameter(final String string) throws MessagingException {
+        final String parameter = request.getParameter(string);
         if (parameter == null) {
             missingParameter(string);
         }
@@ -188,10 +188,10 @@ public class MessagingRequestData {
             return getLongFolder().getAccount();
         }
 
-        String parameter = requireParameter("account");
+        final String parameter = requireParameter("account");
         try {
             return Integer.parseInt(parameter);
-        } catch (NumberFormatException x) {
+        } catch (final NumberFormatException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("account", parameter);
         }
     }
@@ -216,13 +216,13 @@ public class MessagingRequestData {
      * @throws MessagingException - When the 'columns' parameter was not set or contains an illegal value.
      */
     public MessagingField[] getColumns() throws MessagingException {
-        String parameter = requireParameter("columns");
+        final String parameter = requireParameter("columns");
         if (parameter == null) {
             return new MessagingField[0];
         }
 
-        String[] columnList = parameter.split("\\s*,\\s*");
-        MessagingField[] fields = MessagingField.getFields(columnList);
+        final String[] columnList = parameter.split("\\s*,\\s*");
+        final MessagingField[] fields = MessagingField.getFields(columnList);
         for (int i = 0; i < fields.length; i++) {
             if (fields[i] == null) {
                 throw MessagingExceptionCodes.INVALID_PARAMETER.create("columns", columnList[i]);
@@ -238,11 +238,11 @@ public class MessagingRequestData {
      * @throws MessagingException - When the 'sort' parameter contains an illegal value.
      */
     public MessagingField getSort() throws MessagingException {
-        String parameter = request.getParameter("sort");
+        final String parameter = request.getParameter("sort");
         if (parameter == null) {
             return null;
         }
-        MessagingField field = MessagingField.getField(parameter);
+        final MessagingField field = MessagingField.getField(parameter);
         if (field == null) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("sort", parameter);
         }
@@ -256,13 +256,13 @@ public class MessagingRequestData {
      * @throws MessagingException - When 'order' contains an illegal value.
      */
     public OrderDirection getOrder() throws MessagingException {
-        String parameter = request.getParameter("order");
+        final String parameter = request.getParameter("order");
         if (parameter == null) {
             return null;
         }
         try {
             return OrderDirection.valueOf(OrderDirection.class, parameter.toUpperCase());
-        } catch (IllegalArgumentException x) {
+        } catch (final IllegalArgumentException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("order", parameter);
         }
     }
@@ -283,7 +283,7 @@ public class MessagingRequestData {
      * @throws MessagingException - When 'peek' contains an illegal value.
      */
     public boolean getPeek() throws MessagingException {
-        String parameter = request.getParameter("peek");
+        final String parameter = request.getParameter("peek");
         if (parameter == null) {
             return false;
         }
@@ -307,7 +307,7 @@ public class MessagingRequestData {
     }
 
     public MessagingMessage getMessage() throws MessagingException, JSONException, IOException {
-        Object data = request.getData();
+        final Object data = request.getData();
         if (data == null) {
             return null;
         }
@@ -320,8 +320,8 @@ public class MessagingRequestData {
     /**
      * Determines if the given parameters were set in the request.
      */
-    public boolean isset(String... params) {
-        for (String param : params) {
+    public boolean isset(final String... params) {
+        for (final String param : params) {
             if (null == request.getParameter(param)) {
                 return false;
             }
@@ -343,7 +343,7 @@ public class MessagingRequestData {
      * @throws MessagingException
      */
     public Collection<MessagingAddressHeader> getRecipients() throws MessagingException {
-        String parameter = request.getParameter("recipients");
+        final String parameter = request.getParameter("recipients");
         if (parameter == null) {
             return null;
         }
@@ -359,7 +359,7 @@ public class MessagingRequestData {
         if (hasLongFolder()) {
             return MessagingFolderAddress.parse(request.getParameter("folder"));
         } else if (isset("messagingService", "account", "folder")) {
-            MessagingFolderAddress address = new MessagingFolderAddress();
+            final MessagingFolderAddress address = new MessagingFolderAddress();
             address.setMessagingService(getMessagingServiceId());
             address.setAccount(getAccountID());
             address.setFolder(getFolderId());
@@ -373,19 +373,19 @@ public class MessagingRequestData {
     }
 
     public List<MessageAddress> getMessageAddresses() throws JSONException, MessagingException {
-        Object data = request.getData();
+        final Object data = request.getData();
         if (data == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");
         }
         if (!JSONArray.class.isInstance(data)) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("body", data.toString());
         }
-        JSONArray idsJSON = (JSONArray) data;
+        final JSONArray idsJSON = (JSONArray) data;
 
-        List<MessageAddress> addresses = new ArrayList<MessageAddress>(idsJSON.length());
+        final List<MessageAddress> addresses = new ArrayList<MessageAddress>(idsJSON.length());
 
         for (int i = 0, size = idsJSON.length(); i < size; i++) {
-            JSONObject pair = idsJSON.getJSONObject(i);
+            final JSONObject pair = idsJSON.getJSONObject(i);
             addresses.add(new MessageAddress(pair.getString("folder"), pair.getString("id")));
         }
 
@@ -396,7 +396,7 @@ public class MessagingRequestData {
         return getMessagingServiceId() + "://" + getAccountID();
     }
 
-    public MessagingMessageAccess wrap(MessagingMessageAccess messageAccess2, String service, int account) {
+    public MessagingMessageAccess wrap(final MessagingMessageAccess messageAccess2, final String service, final int account) {
         if (cache == null) {
             return messageAccess2;
         }
@@ -404,7 +404,7 @@ public class MessagingRequestData {
     }
 
     public void cleanUp() {
-        for (MessagingAccountAccess closeable : closeables) {
+        for (final MessagingAccountAccess closeable : closeables) {
             closeable.close();
         }
     }

@@ -73,29 +73,29 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GetAction extends AbstractMessagingAccountAction {
 
-    public GetAction(MessagingServiceRegistry registry) {
+    public GetAction(final MessagingServiceRegistry registry) {
         super(registry);
     }
 
     @Override
-    protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
         
-        List<String> missingParameters = request.getMissingParameters("messagingService", "id");
+        final List<String> missingParameters = request.getMissingParameters("messagingService", "id");
         if(!missingParameters.isEmpty()) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());
         }
-        String messagingServiceId = request.getParameter("messagingService");
+        final String messagingServiceId = request.getParameter("messagingService");
         
         int id = 0;
-        String idS = request.getParameter("id");
+        final String idS = request.getParameter("id");
         try {
             id = Integer.parseInt(idS);
-        } catch (NumberFormatException x) {
+        } catch (final NumberFormatException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("id", idS);
         }
         
         
-        MessagingAccount account = registry.getMessagingService(messagingServiceId).getAccountManager().getAccount(id, session);
+        final MessagingAccount account = registry.getMessagingService(messagingServiceId).getAccountManager().getAccount(id, session);
         
         return new AJAXRequestResult(writer.write(account));
     }

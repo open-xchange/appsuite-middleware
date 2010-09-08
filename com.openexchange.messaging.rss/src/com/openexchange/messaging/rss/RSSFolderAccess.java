@@ -64,35 +64,35 @@ import com.openexchange.session.Session;
  */
 public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess {
 
-    public RSSFolderAccess(int accountId, Session session) {
+    public RSSFolderAccess(final int accountId, final Session session) {
         super(accountId, session);
     }
 
-    public void clearFolder(String folderId) throws MessagingException {
+    public void clearFolder(final String folderId) throws MessagingException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public void clearFolder(String folderId, boolean hardDelete) throws MessagingException {
+    public void clearFolder(final String folderId, final boolean hardDelete) throws MessagingException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String createFolder(MessagingFolder toCreate) throws MessagingException {
+    public String createFolder(final MessagingFolder toCreate) throws MessagingException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String deleteFolder(String folderId) throws MessagingException {
+    public String deleteFolder(final String folderId) throws MessagingException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String deleteFolder(String folderId, boolean hardDelete) throws MessagingException {
+    public String deleteFolder(final String folderId, final boolean hardDelete) throws MessagingException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public boolean exists(String folderId) {
+    public boolean exists(final String folderId) {
         return EMPTY.equals(folderId);
     }
 
@@ -108,25 +108,25 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
         return null;
     }
 
-    public MessagingFolder getFolder(String folderId) throws MessagingException {
+    public MessagingFolder getFolder(final String folderId) throws MessagingException {
         checkFolder(folderId);
         return new RSSFolder(session.getUserId());
     }
 
     private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
 
-    public Quota getMessageQuota(String folderId) throws MessagingException {
+    public Quota getMessageQuota(final String folderId) throws MessagingException {
         checkFolder(folderId);
         return getQuotas(folderId, MESSAGE)[0];
     }
 
     private static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
 
-    public MessagingFolder[] getPath2DefaultFolder(String folderId) {
+    public MessagingFolder[] getPath2DefaultFolder(final String folderId) {
         return EMPTY_PATH;
     }
 
-    public Quota[] getQuotas(String folder, Type[] types) throws MessagingException {
+    public Quota[] getQuotas(final String folder, final Type[] types) throws MessagingException {
         checkFolder(folder);
         return Quota.getUnlimitedQuotas(types);
     }
@@ -145,12 +145,12 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
 
     private static final Quota.Type[] STORAGE = { Quota.Type.STORAGE };
 
-    public Quota getStorageQuota(String folderId) throws MessagingException {
+    public Quota getStorageQuota(final String folderId) throws MessagingException {
         checkFolder(folderId);
         return getQuotas(folderId, STORAGE)[0];
     }
 
-    public MessagingFolder[] getSubfolders(String parentIdentifier, boolean all) throws MessagingException {
+    public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws MessagingException {
         checkFolder(parentIdentifier);
         return new MessagingFolder[0];
     }
@@ -159,15 +159,15 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String moveFolder(String folderId, String newParentId) throws MessagingException {
+    public String moveFolder(final String folderId, final String newParentId) throws MessagingException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String renameFolder(String folderId, String newName) throws MessagingException {
+    public String renameFolder(final String folderId, final String newName) throws MessagingException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String updateFolder(String identifier, MessagingFolder toUpdate) throws MessagingException {
+    public String updateFolder(final String identifier, final MessagingFolder toUpdate) throws MessagingException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 

@@ -83,11 +83,11 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     
     private FeedAdapter feed = null;
     
-    public RSSMessageAccess(int accountId, Session session, FeedFetcher fetcher, MessagingAccountManager accounts) {
+    public RSSMessageAccess(final int accountId, final Session session, final FeedFetcher fetcher, final MessagingAccountManager accounts) {
         super(accountId, session);
         this.accountId = accountId;
         this.session = session;
-        this.feedFetcher = fetcher;
+        feedFetcher = fetcher;
         this.accounts = accounts;
     }
 
@@ -119,43 +119,43 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     }
 
 
-    public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException {
+    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws MessagingException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
-    public MessagingMessage getMessage(String folder, String id, boolean peek) throws MessagingException {
+    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
         checkFolder(folder);
         return loadFeed().get(id);
     }
 
-    public List<MessagingMessage> getMessages(String folder, String[] messageIds, MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
         checkFolder(folder);
-        List<MessagingMessage> messages = new ArrayList<MessagingMessage>(messageIds.length);
-        for (String id : messageIds) {
+        final List<MessagingMessage> messages = new ArrayList<MessagingMessage>(messageIds.length);
+        for (final String id : messageIds) {
             messages.add(getMessage(folder, id, true));
         }
         return messages;
     }
 
-    public List<String> moveMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException {
+    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
         checkFolder(sourceFolder);
         checkFolder(destFolder);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public MessagingMessage perform(String folder, String id, String action) throws MessagingException {
+    public MessagingMessage perform(final String folder, final String id, final String action) throws MessagingException {
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
-    public MessagingMessage perform(String action) throws MessagingException {
+    public MessagingMessage perform(final String action) throws MessagingException {
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
-    public MessagingMessage perform(MessagingMessage message, String action) throws MessagingException {
+    public MessagingMessage perform(final MessagingMessage message, final String action) throws MessagingException {
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
-    public List<MessagingMessage> searchMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, SearchTerm<?> searchTerm, MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {
         checkFolder(folder);
         List<SyndMessage> messages = loadFeed().getMessages();
         
@@ -166,7 +166,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         return new ArrayList<MessagingMessage>(messages);
     }
 
-    private List<SyndMessage> sublist(List<SyndMessage> messages, IndexRange indexRange) {
+    private List<SyndMessage> sublist(final List<SyndMessage> messages, final IndexRange indexRange) {
         if(indexRange == null) {
             return messages;
         }
@@ -184,18 +184,18 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         return messages.subList(start, end);
     }
 
-    private void sort(List<SyndMessage> messages, MessagingField sortField, OrderDirection order) throws MessagingException {
+    private void sort(final List<SyndMessage> messages, final MessagingField sortField, final OrderDirection order) throws MessagingException {
         if(sortField == null) {
             return;
         }
-        MessagingComparator comparator = new MessagingComparator(sortField, null);
+        final MessagingComparator comparator = new MessagingComparator(sortField, null);
         try {
             Collections.sort(messages, comparator);
             if(order == OrderDirection.DESC) {
                 Collections.reverse(messages);
             }
-        } catch (RuntimeException x) {
-            Throwable cause = x.getCause();
+        } catch (final RuntimeException x) {
+            final Throwable cause = x.getCause();
             if(MessagingException.class.isInstance(cause)) {
                 throw (MessagingException) cause;
             }
@@ -203,14 +203,14 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         }
     }
 
-    private List<SyndMessage> filter(List<SyndMessage> messages, SearchTerm<?> searchTerm) throws MessagingException {
+    private List<SyndMessage> filter(final List<SyndMessage> messages, final SearchTerm<?> searchTerm) throws MessagingException {
         if(searchTerm == null) {
             return messages;
         }
         
-        List<SyndMessage> list = new ArrayList<SyndMessage>(messages.size());
+        final List<SyndMessage> list = new ArrayList<SyndMessage>(messages.size());
         
-        for (SyndMessage syndMessage : list) {
+        for (final SyndMessage syndMessage : list) {
             if(searchTerm.matches(syndMessage)) {
                 list.add(syndMessage);
             }
@@ -218,7 +218,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         return list;
     }
 
-    public void updateMessage(MessagingMessage message, MessagingField[] fields) throws MessagingException {
+    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
     
@@ -226,16 +226,16 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         if(feed != null) {
             return feed;
         }
-        String url = (String) accounts.getAccount(accountId, session).getConfiguration().get("url");
+        final String url = (String) accounts.getAccount(accountId, session).getConfiguration().get("url");
         
         try {
-            return this.feed = new FeedAdapter(feedFetcher.retrieveFeed(new URL(url)), "");
-        } catch (Exception e) {
+            return feed = new FeedAdapter(feedFetcher.retrieveFeed(new URL(url)), "");
+        } catch (final Exception e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
 
-    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
         throw new UnsupportedOperationException();
     }
 

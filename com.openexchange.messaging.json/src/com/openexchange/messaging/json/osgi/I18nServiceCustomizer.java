@@ -65,22 +65,22 @@ public class I18nServiceCustomizer implements ServiceTrackerCustomizer {
     private final BundleContext context;
     private final I18nServices services = I18nServices.getInstance();
 
-    I18nServiceCustomizer(BundleContext context) {
+    I18nServiceCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        I18nService service = (I18nService) context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final I18nService service = (I18nService) context.getService(reference);
         services.addService(service);
         return service;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         try {
             services.removeService((I18nService) service);
         } finally {

@@ -62,23 +62,23 @@ import com.openexchange.messaging.json.MessagingMessageWriter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContentWriterTracker extends ServiceTracker {
-    private MessagingMessageWriter writer;
+    private final MessagingMessageWriter writer;
 
-    public ContentWriterTracker(BundleContext context, MessagingMessageWriter writer) {
+    public ContentWriterTracker(final BundleContext context, final MessagingMessageWriter writer) {
         super(context, MessagingContentWriter.class.getName(), null);
         this.writer = writer;
     }
     
     @Override
-    public Object addingService(ServiceReference reference) {
-        MessagingContentWriter writer = (MessagingContentWriter) super.addingService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final MessagingContentWriter writer = (MessagingContentWriter) super.addingService(reference);
         this.writer.addContentWriter(writer);
         return writer;
     }
     
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        this.writer.removeContentWriter((MessagingContentWriter) service);
+    public void removedService(final ServiceReference reference, final Object service) {
+        writer.removeContentWriter((MessagingContentWriter) service);
         super.removedService(reference, service);
     }
 }

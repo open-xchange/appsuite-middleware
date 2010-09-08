@@ -74,23 +74,23 @@ public abstract class AbstractMessagingServiceAction implements AJAXActionServic
 
     protected MessagingServiceRegistry registry;
 
-    public AbstractMessagingServiceAction(MessagingServiceRegistry registry) {
+    public AbstractMessagingServiceAction(final MessagingServiceRegistry registry) {
         super();
         this.registry = registry;
     }
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         try {
             return doIt(request, session);
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw MessagingExceptionCodes.JSON_ERROR.create(x, x.getMessage());
         }
     }
 
     protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException;
 
-    protected final MessagingServiceWriter getWriter(ServerSession session) {
-        I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
+    protected final MessagingServiceWriter getWriter(final ServerSession session) {
+        final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
         return new MessagingServiceWriter(null == service ? Translator.EMPTY : new I18nTranslator(service));
     }
 }

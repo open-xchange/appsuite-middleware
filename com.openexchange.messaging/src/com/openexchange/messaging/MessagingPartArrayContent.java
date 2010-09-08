@@ -61,16 +61,16 @@ public class MessagingPartArrayContent implements MultipartContent {
 
     private MessagingBodyPart[] parts = null;
     
-    public MessagingPartArrayContent(MessagingBodyPart[] parts) {
+    public MessagingPartArrayContent(final MessagingBodyPart[] parts) {
         super();
         this.parts = parts;
     }
     
-    public MessagingPartArrayContent(Collection<? extends MessagingBodyPart> parts) {
+    public MessagingPartArrayContent(final Collection<? extends MessagingBodyPart> parts) {
         this.parts = parts.toArray(new MessagingBodyPart[parts.size()]);
     }
 
-    public MessagingBodyPart get(int index) {
+    public MessagingBodyPart get(final int index) {
         return parts[index];
     }
 

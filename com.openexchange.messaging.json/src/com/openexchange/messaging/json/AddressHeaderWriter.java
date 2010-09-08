@@ -52,8 +52,8 @@ package com.openexchange.messaging.json;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,19 +89,19 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         return 1;
     }
 
-    public boolean handles(Entry<String, Collection<MessagingHeader>> entry) {
+    public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
         return WHITELIST.contains(entry.getKey());
     }
 
-    public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+    public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
         return entry.getKey();
     }
 
-    public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        JSONArray addresses = new JSONArray();
-        for (MessagingHeader address : entry.getValue()) {
-            JSONObject object = new JSONObject();
-            MessagingAddressHeader addr = toMessagingAddress(address);
+    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+        final JSONArray addresses = new JSONArray();
+        for (final MessagingHeader address : entry.getValue()) {
+            final JSONObject object = new JSONObject();
+            final MessagingAddressHeader addr = toMessagingAddress(address);
             object.put("personal", addr.getPersonal());
             object.put("address", addr.getAddress());
             if(entry.getKey().equalsIgnoreCase(KnownHeader.FROM.toString())) {
@@ -113,7 +113,7 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         return addresses;
     }
 
-    private MessagingAddressHeader toMessagingAddress(MessagingHeader address) throws MessagingException {
+    private MessagingAddressHeader toMessagingAddress(final MessagingHeader address) throws MessagingException {
         if(MessagingAddressHeader.class.isInstance(address)) {
             return (MessagingAddressHeader) address;
         }

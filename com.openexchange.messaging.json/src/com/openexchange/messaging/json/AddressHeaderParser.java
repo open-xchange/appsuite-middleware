@@ -89,15 +89,15 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         return 1;
     }
 
-    public boolean handles(String key, Object value) {
+    public boolean handles(final String key, final Object value) {
         return WHITELIST.contains(key);
     }
 
-    public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) throws JSONException, MessagingException {
-        ArrayList<MessagingHeader> list = new ArrayList<MessagingHeader>();
+    public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, MessagingException {
+        final ArrayList<MessagingHeader> list = new ArrayList<MessagingHeader>();
         
         if(JSONArray.class.isInstance(value)) {
-            JSONArray arr = (JSONArray) value;
+            final JSONArray arr = (JSONArray) value;
             for(int i = 0, size = arr.length(); i < size; i++) {
                 parse(key, arr.get(i), list);
             }
@@ -108,7 +108,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         headers.put(key, list);
     }
 
-    private void parse(String key, Object value, ArrayList<MessagingHeader> list) throws JSONException, MessagingException {
+    private void parse(final String key, final Object value, final ArrayList<MessagingHeader> list) throws JSONException, MessagingException {
         if(JSONObject.class.isInstance(value)) {
             list.add(parseObject(key, (JSONObject) value));
         } else if (String.class.isInstance(value)) {
@@ -116,13 +116,13 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         }
     }
 
-    private MessagingHeader parseString(String key, String value) throws MessagingException {
+    private MessagingHeader parseString(final String key, final String value) throws MessagingException {
         return MimeAddressMessagingHeader.parseRFC822(key, value).iterator().next();
     }
 
-    private MessagingHeader parseObject(String key, JSONObject value) throws JSONException {
-        String address = value.optString("address");
-        String personal = value.optString("personal");
+    private MessagingHeader parseObject(final String key, final JSONObject value) throws JSONException {
+        final String address = value.optString("address");
+        final String personal = value.optString("personal");
         return MimeAddressMessagingHeader.valueOfPlain(key, personal, address);
     }
 

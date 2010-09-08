@@ -191,7 +191,7 @@ public final class FacebookFQLStreamParser {
         final Map<String, AttachmentHandler> m = new HashMap<String, AttachmentHandler>(8);
         m.put("album", new AttachmentHandler() {
 
-            public void handleAttachment(NodeList attachNodes, int len, FacebookMessagingMessage message, MultipartProvider multipartProvider) throws MessagingException {
+            public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws MessagingException {
                 String name = null;
                 String href = null;
                 int flag = 0;
@@ -280,7 +280,7 @@ public final class FacebookFQLStreamParser {
         });
         m.put("group", new AttachmentHandler() {
 
-            public void handleAttachment(NodeList attachNodes, int len, final FacebookMessagingMessage message, MultipartProvider multipartProvider) throws MessagingException {
+            public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws MessagingException {
                 /*
                  * A group post
                  */

@@ -144,7 +144,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return ((MessagingMessage)object).getHeader(header);
     }
 
-    public Object picture(Object... args) {
+    public Object picture(final Object... args) {
         return ((MessagingMessage)args[0]).getPicture();
     }
 

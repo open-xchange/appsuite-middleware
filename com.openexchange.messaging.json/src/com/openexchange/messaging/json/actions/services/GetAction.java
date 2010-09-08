@@ -70,21 +70,21 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GetAction extends AbstractMessagingServiceAction {
 
-    public GetAction(MessagingServiceRegistry registry) {
+    public GetAction(final MessagingServiceRegistry registry) {
         super(registry);
     }
 
     @Override
-    protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
-        String id = request.getParameter("id");
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+        final String id = request.getParameter("id");
         if (id == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("id");
         }
-        MessagingService service = registry.getMessagingService(id);
+        final MessagingService service = registry.getMessagingService(id);
         if (null == service) {
             throw MessagingExceptionCodes.UNKNOWN_MESSAGING_SERVICE.create(id);
         }
-        JSONObject responseObject = getWriter(session).write(service);
+        final JSONObject responseObject = getWriter(session).write(service);
         return new AJAXRequestResult(responseObject);
     }
 }

@@ -70,7 +70,7 @@ public class RSSFolder implements MessagingFolder {
 
     private final List<MessagingPermission> permissions;
 
-    public RSSFolder(int user) {
+    public RSSFolder(final int user) {
         super();
         final MessagingPermission mp = DefaultMessagingPermission.newInstance();
         mp.setAllPermissions(

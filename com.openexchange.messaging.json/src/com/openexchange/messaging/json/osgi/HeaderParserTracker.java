@@ -63,23 +63,23 @@ import com.openexchange.messaging.json.MessagingMessageParser;
  */
 public class HeaderParserTracker extends ServiceTracker {
 
-    private MessagingMessageParser parser;
+    private final MessagingMessageParser parser;
 
-    public HeaderParserTracker(BundleContext context, MessagingMessageParser parser) {
+    public HeaderParserTracker(final BundleContext context, final MessagingMessageParser parser) {
         super(context, MessagingHeaderParser.class.getName(), null);
         this.parser = parser;
     }
     
     @Override
-    public Object addingService(ServiceReference reference) {
-        MessagingHeaderParser parser = (MessagingHeaderParser) super.addingService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final MessagingHeaderParser parser = (MessagingHeaderParser) super.addingService(reference);
         this.parser.addHeaderParser(parser);
         return parser;
     }
     
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        this.parser.removeHeaderParser((MessagingHeaderParser) service);
+    public void removedService(final ServiceReference reference, final Object service) {
+        parser.removeHeaderParser((MessagingHeaderParser) service);
         super.removedService(reference, service);
     }
     

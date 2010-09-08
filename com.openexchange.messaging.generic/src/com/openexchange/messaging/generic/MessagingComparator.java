@@ -202,8 +202,8 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
             c2 = transform(c2);
 
             if (String.class.isInstance(c1)) {
-                String s1 = (String) c1;
-                String s2 = (String) c2;
+                final String s1 = (String) c1;
+                final String s2 = (String) c2;
                 
                 return collator.compare(s1, s2);
             }
@@ -221,11 +221,11 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
     private static final String DATE = "Date";
     private static final SimpleDateFormat dateFormat = new MailDateFormat();
     
-    private Object getValue(MessagingHeader h) {
+    private Object getValue(final MessagingHeader h) {
         if(DATE.equalsIgnoreCase(h.getName())) {
             try {
                 return dateFormat.parse(h.getValue());
-            } catch (ParseException e) {
+            } catch (final ParseException e) {
                 // IGNORE
             }
         }

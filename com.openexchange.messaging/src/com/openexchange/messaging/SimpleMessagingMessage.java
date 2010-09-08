@@ -189,7 +189,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         this.headers = headers;
     }
     
-    public void putHeader(MessagingHeader header) {
+    public void putHeader(final MessagingHeader header) {
         if(headers.containsKey(header.getName())) {
             headers.get(header.getName()).add(header);
         } else {
@@ -215,11 +215,11 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
     }
 
     public void setContent(final byte[] bytes) {
-        this.content = new ByteArrayContent(bytes);
+        content = new ByteArrayContent(bytes);
     }
 
     public void setContent(final MessagingBodyPart... parts) {
-        this.content = new MessagingPartArrayContent(parts);
+        content = new MessagingPartArrayContent(parts);
     }
 
     public MultipartContent getParent() throws MessagingException {
@@ -250,12 +250,12 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         return picture;
     }
     
-    public void setPicture(String picture) {
+    public void setPicture(final String picture) {
         this.picture = picture;
     }
 
-    public void setContentReference(String string) {
-      this.content =  new ReferenceContent(string);
+    public void setContentReference(final String string) {
+      content =  new ReferenceContent(string);
     }
 
 

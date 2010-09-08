@@ -67,7 +67,7 @@ public class AccountServlet extends MultipleAdapterServletNew {
     }
 
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return true; // TODO: Permission Checking. Same as mail?
     }
 

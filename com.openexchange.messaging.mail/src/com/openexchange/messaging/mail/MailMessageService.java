@@ -208,7 +208,7 @@ public final class MailMessageService implements MessagingService {
         /*
          * Create read-only view on generated form description
          */
-        this.formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
+        formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
         secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MailConstants.MAIL_PASSWORD, MailConstants.TRANSPORT_PASSWORD)));
     }
 

@@ -152,7 +152,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         }
     }
     
-    private TwitterMessagingMessage get(long id) throws TwitterException {
+    private TwitterMessagingMessage get(final long id) throws TwitterException {
         return new TwitterMessagingMessage(twitterAccess.showStatus(id));
     }
 
@@ -242,7 +242,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 final List<Status> friendsTimeline = twitterAccess.getFriendsTimeline();
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
-                    TwitterMessagingMessage message = new TwitterMessagingMessage(status);
+                    final TwitterMessagingMessage message = new TwitterMessagingMessage(status);
                     msgs.add(message);
                }
             }
@@ -304,7 +304,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
 //        return retval;
 //    }
 
-    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
         throw new UnsupportedOperationException();
     }
 

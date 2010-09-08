@@ -100,7 +100,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
                 return folderAccess.getRootFolder();
             }
 
-            public MessagingFolder[] getSubfolders(FacebookMessagingFolderAccess folderAccess) throws MessagingException {
+            public MessagingFolder[] getSubfolders(final FacebookMessagingFolderAccess folderAccess) throws MessagingException {
                 return new MessagingFolder[] { folderAccess.generateWallFolder() };
             }
 
@@ -114,7 +114,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
                 return folderAccess.generateWallFolder();
             }
 
-            public MessagingFolder[] getSubfolders(FacebookMessagingFolderAccess folderAccess) throws MessagingException {
+            public MessagingFolder[] getSubfolders(final FacebookMessagingFolderAccess folderAccess) throws MessagingException {
                 return EMPTY_PATH;
             }
 

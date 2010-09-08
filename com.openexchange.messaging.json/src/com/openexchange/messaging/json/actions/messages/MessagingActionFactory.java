@@ -58,7 +58,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -74,16 +73,16 @@ public class MessagingActionFactory implements AJAXActionServiceFactory {
 
     private Map<String, AJAXActionService> actions = null;
 
-    private Cache cache;
+    private final Cache cache;
 
-    private MessagingMessageParser parser;
+    private final MessagingMessageParser parser;
 
-    private MessagingMessageWriter writer;
+    private final MessagingMessageWriter writer;
 
-    private MessagingServiceRegistry registry;
+    private final MessagingServiceRegistry registry;
     
     
-    public MessagingActionFactory(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+    public MessagingActionFactory(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super();
         actions = new HashMap<String, AJAXActionService>();
         
@@ -101,11 +100,11 @@ public class MessagingActionFactory implements AJAXActionServiceFactory {
         this.registry = registry;
     } 
     
-    public AJAXActionService createActionService(String action) throws AjaxException {
+    public AJAXActionService createActionService(final String action) throws AjaxException {
         return actions.get(action);
     }
     
-    public MessagingRequestData wrapRequest(AJAXRequestData req, ServerSession session) {
+    public MessagingRequestData wrapRequest(final AJAXRequestData req, final ServerSession session) {
         return new MessagingRequestData(req, session, registry, parser, cache);
     }
 

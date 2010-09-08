@@ -106,8 +106,8 @@ public class FacebookMessagingResource implements MessagingResource {
      */
     public FacebookMessagingResource(final String login, final String password, final String apiKey, final String secretKey) {
         super();
-        this.messagingAccount = null;
-        this.session = null;
+        messagingAccount = null;
+        session = null;
         facebookSession = new FacebookSession(login, password, apiKey, secretKey);
     }
 

@@ -65,24 +65,24 @@ import com.sun.syndication.feed.synd.SyndFeed;
  */
 public class FeedAdapter {
     
-    private SyndFeed feed;
+    private final SyndFeed feed;
     
-    private Map<String, SyndMessage> messages = new LinkedHashMap<String, SyndMessage>();
+    private final Map<String, SyndMessage> messages = new LinkedHashMap<String, SyndMessage>();
     
-    public FeedAdapter(SyndFeed feed, String folder) throws MessagingException {
+    public FeedAdapter(final SyndFeed feed, final String folder) throws MessagingException {
         this.feed = feed;
     
-        List<SyndEntry> entries = feed.getEntries();
-        for (SyndEntry syndEntry : entries) {
+        final List<SyndEntry> entries = feed.getEntries();
+        for (final SyndEntry syndEntry : entries) {
             remember(new SyndMessage(feed, syndEntry, folder));
         }
     }
 
-    private void remember(SyndMessage syndMessage) {
+    private void remember(final SyndMessage syndMessage) {
         messages.put(syndMessage.getId(), syndMessage);
     }
     
-    public SyndMessage get(String id) {
+    public SyndMessage get(final String id) {
         return messages.get(id);
     }
     

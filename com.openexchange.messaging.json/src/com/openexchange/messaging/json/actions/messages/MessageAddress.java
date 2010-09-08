@@ -58,12 +58,12 @@ import com.openexchange.messaging.MessagingException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MessageAddress {
-    private MessagingFolderAddress folder;
-    private String id;
+    private final MessagingFolderAddress folder;
+    private final String id;
 
 
-    public MessageAddress(String longFolder, String id) throws MessagingException {
-        this.folder = MessagingFolderAddress.parse(longFolder);
+    public MessageAddress(final String longFolder, final String id) throws MessagingException {
+        folder = MessagingFolderAddress.parse(longFolder);
         this.id = id;
     }
 
@@ -89,7 +89,7 @@ public class MessageAddress {
 
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -99,7 +99,7 @@ public class MessageAddress {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        MessageAddress other = (MessageAddress) obj;
+        final MessageAddress other = (MessageAddress) obj;
         if (folder == null) {
             if (other.folder != null) {
                 return false;

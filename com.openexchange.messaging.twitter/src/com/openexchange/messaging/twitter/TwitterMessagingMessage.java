@@ -97,7 +97,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
 
     private final long size;
 
-    private String picture;
+    private final String picture;
 
     /**
      * Initializes a new {@link TwitterMessagingMessage}.

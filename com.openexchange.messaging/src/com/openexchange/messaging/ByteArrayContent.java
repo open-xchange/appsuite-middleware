@@ -60,9 +60,9 @@ import java.io.InputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ByteArrayContent implements BinaryContent {
-    private byte[] data;
+    private final byte[] data;
 
-    public ByteArrayContent(byte[] data) {
+    public ByteArrayContent(final byte[] data) {
         super();
         this.data = data;
     }

@@ -64,15 +64,15 @@ public class ServicesActionFactory implements AJAXActionServiceFactory {
 
     public static ServicesActionFactory INSTANCE; // Initialized in Activator
 
-    private Map<String, AJAXActionService> actions;
+    private final Map<String, AJAXActionService> actions;
 
-    public ServicesActionFactory(MessagingServiceRegistry registry) {
-        this.actions = new HashMap<String, AJAXActionService>();
+    public ServicesActionFactory(final MessagingServiceRegistry registry) {
+        actions = new HashMap<String, AJAXActionService>();
         actions.put("all", new AllAction(registry));
         actions.put("get", new GetAction(registry));
     }
 
-    public AJAXActionService createActionService(String action) {
+    public AJAXActionService createActionService(final String action) {
         return actions.get(action);
     }
 }

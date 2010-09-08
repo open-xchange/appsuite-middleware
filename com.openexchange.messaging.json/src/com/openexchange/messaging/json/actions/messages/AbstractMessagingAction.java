@@ -77,25 +77,25 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
     protected MessagingMessageParser parser;
     private Cache cache;
     
-    public AbstractMessagingAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+    public AbstractMessagingAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         this(registry, writer, parser, null);
     }
     
-    public AbstractMessagingAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+    public AbstractMessagingAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         this.registry = registry;
         this.writer = writer;
         this.parser = parser;
         this.cache = cache;
     }
     
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
-        MessagingRequestData req = new MessagingRequestData(request, session, registry, parser, cache);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+        final MessagingRequestData req = new MessagingRequestData(request, session, registry, parser, cache);
         try {
-            AJAXRequestResult result = doIt(req, session);
+            final AJAXRequestResult result = doIt(req, session);
             return result;
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             req.cleanUp();
@@ -105,7 +105,7 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
     protected abstract AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException, IOException;
 
     
-    public void setCache(Cache cache) {
+    public void setCache(final Cache cache) {
         this.cache = cache;
     }
 }

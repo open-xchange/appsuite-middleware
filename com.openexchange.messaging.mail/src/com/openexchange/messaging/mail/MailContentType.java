@@ -72,7 +72,7 @@ public final class MailContentType implements ContentType {
      * 
      * @param contentType The mail content type
      */
-    public MailContentType(com.openexchange.mail.mime.ContentType contentType) {
+    public MailContentType(final com.openexchange.mail.mime.ContentType contentType) {
         super();
         if (null == contentType) {
             throw new IllegalArgumentException("Content type is null.");
@@ -108,78 +108,78 @@ public final class MailContentType implements ContentType {
         return contentType.getSubType();
     }
 
-    public boolean isMimeType(String pattern) {
+    public boolean isMimeType(final String pattern) {
         return contentType.isMimeType(pattern);
     }
 
-    public void setBaseType(String baseType) throws MessagingException {
+    public void setBaseType(final String baseType) throws MessagingException {
         try {
             contentType.setBaseType(baseType);
-        } catch (MailException e) {
+        } catch (final MailException e) {
             throw new MessagingException(e);
         }
     }
 
-    public void setCharsetParameter(String charset) {
+    public void setCharsetParameter(final String charset) {
         contentType.setCharsetParameter(charset);
     }
 
-    public void setContentType(String contentType) throws MessagingException {
+    public void setContentType(final String contentType) throws MessagingException {
         try {
             this.contentType.setContentType(contentType);
-        } catch (MailException e) {
+        } catch (final MailException e) {
             throw new MessagingException(e);
         }
     }
 
-    public void setContentType(ContentType contentType) {
-        com.openexchange.mail.mime.ContentType thisObj = this.contentType;
+    public void setContentType(final ContentType contentType) {
+        final com.openexchange.mail.mime.ContentType thisObj = this.contentType;
         thisObj.setPrimaryType(contentType.getPrimaryType());
         thisObj.setSubType(contentType.getSubType());
         /*
          * Drop parameters. Store names in separate list to avoid ConcurrentModificationException
          */
         final List<String> names = new ArrayList<String>();
-        for (Iterator<String> iter = thisObj.getParameterNames(); iter.hasNext();) {
+        for (final Iterator<String> iter = thisObj.getParameterNames(); iter.hasNext();) {
             names.add(iter.next());
         }
-        for (String name : names) {
+        for (final String name : names) {
             thisObj.removeParameter(name);
         }
         /*
          * Replace with other ones
          */
-        for (Iterator<String> iter = contentType.getParameterNames(); iter.hasNext();) {
+        for (final Iterator<String> iter = contentType.getParameterNames(); iter.hasNext();) {
             final String name = iter.next();
             thisObj.setParameter(name, contentType.getParameter(name));
         }
     }
 
-    public void setNameParameter(String filename) {
+    public void setNameParameter(final String filename) {
         contentType.setNameParameter(filename);
     }
 
-    public void setPrimaryType(String primaryType) {
+    public void setPrimaryType(final String primaryType) {
         contentType.setPrimaryType(primaryType);
     }
 
-    public void setSubType(String subType) {
+    public void setSubType(final String subType) {
         contentType.setSubType(subType);
     }
 
-    public boolean startsWith(String prefix) {
+    public boolean startsWith(final String prefix) {
         return contentType.startsWith(prefix);
     }
 
-    public void addParameter(String key, String value) {
+    public void addParameter(final String key, final String value) {
         contentType.addParameter(key, value);
     }
 
-    public boolean containsParameter(String key) {
+    public boolean containsParameter(final String key) {
         return contentType.containsParameter(key);
     }
 
-    public String getParameter(String key) {
+    public String getParameter(final String key) {
         return contentType.getParameter(key);
     }
 
@@ -187,11 +187,11 @@ public final class MailContentType implements ContentType {
         return contentType.getParameterNames();
     }
 
-    public String removeParameter(String key) {
+    public String removeParameter(final String key) {
         return contentType.removeParameter(key);
     }
 
-    public void setParameter(String key, String value) {
+    public void setParameter(final String key, final String value) {
         contentType.setParameter(key, value);
     }
 

@@ -88,27 +88,27 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         super();
         try {
             mailTransport = MailTransport.getInstance(session, accountId);
-        } catch (MailException e) {
+        } catch (final MailException e) {
             throw new MessagingException(e);
         }
     }
 
-    public void transport(MessagingMessage message, Collection<MessagingAddressHeader> recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
         try {
             final UnsynchronizedByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
             message.writeTo(out);
             final List<Address> addrs = new ArrayList<Address>(recipients.size());
-            for (MessagingAddressHeader mah : recipients) {
+            for (final MessagingAddressHeader mah : recipients) {
                 final QuotedInternetAddress addr = new QuotedInternetAddress();
                 addr.setAddress(mah.getAddress());
                 addr.setPersonal(mah.getPersonal());
             }
             mailTransport.sendRawMessage(out.toByteArray(), addrs.toArray(new Address[0]));
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (MailException e) {
+        } catch (final MailException e) {
             throw new MessagingException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -120,7 +120,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
     public void close() {
         try {
             mailTransport.close();
-        } catch (MailException e) {
+        } catch (final MailException e) {
             getLog(MailMessagingAccountTransport.class).error(e.getMessage(), e);
         }
     }
@@ -137,7 +137,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         try {
             mailTransport.ping();
             return true;
-        } catch (MailException e) {
+        } catch (final MailException e) {
             getLog(MailMessagingAccountTransport.class).error(e.getMessage(), e);
             return false;
         }

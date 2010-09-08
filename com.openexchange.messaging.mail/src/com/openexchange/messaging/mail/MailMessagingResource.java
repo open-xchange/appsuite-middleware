@@ -84,8 +84,8 @@ public class MailMessagingResource implements MessagingResource {
         this.accountId = accountId;
         this.session = session;
         try {
-            this.mailAccess = MailAccess.getInstance(session, accountId);
-        } catch (MailException e) {
+            mailAccess = MailAccess.getInstance(session, accountId);
+        } catch (final MailException e) {
             throw new MessagingException(e);
         }
     }
@@ -104,7 +104,7 @@ public class MailMessagingResource implements MessagingResource {
     public void connect() throws MessagingException {
         try {
             mailAccess.connect();
-        } catch (MailException e) {
+        } catch (final MailException e) {
             throw new MessagingException(e);
         }
     }
@@ -116,7 +116,7 @@ public class MailMessagingResource implements MessagingResource {
     public boolean ping() throws MessagingException {
         try {
             return mailAccess.ping();
-        } catch (MailException e) {
+        } catch (final MailException e) {
             throw new MessagingException(e);
         }
     }

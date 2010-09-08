@@ -193,7 +193,7 @@ public class DefaultMessagingPermission implements MessagingPermission {
     }
 
     public void setDeletePermission(final int permission) {
-        this.deletePermission = permission;
+        deletePermission = permission;
     }
 
     public void setEntity(final int entity) {
@@ -201,7 +201,7 @@ public class DefaultMessagingPermission implements MessagingPermission {
     }
 
     public void setFolderPermission(final int permission) {
-        this.folderPermission = permission;
+        folderPermission = permission;
     }
 
     public void setGroup(final boolean group) {
@@ -209,23 +209,23 @@ public class DefaultMessagingPermission implements MessagingPermission {
     }
 
     public void setMaxPermissions() {
-        this.folderPermission = MessagingPermission.MAX_PERMISSION;
-        this.readPermission = MessagingPermission.MAX_PERMISSION;
-        this.deletePermission = MessagingPermission.MAX_PERMISSION;
-        this.writePermission = MessagingPermission.MAX_PERMISSION;
-        this.admin = true;
+        folderPermission = MessagingPermission.MAX_PERMISSION;
+        readPermission = MessagingPermission.MAX_PERMISSION;
+        deletePermission = MessagingPermission.MAX_PERMISSION;
+        writePermission = MessagingPermission.MAX_PERMISSION;
+        admin = true;
     }
 
     public void setNoPermissions() {
-        this.folderPermission = MessagingPermission.NO_PERMISSIONS;
-        this.readPermission = MessagingPermission.NO_PERMISSIONS;
-        this.deletePermission = MessagingPermission.NO_PERMISSIONS;
-        this.writePermission = MessagingPermission.NO_PERMISSIONS;
-        this.admin = false;
+        folderPermission = MessagingPermission.NO_PERMISSIONS;
+        readPermission = MessagingPermission.NO_PERMISSIONS;
+        deletePermission = MessagingPermission.NO_PERMISSIONS;
+        writePermission = MessagingPermission.NO_PERMISSIONS;
+        admin = false;
     }
 
     public void setReadPermission(final int permission) {
-        this.readPermission = permission;
+        readPermission = permission;
     }
 
     public void setSystem(final int system) {
@@ -233,7 +233,7 @@ public class DefaultMessagingPermission implements MessagingPermission {
     }
 
     public void setWritePermission(final int permission) {
-        this.writePermission = permission;
+        writePermission = permission;
     }
 
     @Override

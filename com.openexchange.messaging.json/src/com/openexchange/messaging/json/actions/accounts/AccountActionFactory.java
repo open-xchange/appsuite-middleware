@@ -68,7 +68,7 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
     
     private Map<String, AJAXActionService> actions = null;
     
-    public AccountActionFactory(MessagingServiceRegistry registry) {
+    public AccountActionFactory(final MessagingServiceRegistry registry) {
         actions = new HashMap<String, AJAXActionService>();
     
         actions.put("all", new AllAction(registry));
@@ -79,7 +79,7 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
         
     }
     
-    public AJAXActionService createActionService(String action) throws AjaxException {
+    public AJAXActionService createActionService(final String action) throws AjaxException {
         return actions.get(action);
     }
 }

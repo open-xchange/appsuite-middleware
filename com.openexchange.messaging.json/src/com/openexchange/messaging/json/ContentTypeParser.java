@@ -76,11 +76,11 @@ public class ContentTypeParser implements MessagingHeaderParser {
         return 1;
     }
 
-    public boolean handles(String key, Object value) {
+    public boolean handles(final String key, final Object value) {
         return MimeContentType.getContentTypeName().equalsIgnoreCase(key);
     }
 
-    public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) throws JSONException, MessagingException {
+    public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, MessagingException {
         if (JSONObject.class.isInstance(value)) {
             parseObject(headers, key, (JSONObject) value);
         } else if (String.class.isInstance(value)) {
@@ -88,18 +88,18 @@ public class ContentTypeParser implements MessagingHeaderParser {
         }
     }
 
-    private void parseString(Map<String, Collection<MessagingHeader>> headers, String key, String value) throws MessagingException {
-        MimeContentType contentType = new MimeContentType(value);
+    private void parseString(final Map<String, Collection<MessagingHeader>> headers, final String key, final String value) throws MessagingException {
+        final MimeContentType contentType = new MimeContentType(value);
         headers.put(MimeContentType.getContentTypeName(), Arrays.asList((MessagingHeader) contentType));
     }
 
-    private void parseObject(Map<String, Collection<MessagingHeader>> headers, String key, JSONObject value) throws MessagingException, JSONException {
-        MimeContentType contentType = new MimeContentType();
-        JSONObject jsonCType = value;
+    private void parseObject(final Map<String, Collection<MessagingHeader>> headers, final String key, final JSONObject value) throws MessagingException, JSONException {
+        final MimeContentType contentType = new MimeContentType();
+        final JSONObject jsonCType = value;
         contentType.setBaseType(jsonCType.getString("type"));
 
         if (jsonCType.has("params")) {
-            JSONObject params = jsonCType.getJSONObject("params");
+            final JSONObject params = jsonCType.getJSONObject("params");
             if (params.has("charset")) {
                 contentType.setCharsetParameter(params.getString("charset"));
                 contentType.setNameParameter(params.getString("name"));

@@ -71,14 +71,14 @@ public class MessagingServiceWriter {
     private static final String DISPLAY_NAME = "displayName";
     private static final String ID = "id";
 
-    private Translator translator;
+    private final Translator translator;
     
-    public MessagingServiceWriter(Translator translator) {
+    public MessagingServiceWriter(final Translator translator) {
         this.translator = translator;
     }
     
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
+    public JSONObject write(final MessagingService messagingService) throws JSONException {
+        final JSONObject object = new JSONObject();
         object.put(ID, messagingService.getId());
         object.put(DISPLAY_NAME, messagingService.getDisplayName());
         object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
@@ -88,12 +88,12 @@ public class MessagingServiceWriter {
         return object;
     }
 
-    private JSONArray writeCapabilities(List<MessagingAction> capabilities) {
-        JSONArray array = new JSONArray();
+    private JSONArray writeCapabilities(final List<MessagingAction> capabilities) {
+        final JSONArray array = new JSONArray();
         if(capabilities == null) {
             return array;
         }
-        for (MessagingAction action : capabilities) {
+        for (final MessagingAction action : capabilities) {
             array.put(action.getName());
         }
         return array;

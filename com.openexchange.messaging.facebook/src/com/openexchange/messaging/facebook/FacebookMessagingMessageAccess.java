@@ -131,7 +131,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
      * @param retrySafetyCheck <code>true</code> to retry requesting failed user data; otherwise <code>false</code>
      * @return This Facebook message access with new behavior applied
      */
-    public FacebookMessagingMessageAccess setRetrySafetyCheck(boolean retrySafetyCheck) {
+    public FacebookMessagingMessageAccess setRetrySafetyCheck(final boolean retrySafetyCheck) {
         this.retrySafetyCheck = retrySafetyCheck;
         return this;
     }
@@ -818,9 +818,9 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                     
                     {
                         System.out.println("-- Affected Messages:");
-                        List<FacebookMessagingMessage> list = m.get(missingUserId);
-                        for (FacebookMessagingMessage fbMessagingMessage : list) {
-                            FQLQuery fqlQuery = FacebookMessagingUtility.composeFQLStreamQueryFor(SET_FULL, fbMessagingMessage.getId());
+                        final List<FacebookMessagingMessage> list = m.get(missingUserId);
+                        for (final FacebookMessagingMessage fbMessagingMessage : list) {
+                            final FQLQuery fqlQuery = FacebookMessagingUtility.composeFQLStreamQueryFor(SET_FULL, fbMessagingMessage.getId());
                             final List<Object> results = FacebookMessagingUtility.fireFQLQuery(fqlQuery.getCharSequence(), facebookRestClient);
                             System.out.println(Utility.prettyPrintXML((Element) results.get(0)));
                         }

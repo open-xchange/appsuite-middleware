@@ -63,10 +63,10 @@ import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
-import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.generic.Utility;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
@@ -78,25 +78,25 @@ import com.sun.syndication.feed.synd.SyndFeed;
 public class SyndMessage implements MessagingMessage {
 
     private static final String CONTENT_TYPE = "Content-Type";
-    private SyndEntry entry;
+    private final SyndEntry entry;
 
-    private Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+    private final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
     private MessagingContent content;
-    private String folder;
-    private SyndFeed feed;
+    private final String folder;
+    private final SyndFeed feed;
      
-    public SyndMessage(SyndFeed feed, SyndEntry syndEntry, String folder) throws MessagingException {
-        this.entry = syndEntry;
+    public SyndMessage(final SyndFeed feed, final SyndEntry syndEntry, final String folder) throws MessagingException {
+        entry = syndEntry;
         this.folder = folder;
         this.feed = feed;
         
         addStringHeader(KnownHeader.SUBJECT, syndEntry.getTitle());
         //addStringHeader(KnownHeader.FROM, syndEntry.getAuthor());
-        List<SyndContent> contents = syndEntry.getContents();
+        final List<SyndContent> contents = syndEntry.getContents();
         // For now we'll only use the first content element
         
         if(contents.size() > 0) {
-            SyndContent content = contents.get(0);
+            final SyndContent content = contents.get(0);
             setContent(content);
         } else if (entry.getDescription() != null){
             setContent(entry.getDescription());
@@ -105,7 +105,7 @@ public class SyndMessage implements MessagingMessage {
         }
     }
 
-    private void setContent(SyndContent content) throws MessagingException {
+    private void setContent(final SyndContent content) throws MessagingException {
         String type = content.getType();
         if(type == null) {
             type = "text/plain";
@@ -117,44 +117,44 @@ public class SyndMessage implements MessagingMessage {
         }
         
         if( isHTML(type) ) {
-            String textVersion = Utility.textFormat(content.getValue());
+            final String textVersion = Utility.textFormat(content.getValue());
             
-            MimeMultipartContent multipart = new MimeMultipartContent();
-            MimeMessagingBodyPart textPart = new MimeMessagingBodyPart();
+            final MimeMultipartContent multipart = new MimeMultipartContent();
+            final MimeMessagingBodyPart textPart = new MimeMessagingBodyPart();
             textPart.setContent(new StringContent(textVersion), "text/plain");
             
             multipart.addBodyPart(textPart);
             
-            MimeMessagingBodyPart htmlPart = new MimeMessagingBodyPart();
+            final MimeMessagingBodyPart htmlPart = new MimeMessagingBodyPart();
             htmlPart.setContent(new StringContent(content.getValue()), type);
             
             multipart.addBodyPart(htmlPart);
             
-            MimeContentType contentType = new MimeContentType("multipart/alternative");
+            final MimeContentType contentType = new MimeContentType("multipart/alternative");
             addHeader(KnownHeader.CONTENT_TYPE, contentType);
             
             this.content = multipart;
         } else {
-            MimeContentType contentType = new MimeContentType(type);
+            final MimeContentType contentType = new MimeContentType(type);
             addHeader(KnownHeader.CONTENT_TYPE, contentType);
             this.content = new StringContent(content.getValue());
         }
         
     }
 
-    private boolean isHTML(String type) {
+    private boolean isHTML(final String type) {
         return type.endsWith("html");
     }
 
-    private boolean knowsType(String type) {
+    private boolean knowsType(final String type) {
         return type.contains("plain") || type.contains("html");
     }
 
-    private void addStringHeader(KnownHeader header, String value) {
+    private void addStringHeader(final KnownHeader header, final String value) {
         headers.put(header.toString(), Arrays.asList((MessagingHeader)new StringMessageHeader(header.toString(), value)));
     }
 
-    private void addHeader(KnownHeader header, MessagingHeader value) {
+    private void addHeader(final KnownHeader header, final MessagingHeader value) {
         headers.put(header.toString(), Arrays.asList(value));
     }
     
@@ -183,12 +183,12 @@ public class SyndMessage implements MessagingMessage {
     }
 
     public Collection<String> getUserFlags() throws MessagingException {
-        List categories = entry.getCategories();
+        final List categories = entry.getCategories();
         if(categories == null) {
             return null;
         }
-        List<String> strings = new LinkedList<String>();
-        for(Object cat : categories) {
+        final List<String> strings = new LinkedList<String>();
+        for(final Object cat : categories) {
             strings.add(cat.toString());
         }
         return strings;
@@ -210,14 +210,14 @@ public class SyndMessage implements MessagingMessage {
         return null;
     }
 
-    public MessagingHeader getFirstHeader(String name) throws MessagingException {
+    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
         if(headers.containsKey(name)) {
             return headers.get(name).iterator().next();
         }
         return null;
     }
 
-    public Collection<MessagingHeader> getHeader(String name) throws MessagingException {
+    public Collection<MessagingHeader> getHeader(final String name) throws MessagingException {
         if(headers.containsKey(name)) {
             return headers.get(name);
         }
@@ -236,20 +236,20 @@ public class SyndMessage implements MessagingMessage {
         return 0;
     }
 
-    public void writeTo(OutputStream os) throws IOException, MessagingException {
+    public void writeTo(final OutputStream os) throws IOException, MessagingException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create();
     }
     
     public String getPicture() {
-        SyndFeed source = (entry.getSource() != null) ? entry.getSource() : feed;
+        final SyndFeed source = (entry.getSource() != null) ? entry.getSource() : feed;
         if(null != source.getImage()) {
             return source.getImage().getUrl();
         }
         return null;
     }
     
-    protected Object tryThese(Object...objects) {
-        for (Object object : objects) {
+    protected Object tryThese(final Object...objects) {
+        for (final Object object : objects) {
             if(object != null) {
                 return object;
             }

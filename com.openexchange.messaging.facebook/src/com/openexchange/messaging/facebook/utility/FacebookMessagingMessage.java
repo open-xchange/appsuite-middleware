@@ -121,7 +121,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
      * 
      * @param toString The toString() text
      */
-    public void setToString(String toString) {
+    public void setToString(final String toString) {
         this.toString = toString;
     }
 
@@ -162,7 +162,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
      * 
      * @param group <code>true</code> if entity denotes a group; otherwise <code>false</code>
      */
-    public void setGroup(boolean group) {
+    public void setGroup(final boolean group) {
         this.group = group;
     }
 

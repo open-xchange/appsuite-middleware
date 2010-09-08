@@ -53,7 +53,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,19 +65,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.messaging.ByteArrayContent;
-import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
-import com.openexchange.messaging.MessagingPartArrayContent;
-import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
-import com.openexchange.messaging.MessagingHeader.KnownHeader;
-import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
@@ -94,8 +88,8 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class MessagingMessageParser {
 
-    private Collection<MessagingHeaderParser> headerParsers = new ConcurrentLinkedQueue<MessagingHeaderParser>();
-    private Collection<MessagingContentParser> contentParsers = new ConcurrentLinkedQueue<MessagingContentParser>();
+    private final Collection<MessagingHeaderParser> headerParsers = new ConcurrentLinkedQueue<MessagingHeaderParser>();
+    private final Collection<MessagingContentParser> contentParsers = new ConcurrentLinkedQueue<MessagingContentParser>();
     
     public MessagingMessageParser() {
         headerParsers.add(new AddressHeaderParser());
@@ -111,9 +105,9 @@ public class MessagingMessageParser {
     /**
      * Parses the JSON representation of a messaging message. References to binaries are resolved using the attached registry.
      */
-    public MessagingMessage parse(JSONObject messageJSON, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
+    public MessagingMessage parse(final JSONObject messageJSON, final MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
         
-        MimeMessagingMessage message = new MimeMessagingMessage();
+        final MimeMessagingMessage message = new MimeMessagingMessage();
         
         if(messageJSON.has("colorLabel")) {
             message.setColorLabel(messageJSON.getInt("colorLabel"));
@@ -124,8 +118,8 @@ public class MessagingMessageParser {
         }
         
         if(messageJSON.has("userFlags")) {
-            JSONArray array = messageJSON.getJSONArray("userFlags");
-            List<String> userFlags = new ArrayList<String>(array.length());
+            final JSONArray array = messageJSON.getJSONArray("userFlags");
+            final List<String> userFlags = new ArrayList<String>(array.length());
             for(int i = 0, size = array.length(); i < size; i++) {
                 userFlags.add(array.getString(i));
             }
@@ -152,7 +146,7 @@ public class MessagingMessageParser {
         return message;
     }
     
-    protected void setValues(MimeMessagingBodyPart message, MessagingInputStreamRegistry registry, JSONObject messageJSON) throws JSONException, MessagingException, IOException {
+    protected void setValues(final MimeMessagingBodyPart message, final MessagingInputStreamRegistry registry, final JSONObject messageJSON) throws JSONException, MessagingException, IOException {
         
         if(messageJSON.has("id")) {
             message.setSectionId(messageJSON.getString("id"));
@@ -167,7 +161,7 @@ public class MessagingMessageParser {
             headers = new JSONObject();
         }
         
-        for (MessagingField field : MessagingField.values()) {
+        for (final MessagingField field : MessagingField.values()) {
             if(field.getEquivalentHeader() != null && messageJSON.has(field.toString())) {
                 headers.put(field.getEquivalentHeader().toString(), messageJSON.get(field.toString()));
             }
@@ -187,11 +181,11 @@ public class MessagingMessageParser {
      * custom manner
      * @param parser
      */
-    public void addHeaderParser(MessagingHeaderParser parser) {
+    public void addHeaderParser(final MessagingHeaderParser parser) {
         headerParsers.add(parser);
     }
     
-    public void removeHeaderParser(MessagingHeaderParser parser) {
+    public void removeHeaderParser(final MessagingHeaderParser parser) {
         headerParsers.remove(parser);
     }
 
@@ -201,22 +195,22 @@ public class MessagingMessageParser {
      * custom manner
      * @param parser
      */
-    public void addContentParser(MessagingContentParser parser) {
+    public void addContentParser(final MessagingContentParser parser) {
         contentParsers.add(parser);
     }
     
-    public void removeContentParser(MessagingContentParser parser) {
+    public void removeContentParser(final MessagingContentParser parser) {
         contentParsers.remove(parser);
     }
     
-    private void setHeaders(JSONObject object, MimeMessagingBodyPart message) throws JSONException, MessagingException {
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
-        for (String key : object.keySet()) {
-            Object value = object.get(key);
+    private void setHeaders(final JSONObject object, final MimeMessagingBodyPart message) throws JSONException, MessagingException {
+        final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        for (final String key : object.keySet()) {
+            final Object value = object.get(key);
             
             MessagingHeaderParser candidate = null;
             int priority = 0;
-            for(MessagingHeaderParser parser : headerParsers) {
+            for(final MessagingHeaderParser parser : headerParsers) {
                 if(parser.handles(key, value)) {
                     if(candidate == null || priority < parser.getPriority()) {
                         candidate = parser;
@@ -227,7 +221,7 @@ public class MessagingMessageParser {
             if(candidate != null) {
                 candidate.parseAndAdd(headers, key, value);
             } else {
-                StringMessageHeader header = new StringMessageHeader(key, value.toString());
+                final StringMessageHeader header = new StringMessageHeader(key, value.toString());
                 headers.put(key, Arrays.asList((MessagingHeader)header));
             }
             
@@ -235,11 +229,11 @@ public class MessagingMessageParser {
         message.setAllHeaders(headers);
     }
     
-    private void setContent(Object content, MessagingInputStreamRegistry registry, MimeMessagingBodyPart message) throws MessagingException, JSONException, IOException {
+    private void setContent(final Object content, final MessagingInputStreamRegistry registry, final MimeMessagingBodyPart message) throws MessagingException, JSONException, IOException {
         MessagingContentParser candidate = null;
         int priority = 0;
         
-        for (MessagingContentParser parser : contentParsers) {
+        for (final MessagingContentParser parser : contentParsers) {
             if(parser.handles(message, content)) {
                 if(candidate == null || priority < parser.getPriority()) {
                     candidate = parser;
@@ -248,7 +242,7 @@ public class MessagingMessageParser {
             }
         }
         if(candidate != null) {
-            MessagingContent parsedContent = candidate.parse(message, content, registry);
+            final MessagingContent parsedContent = candidate.parse(message, content, registry);
             message.setContent(parsedContent, message.getContentType().getValue());
         }
     }
@@ -261,15 +255,15 @@ public class MessagingMessageParser {
             return 0;
         }
 
-        public boolean handles(String key, Object value) {
+        public boolean handles(final String key, final Object value) {
             return JSONArray.class.isInstance(value);
         }
 
-        public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) throws JSONException {
-            JSONArray values = (JSONArray) value;
-            LinkedList<MessagingHeader> valueList = new LinkedList<MessagingHeader>();
+        public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException {
+            final JSONArray values = (JSONArray) value;
+            final LinkedList<MessagingHeader> valueList = new LinkedList<MessagingHeader>();
             for(int i = 0, size = values.length(); i < size; i++) {
-                StringMessageHeader header = new StringMessageHeader(key, values.getString(i));
+                final StringMessageHeader header = new StringMessageHeader(key, values.getString(i));
                 valueList.add(header);
             }
             headers.put(key, valueList);
@@ -283,14 +277,14 @@ public class MessagingMessageParser {
             return 0;
         }
 
-        public boolean handles(MessagingBodyPart partlyParsedMessage, Object content) throws MessagingException {
+        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws MessagingException {
             if(null != partlyParsedMessage.getContentType()) {
                 return partlyParsedMessage.getContentType().getPrimaryType().equals("text");
             }
             return false;
         }
 
-        public MessagingContent parse(MessagingBodyPart partlyParsedMessage, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException {
+        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, MessagingException {
             return new StringContent((String) content);
         }
     }
@@ -301,21 +295,21 @@ public class MessagingMessageParser {
             return 0;
         }
 
-        public boolean handles(MessagingBodyPart partlyParsedMessage, Object content) throws MessagingException {
+        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws MessagingException {
             if(null != partlyParsedMessage.getContentType()) {
-                String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
+                final String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
                 return !primaryType.equals("text") && ! primaryType.equals("multipart");
             }
             return false;
         }
 
-        public MessagingContent parse(MessagingBodyPart partlyParsedMessage, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
+        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
             if(String.class.isInstance(content)) {
-                byte[] decoded = Base64.decode((String) content);
+                final byte[] decoded = Base64.decode((String) content);
                 return new ByteArrayContent(decoded);
             } else if (JSONObject.class.isInstance(content)) {
-                JSONObject reference = (JSONObject) content;
-                Object id = reference.get("ref");
+                final JSONObject reference = (JSONObject) content;
+                final Object id = reference.get("ref");
                 
                 InputStream in = null;
                 ByteArrayOutputStream out = null;
@@ -352,21 +346,21 @@ public class MessagingMessageParser {
             return 0;
         }
 
-        public boolean handles(MessagingBodyPart partlyParsedMessage, Object content) throws MessagingException {
+        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws MessagingException {
             if(null != partlyParsedMessage.getContentType()) {
-                String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
+                final String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
                 return primaryType.equals("multipart");
             }
             return false;
         }
 
-        public MessagingContent parse(MessagingBodyPart partlyParsedMessage, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
+        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
 
-            MimeMultipartContent multipartContent = new MimeMultipartContent();
-            JSONArray multipartJSON = (JSONArray) content;
+            final MimeMultipartContent multipartContent = new MimeMultipartContent();
+            final JSONArray multipartJSON = (JSONArray) content;
             for(int i = 0, size = multipartJSON.length(); i < size; i++) {
-                JSONObject partJSON = multipartJSON.getJSONObject(i);
-                MimeMessagingBodyPart part = new MimeMessagingBodyPart();
+                final JSONObject partJSON = multipartJSON.getJSONObject(i);
+                final MimeMessagingBodyPart part = new MimeMessagingBodyPart();
                 setValues(part, registry, partJSON);
                 
                 multipartContent.addBodyPart(part);

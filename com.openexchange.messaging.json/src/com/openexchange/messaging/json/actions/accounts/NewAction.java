@@ -67,14 +67,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class NewAction extends AbstractMessagingAccountAction {
 
-    public NewAction(MessagingServiceRegistry registry) {
+    public NewAction(final MessagingServiceRegistry registry) {
         super(registry);
     }
 
     @Override
-    protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
-        MessagingAccount account = parser.parse((JSONObject) request.getData());
-        int id = account.getMessagingService().getAccountManager().addAccount(account, session);
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+        final MessagingAccount account = parser.parse((JSONObject) request.getData());
+        final int id = account.getMessagingService().getAccountManager().addAccount(account, session);
         return new AJAXRequestResult(id);
     }
 

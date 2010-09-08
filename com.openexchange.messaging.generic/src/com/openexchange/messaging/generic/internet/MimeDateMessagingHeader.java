@@ -119,7 +119,7 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
     public MimeDateMessagingHeader(final String name, final Date date) {
         super();
         this.name = name;
-        this.time = date.getTime();
+        time = date.getTime();
         final MailDateFormat mdf = Utility.getDefaultMailDateFormat();
         synchronized (mdf) {
             value = mdf.format(date);

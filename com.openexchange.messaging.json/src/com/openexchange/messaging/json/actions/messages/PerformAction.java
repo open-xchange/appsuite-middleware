@@ -80,19 +80,19 @@ import com.openexchange.tools.session.ServerSession;
 public class PerformAction extends AbstractMessagingAction {
     private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
     
-    public PerformAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+    public PerformAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
     
-    public PerformAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+    public PerformAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super(registry, writer, parser, cache);
     }
 
 
 
     @Override
-    protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException, IOException {
-        MessagingMessage input = req.getMessage();
+    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException, IOException {
+        final MessagingMessage input = req.getMessage();
         MessagingMessage output = null;
         
         if(input == null) {

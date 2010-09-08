@@ -75,7 +75,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
      */
     private final String serviceId;
 
-    private MessagingService service;
+    private final MessagingService service;
 
     /**
      * Initializes a new {@link DefaultMessagingAccountManager}.
@@ -84,7 +84,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
      */
     public DefaultMessagingAccountManager(final MessagingService service) {
         super();
-        this.serviceId = service.getId();
+        serviceId = service.getId();
         this.service = service;
     }
 
@@ -108,11 +108,11 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         CACHE.updateAccount(serviceId, account, session);
     }
 
-    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws MessagingException {
+    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws MessagingException {
         return CACHE.checkSecretCanDecryptStrings(service, session, secret);
     }
 
-    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws MessagingException {
+    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws MessagingException {
         CACHE.migrateToNewSecret(service, oldSecret, newSecret, session);
     }
 

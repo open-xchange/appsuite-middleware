@@ -76,7 +76,7 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
      */
     public MessagingAccountReloader(final OXObjectFactory<MessagingAccount> factory, final String regionName) throws AbstractOXException {
         super(factory, regionName);
-        this.delegate = refresh();
+        delegate = refresh();
     }
 
     /**
@@ -84,7 +84,7 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
      */
     private void updateDelegate() throws RuntimeException {
         try {
-            this.delegate = refresh();
+            delegate = refresh();
         } catch (final AbstractOXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

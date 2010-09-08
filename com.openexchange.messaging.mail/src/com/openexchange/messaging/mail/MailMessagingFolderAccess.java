@@ -63,10 +63,10 @@ import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.DefaultMessagingPermission;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.Quota;
-import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
 import com.openexchange.messaging.Quota.Type;
 import com.openexchange.session.Session;
 

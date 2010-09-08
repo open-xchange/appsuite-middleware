@@ -59,15 +59,15 @@ import com.openexchange.messaging.MessagingExceptionCodes;
  */
 public class MessagingFolderAddress {
 
-    public static boolean matches(String folderId) {
+    public static boolean matches(final String folderId) {
         return folderId.contains("://");
     }
 
-    public static MessagingFolderAddress parse(String folderId) throws MessagingException {
-        MessagingFolderAddress address = new MessagingFolderAddress();
+    public static MessagingFolderAddress parse(final String folderId) throws MessagingException {
+        final MessagingFolderAddress address = new MessagingFolderAddress();
         int state = 0;
-        StringBuilder builder = new StringBuilder();
-        for (char c : folderId.toCharArray()) {
+        final StringBuilder builder = new StringBuilder();
+        for (final char c : folderId.toCharArray()) {
             switch (c) {
             case ':':
                 switch (state) {
@@ -132,7 +132,7 @@ public class MessagingFolderAddress {
         return messagingService;
     }
 
-    public void setMessagingService(String messagingService) {
+    public void setMessagingService(final String messagingService) {
         this.messagingService = messagingService;
     }
 
@@ -140,23 +140,23 @@ public class MessagingFolderAddress {
         return account;
     }
 
-    public void setAccount(String account) throws MessagingException {
+    public void setAccount(final String account) throws MessagingException {
         try {
             this.account = Integer.parseInt(account);
-        } catch (NumberFormatException x) {
+        } catch (final NumberFormatException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("account", account);
         }
     }
 
-    public void setAccount(int accountID) {
-        this.account = accountID;
+    public void setAccount(final int accountID) {
+        account = accountID;
     }
 
     public String getFolder() {
         return folder;
     }
 
-    public void setFolder(String folder) {
+    public void setFolder(final String folder) {
         this.folder = folder;
     }
 
@@ -171,7 +171,7 @@ public class MessagingFolderAddress {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -181,7 +181,7 @@ public class MessagingFolderAddress {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        MessagingFolderAddress other = (MessagingFolderAddress) obj;
+        final MessagingFolderAddress other = (MessagingFolderAddress) obj;
         if (account != other.account) {
             return false;
         }

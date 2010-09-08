@@ -214,8 +214,8 @@ public final class FacebookSession {
          * Read-in configuration
          */
         final Map<String, Object> accountConfiguration = messagingAccount.getConfiguration();
-        this.login = accountConfiguration.get(FacebookConstants.FACEBOOK_LOGIN).toString();
-        this.password = accountConfiguration.get(FacebookConstants.FACEBOOK_PASSWORD).toString();
+        login = accountConfiguration.get(FacebookConstants.FACEBOOK_LOGIN).toString();
+        password = accountConfiguration.get(FacebookConstants.FACEBOOK_PASSWORD).toString();
         facebookUserId = -1L;
         // lastAccessed = System.currentTimeMillis();
     }

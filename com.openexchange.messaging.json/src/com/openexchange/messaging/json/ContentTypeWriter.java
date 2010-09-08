@@ -72,27 +72,27 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
         return 0;
     }
 
-    public boolean handles(Entry<String, Collection<MessagingHeader>> entry) {
+    public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
         return entry.getKey().equalsIgnoreCase("content-type");
     }
 
-    public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+    public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
         return "Content-Type";
     }
 
-    public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        ContentType cType = toCType(entry.getValue().iterator().next());
-        JSONObject jsonCType = new JSONObject();
+    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+        final ContentType cType = toCType(entry.getValue().iterator().next());
+        final JSONObject jsonCType = new JSONObject();
 
         jsonCType.put("type", cType.getBaseType());
         
-        JSONObject params = new JSONObject();
-        Iterator<String> names = cType.getParameterNames();
+        final JSONObject params = new JSONObject();
+        final Iterator<String> names = cType.getParameterNames();
         boolean write = false;
         while(names.hasNext()) {
             write = true;
-            String name = names.next();
-            String value = cType.getParameter(name);
+            final String name = names.next();
+            final String value = cType.getParameter(name);
             params.put(name, value);
         }
         
@@ -100,7 +100,7 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
         return jsonCType;
     }
 
-    private ContentType toCType(MessagingHeader header) throws MessagingException {
+    private ContentType toCType(final MessagingHeader header) throws MessagingException {
         if(ContentType.class.isInstance(header)) {
             return (ContentType) header;
         } else {

@@ -62,23 +62,23 @@ import com.openexchange.messaging.json.MessagingMessageParser;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContentParserTracker extends ServiceTracker {
-    private MessagingMessageParser parser;
+    private final MessagingMessageParser parser;
 
-    public ContentParserTracker(BundleContext context, MessagingMessageParser parser) {
+    public ContentParserTracker(final BundleContext context, final MessagingMessageParser parser) {
         super(context, MessagingContentParser.class.getName(), null);
         this.parser = parser;
     }
     
     @Override
-    public Object addingService(ServiceReference reference) {
-        MessagingContentParser parser = (MessagingContentParser) super.addingService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final MessagingContentParser parser = (MessagingContentParser) super.addingService(reference);
         this.parser.addContentParser(parser);
         return parser;
     }
     
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        this.parser.removeContentParser((MessagingContentParser) service);
+    public void removedService(final ServiceReference reference, final Object service) {
+        parser.removeContentParser((MessagingContentParser) service);
         super.removedService(reference, service);
     }
 }

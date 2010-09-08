@@ -67,14 +67,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AllAction extends AbstractMessagingServiceAction {
 
-    public AllAction(MessagingServiceRegistry registry) {
+    public AllAction(final MessagingServiceRegistry registry) {
         super(registry);
     }
 
     @Override
-    public AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
-        JSONArray result = new JSONArray();
-        for(MessagingService service : registry.getAllServices()) {
+    public AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+        final JSONArray result = new JSONArray();
+        for(final MessagingService service : registry.getAllServices()) {
             result.put(getWriter(session).write(service));
         }
         return new AJAXRequestResult(result);

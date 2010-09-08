@@ -85,26 +85,26 @@ import com.openexchange.tools.session.ServerSession;
 public class ListAction extends AbstractMessagingAction {
     private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
     
-    public ListAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+    public ListAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
     
-    public ListAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+    public ListAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super(registry, writer, parser, cache);
     }
 
 
 
     @Override
-    protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException {
-        JSONArray list = new JSONArray();
+    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException {
+        final JSONArray list = new JSONArray();
         
-        MessagingField[] fields = req.getColumns();
+        final MessagingField[] fields = req.getColumns();
 
        
         MessagingFolderAddress folder = null;
-        List<String> ids = new ArrayList<String>();
-        for (MessageAddress address : req.getMessageAddresses()) {
+        final List<String> ids = new ArrayList<String>();
+        for (final MessageAddress address : req.getMessageAddresses()) {
             if(folder == null) {
                 folder = address.getLongFolder();
                 ids.add(address.getId());
@@ -119,10 +119,10 @@ public class ListAction extends AbstractMessagingAction {
             return new AJAXRequestResult(new JSONArray());
         }
         
-        MessagingMessageAccess messageAccess = req.getMessageAccess(folder.getMessagingService(), folder.getAccount());
-        List<MessagingMessage> messages = messageAccess.getMessages(folder.getFolder(), ids.toArray(new String[ids.size()]), fields);
+        final MessagingMessageAccess messageAccess = req.getMessageAccess(folder.getMessagingService(), folder.getAccount());
+        final List<MessagingMessage> messages = messageAccess.getMessages(folder.getFolder(), ids.toArray(new String[ids.size()]), fields);
         
-        for (MessagingMessage messagingMessage : messages) {
+        for (final MessagingMessage messagingMessage : messages) {
             list.put(writer.writeFields(messagingMessage, fields, folder.getAccountAddress(), session, DISPLAY_MODE));
         }
         

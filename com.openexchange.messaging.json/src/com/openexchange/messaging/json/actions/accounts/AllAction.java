@@ -75,26 +75,26 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AllAction extends AbstractMessagingAccountAction {
 
-    public AllAction(MessagingServiceRegistry registry) {
+    public AllAction(final MessagingServiceRegistry registry) {
         super(registry);
     }
 
     @Override
-    protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
         
-        String messagingServiceId = request.getParameter("messagingService");
+        final String messagingServiceId = request.getParameter("messagingService");
         
-        List<MessagingService> services = new ArrayList<MessagingService>();
+        final List<MessagingService> services = new ArrayList<MessagingService>();
         if(messagingServiceId != null) {
             services.add(registry.getMessagingService(messagingServiceId));
         } else {
             services.addAll(registry.getAllServices());
         }
         
-        JSONArray result = new JSONArray();
+        final JSONArray result = new JSONArray();
         
-        for (MessagingService messagingService : services) {
-            for (MessagingAccount account : messagingService.getAccountManager().getAccounts(session)) {
+        for (final MessagingService messagingService : services) {
+            for (final MessagingAccount account : messagingService.getAccountManager().getAccounts(session)) {
                 result.put(writer.write(account));
             }
         }

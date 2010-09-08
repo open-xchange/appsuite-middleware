@@ -113,7 +113,7 @@ public final class TwitterMessagingService implements MessagingService {
         final DynamicFormDescription tmpDescription = new DynamicFormDescription();
         tmpDescription.add(FormElement.input(TwitterConstants.TWITTER_LOGIN, FORM_LABEL_LOGIN, true, ""));
         tmpDescription.add(FormElement.password(TwitterConstants.TWITTER_PASSWORD, FORM_LABEL_PASSWORD, true, ""));
-        this.formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
+        formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
         secretProperties =
             Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
                 TwitterConstants.TWITTER_PASSWORD,

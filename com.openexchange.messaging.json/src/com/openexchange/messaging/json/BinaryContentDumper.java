@@ -66,12 +66,12 @@ import com.openexchange.messaging.MessagingException;
  */
 public class BinaryContentDumper implements MessagingContentDumper {
 
-    public void dump(MessagingContent content, OutputStream outputStream) throws MessagingException, IOException {
-        BinaryContent binContent = (BinaryContent) content;
-        InputStream inputStream = binContent.getData();
+    public void dump(final MessagingContent content, final OutputStream outputStream) throws MessagingException, IOException {
+        final BinaryContent binContent = (BinaryContent) content;
+        final InputStream inputStream = binContent.getData();
         
-        BufferedInputStream bin = new BufferedInputStream(inputStream);
-        BufferedOutputStream bout = new BufferedOutputStream(outputStream);
+        final BufferedInputStream bin = new BufferedInputStream(inputStream);
+        final BufferedOutputStream bout = new BufferedOutputStream(outputStream);
         try {
             int i = -1;
             while((i = bin.read()) > 0) { bout.write(i); }
@@ -86,7 +86,7 @@ public class BinaryContentDumper implements MessagingContentDumper {
         
     }
 
-    public boolean handles(MessagingContent content) {
+    public boolean handles(final MessagingContent content) {
         return BinaryContent.class.isInstance(content);
     }
 
