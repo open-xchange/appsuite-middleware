@@ -95,7 +95,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String NO_DELETE_PERMISSION_FOR_VERSION_HELP = "The user must be allowed to delete the object in order to delete a version of it.";
 
     public static final String ITERATE_FAILED_MSG = "Could not iterate result.";
-    public static final String ITERATE_FAILED_HELP = "The system couldn't iterate the result dataset. This can have numerous exciting causes.";
+    public static final String ITERATE_FAILED_HELP = "The system couldn't iterate the result dataset.";
 
     public static final String ALREADY_LOCKED_MSG = "This document is locked.";
     public static final String ALREADY_LOCKED_HELP = "The infoitem was locked by some other user. Only the user that locked the item (the one that modified the entry) can modify a locked infoitem.";
