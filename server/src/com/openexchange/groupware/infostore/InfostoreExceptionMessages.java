@@ -119,7 +119,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String DOCUMENT_NOT_EXISTS_HELP = "The document could not be loaded because it doesn't exist.";
 
     public static final String FILENAME_NOT_UNIQUE_MSG = "Files attached to InfoStore items must have unique names. File name: %s. The other document with this file name is %s.";
-    public static final String FILENAME_NOT_UNIQUE_HELP = "To remain consistent in WebDAV file versions in a given folder must not contain a file with the same filen name. The user must either choose a different file name, or switch the other file to a version with a different file name.";
+    public static final String FILENAME_NOT_UNIQUE_HELP = "To remain consistent in WebDAV file versions in a given folder must not contain a file with the same filen name. The user must either choose a different file name, or rename the other file.";
 
     public static final String NUMBER_OF_VERSIONS_FAILED_MSG = "Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s";
     public static final String NUMBER_OF_VERSIONS_FAILED_HELP = "The query to cound the versions in a document failed.";
