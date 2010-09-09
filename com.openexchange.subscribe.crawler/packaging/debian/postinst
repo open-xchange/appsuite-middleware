@@ -41,10 +41,10 @@ postFix() {
 
 case "$1" in
     configure)
-        for i in $(find /opt/open-xchange/etc/groupware/crawlers -name "*.yml"); do
-	    ox_update_permissions "$i" open-xchange:open-xchange 644
-	done
-	ox_update_permissions "/opt/open-xchange/etc/groupware/crawlers" open-xchange:open-xchange 755
+        find /opt/open-xchange/etc/groupware/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
+            ox_update_permissions "$i" open-xchange:open-xchange 644
+        done
+        ox_update_permissions "/opt/open-xchange/etc/groupware/crawlers" open-xchange:open-xchange 755
         test -n "$2" && {
                 # we are in update mode, run postFix to apply fixes
                 postFix "$2"
