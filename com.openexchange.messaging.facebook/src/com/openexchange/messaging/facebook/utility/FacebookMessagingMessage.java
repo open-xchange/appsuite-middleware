@@ -97,7 +97,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
     }
 
     /**
-     * Appends specified text.
+     * Appends specified text. Does the same as <code>getMessageText().append(textContent)</code>.
      * <p>
      * Text should already be HTML-escaped: '<' ==> &amp;lt;
      * 
