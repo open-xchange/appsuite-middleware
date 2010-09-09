@@ -227,21 +227,23 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
         List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, user.getId());
         for (Subscription subscription : allSubscriptions) {
-            Map<String, Object> configuration = subscription.getConfiguration();
-            Map<String, Object> update = new HashMap<String, Object>();
-            for (String passwordField : passwordFields) {
-                String password = (String) configuration.get(passwordField);
-                if (password != null) {
-                    try {
-                        String transcriptedPassword = CRYPTO.encrypt(CRYPTO.decrypt(password, oldSecret), newSecret);
-                        update.put(passwordField, transcriptedPassword);
-                    } catch (CryptoException e) {
-                        throw new SubscriptionException(e);
+            if (subscription.getSource().getId().equals(getSubscriptionSource())) {
+                Map<String, Object> configuration = subscription.getConfiguration();
+                Map<String, Object> update = new HashMap<String, Object>();
+                for (String passwordField : passwordFields) {
+                    String password = (String) configuration.get(passwordField);
+                    if (password != null) {
+                        try {
+                            String transcriptedPassword = CRYPTO.encrypt(CRYPTO.decrypt(password, oldSecret), newSecret);
+                            update.put(passwordField, transcriptedPassword);
+                        } catch (CryptoException e) {
+                            throw new SubscriptionException(e);
+                        }
                     }
                 }
+                subscription.setConfiguration(update);
+                STORAGE.updateSubscription(subscription);
             }
-            subscription.setConfiguration(update);
-            STORAGE.updateSubscription(subscription);
         }
     }
 }
