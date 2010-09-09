@@ -58,6 +58,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.service.Authentication;
+import com.openexchange.context.ContextExceptionCodes;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -123,6 +124,8 @@ public final class LoginPerformer {
             // Checks if something is deactivated.
             try {
                 if (!ctx.isEnabled()) {
+                    ContextException e = ContextExceptionCodes.CONTEXT_DISABLED.create();
+                    LOG.debug(e.getMessage(), e);
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
             } catch (final UndeclaredThrowableException e) {
