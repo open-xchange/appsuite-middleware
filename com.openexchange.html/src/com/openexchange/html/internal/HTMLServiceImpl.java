@@ -1,0 +1,616 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.html.internal;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.w3c.tidy.Tidy;
+import com.openexchange.html.HTMLService;
+import com.openexchange.html.internal.parser.HTMLParser;
+import com.openexchange.html.internal.parser.handler.HTML2TextHandler;
+import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
+import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+
+/**
+ * {@link HTMLServiceImpl}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class HTMLServiceImpl implements HTMLService {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HTMLServiceImpl.class);
+
+    private static final String CHARSET_US_ASCII = "US-ASCII";
+
+    private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
+
+    private static final String RPL_CT = "#CT#";
+
+    private static final String HTML_META_TEMPLATE = "\r\n    <meta content=\"" + RPL_CT + "\" http-equiv=\"Content-Type\" />";
+
+    private static final String RPL_CS = "#CS#";
+
+    private static final String CT_TEXT_HTML = "text/html; charset=" + RPL_CS;
+
+    private static final String TAG_E_HEAD = "</head>";
+
+    private static final String TAG_S_HEAD = "<head>";
+
+    /*-
+     * Member stuff
+     */
+
+    private final Properties tidyConfiguration;
+
+    private final Map<Character, String> htmlCharMap;
+    
+    private final Map<String, Character> htmlEntityMap;
+
+    /**
+     * Initializes a new {@link HTMLServiceImpl}.
+     */
+    public HTMLServiceImpl(final Properties properties, final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
+        super();
+        this.tidyConfiguration = properties;
+        this.htmlCharMap = htmlCharMap;
+        this.htmlEntityMap = htmlEntityMap;
+    }
+
+    public String formatURLs(final String content) {
+        try {
+            final Matcher m = PATTERN_URL.matcher(content);
+            final MatcherReplacer mr = new MatcherReplacer(m, content);
+            final StringBuilder sb = new StringBuilder(content.length());
+            final StringBuilder tmp = new StringBuilder(256);
+            while (m.find()) {
+                String url = m.group();
+                tmp.setLength(0);
+                final int mlen = url.length() - 1;
+                if ((mlen > 0) && (')' == url.charAt(mlen))) {
+                    /*
+                     * Keep starting parenthesis if present
+                     */
+                    if ('(' == url.charAt(0)) {
+                        url = url.substring(1, mlen);
+                        tmp.append('(');
+                    } else {
+                        url = url.substring(0, mlen);
+                    }
+                    mr.appendLiteralReplacement(
+                        sb,
+                        tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
+                            "\" target=\"_blank\">").append(url).append("</a>)").toString());
+                } else {
+                    mr.appendReplacement(
+                        sb,
+                        tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
+                            "$0\" target=\"_blank\">$0</a>").toString());
+                }
+            }
+            mr.appendTail(sb);
+            return sb.toString();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final StackOverflowError error) {
+            LOG.error(StackOverflowError.class.getName(), error);
+        }
+        return content;
+    }
+
+    public String filterWhitelist(final String htmlContent) {
+        final HTMLFilterHandler handler = new HTMLFilterHandler(this, htmlContent.length());
+        HTMLParser.parse(htmlContent, handler);
+        return handler.getHTML();
+    }
+
+    public String filterExternalImages(final String htmlContent, final boolean[] modified) {
+        final HTMLImageFilterHandler handler = new HTMLImageFilterHandler(this, htmlContent.length());
+        HTMLParser.parse(htmlContent, handler);
+        modified[0] |= handler.isImageURLFound();
+        return handler.getHTML();
+    }
+    
+    public String html2text(String htmlContent, boolean appendHref) {
+        final HTML2TextHandler handler = new HTML2TextHandler(this, htmlContent.length(), appendHref);
+        HTMLParser.parse(htmlContent, handler);
+        return handler.getText();
+    }
+
+    private static final String HTML_BR = "<br />";
+
+    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
+
+    public String htmlFormat(final String plainText, final boolean withQuote, final List<Range> ignoreRanges) {
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, ignoreRanges)).replaceAll(HTML_BR);
+    }
+
+    public String htmlFormat(final String plainText, final boolean withQuote) {
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, Collections.<Range> emptyList())).replaceAll(HTML_BR);
+    }
+
+    private String escape(final String s, final boolean withQuote, final List<Range> ignoreRanges) {
+        final int len = s.length();
+        final StringBuilder sb = new StringBuilder(len);
+        /*
+         * Escape
+         */
+        final Set<Integer> ignorePositions;
+        if (null == ignoreRanges || ignoreRanges.isEmpty()) {
+            ignorePositions = new HashSet<Integer>(0);
+        } else {
+            ignorePositions = new HashSet<Integer>(ignoreRanges.size() * 16);
+            for (final Range ignoreRange : ignoreRanges) {
+                final int end = ignoreRange.end;
+                for (int i = ignoreRange.start; i < end; i++) {
+                    ignorePositions.add(Integer.valueOf(i));
+                }
+            }
+        }
+        final char[] chars = s.toCharArray();
+        final Map<Character, String> htmlChar2EntityMap = htmlCharMap;
+        if (withQuote) {
+            for (int i = 0; i < chars.length; i++) {
+                final char c = chars[i];
+                if (ignorePositions.contains(Integer.valueOf(i))) {
+                    sb.append(c);
+                } else {
+                    final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
+                    if (entity == null) {
+                        sb.append(c);
+                    } else {
+                        sb.append('&').append(entity).append(';');
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < chars.length; i++) {
+                final char c = chars[i];
+                if (ignorePositions.contains(Integer.valueOf(i)) || ('"' == c)) {
+                    sb.append(c);
+                } else {
+                    final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
+                    if (entity == null) {
+                        sb.append(c);
+                    } else {
+                        sb.append('&').append(entity).append(';');
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
+     * <code>&quot;&amp;lt;&quot;</code>.
+     * <p>
+     * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
+     * <code>true</code>.
+     * 
+     * @param plainText The plain text
+     * @return properly escaped HTML content
+     * @see #htmlFormat(String, boolean)
+     */
+    public String htmlFormat(final String plainText) {
+        return htmlFormat(plainText, true);
+    }
+
+    private static final String REGEX_URL = "\\(?\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
+
+    private static final Pattern PATTERN_URL = Pattern.compile(REGEX_URL);
+
+    public Pattern getURLPattern() {
+        return PATTERN_URL;
+    }
+
+    /**
+     * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to corresponding ASCII character.
+     * 
+     * @param entity The HTML entity
+     * @return The corresponding ASCII character or <code>null</code>
+     */
+    public Character getHTMLEntity(final String entity) {
+        if (null == entity) {
+            return null;
+        }
+        String key = entity;
+        if (key.charAt(0) == '&') {
+            key = key.substring(1);
+        }
+        {
+            final int lastPos = key.length() - 1;
+            if (key.charAt(lastPos) == ';') {
+                key = key.substring(0, lastPos);
+            }
+        }
+        final Character tmp = htmlEntityMap.get(key);
+        if (tmp != null) {
+            return tmp;
+        }
+        return null;
+    }
+
+    private static final Pattern PAT_HTML_ENTITIES = Pattern.compile("&(?:#([0-9]+)|([a-zA-Z]+));");
+
+    /**
+     * Replaces all HTML entities occurring in specified HTML content.
+     * 
+     * @param content The content
+     * @return The content with HTML entities replaced
+     */
+    public String replaceHTMLEntities(final String content) {
+        final Matcher m = PAT_HTML_ENTITIES.matcher(content);
+        final MatcherReplacer mr = new MatcherReplacer(m, content);
+        final StringBuilder sb = new StringBuilder(content.length());
+        while (m.find()) {
+            final String numEntity = m.group(1);
+            if (null == numEntity) {
+                final Character entity = getHTMLEntity(m.group());
+                if (null != entity) {
+                    mr.appendLiteralReplacement(sb, entity.toString());
+                }
+            } else {
+                mr.appendLiteralReplacement(sb, String.valueOf((char) Integer.parseInt(numEntity)));
+            }
+        }
+        mr.appendTail(sb);
+        return sb.toString();
+    }
+
+    public String prettyPrint(final String htmlContent) {
+        try {
+            final Tidy tidy = createNewTidyInstance();
+            /*
+             * Pretty print document
+             */
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
+            tidy.parseDOM(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(CHARSET_US_ASCII)), out);
+            return new String(out.toByteArray(), CHARSET_US_ASCII);
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+            return htmlContent;
+        }
+    }
+
+    public String getConformHTML(final String htmlContent, final String charset) {
+        if (null == htmlContent) {
+            /*
+             * Nothing to do...
+             */
+            return htmlContent;
+        }
+        /*
+         * Validate with JTidy library
+         */
+        String html = validate(htmlContent);
+        /*
+         * Check for meta tag in validated html content which indicates documents content type. Add if missing.
+         */
+        final int headTagLen = TAG_S_HEAD.length();
+        final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
+        if (start >= headTagLen) {
+            final Matcher m = PAT_META_CT.matcher(html.substring(start, html.indexOf(TAG_E_HEAD)));
+            if (!m.find()) {
+                final StringBuilder sb = new StringBuilder(html);
+                final String cs;
+                if (null == charset) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Missing charset. Using fallback \"US-ASCII\" instead.");
+                    }
+                    cs = CHARSET_US_ASCII;
+                } else {
+                    cs = charset;
+                }
+                sb.insert(start, HTML_META_TEMPLATE.replaceFirst(RPL_CT, CT_TEXT_HTML.replaceFirst(RPL_CS, cs)));
+                html = sb.toString();
+            }
+        }
+        html = processDownlevelRevealedConditionalComments(html);
+        return removeXHTMLCData(html);
+    }
+
+    private static final Pattern PATTERN_XHTML_CDATA;
+
+    private static final Pattern PATTERN_UNQUOTE1;
+
+    private static final Pattern PATTERN_UNQUOTE2;
+
+    private static final Pattern PATTERN_XHTML_COMMENT;
+
+    static {
+        final String group1 = RegexUtility.group("<style[^>]*type=\"text/(?:css|javascript)\"[^>]*>\\s*", true);
+
+        final String ignore1 = RegexUtility.concat(RegexUtility.quote("/*<![CDATA[*/"), "\\s*");
+
+        final String commentStart = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("<!--"), RegexUtility.quote("&lt;!--")), false);
+
+        final String commentEnd =
+            RegexUtility.concat(RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false), "\\s*");
+
+        final String group2 = RegexUtility.group(RegexUtility.concat(commentStart, ".*?", commentEnd), true);
+
+        final String ignore2 = RegexUtility.concat(RegexUtility.quote("/*]]>*/"), "\\s*");
+
+        final String group3 = RegexUtility.group(RegexUtility.quote("</style>"), true);
+
+        final String regex = RegexUtility.concat(group1, ignore1, group2, ignore2, group3);
+
+        PATTERN_XHTML_CDATA = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+        final String commentEnd2 = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false);
+
+        PATTERN_XHTML_COMMENT = Pattern.compile(RegexUtility.concat(commentStart, ".*?", commentEnd2), Pattern.DOTALL);
+
+        PATTERN_UNQUOTE1 = Pattern.compile(RegexUtility.quote("&lt;!--"), Pattern.CASE_INSENSITIVE);
+
+        PATTERN_UNQUOTE2 = Pattern.compile(RegexUtility.quote("--&gt;"), Pattern.CASE_INSENSITIVE);
+    }
+
+    /**
+     * Removes unnecessary CDATA from CSS or JavaScript <code>style</code> elements:
+     * 
+     * <pre>
+     * &lt;style type=&quot;text/css&quot;&gt;
+     * /*&lt;![CDATA[&#42;/
+     * &lt;!--
+     *  /* Some Definitions &#42;/
+     * --&gt;
+     * /*]]&gt;&#42;/
+     * &lt;/style&gt;
+     * </pre>
+     * 
+     * is turned to
+     * 
+     * <pre>
+     * &lt;style type=&quot;text/css&quot;&gt;
+     * &lt;!--
+     *  /* Some Definitions &#42;/
+     * --&gt;
+     * &lt;/style&gt;
+     * </pre>
+     * 
+     * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
+     * @return The (X)HTML content with CDATA removed
+     */
+    private static String removeXHTMLCData(final String htmlContent) {
+        final Matcher m = PATTERN_XHTML_CDATA.matcher(htmlContent);
+        if (m.find()) {
+            final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+            final StringBuilder sb = new StringBuilder(htmlContent.length());
+            final String endingComment = "-->";
+            StringBuilder tmp = null;
+            do {
+                // Un-quote
+                final String match =
+                    Matcher.quoteReplacement(PATTERN_UNQUOTE2.matcher(PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll(
+                        "-->"));
+                // Check for additional HTML comments
+                if (PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("").indexOf(endingComment) == -1) {
+                    // No additional HTML comments
+                    if (null == tmp) {
+                        tmp = new StringBuilder(match.length() + 16);
+                    } else {
+                        tmp.setLength(0);
+                    }
+                    mr.appendReplacement(sb, tmp.append("$1").append(match).append("$3").toString());
+                } else {
+                    // Additional HTML comments
+                    if (null == tmp) {
+                        tmp = new StringBuilder(match.length() + 16);
+                    } else {
+                        tmp.setLength(0);
+                    }
+                    mr.appendReplacement(sb, tmp.append("$1<!--\n").append(match).append("$3").toString());
+                }
+            } while (m.find());
+            mr.appendTail(sb);
+            return sb.toString();
+        }
+        return htmlContent;
+    }
+
+    private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\]>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
+
+    private static final String CC_START_IF = "<!--[if";
+
+    private static final String CC_END_IF = "-->";
+
+    private static final String CC_ENDIF = "<!--<![endif]-->";
+
+    /**
+     * Processes detected downlevel-revealed <a href="http://en.wikipedia.org/wiki/Conditional_comment">conditional comments</a> through
+     * adding dashes before and after each <code>if</code> statement tag to complete them as a valid HTML comment and leaves center code
+     * open to rendering on non-IE browsers:
+     * 
+     * <pre>
+     * &lt;![if !IE]&gt;
+     * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
+     * &lt;![endif]&gt;
+     * </pre>
+     * 
+     * is turned to
+     * 
+     * <pre>
+     * &lt;!--[if !IE]&gt;--&gt;
+     * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
+     * &lt;!--&lt;![endif]--&gt;
+     * </pre>
+     * 
+     * @param htmlContent The HTML content possibly containing downlevel-revealed conditional comments
+     * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
+     */
+    private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
+        final Matcher m = PATTERN_CC.matcher(htmlContent);
+        if (!m.find()) {
+            /*
+             * No conditional comments found
+             */
+            return htmlContent;
+        }
+        int lastMatch = 0;
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
+        do {
+            sb.append(htmlContent.substring(lastMatch, m.start()));
+            sb.append(CC_START_IF).append(m.group(2)).append(CC_END_IF);
+            sb.append(m.group(3));
+            sb.append(CC_ENDIF);
+            lastMatch = m.end();
+        } while (m.find());
+        sb.append(htmlContent.substring(lastMatch));
+        return sb.toString();
+    }
+
+    public String validate(final String htmlContent) {
+        /*
+         * Obtain a new Tidy instance
+         */
+        final Tidy tidy = createNewTidyInstance();
+        /*
+         * Run tidy, providing a reader and writer
+         */
+        final Writer writer = new UnsynchronizedStringWriter(htmlContent.length());
+        tidy.parse(new StringReader(htmlContent), writer);
+        return writer.toString();
+    }
+
+    private Tidy createNewTidyInstance() {
+        final Tidy tidy = new Tidy();
+        /*
+         * Set desired configuration options using tidy setters
+         */
+        tidy.setXHTML(true);
+        tidy.setConfigurationFromProps(tidyConfiguration);
+        tidy.setMakeClean(false);
+        tidy.setForceOutput(true);
+        tidy.setOutputEncoding(CHARSET_US_ASCII);
+        tidy.setTidyMark(false);
+        tidy.setXmlOut(true);
+        tidy.setNumEntities(true);
+        tidy.setDropEmptyParas(false);
+        tidy.setDropFontTags(false);
+        tidy.setDropProprietaryAttributes(false);
+        tidy.setTrimEmptyElements(false);
+        /*
+         * Suppress tidy outputs
+         */
+        tidy.setShowErrors(0);
+        tidy.setShowWarnings(false);
+        tidy.setErrout(TIDY_DUMMY_PRINT_WRITER);
+        return tidy;
+    }
+
+    private static final PrintWriter TIDY_DUMMY_PRINT_WRITER = new PrintWriter(new Writer() {
+
+        @Override
+        public void close() throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final int c) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final char cbuf[]) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final String str) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final String str, final int off, final int len) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public Writer append(final CharSequence csq) throws IOException {
+            return this;
+        }
+
+        @Override
+        public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
+            return this;
+        }
+
+        @Override
+        public Writer append(final char c) throws IOException {
+            return this;
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            // Nothing to do
+        }
+    });
+
+}
