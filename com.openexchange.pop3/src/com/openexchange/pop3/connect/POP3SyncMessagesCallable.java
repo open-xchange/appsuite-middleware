@@ -123,7 +123,8 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                         InetAddress.getByName(server),
                         port,
                         pop3Config.isSecure(),
-                        (IPOP3Properties) pop3Config.getMailProperties());
+                        (IPOP3Properties) pop3Config.getMailProperties(),
+                        pop3Config.getLogin());
                 /*
                  * Check refresh rate against minimum allowed seconds between logins provided that "LOGIN-DELAY" is contained in
                  * capabilities

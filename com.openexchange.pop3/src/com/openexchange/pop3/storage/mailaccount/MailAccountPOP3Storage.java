@@ -277,18 +277,24 @@ public class MailAccountPOP3Storage implements POP3Storage {
                  * Determine where to create
                  */
 
-                final char separator = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-
+                final MailFolder inboxFolder = defaultMailAccess.getFolderStorage().getFolder("INBOX");
+                final char separator = inboxFolder.getSeparator();
                 final String[] parentAndName = parseFullname(path, separator);
                 /*
                  * Check CREATE permission
                  */
-                final MailPermission ownPermission = fs.getFolder(parentAndName[0]).getOwnPermission();
+                final MailPermission ownPermission;
+                final String parentFullname = parentAndName[0];
+                if ("INBOX".equals(parentFullname)) {
+                    ownPermission = inboxFolder.getOwnPermission();
+                } else {
+                    ownPermission = fs.getFolder(parentFullname).getOwnPermission();
+                }
                 if (ownPermission.canCreateSubfolders()) {
                     /*
                      * Set parent to current path's parent
                      */
-                    toCreate.setParentFullname(parentAndName[0]);
+                    toCreate.setParentFullname(parentFullname);
                 } else {
                     /*
                      * Path is invalid! Change path
@@ -331,6 +337,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));
                 }
+
+                /*
+                 * Check default folders
+                 */
+                getFolderStorage().checkDefaultFolders();
             }
         } catch (final MailException e) {
             /*

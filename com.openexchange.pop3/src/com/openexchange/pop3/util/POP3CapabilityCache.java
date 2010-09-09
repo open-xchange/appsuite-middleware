@@ -63,6 +63,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.openexchange.mail.MailException;
+import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -138,9 +140,10 @@ public final class POP3CapabilityCache {
      * @param pop3Properties The POP3 properties
      * @return The CAPABILITY from POP3 server denoted by specified parameters
      * @throws IOException If an I/O error occurs
+     * @throws MailException If a mail error occurs
      */
-    public static String getCapability(final InetAddress inetAddress, final int port, final boolean isSecure, final IPOP3Properties pop3Properties) throws IOException {
-        return getCapability0(new InetSocketAddress(inetAddress, port), isSecure, pop3Properties).getCapability();
+    public static String getCapability(final InetAddress inetAddress, final int port, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
+        return getCapability0(new InetSocketAddress(inetAddress, port), isSecure, pop3Properties, login).getCapability();
     }
 
     /**
@@ -161,9 +164,10 @@ public final class POP3CapabilityCache {
      * @param pop3Properties The POP3 properties
      * @return The CAPABILITY from POP3 server denoted by specified parameters
      * @throws IOException If an I/O error occurs
+     * @throws MailException If a mail error occurs
      */
-    public static String getCapability(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties) throws IOException {
-        return getCapability0(address, isSecure, pop3Properties).getCapability();
+    public static String getCapability(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
+        return getCapability0(address, isSecure, pop3Properties, login).getCapability();
     }
 
     /**
@@ -185,12 +189,13 @@ public final class POP3CapabilityCache {
      * @param timeout The timeout
      * @return The CAPABILITY from POP3 server denoted by specified parameters
      * @throws IOException If an I/O error occurs
+     * @throws MailException If a mail error occurs
      */
-    public static String getCapability(final InetSocketAddress address, final boolean isSecure, final int connectionTimeout, final int timeout) throws IOException {
+    public static String getCapability(final InetSocketAddress address, final boolean isSecure, final int connectionTimeout, final int timeout, final String login) throws IOException, MailException {
         Future<Capability> f = MAP.get(address);
         if (null == f) {
             final FutureTask<Capability> ft =
-                new FutureTask<Capability>(new CapabilityCallable(address, isSecure, connectionTimeout, timeout));
+                new FutureTask<Capability>(new CapabilityCallable(address, isSecure, connectionTimeout, timeout, login));
             f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
@@ -207,6 +212,9 @@ public final class POP3CapabilityCache {
             throw new IOException(e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
+            if (cause instanceof MailException) {
+                throw ((MailException) cause);
+            }
             if (cause instanceof IOException) {
                 throw ((IOException) cause);
             }
@@ -220,10 +228,10 @@ public final class POP3CapabilityCache {
         }
     }
 
-    private static Capability getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties) throws IOException {
+    private static Capability getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
         Future<Capability> f = MAP.get(address);
         if (null == f) {
-            final FutureTask<Capability> ft = new FutureTask<Capability>(new CapabilityCallable(address, isSecure, pop3Properties));
+            final FutureTask<Capability> ft = new FutureTask<Capability>(new CapabilityCallable(address, isSecure, pop3Properties, login));
             f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
@@ -240,6 +248,9 @@ public final class POP3CapabilityCache {
             throw new IOException(e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
+            if (cause instanceof MailException) {
+                throw ((MailException) cause);
+            }
             if (cause instanceof IOException) {
                 throw ((IOException) cause);
             }
@@ -263,19 +274,22 @@ public final class POP3CapabilityCache {
 
         private final int timeout;
 
-        public CapabilityCallable(final InetSocketAddress key, final boolean isSecure, final IPOP3Properties pop3Properties) {
-            this(key, isSecure, pop3Properties.getPOP3ConnectionTimeout(), pop3Properties.getPOP3Timeout());
+        private final String login;
+
+        public CapabilityCallable(final InetSocketAddress key, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) {
+            this(key, isSecure, pop3Properties.getPOP3ConnectionTimeout(), pop3Properties.getPOP3Timeout(), login);
         }
 
-        public CapabilityCallable(final InetSocketAddress key, final boolean isSecure, final int connectionTimeout, final int timeout) {
+        public CapabilityCallable(final InetSocketAddress key, final boolean isSecure, final int connectionTimeout, final int timeout, final String login) {
             super();
             this.key = key;
             this.isSecure = isSecure;
             this.connectionTimeout = connectionTimeout;
             this.timeout = timeout;
+            this.login = login;
         }
 
-        public Capability call() throws IOException {
+        public Capability call() throws IOException, POP3Exception {
             Socket s = null;
             try {
                 try {
@@ -288,7 +302,11 @@ public final class POP3CapabilityCache {
                      * Set connect timeout
                      */
                     if (connectionTimeout > 0) {
-                        s.connect(key, connectionTimeout);
+                        try {
+                            s.connect(key, connectionTimeout);
+                        } catch (java.net.SocketTimeoutException e) {
+                            throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, key, login);
+                        }
                     } else {
                         s.connect(key);
                     }

@@ -223,7 +223,8 @@ public final class POP3StoreConnector {
                         InetAddress.getByName(server),
                         port,
                         pop3Config.isSecure(),
-                        pop3ConfProps);
+                        pop3ConfProps,
+                        pop3Config.getLogin());
             } catch (final UnknownHostException e) {
                 throw new MessagingException(e.getMessage(), e);
             } catch (final IOException e) {

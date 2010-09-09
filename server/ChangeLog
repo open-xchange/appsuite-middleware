@@ -1,3 +1,7 @@
+* 2010-09-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #15681: Checking POP3 account's default folders on path creation in primary mail account
+
 * 2010-09-09 - marcus.klein@open-xchange.com
 
  - Bugfix #16835: post install of crawler bundle is now able to deal with filenames containing a white space character.
