@@ -73,110 +73,55 @@ import com.openexchange.groupware.AbstractOXException.Category;
  */
 public enum LoginExceptionCodes implements OXErrorMessage {
 
-    /**
-     * Account "%s" is locked.
-     */
+    /** Account "%s" is locked. */
     ACCOUNT_LOCKED(ACCOUNT_LOCKED_MSG, Category.PERMISSION, 1),
-    /**
-     * Account "%s" is not ready yet.
-     */
+    /** Account "%s" is not ready yet. */
     ACCOUNT_NOT_READY_YET(ACCOUNT_NOT_READY_YET_MSG, Category.TRY_AGAIN, 2),
-    /**
-     * Unknown problem: "%s".
-     */
+    /** Unknown problem: "%s". */
     UNKNOWN(UNKNOWN_MSG, Category.CODE_ERROR, 3),
-    /**
-     * Login not possible at the moment. Please try again later.
-     */
+    /** Login not possible at the moment. Please try again later. */
     COMMUNICATION(COMMUNICATION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
-    /**
-     * Invalid credentials.
-     */
+    /** Invalid credentials. */
     INVALID_CREDENTIALS(INVALID_CREDENTIALS_MSG, Category.USER_INPUT, 6),
-    /**
-     * Instantiating the class failed.
-     * 
-     * @deprecated this can not appear anymore with OSGi services.
-     */
+    /** Instantiating the class failed. */
     @Deprecated
     INSTANTIATION_FAILED(INSTANTIATION_FAILED_MSG, Category.CODE_ERROR, 7),
-    /**
-     * Class %1$s can not be found.
-     * 
-     * @deprecated this can not appear anymore with OSGi services.
-     */
+    /** Class %1$s can not be found. */
     @Deprecated
     CLASS_NOT_FOUND(CLASS_NOT_FOUND_MSG, Category.SETUP_ERROR, 8),
-    /**
-     * Missing property %1$s.
-     */
+    /** Missing property %1$s. */
     MISSING_PROPERTY(MISSING_PROPERTY_MSG, Category.SETUP_ERROR, 9),
-    /**
-     * database down.
-     */
+    /** database down. */
     DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10),
-    /**
-     * Your password expired.
-     */
+    /** Your password expired. */
     PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, Category.PERMISSION, 11),
-    /**
-     * User %1$s could not be found in context %2$s.
-     */
+    /** User %1$s could not be found in context %2$s. */
     USER_NOT_FOUND(USER_NOT_FOUND_MSG, Category.CODE_ERROR, 12),
-    /**
-     * User is not activated.
-     */
+    /** User is not activated. */
     USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.PERMISSION, 13),
-    /**
-     * Client "%1$s" is not activated.
-     */
+    /** Client "%1$s" is not activated. */
     CLIENT_DENIED(CLIENT_DENIED_MSG, Category.USER_CONFIGURATION, 14);
 
-    /**
-     * Message of the exception.
-     */
     final String message;
 
-    /**
-     * Category of the exception.
-     */
     final Category category;
 
-    /**
-     * Detail number of the exception.
-     */
     final int number;
 
-    /**
-     * Default constructor.
-     * 
-     * @param message message.
-     * @param category category.
-     * @param detailNumber detail number.
-     */
     private LoginExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
         number = detailNumber;
     }
 
-    /**
-     * @return the category
-     */
     public Category getCategory() {
         return category;
     }
 
-    /**
-     * @return the message
-     */
     public String getMessage() {
         return message;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getDetailNumber() {
         return number;
     }
