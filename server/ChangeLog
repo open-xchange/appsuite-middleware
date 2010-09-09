@@ -1,3 +1,7 @@
+* 2010-09-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #16835: post install of crawler bundle is now able to deal with filenames containing a white space character.
+
 * 2010-09-07 - choeger@open-xchange.com
 
  - Bugfix #16815: activation and jcharset packages to use OX versioning
