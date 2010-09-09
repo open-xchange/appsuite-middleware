@@ -47,42 +47,23 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.context;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link ContextExceptionMessages}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class ContextExceptionMessages implements LocalizableStrings {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.tx.osgi.TransactionActivator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.filestore.osgi.FilestoreActivator(),
-        new com.openexchange.context.osgi.ContextActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
-        new com.openexchange.consistency.osgi.ConsistencyActivator()
-    };
+    // This message will be logged if a context is disabled and some user of that context tries to login.
+    // %1$d is replaced with the unique context identifier.
+    // %2$s is replaced with the context name.
+    public static final String CONTEXT_DISABLED_MSG = "Context %1$d, %1$s is disabled.";
 
-    public Activator() {
+    private ContextExceptionMessages() {
         super();
-    }
-
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
     }
 }

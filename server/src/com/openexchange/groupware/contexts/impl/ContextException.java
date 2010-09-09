@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contexts.impl;
 
+import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
@@ -88,8 +89,13 @@ public class ContextException extends AbstractOXException {
      * @param messageArgs arguments that will be formatted into the message.
      */
     public ContextException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.CONTEXT, code.category, code.number, code.message, cause);
+        super(EnumComponent.CONTEXT, code.getCategory(), code.getNumber(), code.getMessage(), cause);
         setMessageArgs(messageArgs);
+    }
+
+    public ContextException(ErrorMessage message, Throwable cause, Object... args) {
+        super(message, cause);
+        setMessageArgs(args);
     }
 
     /**
