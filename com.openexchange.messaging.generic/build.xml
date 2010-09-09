@@ -41,7 +41,7 @@
     <property name="messagingjar" value="com.openexchange.messaging.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
 	<property name="secretrecovjar" value="com.openexchange.secret.recovery.jar"/>
-		
+    <property name="htmljar" value="com.openexchange.html.jar"/>
 
     <property name="mailjar" value="mail-1.4.2.jar"/>
     <property name="activationjar" value="activation-1.1.1.jar"/>
@@ -67,7 +67,7 @@
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
     	<pathelement location="${bundlesdir}/${secretrecovjar}"/>
-    	    	
+    	<pathelement location="${bundlesdir}/${htmljar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
