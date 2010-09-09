@@ -85,7 +85,7 @@ public class LoginException extends AbstractOXException {
      */
     @Deprecated
     public LoginException(final Code code, final Object... messageArgs) {
-        this(code.code, null, messageArgs);
+        this(code.getCode(), null, messageArgs);
     }
 
     /**
@@ -98,7 +98,7 @@ public class LoginException extends AbstractOXException {
      */
     @Deprecated
     public LoginException(final Code code, final Throwable cause, final Object... messageArgs) {
-        this(code.code, cause, messageArgs);
+        this(code.getCode(), cause, messageArgs);
     }
 
     /**
@@ -198,6 +198,10 @@ public class LoginException extends AbstractOXException {
 
         private Code(final LoginExceptionCodes code) {
             this.code = code;
+        }
+
+        public LoginExceptionCodes getCode() {
+            return code;
         }
     }
 }

@@ -87,7 +87,7 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer, Conte
     }
 
     public void modifiedService(ServiceReference reference, Object service) {
-
+        // Nothing to do.
     }
 
     public void removedService(ServiceReference reference, Object service) {
