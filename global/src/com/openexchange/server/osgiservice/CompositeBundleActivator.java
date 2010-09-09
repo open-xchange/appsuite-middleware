@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgiservice;
 
+import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
@@ -62,12 +63,14 @@ import org.osgi.framework.BundleContext;
 public abstract class CompositeBundleActivator implements BundleActivator {
 
     private static final Log LOG = LogFactory.getLog(CompositeBundleActivator.class);
+    private final Stack<BundleActivator> activated = new Stack<BundleActivator>();
 
     public void start(final BundleContext context) throws Exception {
         Exception first = null;
         for (final BundleActivator activator : getActivators()) {
             try {
                 activator.start(context);
+                activated.push(activator);
             } catch (final Exception e) {
                 if (null == first) {
                     first = e;
@@ -82,7 +85,8 @@ public abstract class CompositeBundleActivator implements BundleActivator {
 
     public void stop(final BundleContext context) throws Exception {
         Exception first = null;
-        for (final BundleActivator activator : getActivators()) {
+        while (!activated.isEmpty()) {
+            BundleActivator activator = activated.pop();
             try {
                 activator.stop(context);
             } catch (final Exception e) {
