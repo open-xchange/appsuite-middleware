@@ -13,6 +13,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.tools.stream,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.w3c.dom
 Export-Package: com.openexchange.html
 Bundle-Activator: com.openexchange.html.osgi.HTMLServiceActivator
