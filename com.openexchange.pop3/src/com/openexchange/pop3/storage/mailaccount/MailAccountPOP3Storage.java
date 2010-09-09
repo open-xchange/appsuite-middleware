@@ -318,6 +318,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     // Update in properties
                     properties.addProperty(POP3StoragePropertyNames.PROPERTY_PATH, path);
                     if (fs.exists(path)) {
+                        /*
+                         * Check default folders
+                         */
+                        getFolderStorage().checkDefaultFolders();
                         return;
                     }
                 }
