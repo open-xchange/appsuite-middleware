@@ -62,8 +62,6 @@ import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailPropertiesInit;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.text.HTMLProcessingInit;
-import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.Initialization;
 
@@ -116,17 +114,6 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 
                 public void stop() {
                     MailAccessWatcher.stop();
-                }
-            }, startedStack);
-            startUp(HTMLProcessingInit.getInstance(), startedStack);
-            startUp(new Initialization() {
-
-                public void start() throws AbstractOXException {
-                    HTMLFilterHandler.loadWhitelist();
-                }
-
-                public void stop() {
-                    HTMLFilterHandler.resetWhitelist();
                 }
             }, startedStack);
             startUp(new Initialization() {
@@ -212,8 +199,6 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         JSONMessageCache.releaseInstance();
         JSONMessageCacheConfiguration.releaseInstance();
         MIMEType2ExtMap.reset();
-        HTMLFilterHandler.resetWhitelist();
-        HTMLProcessingInit.getInstance().stop();
         MailAccessCache.releaseInstance();
         MailMessageCache.releaseInstance();
         UserSettingMailStorage.releaseInstance();

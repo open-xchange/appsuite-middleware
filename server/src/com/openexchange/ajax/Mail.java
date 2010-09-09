@@ -129,6 +129,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
+import com.openexchange.html.HTMLService;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
@@ -157,9 +158,6 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.text.HTMLProcessing;
-import com.openexchange.mail.text.parser.HTMLParser;
-import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.CharsetDetector;
@@ -1949,9 +1947,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final String cs =
                             contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
                         final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
-                        final HTMLFilterHandler filterHandler = new HTMLFilterHandler(htmlContent.length());
-                        HTMLParser.parse(HTMLProcessing.getConformHTML(htmlContent, contentType), filterHandler);
-                        attachmentInputStream = new UnsynchronizedByteArrayInputStream(filterHandler.getHTML().getBytes(cs));
+                        final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                        attachmentInputStream =
+                            new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
+                                htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(cs));
                     } else {
                         attachmentInputStream = mailPart.getInputStream();
                     }

@@ -52,7 +52,6 @@ package com.openexchange.mail.parser.handlers;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
-import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -77,6 +76,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.html.HTMLService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -98,11 +98,10 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.text.RTF2HTMLConverter;
-import com.openexchange.mail.text.parser.HTMLParser;
-import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.uuencode.UUEncodedPart;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
@@ -149,8 +148,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
     private final JSONObject jsonObject;
 
     // private Html2TextConverter converter;
-
-    private HTML2TextHandler html2textHandler;
 
     private JSONArray attachmentsArr;
 
@@ -268,24 +265,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.NESTED_MESSAGES.getKey(), nestedMsgsArr);
         }
         return nestedMsgsArr;
-    }
-
-    private HTML2TextHandler getHandler() {
-        if (html2textHandler == null) {
-            html2textHandler = new HTML2TextHandler(4096, true);
-            /*
-             * Add debugging information
-             */
-            if (jsonObject.hasAndNotNull(FolderChildFields.FOLDER_ID)) {
-                html2textHandler.setMailFolderPath(prepareMailFolderParam(jsonObject.optString(FolderChildFields.FOLDER_ID)).getFullname());
-            }
-            if (jsonObject.hasAndNotNull(DataFields.ID)) {
-                html2textHandler.setMailId(jsonObject.optLong(DataFields.ID));
-            }
-            html2textHandler.setContextId(session.getContextId());
-            html2textHandler.setUserId(session.getUserId());
-        }
-        return html2textHandler;
     }
 
     private TimeZone getTimeZone() {
@@ -1050,8 +1029,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
             /*
              * Try to convert the given html to regular text
              */
-            HTMLParser.parse(HTMLProcessing.getConformHTML(htmlContent, (String) null), getHandler().reset());
-            final String content = HTMLProcessing.formatTextForDisplay(getHandler().getText(), usm, displayMode);
+            final String content;
+            {
+                final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
+                content = HTMLProcessing.formatTextForDisplay(plainText, usm, displayMode);
+            }
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);

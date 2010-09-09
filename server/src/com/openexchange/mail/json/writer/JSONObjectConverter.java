@@ -59,6 +59,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.html.HTMLService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -69,11 +70,9 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.text.RTF2HTMLConverter;
-import com.openexchange.mail.text.parser.HTMLParser;
-import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
@@ -99,8 +98,6 @@ public final class JSONObjectConverter {
     private final MailPath mailPath;
 
     // private Html2TextConverter converter;
-
-    private HTML2TextHandler html2textHandler;
 
     private final boolean[] modified;
 
@@ -139,25 +136,6 @@ public final class JSONObjectConverter {
             timeZone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
         }
         return timeZone;
-    }
-
-    private HTML2TextHandler getHandler() {
-        if (html2textHandler == null) {
-            html2textHandler = new HTML2TextHandler(4096, true);
-            /*
-             * Add debugging information
-             */
-            if (rawJSONMailObject.hasAndNotNull(FolderChildFields.FOLDER_ID)) {
-                html2textHandler.setMailFolderPath(MailFolderUtility.prepareMailFolderParam(
-                    rawJSONMailObject.optString(FolderChildFields.FOLDER_ID)).getFullname());
-            }
-            if (rawJSONMailObject.hasAndNotNull(DataFields.ID)) {
-                html2textHandler.setMailId(rawJSONMailObject.optLong(DataFields.ID));
-            }
-            html2textHandler.setContextId(session.getContextId());
-            html2textHandler.setUserId(session.getUserId());
-        }
-        return html2textHandler;
     }
 
     /**
@@ -456,8 +434,12 @@ public final class JSONObjectConverter {
             /*
              * Try to convert the given html to regular text
              */
-            HTMLParser.parse(HTMLProcessing.getConformHTML(htmlContent, (String) null), getHandler().reset());
-            final String content = HTMLProcessing.formatTextForDisplay(getHandler().getText(), usm, displayMode);
+            final String content;
+            {
+                final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
+                content = HTMLProcessing.formatTextForDisplay(plainText, usm, displayMode);
+            }
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             copyValue(MailJSONField.SIZE.getKey(), htmlObject, jsonObject);
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);

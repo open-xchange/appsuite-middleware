@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.mime.filler;
 
-import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -101,6 +100,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
@@ -123,8 +123,6 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
-import com.openexchange.mail.text.parser.HTMLParser;
-import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountException;
@@ -191,9 +189,7 @@ public class MIMEMessageFiller {
 
     private Set<String> uploadFileIDs;
 
-    // private Html2TextConverter converter;
-
-    private HTML2TextHandler html2textHandler;
+    private final HTMLService htmlService;
 
     /**
      * Initializes a new {@link MIMEMessageFiller}
@@ -214,6 +210,7 @@ public class MIMEMessageFiller {
      */
     public MIMEMessageFiller(final Session session, final Context ctx, final UserSettingMail usm) {
         super();
+        htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
         this.session = session;
         this.ctx = ctx;
         this.usm = usm;
@@ -223,21 +220,6 @@ public class MIMEMessageFiller {
      * protected final Html2TextConverter getConverter() { if (converter == null) { converter = new Html2TextConverter(); } return
      * converter; }
      */
-
-    /**
-     * Gets the {@link HTML2TextHandler} instance.
-     * 
-     * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
-     * @return The {@link HTML2TextHandler} instance
-     */
-    protected final HTML2TextHandler getHTML2TextHandler(final boolean appendHref) {
-        if (html2textHandler == null) {
-            html2textHandler = new HTML2TextHandler(4096);
-            html2textHandler.setContextId(session.getContextId());
-            html2textHandler.setUserId(session.getUserId());
-        }
-        return html2textHandler.setAppendHref(appendHref);
-    }
 
     /**
      * Deletes referenced local uploaded files from session and disk after filled instance of <code>{@link MimeMessage}</code> is dispatched
@@ -737,7 +719,7 @@ public class MIMEMessageFiller {
                     /*
                      * Append html content
                      */
-                    primaryMultipart.addBodyPart(createHtmlBodyPart(content));
+                    primaryMultipart.addBodyPart(createHtmlBodyPart(content, htmlService));
                 }
             }
             /*
@@ -866,15 +848,13 @@ public class MIMEMessageFiller {
                     /*
                      * Convert html content to regular text
                      */
-                    final HTML2TextHandler handler = getHTML2TextHandler(false).reset();
-                    HTMLParser.parse(getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()), handler);
-                    mailText = performLineFolding(handler.getText(), usm.getAutoLinebreak());
+                    mailText = performLineFolding(htmlService.html2text(htmlService.getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()), false), usm.getAutoLinebreak());
                     // mailText =
                     // performLineFolding(getConverter().convertWithQuotes
                     // ((String) mail.getContent()), false,
                     // usm.getAutoLinebreak());
                 } else {
-                    mailText = getConformHTML(content, mail.getContentType());
+                    mailText = htmlService.getConformHTML(content, mail.getContentType().getCharsetParameter());
                 }
                 mimeMessage.setContent(mailText, mail.getContentType().toString());
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
@@ -1014,7 +994,7 @@ public class MIMEMessageFiller {
             alternativeMultipart.addBodyPart(altBodyPart);
         } else {
             htmlContent = mailBody;
-            final BodyPart html = createHtmlBodyPart(mailBody);
+            final BodyPart html = createHtmlBodyPart(mailBody, htmlService);
             /*
              * Add html part to superior multipart
              */
@@ -1050,7 +1030,7 @@ public class MIMEMessageFiller {
         /*
          * Process referenced local image files and insert returned html content as a new body part to first index
          */
-        relatedMultipart.addBodyPart(createHtmlBodyPart(htmlContent[0]), 0);
+        relatedMultipart.addBodyPart(createHtmlBodyPart(htmlContent[0], htmlService), 0);
         /*
          * Traverse Content-IDs occurring in original HTML content
          */
@@ -1243,9 +1223,7 @@ public class MIMEMessageFiller {
         if (htmlContent == null || htmlContent.length() == 0) {
             textContent = "";
         } else {
-            final HTML2TextHandler handler = getHTML2TextHandler(appendHref).reset();
-            HTMLParser.parse(getConformHTML(htmlContent, MailProperties.getInstance().getDefaultMimeCharset()), handler);
-            textContent = performLineFolding(handler.getText(), usm.getAutoLinebreak());
+            textContent = performLineFolding(htmlService.html2text(htmlService.getConformHTML(htmlContent, MailProperties.getInstance().getDefaultMimeCharset()), appendHref), usm.getAutoLinebreak());
         }
         text.setText(textContent, MailProperties.getInstance().getDefaultMimeCharset());
         // text.setText(performLineFolding(getConverter().convertWithQuotes(
@@ -1264,18 +1242,19 @@ public class MIMEMessageFiller {
      * Creates a body part of type <code>text/html</code> from given HTML content
      * 
      * @param htmlContent The HTML content
+     * @param htmlService The HTML service
      * @return A body part of type <code>text/html</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
      * @throws MailException If an I/O error occurs
      */
-    protected final static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException, MailException {
+    protected final static BodyPart createHtmlBodyPart(final String htmlContent, final HTMLService htmlService) throws MessagingException, MailException {
         final ContentType htmlCT =
             new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailProperties.getInstance().getDefaultMimeCharset()));
         final MimeBodyPart html = new MimeBodyPart();
         if (htmlContent == null || htmlContent.length() == 0) {
-            html.setContent(getConformHTML(HTML_SPACE, htmlCT).replaceFirst(HTML_SPACE, ""), htmlCT.toString());
+            html.setContent(htmlService.getConformHTML(HTML_SPACE, htmlCT.getCharsetParameter()).replaceFirst(HTML_SPACE, ""), htmlCT.toString());
         } else {
-            html.setContent(getConformHTML(htmlContent, htmlCT), htmlCT.toString());
+            html.setContent(htmlService.getConformHTML(htmlContent, htmlCT.getCharsetParameter()), htmlCT.toString());
         }
         html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
         html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, htmlCT.toString());

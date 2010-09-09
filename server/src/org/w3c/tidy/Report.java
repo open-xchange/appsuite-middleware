@@ -64,7 +64,6 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import org.w3c.tidy.TidyMessage.Level;
-import com.openexchange.mail.text.HTMLProcessing;
 
 
 /**
@@ -73,7 +72,7 @@ import com.openexchange.mail.text.HTMLProcessing;
  * @author Dave Raggett <a href="mailto:dsr@w3.org">dsr@w3.org </a>
  * @author Andy Quick <a href="mailto:ac.quick@sympatico.ca">ac.quick@sympatico.ca </a> (translation to Java)
  * @author Fabrizio Giustina
- * @version $Revision: 1.4 $ ($Author: thorben $)
+ * @version $Revision: 1.5 $ ($Author: thorben $)
  */
 public final class Report
 {
@@ -633,6 +632,11 @@ public final class Report
      */
     private TidyMessageListener listener;
 
+    /*
+     * According to COPYRIGHT NOTICE point 2 the following represents
+     * modified code that is NOT part of the original code
+     */
+
     static
     {
         try
@@ -641,41 +645,46 @@ public final class Report
         }
         catch (MissingResourceException exc)
         {
-        	/*
-			 * According to COPYRIGHT NOTICE point 2 the following represents
-			 * modified code that is NOT part of the original code
-			 */
-        	InputStream in = null;
-    		try
-    		{
-    			in = HTMLProcessing.getTidyMessages();
-    			res = new PropertyResourceBundle(in);
-    		}
-    		catch (final FileNotFoundException e)
-    		{
-    			throw new Error(e.toString());
-    		}
-    		catch (final IOException e)
-    		{
-    			throw new Error(e.toString());
-    		}
-    		finally
-    		{
-    			if (null != in)
-    			{
-    				try
-    				{
-    					in.close();
-    				}
-    				catch (final IOException e) {
-    				}
-    			}
-    		}
-    		/*
-    		 * Modified code ends here
-    		 */
         }
     }
+
+    /**
+     * Sets the resource bundle with messages.
+     * <p>
+     * The specified stream is properly closed.
+     * 
+     * @param in The property file to read from
+     */
+    public static void setResourceBundleFrom(final InputStream in) {
+        try
+        {
+            res = new PropertyResourceBundle(in);
+        }
+        catch (final FileNotFoundException e)
+        {
+            throw new Error(e.toString());
+        }
+        catch (final IOException e)
+        {
+            throw new Error(e.toString());
+        }
+        finally
+        {
+            if (null != in)
+            {
+                try
+                {
+                    in.close();
+                }
+                catch (final IOException e) {
+                }
+            }
+        }
+    }
+    
+    /*
+     * Modified code ends here
+     */
 
     /**
      * Instantiated only in Tidy() constructor.

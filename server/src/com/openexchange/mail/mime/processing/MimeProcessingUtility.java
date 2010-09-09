@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.mime.processing;
 
-import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -59,6 +58,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.html.HTMLService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -67,11 +67,10 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
-import com.openexchange.mail.text.parser.HTMLParser;
-import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MimeProcessingUtility} - Provides some utility methods for {@link MimeForward} and {@link MimeReply}
@@ -198,9 +197,8 @@ public final class MimeProcessingUtility {
                 return readContent(textPart, charset);
             }
             contentType.setBaseType("text/plain");
-            final HTML2TextHandler handler = new HTML2TextHandler((int) textPart.getSize(), false);
-            HTMLParser.parse(getConformHTML(readContent(textPart, charset), contentType), handler);
-            return handler.getText();
+            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+            return htmlService.html2text(htmlService.getConformHTML(readContent(textPart, charset), contentType.getCharsetParameter()), false);
             // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
         } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
             final String content = readContent(textPart, charset);
@@ -298,9 +296,9 @@ public final class MimeProcessingUtility {
         } else if (rootType.startsWith(CT_TEXT_HTM)) {
             textBuilder.append(htmlFormat(text));
         } else {
-            final HTML2TextHandler handler = new HTML2TextHandler(text.length(), false);
-            HTMLParser.parse(getConformHTML(text, contentType), handler);
-            textBuilder.append(handler.getText());
+            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+            final String plainText = htmlService.html2text(htmlService.getConformHTML(text, contentType.getCharsetParameter()), false);
+            textBuilder.append(plainText);
             // textBuilder.append(new Html2TextConverter().convertWithQuotes(text));
         }
     }

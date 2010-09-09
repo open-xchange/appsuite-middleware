@@ -56,17 +56,16 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import com.openexchange.html.HTMLService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.text.HTMLProcessing;
-import com.openexchange.mail.text.parser.HTMLParser;
-import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link BodyTerm}
@@ -210,9 +209,8 @@ public final class BodyTerm extends SearchTerm<String> {
         }
         try {
             if (contentType.startsWith("text/htm")) {
-                final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
-                HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
-                return h.getText();
+                final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                return htmlService.html2text(htmlService.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), false);
             }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final IOException e) {
@@ -241,9 +239,8 @@ public final class BodyTerm extends SearchTerm<String> {
                 charset = CharsetDetector.detectCharset(part.getInputStream());
             }
             if (ct.startsWith("text/htm")) {
-                final HTML2TextHandler h = new HTML2TextHandler(part.getSize(), false);
-                HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMimePart(part, charset), charset), h);
-                return h.getText();
+                final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                return htmlService.html2text(htmlService.getConformHTML(MessageUtility.readMimePart(part, charset), charset), false);
             }
             return MessageUtility.readMimePart(part, charset);
         } catch (final IOException e) {
