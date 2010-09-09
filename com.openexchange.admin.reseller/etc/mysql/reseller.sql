@@ -36,9 +36,11 @@ CREATE TABLE context_restrictions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE context2subadmin (
-    sid INT4 UNSIGNED NOT NULL,
     cid INT4 UNSIGNED NOT NULL,
-    CONSTRAINT cid_unique UNIQUE (cid),
+    sid INT4 UNSIGNED NOT NULL,
+    PRIMARY KEY (cid,sid),
+    INDEX (sid),
+    UNIQUE (cid),
     FOREIGN KEY(sid) REFERENCES subadmin(sid),
     FOREIGN KEY(cid) REFERENCES context(cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
