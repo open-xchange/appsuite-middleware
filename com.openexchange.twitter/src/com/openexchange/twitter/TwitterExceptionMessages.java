@@ -73,6 +73,9 @@ public final class TwitterExceptionMessages implements LocalizableStrings {
     // The access token for twitter user %1$s could not be obtained.
     public static final String ACCESS_TOKEN_FAILED_MSG = "The access token for twitter user %1$s could not be obtained.";
 
+    // The configured consumer key/consumer secret pair is invalid.
+    public static final String INVALID_CONSUMER_KEY_SECRET_MSG = "The configured consumer key/consumer secret pair is invalid.";
+
     /**
      * Initializes a new {@link TwitterExceptionMessages}.
      */

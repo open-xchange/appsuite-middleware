@@ -79,7 +79,11 @@ public enum TwitterExceptionCodes implements OXErrorMessage {
     /**
      * The access token for twitter user %1$s could not be obtained.
      */
-    ACCESS_TOKEN_FAILED(TwitterExceptionMessages.ACCESS_TOKEN_FAILED_MSG, Category.CODE_ERROR, 5);
+    ACCESS_TOKEN_FAILED(TwitterExceptionMessages.ACCESS_TOKEN_FAILED_MSG, Category.CODE_ERROR, 5),
+    /**
+     * The configured consumer key/consumer secret pair is invalid.
+     */
+    INVALID_CONSUMER_KEY_SECRET(TwitterExceptionMessages.INVALID_CONSUMER_KEY_SECRET_MSG, Category.CODE_ERROR, 6);
 
     private final Category category;
 
