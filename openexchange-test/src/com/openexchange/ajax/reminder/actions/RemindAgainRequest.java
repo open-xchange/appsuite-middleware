@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.reminder.actions;
 
-import java.util.Date;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -63,27 +62,21 @@ public class RemindAgainRequest extends AbstractReminderRequest<RemindAgainRespo
 
     private final ReminderObject reminder;
 
-    private final Date timestamp;
-
     /**
      * Default constructor.
      * 
      * @param reminder The reminder with new alarm date set
-     * @param timestamp The client last-modified time stamp
      */
-    public RemindAgainRequest(final ReminderObject reminder, final Date timestamp) {
+    public RemindAgainRequest(final ReminderObject reminder) {
         super();
         if (null == reminder) {
             throw new NullPointerException("reminder is null.");
-        } else if (null == timestamp) {
-            throw new NullPointerException("timestamp is null.");
         } else if (reminder.getObjectId() <= 0) {
             throw new IllegalArgumentException("Missing identifier in reminder.");
         } else if (null == reminder.getDate()) {
             throw new IllegalArgumentException("Missing alarm date in reminder.");
         }
         this.reminder = reminder;
-        this.timestamp = new Date(timestamp.getTime());
     }
 
     /**
@@ -107,7 +100,6 @@ public class RemindAgainRequest extends AbstractReminderRequest<RemindAgainRespo
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "remindAgain"),
             new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(reminder.getObjectId())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(timestamp.getTime())),
         };
     }
 
