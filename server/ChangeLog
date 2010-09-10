@@ -5,6 +5,7 @@
 * 2010-09-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #16848: Use correct date format in response headers.
+ - Bugfix #16846: Forward autologin parameter
 
 * 2010-09-10 - karsten.will@open-xchange.com
 
