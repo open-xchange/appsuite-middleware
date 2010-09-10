@@ -1,3 +1,7 @@
+* 2010-09-10 - martin.herfurth@open-xchange.com
+
+ - Bugfix #16151: Move appointment from shared to private folder.
+
 * 2010-09-09 - thorben.betten@open-xchange.com
 
  - Bugfix #15681: Checking POP3 account's default folders on path creation in primary mail account
