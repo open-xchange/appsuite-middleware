@@ -287,4 +287,8 @@ public class ServerSessionAdapter implements ServerSession {
         return session;
     }
 
+    public void setHash(String hash) {
+        session().setHash(hash);
+    }
+
 }

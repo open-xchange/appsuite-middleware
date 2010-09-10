@@ -174,4 +174,10 @@ public interface Session {
      */
     public String getHash();
 
+    /**
+     * Updates the hash value of this session.
+     * @param hash The new hash value
+     */
+    public void setHash(String hash);
+
 }

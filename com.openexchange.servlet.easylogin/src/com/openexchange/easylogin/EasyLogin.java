@@ -78,8 +78,8 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * New version with a login/handling that is more secure. Also parameter AuthID is added. 
- * Defaults are still set for maximum security: no GET, SSL only
+ * New version with a login/handling that is more secure. Also parameter AuthID is added. Defaults are still set for maximum security: no
+ * GET, SSL only
  * 
  * @author <a href="mailto:info@open-xchange.com">Holger Achtziger</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -100,14 +100,22 @@ public class EasyLogin extends HttpServlet {
 
     private String loginParam;
 
+    private String autologinParam;
+
+    private boolean autologinDefault;
+
+    private String clientParam;
+
+    private String defaultClient;
+
     private boolean doGetEnabled;
 
     private boolean popupOnError;
 
     private boolean allowInsecure;
-    
+
     private String errorPageTemplate;
-    
+
     private String loadBalancer;
 
     public EasyLogin() {
@@ -131,6 +139,38 @@ public class EasyLogin extends HttpServlet {
         } else {
             LOG.info("Set loginPara to " + loginParam);
         }
+        autologinParam = config.getInitParameter("com.openexchange.easylogin.autologinPara");
+        if (null == autologinParam) {
+            autologinParam = "autologin";
+            LOG.error("Could not find autologinPara in configuration file, using default: " + autologinParam);
+        } else {
+            LOG.info("Set autologinPara to " + autologinParam);
+        }
+
+        clientParam = config.getInitParameter("com.openexchange.easylogin.clientPara");
+        if (null == clientParam) {
+            autologinParam = "autologin";
+            LOG.error("Could not find clientPara in configuration file, using default: " + clientParam);
+        } else {
+            LOG.info("Set clientPara to " + clientParam);
+        }
+
+        defaultClient = config.getInitParameter("com.openexchange.easylogin.defaultClient");
+        if (null == defaultClient) {
+            LOG.info("No default client set for easylogin.");
+        } else {
+            LOG.info("Defaulting to client " + defaultClient);
+        }
+
+        String autologinDefaultS = config.getInitParameter("com.openexchange.easylogin.autologin.default");
+        if (null == autologinDefaultS) {
+            LOG.error("No default for autologin param defined. Assuming false");
+            autologinDefault = false;
+        } else {
+            autologinDefault = Boolean.parseBoolean(autologinDefaultS);
+            LOG.info("Set autologin default to " + autologinDefault);
+        }
+
         ajaxRoot = config.getInitParameter("com.openexchange.easylogin.AJAX_ROOT");
         if (null == ajaxRoot) {
             ajaxRoot = "/ajax";
@@ -250,34 +290,43 @@ public class EasyLogin extends HttpServlet {
         return login;
     }
 
-    private void doJavaLogin(final HttpServletRequest req, HttpServletResponse resp, final String authID, final String login, final String password) throws IOException{        
+    private void doJavaLogin(final HttpServletRequest req, HttpServletResponse resp, final String authID, final String login, final String password) throws IOException {
         final LoginResult result;
         try {
             result = LoginPerformer.getInstance().doLogin(new LoginRequest() {
+
                 public String getUserAgent() {
                     return req.getHeader("user-agent");
                 }
+
                 public String getPassword() {
                     return password;
                 }
+
                 public String getLogin() {
                     return login;
                 }
+
                 public Interface getInterface() {
                     return Interface.HTTP_JSON;
                 }
+
                 public String getClientIP() {
                     return req.getRemoteAddr();
                 }
+
                 public String getAuthId() {
                     return authID;
                 }
+
                 public String getClient() {
                     return null;
                 }
+
                 public String getVersion() {
                     return null;
                 }
+
                 public String getHash() {
                     return null;
                 }
@@ -302,12 +351,26 @@ public class EasyLogin extends HttpServlet {
             sb.append('=');
             sb.append(uiWebPath);
         }
+        // Store needed?
+        String autologinS = getParameter(req, autologinParam);
+        boolean store = autologinDefault;
+        if (autologinS != null) {
+            store = Boolean.parseBoolean(autologinS);
+        }
+        sb.append("&store=").append(store);
+
+        // Client
+        String client = getParameter(req, clientParam);
+        if (client != null) {
+            sb.append("client=").append(client);
+        }
+
         resp.sendRedirect(sb.toString());
     }
 
     @SuppressWarnings("unused")
     private void doHTTPLogin(final HttpServletResponse resp, PrintWriter out, final String password, final String login, final String authID) throws MalformedURLException, IOException {
-        String urlString = "https://"+ loadBalancer + ajaxRoot + "/login?action=login&name=" + login + "&password=" + password + "&" + AUTH_ID_PARAMETER + "=" + authID;
+        String urlString = "https://" + loadBalancer + ajaxRoot + "/login?action=login&name=" + login + "&password=" + password + "&" + AUTH_ID_PARAMETER + "=" + authID;
         URL url = new URL(urlString);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setDoOutput(true);
@@ -315,7 +378,7 @@ public class EasyLogin extends HttpServlet {
         int i = 1;
         String hdrKey = null;
         String jSessionID = "";
-        
+
         while ((hdrKey = con.getHeaderFieldKey(i)) != null) {
             if (hdrKey.equals("Set-Cookie")) {
                 String content = con.getHeaderField(i);
@@ -360,8 +423,8 @@ public class EasyLogin extends HttpServlet {
         }
         rd.close();
         con.disconnect();
-        
-        if (errorMessage == null){
+
+        if (errorMessage == null) {
             // send redirect if login worked
             LOG.info("Login worked, sending redirect");
             resp.sendRedirect(ajaxRoot + "/login;jsessionid=" + jSessionID + "?action=redirect&random=" + randomToken);
@@ -391,35 +454,6 @@ public class EasyLogin extends HttpServlet {
         return stringBuilder.toString();
     }
 
-    private static final String ERROR_PAGE_TEMPLATE =
-        "<html>\n" +
-        "<script type=\"text/javascript\">\n" +
-        "\n" +
-        "// Display normal HTML for 3 seconds, then redirect via referrer.\n" +
-        "setTimeout(redirect,3000);\n" +
-        "\n" +
-        "function redirect(){\n" +
-        " var referrer=document.referrer;\n" +
-        " var redirect_url;\n" +
-        " // If referrer already contains failed parameter, we don't add a 2nd one.\n" +
-        " if(referrer.indexOf(\"login=failed\")>=0){\n" +
-        "  redirect_url=referrer;\n" +
-        " }else{\n" +
-        "  // Check if referrer contains multiple parameter\n" +
-        "  if(referrer.indexOf(\"?\")<0){\n" +
-        "   redirect_url=referrer+\"?login=failed\";\n" +
-        "  }else{\n" +
-        "   redirect_url=referrer+\"&login=failed\";\n" +
-        "  }\n" +
-        " }\n" +
-        " // Redirect to referrer\n" +
-        " window.location.href=redirect_url;\n" +
-        "}\n" +
-        "\n" +
-        "</script>\n" +
-        "<body>\n" +
-        "<h1>ERROR_MESSAGE</h1>\n" +
-        "</body>\n" +
-        "</html>\n";
+    private static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "\n" + "// Display normal HTML for 3 seconds, then redirect via referrer.\n" + "setTimeout(redirect,3000);\n" + "\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
 
 }

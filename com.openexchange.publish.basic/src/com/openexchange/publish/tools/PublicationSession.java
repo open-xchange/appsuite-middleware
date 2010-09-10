@@ -146,4 +146,12 @@ public class PublicationSession implements Session {
         // TODO Auto-generated method stub
         
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.session.Session#setHash(java.lang.String)
+     */
+    public void setHash(String hash) {
+        // TODO Auto-generated method stub
+        
+    }
 }

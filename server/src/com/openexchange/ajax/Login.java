@@ -214,6 +214,8 @@ public class Login extends AJAXServlet {
                 return;
             }
 
+            session.setHash(HashCalculator.getHash(req));
+            
             String oldIP = session.getLocalIp();
             String newIP = req.getRemoteAddr();
             if (!newIP.equals(oldIP)) {

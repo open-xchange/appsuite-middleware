@@ -84,7 +84,7 @@ public final class SessionImpl implements Session {
 
     private final String authId;
 
-    private final String hash;
+    private String hash;
     
     private final Map<String, Object> parameters;
 
@@ -234,5 +234,9 @@ public final class SessionImpl implements Session {
 
     public String getHash() {
         return hash;
+    }
+    
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 }

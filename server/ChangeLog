@@ -7,6 +7,8 @@
 * 2010-09-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #16848: Use correct date format in response headers.
+ - Bugfix #16846: Easy Login transmits "autologin" parameter to redirect method, which in turn forwards it to the UI, that, then will issue
+                  store request.
 
 * 2010-09-10 - martin.herfurth@open-xchange.com
 
