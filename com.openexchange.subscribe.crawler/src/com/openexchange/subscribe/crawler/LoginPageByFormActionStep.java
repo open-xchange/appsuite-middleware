@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,147 +51,222 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
+import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
- * This Step logs into a website via a form requiring username and password. The form is specified by its action. 
+ * This Step logs into a website via a form requiring username and password. The form is specified by its action.
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageByFormActionStep extends AbstractStep implements Step<HtmlPage, Object>{
+public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> implements LoginStep {
+    
+    private static Log LOG = LogFactory.getLog(LoginPageByFormActionStep.class);
 
-	private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, pageTitleAfterLogin;
-	private HtmlPage currentPage;
-	
-	public LoginPageByFormActionStep(){
-		
-	}
-	
-	public LoginPageByFormActionStep (String description, String url, String username, String password, String nameOfLoginForm, String nameOfUserField, String nameOfPasswordField, String pageTitleAfterLogin) {
-		this.description = description;
-		this.url = url;
-		this.username = username;
-		this.password = password;
-		this.nameOfLoginForm = nameOfLoginForm;
-		this.nameOfUserField = nameOfUserField;
-		this.nameOfPasswordField = nameOfPasswordField;
-		this.pageTitleAfterLogin = pageTitleAfterLogin;
-	}
-	
-	public void execute(WebClient webClient) throws SubscriptionException{
-		HtmlPage loginPage;
-		try {
-			// Get the page, fill in the credentials and submit the login form
-			loginPage = webClient.getPage(this.url);
-		    HtmlForm loginForm = loginPage.getFormByName(this.nameOfLoginForm);
-		    HtmlTextInput userfield = loginForm.getInputByName(this.nameOfUserField);
-		    userfield.setValueAttribute(this.username);
-		    HtmlPasswordInput passwordfield = loginForm.getInputByName(this.nameOfPasswordField);
-		    passwordfield.setValueAttribute(this.password);
-		    final HtmlPage pageAfterLogin = (HtmlPage)loginForm.submit(null);
-		    this.currentPage = pageAfterLogin;
-		    
-		    if (!pageAfterLogin.getTitleText().equals(pageTitleAfterLogin)){
-		    	throw SubscriptionErrorMessage.INVALID_LOGIN.create();
-		    }
-		    executedSuccessfully = true;
-		} catch (FailingHttpStatusCodeException e) {	
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		} catch (MalformedURLException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		} catch (IOException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		}		
-	}
+    private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl, nameOfSubmit;
 
-	public HtmlPage getCurrentPage() {
-		return currentPage;
-	}
-	
-	public String inputType() {
-		return null;
-	}
+    private int numberOfForm;
 
-	public String outputType() {
-		return HTML_PAGE;
-	}
+    public LoginPageByFormActionStep() {
+        nameOfSubmit = "";
+    }
 
-	public HtmlPage getOutput() {
-		return currentPage;
-	}
+    public LoginPageByFormActionStep(final String description, final String url, final String username, final String password, final String actionOfLoginForm, final String nameOfUserField, final String nameOfPasswordField, final String linkAvailableAfterLogin, final int numberOfForm, final String baseUrl) {
+        this.description = description;
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.actionOfLoginForm = actionOfLoginForm;
+        this.nameOfUserField = nameOfUserField;
+        this.nameOfPasswordField = nameOfPasswordField;
+        this.linkAvailableAfterLogin = linkAvailableAfterLogin;
+        this.numberOfForm = numberOfForm;
+        this.baseUrl = baseUrl;
+        this.nameOfSubmit = "";
+    }
+    
+    public LoginPageByFormActionStep(final String description, final String url, final String username, final String password, final String actionOfLoginForm, final String nameOfUserField, final String nameOfPasswordField, final String linkAvailableAfterLogin, final int numberOfForm, final String baseUrl, final String nameOfSubmit) {
+        this.description = description;
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.actionOfLoginForm = actionOfLoginForm;
+        this.nameOfUserField = nameOfUserField;
+        this.nameOfPasswordField = nameOfPasswordField;
+        this.linkAvailableAfterLogin = linkAvailableAfterLogin;
+        this.numberOfForm = numberOfForm;
+        this.baseUrl = baseUrl;
+        this.nameOfSubmit = nameOfSubmit;
+    }
 
-	public void setInput(Object input) {
-		// this does nothing
-	}
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
+        HtmlPage loginPage;
+        try {
+            // Get the page, fill in the credentials and submit the login form identified by its action
+            loginPage = webClient.getPage(url);
+            HtmlForm loginForm = null;
+            int numberOfFormCounter = 1;
+            for (final HtmlForm form : loginPage.getForms()) {
+                LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / "+numberOfForm);
+                if (form.getActionAttribute().startsWith(actionOfLoginForm) && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
+                    loginForm = form;
+                }
+                numberOfFormCounter++;
+            }
+            if (loginForm != null) {
+                final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
+                userfield.setValueAttribute(username);
+                final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
+                passwordfield.setValueAttribute(password);
+                HtmlPage pageAfterLogin;
+                // if there is no submit-element specified use the default submit.
+                if (nameOfSubmit.equals("")){
+                    pageAfterLogin = (HtmlPage) loginForm.submit(null);
+                } else {
+                    HtmlSubmitInput button = (HtmlSubmitInput) loginPage.getElementByName(nameOfSubmit);
+                    pageAfterLogin = button.click();
+                }
+                
+                output = pageAfterLogin;
 
-	public String getUrl() {
-		return url;
-	}
+                boolean linkAvailable = false;
+                for (final HtmlAnchor link : pageAfterLogin.getAnchors()) {
+                    if (link.getHrefAttribute().matches(linkAvailableAfterLogin)) {
+                        linkAvailable = true;
+                    }
+                }
+                if (!linkAvailable) {
+                    LOG.error("Login for url "+ url +" failed!");                    
+                    LOG.debug("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
+                    throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+                }
+                executedSuccessfully = true;
+//                openPageInBrowser(output);
+            }
+        } catch (final FailingHttpStatusCodeException e) {
+        	LOG.error(e);
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (final MalformedURLException e) {
+        	LOG.error(e);
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (final IOException e) {
+        	LOG.error(e);
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        }
+//        if (!executedSuccessfully){
+//            openPageInBrowser(loginPage);
+//        }
+    }
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
+    @Override
+    public void setInput(final Object input) {
+        // this does nothing
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public void setUrl(final String url) {
+        this.url = url;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setUsername(final String username) {
+        this.username = username;
+    }
 
-	public String getNameOfLoginForm() {
-		return nameOfLoginForm;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public void setNameOfLoginForm(String nameOfLoginForm) {
-		this.nameOfLoginForm = nameOfLoginForm;
-	}
+    public void setPassword(final String password) {
+        this.password = password;
+    }
 
-	public String getNameOfUserField() {
-		return nameOfUserField;
-	}
+    public String getActionOfLoginForm() {
+        return actionOfLoginForm;
+    }
 
-	public void setNameOfUserField(String nameOfUserField) {
-		this.nameOfUserField = nameOfUserField;
-	}
+    public void setActionOfLoginForm(final String nameOfLoginForm) {
+        actionOfLoginForm = nameOfLoginForm;
+    }
 
-	public String getNameOfPasswordField() {
-		return nameOfPasswordField;
-	}
+    public String getNameOfUserField() {
+        return nameOfUserField;
+    }
 
-	public void setNameOfPasswordField(String nameOfPasswordField) {
-		this.nameOfPasswordField = nameOfPasswordField;
-	}
+    public void setNameOfUserField(final String nameOfUserField) {
+        this.nameOfUserField = nameOfUserField;
+    }
 
-	public void setCurrentPage(HtmlPage currentPage) {
-		this.currentPage = currentPage;
-	}
+    public String getNameOfPasswordField() {
+        return nameOfPasswordField;
+    }
 
-	public String getPageTitleAfterLogin() {
-		return pageTitleAfterLogin;
-	}
+    public void setNameOfPasswordField(final String nameOfPasswordField) {
+        this.nameOfPasswordField = nameOfPasswordField;
+    }
 
-	public void setPageTitleAfterLogin(String pageTitleAfterLogin) {
-		this.pageTitleAfterLogin = pageTitleAfterLogin;
-	}
-	
-	
+    public String getPageTitleAfterLogin() {
+        return linkAvailableAfterLogin;
+    }
+
+    public void setPageTitleAfterLogin(final String pageTitleAfterLogin) {
+        linkAvailableAfterLogin = pageTitleAfterLogin;
+    }
+
+    public String getLinkAvailableAfterLogin() {
+        return linkAvailableAfterLogin;
+    }
+
+    public void setLinkAvailableAfterLogin(final String linkAvailableAfterLogin) {
+        this.linkAvailableAfterLogin = linkAvailableAfterLogin;
+    }
+
+    public int getNumberOfForm() {
+        return numberOfForm;
+    }
+
+    public void setNumberOfForm(final int numberOfForm) {
+        this.numberOfForm = numberOfForm;
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl(final String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    
+    public String getNameOfSubmit() {
+        return nameOfSubmit;
+    }
+
+    
+    public void setNameOfSubmit(String nameOfSubmit) {
+        this.nameOfSubmit = nameOfSubmit;
+    }
+    
+    
 
 }
