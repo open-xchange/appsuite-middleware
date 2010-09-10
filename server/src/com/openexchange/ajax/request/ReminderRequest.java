@@ -242,7 +242,7 @@ public final class ReminderRequest {
     }
 
     private JSONObject actionRemindAgain(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
-        timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
+        // timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
         final int reminderId = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
         final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
         final TimeZone timeZone;
@@ -284,7 +284,7 @@ public final class ReminderRequest {
         /*
          * Trigger action
          */
-        reminderSql.remindAgain(reminder, session, session.getContext(), timestamp);
+        reminderSql.remindAgain(reminder, session, session.getContext());
         timestamp = reminder.getLastModified();
         /*
          * Write updated reminder

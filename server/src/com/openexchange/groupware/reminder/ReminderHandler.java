@@ -629,26 +629,26 @@ public class ReminderHandler implements ReminderService {
         return arising.loadWithIterator();
     }
 
-    public void remindAgain(final ReminderObject reminder, final Session session, final Context ctx, final Date timestamp) throws OXException {
+    public void remindAgain(final ReminderObject reminder, final Session session, final Context ctx) throws OXException {
         Connection readCon = null;
         try {
-            readCon = DBPool.pickup(context);
-            remindAgain(reminder, session, ctx, timestamp, readCon);
+            readCon = DBPool.pickupWriteable(context);
+            remindAgain(reminder, session, ctx, readCon);
         } catch (final DBPoolingException exc) {
             throw new OXException(exc);
         } finally {
-            DBPool.closeReaderSilent(context, readCon);
+            DBPool.closeWriterSilent(context, readCon);
         }
     }
 
-    public void remindAgain(final ReminderObject reminder, final Session session, final Context ctx, final Date timestamp, final Connection readCon) throws OXException {
-        final RemindAgain remindAgain = new RemindAgain(reminder, session, ctx, timestamp, this);
+    public void remindAgain(final ReminderObject reminder, final Session session, final Context ctx, final Connection writeCon) throws OXException {
+        final RemindAgain remindAgain = new RemindAgain(reminder, session, ctx, this);
         remindAgain.remindAgain();
         /*
          * Update target
          */
         try {
-            TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(context, readCon, reminder.getTargetId());
+            TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(context, writeCon, reminder.getTargetId());
         } catch (final AbstractOXException e) {
             throw new ReminderException(e);
         }

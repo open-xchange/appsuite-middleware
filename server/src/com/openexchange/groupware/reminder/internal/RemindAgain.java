@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.reminder.internal;
 
-import java.util.Date;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.groupware.Types;
@@ -68,7 +67,6 @@ public class RemindAgain {
     private final Session session;
     private final Context ctx;
     private final ReminderObject reminder;
-    private final Date timestamp;
     private final ReminderService reminderService;
 
     /**
@@ -77,14 +75,12 @@ public class RemindAgain {
      * @param reminder The reminder
      * @param session The session
      * @param ctx The context
-     * @param timestamp The client's time stamp
      */
-    public RemindAgain(final ReminderObject reminder, final Session session, final Context ctx, final Date timestamp, final ReminderService reminderService) {
+    public RemindAgain(final ReminderObject reminder, final Session session, final Context ctx, final ReminderService reminderService) {
         super();
         this.session = session;
         this.ctx = ctx;
         this.reminder = reminder;
-        this.timestamp = timestamp;
         this.reminderService = reminderService;
     }
 

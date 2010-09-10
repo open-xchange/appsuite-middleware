@@ -131,10 +131,9 @@ public interface ReminderService {
      * @param ctx The context
      * @param user The user
      * @param tz The time zone
-     * @param timestamp The time stamp
      * @throws OXException If alarm of reminder cannot be updated
      */
-    public void remindAgain(ReminderObject reminder, Session session, Context ctx, Date timestamp) throws OXException;
+    public void remindAgain(ReminderObject reminder, Session session, Context ctx) throws OXException;
 
     /**
      * Updates the alarm of specified reminder.
@@ -144,11 +143,10 @@ public interface ReminderService {
      * @param ctx The context
      * @param user The user
      * @param tz The time zone
-     * @param timestamp The time stamp
-     * @param readCon The read-only connection
+     * @param writeCon The read-write connection
      * @throws OXException If alarm of reminder cannot be updated
      */
-    public void remindAgain(ReminderObject reminder, Session session, Context ctx, Date timestamp, Connection readCon) throws OXException;
+    public void remindAgain(ReminderObject reminder, Session session, Context ctx, Connection writeCon) throws OXException;
 
     public SearchIterator listModifiedReminder(int userId, Date lastModified) throws OXException;
 
