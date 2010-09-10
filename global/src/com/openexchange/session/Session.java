@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,6 +68,12 @@ public interface Session {
      */
     public String getLocalIp();
 
+    /**
+     * Updates the local IP address.
+     * @param ip the new IP address associated with this session
+     */
+    public void setLocalIp(String ip);
+    
     /**
      * Gets the login name
      * 
@@ -157,5 +163,21 @@ public interface Session {
      * Removes the random token
      */
     public void removeRandomToken();
+
+    /**
+     * @return the authentication identifier that is used to trace the login request across different systems.
+     */
+    String getAuthId();
+
+    /**
+     * @return The HashCode distinguishing this session from others in the same store.
+     */
+    public String getHash();
+
+    /**
+     * Updates the hash value of this session.
+     * @param hash The new hash value
+     */
+    public void setHash(String hash);
 
 }

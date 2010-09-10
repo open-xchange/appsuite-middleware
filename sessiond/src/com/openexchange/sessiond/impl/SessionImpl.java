@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -82,6 +82,10 @@ public final class SessionImpl implements Session {
 
     private String localIp;
 
+    private final String authId;
+
+    private String hash;
+    
     private final Map<String, Object> parameters;
 
     /**
@@ -96,7 +100,7 @@ public final class SessionImpl implements Session {
      * @param randomToken The random token
      * @param localIp The local IP
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login) {
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, String authId, String hash) {
         this.userId = userId;
         this.loginName = loginName;
         this.password = password;
@@ -106,6 +110,8 @@ public final class SessionImpl implements Session {
         this.localIp = localIp;
         this.contextId = contextId;
         this.login = login;
+        this.authId = authId;
+        this.hash = hash;
         parameters = new ConcurrentHashMap<String, Object>();
     }
 
@@ -113,9 +119,8 @@ public final class SessionImpl implements Session {
      * Initializes a new {@link SessionImpl} from specified cached session.
      * 
      * @param cachedSession The cached session
-     * @param localIP The host's local IP
      */
-    public SessionImpl(final CachedSession cachedSession, final String localIP) {
+    protected SessionImpl(final CachedSession cachedSession) {
         super();
         userId = cachedSession.getUserId();
         contextId = cachedSession.getContextId();
@@ -125,7 +130,9 @@ public final class SessionImpl implements Session {
         secret = cachedSession.getSecret();
         randomToken = cachedSession.getRandomToken();
         login = cachedSession.getLogin();
-        localIp = localIP;
+        localIp = cachedSession.getLocalIp();
+        authId = cachedSession.getAuthId();
+        hash = cachedSession.getHash();
         final Map<String, Serializable> params = cachedSession.getParameters();
         parameters = new ConcurrentHashMap<String, Object>(params.size());
         for (final Iterator<Map.Entry<String, Serializable>> iter = params.entrySet().iterator(); iter.hasNext();) {
@@ -140,7 +147,7 @@ public final class SessionImpl implements Session {
      * @return An appropriate instance of {@link CachedSession}
      */
     public CachedSession createCachedSession() {
-        return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp, login, parameters);
+        return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp, login, authId, hash, parameters);
     }
 
     public int getContextId() {
@@ -186,13 +193,9 @@ public final class SessionImpl implements Session {
     public String getLocalIp() {
         return localIp;
     }
+    
 
-    /**
-     * Sets the local IP
-     * 
-     * @param localIp The local IP to set
-     */
-    void setLocalIp(final String localIp) {
+    public void setLocalIp(final String localIp) {
         this.localIp = localIp;
     }
 
@@ -223,5 +226,17 @@ public final class SessionImpl implements Session {
      */
     public void setPassword(final String password) {
         this.password = password;
+    }
+
+    public String getAuthId() {
+        return authId;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+    
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 }

@@ -47,32 +47,63 @@
  *
  */
 
-package com.openexchange.publish.tools;
+package com.openexchange.tools.session;
 
-import com.openexchange.publish.Publication;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.MockUser;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.usersetting.UserSettingMail;
+
 
 /**
- * {@link PublicationSession}
- * 
+ * {@link SimServerSession}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class PublicationSession implements Session {
+public class SimServerSession implements ServerSession {
 
-    private final Publication publication;
-
-    /**
-     * Initializes a new {@link PublicationSession}.
-     * 
-     * @param publication
-     */
-    public PublicationSession(final Publication publication) {
+    private Context context;
+    private User user;
+    private UserConfiguration userConfig;
+    
+    public SimServerSession(Context context, User user, UserConfiguration userConfig) {
         super();
-        this.publication = publication;
+        this.context = context;
+        this.user = user;
+        this.userConfig = userConfig;
+    }
+    
+    
+    public SimServerSession(int ctxId, int uid) {
+        this(new SimContext(ctxId), null, null);
+        this.user = new MockUser(uid);
+    }
+    
+    public Context getContext() {
+        return context;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public UserConfiguration getUserConfiguration() {
+        return userConfig;
+    }
+
+    public UserSettingMail getUserSettingMail() {
+        return null;
+    }
+
+    public boolean containsParameter(String name) {
+        return false;
     }
 
     public int getContextId() {
-        return publication.getContext().getContextId();
+        return context.getContextId();
     }
 
     public String getLocalIp() {
@@ -87,11 +118,7 @@ public class PublicationSession implements Session {
         return null;
     }
 
-    public boolean containsParameter(final String name) {
-        return false;
-    }
-
-    public Object getParameter(final String name) {
+    public Object getParameter(String name) {
         return null;
     }
 
@@ -112,7 +139,7 @@ public class PublicationSession implements Session {
     }
 
     public int getUserId() {
-        return publication.getUserId();
+        return user.getId();
     }
 
     public String getUserlogin() {
@@ -123,13 +150,14 @@ public class PublicationSession implements Session {
         throw new UnsupportedOperationException();
     }
 
-    public void setParameter(final String name, final Object value) {
-        // Nothing to remember.
+    public void setParameter(String name, Object value) {
+        throw new UnsupportedOperationException();
     }
 
     public String getAuthId() {
         throw new UnsupportedOperationException();
     }
+
 
     /* (non-Javadoc)
      * @see com.openexchange.session.Session#getHash()
@@ -139,6 +167,7 @@ public class PublicationSession implements Session {
         return null;
     }
 
+
     /* (non-Javadoc)
      * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
      */
@@ -146,6 +175,7 @@ public class PublicationSession implements Session {
         // TODO Auto-generated method stub
         
     }
+
 
     /* (non-Javadoc)
      * @see com.openexchange.session.Session#setHash(java.lang.String)

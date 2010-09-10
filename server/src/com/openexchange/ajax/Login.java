@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.login.Interface.HTTP_JSON;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.UUID;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -60,11 +63,17 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.helper.Send;
+import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.config.ConfigTools;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -72,185 +81,99 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.login.Interface;
+import com.openexchange.login.LoginRequest;
+import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
+/**
+ * Servlet doing the login and logout stuff.
+ * 
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class Login extends AJAXServlet {
 
-    /**
-     * For serialization.
-     */
     private static final long serialVersionUID = 7680745138705836499L;
-
-    public static final String PARAM_RANDOM = "random";
 
     private static final String PARAM_NAME = "name";
 
     private static final String PARAM_PASSWORD = "password";
 
-    private static final String REDIRECT_URL = "/index.html#id=";
+    private static final String PARAM_UI_WEB_PATH = "uiWebPath";
 
-    public static final String COOKIE_PREFIX = "open-xchange-session-";
+    public static final String SESSION_PREFIX = "open-xchange-session-";
 
-    private static transient final Log LOG = LogFactory.getLog(Login.class);
+    public static final String SECRET_PREFIX = "open-xchange-secret-";
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
-     */
+    private static final Log LOG = LogFactory.getLog(Login.class);
+
+    private String uiWebPath;
+
+    public Login() {
+        super();
+    }
+
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
+    }
+
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final String action = req.getParameter(PARAMETER_ACTION);
         if (action == null) {
             logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION));
             return;
         }
         if (ACTION_LOGIN.equals(action)) {
-            /*
-             * Look-up necessary credentials
-             */
-            final String name = req.getParameter(PARAM_NAME);
-            if (null == name) {
-                logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_NAME));
+            // Look-up necessary credentials
+            try {
+                doLogin(req, resp);
+            } catch (AjaxException e) {
+                logAndSendException(resp, e);
                 return;
             }
-            final String password = req.getParameter(PARAM_PASSWORD);
-            if (null == password) {
-                logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_PASSWORD));
+        } else if (ACTION_STORE.equals(action)) {
+            try {
+                doStore(req, resp);
+            } catch (AbstractOXException e) {
+                logAndSendException(resp, e);
                 return;
-            }
-            /*
-             * Perform the login
-             */
-            Session session = null;
-            final Response response = new Response();
-            com.openexchange.login.Login loginResult = null;
-            try {
-                loginResult = LoginPerformer.getInstance().doLogin(name, password, req.getRemoteAddr());
-                session = loginResult.getSession();
-            } catch (final LoginException e) {
-                if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
-                    LOG.debug(e.getMessage(), e);
-                } else {
-                    LOG.error(e.getMessage(), e);
-                }
-                response.setException(e);
-            }
-            if (null != loginResult && null != loginResult.getError()) {
-                final LoginException e = loginResult.getError();
-                if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
-                    LOG.debug(e.getMessage(), e);
-                } else {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-            /*
-             * Store associated session
-             */
-            try {
-                if (null != session) {
-                    SessionServlet.rememberSession(req, new ServerSessionAdapter(session));
-                }
-            } catch (final ContextException e) {
-                LOG.error(e.getMessage(), e);
-                response.setException(e);
-            }
-            // Write response
-            JSONObject login = null;
-            if (!response.hasError()) {
-                try {
-                    login = writeLogin(session);
-                } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-                    LOG.error(oje.getMessage(), oje);
-                    response.setException(oje);
-                }
-            }
-            // The magic spell to disable caching
-            Tools.disableCaching(resp);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            if (!response.hasError()) {
-                writeCookie(resp, session);
-            }
-            try {
-                if (null == login) {
-                    ResponseWriter.write(response, resp.getWriter());
-                    // Response.write(response, resp.getWriter());
-                } else {
-                    login.write(resp.getWriter());
-                }
-            } catch (final JSONException e) {
-                if (e.getCause() instanceof IOException) {
-                    /*
-                     * Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just
-                     * throwing a JSON error possibly hides this fact by trying to write to/read from a broken socket connection.
-                     */
-                    throw (IOException) e.getCause();
-                }
+            } catch (JSONException e) {
                 log(RESPONSE_ERROR, e);
                 sendError(resp);
             }
         } else if (ACTION_LOGOUT.equals(action)) {
-            /*
-             * The magic spell to disable caching
-             */
+            // The magic spell to disable caching
             Tools.disableCaching(resp);
-            final String cookieId = req.getParameter(PARAMETER_SESSION);
-            if (cookieId == null) {
+            final String sessionId = req.getParameter(PARAMETER_SESSION);
+            if (sessionId == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
-            /*
-             * Drop relevant cookies
-             */
-            String sessionId = null;
-            final Cookie[] cookies = req.getCookies();
-            if (cookies != null) {
-                final String cookieName = new StringBuilder(Login.COOKIE_PREFIX).append(cookieId).toString();
-                int stat = 0;
-                for (int a = 0; a < cookies.length && stat != 3; a++) {
-                    if (cookieName.equals(cookies[a].getName())) {
-                        sessionId = cookies[a].getValue();
-                        final Cookie respCookie = new Cookie(cookieName, sessionId);
-                        respCookie.setPath("/");
-                        respCookie.setMaxAge(0); // delete
-                        resp.addCookie(respCookie);
-                        stat |= 1;
-                    } else if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookies[a].getName())) {
-                        final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookies[a].getValue());
-                        jsessionIdCookie.setPath("/");
-                        jsessionIdCookie.setMaxAge(0); // delete
-                        resp.addCookie(jsessionIdCookie);
-                        stat |= 2;
-                    }
+            try {
+                Session session = LoginPerformer.getInstance().doLogout(sessionId);
+                if(session != null) {
+                    // Drop relevant cookies
+                    SessionServlet.removeOXCookies(session.getHash(), req, resp);
                 }
+            } catch (final LoginException e) {
+                LOG.error("Logout failed", e);
             }
-            if (sessionId == null) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("no session cookie found in request!");
-                }
-            } else {
-                // Do logout
-                try {
-                    LoginPerformer.getInstance().doLogout(sessionId);
-                } catch (final LoginException e) {
-                    LOG.error("Logout failed", e);
-                }
-            }
-        } else if (ACTION_REDIRECT.equals(action)) {
-            /*
-             * The magic spell to disable caching
-             */
+        } else if (ACTION_REDIRECT.equals(action) || ACTION_REDEEM.equals(action)) {
+            // The magic spell to disable caching
             Tools.disableCaching(resp);
-            final String randomToken = req.getParameter(PARAM_RANDOM);
+            final String randomToken = req.getParameter(LoginFields.PARAM_RANDOM);
             if (randomToken == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
@@ -264,9 +187,7 @@ public class Login extends AJAXServlet {
             }
             final Session session = sessiondService.getSessionByRandomToken(randomToken, req.getRemoteAddr());
             if (session == null) {
-                /*
-                 * Unknown random token; throw error
-                 */
+                // Unknown random token; throw error
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
                 } else if (LOG.isInfoEnabled()) {
@@ -280,31 +201,86 @@ public class Login extends AJAXServlet {
                 final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                 if (!context.isEnabled() || !user.isMailEnabled()) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
                 }
             } catch (final UndeclaredThrowableException e) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
             } catch (final ContextException e) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
             } catch (final LdapException e) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
             }
-            writeCookie(resp, session);
-            resp.sendRedirect(REDIRECT_URL + session.getSecret());
+
+            session.setHash(HashCalculator.getHash(req));
+            
+            String oldIP = session.getLocalIp();
+            String newIP = req.getRemoteAddr();
+            if (!newIP.equals(oldIP)) {
+                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID" + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+                session.setLocalIp(newIP);
+            }
+            
+            writeSecretCookie(resp, session, req.isSecure());
+
+            if(ACTION_REDIRECT.equals(action)) {
+                String usedUIWebPath = req.getParameter(PARAM_UI_WEB_PATH);
+                if (null == usedUIWebPath) {
+                    usedUIWebPath = uiWebPath;
+                }
+                // Prevent HTTP response splitting.
+                usedUIWebPath = usedUIWebPath.replaceAll("[\n\r]", "");
+                usedUIWebPath = addFragmentParameter(usedUIWebPath, PARAMETER_SESSION, session.getSessionID());
+                String shouldStore = req.getParameter("store");
+                if(shouldStore != null) {
+                    usedUIWebPath = addFragmentParameter(usedUIWebPath, "store", shouldStore);
+                }
+                resp.sendRedirect(usedUIWebPath);
+            } else {
+                try {
+                    JSONObject json = new JSONObject();
+                    new LoginWriter().writeLogin(session, json);
+                    json.write(resp.getWriter());
+                } catch (JSONException e) {
+                    log(RESPONSE_ERROR, e);
+                    sendError(resp);
+                }
+            }
         } else if (ACTION_AUTOLOGIN.equals(action)) {
-            final Cookie[] cookies = req.getCookies();
             final Response response = new Response();
             try {
+                if (!isAutologinEnabled()) {
+                    throw new AjaxException(AjaxException.Code.DisabledAction, "autologin");
+                }
+
+                final Cookie[] cookies = req.getCookies();
+                String hash = HashCalculator.getHash(req);
+
                 if (cookies == null) {
                     throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
                 }
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+
+                Session session = null;
+                String secret = null;
+
+                String sessionCookieName = SESSION_PREFIX + hash;
+                String secretCookieName = SECRET_PREFIX + hash;
+
                 for (final Cookie cookie : cookies) {
                     final String cookieName = cookie.getName();
-                    if (cookieName.startsWith(COOKIE_PREFIX)) {
+                    if (cookieName.startsWith(sessionCookieName)) {
                         final String sessionId = cookie.getValue();
                         if (sessiondService.refreshSession(sessionId)) {
-                            final Session session = sessiondService.getSession(sessionId);
-                            SessionServlet.checkIP(session.getLocalIp(), req.getRemoteAddr());
+                            session = sessiondService.getSession(sessionId);
+                            String oldIP = session.getLocalIp();
+                            String newIP = req.getRemoteAddr();
+                            if (!newIP.equals(oldIP)) {
+                                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID" + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+                                session.setLocalIp(newIP);
+                            }
                             try {
                                 final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
                                 final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
@@ -314,21 +290,19 @@ public class Login extends AJAXServlet {
                             } catch (final UndeclaredThrowableException e) {
                                 throw LoginExceptionCodes.UNKNOWN.create(e);
                             }
-
-                            response.setData(writeLogin(session));
-                            break;
+                            JSONObject json = new JSONObject();
+                            new LoginWriter().writeLogin(session, json);
+                            response.setData(json);
                         }
-                        // Not found session. Delete old OX cookie.
-                        final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
-                        respCookie.setPath("/");
-                        respCookie.setMaxAge(0); // delete
-                        resp.addCookie(respCookie);
+                    } else if (cookieName.startsWith(secretCookieName)) {
+                        secret = cookie.getValue();
                     }
                 }
-                if (null == response.getData()) {
+                if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
+                    SessionServlet.removeOXCookies(hash, req, resp);
                     throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
                 }
-            } catch (final SessiondException e) {
+            } catch (final AjaxException e) {
                 LOG.debug(e.getMessage(), e);
                 response.setException(e);
             } catch (final OXJSONException e) {
@@ -352,9 +326,7 @@ public class Login extends AJAXServlet {
                 }
                 response.setException(e);
             }
-            /*
-             * The magic spell to disable caching
-             */
+            // The magic spell to disable caching
             Tools.disableCaching(resp);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -373,18 +345,64 @@ public class Login extends AJAXServlet {
         }
     }
 
-    private void logAndSendException(final HttpServletResponse resp, final AjaxException e) throws IOException {
+    protected String addFragmentParameter(String usedUIWebPath, String param, String value) {
+        int fragIndex = usedUIWebPath.indexOf('#');
+        
+        // First get rid of the query String, so we can reappend it later
+        int questionMarkIndex = usedUIWebPath.indexOf('?', fragIndex);
+        String query = "";
+        if(questionMarkIndex > 0) {
+            query = usedUIWebPath.substring(questionMarkIndex);
+            usedUIWebPath = usedUIWebPath.substring(0, questionMarkIndex);
+        }
+        // Now let's see, if this url already contains a fragment
+        if(!usedUIWebPath.contains("#")) {
+            // Apparently it didn't, so we can append our own
+            return usedUIWebPath+"#"+param+"="+value+query;
+        }
+        // Alright, we already have a fragment, let's append a new parameer
+        
+        return usedUIWebPath+"&"+param+"="+value+query;
+    }
+
+    private void doStore(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
+        if (!isAutologinEnabled()) {
+            throw new AjaxException(AjaxException.Code.DisabledAction, "store");
+        }
+        SessiondService sessiond = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null == sessiond) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
+        }
+
+        String sessionId = req.getParameter(PARAMETER_SESSION);
+        if (null == sessionId) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_SESSION);
+        }
+
+        Session session = SessionServlet.getSession(req, sessionId, sessiond);
+
+        writeSessionCookie(resp, session, req.isSecure());
+
+        Response response = new Response();
+        response.setData("1");
+
+        ResponseWriter.write(response, resp.getWriter());
+    }
+
+    private boolean isAutologinEnabled() {
+        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false);
+    }
+
+    private void logAndSendException(final HttpServletResponse resp, final AbstractOXException e) throws IOException {
         LOG.debug(e.getMessage(), e);
         final Response response = new Response();
         response.setException(e);
         Send.sendResponse(response, resp);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         doGet(req, resp);
     }
 
@@ -395,16 +413,140 @@ public class Login extends AJAXServlet {
      * @param resp The HTTP servlet response
      * @param session The session providing the secret cookie identifier
      */
-    protected static void writeCookie(final HttpServletResponse resp, final Session session) {
-        final Cookie cookie = new Cookie(COOKIE_PREFIX + session.getSecret(), session.getSessionID());
-        cookie.setPath("/");
+    protected static void writeSecretCookie(final HttpServletResponse resp, final Session session, boolean secure) {
+        final Cookie cookie = new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret());
+        configureCookie(cookie, secure);
         resp.addCookie(cookie);
     }
 
-    private JSONObject writeLogin(final Session sessionObj) throws JSONException {
-        final JSONObject retval = new JSONObject();
-        retval.put(PARAMETER_SESSION, sessionObj.getSecret());
-        retval.put(PARAM_RANDOM, sessionObj.getRandomToken());
-        return retval;
+    protected static void writeSessionCookie(final HttpServletResponse resp, final Session session, boolean secure) {
+        final Cookie cookie = new Cookie(SESSION_PREFIX + session.getHash(), session.getSessionID());
+        configureCookie(cookie, secure);
+        resp.addCookie(cookie);
+    }
+
+    private static void configureCookie(Cookie cookie, boolean secure) {
+        cookie.setPath("/");
+        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        boolean autologin = configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false);
+        if (!autologin) {
+            return;
+        }
+        String spanDef = configurationService.getProperty("com.openexchange.sessiond.cookie.ttl", "1W");
+        cookie.setMaxAge((int) (ConfigTools.parseTimespan(spanDef) / 1000));
+        boolean forceHTTPS = configurationService.getBoolProperty("com.openexchange.sessiond.cookie.forceHTTPS", false);
+        if (forceHTTPS || secure) {
+            cookie.setSecure(true);
+        }
+    }
+
+    private void doLogin(HttpServletRequest req, HttpServletResponse resp) throws AjaxException, IOException {
+        final LoginRequest request = parseLogin(req);
+        // Perform the login
+        final Response response = new Response();
+        LoginResult result = null;
+        try {
+            result = LoginPerformer.getInstance().doLogin(request);
+            // Write response
+            JSONObject json = new JSONObject();
+            new LoginWriter().writeLogin(result.getSession(), json);
+            response.setData(json);
+        } catch (final LoginException e) {
+            if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
+                LOG.debug(e.getMessage(), e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
+            response.setException(e);
+        } catch (final JSONException e) {
+            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            LOG.error(oje.getMessage(), oje);
+            response.setException(oje);
+        }
+        // The magic spell to disable caching
+        Tools.disableCaching(resp);
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        try {
+            if (response.hasError() || null == result) {
+                ResponseWriter.write(response, resp.getWriter());
+            } else {
+                final Session session = result.getSession();
+                // Store associated session
+                SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
+                writeSecretCookie(resp, session, req.isSecure());
+                
+                // Login response is unfortunately not conform to default responses.
+                ((JSONObject) response.getData()).write(resp.getWriter());
+            }
+        } catch (final JSONException e) {
+            if (e.getCause() instanceof IOException) {
+                // Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just
+                // throwing a JSON error possibly hides this fact by trying to write to/read from a broken socket connection.
+                throw (IOException) e.getCause();
+            }
+            LOG.error(RESPONSE_ERROR, e);
+            sendError(resp);
+        }
+    }
+
+    private LoginRequest parseLogin(final HttpServletRequest req) throws AjaxException {
+        final String login = req.getParameter(PARAM_NAME);
+        if (null == login) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_NAME);
+        }
+        final String password = req.getParameter(PARAM_PASSWORD);
+        if (null == password) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_PASSWORD);
+        }
+        final String authId = null == req.getParameter(LoginFields.AUTHID_PARAM) ? UUIDs.getUnformattedString(UUID.randomUUID()) : req.getParameter(LoginFields.AUTHID_PARAM);
+        LoginRequest loginRequest = new LoginRequest() {
+
+            private String hash = null;
+
+            public String getLogin() {
+                return login;
+            }
+
+            public String getPassword() {
+                return password;
+            }
+
+            public String getClientIP() {
+                return req.getRemoteAddr();
+            }
+
+            public String getUserAgent() {
+                return req.getHeader(Header.USER_AGENT);
+            }
+
+            public String getAuthId() {
+                return authId;
+            }
+
+            public String getClient() {
+                if (req.getParameter(LoginFields.CLIENT_PARAM) == null) {
+                    return "default";
+                }
+                return req.getParameter(LoginFields.CLIENT_PARAM);
+            }
+
+            public String getVersion() {
+                return req.getParameter(LoginFields.VERSION_PARAM);
+            }
+
+            public Interface getInterface() {
+                return HTTP_JSON;
+            }
+
+            public String getHash() {
+                if (hash != null) {
+                    return hash;
+                }
+
+                return hash = HashCalculator.getHash(req);
+
+            }
+        };
+        return loginRequest;
     }
 }
