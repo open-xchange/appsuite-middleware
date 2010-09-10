@@ -58,6 +58,7 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -345,6 +346,11 @@ public class EasyLogin extends HttpServlet {
         sb.append("/login?action=redirect&random=");
         sb.append(session.getRandomToken());
         String uiWebPath = getParameter(req, UI_WEB_PATH_PARAMETER);
+        
+        // Escape significant characters like '#' so that the redirect target doesn't mistakenly parse them
+        
+        uiWebPath = URLEncoder.encode(uiWebPath, "UTF-8"); 
+        
         if (null != uiWebPath) {
             sb.append('&');
             sb.append(UI_WEB_PATH_PARAMETER);
