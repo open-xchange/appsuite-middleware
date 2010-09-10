@@ -227,7 +227,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
         List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, user.getId());
         for (Subscription subscription : allSubscriptions) {
-            if (subscription.getSource().getId().equals(getSubscriptionSource())) {
+            if (subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
                 Map<String, Object> configuration = subscription.getConfiguration();
                 Map<String, Object> update = new HashMap<String, Object>();
                 for (String passwordField : passwordFields) {
