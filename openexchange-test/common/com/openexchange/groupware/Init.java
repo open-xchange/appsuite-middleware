@@ -56,8 +56,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import org.osgi.service.event.EventAdmin;
+import org.w3c.tidy.Report;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
@@ -112,6 +114,9 @@ import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServ
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
+import com.openexchange.html.HTMLService;
+import com.openexchange.html.internal.HTMLServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
@@ -292,6 +297,7 @@ public final class Init {
         startAndInjectConfigBundle();
         startAndInjectThreadPoolBundle();
         startAndInjectBasicServices();
+        startAndInjectHTMLService();
         startAndInjectCalendarServices();
         startAndInjectExceptionFramework();
         startAndInjectServerConfiguration();
@@ -375,6 +381,16 @@ public final class Init {
         ServerServiceRegistry.getInstance().addService(
             ContactInterfaceDiscoveryService.class,
             services.get(ContactInterfaceDiscoveryService.class));
+    }
+
+    private static void startAndInjectHTMLService() {
+        ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
+        Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
+        Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
+        Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
+        HTMLService service = new HTMLServiceImpl(properties, (Map<Character, String>) maps[0], (Map<String, Character>) maps[1]);
+        services.put(HTMLService.class, service);
+        ServerServiceRegistry.getInstance().addService(HTMLService.class, service);
     }
 
     private static final AbstractOXException getWrappingOXException(final Exception cause) {
