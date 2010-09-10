@@ -1,3 +1,7 @@
+* 2010-09-10 - francisco.laguna@open-xchange.com
+
+ - Bugfix #16848: Use correct date format in response headers.
+
 * 2010-09-10 - martin.herfurth@open-xchange.com
 
  - Bugfix #16151: Move appointment from shared to private folder.

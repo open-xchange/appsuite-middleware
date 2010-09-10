@@ -144,7 +144,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         /*
          * Date Format
          */
-        HEADER_DATE_FORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy hh:mm:ss z", Locale.ENGLISH);
+        HEADER_DATE_FORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
         final DateFormatSymbols dfs = HEADER_DATE_FORMAT.getDateFormatSymbols();
         final String[] shortWeekdays = new String[8];
         shortWeekdays[Calendar.SUNDAY] = "Sun";
