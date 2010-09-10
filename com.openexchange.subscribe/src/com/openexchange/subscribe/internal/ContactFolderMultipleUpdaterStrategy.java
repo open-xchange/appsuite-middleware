@@ -220,6 +220,9 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
+        
+        // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
+        newElement.setUserField20(UUID.randomUUID().toString());
 
         contacts.insertContactObject(newElement);
     }

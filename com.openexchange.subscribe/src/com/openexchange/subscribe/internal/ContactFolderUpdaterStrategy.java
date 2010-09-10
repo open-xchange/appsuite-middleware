@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
@@ -183,6 +184,9 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
 
+        // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
+        newElement.setUserField20(UUID.randomUUID().toString());
+        
         contacts.insertContactObject(newElement);
     }
 
