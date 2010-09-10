@@ -108,10 +108,12 @@ public class RemindAgainTest extends AbstractAJAXSession {
 
         Task reload = null;
         
+        int targetId = -1;
+        
         final com.openexchange.ajax.task.actions.InsertResponse insertR = client.execute(new com.openexchange.ajax.task.actions.InsertRequest(task, timeZone));
         try {
-            final int targetId = insertR.getId();
-            final com.openexchange.ajax.task.actions.GetResponse getR = com.openexchange.ajax.task.TaskTools.get(client, new com.openexchange.ajax.task.actions.GetRequest(insertR));
+            targetId = insertR.getId();
+            final com.openexchange.ajax.task.actions.GetResponse getR = com.openexchange.ajax.task.TaskTools.get(client, new com.openexchange.ajax.task.actions.GetRequest(folderId, targetId));
             reload = getR.getTask(timeZone);
             
             /*
@@ -139,7 +141,7 @@ public class RemindAgainTest extends AbstractAJAXSession {
             c.add(Calendar.DAY_OF_YEAR, -2); // Reminder
             final Date newAlarm = c.getTime();
             reminderObject.setDate(newAlarm);
-            Executor.execute(client, new RemindAgainRequest(reminderObject, reload.getLastModified()));
+            Executor.execute(client, new RemindAgainRequest(reminderObject));
             
             c.add(Calendar.DAY_OF_YEAR, 2);
             reminderObjs = Executor.execute(client, new RangeRequest(c.getTime())).getReminder(timeZone);
@@ -157,15 +159,18 @@ public class RemindAgainTest extends AbstractAJAXSession {
             assertEquals("target id is not equal", targetId, reminderObject.getTargetId());
             assertEquals("folder id is not equal", folderId, reminderObject.getFolder());
             assertEquals("user id is not equal", userId, reminderObject.getUser());
-            assertEquals("alarm is not equal", newAlarm.getTime(), reminderObject.getDate().getTime());
-            
-            
-            reload = com.openexchange.ajax.task.TaskTools.get(client, new com.openexchange.ajax.task.actions.GetRequest(insertR)).getTask(timeZone);
+
+            final Date timzonedNewAlarm = new Date(newAlarm.getTime());
+            final int offset = timeZone.getOffset(timzonedNewAlarm.getTime());
+            timzonedNewAlarm.setTime(timzonedNewAlarm.getTime() - offset);
+            assertEquals("alarm is not equal", timzonedNewAlarm, reminderObject.getDate());
+
         } finally {
             if (null != reload) {
                 /*
                  * Delete task
                  */
+                reload = com.openexchange.ajax.task.TaskTools.get(client, new com.openexchange.ajax.task.actions.GetRequest(folderId, targetId)).getTask(timeZone);
                 client.execute(new com.openexchange.ajax.task.actions.DeleteRequest(reload));
             }
         }
