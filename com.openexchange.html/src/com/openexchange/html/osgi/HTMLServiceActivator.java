@@ -187,7 +187,7 @@ public class HTMLServiceActivator extends DeferredActivator {
             context.registerService(HTMLService.class.getName(), new HTMLServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
     }
 
-    private static Object[] getHTMLEntityMaps(final String htmlEntityFilename) {
+    public static Object[] getHTMLEntityMaps(final String htmlEntityFilename) {
         final Map<Character, String> htmlCharMap = new HashMap<Character, String>();
         final Map<String, Character> htmlEntityMap = new HashMap<String, Character>();
         final Properties htmlEntities = new Properties();
@@ -442,7 +442,7 @@ public class HTMLServiceActivator extends DeferredActivator {
         return new Object[] { htmlCharMap, htmlEntityMap };
     }
 
-    private static Properties getTidyConfiguration(final String tidyConfigFilename) {
+    public static Properties getTidyConfiguration(final String tidyConfigFilename) {
         final Properties properties = new Properties();
         boolean useDefaultConfig = true;
         if (null != tidyConfigFilename) {
@@ -514,7 +514,7 @@ public class HTMLServiceActivator extends DeferredActivator {
      * @param tidyMessagesFilename The file name for the file containing the tidy messages
      * @return The messages used by JTidy as an input stream
      */
-    private static InputStream getTidyMessages(final String tidyMessagesFilename) {
+    public static InputStream getTidyMessages(final String tidyMessagesFilename) {
         /*
          * Load from file
          */
