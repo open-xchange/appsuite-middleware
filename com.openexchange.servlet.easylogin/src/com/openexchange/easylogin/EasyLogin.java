@@ -149,7 +149,7 @@ public class EasyLogin extends HttpServlet {
 
         clientParam = config.getInitParameter("com.openexchange.easylogin.clientPara");
         if (null == clientParam) {
-            autologinParam = "autologin";
+            clientParam = "client";
             LOG.error("Could not find clientPara in configuration file, using default: " + clientParam);
         } else {
             LOG.info("Set clientPara to " + clientParam);
@@ -361,6 +361,9 @@ public class EasyLogin extends HttpServlet {
 
         // Client
         String client = getParameter(req, clientParam);
+        if(client == null) {
+            client = defaultClient;
+        }
         if (client != null) {
             sb.append("client=").append(client);
         }
