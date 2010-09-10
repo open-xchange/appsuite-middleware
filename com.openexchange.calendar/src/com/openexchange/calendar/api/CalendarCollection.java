@@ -2267,7 +2267,12 @@ public final class CalendarCollection implements CalendarCollectionService {
             final CalendarDataObject newAppointment) throws OXCalendarException {
         final EventClient eventclient = new EventClient(session);
         try {
-            final FolderObject sourceFolder = getFolder(session, oldAppointment.getEffectiveFolderId());
+            int folderId = oldAppointment.getEffectiveFolderId();
+            if (folderId == 0) {
+                OXFolderAccess folderAccess = new OXFolderAccess(oldAppointment.getContext());
+                folderId = folderAccess.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR).getObjectID();
+            }
+            final FolderObject sourceFolder = getFolder(session, folderId);
             eventclient.modify(oldAppointment, newAppointment, sourceFolder); // TODO
         } catch (final AbstractOXException e) {
             throw new OXCalendarException(e);
@@ -2923,6 +2928,9 @@ public final class CalendarCollection implements CalendarCollectionService {
                 } else if (FolderObject.PUBLIC == edao.getFolderType() && FolderObject.PRIVATE == cdao.getFolderType()) {
                     // Move from public to private
                     cdao.setParentFolderID(0);
+                    cdao.setFolderMoveAction(CalendarOperation.PRIVATE_ALL_PARTICIPANTS);
+                } else if (edao.getFolderType() == FolderObject.SHARED && cdao.getFolderType() == FolderObject.PRIVATE) {
+                    //cdao.setParentFolderID(0);
                     cdao.setFolderMoveAction(CalendarOperation.PRIVATE_ALL_PARTICIPANTS);
                 } else {
                     throw new OXCalendarException(Code.MOVE_NOT_SUPPORTED, I(edao.getFolderType()), I(cdao.getFolderType()));
