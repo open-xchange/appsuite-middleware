@@ -277,7 +277,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                  * Determine where to create
                  */
 
-                final MailFolder inboxFolder = defaultMailAccess.getFolderStorage().getFolder("INBOX");
+                final MailFolder inboxFolder = fs.getFolder("INBOX");
                 final char separator = inboxFolder.getSeparator();
                 final String[] parentAndName = parseFullname(path, separator);
                 /*
