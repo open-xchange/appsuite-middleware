@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.servlet.http;
 
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import gnu.trove.TIntObjectHashMap;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.text.DateFormatSymbols;
@@ -56,13 +58,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -84,68 +84,68 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     private static final String ERROR_PAGE_TEMPL = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n" + "<html><head>\r\n" + "<title>#STATUS_CODE# #STATUS_MSG#</title>\r\n" + "</head><body>\r\n" + "<h1>#STATUS_CODE# #STATUS_MSG#</h1>\r\n" + "<p>#STATUS_DESC#</p>\r\n" + "<hr>\r\n" + "<address>#DATE#,&nbsp;Open-Xchange v#VERSION#</address>\r\n" + "</body></html>";
 
-    private static final Map<Integer, String> STATUS_MSGS;
+    private static final TIntObjectHashMap<String> STATUS_MSGS;
 
-    private static final Map<Integer, String> STATUS_DESC;
+    private static final TIntObjectHashMap<String> STATUS_DESC;
 
     private static final SimpleDateFormat HEADER_DATE_FORMAT;
 
     static {
-        STATUS_MSGS = new HashMap<Integer, String>();
-        STATUS_MSGS.put(Integer.valueOf(100), "Continue");
-        STATUS_MSGS.put(Integer.valueOf(101), "Switching Protocols");
-        STATUS_MSGS.put(Integer.valueOf(200), "OK");
-        STATUS_MSGS.put(Integer.valueOf(201), "Created");
-        STATUS_MSGS.put(Integer.valueOf(202), "Accepted");
-        STATUS_MSGS.put(Integer.valueOf(203), "Non-Authoritative Information");
-        STATUS_MSGS.put(Integer.valueOf(204), "No Content");
-        STATUS_MSGS.put(Integer.valueOf(205), "Reset Content");
-        STATUS_MSGS.put(Integer.valueOf(206), "Partial Content");
-        STATUS_MSGS.put(Integer.valueOf(207), "Multistatus");
-        STATUS_MSGS.put(Integer.valueOf(300), "Multiple Choices");
-        STATUS_MSGS.put(Integer.valueOf(301), "Moved Permanently");
-        STATUS_MSGS.put(Integer.valueOf(302), "Found");
-        STATUS_MSGS.put(Integer.valueOf(303), "See Other");
-        STATUS_MSGS.put(Integer.valueOf(304), "Not Modified");
-        STATUS_MSGS.put(Integer.valueOf(305), "Use Proxy");
-        STATUS_MSGS.put(Integer.valueOf(306), "");
-        STATUS_MSGS.put(Integer.valueOf(307), "Temporary Redirect");
-        STATUS_MSGS.put(Integer.valueOf(400), "Bad Request");
-        STATUS_MSGS.put(Integer.valueOf(401), "Unauthorized");
-        STATUS_MSGS.put(Integer.valueOf(402), "Payment Required");
-        STATUS_MSGS.put(Integer.valueOf(403), "Forbidden");
-        STATUS_MSGS.put(Integer.valueOf(404), "Not Found");
-        STATUS_MSGS.put(Integer.valueOf(405), "Method Not Allowed");
-        STATUS_MSGS.put(Integer.valueOf(406), "Not Acceptable");
-        STATUS_MSGS.put(Integer.valueOf(407), "Proxy Authentication Required");
-        STATUS_MSGS.put(Integer.valueOf(408), "Request Timeout");
-        STATUS_MSGS.put(Integer.valueOf(409), "Conflict");
-        STATUS_MSGS.put(Integer.valueOf(410), "Gone");
-        STATUS_MSGS.put(Integer.valueOf(411), "Length Required");
-        STATUS_MSGS.put(Integer.valueOf(412), "Precondition Failed");
-        STATUS_MSGS.put(Integer.valueOf(413), "Request Entity Too Large");
-        STATUS_MSGS.put(Integer.valueOf(414), "Request-URI Too Long");
-        STATUS_MSGS.put(Integer.valueOf(415), "Unsupported Media Type");
-        STATUS_MSGS.put(Integer.valueOf(416), "Requested Range Not Satisfiable");
-        STATUS_MSGS.put(Integer.valueOf(417), "Expectation Failed");
-        STATUS_MSGS.put(Integer.valueOf(500), "Internal Server Error");
-        STATUS_MSGS.put(Integer.valueOf(501), "Not Implemented");
-        STATUS_MSGS.put(Integer.valueOf(502), "Bad Gateway");
-        STATUS_MSGS.put(Integer.valueOf(503), "Service Unavailable");
-        STATUS_MSGS.put(Integer.valueOf(504), "Gateway Timeout");
-        STATUS_MSGS.put(Integer.valueOf(505), "HTTP Version Not Supported");
+        STATUS_MSGS = new TIntObjectHashMap<String>(46);
+        STATUS_MSGS.put(100, "Continue");
+        STATUS_MSGS.put(101, "Switching Protocols");
+        STATUS_MSGS.put(200, "OK");
+        STATUS_MSGS.put(201, "Created");
+        STATUS_MSGS.put(202, "Accepted");
+        STATUS_MSGS.put(203, "Non-Authoritative Information");
+        STATUS_MSGS.put(204, "No Content");
+        STATUS_MSGS.put(205, "Reset Content");
+        STATUS_MSGS.put(206, "Partial Content");
+        STATUS_MSGS.put(207, "Multistatus");
+        STATUS_MSGS.put(300, "Multiple Choices");
+        STATUS_MSGS.put(301, "Moved Permanently");
+        STATUS_MSGS.put(302, "Found");
+        STATUS_MSGS.put(303, "See Other");
+        STATUS_MSGS.put(304, "Not Modified");
+        STATUS_MSGS.put(305, "Use Proxy");
+        STATUS_MSGS.put(306, "");
+        STATUS_MSGS.put(307, "Temporary Redirect");
+        STATUS_MSGS.put(400, "Bad Request");
+        STATUS_MSGS.put(401, "Unauthorized");
+        STATUS_MSGS.put(402, "Payment Required");
+        STATUS_MSGS.put(403, "Forbidden");
+        STATUS_MSGS.put(404, "Not Found");
+        STATUS_MSGS.put(405, "Method Not Allowed");
+        STATUS_MSGS.put(406, "Not Acceptable");
+        STATUS_MSGS.put(407, "Proxy Authentication Required");
+        STATUS_MSGS.put(408, "Request Timeout");
+        STATUS_MSGS.put(409, "Conflict");
+        STATUS_MSGS.put(410, "Gone");
+        STATUS_MSGS.put(411, "Length Required");
+        STATUS_MSGS.put(412, "Precondition Failed");
+        STATUS_MSGS.put(413, "Request Entity Too Large");
+        STATUS_MSGS.put(414, "Request-URI Too Long");
+        STATUS_MSGS.put(415, "Unsupported Media Type");
+        STATUS_MSGS.put(416, "Requested Range Not Satisfiable");
+        STATUS_MSGS.put(417, "Expectation Failed");
+        STATUS_MSGS.put(500, "Internal Server Error");
+        STATUS_MSGS.put(501, "Not Implemented");
+        STATUS_MSGS.put(502, "Bad Gateway");
+        STATUS_MSGS.put(503, "Service Unavailable");
+        STATUS_MSGS.put(504, "Gateway Timeout");
+        STATUS_MSGS.put(505, "HTTP Version Not Supported");
         /*
          * Status descriptions
          */
-        STATUS_DESC = new HashMap<Integer, String>();
-        STATUS_DESC.put(Integer.valueOf(404), "The requested URL %s was not found on this server.");
+        STATUS_DESC = new TIntObjectHashMap<String>(2);
+        STATUS_DESC.put(404, "The requested URL %s was not found on this server.");
         STATUS_DESC.put(
-            Integer.valueOf(503),
+            503,
             "The server is temporarily unable to service your request due to" + " maintenance downtime or capacity problems. Please try again later.");
         /*
          * Date Format
          */
-        HEADER_DATE_FORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy hh:mm:ss z", Locale.ENGLISH);
+        HEADER_DATE_FORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
         final DateFormatSymbols dfs = HEADER_DATE_FORMAT.getDateFormatSymbols();
         final String[] shortWeekdays = new String[8];
         shortWeekdays[Calendar.SUNDAY] = "Sun";
@@ -171,7 +171,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         shortMonths[Calendar.DECEMBER] = "Dec";
         dfs.setShortMonths(shortMonths);
         HEADER_DATE_FORMAT.setDateFormatSymbols(dfs);
-        HEADER_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+        HEADER_DATE_FORMAT.setTimeZone(getTimeZone("GMT"));
     }
 
     private final Set<Cookie> cookies;
@@ -401,17 +401,17 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     public String getStatusMsg() {
         // System.out.println("STATUS: " + status + " - " + (statusMsg != null ?
         // statusMsg : statusMsgs.get(new Integer(status))));
-        return statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
+        return statusMsg == null ? STATUS_MSGS.get(status) : statusMsg;
     }
 
     public void setStatus(final int status) {
         this.status = status;
-        statusMsg = STATUS_MSGS.get(Integer.valueOf(status));
+        statusMsg = STATUS_MSGS.get(status);
     }
 
     public void setStatus(final int status, final String statusMsg) {
         this.status = status;
-        this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
+        this.statusMsg = statusMsg == null ? STATUS_MSGS.get(status) : statusMsg;
     }
 
     public void setDateHeader(final String name, final long l) {
@@ -467,7 +467,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     public final void sendRedirect(final String location) {
         status = HttpServletResponse.SC_MOVED_TEMPORARILY;
-        statusMsg = STATUS_MSGS.get(Integer.valueOf(HttpServletResponse.SC_MOVED_TEMPORARILY));
+        statusMsg = STATUS_MSGS.get(HttpServletResponse.SC_MOVED_TEMPORARILY);
         addHeader("Location", location);
     }
 
@@ -483,8 +483,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      */
     public final byte[] composeAndSetError(final int status, final String statusMsg) throws IOException {
         this.status = status;
-        this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
-        String desc = STATUS_DESC.containsKey(Integer.valueOf(this.status)) ? STATUS_DESC.get(Integer.valueOf(this.status)) : ERR_DESC_NOT_AVAILABLE;
+        this.statusMsg = statusMsg == null ? STATUS_MSGS.get(status) : statusMsg;
+        String desc = STATUS_DESC.containsKey(this.status) ? STATUS_DESC.get(this.status) : ERR_DESC_NOT_AVAILABLE;
         if (HttpServletResponse.SC_NOT_FOUND == status) {
             desc = String.format(desc, request.getServletPath());
         }
@@ -504,9 +504,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     public final void sendError(final int status, final String statusMsg) throws IOException {
         this.status = status;
-        this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
+        this.statusMsg = statusMsg == null ? STATUS_MSGS.get(status) : statusMsg;
         if (errormessage == null) {
-            String desc = STATUS_DESC.containsKey(Integer.valueOf(this.status)) ? STATUS_DESC.get(Integer.valueOf(this.status)) : ERR_DESC_NOT_AVAILABLE;
+            String desc = STATUS_DESC.containsKey(this.status) ? STATUS_DESC.get(this.status) : ERR_DESC_NOT_AVAILABLE;
             if (HttpServletResponse.SC_NOT_FOUND == status) {
                 desc = String.format(desc, request.getServletPath());
             }
@@ -526,7 +526,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     public void sendError(final int status) throws IOException {
-        sendError(status, STATUS_MSGS.get(Integer.valueOf(status)));
+        sendError(status, STATUS_MSGS.get(status));
     }
 
     private Enumeration<?> makeEnumeration(final Object obj) {

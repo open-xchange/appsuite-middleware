@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,7 +62,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -72,6 +71,7 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * HttpServletResponseWrapper
@@ -144,7 +144,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         /*
          * Date Format
          */
-        HEADER_DATE_FORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy hh:mm:ss z", Locale.ENGLISH);
+        HEADER_DATE_FORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
         final DateFormatSymbols dfs = HEADER_DATE_FORMAT.getDateFormatSymbols();
         final String[] shortWeekdays = new String[8];
         shortWeekdays[Calendar.SUNDAY] = "Sun";
@@ -170,7 +170,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         shortMonths[Calendar.DECEMBER] = "Dec";
         dfs.setShortMonths(shortMonths);
         HEADER_DATE_FORMAT.setDateFormatSymbols(dfs);
-        HEADER_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+        HEADER_DATE_FORMAT.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
     }
 
     private final Set<Cookie> cookies;

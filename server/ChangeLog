@@ -1,3 +1,7 @@
+* 2010-09-10 - francisco.laguna@open-xchange.com
+
+ - Bugfix #16848: Use correct date format in response headers.
+
 * 2010-09-10 - karsten.will@open-xchange.com
 
  - Bugfix #16756: Calendar folder now have the information that their content is subscribed.
