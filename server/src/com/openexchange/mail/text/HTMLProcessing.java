@@ -428,16 +428,6 @@ public final class HTMLProcessing {
     }
 
     /**
-     * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library.
-     * 
-     * @param htmlContent The HTML content
-     * @return The validated HTML content
-     */
-    public static String validate(final String htmlContent) {
-        return ServerServiceRegistry.getInstance().getService(HTMLService.class).validate(htmlContent);
-    }
-
-    /**
      * Pretty prints specified HTML content.
      * 
      * @param htmlContent The HTML content

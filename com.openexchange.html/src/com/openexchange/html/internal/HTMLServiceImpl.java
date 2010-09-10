@@ -551,7 +551,13 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.toString();
     }
 
-    public String validate(final String htmlContent) {
+    /**
+     * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library.
+     * 
+     * @param htmlContent The HTML content
+     * @return The validated HTML content
+     */
+    private String validate(final String htmlContent) {
         /*
          * Obtain a new Tidy instance
          */

@@ -215,14 +215,6 @@ public interface HTMLService {
     String getConformHTML(String htmlContent, String charset);
 
     /**
-     * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library.
-     * 
-     * @param htmlContent The HTML content
-     * @return The validated HTML content
-     */
-    String validate(String htmlContent);
-
-    /**
      * Pretty prints specified HTML content.
      * 
      * @param htmlContent The HTML content
