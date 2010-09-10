@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -118,11 +118,13 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                 final POP3Config pop3Config = pop3Access.getPOP3Config();
                 server = pop3Config.getServer();
                 final int port = pop3Config.getPort();
-                final String capabilities = POP3CapabilityCache.getCapability(
-                    InetAddress.getByName(server),
-                    port,
-                    pop3Config.isSecure(),
-                    (IPOP3Properties) pop3Config.getMailProperties());
+                final String capabilities =
+                    POP3CapabilityCache.getCapability(
+                        InetAddress.getByName(server),
+                        port,
+                        pop3Config.isSecure(),
+                        (IPOP3Properties) pop3Config.getMailProperties(),
+                        pop3Config.getLogin());
                 /*
                  * Check refresh rate against minimum allowed seconds between logins provided that "LOGIN-DELAY" is contained in
                  * capabilities
@@ -140,7 +142,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("\n\tSynchronizing messages with POP3 account: " + server);
+                LOG.debug("\n\tSynchronizing messages with POP3 account: " + server, new Throwable());
             }
             /*
              * Check default folders since INBOX folder must be present prior to appending to it
@@ -192,30 +194,29 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
 
     private long getRefreshRateMillis() throws MailException {
         final String frequencyStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE);
-        if (null != frequencyStr) {
-            int minutes = 0;
-            try {
-                minutes = Integer.parseInt(frequencyStr);
-            } catch (final NumberFormatException e) {
-                LOG.warn(new StringBuilder(128).append("POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
-                    "\" is not a number: ``").append(frequencyStr).append("''. Using fallback of ").append(FALLBACK_MINUTES).append(
-                    " minutes."), e);
-                minutes = FALLBACK_MINUTES;
-            }
-            return minutes * 60L * 1000L;
+        if (null == frequencyStr) {
+            // Fallback to 10 minutes
+            LOG.warn(
+                new StringBuilder(128).append("Missing POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
+                    "\"").append(". Using fallback of ").append(FALLBACK_MINUTES).append(" minutes."),
+                new Throwable());
+            return FALLBACK_MINUTES * 60L * 1000L;
         }
-        // Fallback to 10 minutes
-        LOG.warn(new StringBuilder(128).append("Missing POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
-            "\"").append(". Using fallback of ").append(FALLBACK_MINUTES).append(" minutes."), new Throwable());
-        return FALLBACK_MINUTES * 60L * 1000L;
+        int minutes = 0;
+        try {
+            minutes = Integer.parseInt(frequencyStr);
+        } catch (final NumberFormatException e) {
+            LOG.warn(new StringBuilder(128).append("POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
+                "\" is not a number: ``").append(frequencyStr).append("''. Using fallback of ").append(FALLBACK_MINUTES).append(
+                " minutes."), e);
+            minutes = FALLBACK_MINUTES;
+        }
+        return minutes * 60L * 1000L;
     }
 
     private boolean isExpungeOnQuit() throws MailException {
         final String expungeStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_EXPUNGE);
-        if (null != expungeStr) {
-            return Boolean.parseBoolean(expungeStr);
-        }
-        return false;
+        return (null == expungeStr) ? false : Boolean.parseBoolean(expungeStr);
     }
 
 }

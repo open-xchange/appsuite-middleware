@@ -1,3 +1,7 @@
+* 2010-09-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #15681: Checking POP3 account's default folders on path creation in primary mail account
+
 * 2010-09-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #16848: Use correct date format in response headers.

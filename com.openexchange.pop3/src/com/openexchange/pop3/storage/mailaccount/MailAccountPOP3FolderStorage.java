@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,6 +58,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -67,6 +68,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -92,7 +94,8 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
  */
 public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountPOP3FolderStorage.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(MailAccountPOP3FolderStorage.class);
 
     private final IMailFolderStorage delegatee;
 
@@ -144,20 +147,22 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     }
 
     private String getStandardFolder(final int index) throws MailException {
-        if (!isDefaultFoldersChecked()) {
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        if (!isDefaultFoldersChecked(mailSessionCache)) {
             checkDefaultFolders();
         }
         final String retval = getDefaultMailFolder(index);
         if (retval != null) {
             return retval;
         }
-        setDefaultFoldersChecked(false);
+        setDefaultFoldersChecked(false, mailSessionCache);
         checkDefaultFolders();
         return getDefaultMailFolder(index);
     }
 
     private String getDefaultMailFolder(final int index) {
-        final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.getParamDefaultFolderArray(accountId));
+        final String[] arr =
+            MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
         return arr == null ? null : arr[index];
     }
 
@@ -171,10 +176,30 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return false;
     }
 
+    private static final DefaultFolderType[] TYPES =
+        {
+            DefaultFolderType.DRAFTS, DefaultFolderType.SENT, DefaultFolderType.SPAM, DefaultFolderType.TRASH,
+            DefaultFolderType.CONFIRMED_SPAM, DefaultFolderType.CONFIRMED_HAM, DefaultFolderType.INBOX };
+
+    private void setDefaultFolderInfo(final MailFolder mailFolder) throws MailException {
+        final String fullname = mailFolder.getFullname();
+        for (int i = 0; i < 7; i++) {
+            final String stdFullname = getStandardFolder(i);
+            if (null != stdFullname && stdFullname.equals(fullname)) {
+                mailFolder.setDefaultFolder(true);
+                mailFolder.setDefaultFolderType(TYPES[i]);
+                return;
+            }
+        }
+        mailFolder.setDefaultFolder(false);
+        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
+    }
+
     public void checkDefaultFolders() throws MailException {
-        if (!isDefaultFoldersChecked()) {
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        if (!isDefaultFoldersChecked(mailSessionCache)) {
             synchronized (session) {
-                if (isDefaultFoldersChecked()) {
+                if (isDefaultFoldersChecked(mailSessionCache)) {
                     return;
                 }
                 /*
@@ -183,10 +208,11 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                 final boolean isSpamOptionEnabled;
                 final MailAccount mailAccount;
                 try {
-                    mailAccount = POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true).getMailAccount(
-                        accountId,
-                        session.getUserId(),
-                        session.getContextId());
+                    mailAccount =
+                        POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true).getMailAccount(
+                            accountId,
+                            session.getUserId(),
+                            session.getContextId());
                     final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), getContext());
                     isSpamOptionEnabled = usm.isSpamOptionEnabled();
                 } catch (final ServiceException e) {
@@ -197,17 +223,15 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                 /*
                  * Get default folder names
                  */
-                final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(
-                    accountId,
-                    session.getUserId(),
-                    session.getContextId());
-                final String[] defaultFolderFullnames = defaultFolderNamesProvider.getDefaultFolderFullnames(
-                    mailAccount,
-                    isSpamOptionEnabled);
+                final DefaultFolderNamesProvider defaultFolderNamesProvider =
+                    new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
+                final String[] defaultFolderFullnames =
+                    defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, isSpamOptionEnabled);
                 final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, isSpamOptionEnabled);
                 final SpamHandler spamHandler;
                 {
-                    spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
+                    spamHandler =
+                        isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                 }
                 // INBOX
                 setDefaultMailFolder(StorageUtility.INDEX_INBOX, checkDefaultFolder(getRealFullname("INBOX"), storage.getSeparator(), 0));
@@ -242,7 +266,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                         setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator(), 0));
                     }
                 }
-                setDefaultFoldersChecked(true);
+                setDefaultFoldersChecked(true, mailSessionCache);
             }
         }
     }
@@ -274,21 +298,22 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return stripPathFromFullname(path, fn);
     }
 
-    private boolean isDefaultFoldersChecked() {
-        final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(accountId));
+    private boolean isDefaultFoldersChecked(final MailSessionCache mailSessionCache) {
+        final Boolean b = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
         return (b != null) && b.booleanValue();
     }
 
-    private void setDefaultFoldersChecked(final boolean checked) {
-        session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(accountId), Boolean.valueOf(checked));
+    private void setDefaultFoldersChecked(final boolean checked, final MailSessionCache mailSessionCache) {
+        mailSessionCache.putParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked(), Boolean.valueOf(checked));
     }
 
     private void setDefaultMailFolder(final int index, final String fullname) {
-        final String key = MailSessionParameterNames.getParamDefaultFolderArray(accountId);
-        String[] arr = (String[]) session.getParameter(key);
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        final String key = MailSessionParameterNames.getParamDefaultFolderArray();
+        String[] arr = mailSessionCache.getParameter(accountId, key);
         if (null == arr) {
             arr = new String[7];
-            session.setParameter(key, arr);
+            mailSessionCache.putParameter(accountId, key, arr);
         }
         arr[index] = fullname;
     }
@@ -302,12 +327,8 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         // Get affected mail IDs through loading all messages in folder
         final String[] mailIDs;
         {
-            final MailMessage[] mails = getMessageStorage().getAllMessages(
-                fullname,
-                null,
-                MailSortField.RECEIVED_DATE,
-                OrderDirection.ASC,
-                FIELDS_ID);
+            final MailMessage[] mails =
+                getMessageStorage().getAllMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
             mailIDs = new String[mails.length];
             for (int i = 0; i < mails.length; i++) {
                 mailIDs[i] = mails[i].getMailId();
@@ -399,12 +420,8 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         // Load mail IDs
         final String[] mailIDs;
         {
-            final MailMessage[] mails = getMessageStorage().getAllMessages(
-                fullname,
-                null,
-                MailSortField.RECEIVED_DATE,
-                OrderDirection.ASC,
-                FIELDS_ID);
+            final MailMessage[] mails =
+                getMessageStorage().getAllMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
             mailIDs = new String[mails.length];
             for (int i = 0; i < mails.length; i++) {
                 mailIDs[i] = mails[i].getMailId();
@@ -439,12 +456,8 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         // Get affected mail IDs
         final String[] mailIDs;
         {
-            final MailMessage[] mails = getMessageStorage().getAllMessages(
-                fullname,
-                null,
-                MailSortField.RECEIVED_DATE,
-                OrderDirection.ASC,
-                FIELDS_ID);
+            final MailMessage[] mails =
+                getMessageStorage().getAllMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
             mailIDs = new String[mails.length];
             for (int i = 0; i < mails.length; i++) {
                 mailIDs[i] = mails[i].getMailId();
@@ -571,8 +584,9 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     public String renameFolder(final String fullname, final String newName) throws MailException {
         final MailFolder realMailFolder = delegatee.getFolder(getRealFullname(fullname));
-        final String newFullname = new StringBuilder(stripPathFromFullname(path, realMailFolder.getParentFullname())).append(
-            storage.getSeparator()).append(realMailFolder.getName()).toString();
+        final String newFullname =
+            new StringBuilder(stripPathFromFullname(path, realMailFolder.getParentFullname())).append(storage.getSeparator()).append(
+                realMailFolder.getName()).toString();
         return moveFolder(fullname, newFullname);
     }
 
@@ -582,8 +596,10 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private void prepareMailFolder(final MailFolder mailFolder) throws MailException {
         mailFolder.setFullname(stripPathFromFullname(path, mailFolder.getFullname()));
+        mailFolder.setParentFullname(stripPathFromFullname(path, mailFolder.getParentFullname()));
         mailFolder.setRootFolder(false);
         mailFolder.setDefaultFolder(false);
+        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
         final MailPermission mp = getPOP3MailPermission();
         if (MailFolder.DEFAULT_FOLDER_ID.equals(mailFolder.getFullname())) {
             mp.setAllPermission(
@@ -592,8 +608,8 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                 MailPermission.NO_PERMISSIONS,
                 MailPermission.NO_PERMISSIONS);
             mailFolder.setRootFolder(true);
-        } else if (isDefaultFolder(mailFolder.getFullname())) {
-            mailFolder.setDefaultFolder(true);
+        } else {
+            setDefaultFolderInfo(mailFolder);
         }
         mailFolder.removePermissions();
         mailFolder.removeOwnPermission();
