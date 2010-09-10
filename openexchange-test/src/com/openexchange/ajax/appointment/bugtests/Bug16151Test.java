@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -96,11 +97,11 @@ public class Bug16151Test extends AbstractAJAXSession {
             API.OX_NEW,
             client2.getValues().getPrivateAppointmentFolder(),
             client.getValues().getUserId(),
-            OCLPermission.READ_FOLDER,
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
             OCLPermission.READ_ALL_OBJECTS,
             OCLPermission.WRITE_ALL_OBJECTS,
             OCLPermission.DELETE_ALL_OBJECTS);
-        // client2 creates appointment
+        // client creates appointment
         appointment = new Appointment();
         appointment.setTitle("Appointment for bug 16151");
         appointment.setIgnoreConflicts(true);
@@ -110,13 +111,14 @@ public class Bug16151Test extends AbstractAJAXSession {
         calendar.add(Calendar.HOUR, 1);
         appointment.setEndDate(calendar.getTime());
         InsertRequest request = new InsertRequest(appointment, timeZone2);
-        AppointmentInsertResponse response = client2.execute(request);
+        AppointmentInsertResponse response = client.execute(request);
         response.fillAppointment(appointment);
     }
 
     @Override
     protected void tearDown() throws Exception {
         // client deletes appointment
+        appointment.setLastModified(new Date(Long.MAX_VALUE));
         client.execute(new DeleteRequest(appointment));
         // client2 unshares folder
         FolderTools.unshareFolder(client2, API.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId());
