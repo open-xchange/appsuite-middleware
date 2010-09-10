@@ -1,0 +1,28 @@
+--- !com.openexchange.subscribe.crawler.CrawlerDescription
+crawlerApiVersion: 618
+displayName: Sun Contacts
+id: com.openexchange.subscribe.crawler.suncontacts
+javascriptEnabled: true
+priority: 1
+workflowString: |
+  --- !com.openexchange.subscribe.crawler.Workflow
+  enableJavascript: true
+  steps: 
+    - !com.openexchange.subscribe.crawler.LoginPageByFormActionRegexVerifiedByStringStep
+      actionOfLoginForm: ".*Login.*"
+      nameOfPasswordField: IDToken2
+      nameOfUserField: IDToken1
+      numberOfForm: 1
+      password: ""
+      stringAvailableAfterLogin: ".*favicon.ico.*"
+      url: "https://uwc1.us.es:444/uwc/auth"
+      username: ""
+    - !com.openexchange.subscribe.crawler.PageByUrlStep
+      url: "https://uwc1.us.es:444/uwc/abclient/AddressBook"
+    - !com.openexchange.subscribe.crawler.StringByFrameNumberAndRegexStep
+      frameNumber: 2
+      regex: "document.iabform.actionbookid.value\\s=[\\s]+'([^']*)'"
+    - !com.openexchange.subscribe.crawler.PageByUrlAndParameterStep
+      url: "https://uwc1.us.es:444/uwc/abs/iabvcard.vcf?bookid="
+    - !com.openexchange.subscribe.crawler.ContactObjectsByVcardFileStep {}
+  
