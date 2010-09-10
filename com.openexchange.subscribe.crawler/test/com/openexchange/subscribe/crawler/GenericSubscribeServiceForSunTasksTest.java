@@ -80,7 +80,7 @@ public class GenericSubscribeServiceForSunTasksTest extends GenericSubscribeServ
 
         ArrayList<Step> steps = new ArrayList<Step>();
 
-        LoginPageByFormActionRegexStep loginStep = new LoginPageByFormActionRegexStep();
+        LoginPageByFormActionRegexVerifiedByStringStep loginStep = new LoginPageByFormActionRegexVerifiedByStringStep();
         loginStep.setUrl("https://uwc1.us.es:444/uwc/auth");
         loginStep.setUsername(username);
         loginStep.setPassword(password);
@@ -88,7 +88,7 @@ public class GenericSubscribeServiceForSunTasksTest extends GenericSubscribeServ
         loginStep.setNumberOfForm(1);
         loginStep.setNameOfUserField("IDToken1");
         loginStep.setNameOfPasswordField("IDToken2");
-        loginStep.setLinkAvailableAfterLogin("javascript:main.logout()");
+        loginStep.setStringAvailableAfterLogin(".*favicon.ico.*");
         steps.add(loginStep);
         
         PageByFrameNumberStep pageByFrameNumberStep = new PageByFrameNumberStep();
