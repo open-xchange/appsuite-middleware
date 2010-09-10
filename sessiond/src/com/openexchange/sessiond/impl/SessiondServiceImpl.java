@@ -49,6 +49,10 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
@@ -98,6 +102,19 @@ public class SessiondServiceImpl implements SessiondService {
 
     public int getUserSessions(final int userId, final int contextId) {
         return SessionHandler.getUserSessions(userId, contextId).length;
+    }
+
+    public Collection<Session> getSessions(final int userId, final int contextId) {
+        final SessionControl[] sessionControls = SessionHandler.getUserSessions(userId, contextId);
+        if (null == sessionControls || 0 == sessionControls.length) {
+            return Collections.<Session> emptyList();
+        }
+        final int length = sessionControls.length;
+        final List<Session> list = new ArrayList<Session>(length);
+        for (int i = 0; i < length; i++) {
+            list.add(sessionControls[i].getSession());
+        }
+        return list;
     }
 
     public Session getSession(final String sessionId) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import java.util.Collection;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -111,6 +112,15 @@ public interface SessiondService {
      * @return The number of active sessions belonging to given user in specified context
      */
     public int getUserSessions(final int userId, final int contextId);
+
+    /**
+     * Gets the sessions associated with specified user in given context.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The sessions associated with specified user in given context
+     */
+    public Collection<Session> getSessions(int userId, int contextId);
 
     /**
      * Get the session object related to the given session ID.
