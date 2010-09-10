@@ -115,6 +115,40 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         }
     }
 
+    private static final String SQL_SELECT = "SELECT value FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
+
+    /**
+     * Gets the named property related to specified POP3 account.
+     * 
+     * @param accountId The account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param propertyName The property name
+     * @param con The connection to use
+     * @throws MailException If dropping properties fails
+     */
+    public static String getProperty(final int accountId, final int user, final int cid, final String propertyName, final Connection con) throws MailException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos++, propertyName);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+            return null;
+        } catch (final SQLException e) {
+            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
     private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME + " (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)";
 
     private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
@@ -154,8 +188,6 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         }
     }
 
-    private static final String SQL_SELECT = "SELECT value FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
-
     public String getProperty(final String propertyName) throws MailException {
         final Connection con;
         try {
@@ -163,24 +195,9 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT);
-            int pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, user);
-            stmt.setInt(pos++, accountId);
-            stmt.setString(pos++, propertyName);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getString(1);
-            }
-            return null;
-        } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            return getProperty(accountId, user, cid, propertyName, con);
         } finally {
-            closeSQLStuff(null, stmt);
             Database.back(cid, false, con);
         }
     }
