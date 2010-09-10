@@ -104,7 +104,7 @@ public final class HTMLServiceImpl implements HTMLService {
     private final Properties tidyConfiguration;
 
     private final Map<Character, String> htmlCharMap;
-    
+
     private final Map<String, Character> htmlEntityMap;
 
     /**
@@ -137,10 +137,25 @@ public final class HTMLServiceImpl implements HTMLService {
                     } else {
                         url = url.substring(0, mlen);
                     }
-                    mr.appendLiteralReplacement(
-                        sb,
-                        tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
-                            "\" target=\"_blank\">").append(url).append("</a>)").toString());
+                    tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
+                        "\" target=\"_blank\">").append(url).append("</a>").append(')');
+                    mr.appendLiteralReplacement(sb, tmp.toString());
+                } else if ((mlen > 0) && ('(' == url.charAt(0))) {
+                    final boolean appendParen;
+                    if (')' == url.charAt(mlen)) {
+                        url = url.substring(1, mlen);
+                        appendParen = true;
+                    } else {
+                        url = url.substring(1);
+                        tmp.append('(');
+                        appendParen = false;
+                    }
+                    tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
+                        "\" target=\"_blank\">").append(url).append("</a>");
+                    if (appendParen) {
+                        tmp.append(')');
+                    }
+                    mr.appendLiteralReplacement(sb, tmp.toString());
                 } else {
                     mr.appendReplacement(
                         sb,
@@ -170,7 +185,7 @@ public final class HTMLServiceImpl implements HTMLService {
         modified[0] |= handler.isImageURLFound();
         return handler.getHTML();
     }
-    
+
     public String html2text(String htmlContent, boolean appendHref) {
         final HTML2TextHandler handler = new HTML2TextHandler(this, htmlContent.length(), appendHref);
         HTMLParser.parse(htmlContent, handler);
@@ -256,12 +271,27 @@ public final class HTMLServiceImpl implements HTMLService {
         return htmlFormat(plainText, true);
     }
 
-    private static final String REGEX_URL = "\\(?\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
+    private static final String REGEX_URL =
+        "\\(?\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
 
     private static final Pattern PATTERN_URL = Pattern.compile(REGEX_URL);
 
     public Pattern getURLPattern() {
         return PATTERN_URL;
+    }
+
+    private static final String REGEX_ANCHOR = "<a\\s+href[^>]+>.*?</a>";
+
+    private static final Pattern PATTERN_LINK = Pattern.compile(REGEX_ANCHOR + '|' + REGEX_URL);
+
+    public Pattern getLinkPattern() {
+        return PATTERN_LINK;
+    }
+
+    private static final Pattern PATTERN_LINK_WITH_GROUP = Pattern.compile(REGEX_ANCHOR + "|(" + REGEX_URL + ')');
+
+    public Pattern getLinkWithGroupPattern() {
+        return PATTERN_LINK_WITH_GROUP;
     }
 
     /**

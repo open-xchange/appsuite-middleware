@@ -1,3 +1,9 @@
+* 2010-09-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #16809: Changed error message if twitter consumer key/secret pair is invalid.
+                  Changed default consumer key/secret to Open-Xchange application.
+ - Bugfix #16843: Fixed URLs parsing in plain text
+
 * 2010-09-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #16848: Use correct date format in response headers.
