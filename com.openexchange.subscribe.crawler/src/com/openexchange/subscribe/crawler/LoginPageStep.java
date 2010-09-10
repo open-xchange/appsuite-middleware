@@ -51,6 +51,9 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -71,6 +74,8 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements LoginStep {
 
     private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
+    
+    private static final Log LOG = LogFactory.getLog(LoginPageStep.class);
 
     public LoginPageStep() {
     }
@@ -89,8 +94,8 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
 
     @Override
     public void execute(final WebClient webClient) throws SubscriptionException {
-        HtmlPage loginPage;
-        try {
+        HtmlPage loginPage = null;;
+        try { 
             // Get the page, fill in the credentials and submit the login form
             loginPage = webClient.getPage(url);
             final HtmlForm loginForm = loginPage.getFormByName(nameOfLoginForm);
@@ -117,6 +122,9 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         } catch (final MalformedURLException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final IOException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (ElementNotFoundException e){            
+            LOG.error("The page that does not contain the needed form : \n" + loginPage.getWebResponse().getContentAsString());
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }
