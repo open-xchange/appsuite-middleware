@@ -56,6 +56,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.group.Group;
 
 /**
  *
@@ -79,6 +80,10 @@ public final class DeleteRequest extends AbstractGroupRequest<DeleteResponse> {
 
     public DeleteRequest(final int groupId, final Date lastModified) {
         this(groupId, lastModified, true);
+    }
+    
+    public DeleteRequest(Group group, boolean failOnError) {
+        this(group.getIdentifier(), group.getLastModified(), failOnError);
     }
 
     public Object getBody() throws JSONException {
