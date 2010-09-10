@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,7 +74,7 @@ public class LdapGlobalFolderCreator {
          * @param folderid
          * @param adminid
          */
-        private FolderIDAndAdminID(final int folderid, final int adminid) {
+        FolderIDAndAdminID(final int folderid, final int adminid) {
             this.folderid = folderid;
             this.adminid = adminid;
         }
@@ -99,23 +99,25 @@ public class LdapGlobalFolderCreator {
     
     public static FolderIDAndAdminID createGlobalFolder(final Context ctx, final FolderProperties folderprops) throws OXException, SQLException, DBPoolingException {
         // First search for a folder with the name if is doesn't exist create it
-        final Connection readCon = DBPool.pickup(ctx);
         int ldapFolderID;
         final int admin_user_id;
         final String foldername = folderprops.getFoldername();
-        try {
-            admin_user_id = OXFolderSQL.getContextAdminID(ctx, readCon);
-            ldapFolderID = getLdapFolderID(foldername, ctx, readCon);
-        } finally {
-            DBPool.closeReaderSilent(ctx, readCon);
+        {
+            final Connection readCon = DBPool.pickup(ctx);
+            try {
+                admin_user_id = OXFolderSQL.getContextAdminID(ctx, readCon);
+                ldapFolderID = getLdapFolderID(foldername, ctx, readCon);
+            } finally {
+                DBPool.closeReaderSilent(ctx, readCon);
+            }
         }
-
         if (-1 == ldapFolderID) {
             final FolderObject fo = createFolderObject(admin_user_id, foldername);
-            // As we have no possibility right now to access the foldermanager without a session, we have to create
-            // a dummy session object here, which provides the needed information
-            final Session dummysession = getDummySessionObj(admin_user_id, ctx.getContextId());
-            final OXFolderManager instance = OXFolderManager.getInstance(dummysession);
+            /*
+             * As we have no possibility right now to access OXFolderManager without a session, we have to create
+             * a dummy session object here, which provides the needed information
+             */
+            final OXFolderManager instance = OXFolderManager.getInstance(getDummySessionObj(admin_user_id, ctx.getContextId()));
             ldapFolderID = instance.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
             if (LOG.isInfoEnabled()) {
                 LOG.info("LDAP folder successfully created");
@@ -133,11 +135,12 @@ public class LdapGlobalFolderCreator {
      */
     private static int getLdapFolderID(final String globalLdapFolderName2, final Context ctx, final Connection readCon) throws SQLException {
         PreparedStatement ps = null;
+        ResultSet executeQuery = null;
         try {
             ps = readCon.prepareStatement("SELECT fuid from oxfolder_tree WHERE cid=? AND fname=?");
             ps.setInt(1, ctx.getContextId());
             ps.setString(2, globalLdapFolderName2);
-            final ResultSet executeQuery = ps.executeQuery();
+            executeQuery = ps.executeQuery();
             while (executeQuery.next()) {
                 return executeQuery.getInt(1);
             }
@@ -145,12 +148,19 @@ public class LdapGlobalFolderCreator {
         } catch (final SQLException e) {
             throw e;
         } finally {
-            try {
-                if (null != ps) {
-                    ps.close();
+            if (null != executeQuery) {
+                try {
+                    executeQuery.close();
+                } catch (final SQLException e) {
+                    LOG.error(e.getMessage(), e);
                 }
-            } catch (final SQLException e) {
-                e.printStackTrace();
+            }
+            if (null != ps) {
+                try {
+                    ps.close();
+                } catch (final SQLException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
     }
@@ -185,7 +195,7 @@ public class LdapGlobalFolderCreator {
     }
 
     private static Session getDummySessionObj(final int admin_user_id, final int contextid) {
-        final Session dummysession = new Session(){
+        return new Session(){
 
             public int getContextId() {
                 return contextid;
@@ -236,12 +246,30 @@ public class LdapGlobalFolderCreator {
             }
 
             public void removeRandomToken() {
+                // Nothing to do
             }
 
             public void setParameter(final String name, final Object value) {
+                // Nothing to do
             }
-            
+            public String getAuthId() {
+                throw new UnsupportedOperationException();
+            }
+
+            public String getHash() {
+                return null;
+            }
+
+            public void setLocalIp(String ip) {
+                // TODO Auto-generated method stub
+                
+            }
+
+			public void setHash(String hash) {
+				// TODO Auto-generated method stub
+				
+			}
         };
-        return dummysession;
     }
+
 }
