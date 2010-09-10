@@ -71,8 +71,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -146,7 +144,6 @@ public abstract class SessionServlet extends AJAXServlet {
      * Checks the session ID supplied as a query parameter in the request URI.
      */
     @Override
-    @OXThrows(category = Category.TRY_AGAIN, desc = "", exceptionId = 4, msg = "Context is locked.")
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
         try {
@@ -154,16 +151,16 @@ public abstract class SessionServlet extends AJAXServlet {
             if (sessiondService == null) {
                 throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
             }
-            final Session session = getSession(req, getSessionId(req), sessiondService);
+            final ServerSession session = getSession(req, getSessionId(req), sessiondService);
             final String sessionId = session.getSessionID();
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            final Context ctx = session.getContext();
             if (!ctx.isEnabled()) {
                 final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 sessiondCon.removeSession(sessionId);
                 throw SessionExceptionCodes.CONTEXT_LOCKED.create();
             }
             checkIP(session, req.getRemoteAddr());
-            rememberSession(req, new ServerSessionAdapter(session, ctx));
+            rememberSession(req, session);
             super.service(req, resp);
         } catch (final SessiondException e) {
             LOG.debug(e.getMessage(), e);
@@ -269,7 +266,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    public static Session getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
+    public static ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
@@ -279,16 +276,18 @@ public abstract class SessionServlet extends AJAXServlet {
         if (secret == null || !session.getSecret().equals(secret)) {
             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
         }
+        final Context context;
+        final User user;
         try {
-            final Context context = ContextStorage.getStorageContext(session.getContextId());
-            final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+            context = ContextStorage.getInstance().getContext(session.getContextId());
+            user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!user.isMailEnabled()) {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
         } catch (UndeclaredThrowableException e) {
             throw new UserException(UserException.Code.USER_NOT_FOUND, e, I(session.getUserId()), I(session.getContextId()));
         }
-        return session;
+        return new ServerSessionAdapter(session, context, user);
     }
     
     public static String extractSecret(String hash, Cookie[] cookies) {

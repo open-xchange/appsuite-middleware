@@ -1,3 +1,7 @@
+* 2010-09-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #16763: Not throwing a session expired exception anymore if loading context or user fails.
+
 * 2010-09-10 - thorben.betten@open-xchange.com
 
  - Bugfix #16809: Changed error message if twitter consumer key/secret pair is invalid.
