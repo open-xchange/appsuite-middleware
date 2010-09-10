@@ -108,6 +108,13 @@ public interface POP3Storage {
     public void syncMessages(boolean expunge, POP3StorageConnectCounter connectCounter) throws MailException;
 
     /**
+     * Drops resources for associated user.
+     * 
+     * @throws MailException If operation fails
+     */
+    public void drop() throws MailException;
+
+    /**
      * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
      * 
      * @return The appropriate {@link IMailFolderStorage} implementation

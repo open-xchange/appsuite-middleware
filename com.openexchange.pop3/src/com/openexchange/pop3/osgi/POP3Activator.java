@@ -50,8 +50,10 @@
 package com.openexchange.pop3.osgi;
 
 import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegistry;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
@@ -65,6 +67,7 @@ import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
@@ -81,7 +84,7 @@ public final class POP3Activator extends DeferredActivator {
 
     private ServiceRegistration pop3ServiceRegistration;
 
-    private ServiceTracker providerServiceTracker;
+    private List<ServiceTracker> trackers;
 
     private POP3StorageProviderServiceTrackerCustomizer customizer;
 
@@ -142,9 +145,13 @@ public final class POP3Activator extends DeferredActivator {
             /*
              * Service tracker for possible POP3 storage provider
              */
+            trackers = new ArrayList<ServiceTracker>(2);
             customizer = new POP3StorageProviderServiceTrackerCustomizer(context);
-            providerServiceTracker = new ServiceTracker(context, POP3StorageProvider.class.getName(), customizer);
-            providerServiceTracker.open();
+            trackers.add(new ServiceTracker(context, POP3StorageProvider.class.getName(), customizer));
+            trackers.add(new ServiceTracker(context, SessiondService.class.getName(), new SessiondServiceServiceTrackerCustomizer(context)));
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
             /*
              * Add built-in mail account POP3 storage provider
              */
@@ -164,12 +171,14 @@ public final class POP3Activator extends DeferredActivator {
             builtInProvider = null;
             // Customizer shut-down
             customizer.dropAllRegistrations();
-            if (null != providerServiceTracker) {
+            if (null != trackers) {
                 /*
-                 * Close tracker
+                 * Close trackers
                  */
-                providerServiceTracker.close();
-                providerServiceTracker = null;
+                while (!trackers.isEmpty()) {
+                    trackers.remove(0).close();
+                }
+                trackers = null;
             }
             customizer = null;
             /*

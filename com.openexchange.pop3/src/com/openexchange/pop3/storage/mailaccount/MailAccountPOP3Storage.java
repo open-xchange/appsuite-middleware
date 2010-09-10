@@ -240,6 +240,21 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return separator;
     }
 
+    public void drop() throws MailException {
+        if (null != path) {
+            if (defaultMailAccess.isConnected()) {
+                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+            } else {
+                defaultMailAccess.connect(false);
+                try {
+                    defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+                } finally {
+                    defaultMailAccess.close(true);
+                }
+            }
+        }
+    }
+
     /**
      * Gets the path to virtual root folder.
      * 

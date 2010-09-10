@@ -47,65 +47,59 @@
  *
  */
 
-package com.openexchange.pop3.storage.mailaccount.util;
+package com.openexchange.pop3.osgi;
 
-import java.sql.Connection;
-import java.util.Collection;
-import java.util.Map;
-import com.openexchange.mail.MailException;
-import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.POP3Provider;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
-import com.openexchange.pop3.storage.POP3Storage;
-import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageProperties;
-import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageTrashContainer;
-import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageUIDLMap;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link StorageDeleteListener} - Delete listener for mail account POP3 storage.
+ * {@link SessiondServiceServiceTrackerCustomizer} - Service tracker customizer for {@link SessiondService}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class StorageDeleteListener implements MailAccountDeleteListener {
+public class SessiondServiceServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(SessiondServiceServiceTrackerCustomizer.class);
+
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link StorageDeleteListener}.
+     * Initializes a new {@link SessiondServiceServiceTrackerCustomizer}.
      */
-    public StorageDeleteListener() {
+    public SessiondServiceServiceTrackerCustomizer(final BundleContext context) {
         super();
+        this.context = context;
     }
 
-    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
+    public Object addingService(final ServiceReference reference) {
+        final Object addedService = context.getService(reference);
+        if (null == addedService) {
+            LOG.warn("Added service is null!", new Throwable());
+        }
+        if ((addedService instanceof SessiondService)) {
+            POP3ServiceRegistry.getServiceRegistry().addService(SessiondService.class, addedService);
+            return addedService;
+        }
+        // Service needs not to be tracked
+        context.ungetService(reference);
+        return null;
+    }
+
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
-    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
-        try {
-            /*
-             * Delete storage for user
-             */
-            final SessiondService sessiondService = POP3ServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-            if (null != sessiondService) {
-                final Collection<Session> sessions = sessiondService.getSessions(user, cid);
-                if (!sessions.isEmpty()) {
-                    final Session session = sessions.iterator().next();
-                    final POP3Access pop3Access = (POP3Access) POP3Provider.getInstance().createNewMailAccess(session, id);
-                    final POP3Storage pop3Storage = pop3Access.getPOP3Storage();
-                    pop3Storage.drop();
-                }
+    public void removedService(final ServiceReference reference, final Object service) {
+        if (null != service) {
+            try {
+                POP3ServiceRegistry.getServiceRegistry().removeService(SessiondService.class);
+            } finally {
+                context.ungetService(reference);
             }
-            /*
-             * Drop database entries
-             */
-            RdbPOP3StorageProperties.dropProperties(id, user, cid, con);
-            RdbPOP3StorageTrashContainer.dropTrash(id, user, cid, con);
-            RdbPOP3StorageUIDLMap.dropIDs(id, user, cid, con);
-        } catch (final MailException e) {
-            throw new MailAccountException(e);
         }
     }
 

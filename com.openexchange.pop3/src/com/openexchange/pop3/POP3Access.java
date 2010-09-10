@@ -274,6 +274,15 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     /**
+     * Gets the POP3 storage.
+     * 
+     * @return The POP3 storage
+     */
+    public POP3Storage getPOP3Storage() {
+        return pop3Storage;
+    }
+
+    /**
      * Since POP3 account's messages are kept in a separate storage, a {@link POP3Access POP3 access} is not supposed to be cached.
      * 
      * @see com.openexchange.mail.api.MailAccess#isCacheable()
