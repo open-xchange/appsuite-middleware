@@ -180,6 +180,32 @@ public interface HTMLService {
     Pattern getURLPattern();
 
     /**
+     * The regular expression to match URLs and anchors inside text.
+     * 
+     * <pre>
+     * String s = matcher.group();
+     * int mlen = s.length() - 1;
+     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
+     *     s = s.substring(1, mlen);
+     * }
+     * </pre>
+     */
+    Pattern getLinkPattern();
+
+    /**
+     * The regular expression to match URLs and anchors inside text. The URLs are matched in capturing group #1.
+     * 
+     * <pre>
+     * String s = matcher.group(1);
+     * int mlen = s.length() - 1;
+     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
+     *     s = s.substring(1, mlen);
+     * }
+     * </pre>
+     */
+    Pattern getLinkWithGroupPattern();
+
+    /**
      * Creates valid HTML from specified HTML content conform to W3C standards.
      * 
      * @param htmlContent The HTML content

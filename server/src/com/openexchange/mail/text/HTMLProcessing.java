@@ -208,51 +208,7 @@ public final class HTMLProcessing {
 
     private static final String REGEX_ANCHOR = "<a\\s+href[^>]+>.*?</a>";
 
-    private static final String REGEX_URL = "\\(?\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
-
-    /**
-     * The regular expression to match URLs inside text:<br>
-     * <code>\(?\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]</code>
-     * <p>
-     * Parentheses, if present, are allowed in the URL -- The leading one is absorbed, too.
-     * 
-     * <pre>
-     * String s = matcher.group();
-     * int mlen = s.length() - 1;
-     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
-     *     s = s.substring(1, mlen);
-     * }
-     * </pre>
-     */
-    public static final Pattern PATTERN_URL = Pattern.compile(REGEX_URL);
-
     private static final Pattern PATTERN_ANCHOR = Pattern.compile(REGEX_ANCHOR);
-
-    /**
-     * The regular expression to match URLs and anchors inside text.
-     * 
-     * <pre>
-     * String s = matcher.group();
-     * int mlen = s.length() - 1;
-     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
-     *     s = s.substring(1, mlen);
-     * }
-     * </pre>
-     */
-    public static final Pattern PATTERN_LINK = Pattern.compile(REGEX_ANCHOR + '|' + REGEX_URL);
-
-    /**
-     * The regular expression to match URLs and anchors inside text. The URLs are matched in capturing group #1.
-     * 
-     * <pre>
-     * String s = matcher.group(1);
-     * int mlen = s.length() - 1;
-     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
-     *     s = s.substring(1, mlen);
-     * }
-     * </pre>
-     */
-    public static final Pattern PATTERN_LINK_WITH_GROUP = Pattern.compile(REGEX_ANCHOR + "|(" + REGEX_URL + ')');
 
     private static List<Range> getAnchorPositions(final String content) {
         try {
@@ -296,7 +252,7 @@ public final class HTMLProcessing {
      */
     public static String formatHrefLinks(final String content) {
         try {
-            final Matcher m = PATTERN_LINK_WITH_GROUP.matcher(content);
+            final Matcher m = ServerServiceRegistry.getInstance().getService(HTMLService.class).getLinkWithGroupPattern().matcher(content);
             final MatcherReplacer mr = new MatcherReplacer(m, content);
             final StringBuilder sb = new StringBuilder(content.length());
             final StringBuilder tmp = new StringBuilder(256);
