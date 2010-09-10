@@ -131,7 +131,15 @@ public final class TwitterServiceImpl implements TwitterService {
                 throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
             }
             twitter.setOAuthConsumer(consumerKey, consumerSecret);
-            final RequestToken requestToken = twitter.getOAuthRequestToken();
+            final RequestToken requestToken;
+            try {
+                requestToken = twitter.getOAuthRequestToken();
+            } catch (final twitter4j.TwitterException e) {
+                /*
+                 * Probably consumer-key/consumer-secret pair is invalid
+                 */
+                throw TwitterExceptionCodes.INVALID_CONSUMER_KEY_SECRET.create(e, e.getMessage());
+            }
             /*
              * Crawl PIN
              */

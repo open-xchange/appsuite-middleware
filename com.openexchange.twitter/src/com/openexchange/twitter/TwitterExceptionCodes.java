@@ -81,7 +81,7 @@ public enum TwitterExceptionCodes implements OXErrorMessage {
      */
     ACCESS_TOKEN_FAILED(TwitterExceptionMessages.ACCESS_TOKEN_FAILED_MSG, Category.CODE_ERROR, 5),
     /**
-     * The configured consumer key/consumer secret pair is invalid.
+     * The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.
      */
     INVALID_CONSUMER_KEY_SECRET(TwitterExceptionMessages.INVALID_CONSUMER_KEY_SECRET_MSG, Category.CODE_ERROR, 6);
 
