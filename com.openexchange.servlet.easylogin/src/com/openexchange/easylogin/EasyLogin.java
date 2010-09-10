@@ -365,7 +365,7 @@ public class EasyLogin extends HttpServlet {
             client = defaultClient;
         }
         if (client != null) {
-            sb.append("client=").append(client);
+            sb.append("&client=").append(client);
         }
 
         resp.sendRedirect(sb.toString());
