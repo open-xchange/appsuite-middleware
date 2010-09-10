@@ -6,7 +6,8 @@
 
  - Bugfix #16848: Use correct date format in response headers.
  - Bugfix #16846: Forward autologin parameter
-
+ - Bugfix #15936: URLEncode webUIPath parameter.
+ 
 * 2010-09-10 - karsten.will@open-xchange.com
 
  - Bugfix #16756: Calendar folder now have the information that their content is subscribed.
