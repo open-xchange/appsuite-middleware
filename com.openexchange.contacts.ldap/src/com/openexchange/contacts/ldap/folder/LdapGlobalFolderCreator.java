@@ -264,6 +264,11 @@ public class LdapGlobalFolderCreator {
                 // TODO Auto-generated method stub
                 
             }
+
+            public void setHash(String hash) {
+                // TODO Auto-generated method stub
+                
+            }
         };
     }
 
