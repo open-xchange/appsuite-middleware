@@ -114,11 +114,13 @@ public interface SessiondService {
     public int getUserSessions(final int userId, final int contextId);
 
     /**
-     * Gets the sessions associated with specified user in given context.
+     * Gets the <b>local-only</b> sessions associated with specified user in given context.
+     * <p>
+     * <b>Note</b>: Remote sessions are not considered by this method.
      * 
      * @param userId The user ID
      * @param contextId The context ID
-     * @return The sessions associated with specified user in given context
+     * @return The <b>local-only</b> sessions associated with specified user in given context
      */
     public Collection<Session> getSessions(int userId, int contextId);
 
