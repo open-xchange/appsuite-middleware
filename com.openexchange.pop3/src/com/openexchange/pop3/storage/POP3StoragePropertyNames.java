@@ -64,7 +64,7 @@ public final class POP3StoragePropertyNames {
     }
 
     /**
-     * The abbreviation of the storage to user;<br />
+     * The abbreviation of the storage to use;<br />
      * e.g. <code>"mailaccount"</code> to use the default mail account as storage.
      * 
      * @type <code>String</code>
