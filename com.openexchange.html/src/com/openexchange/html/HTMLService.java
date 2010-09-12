@@ -107,7 +107,6 @@ public interface HTMLService {
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
      * 
      * @param htmlContent The <b>validated</b> HTML content
-     * @param charset The HTML content's charset
      * @return The filtered HTML content
      * @see #getConformHTML(String, String)
      */
@@ -119,7 +118,6 @@ public interface HTMLService {
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
      * 
      * @param htmlContent The <b>validated</b> HTML content
-     * @param charset The HTML content's charset
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status
      * @return The HTML content stripped by external images
      * @see #getConformHTML(String, String)
@@ -132,7 +130,6 @@ public interface HTMLService {
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
      * 
      * @param htmlContent The <b>validated</b> HTML content
-     * @param charset The HTML content's charset
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
      *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be <code>Link&nbsp;[www.somewhere.com]</code>
      * @return The plain text representation of specified HTML content
