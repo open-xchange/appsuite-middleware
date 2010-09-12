@@ -213,15 +213,21 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         if (null != session) {
             final int user = session.getUserId();
             final int cid = session.getContextId();
-            // At least this property must be kept in database
+            /*
+             * At least this property must be kept in database
+             */
             String providerName = POP3StorageUtil.getPOP3StorageProviderName(pop3Access.accountId, user, cid);
             if (null == providerName) {
                 final POP3Exception e =
                     new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
                 LOG.warn("Using fallback storage \"mailaccount\".\n" + e.getMessage(), e);
                 providerName = MailAccountPOP3StorageProvider.NAME;
-                // Add to properties
-                POP3StorageUtil.setPOP3StorageProviderName(pop3Access.accountId, user, cid, providerName);
+                /*
+                 * Add to properties if marker is absent
+                 */
+                if (!"validate".equals(session.getParameter("mail-account.request"))) {
+                    POP3StorageUtil.setPOP3StorageProviderName(pop3Access.accountId, user, cid, providerName);
+                }
             }
             final POP3StorageProvider provider = POP3StorageProviderRegistry.getInstance().getPOP3StorageProvider(providerName);
             if (null == provider) {
