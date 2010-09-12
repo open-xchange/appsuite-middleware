@@ -432,13 +432,13 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                         public void decrementCounter() {
                             MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
                             MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-                            POP3Access.decrementCounter();
+                            pop3DecrementCounter();
                         }
 
                         public void incrementCounter() {
                             MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
                             MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-                            POP3Access.incrementCounter();
+                            pop3IncrementCounter();
                         }
                     }));
             f = SYNCHRONIZER_MAP.putIfAbsent(key, ft);
@@ -483,6 +483,20 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 SYNCHRONIZER_MAP.remove(key);
             }
         }
+    }
+
+    /**
+     * Increments the global access counter.
+     */
+    static void pop3IncrementCounter() {
+        incrementCounter();
+    }
+
+    /**
+     * Decrements the global access counter.
+     */
+    static void pop3DecrementCounter() {
+        decrementCounter();
     }
 
     @Override
