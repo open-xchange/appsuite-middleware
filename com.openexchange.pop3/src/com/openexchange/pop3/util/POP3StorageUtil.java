@@ -109,7 +109,7 @@ public class POP3StorageUtil {
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
-            stmt.setString(pos++, POP3StoragePropertyNames.PROPERTY_STORAGE);
+            stmt.setString(pos, POP3StoragePropertyNames.PROPERTY_STORAGE);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getString(1);

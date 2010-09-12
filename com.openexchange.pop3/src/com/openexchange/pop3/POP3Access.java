@@ -218,7 +218,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             if (null == providerName) {
                 final POP3Exception e =
                     new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
-                LOG.warn("Using fallback storage \"mailaccount\". Error: " + e.getMessage(), e);
+                LOG.warn("Using fallback storage \"mailaccount\".\n" + e.getMessage(), e);
                 providerName = MailAccountPOP3StorageProvider.NAME;
                 // Add to properties
                 POP3StorageUtil.setPOP3StorageProviderName(pop3Access.accountId, user, cid, providerName);
