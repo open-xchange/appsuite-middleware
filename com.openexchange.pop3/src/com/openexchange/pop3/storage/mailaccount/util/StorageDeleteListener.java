@@ -86,7 +86,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
     public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
         try {
             /*
-             * Delete storage for user
+             * Delete storage content for user if a valid session can be found
              */
             final SessiondService sessiondService = POP3ServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null != sessiondService) {
