@@ -64,8 +64,14 @@ public interface HTMLService {
      */
     public static final class Range {
 
+        /**
+         * The start position.
+         */
         public final int start;
 
+        /**
+         * The end position.
+         */
         public final int end;
 
         /**
@@ -128,8 +134,7 @@ public interface HTMLService {
      * @param htmlContent The <b>validated</b> HTML content
      * @param charset The HTML content's charset
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
-     *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
-     *            <code>Link&nbsp;[www.somewhere.com]</code>
+     *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be <code>Link&nbsp;[www.somewhere.com]</code>
      * @return The plain text representation of specified HTML content
      * @see #getConformHTML(String, String)
      */
