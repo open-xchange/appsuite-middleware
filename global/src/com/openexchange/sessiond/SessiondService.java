@@ -54,12 +54,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessiondService} - The SessionD service.
+ * {@link SessiondService}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+
 public interface SessiondService {
 
     /**
