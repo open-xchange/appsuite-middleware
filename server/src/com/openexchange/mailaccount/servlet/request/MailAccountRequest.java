@@ -439,36 +439,43 @@ public final class MailAccountRequest {
             }
             return null;
         }
-        // Create a mail access instance
-        final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
-        final MailConfig mailConfig = mailAccess.getMailConfig();
-        // Set login and password
-        mailConfig.setLogin(accountDescription.getLogin());
-        mailConfig.setPassword(accountDescription.getPassword());
-        // Set server and port
-        final String server;
-        {
-            final String[] tmp = MailConfig.parseProtocol(mailServerURL);
-            server = tmp == null ? mailServerURL : tmp[1];
-        }
-        final int pos = server.indexOf(':');
-        if (pos == -1) {
-            mailConfig.setPort(143);
-            mailConfig.setServer(server);
-        } else {
-            final String sPort = server.substring(pos + 1);
-            try {
-                mailConfig.setPort(Integer.parseInt(sPort));
-            } catch (final NumberFormatException e) {
-                LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
-                    "\". Using fallback 143 instead."), e);
-                mailConfig.setPort(143);
+        // Set marker
+        session.setParameter("mail-account.request", "validate");
+        try {
+            // Create a mail access instance
+            final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
+            final MailConfig mailConfig = mailAccess.getMailConfig();
+            // Set login and password
+            mailConfig.setLogin(accountDescription.getLogin());
+            mailConfig.setPassword(accountDescription.getPassword());
+            // Set server and port
+            final String server;
+            {
+                final String[] tmp = MailConfig.parseProtocol(mailServerURL);
+                server = tmp == null ? mailServerURL : tmp[1];
             }
-            mailConfig.setServer(server.substring(0, pos));
+            final int pos = server.indexOf(':');
+            if (pos == -1) {
+                mailConfig.setPort(143);
+                mailConfig.setServer(server);
+            } else {
+                final String sPort = server.substring(pos + 1);
+                try {
+                    mailConfig.setPort(Integer.parseInt(sPort));
+                } catch (final NumberFormatException e) {
+                    LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
+                        "\". Using fallback 143 instead."), e);
+                    mailConfig.setPort(143);
+                }
+                mailConfig.setServer(server.substring(0, pos));
+            }
+            mailConfig.setSecure(accountDescription.isMailSecure());
+            mailAccess.setCacheable(false);
+            return mailAccess;
+        } finally {
+            // Unset marker
+            session.setParameter("mail-account.request", null);
         }
-        mailConfig.setSecure(accountDescription.isMailSecure());
-        mailAccess.setCacheable(false);
-        return mailAccess;
     }
 
     private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException {
