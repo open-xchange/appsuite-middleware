@@ -68,6 +68,12 @@ public interface HTMLService {
 
         public final int end;
 
+        /**
+         * Initializes a new {@link Range}.
+         * 
+         * @param start The start position
+         * @param end The end position
+         */
         public Range(final int start, final int end) {
             super();
             this.start = start;
