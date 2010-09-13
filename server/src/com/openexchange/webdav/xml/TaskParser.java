@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml;
 
 import org.apache.commons.logging.Log;
@@ -63,138 +61,133 @@ import com.openexchange.webdav.xml.fields.TaskFields;
 
 /**
  * TaskParser
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-
 public class TaskParser extends CalendarParser {
-	
-	private static final Log LOG = LogFactory.getLog(TaskParser.class);
-	
-	public TaskParser(final Session sessionObj) {
-		this.sessionObj = sessionObj;
-	}
-	
-	public void parse(final XmlPullParser parser, final Task taskobject) throws OXException, XmlPullParserException {
-		try {
-			while (true) {
-				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
-					break;
-				}
 
-				parseElementTask(taskobject, parser);	
-				parser.nextTag();
-			}
-		} catch (final XmlPullParserException exc) {
-			throw exc;
-		} catch (final Exception exc) {
-			throw new OXException(exc);
-		}
-	}
-	
-	protected void parseElementTask(final Task taskobject, final XmlPullParser parser) throws Exception {
-		if (!hasCorrectNamespace(parser)) {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("unknown namespace in tag: " + parser.getName());
-			}
-			parser.nextText();
-			return ;
-		} 
-		
-		if (isTag(parser, TaskFields.STATUS)) {
-			try {
-				taskobject.setStatus(getValueAsInt(parser));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(TaskFields.STATUS + " is not an integer");
-			}
-			
-			return ;
-		} else if (isTag(parser, TaskFields.PERCENT_COMPLETED)) {
-			try {
-				taskobject.setPercentComplete(getValueAsInt(parser));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(TaskFields.PERCENT_COMPLETED + " is not an integer");
-			}
-			
-			return ;
-		} else if (isTag(parser, TaskFields.PRIORITY)) {
-			try {
-				taskobject.setPriority(getValueAsInt(parser));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(TaskFields.PRIORITY + " is not an integer");
-			}
-			
-			return ;
-		} else if (isTag(parser, TaskFields.TARGET_DURATION)) {
-			try {
-				taskobject.setTargetDuration(getValueAsLong(parser));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(TaskFields.TARGET_DURATION + " is not a long");
-			}
-			
-			return ;
-		} else if (isTag(parser, TaskFields.TARGET_COSTS)) {
-			try {
-				taskobject.setTargetCosts(getValueAsFloat(parser));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(TaskFields.TARGET_COSTS + " is not a float");
-			}
-			
-			return ;
-		} else if (isTag(parser, TaskFields.ACTUAL_DURATION)) {
-			try {
-				taskobject.setActualDuration(getValueAsLong(parser));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(TaskFields.ACTUAL_DURATION + " is not a long");
-			}
-			
-			return ;
-		} else if (isTag(parser, TaskFields.ACTUAL_COSTS)) {
-			try {
-				taskobject.setActualCosts(getValueAsFloat(parser));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(TaskFields.ACTUAL_COSTS + " is not a float");
-			}
-			
-			return ;
-		} else if (isTag(parser, TaskFields.DATE_COMPLETED)) {
-			try {
-				taskobject.setDateCompleted(getValueAsDate(parser));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(TaskFields.DATE_COMPLETED + " is not a long");
-			}
-			
-			return ;
-		} else if (isTag(parser, TaskFields.ALARM)) {
-			taskobject.setAlarm(getValueAsDate(parser));
+    private static final Log LOG = LogFactory.getLog(TaskParser.class);
 
-			return ;
-		} else if (isTag(parser, TaskFields.ALARM_FLAG)) {
-			taskobject.setAlarmFlag(getValueAsBoolean(parser));
+    public TaskParser(final Session sessionObj) {
+        this.sessionObj = sessionObj;
+    }
 
-			return ;
-		} else if (isTag(parser, TaskFields.BILLING_INFORMATION)) {
-			taskobject.setBillingInformation(getValue(parser));
-			
-			return ;
-		} else if (isTag(parser, TaskFields.CURRENCY)) {
-			taskobject.setCurrency(getValue(parser));
-			
-			return ;
-		} else if (isTag(parser, TaskFields.TRIP_METER)) {
-			taskobject.setTripMeter(getValue(parser));
-			
-			return ;
-		} else if (isTag(parser, TaskFields.COMPANIES)) {
-			taskobject.setCompanies(getValue(parser));
-			
-			return ;
-		} else {
-			parseElementCalendar(taskobject, parser);
-		}
-	}
+    public void parse(final XmlPullParser parser, final Task taskobject) throws OXException, XmlPullParserException {
+        try {
+            while (true) {
+                if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
+                    break;
+                }
+
+                parseElementTask(taskobject, parser);
+                parser.nextTag();
+            }
+        } catch (final XmlPullParserException exc) {
+            throw exc;
+        } catch (final Exception exc) {
+            throw new OXException(exc);
+        }
+    }
+
+    protected void parseElementTask(final Task taskobject, final XmlPullParser parser) throws Exception {
+        if (!hasCorrectNamespace(parser)) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("unknown namespace in tag: " + parser.getName());
+            }
+            parser.nextText();
+            return ;
+        }
+
+        if (isTag(parser, TaskFields.STATUS)) {
+            try {
+                taskobject.setStatus(getValueAsInt(parser));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(TaskFields.STATUS + " is not an integer");
+            }
+
+            return ;
+        } else if (isTag(parser, TaskFields.PERCENT_COMPLETED)) {
+            try {
+                taskobject.setPercentComplete(getValueAsInt(parser));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(TaskFields.PERCENT_COMPLETED + " is not an integer");
+            }
+
+            return ;
+        } else if (isTag(parser, TaskFields.PRIORITY)) {
+            try {
+                taskobject.setPriority(getValueAsInt(parser));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(TaskFields.PRIORITY + " is not an integer");
+            }
+
+            return ;
+        } else if (isTag(parser, TaskFields.TARGET_DURATION)) {
+            try {
+                taskobject.setTargetDuration(getValueAsLong(parser));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(TaskFields.TARGET_DURATION + " is not a long");
+            }
+
+            return ;
+        } else if (isTag(parser, TaskFields.TARGET_COSTS)) {
+            try {
+                taskobject.setTargetCosts(getValueAsFloat(parser));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(TaskFields.TARGET_COSTS + " is not a float");
+            }
+
+            return ;
+        } else if (isTag(parser, TaskFields.ACTUAL_DURATION)) {
+            try {
+                taskobject.setActualDuration(getValueAsLong(parser));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(TaskFields.ACTUAL_DURATION + " is not a long");
+            }
+
+            return ;
+        } else if (isTag(parser, TaskFields.ACTUAL_COSTS)) {
+            try {
+                taskobject.setActualCosts(getValueAsFloat(parser));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(TaskFields.ACTUAL_COSTS + " is not a float");
+            }
+
+            return ;
+        } else if (isTag(parser, TaskFields.DATE_COMPLETED)) {
+            try {
+                taskobject.setDateCompleted(getValueAsDate(parser));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(TaskFields.DATE_COMPLETED + " is not a long");
+            }
+
+            return ;
+        } else if (isTag(parser, TaskFields.ALARM)) {
+            taskobject.setAlarm(getValueAsDate(parser));
+
+            return ;
+        } else if (isTag(parser, TaskFields.ALARM_FLAG)) {
+            taskobject.setAlarmFlag(getValueAsBoolean(parser));
+
+            return ;
+        } else if (isTag(parser, TaskFields.BILLING_INFORMATION)) {
+            taskobject.setBillingInformation(getValue(parser));
+
+            return ;
+        } else if (isTag(parser, TaskFields.CURRENCY)) {
+            taskobject.setCurrency(getValue(parser));
+
+            return ;
+        } else if (isTag(parser, TaskFields.TRIP_METER)) {
+            taskobject.setTripMeter(getValue(parser));
+
+            return ;
+        } else if (isTag(parser, TaskFields.COMPANIES)) {
+            taskobject.setCompanies(getValue(parser));
+
+            return ;
+        } else {
+            parseElementCalendar(taskobject, parser);
+        }
+    }
 }
-
-
-
-
