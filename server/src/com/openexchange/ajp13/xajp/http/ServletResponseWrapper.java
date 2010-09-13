@@ -209,7 +209,7 @@ public class ServletResponseWrapper implements ServletResponse {
                 /*
                  * No charset argument set in content type, yet
                  */
-                final String newCT = contentType + "; charset=" + characterEncoding;
+                final String newCT = new StringBuilder(contentType).append("; charset=").append(characterEncoding).toString();
                 headers.put(CONTENT_TYPE, new String[] { newCT });
             }
         }
