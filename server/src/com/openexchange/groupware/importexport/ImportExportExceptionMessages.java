@@ -47,33 +47,25 @@
  *
  */
 
-package com.openexchange.groupware.importexport.exceptions;
+package com.openexchange.groupware.importexport;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exceptions.LocalizableStrings;
+
 
 /**
- * An exception thrown by classes associated with the import or export of OX data.
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * {@link ImportExportExceptionMessages}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ImportExportException extends OXException {
+public class ImportExportExceptionMessages implements LocalizableStrings {
 
-    private static final long serialVersionUID = 8368543799201210727L;
+    public static final String CANNOT_EXPORT_MSG = "Could not export the folder %s in the format %s.";
 
-    public ImportExportException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-        super(EnumComponent.IMPORT_EXPORT, category, id, message, cause);
-        setMessageArgs(msgParams);
-    }
+    public static final String LOADING_CONTACTS_FAILED_MSG = "Could not load contacts";
 
-    public ImportExportException(final AbstractOXException e) {
-        super(e);
-    }
+    public static final String UTF8_ENCODE_FAILED_MSG = "Could not encode as UTF-8";
 
-    public ImportExportException(ErrorMessage message, Throwable cause, Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    private ImportExportExceptionMessages() {
+        super();
     }
 }

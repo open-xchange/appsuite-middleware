@@ -47,33 +47,38 @@
  *
  */
 
-package com.openexchange.groupware.importexport.exceptions;
+package com.openexchange.groupware.importexport.internal;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+
 
 /**
- * An exception thrown by classes associated with the import or export of OX data.
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * {@link ImportExportExceptionFactory}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ImportExportException extends OXException {
+public class ImportExportExceptionFactory extends Exceptions<ImportExportException> {
 
-    private static final long serialVersionUID = 8368543799201210727L;
+    private static final ImportExportExceptionFactory SINGLETON = new ImportExportExceptionFactory();
 
-    public ImportExportException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-        super(EnumComponent.IMPORT_EXPORT, category, id, message, cause);
-        setMessageArgs(msgParams);
+    private ImportExportExceptionFactory() {
+        super();
     }
 
-    public ImportExportException(final AbstractOXException e) {
-        super(e);
+    public static final ImportExportExceptionFactory getInstance() {
+        return SINGLETON;
     }
 
-    public ImportExportException(ErrorMessage message, Throwable cause, Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    @Override
+    protected void knownExceptions() {
+        declareAll(ImportExportExceptionCodes.values());
+    }
+
+    @Override
+    protected ImportExportException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new ImportExportException(message, cause, args);
     }
 }

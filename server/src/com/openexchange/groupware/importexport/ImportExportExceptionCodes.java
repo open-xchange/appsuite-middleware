@@ -47,33 +47,59 @@
  *
  */
 
-package com.openexchange.groupware.importexport.exceptions;
+package com.openexchange.groupware.importexport;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.*;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.importexport.internal.ImportExportExceptionFactory;
 
 /**
- * An exception thrown by classes associated with the import or export of OX data.
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * {@link ImportExportExceptionCodes}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ImportExportException extends OXException {
+public enum ImportExportExceptionCodes implements OXErrorMessage {
+    /** Could not export the folder %s in the format %s. */
+    CANNOT_EXPORT(CANNOT_EXPORT_MSG, Category.PERMISSION, 100),
+    /** Could not load contacts */
+    LOADING_CONTACTS_FAILED(LOADING_CONTACTS_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 102),
+    /** Could not encode as UTF-8 */
+    UTF8_ENCODE_FAILED(UTF8_ENCODE_FAILED_MSG, Category.CODE_ERROR, 104),
+    ;
 
-    private static final long serialVersionUID = 8368543799201210727L;
+    private String message;
+    private Category category;
+    private int number;
 
-    public ImportExportException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-        super(EnumComponent.IMPORT_EXPORT, category, id, message, cause);
-        setMessageArgs(msgParams);
+    private ImportExportExceptionCodes(String message, Category category, int number) {
+        this.message = message;
+        this.category = category;
+        this.number = number;
     }
 
-    public ImportExportException(final AbstractOXException e) {
-        super(e);
+    public int getDetailNumber() {
+        return number;
     }
 
-    public ImportExportException(ErrorMessage message, Throwable cause, Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    public String getMessage() {
+        return message;
+    }
+
+    public String getHelp() {
+        return null;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public ImportExportException create(Object... args) {
+        return ImportExportExceptionFactory.getInstance().create(this, args);
+    }
+
+    public ImportExportException create(Throwable cause, Object... args) {
+        return ImportExportExceptionFactory.getInstance().create(this, cause, args);
     }
 }
