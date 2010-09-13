@@ -291,7 +291,7 @@ public class ServletResponseWrapper implements ServletResponse {
     }
 
     /**
-     * Sets the commited flag
+     * Sets the committed flag
      * 
      * @param committed
      */
