@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -105,9 +106,10 @@ public final class CreateAction extends AbstractFolderAction {
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         final String newId = folderService.createFolder(folder, session);
         /*
-         * Return appropriate result
+         * Return appropriate result with last-modified time stamp
          */
-        return new AJAXRequestResult(newId);
+        final Date lastModifiedUTC = folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC();
+        return new AJAXRequestResult(newId, lastModifiedUTC);
     }
 
 }
