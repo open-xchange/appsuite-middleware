@@ -241,7 +241,7 @@ public class CSVContactExporter implements Exporter {
         } else {
             cols = fieldsToBeExported;
         }
-        Contact conObj;
+        final Contact conObj;
         try {
             final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
                 folderId,
