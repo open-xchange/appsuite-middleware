@@ -348,10 +348,9 @@ public class EasyLogin extends HttpServlet {
         String uiWebPath = getParameter(req, UI_WEB_PATH_PARAMETER);
         
         // Escape significant characters like '#' so that the redirect target doesn't mistakenly parse them
-        
-        uiWebPath = URLEncoder.encode(uiWebPath, "UTF-8"); 
-        
+
         if (null != uiWebPath) {
+            uiWebPath = URLEncoder.encode(uiWebPath, "UTF-8"); 
             sb.append('&');
             sb.append(UI_WEB_PATH_PARAMETER);
             sb.append('=');
