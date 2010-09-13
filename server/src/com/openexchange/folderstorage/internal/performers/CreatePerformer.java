@@ -61,6 +61,7 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -155,7 +156,8 @@ public final class CreatePerformer extends AbstractPerformer {
                     getUser().getDisplayName(),
                     Integer.valueOf(getContextId()));
             }
-            if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && "mail".equals(toCreate.getContentType().toString())) {
+            if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && MailContentType.getInstance().toString().equals(
+                toCreate.getContentType().toString())) {
                 throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
             }
             /*
@@ -252,10 +254,10 @@ public final class CreatePerformer extends AbstractPerformer {
                             virtualStorage.getFolder(treeId, sortableId.getId(), storageParameters).getLocalizedName(locale);
                         if (localizedName.equals(toCreate.getName())) {
                             checkOpenedStorage(realStorage, openedStorages);
-                            throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), realStorage.getFolder(
-                                FolderStorage.REAL_TREE_ID,
-                                parentId,
-                                storageParameters).getLocalizedName(locale), treeId);
+                            throw FolderExceptionErrorMessage.EQUAL_NAME.create(
+                                toCreate.getName(),
+                                realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale),
+                                treeId);
                         }
                     }
                 }
@@ -273,10 +275,11 @@ public final class CreatePerformer extends AbstractPerformer {
                  */
                 {
                     final String realParentId =
-                        capStorage.getDefaultFolderID(
+                        virtualStorage.getDefaultFolderID(
                             user,
-                            FolderStorage.REAL_TREE_ID,
+                            treeId,
                             null == folderContentType ? capStorage.getDefaultContentType() : folderContentType,
+                            virtualStorage.getTypeByParent(user, treeId, parentId, storageParameters),
                             storageParameters);
                     if (null == realParentId) {
                         /*

@@ -113,7 +113,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         Delete.deleteFolder(storageParameters.getContextId(), Integer.parseInt(treeId), storageParameters.getUserId(), folderId, true);
     }
 
-    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
         // Get default folder
         final FolderStorage byContentType = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
         if (null == byContentType) {
@@ -121,7 +121,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         }
         final boolean started = byContentType.startTransaction(storageParameters, false);
         try {
-            final String defaultFolderID = byContentType.getDefaultFolderID(user, treeId, contentType, storageParameters);
+            final String defaultFolderID = byContentType.getDefaultFolderID(user, treeId, contentType, type, storageParameters);
             if (started) {
                 byContentType.commitTransaction(storageParameters);
             }
@@ -137,6 +137,10 @@ public final class VirtualFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+        return null;
     }
 
     public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {

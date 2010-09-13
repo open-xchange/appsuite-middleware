@@ -305,7 +305,12 @@ final class MovePerformer extends AbstractPerformer {
                  */
                 checkOpenedStorage(realStorage, openedStorages);
                 final String defaultParentId =
-                    realStorage.getDefaultFolderID(user, FolderStorage.REAL_TREE_ID, realStorage.getDefaultContentType(), storageParameters);
+                    virtualStorage.getDefaultFolderID(
+                        user,
+                        treeId,
+                        realStorage.getDefaultContentType(),
+                        virtualStorage.getTypeByParent(user, treeId, folder.getParentID(), storageParameters),
+                        storageParameters);
                 if (null == defaultParentId) {
                     /*
                      * No default folder found

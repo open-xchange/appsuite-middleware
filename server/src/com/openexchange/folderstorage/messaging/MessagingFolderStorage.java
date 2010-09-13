@@ -83,6 +83,7 @@ import com.openexchange.folderstorage.messaging.contentType.MessagingContentType
 import com.openexchange.folderstorage.messaging.contentType.SentContentType;
 import com.openexchange.folderstorage.messaging.contentType.SpamContentType;
 import com.openexchange.folderstorage.messaging.contentType.TrashContentType;
+import com.openexchange.folderstorage.type.MessagingType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
@@ -380,7 +381,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         }
     }
 
-    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
         if (!(contentType instanceof MessagingContentType)) {
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
         }
@@ -424,6 +425,10 @@ public final class MessagingFolderStorage implements FolderStorage {
         } catch (final MessagingException e) {
             throw new FolderException(e);
         }
+    }
+
+    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+        return MessagingType.getInstance();
     }
 
     public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {

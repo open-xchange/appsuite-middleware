@@ -94,6 +94,7 @@ import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -355,7 +356,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
         final Context context = storageParameters.getContext();
         try {
             final Connection con = getConnection(storageParameters);
@@ -381,6 +382,35 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
+    }
+
+    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Special treatment for system folders
+         */
+        final int pid = Integer.parseInt(parentId);
+        if (pid == FolderObject.SYSTEM_SHARED_FOLDER_ID) {
+            return SharedType.getInstance();
+        } else if (pid == FolderObject.SYSTEM_PRIVATE_FOLDER_ID) {
+            return PrivateType.getInstance();
+        } else if (Arrays.binarySearch(PUBLIC_FOLDER_IDS, pid) >= 0) {
+            return PublicType.getInstance();
+        } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
+            return SystemType.getInstance();
+        } else {
+            try {
+                final FolderObject p = getFolderAccess(storageParameters).getFolderObject(pid);
+                final int parentType = p.getType();
+                if (FolderObject.PRIVATE == parentType) {
+                    return p.getCreatedBy() == user.getId() ? PrivateType.getInstance() : SharedType.getInstance();
+                } else if (FolderObject.PUBLIC == parentType) {
+                    return PublicType.getInstance();
+                }
+            } catch (final OXException e) {
+                throw new FolderException(e);
+            }
+        }
+        return SystemType.getInstance();
     }
 
     public boolean containsForeignObjects(final User user, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {

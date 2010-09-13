@@ -218,11 +218,24 @@ public interface FolderStorage {
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
      * @param contentType The content type or the default folder
+     * @param type The folder type
      * @param storageParameters The storage parameters
      * @return The default folder identifier for specified user for given content type
      * @throws FolderException If the default folder cannot be returned
      */
-    String getDefaultFolderID(User user, String treeId, ContentType contentType, StorageParameters storageParameters) throws FolderException;
+    String getDefaultFolderID(User user, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException;
+
+    /**
+     * Gets the type as indicated by specified parent.
+     * 
+     * @param user The user
+     * @param treeId The tree identifier
+     * @param parentId The parent identifier
+     * @param storageParameters The storage parameters
+     * @return The type as indicated by specified parent
+     * @throws FolderException Id determining the type fails
+     */
+    Type getTypeByParent(User user, String treeId, String parentId, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Deletes the folder denoted by specified folder ID.

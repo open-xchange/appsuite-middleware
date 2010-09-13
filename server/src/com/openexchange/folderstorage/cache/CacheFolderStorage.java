@@ -452,7 +452,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
         final FolderStorage storage = registry.getFolderStorageByContentType(treeId, contentType);
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
@@ -460,7 +460,7 @@ public final class CacheFolderStorage implements FolderStorage {
         final String folderId;
         final boolean started = storage.startTransaction(storageParameters, false);
         try {
-            folderId = storage.getDefaultFolderID(user, treeId, contentType, storageParameters);
+            folderId = storage.getDefaultFolderID(user, treeId, contentType, type, storageParameters);
             if (started) {
                 storage.commitTransaction(storageParameters);
             }
@@ -476,6 +476,32 @@ public final class CacheFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         return folderId;
+    }
+
+    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+        final FolderStorage storage = registry.getFolderStorage(treeId, parentId);
+        if (null == storage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
+        }
+        final Type type;
+        final boolean started = storage.startTransaction(storageParameters, false);
+        try {
+            type = storage.getTypeByParent(user, treeId, parentId, storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
+        } catch (final FolderException e) {
+            if (started) {
+                storage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            if (started) {
+                storage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        return type;
     }
 
     public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
