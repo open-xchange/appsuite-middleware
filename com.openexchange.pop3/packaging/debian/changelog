@@ -1,3 +1,9 @@
+open-xchange-pop3 (6.18.0.0-9) unstable; urgency=low
+
+  * Build for PTF 2010032510000321
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Mon, 13 Sep 2010 14:12:17 +0200
+
 open-xchange-pop3 (6.18.0.0-8) unstable; urgency=low
 
   * build for public ptf 2010-09-08
