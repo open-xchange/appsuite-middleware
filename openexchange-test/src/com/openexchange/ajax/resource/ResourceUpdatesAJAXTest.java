@@ -98,7 +98,8 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
 
     @Override
     protected void tearDown() throws Exception {
-        Executor.execute(getSession(), new ResourceDeleteRequest(resource));
+        if(resource != null)
+            Executor.execute(getSession(), new ResourceDeleteRequest(resource));
         super.tearDown();
     }
 
@@ -107,8 +108,7 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
     public void testUpdatesSinceBeginning() throws Exception{
         final ResourceUpdatesResponse response = Executor.execute(getSession(),
             new ResourceUpdatesRequest(new Date(0), true));
-        assertEquals("Should currently not find any deleted objects (change when implemented)", 0, response.getDeleted().size());
-        assertEquals("Should currently not find any new objects (change when implemented)", 0, response.getNew().size());
+        assertTrue("Should find more than 0 new elements", response.getNew().size() > 0);
         assertTrue("Should find more than 0 updated elements", response.getModified().size() > 0);
     }
 
@@ -120,7 +120,24 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
         
         List<Group> modified = response.getModified();
         assertEquals("Should find one updated element", 1, modified.size());
-        assertEquals("Should have matching ID", resource.getIdentifier(), modified.get(0).getIdentifier());
+        assertEquals("Should have matching ID", resource.getIdentifier(), modified.get(0).getIdentifier());        
+    }
+    
+    public void testUpdatesShouldContainDeletes() throws Exception{
+        Date since = new Date(resource.getLastModified().getTime() - 1);
+        
+        ResourceUpdatesResponse response = Executor.execute(getSession(),
+            new ResourceUpdatesRequest(since, true));
+        int deletedBefore = response.getDeleted().size();
+        
+        Executor.execute(getSession(), new ResourceDeleteRequest(resource));
+        
+        response = Executor.execute(getSession(),
+            new ResourceUpdatesRequest(since, true));        
+        int deletedAfter =  response.getDeleted().size();
+        
+        resource = null; //so it does not get deleted in the tearDown()
+        assertEquals("Should have one more element in deleted list after deletion", deletedAfter - 1, deletedBefore);
 
     }
 

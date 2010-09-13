@@ -49,13 +49,10 @@
 
 package com.openexchange.ajax.group.actions;
 
-import java.io.IOException;
 import java.util.Date;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Params;
 
 
