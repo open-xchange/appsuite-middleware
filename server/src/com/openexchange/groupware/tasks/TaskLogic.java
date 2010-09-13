@@ -446,7 +446,8 @@ public final class TaskLogic {
     }
 
     private static void moveToFirstOccurrence(Task task) throws TaskException {
-        if (!task.containsStartDate() || !task.containsEndDate()) {
+        // WebDAV/XML sets null values if value is missing.
+        if (!task.containsStartDate() || !task.containsEndDate() || null == task.getStartDate() || null == task.getEndDate()) {
             return;
         }
         try {

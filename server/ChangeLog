@@ -1,3 +1,7 @@
+* 2010-09-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #16796: Fixed creating a task without start and end date through first generation Outlook OXtender. 
+
 * 2010-09-13 - tobias.prinz@open-xchange.com
 
  - Userstory #5212: Both resources and groups now allow to be queried for updates, just like other elements. See HTTP API for details. 
