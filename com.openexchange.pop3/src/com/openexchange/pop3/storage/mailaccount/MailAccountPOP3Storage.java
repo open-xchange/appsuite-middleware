@@ -591,8 +591,29 @@ public class MailAccountPOP3Storage implements POP3Storage {
             mm.setMailId(inbox.getUID(message));
             toAppend.add(mm);
         }
-
-        ((MailAccountPOP3MessageStorage) getMessageStorage()).appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
+        /*
+         * First try batch append operation
+         */
+        final MailAccountPOP3MessageStorage pop3MessageStorage = (MailAccountPOP3MessageStorage) getMessageStorage();
+        try {
+            pop3MessageStorage.appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
+        } catch (final MailException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Batch append operation to POP3 storage failed: " + e.getMessage(), e);
+            }
+            /*
+             * Retry one-by-one. Handling each mail message.
+             */
+            final MailMessage[] arr = new MailMessage[1];
+            for (final MailMessage mailMessage : toAppend) {
+                try {
+                    arr[0] = mailMessage;
+                    pop3MessageStorage.appendPOP3Messages(arr);
+                } catch (final MailException inner) {
+                    LOG.warn("POP3 message could not be appended to POP3 storage: " + inner.getMessage(), inner);
+                }
+            }
+        }
     }
 
     private void addAllMessagesToStorage(final POP3Folder inbox, final Message[] all) throws MessagingException, MailException {
