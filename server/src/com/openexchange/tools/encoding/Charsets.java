@@ -106,14 +106,30 @@ public final class Charsets {
         return cs;
     }
 
+    /**
+     * Constructs a new <tt>String</tt> by decoding the specified array of bytes using the specified charset. The length of the new
+     * <tt>String</tt> is a function of the charset, and hence may not be equal to the length of the byte array.
+     * 
+     * @param bytes The bytes to construct the <tt>String</tt> from
+     * @param charset The charset
+     * @return The new <tt>String</tt>
+     */
     public static String toString(final byte[] bytes, final Charset charset) {
         return charset.decode(ByteBuffer.wrap(bytes)).toString();
     }
 
+    /**
+     * Encodes specified <tt>String</tt> into a sequence of bytes using the given charset, storing the result into a new byte array.
+     * 
+     * @param source The string
+     * @param charset The charset
+     * @return The resulting bytes
+     */
     public static byte[] getBytes(final String source, final Charset charset) {
         final ByteBuffer buf = charset.encode(CharBuffer.wrap(source));
         final byte[] retval = new byte[buf.limit()];
         buf.get(retval);
         return retval;
     }
+
 }
