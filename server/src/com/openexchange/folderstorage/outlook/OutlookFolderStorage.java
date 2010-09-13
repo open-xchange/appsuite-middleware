@@ -61,15 +61,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.ContentType;
@@ -258,6 +259,11 @@ public final class OutlookFolderStorage implements FolderStorage {
     private final FolderType folderType;
 
     /**
+     * The path to public mail folder
+     */
+    private final String publicMailFolderPath;
+
+    /**
      * The folder storage registry.
      */
     final OutlookFolderStorageRegistry folderStorageRegistry;
@@ -270,6 +276,13 @@ public final class OutlookFolderStorage implements FolderStorage {
         realTreeId = FolderStorage.REAL_TREE_ID;
         folderType = new OutlookFolderType();
         folderStorageRegistry = OutlookFolderStorageRegistry.getInstance();
+        final ConfigurationService service = OutlookServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        if (null == service) {
+            publicMailFolderPath = null;
+        } else {
+            // Take from foldercache.properties
+            publicMailFolderPath = service.getProperty("PUBLIC_MAIL_FOLDER");
+        }
     }
 
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
