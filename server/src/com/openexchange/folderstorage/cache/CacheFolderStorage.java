@@ -809,6 +809,13 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null != oldParentId && !FolderStorage.ROOT_ID.equals(oldParentId)) {
             removeFromCache(oldParentId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
         }
+        /*
+         * Put updated folder
+         */
+        final Folder updatedFolder = loadFolder(treeId, folderId, StorageType.WORKING, storageParameters);
+        if (updatedFolder.isCacheable()) {
+            putFolder(updatedFolder, treeId, storageParameters);
+        }
     }
 
     public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
