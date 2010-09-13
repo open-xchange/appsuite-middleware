@@ -1,3 +1,7 @@
+* 2010-09-13 - tobias.prinz@open-xchange.com
+
+ - Userstory #5212: Both resources and groups now allow to be queried for updates, just like other elements. See HTTP API for details. 
+
 * 2010-09-10 - marcus.klein@open-xchange.com
 
  - Bugfix #16763: Not throwing a session expired exception anymore if loading context or user fails.
