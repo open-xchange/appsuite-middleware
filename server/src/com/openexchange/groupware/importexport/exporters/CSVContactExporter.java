@@ -96,8 +96,8 @@ public class CSVContactExporter implements Exporter {
         DataObject.CREATION_DATE,
         DataObject.LAST_MODIFIED,
         DataObject.MODIFIED_BY,
-//        CommonObject.PRIVATE_FLAG,
-//        CommonObject.CATEGORIES,
+        // CommonObject.PRIVATE_FLAG,
+        // CommonObject.CATEGORIES,
         Contact.SUR_NAME,
         Contact.ANNIVERSARY,
         Contact.ASSISTANT_NAME,
@@ -117,7 +117,7 @@ public class CSVContactExporter implements Exporter {
         Contact.COUNTRY_OTHER,
         Contact.DEPARTMENT,
         Contact.DISPLAY_NAME,
-//        ContactObject.DISTRIBUTIONLIST,
+        // ContactObject.DISTRIBUTIONLIST,
         Contact.EMAIL1,
         Contact.EMAIL2,
         Contact.EMAIL3,
@@ -125,17 +125,16 @@ public class CSVContactExporter implements Exporter {
         Contact.FAX_BUSINESS,
         Contact.FAX_HOME,
         Contact.FAX_OTHER,
-//        ContactObject.FILE_AS,
+        // ContactObject.FILE_AS,
         Contact.FOLDER_ID,
         Contact.GIVEN_NAME,
-//        ContactObject.IMAGE1,
-//        ContactObject.IMAGE1_CONTENT_TYPE,
+        // ContactObject.IMAGE1,
+        // ContactObject.IMAGE1_CONTENT_TYPE,
         Contact.INFO,
         Contact.INSTANT_MESSENGER1,
         Contact.INSTANT_MESSENGER2,
-//        ContactObject.LINKS,
-        Contact.MANAGER_NAME,
-        Contact.MARITAL_STATUS,
+        // ContactObject.LINKS,
+        Contact.MANAGER_NAME, Contact.MARITAL_STATUS,
         Contact.MIDDLE_NAME,
         Contact.NICKNAME,
         Contact.NOTE,
@@ -145,63 +144,22 @@ public class CSVContactExporter implements Exporter {
         Contact.POSTAL_CODE_BUSINESS,
         Contact.POSTAL_CODE_HOME,
         Contact.POSTAL_CODE_OTHER,
-//        ContactObject.PRIVATE_FLAG,
-        Contact.PROFESSION,
-        Contact.ROOM_NUMBER,
-        Contact.SALES_VOLUME,
-        Contact.SPOUSE_NAME,
-        Contact.STATE_BUSINESS,
-        Contact.STATE_HOME,
-        Contact.STATE_OTHER,
-        Contact.STREET_BUSINESS,
-        Contact.STREET_HOME,
-        Contact.STREET_OTHER,
-        Contact.SUFFIX,
-        Contact.TAX_ID,
-        Contact.TELEPHONE_ASSISTANT,
-        Contact.TELEPHONE_BUSINESS1,
-        Contact.TELEPHONE_BUSINESS2,
-        Contact.TELEPHONE_CALLBACK,
-        Contact.TELEPHONE_CAR,
-        Contact.TELEPHONE_COMPANY,
-        Contact.TELEPHONE_HOME1,
-        Contact.TELEPHONE_HOME2,
-        Contact.TELEPHONE_IP,
-        Contact.TELEPHONE_ISDN,
-        Contact.TELEPHONE_OTHER,
-        Contact.TELEPHONE_PAGER,
-        Contact.TELEPHONE_PRIMARY,
-        Contact.TELEPHONE_RADIO,
-        Contact.TELEPHONE_TELEX,
-        Contact.TELEPHONE_TTYTDD,
-        Contact.TITLE,
-        Contact.URL,
-        Contact.USERFIELD01,
-        Contact.USERFIELD02,
-        Contact.USERFIELD03,
-        Contact.USERFIELD04,
-        Contact.USERFIELD05,
-        Contact.USERFIELD06,
-        Contact.USERFIELD07,
-        Contact.USERFIELD08,
-        Contact.USERFIELD09,
-        Contact.USERFIELD10,
-        Contact.USERFIELD11,
-        Contact.USERFIELD12,
-        Contact.USERFIELD13,
-        Contact.USERFIELD14,
-        Contact.USERFIELD15,
-        Contact.USERFIELD16,
-        Contact.USERFIELD17,
-        Contact.USERFIELD18,
-        Contact.USERFIELD19,
-        Contact.USERFIELD20,
-        Contact.DEFAULT_ADDRESS};
+        // ContactObject.PRIVATE_FLAG,
+        Contact.PROFESSION, Contact.ROOM_NUMBER, Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME,
+        Contact.STATE_OTHER, Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX, Contact.TAX_ID,
+        Contact.TELEPHONE_ASSISTANT, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK,
+        Contact.TELEPHONE_CAR, Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP,
+        Contact.TELEPHONE_ISDN, Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO,
+        Contact.TELEPHONE_TELEX, Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.USERFIELD01, Contact.USERFIELD02,
+        Contact.USERFIELD03, Contact.USERFIELD04, Contact.USERFIELD05, Contact.USERFIELD06, Contact.USERFIELD07, Contact.USERFIELD08,
+        Contact.USERFIELD09, Contact.USERFIELD10, Contact.USERFIELD11, Contact.USERFIELD12, Contact.USERFIELD13, Contact.USERFIELD14,
+        Contact.USERFIELD15, Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20,
+        Contact.DEFAULT_ADDRESS };
 
     private static final Log LOG = LogFactory.getLog(CSVContactExporter.class);
 
-    public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map <String, String[]> optionalParams) {
-        if( !format.equals(Format.CSV) ){
+    public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) {
+        if (!format.equals(Format.CSV)) {
             return false;
         }
         FolderObject fo;
@@ -210,14 +168,16 @@ public class CSVContactExporter implements Exporter {
         } catch (final ImportExportException e) {
             return false;
         }
-        //check format of folder
-        if ( fo.getModule() != FolderObject.CONTACT ){
+        // check format of folder
+        if (fo.getModule() != FolderObject.CONTACT) {
             return false;
         }
-        //check read access to folder
+        // check read access to folder
         EffectivePermission perm;
         try {
-            perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
+            perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+                sessObj.getUserId(),
+                sessObj.getContext()));
         } catch (final DBPoolingException e) {
             return false;
         } catch (final SQLException e) {
@@ -226,39 +186,38 @@ public class CSVContactExporter implements Exporter {
         return perm.canReadAllObjects();
     }
 
-
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder,
-            final int[] fieldsToBeExported, final Map <String, String[]> optionalParams) throws ImportExportException {
-        if(! canExport(sessObj, format, folder, optionalParams)){
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+        if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
         final int folderId = getFolderId(folder);
-        //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
+        // final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
         int[] cols = null;
-        if( fieldsToBeExported == null || fieldsToBeExported.length == 0){
+        if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             cols = POSSIBLE_FIELDS;
         } else {
-            final Set <Integer> s1 = transformIntArrayToSet(fieldsToBeExported);
-            final Set <Integer> s2 = transformIntArrayToSet(POSSIBLE_FIELDS);
+            final Set<Integer> s1 = transformIntArrayToSet(fieldsToBeExported);
+            final Set<Integer> s2 = transformIntArrayToSet(POSSIBLE_FIELDS);
             s1.retainAll(s2);
-            cols = transformSetToIntArray( s1 );
+            cols = transformSetToIntArray(s1);
         }
         SearchIterator<Contact> conIter;
         try {
-            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessObj);
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                folderId,
+                sessObj);
             conIter = contactInterface.getContactsInFolder(folderId, 0, contactInterface.getNumberOfContacts(folderId), 0, "ASC", cols);
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
         final StringBuilder ret = new StringBuilder();
-        ret.append( convertToLine( com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols) ) );
+        ret.append(convertToLine(com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols)));
 
-        while(conIter.hasNext()){
+        while (conIter.hasNext()) {
             Contact current;
             try {
                 current = conIter.next();
-                ret.append( convertToLine( convertToList(current, cols) ) );
+                ret.append(convertToLine(convertToList(current, cols)));
             } catch (final SearchIteratorException e) {
                 LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
             } catch (final OXException e) {
@@ -266,54 +225,49 @@ public class CSVContactExporter implements Exporter {
             }
 
         }
-        return new SizedInputStream(
-                new ByteArrayInputStream ( ret.toString().getBytes(Charsets.UTF_8)) ,
-                ret.toString().getBytes(Charsets.UTF_8).length,
-                Format.CSV);
+        final byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
+        return new SizedInputStream(new ByteArrayInputStream(bytes), bytes.length, Format.CSV);
     }
 
-
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder,
-            final int objectId,    final int[] fieldsToBeExported, final Map <String, String[]> optionalParams) throws ImportExportException {
-        if(! canExport(sessObj, format, folder, optionalParams)){
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+        if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
         final int folderId = getFolderId(folder);
-        //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
+        // final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
         int[] cols;
-        if( fieldsToBeExported == null || fieldsToBeExported.length == 0){
+        if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             cols = POSSIBLE_FIELDS;
         } else {
             cols = fieldsToBeExported;
         }
         Contact conObj;
         try {
-            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessObj);
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                folderId,
+                sessObj);
             conObj = contactInterface.getObjectById(objectId, folderId);
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
 
         final StringBuilder ret = new StringBuilder();
-        ret.append( convertToLine( com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols) ) );
-        ret.append( convertToLine( convertToList(conObj, cols) ) );
+        ret.append(convertToLine(com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols)));
+        ret.append(convertToLine(convertToList(conObj, cols)));
 
-        return new SizedInputStream(
-                new ByteArrayInputStream ( ret.toString().getBytes(Charsets.UTF_8)) ,
-                ret.toString().getBytes(Charsets.UTF_8).length,
-                Format.CSV);
+        final byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
+        return new SizedInputStream(new ByteArrayInputStream(bytes), bytes.length, Format.CSV);
     }
 
-    protected List<String> convertToList(final Contact conObj, final int[] cols){
+    protected List<String> convertToList(final Contact conObj, final int[] cols) {
         final List<String> l = new LinkedList<String>();
         final ContactStringGetter getter = new ContactStringGetter();
-        getter.setDelegate( new ContactGetter() );
+        getter.setDelegate(new ContactGetter());
         ContactField tempField;
-        for(final int col : cols){
+        for (final int col : cols) {
             tempField = ContactField.getByValue(col);
             try {
-                l.add( (String) tempField.doSwitch(getter, conObj) );
+                l.add((String) tempField.doSwitch(getter, conObj));
             } catch (final ContactException e) {
                 l.add("");
             }
@@ -321,12 +275,11 @@ public class CSVContactExporter implements Exporter {
         return l;
     }
 
-    protected String convertToLine(final List<String> line){
+    protected String convertToLine(final List<String> line) {
         final StringBuilder bob = new StringBuilder();
-        for(String str : line){
+        for (final String str : line) {
             bob.append("\"");
-            str = str.replace("\"", "\"\"");
-            bob.append(str);
+            bob.append(str.replace("\"", "\"\""));
             bob.append("\"");
             bob.append(com.openexchange.groupware.importexport.csv.CSVLibrary.CELL_DELIMITER);
         }
