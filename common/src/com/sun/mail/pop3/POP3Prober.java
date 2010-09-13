@@ -50,16 +50,23 @@
 package com.sun.mail.pop3;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.mail.MessagingException;
 
 /**
  * {@link POP3Prober} - Probes support of <code><small>UIDL</small></code> and <code><small>TOP</small></code> POP3 commands.
+ * <p>
+ * Any occurred exception can be retrieved via {@link #getWarnings()}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3Prober {
 
     private final Protocol protocol;
+
+    private final List<Exception> warnings;
 
     /**
      * Initializes a new {@link POP3Prober}.
@@ -72,6 +79,7 @@ public final class POP3Prober {
     public POP3Prober(final POP3Store pop3Store, final POP3Folder pop3Folder) throws IOException, MessagingException {
         super();
         protocol = (0 == pop3Folder.getMessageCount() ? null : pop3Store.getPort(pop3Folder));
+        warnings = new ArrayList<Exception>(2);
     }
 
     /**
@@ -89,6 +97,7 @@ public final class POP3Prober {
         try {
             return protocol.uidl(new String[1]);
         } catch (final IOException e) {
+            warnings.add(e);
             return false;
         }
     }
@@ -108,8 +117,18 @@ public final class POP3Prober {
         try {
             return (null != protocol.top(1, 1));
         } catch (final IOException e) {
+            warnings.add(e);
             return false;
         }
+    }
+
+    /**
+     * Gets an unmodifiable list of occurred warnings during probing.
+     * 
+     * @return An unmodifiable list of occurred warnings
+     */
+    public List<Exception> getWarnings() {
+        return Collections.unmodifiableList(warnings);
     }
 
 }
