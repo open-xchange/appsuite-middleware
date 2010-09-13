@@ -81,13 +81,13 @@ public enum SessionExceptionCodes implements OXErrorMessage {
     /** Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s. */
     DUPLICATE_AUTHID(DUPLICATE_AUTHID_MSG, Category.CODE_ERROR, 8),
 
-    SESSION_PARAMETER_MISSING(SESSION_PARAMETER_MISSING_MSG, Category.CODE_ERROR, 201, SESSION_PARAMETER_MISSING_HELP_MSG),
+    SESSION_PARAMETER_MISSING(SESSION_PARAMETER_MISSING_MSG, Category.CODE_ERROR, 201, "Every AJAX request must contain a parameter named \"session\" that value contains the identifier of the session cookie."),
 
-    SESSION_EXPIRED(SESSION_EXPIRED_MSG, Category.TRY_AGAIN, 203, SESSION_EXPIRED_HELP_MSG),
+    SESSION_EXPIRED(SESSION_EXPIRED_MSG, Category.TRY_AGAIN, 203, "A session with the given identifier can not be found."),
 
     CONTEXT_LOCKED(CONTEXT_LOCKED_MSG, Category.TRY_AGAIN, 204),
 
-    WRONG_CLIENT_IP(WRONG_CLIENT_IP_MSG, Category.PERMISSION, 205, WRONG_CLIENT_IP_HELP_MSG),
+    WRONG_CLIENT_IP(WRONG_CLIENT_IP_MSG, Category.PERMISSION, 205, "The client IP address of all session requests are checked to see whether they match the IP address when the session was created."),
 
     WRONG_SESSION_SECRET(WRONG_SESSION_SECRET_MSG, Category.TRY_AGAIN, 206);
 

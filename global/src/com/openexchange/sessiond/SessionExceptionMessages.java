@@ -75,15 +75,12 @@ public final class SessionExceptionMessages implements LocalizableStrings {
     public static final String DUPLICATE_AUTHID_MSG = "Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s.";
 
     public static final String SESSION_PARAMETER_MISSING_MSG = "The session parameter is missing.";
-    public static final String SESSION_PARAMETER_MISSING_HELP_MSG = "Every AJAX request must contain a parameter named \"session\" that value contains the identifier of the session cookie.";
 
     public static final String SESSION_EXPIRED_MSG = "Your session %s expired. Please start a new browser session.";
-    public static final String SESSION_EXPIRED_HELP_MSG = "A session with the given identifier can not be found.";
 
     public static final String CONTEXT_LOCKED_MSG = "Context is locked.";
 
     public static final String WRONG_CLIENT_IP_MSG = "Request to server was refused. Original client IP address changed. Please try again.";
-    public static final String WRONG_CLIENT_IP_HELP_MSG = "The client IP address of all session requests are checked to see whether they match the IP address when the session was created.";
 
     public static final String WRONG_SESSION_SECRET_MSG = "Session secret is different. Given %1$s differs from %2$s in session.";
 

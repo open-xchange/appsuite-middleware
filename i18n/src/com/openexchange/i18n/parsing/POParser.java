@@ -57,13 +57,8 @@ import java.util.Properties;
  */
 public class POParser {
 
-    static final int CLASS_ID = 1;
-
     private final Properties headers = new Properties();
 
-    /**
-     * Default constructor.
-     */
     public POParser() {
         super();
     }

@@ -47,26 +47,25 @@
  *
  */
 
-
 package com.openexchange.i18n.parsing;
 
 import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public enum I18NErrorMessages implements OXErrorMessage {
 
-    UNEXPECTED_TOKEN(POParser.CLASS_ID * 100 + 1, I18NErrorStrings.UNEXPECTED_TOKEN, I18NErrorStrings.CHECK_FILE, AbstractOXException.Category.SETUP_ERROR),
-    UNEXPECTED_TOKEN_CONSUME(POParser.CLASS_ID * 100 + 2, I18NErrorStrings.UNEXPECTED_TOKEN, I18NErrorStrings.CHECK_FILE, AbstractOXException.Category.SETUP_ERROR),
-    EXPECTED_NUMBER(POParser.CLASS_ID * 100 + 3, I18NErrorStrings.EXPECTED_NUMBER, I18NErrorStrings.CHECK_FILE, AbstractOXException.Category.SETUP_ERROR),
-    MALFORMED_TOKEN(POParser.CLASS_ID * 100 + 4, I18NErrorStrings.MALFORMED_TOKEN, I18NErrorStrings.CHECK_FILE, AbstractOXException.Category.SETUP_ERROR),
-    IO_EXCEPTION(POParser.CLASS_ID * 100 + 5, I18NErrorStrings.IO_EXCEPTION, I18NErrorStrings.FILE_ACCESS, AbstractOXException.Category.SETUP_ERROR);
+    UNEXPECTED_TOKEN(101, I18NErrorStrings.UNEXPECTED_TOKEN, I18NErrorStrings.CHECK_FILE, Category.SETUP_ERROR),
+    UNEXPECTED_TOKEN_CONSUME(102, I18NErrorStrings.UNEXPECTED_TOKEN, I18NErrorStrings.CHECK_FILE, Category.SETUP_ERROR),
+    EXPECTED_NUMBER(103, I18NErrorStrings.EXPECTED_NUMBER, I18NErrorStrings.CHECK_FILE, Category.SETUP_ERROR),
+    MALFORMED_TOKEN(104, I18NErrorStrings.MALFORMED_TOKEN, I18NErrorStrings.CHECK_FILE, Category.SETUP_ERROR),
+    IO_EXCEPTION(105, I18NErrorStrings.IO_EXCEPTION, I18NErrorStrings.FILE_ACCESS, Category.SETUP_ERROR);
 
     public static I18NExceptions FACTORY = new I18NExceptions();
 
-    private AbstractOXException.Category category;
+    private Category category;
 
     private String help;
 
@@ -74,7 +73,7 @@ public enum I18NErrorMessages implements OXErrorMessage {
 
     private int errorCode;
 
-    I18NErrorMessages(final int errorCode, final String message, final String help, final AbstractOXException.Category category) {
+    I18NErrorMessages(final int errorCode, final String message, final String help, final Category category) {
         this.category = category;
         this.help = help;
         this.message = message;
@@ -93,7 +92,7 @@ public enum I18NErrorMessages implements OXErrorMessage {
         return help;
     }
 
-    public AbstractOXException.Category getCategory() {
+    public Category getCategory() {
         return category;
     }
 
