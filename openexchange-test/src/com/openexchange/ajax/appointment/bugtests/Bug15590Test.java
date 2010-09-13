@@ -61,7 +61,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         InsertResponse folderInsertResponse = client.execute(insFolder);
         testFolder.setObjectID(folderInsertResponse.getId());
         // Only necessary because new folder API missed the time stamps.
-        testFolder.setLastModified(client.execute(new GetRequest(API.OX_NEW, testFolder.getObjectID())).getFolder().getLastModified());
+        testFolder.setLastModified(client.execute(new GetRequest(API.OX_NEW, testFolder.getObjectID())).getTimestamp());
 
         FolderTools.shareFolder(
             client,
