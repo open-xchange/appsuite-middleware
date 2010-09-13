@@ -392,6 +392,24 @@ public final class POP3StoreConnector {
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()));
                     }
+                    /*
+                     * Check for warnings
+                     */
+                    final List<Exception> warnings = prober.getWarnings();
+                    if (!warnings.isEmpty()) {
+                        final org.apache.commons.logging.Log logger =
+                            org.apache.commons.logging.LogFactory.getLog(POP3StoreConnector.class);
+                        if (logger.isDebugEnabled()) {
+                            final StringBuilder sb = new StringBuilder(128);
+                            sb.append("Exception during probing POP3 server \"").append(server).append("\": ");
+                            final int resetLen = sb.length();
+                            for (final Exception warning : warnings) {
+                                sb.setLength(resetLen);
+                                sb.append(warning.getMessage());
+                                logger.debug(sb.toString(), warning);
+                            }
+                        }
+                    }
                 } catch (final IOException e) {
                     throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
                 } finally {

@@ -55,7 +55,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -83,9 +82,9 @@ public final class POP3CapabilityCache {
     /**
      * The default capabilities providing only mandatory POP3 commands.
      */
-    static final Capability DEFAULT_CAPABILITIES = new Capability("USER\r\nPASS\r\nSTAT\r\nLIST\r\nRETR\r\nDELE\r\nNOOP\r\nRSET\r\nQUIT");
+    static final String DEFAULT_CAPABILITIES = "USER\r\nPASS\r\nSTAT\r\nLIST\r\nRETR\r\nDELE\r\nNOOP\r\nRSET\r\nQUIT";
 
-    private static ConcurrentMap<InetSocketAddress, Future<Capability>> MAP;
+    private static ConcurrentMap<InetSocketAddress, Future<String>> MAP;
 
     /**
      * Initializes a new {@link POP3CapabilityCache}.
@@ -99,7 +98,7 @@ public final class POP3CapabilityCache {
      */
     public static void init() {
         if (MAP == null) {
-            MAP = new ConcurrentHashMap<InetSocketAddress, Future<Capability>>();
+            MAP = new ConcurrentHashMap<InetSocketAddress, Future<String>>();
             // TODO: Probably pre-load CAPABILITY and greeting from common POP3 servers like GMail, etc.
         }
     }
@@ -143,7 +142,7 @@ public final class POP3CapabilityCache {
      * @throws MailException If a mail error occurs
      */
     public static String getCapability(final InetAddress inetAddress, final int port, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
-        return getCapability0(new InetSocketAddress(inetAddress, port), isSecure, pop3Properties, login).getCapability();
+        return getCapability0(new InetSocketAddress(inetAddress, port), isSecure, pop3Properties, login);
     }
 
     /**
@@ -167,7 +166,7 @@ public final class POP3CapabilityCache {
      * @throws MailException If a mail error occurs
      */
     public static String getCapability(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
-        return getCapability0(address, isSecure, pop3Properties, login).getCapability();
+        return getCapability0(address, isSecure, pop3Properties, login);
     }
 
     /**
@@ -192,46 +191,10 @@ public final class POP3CapabilityCache {
      * @throws MailException If a mail error occurs
      */
     public static String getCapability(final InetSocketAddress address, final boolean isSecure, final int connectionTimeout, final int timeout, final String login) throws IOException, MailException {
-        Future<Capability> f = MAP.get(address);
+        Future<String> f = MAP.get(address);
         if (null == f) {
-            final FutureTask<Capability> ft =
-                new FutureTask<Capability>(new CapabilityCallable(address, isSecure, connectionTimeout, timeout, login));
-            f = MAP.putIfAbsent(address, ft);
-            if (null == f) {
-                f = ft;
-                ft.run();
-            }
-        }
-        try {
-            return f.get().getCapability();
-        } catch (final InterruptedException e) {
-            // Keep interrupted status
-            Thread.currentThread().interrupt();
-            throw new IOException(e.getMessage());
-        } catch (final CancellationException e) {
-            throw new IOException(e.getMessage());
-        } catch (final ExecutionException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof MailException) {
-                throw ((MailException) cause);
-            }
-            if (cause instanceof IOException) {
-                throw ((IOException) cause);
-            }
-            if (cause instanceof RuntimeException) {
-                throw new IOException(e.getMessage());
-            }
-            if (cause instanceof Error) {
-                throw (Error) cause;
-            }
-            throw new IllegalStateException("Not unchecked", cause);
-        }
-    }
-
-    private static Capability getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
-        Future<Capability> f = MAP.get(address);
-        if (null == f) {
-            final FutureTask<Capability> ft = new FutureTask<Capability>(new CapabilityCallable(address, isSecure, pop3Properties, login));
+            final FutureTask<String> ft =
+                new FutureTask<String>(new CapabilityCallable(address, isSecure, connectionTimeout, timeout, login));
             f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
@@ -264,7 +227,43 @@ public final class POP3CapabilityCache {
         }
     }
 
-    private static final class CapabilityCallable implements Callable<Capability> {
+    private static String getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
+        Future<String> f = MAP.get(address);
+        if (null == f) {
+            final FutureTask<String> ft = new FutureTask<String>(new CapabilityCallable(address, isSecure, pop3Properties, login));
+            f = MAP.putIfAbsent(address, ft);
+            if (null == f) {
+                f = ft;
+                ft.run();
+            }
+        }
+        try {
+            return f.get();
+        } catch (final InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            throw new IOException(e.getMessage());
+        } catch (final CancellationException e) {
+            throw new IOException(e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof MailException) {
+                throw ((MailException) cause);
+            }
+            if (cause instanceof IOException) {
+                throw ((IOException) cause);
+            }
+            if (cause instanceof RuntimeException) {
+                throw new IOException(e.getMessage());
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
+        }
+    }
+
+    private static final class CapabilityCallable implements Callable<String> {
 
         private final InetSocketAddress key;
 
@@ -289,7 +288,7 @@ public final class POP3CapabilityCache {
             this.login = login;
         }
 
-        public Capability call() throws IOException, POP3Exception {
+        public String call() throws IOException, POP3Exception {
             Socket s = null;
             try {
                 try {
@@ -462,7 +461,7 @@ public final class POP3CapabilityCache {
                 /*
                  * Create new object
                  */
-                return new Capability(capabilities);
+                return capabilities;
             } finally {
                 if (s != null) {
                     try {
@@ -473,51 +472,6 @@ public final class POP3CapabilityCache {
                 }
             }
         }
-    }
-
-    private static final class Capability {
-
-        private final String capabilities;
-
-        public Capability(final String capabilities) {
-            super();
-            this.capabilities = capabilities == null ? null : capabilities.toUpperCase(Locale.ENGLISH);
-        }
-
-        public String getCapability() {
-            return capabilities;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((capabilities == null) ? 0 : capabilities.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final Capability other = (Capability) obj;
-            if (capabilities == null) {
-                if (other.capabilities != null) {
-                    return false;
-                }
-            } else if (!capabilities.equals(other.capabilities)) {
-                return false;
-            }
-            return true;
-        }
-
     }
 
 }
