@@ -346,14 +346,12 @@ public class EasyLogin extends HttpServlet {
         sb.append("/login?action=redirect&random=");
         sb.append(session.getRandomToken());
         String uiWebPath = getParameter(req, UI_WEB_PATH_PARAMETER);
-        
+
         // Escape significant characters like '#' so that the redirect target doesn't mistakenly parse them
-        
-        if(uiWebPath != null) {
-            uiWebPath = URLEncoder.encode(uiWebPath, "UTF-8"); 
-        }
-        
+
+
         if (null != uiWebPath) {
+            uiWebPath = URLEncoder.encode(uiWebPath, "UTF-8");
             sb.append('&');
             sb.append(UI_WEB_PATH_PARAMETER);
             sb.append('=');
@@ -369,7 +367,7 @@ public class EasyLogin extends HttpServlet {
 
         // Client
         String client = getParameter(req, clientParam);
-        if(client == null) {
+        if (client == null) {
             client = defaultClient;
         }
         if (client != null) {
