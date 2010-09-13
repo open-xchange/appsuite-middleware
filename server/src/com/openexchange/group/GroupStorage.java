@@ -156,6 +156,16 @@ public abstract class GroupStorage {
     public abstract Group[] listModifiedGroups(Date modifiedSince, Context context) throws LdapException;
 
     /**
+     * This metods returns groups that have been deleted since the given timestamp
+     * 
+     * @param modifiedSince timestamp after that the groups have been deleted.
+     * @param The context.
+     * @return an array of groups.
+     * @throws LdapException if an error occurs.
+     */
+    public abstract Group[] listDeletedGroups(Date modifiedSince, Context context) throws LdapException;
+    
+    /**
      * Returns the data objects of all groups.
      * 
      * @param The context.
@@ -188,4 +198,6 @@ public abstract class GroupStorage {
          */
         DELETED
     }
+
+
 }

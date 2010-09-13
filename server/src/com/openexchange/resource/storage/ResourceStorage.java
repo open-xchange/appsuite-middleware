@@ -186,6 +186,17 @@ public abstract class ResourceStorage {
      */
     public abstract Resource[] listModified(Date modifiedSince, Context context) throws LdapException;
 
+
+    /**
+     * This method returns resources that have been deleted since the given timestamp.
+     * 
+     * @param modifiedSince timestamp after that the resources have been modified.
+     * @param context The context.
+     * @return an array of resources.
+     * @throws LdapException If an error occurs.
+     */
+    public abstract Resource[] listDeleted(Date modifiedSince, Context context) throws LdapException;
+    
     /**
      * This method inserts a resource into the storage.
      * 

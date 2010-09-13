@@ -379,9 +379,19 @@ public class RdbResourceStorage extends ResourceStorage {
     }
 
     private static final String SQL_SELECT_RESOURCE = "SELECT id,identifier,displayName,mail,available,description,lastModified " + "FROM resource WHERE cid = ? AND lastModified > ?";
+    private static final String SQL_SELECT_DELETED_RESOURCE = "SELECT id,identifier,displayName,mail,available,description,lastModified " + "FROM del_resource WHERE cid = ? AND lastModified > ?";
 
     @Override
     public Resource[] listModified(final Date modifiedSince, final Context context) throws LdapException {
+        return listModifiedOrDeleted(modifiedSince, context, SQL_SELECT_RESOURCE);
+    }
+    
+    @Override
+    public Resource[] listDeleted(final Date modifiedSince, final Context context) throws LdapException {
+        return listModifiedOrDeleted(modifiedSince, context, SQL_SELECT_DELETED_RESOURCE);
+    }
+
+    private Resource[] listModifiedOrDeleted(final Date modifiedSince, final Context context, String statement) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -392,7 +402,7 @@ public class RdbResourceStorage extends ResourceStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT_RESOURCE);
+            stmt = con.prepareStatement(statement);
             stmt.setLong(1, context.getContextId());
             stmt.setLong(2, modifiedSince.getTime());
             result = stmt.executeQuery();

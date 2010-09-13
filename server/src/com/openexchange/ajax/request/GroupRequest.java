@@ -129,9 +129,13 @@ public class GroupRequest {
         timestamp = new Date(0);
         final GroupStorage groupStorage = GroupStorage.getInstance();
         Date modifiedSince = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
+        
         final Group[] modifiedGroups = groupStorage.listModifiedGroups(modifiedSince, session.getContext());
+        final Group[] deletedGroups = groupStorage.listDeletedGroups(modifiedSince, session.getContext());
         final GroupWriter groupWriter = new GroupWriter();
         final JSONArray modified = new JSONArray();
+        final JSONArray deleted= new JSONArray();
+        
         long lm = 0;
         for(Group group: modifiedGroups){
             JSONObject temp = new JSONObject();
@@ -139,12 +143,18 @@ public class GroupRequest {
             modified.put(temp);
             lm = group.getLastModified().getTime() > lm ? group.getLastModified().getTime() : lm;
         }
+        for(Group group: deletedGroups){
+            JSONObject temp = new JSONObject();
+            groupWriter.writeGroup(group, temp);
+            deleted.put(temp);
+            lm = group.getLastModified().getTime() > lm ? group.getLastModified().getTime() : lm;
+        }
         timestamp = new Date(lm);
         JSONObject retVal = new JSONObject();
         
-        retVal.put("new", JSONObject.NULL);
+        retVal.put("new", modified);
         retVal.put("modified", modified);
-        retVal.put("deleted", JSONObject.NULL);
+        retVal.put("deleted", deleted);
         
         return retVal;
     }

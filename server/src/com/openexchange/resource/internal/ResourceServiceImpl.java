@@ -115,6 +115,14 @@ public final class ResourceServiceImpl implements ResourceService {
             throw new ResourceException(e);
         }
     }
+    
+    public Resource[] listDeleted(final Date modifiedSince, final Context context) throws ResourceException {
+        try {
+            return ResourceStorage.getInstance().listDeleted(modifiedSince, context);
+        } catch (final LdapException e) {
+            throw new ResourceException(e);
+        }
+    }
 
     public Resource[] searchResources(final String pattern, final Context context) throws ResourceException {
         try {

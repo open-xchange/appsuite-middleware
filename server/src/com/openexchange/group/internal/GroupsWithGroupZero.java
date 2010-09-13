@@ -135,6 +135,19 @@ public final class GroupsWithGroupZero extends GroupStorage {
         System.arraycopy(groups, 0, retval, 1, groups.length);
         return retval;
     }
+    
+    @Override
+    public Group[] listDeletedGroups(Date modifiedSince, Context ctx) throws LdapException {
+        final Group[] groups = delegate.listDeletedGroups(modifiedSince, ctx);
+        final Group[] retval = new Group[groups.length + 1];
+        try {
+            retval[0] = GroupTools.getGroupZero(ctx);
+        } catch (final UserException e) {
+            throw new LdapException(e);
+        }
+        System.arraycopy(groups, 0, retval, 1, groups.length);
+        return retval;
+    }
 
     /**
      * {@inheritDoc}
@@ -192,4 +205,5 @@ public final class GroupsWithGroupZero extends GroupStorage {
         final int groupId, final Date lastRead) throws GroupException {
         delegate.deleteGroup(ctx, con, groupId, lastRead);
     }
+
 }

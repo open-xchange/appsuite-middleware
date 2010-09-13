@@ -135,29 +135,41 @@ public class ResourceRequest {
 
     private JSONValue actionUpdates(final JSONObject jsonObj)  throws AbstractOXException, JSONException {
         final Date lastModified = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
-        Resource[] resources = null;
+        Resource[] updatedResources = null;
+        Resource[] deletedResources = null;
         try {
-            resources = ResourceServiceImpl.getInstance().listModified(lastModified, session.getContext());
+            ResourceService resService = ResourceServiceImpl.getInstance();
+            updatedResources = resService .listModified(lastModified, session.getContext());
+            deletedResources = resService.listDeleted(lastModified, session.getContext());
         } catch (final ResourceException exc) {
             LOG.debug("Tried to find resources that were modified since "+lastModified, exc);
         }
 
         final JSONArray modified = new JSONArray();
         long lm = 0;
-        if(resources != null){
-            for(Resource res: resources){
+        if(updatedResources != null){
+            for(Resource res: updatedResources){
+                if(res.getLastModified().getTime() > lm)
+                    lm = res.getLastModified().getTime();
+                modified.put(ResourceWriter.writeResource(res));
+            }
+        }
+        
+        final JSONArray deleted = new JSONArray();
+        if(deletedResources != null){
+            for(Resource res: deletedResources){
                 if(res.getLastModified().getTime() > lm)
                     lm = res.getLastModified().getTime();
                 
-                modified.put(ResourceWriter.writeResource(res));
+                deleted.put(ResourceWriter.writeResource(res));
             }
         }
         timestamp = new Date(lm);
 
         JSONObject retVal = new JSONObject();
         retVal.put("modified", modified);
-        retVal.put("new", JSONObject.NULL);
-        retVal.put("deleted", JSONObject.NULL);
+        retVal.put("new", modified);
+        retVal.put("deleted", deleted);
         
         return retVal;
     }

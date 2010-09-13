@@ -76,6 +76,7 @@ import com.openexchange.server.impl.DBPool;
 public class RdbGroupStorage extends GroupStorage {
 
     private static final String SELECT_GROUPS = "SELECT id,identifier,displayName,lastModified FROM groups WHERE cid=?";
+    private static final String SELECT_DELETED_GROUPS = "SELECT id,identifier,displayName,lastModified FROM del_groups WHERE cid=?";
 
     /**
      * Default constructor.
@@ -250,11 +251,17 @@ public class RdbGroupStorage extends GroupStorage {
         return group;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Group[] listModifiedGroups(final Date modifiedSince, final Context context) throws LdapException {
+        return listModifiedOrDeletedGroups(modifiedSince, context, SELECT_GROUPS);
+    }
+
+    @Override
+    public Group[] listDeletedGroups(final Date modifiedSince, final Context context) throws LdapException {
+        return listModifiedOrDeletedGroups(modifiedSince, context, SELECT_DELETED_GROUPS);
+    }
+    
+    private Group[] listModifiedOrDeletedGroups(final Date modifiedSince, final Context context, String statement) throws LdapException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -265,7 +272,7 @@ public class RdbGroupStorage extends GroupStorage {
         ResultSet result = null;
         Group[] groups = null;
         try {
-            stmt = con.prepareStatement(SELECT_GROUPS + " AND lastModified>?");
+            stmt = con.prepareStatement(statement + " AND lastModified>?");
             stmt.setLong(1, context.getContextId());
             stmt.setLong(2, modifiedSince.getTime());
             result = stmt.executeQuery();
