@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,14 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Sep 10 2010 - karsten.will@open-xchange.com
+ - Bugfix #16756: Calendar folder now have the information that their content is subscribed.
+* Fri Sep 10 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #16848: Use correct date format in response headers.
+ - Bugfix #16846: Forward autologin parameter
+ - Bugfix #15936: URLEncode webUIPath parameter.
+* Fri Sep 10 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15681: Checking POP3 account's default folders on path creation in primary mail account
 * Thu Sep 02 2010 - marcus.klein@open-xchange.com
  - Bugfix #16532: Update task fixes primary key on table publication and table publication_users is tried be created again. Additionally
    possibly wrong primary key on table subscriptions is fixed, too.

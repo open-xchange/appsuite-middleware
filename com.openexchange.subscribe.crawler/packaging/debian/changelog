@@ -1,3 +1,9 @@
+open-xchange-subscribe-crawler (6.18.0.0-12) unstable; urgency=low
+
+  * Build for PTF 2010032510000321
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Mon, 13 Sep 2010 14:16:02 +0200
+
 open-xchange-subscribe-crawler (6.18.0.0-11) unstable; urgency=low
 
   * build for public ptf 2010-09-08
