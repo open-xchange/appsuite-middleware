@@ -120,8 +120,8 @@ public class ServletResponseWrapper implements ServletResponse {
     private static final Pattern CONTENT_TYPE_CHARSET_PARAM = Pattern.compile("(;\\s*charset=)([^\\s|^;]+)");
 
     public void setContentType(final String contentType) {
-        if(contentType == null) {
-            return; 
+        if (contentType == null) {
+            return;
         }
         final Matcher m = CONTENT_TYPE_CHARSET_PARAM.matcher(contentType);
         if (m.find()) {
@@ -233,9 +233,10 @@ public class ServletResponseWrapper implements ServletResponse {
         if (outputSelection == OUTPUT_WRITER && writer != null) {
             try {
                 if (bufferSize > 0) {
-                    writer = new PrintWriter(new BufferedWriter(
-                        new OutputStreamWriter(servletOutputStream, getCharacterEncoding()),
-                        bufferSize), true);
+                    writer =
+                        new PrintWriter(
+                            new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding()), bufferSize),
+                            true);
                 } else {
                     writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
                 }
@@ -278,11 +279,9 @@ public class ServletResponseWrapper implements ServletResponse {
             outputSelection = OUTPUT_WRITER;
         }
         if (bufferSize > 0) {
-            writer = new PrintWriter(
-                new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding()), bufferSize),
-                true);
+            writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, characterEncoding), bufferSize), true);
         } else {
-            writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
+            writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, characterEncoding)), true);
         }
         return writer;
     }
@@ -359,9 +358,10 @@ public class ServletResponseWrapper implements ServletResponse {
         if (writer != null) {
             try {
                 if (bufferSize > 0) {
-                    writer = new PrintWriter(new BufferedWriter(
-                        new OutputStreamWriter(servletOutputStream, getCharacterEncoding()),
-                        bufferSize), true);
+                    writer =
+                        new PrintWriter(
+                            new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding()), bufferSize),
+                            true);
                 } else {
                     writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
                 }
