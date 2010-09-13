@@ -100,7 +100,7 @@ final class ACLExtensionAutoDetector {
          * Check if newer ACL extension is supported
          */
         for (final String upperName : capabilities.keySet()) {
-            if (upperName.startsWith("RIGHTS=")) {
+            if (upperName.startsWith("RIGHTS=", 0)) {
                 /*
                  * Check if RIGHTS=... capability contains right characters specified in RFC4314
                  */
