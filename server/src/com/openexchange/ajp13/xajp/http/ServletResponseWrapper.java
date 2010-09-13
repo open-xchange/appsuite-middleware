@@ -260,7 +260,7 @@ public class ServletResponseWrapper implements ServletResponse {
         /*
          * Check Charset Encoding
          */
-        "Bla".getBytes(characterEncoding);
+        CharsetValidator.getInstance().checkCharset(characterEncoding);
         /*
          * Check if getOutputSteam hasn't been called before
          */
