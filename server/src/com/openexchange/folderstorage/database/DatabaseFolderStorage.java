@@ -287,23 +287,23 @@ public final class DatabaseFolderStorage implements FolderStorage {
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
-    private static int getFolderType(final int folderIdArg, final StorageParameters storageParameters) throws OXException, FolderException {
+    private static int getFolderType(final int parentId, final StorageParameters storageParameters) throws OXException, FolderException {
         int type = -1;
-        int folderId = folderIdArg;
+        int pid = parentId;
         /*
          * Special treatment for system folders
          */
-        if (folderId == FolderObject.SYSTEM_SHARED_FOLDER_ID) {
-            folderId = FolderObject.SYSTEM_PRIVATE_FOLDER_ID;
+        if (pid == FolderObject.SYSTEM_SHARED_FOLDER_ID) {
+            pid = FolderObject.SYSTEM_PRIVATE_FOLDER_ID;
             type = FolderObject.SHARED;
-        } else if (folderId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID) {
+        } else if (pid == FolderObject.SYSTEM_PRIVATE_FOLDER_ID) {
             type = FolderObject.PRIVATE;
-        } else if (Arrays.binarySearch(PUBLIC_FOLDER_IDS, folderId) >= 0) {
+        } else if (Arrays.binarySearch(PUBLIC_FOLDER_IDS, pid) >= 0) {
             type = FolderObject.PUBLIC;
-        } else if (folderId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
+        } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
             type = FolderObject.PROJECT;
         } else {
-            type = getFolderAccess(storageParameters).getFolderType(folderId);
+            type = getFolderAccess(storageParameters).getFolderType(pid);
         }
         return type;
     }
