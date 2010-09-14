@@ -268,7 +268,6 @@ public final class MALPollDBUtility {
     }
 
     private static List<UUID> getUserUUIDs(int cid, Connection con, int user) throws SQLException {
-        final List<UUID> uuids = new ArrayList<UUID>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -277,14 +276,15 @@ public final class MALPollDBUtility {
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
+            final List<UUID> uuids = new ArrayList<UUID>();
             while (rs.next()) {
                 uuids.add(toUUID(rs.getBytes(1)));
             }
+            return uuids;
         } finally {
             MALPollDBUtility.closeSQLStuff(rs);
             MALPollDBUtility.closeSQLStuff(stmt);
         }
-        return uuids;
     }
 
     private static void deleteEntries(int cid, Connection con, List<UUID> uuids) throws SQLException {

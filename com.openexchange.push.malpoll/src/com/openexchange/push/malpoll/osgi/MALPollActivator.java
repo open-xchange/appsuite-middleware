@@ -58,6 +58,7 @@ import java.util.concurrent.Executor;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
@@ -115,7 +116,9 @@ public final class MALPollActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailService.class, EventAdmin.class, TimerService.class, ConfigurationService.class, DatabaseService.class, ContextService.class };
+        return new Class<?>[] {
+            MailService.class, EventAdmin.class, TimerService.class, ConfigurationService.class, DatabaseService.class,
+            ContextService.class };
     }
 
     @Override
@@ -147,8 +150,6 @@ public final class MALPollActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        sessiondTracker = new ServiceTracker(context, SessiondService.class.getName(), new RegistryServiceTrackerCustomizer<SessiondService>(context, MALPollServiceRegistry.getServiceRegistry(), SessiondService.class));
-        sessiondTracker.open();
         try {
             /*
              * (Re-)Initialize service registry with available services
@@ -163,6 +164,15 @@ public final class MALPollActivator extends DeferredActivator {
                         registry.addService(classes[i], service);
                     }
                 }
+            }
+            /*
+             * Initialize & open tracker
+             */
+            {
+                final ServiceTrackerCustomizer trackerCustomizer =
+                    new RegistryServiceTrackerCustomizer<SessiondService>(context, getServiceRegistry(), SessiondService.class);
+                sessiondTracker = new ServiceTracker(context, SessiondService.class.getName(), trackerCustomizer);
+                sessiondTracker.open();
             }
             /*
              * Read configuration
@@ -243,6 +253,13 @@ public final class MALPollActivator extends DeferredActivator {
                 serviceRegistrations = null;
             }
             /*
+             * Close tracker
+             */
+            if (null != sessiondTracker) {
+                sessiondTracker.close();
+                sessiondTracker = null;
+            }
+            /*
              * Clear all running listeners
              */
             MALPollPushListenerRegistry.getInstance().purgeAllPushListener();
@@ -268,7 +285,6 @@ public final class MALPollActivator extends DeferredActivator {
             LOG.error(e.getMessage(), e);
             throw e;
         }
-        sessiondTracker.close();
     }
 
     private void startScheduledTask(final TimerService timerService, final long periodMillis, final boolean parallel) {
