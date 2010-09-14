@@ -52,7 +52,6 @@ package com.openexchange.groupware.importexport.exceptions;
 import com.openexchange.api2.OXException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 
 /**
  * An exception thrown by classes associated with the import or export of OX data.
@@ -62,11 +61,6 @@ import com.openexchange.groupware.EnumComponent;
 public class ImportExportException extends OXException {
 
     private static final long serialVersionUID = 8368543799201210727L;
-
-    public ImportExportException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-        super(EnumComponent.IMPORT_EXPORT, category, id, message, cause);
-        setMessageArgs(msgParams);
-    }
 
     public ImportExportException(final AbstractOXException e) {
         super(e);
