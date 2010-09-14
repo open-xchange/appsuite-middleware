@@ -74,6 +74,8 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String ICAL_CONVERSION_FAILED_MSG = "Conversion to iCal failed.";
 
+    public static final String VCARD_CONVERSION_FAILED_MSG = "Conversion to vCard failed.";
+
     private ImportExportExceptionMessages() {
         super();
     }

@@ -77,6 +77,8 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     NUMBER_FAILED(NUMBER_FAILED_MSG, Category.CODE_ERROR, 207),
     /** Conversion to iCal failed. */
     ICAL_CONVERSION_FAILED(ICAL_CONVERSION_FAILED_MSG, Category.CODE_ERROR, 208),
+    /** Conversion to vCard failed. */
+    VCARD_CONVERSION_FAILED(VCARD_CONVERSION_FAILED_MSG, Category.CODE_ERROR, 304),
     ;
 
     private String message;

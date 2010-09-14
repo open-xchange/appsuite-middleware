@@ -54,12 +54,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
@@ -69,10 +67,9 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
+import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -85,36 +82,16 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
-@OXExceptionSource(
-classId=ImportExportExceptionClasses.VCARDEXPORTER,
-        component=EnumComponent.IMPORT_EXPORT)
-        @OXThrowsMultiple(
-category={
-    Category.PERMISSION,
-    Category.SUBSYSTEM_OR_SERVICE_DOWN,
-    Category.USER_INPUT,
-    Category.CODE_ERROR},
-        desc={"","","",""},
-        exceptionId={0,1,2,3},
-        msg={
-    "Could not import into the folder %s.",
-    "Could not import into folder %s",
-    "User input error %s",
-    "Could not import into folder %s"})
+/**
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
+ */
+public class VCardExporter implements Exporter {
 
-    /**
-     * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
-     * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
-     */
-    public class VCardExporter implements Exporter {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(VCardExporter.class);
-
-    private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(VCardExporter.class);
-
+    private static final Log LOG = LogFactory.getLog(VCardExporter.class);
     protected final static int[] _contactFields = {
         DataObject.OBJECT_ID,
         DataObject.CREATED_BY,
@@ -246,16 +223,11 @@ category={
         try {
             perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
         } catch (final DBPoolingException e) {
-            throw importExportExceptionFactory.create(2, e, folder);
+            throw new ImportExportException(e);
         } catch (final SQLException e) {
-            throw importExportExceptionFactory.create(2, e, folder);
+            throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
-
-        if (perm.canReadAllObjects()) {
-            return true;
-        }
-
-        return false;
+        return perm.canReadAllObjects();
     }
 
     public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
@@ -291,8 +263,16 @@ category={
                     LOG.error(e.getMessage(), e);
                 }
             }
-        } catch (final Exception exc) {
-            throw importExportExceptionFactory.create(3, exc, folder);
+        } catch (NumberFormatException e) {
+            throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
+        } catch (OXException e) {
+            throw new ImportExportException(e);
+        } catch (SearchIteratorException e) {
+            throw new ImportExportException(e);
+        } catch (IOException e) {
+            throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+        } catch (ConverterException e) {
+            throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         }
 
         return new SizedInputStream(
@@ -318,8 +298,14 @@ category={
             } finally {
                 closeVersitResources(oxContainerConverter, versitWriter);
             }
-        } catch (final Exception exc) {
-            throw importExportExceptionFactory.create(3, exc, folder);
+        } catch (NumberFormatException e) {
+            throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
+        } catch (OXException e) {
+            throw new ImportExportException(e);
+        } catch (IOException e) {
+            throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+        } catch (ConverterException e) {
+            throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         }
 
         return new SizedInputStream(
@@ -328,7 +314,7 @@ category={
                 Format.VCARD);
     }
 
-    protected void exportContact(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final Contact contactObj) throws Exception {
+    protected void exportContact(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final Contact contactObj) throws ConverterException, IOException {
         final VersitObject versitObject = oxContainerConverter.convertContact(contactObj, "3.0");
         versitDef.write(writer, versitObject);
         writer.flush();
