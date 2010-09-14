@@ -90,6 +90,16 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String WARNINGS_MSG = "Warnings when importing file: %i warnings";
 
+    public static final String UNKNOWN_FORMAT_MSG = "Could not recognize format of the following data: %s";
+
+    public static final String CONTACTS_DISABLED_MSG = "Module contacts not enabled for user, cannot import contacts.";
+
+    public static final String NO_VCARD_FOUND_MSG = "No VCard to import found.";
+
+    public static final String VCARD_PARSING_PROBLEM_MSG = "Problem while parsing the vcard, reason: %s";
+
+    public static final String VCARD_CONVERSION_PROBLEM_MSG = "Problem while converting the vcard to a contact, reason: %s";
+
     private ImportExportExceptionMessages() {
         super();
     }

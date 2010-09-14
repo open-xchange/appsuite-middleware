@@ -83,9 +83,9 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     VCARD_CONVERSION_FAILED(VCARD_CONVERSION_FAILED_MSG, Category.CODE_ERROR, 304),
     /** Can not import the format %2$s into folder %1$s. */
     CANNOT_IMPORT(CANNOT_IMPORT_MSG, Category.CODE_ERROR, 500),
-    /** Module Calendar not enabled for user, cannot import appointments. */
+    /** Module calendar not enabled for user, cannot import appointments. */
     CALENDAR_DISABLED(CALENDAR_DISABLED_MSG, Category.PERMISSION, 507),
-    /** Module calendar not enabled for user, cannot import tasks. */
+    /** Module tasks not enabled for user, cannot import tasks. */
     TASKS_DISABLED(TASKS_DISABLED_MSG, Category.PERMISSION, 508),
     /** The necessary iCal parser service is missing. */
     ICAL_PARSER_SERVICE_MISSING(ICAL_PARSER_SERVICE_MISSING_MSG, Category.CODE_ERROR, 512),
@@ -93,6 +93,16 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     RESOURCE_HARD_CONFLICT(RESOURCE_HARD_CONFLICT_MSG, Category.USER_INPUT, 513),
     /** Warnings when importing file: %i warnings */
     WARNINGS(WARNINGS_MSG, Category.WARNING, 514),
+    /** Could not recognize format of the following data: %s */
+    UNKNOWN_FORMAT(UNKNOWN_FORMAT_MSG, Category.USER_INPUT, 605),
+    /** Module contacts not enabled for user, cannot import contacts. */
+    CONTACTS_DISABLED(CONTACTS_DISABLED_MSG, Category.PERMISSION, 607),
+    /** No VCard to import found. */
+    NO_VCARD_FOUND(NO_VCARD_FOUND_MSG, Category.USER_INPUT, 608),
+    /** Problem while parsing the vcard, reason: %s */
+    VCARD_PARSING_PROBLEM(VCARD_PARSING_PROBLEM_MSG, Category.USER_INPUT, 609),
+    /** Problem while converting the vcard to a contact, reason: %s */
+    VCARD_CONVERSION_PROBLEM(VCARD_CONVERSION_PROBLEM_MSG, Category.USER_INPUT, 610),
     ;
 
     private String message;
