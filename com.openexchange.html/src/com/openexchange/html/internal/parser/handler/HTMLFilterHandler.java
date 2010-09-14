@@ -108,9 +108,9 @@ public final class HTMLFilterHandler implements HTMLHandler {
     // A decimal digit: [0-9]
     private static final Pattern PAT_NUMERIC = Pattern.compile("\\p{Digit}+");
 
-    private static volatile Map<String, Map<String, Set<String>>> shtmlMap;
+    private static volatile Map<String, Map<String, Set<String>>> staticHTMLMap;
 
-    private static volatile Map<String, Set<String>> sstyleMap;
+    private static volatile Map<String, Set<String>> staticStyleMap;
 
     /*-
      * ----------------- Member stuff -----------------
@@ -190,11 +190,11 @@ public final class HTMLFilterHandler implements HTMLHandler {
         cssBuffer = new StringBuilder(256);
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
-        if (null == shtmlMap) {
+        if (null == staticHTMLMap) {
             loadWhitelist();
         }
-        htmlMap = shtmlMap;
-        styleMap = sstyleMap;
+        htmlMap = staticHTMLMap;
+        styleMap = staticStyleMap;
         checkHTMLMap();
     }
 
@@ -246,7 +246,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
      */
     public static void loadWhitelist() {
         synchronized (HTMLFilterHandler.class) {
-            if (null == shtmlMap) {
+            if (null == staticHTMLMap) {
                 String mapStr = null;
                 {
                     final String whitelist =
@@ -286,8 +286,8 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 if (!map.containsKey(HEAD)) {
                     map.put(HEAD, null);
                 }
-                shtmlMap = Collections.unmodifiableMap(map);
-                sstyleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
+                staticHTMLMap = Collections.unmodifiableMap(map);
+                staticStyleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
             }
         }
     }
@@ -297,8 +297,8 @@ public final class HTMLFilterHandler implements HTMLHandler {
      */
     public static void resetWhitelist() {
         synchronized (HTMLFilterHandler.class) {
-            shtmlMap = null;
-            sstyleMap = null;
+            staticHTMLMap = null;
+            staticStyleMap = null;
         }
     }
 
