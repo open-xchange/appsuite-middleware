@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport.csv;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -58,16 +57,13 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -78,33 +74,13 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-@OXExceptionSource(
-    classId=ImportExportExceptionClasses.CSVLIBRARY,
-    component=EnumComponent.IMPORT_EXPORT)
-@OXThrowsMultiple(
-    category={
-        Category.SUBSYSTEM_OR_SERVICE_DOWN,
-        Category.CODE_ERROR,
-        Category.CODE_ERROR,
-        Category.CODE_ERROR},
-    desc={"","","", ""},
-    exceptionId={0,1,2,3},
-    msg={
-        "Could not load folder %s",
-        "Could not create folder id from string %s",
-        "Could not read InputStream as string",
-        "Missing ability to encode or decode UTF-8 on server, cannot read file."})
 public final class CSVLibrary {
 
     private CSVLibrary() {
         super();
     }
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(CSVLibrary.class);
-
-    private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVLibrary.class);
-
+    private static final Log LOG = LogFactory.getLog(CSVLibrary.class);
     public static final char CELL_DELIMITER = ',';
     public static final char ROW_DELIMITER = '\n';
 
@@ -122,7 +98,7 @@ public final class CSVLibrary {
         try {
             fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
         } catch (final OXException e) {
-            throw EXCEPTIONS.create(0, e, folder);
+            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, folder);
         }
         return fo;
     }
@@ -138,7 +114,7 @@ public final class CSVLibrary {
         try{
             return Integer.parseInt(folderString);
         } catch (final NumberFormatException e) {
-            throw EXCEPTIONS.create(1, e, folderString);
+            throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folderString);
         }
     }
 
@@ -179,33 +155,29 @@ public final class CSVLibrary {
     }
 
     public static String transformInputStreamToString(final InputStream is, final String encoding) throws ImportExportException{
-        BufferedReader br = null;
+        final InputStreamReader isr;
         try {
-            br = new BufferedReader(new InputStreamReader(is, encoding));
-        } catch (final UnsupportedEncodingException e1) {
-            LOG.fatal(e1);
-            throw EXCEPTIONS.create(3, e1, new Object[0]);
+            isr = new InputStreamReader(is, encoding);
+        } catch (final UnsupportedEncodingException e) {
+            LOG.fatal(e);
+            throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         }
         final StringBuilder bob = new StringBuilder();
-        String buffer;
         try {
-            while( (buffer = br.readLine()) != null){
-                bob.append(buffer);
-                bob.append('\n');
+            char[] buf = new char[512];
+            int length = -1;
+            while ((length = isr.read(buf)) != -1) {
+                bob.append(buf, 0, length);
             }
         } catch (final IOException e) {
-            throw EXCEPTIONS.create(2, e, new Object[0]);
+            throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
         } finally {
             try {
-                br.close();
+                isr.close();
             } catch (final IOException e) {
-                /*
-                 * already closed
-                 */
                 LOG.error(e.getMessage(), e);
             }
         }
         return bob.toString();
     }
-
 }

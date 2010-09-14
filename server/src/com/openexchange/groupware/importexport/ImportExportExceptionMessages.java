@@ -112,6 +112,8 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String NO_FIELD_FOR_NAMING_IN_LINE_MSG = "No field was set that might give the contact in line %s a display name: no name, no company nor e-mail.";
 
+    public static final String IOEXCEPTION_MSG = "Could not read InputStream as string";
+
     private ImportExportExceptionMessages() {
         super();
     }

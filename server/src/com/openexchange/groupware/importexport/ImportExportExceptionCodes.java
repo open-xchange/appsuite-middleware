@@ -115,6 +115,8 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     NO_FIELD_FOR_NAMING(NO_FIELD_FOR_NAMING_MSG, Category.USER_INPUT, 807),
     /** No field was set that might give the contact in line %s a display name: no name, no company nor e-mail. */
     NO_FIELD_FOR_NAMING_IN_LINE(NO_FIELD_FOR_NAMING_IN_LINE_MSG, Category.USER_INPUT, 808),
+    /** Could not read InputStream as string */
+    IOEXCEPTION(IOEXCEPTION_MSG, Category.CODE_ERROR, 902),
     ;
 
     private String message;
