@@ -56,7 +56,7 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 
 /**
- * {@link UpdateTaskPublisher}
+ * {@link UpdateTaskPublisher} - The {@link UpdateTaskProviderService} for MAL Poll bundle.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -70,6 +70,7 @@ public final class UpdateTaskPublisher implements UpdateTaskProviderService {
         super();
     }
 
+    @SuppressWarnings("deprecation")
     public Collection<UpdateTask> getUpdateTasks() {
         final List<UpdateTask> tasks = new ArrayList<UpdateTask>(2);
         tasks.add(new MALPollCreateTableTask());

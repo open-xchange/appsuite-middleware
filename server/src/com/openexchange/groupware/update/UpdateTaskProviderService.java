@@ -52,7 +52,8 @@ package com.openexchange.groupware.update;
 import java.util.Collection;
 
 /**
- * {@link UpdateTaskProviderService} - Provider service for {@link UpdateTask update tasks}.
+ * {@link UpdateTaskProviderService} - Provides a collection of {@link UpdateTask update tasks} which should be added to update task
+ * framework.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
