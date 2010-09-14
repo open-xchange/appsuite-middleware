@@ -263,7 +263,7 @@ public final class HTMLProcessing {
                 } else {
                     tmp.setLength(0);
                     final int mlen = url.length() - 1;
-                    if (mlen > 0 && ')' == url.charAt(mlen)) {
+                    if (mlen > 0 && ')' == url.charAt(mlen)) { // Ends with a parenthesis
                         /*
                          * Keep starting parenthesis if present
                          */
@@ -276,7 +276,23 @@ public final class HTMLProcessing {
                         mr.appendLiteralReplacement(
                             sb,
                             tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
-                                "\" target=\"_blank\">").append(url).append("</a>)").toString());
+                                "\" target=\"_blank\">").append(url).append("</a>").append(')').toString());
+                    } else if ((mlen > 0) && ('(' == url.charAt(0))) {  // Starts with a parenthesis
+                        final boolean appendParen;
+                        if (')' == url.charAt(mlen)) {
+                            url = url.substring(1, mlen);
+                            appendParen = true;
+                        } else {
+                            url = url.substring(1);
+                            tmp.append('(');
+                            appendParen = false;
+                        }
+                        tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
+                            "\" target=\"_blank\">").append(url).append("</a>");
+                        if (appendParen) {
+                            tmp.append(')');
+                        }
+                        mr.appendLiteralReplacement(sb, tmp.toString());
                     } else {
                         mr.appendReplacement(
                             sb,
