@@ -70,6 +70,7 @@ import org.w3c.tidy.Report;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.HTMLServiceImpl;
+import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -122,6 +123,10 @@ public class HTMLServiceActivator extends DeferredActivator {
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
+            /*
+             * Other start-up stuff
+             */
+            HTMLFilterHandler.loadWhitelist();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -131,6 +136,13 @@ public class HTMLServiceActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            /*
+             * Other shut-down stuff
+             */
+            HTMLFilterHandler.resetWhitelist();
+            /*
+             * Close trackers
+             */
             if (null != trackers) {
                 /*
                  * Close trackers
