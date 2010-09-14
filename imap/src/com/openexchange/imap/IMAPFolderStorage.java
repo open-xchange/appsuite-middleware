@@ -64,9 +64,9 @@ import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
+import javax.mail.Quota.Resource;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
-import javax.mail.Quota.Resource;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -697,14 +697,21 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final MailException e) {
-            if (createMe != null && created) {
-                try {
-                    if (createMe.exists()) {
-                        createMe.delete(true);
+            /*
+             * No folder deletion on IMAP error "NO_ADMINISTER_ACCESS_ON_INITIAL"
+             */
+            if (!IMAPProvider.PROTOCOL_IMAP.equals(e.getComponent()) || IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL.getNumber() != e.getDetailNumber()) {
+                if (createMe != null && created) {
+                    try {
+                        if (createMe.exists()) {
+                            createMe.delete(true);
+                        }
+                    } catch (final Throwable e2) {
+                        LOG.error(
+                            new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
+                                "could not be deleted"),
+                            e2);
                     }
-                } catch (final Throwable e2) {
-                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                        "could not be deleted"), e2);
                 }
             }
             throw e;
