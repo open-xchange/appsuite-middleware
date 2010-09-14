@@ -121,20 +121,20 @@ public final class HTMLServiceImpl implements HTMLService {
         try {
             final Matcher m = PATTERN_LINK_WITH_GROUP.matcher(content);
             final MatcherReplacer mr = new MatcherReplacer(m, content);
-            final StringBuilder sb = new StringBuilder(content.length());
-            final StringBuilder tmp = new StringBuilder(256);
+            final StringBuilder targetBuilder = new StringBuilder(content.length());
+            final StringBuilder sb = new StringBuilder(256);
             while (m.find()) {
                 final String url = m.group(1);
+                sb.setLength(0);
                 if ((url == null) || (isSrcAttr(content, m.start(1)))) {
-                    mr.appendLiteralReplacement(sb, checkTarget(m.group()));
+                    mr.appendLiteralReplacement(targetBuilder, checkTarget(m.group(), sb));
                 } else {
-                    tmp.setLength(0);
-                    appendLink(url, tmp);
-                    mr.appendLiteralReplacement(sb, tmp.toString());
+                    appendLink(url, sb);
+                    mr.appendLiteralReplacement(targetBuilder, sb.toString());
                 }
             }
-            mr.appendTail(sb);
-            return sb.toString();
+            mr.appendTail(targetBuilder);
+            return targetBuilder.toString();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } catch (final StackOverflowError error) {
@@ -155,11 +155,10 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final String STR_BLANK = "_blank";
 
-    private static String checkTarget(final String anchorTag) {
+    private static String checkTarget(final String anchorTag, final StringBuilder sb) {
         final Matcher m = PATTERN_TARGET.matcher(anchorTag);
         if (m.matches()) {
             if (!STR_BLANK.equalsIgnoreCase(m.group(2))) {
-                final StringBuilder sb = new StringBuilder(128);
                 return sb.append(m.group(1)).append(STR_BLANK).append(m.group(3)).toString();
             }
             return anchorTag;
@@ -171,24 +170,23 @@ public final class HTMLServiceImpl implements HTMLService {
         if (pos == -1) {
             return anchorTag;
         }
-        return new StringBuilder(anchorTag.length() + 16).append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append(
-            '"').append(anchorTag.substring(pos)).toString();
+        return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(anchorTag.substring(pos)).toString();
     }
 
     public String formatURLs(final String content) {
         try {
             final Matcher m = PATTERN_URL.matcher(content);
             final MatcherReplacer mr = new MatcherReplacer(m, content);
-            final StringBuilder sb = new StringBuilder(content.length());
-            final StringBuilder tmp = new StringBuilder(256);
+            final StringBuilder targetBuilder = new StringBuilder(content.length());
+            final StringBuilder sb = new StringBuilder(256);
             while (m.find()) {
                 final String url = m.group();
-                tmp.setLength(0);
-                appendLink(url, tmp);
-                mr.appendLiteralReplacement(sb, tmp.toString());
+                sb.setLength(0);
+                appendLink(url, sb);
+                mr.appendLiteralReplacement(targetBuilder, sb.toString());
             }
-            mr.appendTail(sb);
-            return sb.toString();
+            mr.appendTail(targetBuilder);
+            return targetBuilder.toString();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } catch (final StackOverflowError error) {
