@@ -89,7 +89,7 @@ public final class RightsCache {
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
             entry.setValue(f.myRights());
-            mailCache.put(entry);
+            mailCache.putIfAbsent(entry);
         }
         return entry.getValue();
     }
