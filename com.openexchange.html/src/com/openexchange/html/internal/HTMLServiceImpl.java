@@ -171,8 +171,8 @@ public final class HTMLServiceImpl implements HTMLService {
         if (pos == -1) {
             return anchorTag;
         }
-        final StringBuilder sb = new StringBuilder(anchorTag.length() + 16);
-        return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(anchorTag.substring(pos)).toString();
+        return new StringBuilder(anchorTag.length() + 16).append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append(
+            '"').append(anchorTag.substring(pos)).toString();
     }
 
     public String formatURLs(final String content) {
