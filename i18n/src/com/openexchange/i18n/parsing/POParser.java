@@ -70,7 +70,7 @@ public class POParser {
         skipContexts(tokens);
         while (tokens.lookahead(POToken.MSGID)) {
             readTranslation(translations, tokens);
-            if (null != translations.translate("") && 0 == headers.size()) {
+            if (null != translations.translate("") && headers.isEmpty()) {
                 parseHeader(translations.translate(""));
                 setCharSet(tokens);
             }
