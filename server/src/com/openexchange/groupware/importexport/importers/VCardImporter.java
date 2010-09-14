@@ -203,7 +203,7 @@ public class VCardImporter extends AbstractImporter {
                     // could not find appropriate parser for this part of the vcard file
                     LOG.error("Could not recognize format of the following VCard data: " + Arrays.toString(chunk.getContent()));
                     importResult.setDate(new Date(System.currentTimeMillis()));
-                    importResult.setException(ImportExportExceptionCodes.UNKNOWN_FORMAT.create(chunk.getContent()));
+                    importResult.setException(ImportExportExceptionCodes.UNKNOWN_VCARD_FORMAT.create(chunk.getContent()));
                 } else {
                     final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(
                             chunk.getContent()), "UTF-8");

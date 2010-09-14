@@ -54,10 +54,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
@@ -72,43 +68,33 @@ import com.openexchange.groupware.contact.mappers.FrenchOutlookMapper;
 import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections;
 
-@OXExceptionSource(
-	classId=ImportExportExceptionClasses.OUTLOOKCSVCONTACTIMPORTER, 
-	component=EnumComponent.IMPORT_EXPORT)
-@OXThrowsMultiple(
-	category={
-		Category.TRUNCATED}, 
-	desc={""}, 
-	exceptionId={0}, 
-	msg={
-		"The following field(s) are too long to be imported: %s"})
 /**
- * Imports the CSV format of Outlook, regardless of the file being written with an English, 
- * French or German version of Outlook.
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * Imports the CSV format of Outlook, regardless of the file being written with an English, French or German version of Outlook.
  *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class OutlookCSVContactImporter extends CSVContactImporter {
-	private List<ContactFieldMapper> fieldMappers;
-	private ContactFieldMapper fieldMapper;
-	private boolean isUsingFallback = false;
-    
-	public boolean isUsingFallback(){
-	    return isUsingFallback;
-	}
-	
+
+    private List<ContactFieldMapper> fieldMappers;
+
+    private ContactFieldMapper fieldMapper;
+
+    private boolean isUsingFallback = false;
+
+    public boolean isUsingFallback() {
+        return isUsingFallback;
+    }
+
     public List<ContactFieldMapper> getFieldMappers() {
-        if(fieldMappers == null){ //default
+        if (fieldMappers == null) { // default
             fieldMappers = new LinkedList<ContactFieldMapper>();
-            fieldMappers.add( new GermanOutlookMapper()); 
-            fieldMappers.add( new FrenchOutlookMapper());
-            fieldMappers.add( new EnglishOutlookMapper());
-            fieldMappers.add( new DutchOutlookMapper());
+            fieldMappers.add(new GermanOutlookMapper());
+            fieldMappers.add(new FrenchOutlookMapper());
+            fieldMappers.add(new EnglishOutlookMapper());
+            fieldMappers.add(new DutchOutlookMapper());
             isUsingFallback = true;
         }
         return fieldMappers;
@@ -117,116 +103,114 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
     public void setFieldMappers(List<ContactFieldMapper> fieldMappers) {
         this.fieldMappers = fieldMappers;
     }
-    
+
     public ContactFieldMapper getFieldMapper() {
         return fieldMapper;
     }
-    
+
     public void setFieldMapper(ContactFieldMapper fieldMapper) {
         this.fieldMapper = fieldMapper;
     }
-    
+
     public void addFieldMappers(ContactFieldMapper newMapper) {
-        if(fieldMappers == null)
+        if (fieldMappers == null)
             fieldMappers = new LinkedList<ContactFieldMapper>();
         fieldMappers.add(newMapper);
     }
 
     @Override
-	protected ContactField getRelevantField(final String name) {
-		return getFieldMapper().getFieldByName(name);
-	}
+    protected ContactField getRelevantField(final String name) {
+        return getFieldMapper().getFieldByName(name);
+    }
 
-	@Override
-	protected CSVParser getCSVParser() {
-		final CSVParser result = super.getCSVParser();
-		result.setTolerant(true);
-		return result;
-	}
+    @Override
+    protected CSVParser getCSVParser() {
+        final CSVParser result = super.getCSVParser();
+        result.setTolerant(true);
+        return result;
+    }
 
-	@Override
-	protected Format getResponsibleFor() {
-		return Format.OUTLOOK_CSV;
-	}
+    @Override
+    protected Format getResponsibleFor() {
+        return Format.OUTLOOK_CSV;
+    }
 
-	
-	/**
-	 * This importers assumes the encoding CP-1252 for files uploaded,
-	 * since this format is mainly used on European and American
-	 * Windows systems. 
-	 */
-	@Override
-	public String getEncoding() {
-		return "cp1252";
-	}
+    /**
+     * This importers assumes the encoding CP-1252 for files uploaded, since this format is mainly used on European and American Windows
+     * systems.
+     */
+    @Override
+    public String getEncoding() {
+        return "cp1252";
+    }
 
-	/**
-	 * Opposed to the basic CSV importer, this method probes different
-	 * language mappers and sets the correct ContactFieldMapper for this
-	 * class.
-	 */
-	@Override
-	protected boolean checkFields(final List<String> fields) {
-		int highestAmountOfMappedFields = 0;
+    /**
+     * Opposed to the basic CSV importer, this method probes different language mappers and sets the correct ContactFieldMapper for this
+     * class.
+     */
+    @Override
+    protected boolean checkFields(final List<String> fields) {
+        int highestAmountOfMappedFields = 0;
 
-		for(ContactFieldMapper mapper : getFieldMappers()){
-		    int mappedFields = 0;
-		    for(final String name: fields){
-		        if(mapper.getFieldByName(name) != null){
-		            mappedFields++;
-		        }
-		    }
-		    if(mappedFields > highestAmountOfMappedFields){
-		        fieldMapper = mapper;
-		        highestAmountOfMappedFields = mappedFields;
-		    }
-		    
-		}
-		return fieldMapper != null;
-	}
+        for (ContactFieldMapper mapper : getFieldMappers()) {
+            int mappedFields = 0;
+            for (final String name : fields) {
+                if (mapper.getFieldByName(name) != null) {
+                    mappedFields++;
+                }
+            }
+            if (mappedFields > highestAmountOfMappedFields) {
+                fieldMapper = mapper;
+                highestAmountOfMappedFields = mappedFields;
+            }
 
-	@Override
-	protected ContactSwitcher getContactSwitcher() {
-		final ContactSwitcherForSimpleDateFormat dateSwitcher = new ContactSwitcherForSimpleDateFormat();
-		dateSwitcher.addDateFormat( getGermanDateNotation());
-		dateSwitcher.addDateFormat( getAmericanDateNotation());
-		dateSwitcher.setDelegate(new ContactSetter());
+        }
+        return fieldMapper != null;
+    }
 
-		final ContactSwitcherForBooleans boolSwitcher = new ContactSwitcherForBooleans();
-		boolSwitcher.setDelegate(dateSwitcher);
+    @Override
+    protected ContactSwitcher getContactSwitcher() {
+        final ContactSwitcherForSimpleDateFormat dateSwitcher = new ContactSwitcherForSimpleDateFormat();
+        dateSwitcher.addDateFormat(getGermanDateNotation());
+        dateSwitcher.addDateFormat(getAmericanDateNotation());
+        dateSwitcher.setDelegate(new ContactSetter());
 
-		final SplitBirthdayFieldsSetter bdaySwitcher = new SplitBirthdayFieldsSetter();
-		bdaySwitcher.setDelegate(boolSwitcher);
+        final ContactSwitcherForBooleans boolSwitcher = new ContactSwitcherForBooleans();
+        boolSwitcher.setDelegate(dateSwitcher);
 
-		return bdaySwitcher;
-	}
-	
-	public static final SimpleDateFormat getGermanDateNotation(){
-		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
-		sdf.setTimeZone(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"));
-		return sdf; 
-	}
-	
-	public static final SimpleDateFormat getAmericanDateNotation(){
-		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
-		sdf.setTimeZone(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"));
-		return sdf; 
-	}
+        final SplitBirthdayFieldsSetter bdaySwitcher = new SplitBirthdayFieldsSetter();
+        bdaySwitcher.setDelegate(boolSwitcher);
 
-	@Override
-	protected String getNameForFieldInTruncationError(final int id, final OXException notused) {
-		final ContactField field = ContactField.getByValue(id);
-		if(field == null){
-			return String.valueOf( id );
-		}
-		return getFieldMapper().getNameOfField(field);
-	}
+        return bdaySwitcher;
+    }
+
+    public static final SimpleDateFormat getGermanDateNotation() {
+        final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
+        sdf.setTimeZone(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"));
+        return sdf;
+    }
+
+    public static final SimpleDateFormat getAmericanDateNotation() {
+        final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+        sdf.setTimeZone(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"));
+        return sdf;
+    }
+
+    @Override
+    protected String getNameForFieldInTruncationError(final int id, final OXException notused) {
+        final ContactField field = ContactField.getByValue(id);
+        if (field == null) {
+            return String.valueOf(id);
+        }
+        return getFieldMapper().getNameOfField(field);
+    }
 
     @Override
     protected boolean passesSanityTestForDisplayName(List<String> headers) {
         ContactFieldMapper mpr = getFieldMapper();
-        
-        return Collections.any(headers, 
+
+        return Collections.any(
+            headers,
             mpr.getNameOfField(ContactField.DISPLAY_NAME),
             mpr.getNameOfField(ContactField.SUR_NAME),
             mpr.getNameOfField(ContactField.GIVEN_NAME),
@@ -237,6 +221,5 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
             mpr.getNameOfField(ContactField.NICKNAME),
             mpr.getNameOfField(ContactField.MIDDLE_NAME));
     }
-	
-	
+
 }

@@ -90,7 +90,7 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String WARNINGS_MSG = "Warnings when importing file: %i warnings";
 
-    public static final String UNKNOWN_FORMAT_MSG = "Could not recognize format of the following data: %s";
+    public static final String UNKNOWN_VCARD_FORMAT_MSG = "Could not recognize format of the following data: %s";
 
     public static final String CONTACTS_DISABLED_MSG = "Module contacts not enabled for user, cannot import contacts.";
 
@@ -125,6 +125,14 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
     public static final String NO_TYPES_CONSTANT_MSG = "Cannot translate id=%d to a constant from Types.";
 
     public static final String NO_FOLDEROBJECT_CONSTANT_MSG = "Cannot translate id=%d to a constant from FolderObject.";
+
+    public static final String ONLY_ONE_FILE_MSG = "Can only handle one file, not %s";
+
+    public static final String UNKNOWN_FORMAT_MSG = "Unknown format: %s";
+
+    public static final String EMPTY_FILE_MSG = "Empty file uploaded.";
+
+    public static final String FILE_NOT_EXISTS_MSG = "The file you selected does not exist.";
 
     private ImportExportExceptionMessages() {
         super();

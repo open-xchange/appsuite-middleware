@@ -95,7 +95,7 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     /** Warnings when importing file: %i warnings */
     WARNINGS(WARNINGS_MSG, Category.WARNING, 514),
     /** Could not recognize format of the following data: %s */
-    UNKNOWN_FORMAT(UNKNOWN_FORMAT_MSG, Category.USER_INPUT, 605),
+    UNKNOWN_VCARD_FORMAT(UNKNOWN_VCARD_FORMAT_MSG, Category.USER_INPUT, 605),
     /** Module contacts not enabled for user, cannot import contacts. */
     CONTACTS_DISABLED(CONTACTS_DISABLED_MSG, Category.PERMISSION, 607),
     /** No VCard to import found. */
@@ -130,6 +130,14 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     NO_TYPES_CONSTANT(NO_TYPES_CONSTANT_MSG, Category.CODE_ERROR, 1200),
     /** Cannot translate id=%d to a constant from FolderObject. */
     NO_FOLDEROBJECT_CONSTANT(NO_FOLDEROBJECT_CONSTANT_MSG, Category.CODE_ERROR, 1201),
+    /** Can only handle one file, not %s */
+    ONLY_ONE_FILE(ONLY_ONE_FILE_MSG, Category.USER_INPUT, 1300),
+    /** Unknown format: %s */
+    UNKNOWN_FORMAT(UNKNOWN_FORMAT_MSG, Category.USER_INPUT, 1301),
+    /** Empty file uploaded. */
+    EMPTY_FILE(EMPTY_FILE_MSG, Category.USER_INPUT, 1303),
+    /** The file you selected does not exist. */
+    FILE_NOT_EXISTS(FILE_NOT_EXISTS_MSG, Category.USER_INPUT, 1304),
     ;
 
     private String message;

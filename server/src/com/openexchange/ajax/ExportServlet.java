@@ -51,7 +51,6 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -89,7 +88,7 @@ public class ExportServlet extends ImportExport {
     }
     
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             init();
             final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);

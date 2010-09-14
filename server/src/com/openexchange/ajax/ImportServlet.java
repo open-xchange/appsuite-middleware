@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -65,17 +65,12 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.writer.ImportExportWriter;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.importexport.Format;
+import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
-import com.openexchange.server.osgi.CSVTranslator;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.OXJSONException.Code;
 import com.openexchange.tools.session.ServerSession;
@@ -95,42 +90,19 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a> (development)
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (refactoring, redesign)
  */
-@OXExceptionSource(
-    classId=ImportExportExceptionClasses.IMPORTSERVLET, 
-    component=EnumComponent.IMPORT_EXPORT
-)
-@OXThrowsMultiple(
-    category = { 
-        Category.USER_INPUT, 
-        Category.USER_INPUT,
-        Category.USER_INPUT,
-        Category.USER_INPUT,
-        Category.USER_INPUT
-    }, 
-    desc = { "", "", "", "", "" },
-    exceptionId = { 0, 1, 2, 3, 4 },
-    msg = { 
-        "Can only handle one file, not %s",
-        "Unknown format: %s",
-        "Uploaded file is of type %s, cannot handle that",
-        "Empty file uploaded.",
-        "The file you selected does not exist."
-    }
-)
 public class ImportServlet extends ImportExport {
     
+    private static final long serialVersionUID = 5639598623111215315L;
     private static final Log LOG = LogFactory.getLog(ImportServlet.class);
-
-    private final static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ImportServlet.class);
-
-    public static final String JSON_CALLBACK = "import"; //identifying part of the ajax method that does the callback after the upload
+    //identifying part of the ajax method that does the callback after the upload
+    public static final String JSON_CALLBACK = "import";
 
     public ImportServlet() {
         super();
     }
     
     @Override 
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response resObj = new Response();
         final List<ImportResult> importResult;
         try {
@@ -139,7 +111,7 @@ public class ImportServlet extends ImportExport {
             final String formatStr = DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION);
             final Format format = Format.getFormatByConstantName(formatStr);
             if (format == null) {
-                throw EXCEPTIONS.create(1, formatStr);
+                throw ImportExportExceptionCodes.UNKNOWN_FORMAT.create(formatStr);
             }
             //getting folders
             final List <String> folders = Arrays.asList(DataServlet.parseStringParameterArray(req, PARAMETER_FOLDERID));
@@ -150,14 +122,14 @@ public class ImportServlet extends ImportExport {
                 final Iterator<UploadFile> iter = event.getUploadFilesIterator();
                 if (event.getNumberOfUploadFiles() != 1) {
                     if (event.getNumberOfUploadFiles() == 0) {
-                        throw EXCEPTIONS.create(4);
+                        throw ImportExportExceptionCodes.FILE_NOT_EXISTS.create();
                     }
-                    throw EXCEPTIONS.create(0, Integer.valueOf(event.getNumberOfUploadFiles()));
+                    throw ImportExportExceptionCodes.ONLY_ONE_FILE.create(I(event.getNumberOfUploadFiles()));
                 }
                 final UploadFile file = iter.next();
                 final File upload = file.getTmpFile();
                 if (upload.length() == 0) {
-                    throw EXCEPTIONS.create(3);
+                    throw ImportExportExceptionCodes.EMPTY_FILE.create();
                 }
                 //actual import
                 final ServerSession session = new ServerSessionAdapter(getSessionObject(req));
