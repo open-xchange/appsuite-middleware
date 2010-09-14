@@ -37,6 +37,7 @@
     <property name="publishbasicjar" value="com.openexchange.publish.basic.jar"/>
     <property name="templatingjar" value="com.openexchange.templating.jar"/>
 	<property name="configreadjar" value="com.openexchange.configread.jar"/>
+    <property name="htmljar" value="com.openexchange.html.jar"/>
 
     <!-- Bundle dependencies -->
     <property name="templatingBundle" value="com.openexchange.templating"/>
@@ -55,6 +56,7 @@
         <pathelement location="${bundlesdir}/${templatingBundle}/${templatingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
     	<pathelement location="${bundlesdir}/${configreadjar}"/>
+        <pathelement location="${bundlesdir}/${htmljar}"/>
     </path>
 
     <!-- Compile -->
