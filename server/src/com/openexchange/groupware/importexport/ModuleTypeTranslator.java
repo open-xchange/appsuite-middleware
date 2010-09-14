@@ -63,57 +63,57 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
  * This sad little class translates has the sad little task to
  * translate between different constants that are used to identify
  * types of modules.
- * 
+ *
  * So, in case yo
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
 @OXExceptionSource(
-		classId=ImportExportExceptionClasses.MODULETYPETRANSLATOR, 
-		component=EnumComponent.IMPORT_EXPORT)
-	@OXThrowsMultiple(
-		category={
-			Category.USER_INPUT,
-			Category.USER_INPUT}, 
-		desc={"",""}, 
-		exceptionId={0,1}, 
-		msg={
-			"Cannot translate id=%d to a constant from Types.",
-			"Cannot translate id=%d to a constant from FolderObject."})
-			
+        classId=ImportExportExceptionClasses.MODULETYPETRANSLATOR,
+        component=EnumComponent.IMPORT_EXPORT)
+    @OXThrowsMultiple(
+        category={
+            Category.USER_INPUT,
+            Category.USER_INPUT},
+        desc={"",""},
+        exceptionId={0,1},
+        msg={
+            "Cannot translate id=%d to a constant from Types.",
+            "Cannot translate id=%d to a constant from FolderObject."})
+
 public final class ModuleTypeTranslator {
 
-	private ModuleTypeTranslator() {
-		super();
-	}
+    private ModuleTypeTranslator() {
+        super();
+    }
 
-	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ModuleTypeTranslator.class); 
-	
-	/**
-	 * Translates a FolderObject value to a Types value.
-	 */
-	public static int getTypesConstant(final int folderObjectConstant) throws ImportExportException{
-		switch(folderObjectConstant){
-			case FolderObject.CONTACT:		return Types.CONTACT;
-			case FolderObject.INFOSTORE: 	return Types.INFOSTORE;
-			case FolderObject.MAIL: 		return Types.EMAIL;
-			case FolderObject.TASK: 		return Types.TASK;
-			case FolderObject.CALENDAR: 	return Types.APPOINTMENT;
-			default: throw EXCEPTIONS.create(0,Integer.valueOf(folderObjectConstant));
-		}
-	}
-	
-	/**
-	 * Translates a Types value to a FolderObject value
-	 */
-	public static int getFolderObjectConstant(final int typeConstant) throws ImportExportException{
-		switch(typeConstant){
-			case Types.CONTACT:		return FolderObject.CONTACT;
-			case Types.INFOSTORE: 	return FolderObject.INFOSTORE;
-			case Types.EMAIL: 		return FolderObject.MAIL;
-			case Types.TASK: 		return FolderObject.TASK;
-			case Types.APPOINTMENT: return FolderObject.CALENDAR;
-			default: throw EXCEPTIONS.create(1,Integer.valueOf(typeConstant));
-		}
-	}
+    private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ModuleTypeTranslator.class);
+
+    /**
+     * Translates a FolderObject value to a Types value.
+     */
+    public static int getTypesConstant(final int folderObjectConstant) throws ImportExportException{
+        switch(folderObjectConstant){
+            case FolderObject.CONTACT:        return Types.CONTACT;
+            case FolderObject.INFOSTORE:     return Types.INFOSTORE;
+            case FolderObject.MAIL:         return Types.EMAIL;
+            case FolderObject.TASK:         return Types.TASK;
+            case FolderObject.CALENDAR:     return Types.APPOINTMENT;
+            default: throw EXCEPTIONS.create(0,Integer.valueOf(folderObjectConstant));
+        }
+    }
+
+    /**
+     * Translates a Types value to a FolderObject value
+     */
+    public static int getFolderObjectConstant(final int typeConstant) throws ImportExportException{
+        switch(typeConstant){
+            case Types.CONTACT:        return FolderObject.CONTACT;
+            case Types.INFOSTORE:     return FolderObject.INFOSTORE;
+            case Types.EMAIL:         return FolderObject.MAIL;
+            case Types.TASK:         return FolderObject.TASK;
+            case Types.APPOINTMENT: return FolderObject.CALENDAR;
+            default: throw EXCEPTIONS.create(1,Integer.valueOf(typeConstant));
+        }
+    }
 }
