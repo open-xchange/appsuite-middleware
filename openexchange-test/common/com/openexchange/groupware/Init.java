@@ -111,6 +111,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
+import com.openexchange.groupware.importexport.internal.ImportExportExceptionFactory;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
@@ -320,6 +321,7 @@ public final class Init {
         startAndInjectICalServices();
         startAndInjectConverterService();
         startAndInjectXMLServices();
+        startAndInjectImportExportServices();
     }
 
     public static void startAndInjectConfigBundle() {
@@ -409,9 +411,6 @@ public final class Init {
             cause);
     }
 
-    /**
-     * 
-     */
     private static void startAndInjectCalendarServices() {
         ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
         ServerServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
@@ -424,6 +423,11 @@ public final class Init {
 
         final JDOMParser jdomParser = new JDOMParserImpl();
         ServerServiceRegistry.getInstance().addService(JDOMParser.class, jdomParser);
+    }
+
+    private static void startAndInjectImportExportServices() throws ComponentAlreadyRegisteredException {
+        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
+        registry.registerComponent(EnumComponent.IMPORT_EXPORT, "com.openexchange.groupware.importexport", ImportExportExceptionFactory.getInstance());
     }
 
     public static void startAndInjectI18NBundle() throws FileNotFoundException {
