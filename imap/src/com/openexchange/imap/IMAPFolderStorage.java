@@ -709,7 +709,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     } catch (final Throwable e2) {
                         LOG.error(
                             new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                                "could not be deleted"),
+                                "\" could not be deleted"),
                             e2);
                     }
                 }
@@ -724,7 +724,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 } catch (final Throwable e2) {
                     LOG.error(
                         new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                            "could not be deleted"),
+                            "\" could not be deleted"),
                         e2);
                 }
             }
@@ -737,7 +737,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                 } catch (final Throwable e2) {
                     LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                        "could not be deleted"), e2);
+                        "\" could not be deleted"), e2);
                 }
             }
             throw new IMAPException(e);
@@ -749,7 +749,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                 } catch (final Throwable e2) {
                     LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                        "could not be deleted"), e2);
+                        "\" could not be deleted"), e2);
                 }
             }
             throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
