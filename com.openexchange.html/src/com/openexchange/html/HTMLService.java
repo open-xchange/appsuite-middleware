@@ -59,40 +59,6 @@ import java.util.List;
 public interface HTMLService {
 
     /**
-     * A range inside HTML content.
-     */
-    public static final class Range {
-
-        /**
-         * The start position.
-         */
-        public final int start;
-
-        /**
-         * The end position.
-         */
-        public final int end;
-
-        /**
-         * Initializes a new {@link Range}.
-         * 
-         * @param start The start position
-         * @param end The end position
-         */
-        public Range(final int start, final int end) {
-            super();
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder(16).append("start=").append(start).append(" end=").append(end).toString();
-        }
-
-    }
-
-    /**
      * Converts found URLs inside specified content to valid links.
      * 
      * @param content The content

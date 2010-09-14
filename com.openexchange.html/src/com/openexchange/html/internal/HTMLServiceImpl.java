@@ -65,6 +65,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.w3c.tidy.Tidy;
 import com.openexchange.html.HTMLService;
+import com.openexchange.html.Range;
 import com.openexchange.html.internal.parser.HTMLParser;
 import com.openexchange.html.internal.parser.handler.HTML2TextHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;

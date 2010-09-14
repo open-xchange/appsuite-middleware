@@ -74,7 +74,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.html.HTMLService;
-import com.openexchange.html.HTMLService.Range;
+import com.openexchange.html.Range;
 import com.openexchange.image.ImageService;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
