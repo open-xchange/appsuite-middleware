@@ -267,7 +267,7 @@ public final class MALPollDBUtility {
         }
     }
 
-    private static List<UUID> getUserUUIDs(int cid, Connection con, int user) throws SQLException {
+    private static List<UUID> getUserUUIDs(final int cid, final Connection con, final int user) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -287,7 +287,7 @@ public final class MALPollDBUtility {
         }
     }
 
-    private static void deleteEntries(int cid, Connection con, List<UUID> uuids) throws SQLException {
+    private static void deleteEntries(final int cid, final Connection con, final List<UUID> uuids) throws SQLException {
         if (uuids.isEmpty()) {
             return;
         }
@@ -305,7 +305,7 @@ public final class MALPollDBUtility {
         }
     }
 
-    private static void deleteUserData(int cid, Connection con, int user) throws SQLException {
+    private static void deleteUserData(final int cid, final Connection con, final int user) throws SQLException {
         PreparedStatement stmt = null;
         try {
             /*
@@ -330,12 +330,7 @@ public final class MALPollDBUtility {
      */
     public static Set<String> getMailIDs(final UUID hash, final int cid) throws PushException {
         final DatabaseService databaseService = getDBService();
-        final Connection readableConnection;
-        try {
-            readableConnection = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new PushException(e);
-        }
+        final Connection readableConnection = getReadOnlyConnection(cid, databaseService);
         try {
             PreparedStatement stmt = null;
             ResultSet rs = null;
@@ -373,12 +368,7 @@ public final class MALPollDBUtility {
      */
     public static UUID getHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
         final DatabaseService databaseService = getDBService();
-        final Connection readableConnection;
-        try {
-            readableConnection = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new PushException(e);
-        }
+        final Connection readableConnection = getReadOnlyConnection(cid, databaseService);
         try {
             PreparedStatement stmt = null;
             ResultSet rs = null;
@@ -419,12 +409,7 @@ public final class MALPollDBUtility {
      */
     public static UUID insertHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
         final DatabaseService databaseService = getDBService();
-        final Connection writableConnection;
-        try {
-            writableConnection = databaseService.getWritable(cid);
-        } catch (final DBPoolingException e) {
-            throw new PushException(e);
-        }
+        final Connection writableConnection = getReadWriteConnection(cid, databaseService);
         try {
             PreparedStatement stmt = null;
             try {
@@ -447,22 +432,6 @@ public final class MALPollDBUtility {
         } finally {
             databaseService.backWritable(cid, writableConnection);
         }
-    }
-
-    /**
-     * Gets the {@link DatabaseService database service} from service registry.
-     * 
-     * @return The database service
-     * @throws PushException If database service is not available
-     */
-    private static DatabaseService getDBService() throws PushException {
-        final DatabaseService databaseService;
-        try {
-            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
-            throw new PushException(e);
-        }
-        return databaseService;
     }
 
     private static final int UUID_BYTE_LENGTH = 16;
@@ -490,6 +459,38 @@ public final class MALPollDBUtility {
             lsb = (lsb << 8) | (bytes[i] & 0xff);
         }
         return new UUID(msb, lsb);
+    }
+
+    /**
+     * Gets the {@link DatabaseService database service} from service registry.
+     * 
+     * @return The database service
+     * @throws PushException If database service is not available
+     */
+    private static DatabaseService getDBService() throws PushException {
+        final DatabaseService databaseService;
+        try {
+            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        } catch (final ServiceException e) {
+            throw new PushException(e);
+        }
+        return databaseService;
+    }
+
+    private static Connection getReadWriteConnection(final int cid, final DatabaseService databaseService) throws PushException {
+        try {
+            return databaseService.getWritable(cid);
+        } catch (final DBPoolingException e) {
+            throw new PushException(e);
+        }
+    }
+
+    private static Connection getReadOnlyConnection(final int cid, final DatabaseService databaseService) throws PushException {
+        try {
+            return databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new PushException(e);
+        }
     }
 
     /**
