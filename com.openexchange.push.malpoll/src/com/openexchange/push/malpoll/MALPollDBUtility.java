@@ -149,7 +149,7 @@ public final class MALPollDBUtility {
                     sb.append(values);
                     final String delim = ", ";
                     for (int i = j + 1; i < limit; i++) {
-                        sb.append(delim).append(values); // , VALUES (?, ?)
+                        sb.append(delim).append(values); // , VALUES (?, UNHEX(REPLACE(?,'-','')), ?)
                     }
                     stmt = writableConnection.prepareStatement(sb.toString());
                 }
