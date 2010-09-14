@@ -297,7 +297,7 @@ public class ICalExporter implements Exporter {
         } catch (ConversionError e) {
             throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
         }
-        byte[] bytes = icalText.getBytes(Charsets.UTF_8);
+        byte[] bytes = Charsets.getBytes(icalText, Charsets.UTF_8);
         return new SizedInputStream(
                 new UnsynchronizedByteArrayInputStream(bytes),
                 bytes.length,
