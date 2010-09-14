@@ -103,6 +103,18 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     VCARD_PARSING_PROBLEM(VCARD_PARSING_PROBLEM_MSG, Category.USER_INPUT, 609),
     /** Problem while converting the vcard to a contact, reason: %s */
     VCARD_CONVERSION_PROBLEM(VCARD_CONVERSION_PROBLEM_MSG, Category.USER_INPUT, 610),
+    /** Can only import into one folder at a time. */
+    ONLY_ONE_FOLDER(ONLY_ONE_FOLDER_MSG, Category.USER_INPUT, 800),
+    /** Could not find the following fields %s */
+    NOT_FOUND_FIELD(NOT_FOUND_FIELD_MSG, Category.WARNING, 803),
+    /** Could not translate a single column title. Is this a valid CSV file? */
+    NO_VALID_CSV_COLUMNS(NO_VALID_CSV_COLUMNS_MSG, Category.USER_INPUT, 804),
+    /** Could not translate a single field of information, did not insert entry %s. */
+    NO_FIELD_IMPORTED(NO_FIELD_IMPORTED_MSG, Category.USER_INPUT, 805),
+    /** No field can be found that could be used to name contacts in this file: no name, no company nor e-mail. */
+    NO_FIELD_FOR_NAMING(NO_FIELD_FOR_NAMING_MSG, Category.USER_INPUT, 807),
+    /** No field was set that might give the contact in line %s a display name: no name, no company nor e-mail. */
+    NO_FIELD_FOR_NAMING_IN_LINE(NO_FIELD_FOR_NAMING_IN_LINE_MSG, Category.USER_INPUT, 808),
     ;
 
     private String message;

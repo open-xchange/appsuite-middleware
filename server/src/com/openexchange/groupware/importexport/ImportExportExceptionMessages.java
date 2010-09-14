@@ -100,6 +100,18 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String VCARD_CONVERSION_PROBLEM_MSG = "Problem while converting the vcard to a contact, reason: %s";
 
+    public static final String ONLY_ONE_FOLDER_MSG = "Can only import into one folder at a time.";
+
+    public static final String NOT_FOUND_FIELD_MSG = "Could not find the following fields %s";
+
+    public static final String NO_VALID_CSV_COLUMNS_MSG = "Could not translate a single column title. Is this a valid CSV file?";
+
+    public static final String NO_FIELD_IMPORTED_MSG = "Could not translate a single field of information, did not insert entry %s.";
+
+    public static final String NO_FIELD_FOR_NAMING_MSG = "No field can be found that could be used to name contacts in this file: no name, no company nor e-mail.";
+
+    public static final String NO_FIELD_FOR_NAMING_IN_LINE_MSG = "No field was set that might give the contact in line %s a display name: no name, no company nor e-mail.";
+
     private ImportExportExceptionMessages() {
         super();
     }
