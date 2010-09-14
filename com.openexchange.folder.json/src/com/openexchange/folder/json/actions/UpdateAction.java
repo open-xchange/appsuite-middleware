@@ -115,7 +115,8 @@ public final class UpdateAction extends AbstractFolderAction {
         final Folder folder = FolderParser.parseFolder(folderObject);
         folder.setID(id);
         try {
-            if (folderObject.hasAndNotNull(FolderField.SUBSCRIBED.getName()) && 0 == folderObject.getInt(FolderField.SUBSCRIBED.getName())) {
+            final String fieldName = FolderField.SUBSCRIBED.getName();
+            if (folderObject.hasAndNotNull(fieldName) && 0 == folderObject.getInt(fieldName)) {
                 /*
                  * TODO: Remove this ugly hack to fix broken UI behavior which send "subscribed":0 for db folders
                  */
