@@ -74,138 +74,138 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * This is a library with little helpers needed when preparing
  * the parsing of a CSV file.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
 @OXExceptionSource(
-	classId=ImportExportExceptionClasses.CSVLIBRARY, 
-	component=EnumComponent.IMPORT_EXPORT)
+    classId=ImportExportExceptionClasses.CSVLIBRARY,
+    component=EnumComponent.IMPORT_EXPORT)
 @OXThrowsMultiple(
-	category={
-		Category.SUBSYSTEM_OR_SERVICE_DOWN,
-		Category.CODE_ERROR,
-		Category.CODE_ERROR,
-		Category.CODE_ERROR}, 
-	desc={"","","", ""}, 
-	exceptionId={0,1,2,3}, 
-	msg={
-		"Could not load folder %s",
-		"Could not create folder id from string %s",
-		"Could not read InputStream as string",
-		"Missing ability to encode or decode UTF-8 on server, cannot read file."})
+    category={
+        Category.SUBSYSTEM_OR_SERVICE_DOWN,
+        Category.CODE_ERROR,
+        Category.CODE_ERROR,
+        Category.CODE_ERROR},
+    desc={"","","", ""},
+    exceptionId={0,1,2,3},
+    msg={
+        "Could not load folder %s",
+        "Could not create folder id from string %s",
+        "Could not read InputStream as string",
+        "Missing ability to encode or decode UTF-8 on server, cannot read file."})
 public final class CSVLibrary {
 
-	private CSVLibrary() {
-		super();
-	}
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CSVLibrary.class);
-	
-	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVLibrary.class);
+    private CSVLibrary() {
+        super();
+    }
 
-	public static final char CELL_DELIMITER = ',';
-	public static final char ROW_DELIMITER = '\n';
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(CSVLibrary.class);
 
-	/**
-	 * Translates the folder number for a certain user to a FolderObject
-	 *  
-	 * @param sessObj The user's session
-	 * @param folder The folder, usually a number, but for mails it really might be a string
-	 * @return
-	 * @throws ImportExportException - if could not be loaded
-	 */
-	public static FolderObject getFolderObject(final ServerSession sessObj, final String folder) throws ImportExportException {
-		final int folderId = getFolderId(folder);
-		FolderObject fo = null;
-		try {
-			fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
-		} catch (final OXException e) {
-			throw EXCEPTIONS.create(0, e, folder);
-		}
-		return fo;
-	}
+    private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVLibrary.class);
 
-	/**
-	 * ...because OX throws OXExceptions not NumberFormatExceptions 
-	 * 
-	 * @param folderString
-	 * @return
-	 * @throws ImportExportException
-	 */	
-	public static int getFolderId(final String folderString) throws ImportExportException {
-		try{
-			return Integer.parseInt(folderString);
-		} catch (final NumberFormatException e) {
-			throw EXCEPTIONS.create(1, e, folderString);
-		}
-	}
+    public static final char CELL_DELIMITER = ',';
+    public static final char ROW_DELIMITER = '\n';
 
-	 /**
-	  * Translates a list of column numbers to readable titles. 
-	  * @param cols
-	  * @return
-	  */
-	public static List<String> convertToList(final int[] cols) {
-		final List<String> l = new LinkedList<String>();
-		for(final int col : cols){
-			l.add( Contacts.mapping[col].getReadableTitle() );
-		}
-		return l;
-	}
+    /**
+     * Translates the folder number for a certain user to a FolderObject
+     *
+     * @param sessObj The user's session
+     * @param folder The folder, usually a number, but for mails it really might be a string
+     * @return
+     * @throws ImportExportException - if could not be loaded
+     */
+    public static FolderObject getFolderObject(final ServerSession sessObj, final String folder) throws ImportExportException {
+        final int folderId = getFolderId(folder);
+        FolderObject fo = null;
+        try {
+            fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
+        } catch (final OXException e) {
+            throw EXCEPTIONS.create(0, e, folder);
+        }
+        return fo;
+    }
 
-	/**
-	 * ...because Java5, basic data types and Arrays don't mix
-	 */
-	public static Set<Integer> transformIntArrayToSet(final int[] arr) {
-		final LinkedHashSet<Integer> s = new LinkedHashSet<Integer>();
-		for(final int val : arr){
-			s.add(Integer.valueOf(val));
-		}
-		return s;
-	}
+    /**
+     * ...because OX throws OXExceptions not NumberFormatExceptions
+     *
+     * @param folderString
+     * @return
+     * @throws ImportExportException
+     */
+    public static int getFolderId(final String folderString) throws ImportExportException {
+        try{
+            return Integer.parseInt(folderString);
+        } catch (final NumberFormatException e) {
+            throw EXCEPTIONS.create(1, e, folderString);
+        }
+    }
 
-	/**
-	 * ...because Java5, basic data types and Arrays don't mix
-	 */
-	public static int[] transformSetToIntArray(final Set<Integer> s) {
-		final int[] ret = new int[s.size()];
-		int i = 0;
-		for(final Integer val : s){
-			ret[i++] = val.intValue();
-		}
-		return ret;
-	}
-	
-	public static String transformInputStreamToString(final InputStream is, final String encoding) throws ImportExportException{
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new InputStreamReader(is, encoding));
-		} catch (final UnsupportedEncodingException e1) {
-			LOG.fatal(e1);
-			throw EXCEPTIONS.create(3, e1, new Object[0]);
-		}
-		final StringBuilder bob = new StringBuilder();
-		String buffer;
-		try {
-			while( (buffer = br.readLine()) != null){
-				bob.append(buffer);
-				bob.append('\n');
-			}
-		} catch (final IOException e) {
-			throw EXCEPTIONS.create(2, e, new Object[0]);
-		} finally {
-			try {
-				br.close();
-			} catch (final IOException e) {
-				/* 
-				 * already closed
-				 */
-				LOG.error(e.getMessage(), e);
-			}
-		}
-		return bob.toString();
-	}
+     /**
+      * Translates a list of column numbers to readable titles.
+      * @param cols
+      * @return
+      */
+    public static List<String> convertToList(final int[] cols) {
+        final List<String> l = new LinkedList<String>();
+        for(final int col : cols){
+            l.add( Contacts.mapping[col].getReadableTitle() );
+        }
+        return l;
+    }
+
+    /**
+     * ...because Java5, basic data types and Arrays don't mix
+     */
+    public static Set<Integer> transformIntArrayToSet(final int[] arr) {
+        final LinkedHashSet<Integer> s = new LinkedHashSet<Integer>();
+        for(final int val : arr){
+            s.add(Integer.valueOf(val));
+        }
+        return s;
+    }
+
+    /**
+     * ...because Java5, basic data types and Arrays don't mix
+     */
+    public static int[] transformSetToIntArray(final Set<Integer> s) {
+        final int[] ret = new int[s.size()];
+        int i = 0;
+        for(final Integer val : s){
+            ret[i++] = val.intValue();
+        }
+        return ret;
+    }
+
+    public static String transformInputStreamToString(final InputStream is, final String encoding) throws ImportExportException{
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(is, encoding));
+        } catch (final UnsupportedEncodingException e1) {
+            LOG.fatal(e1);
+            throw EXCEPTIONS.create(3, e1, new Object[0]);
+        }
+        final StringBuilder bob = new StringBuilder();
+        String buffer;
+        try {
+            while( (buffer = br.readLine()) != null){
+                bob.append(buffer);
+                bob.append('\n');
+            }
+        } catch (final IOException e) {
+            throw EXCEPTIONS.create(2, e, new Object[0]);
+        } finally {
+            try {
+                br.close();
+            } catch (final IOException e) {
+                /*
+                 * already closed
+                 */
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        return bob.toString();
+    }
 
 }
