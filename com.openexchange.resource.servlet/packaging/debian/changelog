@@ -1,3 +1,9 @@
+open-xchange-resource-managerequest (6.18.0.0-10) unstable; urgency=low
+
+  * Public PTF 2010-09-17
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Tue, 14 Sep 2010 16:16:13 +0200
+
 open-xchange-resource-managerequest (6.18.0.0-9) unstable; urgency=low
 
   * Public PTF 2010-09-27

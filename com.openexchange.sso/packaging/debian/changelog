@@ -1,3 +1,9 @@
+open-xchange-sso (6.18.0.0-10) unstable; urgency=low
+
+  * Public PTF 2010-09-17
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Tue, 14 Sep 2010 16:15:41 +0200
+
 open-xchange-sso (6.18.0.0-9) unstable; urgency=low
 
   * Public PTF 2010-09-27
