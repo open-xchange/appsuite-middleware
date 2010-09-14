@@ -127,7 +127,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 String url = m.group();
                 tmp.setLength(0);
                 final int mlen = url.length() - 1;
-                if ((mlen > 0) && (')' == url.charAt(mlen))) {
+                if ((mlen > 0) && (')' == url.charAt(mlen))) {  // Ends with a parenthesis
                     /*
                      * Keep starting parenthesis if present
                      */
@@ -140,7 +140,7 @@ public final class HTMLServiceImpl implements HTMLService {
                     tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
                         "\" target=\"_blank\">").append(url).append("</a>").append(')');
                     mr.appendLiteralReplacement(sb, tmp.toString());
-                } else if ((mlen > 0) && ('(' == url.charAt(0))) {
+                } else if ((mlen > 0) && ('(' == url.charAt(0))) {  // Starts with a parenthesis
                     final boolean appendParen;
                     if (')' == url.charAt(mlen)) {
                         url = url.substring(1, mlen);
@@ -157,10 +157,9 @@ public final class HTMLServiceImpl implements HTMLService {
                     }
                     mr.appendLiteralReplacement(sb, tmp.toString());
                 } else {
-                    mr.appendReplacement(
-                        sb,
-                        tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
-                            "$0\" target=\"_blank\">$0</a>").toString());
+                    tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
+                        "$0\" target=\"_blank\">$0</a>");
+                    mr.appendReplacement(sb, tmp.toString());
                 }
             }
             mr.appendTail(sb);
