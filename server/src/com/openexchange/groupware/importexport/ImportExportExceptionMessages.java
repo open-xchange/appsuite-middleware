@@ -122,6 +122,10 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String NO_EXPORTER_MSG = "Cannot find an exporter for folder %s to format %s";
 
+    public static final String NO_TYPES_CONSTANT_MSG = "Cannot translate id=%d to a constant from Types.";
+
+    public static final String NO_FOLDEROBJECT_CONSTANT_MSG = "Cannot translate id=%d to a constant from FolderObject.";
+
     private ImportExportExceptionMessages() {
         super();
     }

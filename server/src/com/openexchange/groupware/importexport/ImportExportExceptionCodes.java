@@ -126,6 +126,10 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     NO_IMPORTER(NO_IMPORTER_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 1100),
     /** Cannot find an exporter for folder %s to format %s */
     NO_EXPORTER(NO_EXPORTER_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 1101),
+    /** Cannot translate id=%d to a constant from Types. */
+    NO_TYPES_CONSTANT(NO_TYPES_CONSTANT_MSG, Category.CODE_ERROR, 1200),
+    /** Cannot translate id=%d to a constant from FolderObject. */
+    NO_FOLDEROBJECT_CONSTANT(NO_FOLDEROBJECT_CONSTANT_MSG, Category.CODE_ERROR, 1201),
     ;
 
     private String message;
