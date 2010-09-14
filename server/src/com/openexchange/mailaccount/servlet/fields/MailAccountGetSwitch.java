@@ -62,7 +62,7 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     private final MailAccount account;
 
     public MailAccountGetSwitch(final MailAccount desc) {
-        this.account = desc;
+        account = desc;
     }
 
     public Object confirmedHam() {

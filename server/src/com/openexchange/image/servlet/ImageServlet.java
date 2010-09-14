@@ -121,26 +121,26 @@ public final class ImageServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing URL parameter " + PARAMETER_UID);
             }
             final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class, true);
-            String sessionId = imageService.getSessionForUID(uid);
-            String errorMsg = "Image not found";
+            final String sessionId = imageService.getSessionForUID(uid);
+            final String errorMsg = "Image not found";
             if(sessionId != null) {
-                Session session = sessiondService.getSession(sessionId);
-                String secret = SessionServlet.extractSecret(session.getHash(), req.getCookies());
+                final Session session = sessiondService.getSession(sessionId);
+                final String secret = SessionServlet.extractSecret(session.getHash(), req.getCookies());
           
                 if(session.getSecret().equals(secret)) {
-                    ImageData imageData = imageService.getImageData(session, uid);
+                    final ImageData imageData = imageService.getImageData(session, uid);
                     if(imageData != null) {
                         outputImageData(imageData, session, resp);
                     } else {
-                        String logMsg = "No image found for session " + sessionId + " and uid " + uid;
+                        final String logMsg = "No image found for session " + sessionId + " and uid " + uid;
                         sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
                     }
                 } else {
-                    String logMsg = "Wrong secret " + secret + " for session " + sessionId;
+                    final String logMsg = "Wrong secret " + secret + " for session " + sessionId;
                     sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
                 }
             } else {
-                String logMsg = "No session found for uid " + uid;
+                final String logMsg = "No session found for uid " + uid;
                 sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
             }
         } catch (final SessiondException e) {
@@ -152,7 +152,7 @@ public final class ImageServlet extends HttpServlet {
         }
     }
     
-    private static void sendErrorAndLog(HttpServletResponse resp, int errorCode, String errorMsg, String logMsg, Throwable... throwable) throws IOException {
+    private static void sendErrorAndLog(final HttpServletResponse resp, final int errorCode, final String errorMsg, final String logMsg, final Throwable... throwable) throws IOException {
         if (throwable != null && throwable.length > 0) {
             org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(logMsg, throwable[0]);
         } else {

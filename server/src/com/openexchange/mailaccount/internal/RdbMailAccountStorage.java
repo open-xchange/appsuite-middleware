@@ -504,8 +504,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws MailAccountException {
         final int[][] idsAndUsers = resolveLogin2IDs(login, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
-        for (int i = 0; i < idsAndUsers.length; i++) {
-            final int[] idAndUser = idsAndUsers[i];
+        for (final int[] idAndUser : idsAndUsers) {
             final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
             if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
                 l.add(candidate);
@@ -517,8 +516,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final InetSocketAddress server, final int cid) throws MailAccountException {
         final int[][] idsAndUsers = resolvePrimaryAddr2IDs(primaryAddress, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
-        for (int i = 0; i < idsAndUsers.length; i++) {
-            final int[] idAndUser = idsAndUsers[i];
+        for (final int[] idAndUser : idsAndUsers) {
             final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
             if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
                 l.add(candidate);
@@ -1414,7 +1412,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         return !isWhitespace && valid;
     }
 
-    public boolean checkCanDecryptPasswords(int user, int cid, String secret) throws MailAccountException {
+    public boolean checkCanDecryptPasswords(final int user, final int cid, final String secret) throws MailAccountException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1427,7 +1425,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = stmt.executeQuery();
             
             while(rs.next()) {
-                String password = rs.getString(2);
+                final String password = rs.getString(2);
                 if(password != null) {
                     MailPasswordUtil.decrypt(password, secret);
                 }
@@ -1443,17 +1441,17 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = stmt.executeQuery();
             
             while(rs.next()) {
-                String password = rs.getString(2);
+                final String password = rs.getString(2);
                 if(password != null) {
                     MailPasswordUtil.decrypt(password, secret);
                 }
             }
             
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
-        } catch (GeneralSecurityException e) {
+        } catch (final GeneralSecurityException e) {
             return false;
         } finally {
             if(con != null) {
@@ -1464,7 +1462,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         return true;
     }
 
-    public void migratePasswords(int user, int cid, String oldSecret, String newSecret) throws MailAccountException {
+    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws MailAccountException {
         Connection con = null;
         PreparedStatement select = null;
         PreparedStatement update = null;
@@ -1483,8 +1481,8 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = select.executeQuery();
             
             while(rs.next()) {
-                String password = rs.getString(2);
-                String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                final String password = rs.getString(2);
+                final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
                 update.setString(1, transcribed);
                 update.setInt(3, rs.getInt(1));
                 update.executeUpdate();
@@ -1503,18 +1501,18 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             select.setInt(2, user);
             
             while(rs.next()) {
-                String password = rs.getString(2);
-                String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                final String password = rs.getString(2);
+                final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
                 update.setString(1, transcribed);
                 update.setInt(3, rs.getInt(1));
                 update.executeUpdate();
             }   
             con.commit();
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new MailAccountException(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
-        } catch (GeneralSecurityException e) {
+        } catch (final GeneralSecurityException e) {
             throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(
                 e,
                 "",
@@ -1526,7 +1524,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 try {
                     con.rollback();
                     con.setAutoCommit(true);
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     // Don't care
                 }
                 Database.back(cid, false, con);

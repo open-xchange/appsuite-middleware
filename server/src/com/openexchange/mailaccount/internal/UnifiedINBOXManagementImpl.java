@@ -270,8 +270,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             } else {
                 existingAccounts = storageService.getUserMailAccounts(userId, contextId, con);
             }
-            for (int i = 0; i < existingAccounts.length; i++) {
-                final MailAccount mailAccount = existingAccounts[i];
+            for (final MailAccount mailAccount : existingAccounts) {
                 if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                     return mailAccount.getId();
                 }

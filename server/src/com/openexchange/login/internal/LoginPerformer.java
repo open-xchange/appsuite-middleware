@@ -124,7 +124,7 @@ public final class LoginPerformer {
             // Checks if something is deactivated.
             try {
                 if (!ctx.isEnabled()) {
-                    ContextException e = ContextExceptionCodes.CONTEXT_DISABLED.create();
+                    final ContextException e = ContextExceptionCodes.CONTEXT_DISABLED.create();
                     LOG.debug(e.getMessage(), e);
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }

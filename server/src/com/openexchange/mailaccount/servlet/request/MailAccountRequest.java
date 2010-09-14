@@ -234,8 +234,8 @@ public final class MailAccountRequest {
         final JSONArray jsonArray = new JSONArray();
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                for (int i = 0; i < ids.length; i++) {
-                    if (MailAccount.DEFAULT_ID != ids[i]) {
+                for (final int id : ids) {
+                    if (MailAccount.DEFAULT_ID != id) {
                         throw MailAccountExceptionFactory.getInstance().create(
                             MailAccountExceptionMessages.NOT_ENABLED,
                             Integer.valueOf(session.getUserId()),
@@ -247,8 +247,7 @@ public final class MailAccountRequest {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            for (int i = 0; i < ids.length; i++) {
-                final int id = ids[i];
+            for (final int id : ids) {
                 final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
                 if (!isUnifiedINBOXAccount(mailAccount)) {
@@ -646,8 +645,8 @@ public final class MailAccountRequest {
             final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
             final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
 
-            for (int i = 0; i < userMailAccounts.length; i++) {
-                final MailAccount mailAccount = userMailAccounts[i];
+            for (final MailAccount userMailAccount : userMailAccounts) {
+                final MailAccount mailAccount = userMailAccount;
                 if (!isUnifiedINBOXAccount(mailAccount) && (multipleEnabled || isDefaultMailAccount(mailAccount))) {
                     tmp.add(mailAccount);
                 }

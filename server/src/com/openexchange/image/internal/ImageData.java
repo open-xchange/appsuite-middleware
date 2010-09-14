@@ -110,7 +110,7 @@ public final class ImageData {
         // uniqueId = imageArguments.getID();
         this.imageArguments = imageArguments;
         this.imageSource = imageSource;
-        this.hash = hashCode0();
+        hash = hashCode0();
         url =
             new StringBuilder(64).append('/').append(ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=').append(
                 urlEncodeSafe(this.uniqueId, "UTF-8")).toString();

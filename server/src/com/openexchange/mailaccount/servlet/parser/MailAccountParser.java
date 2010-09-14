@@ -280,8 +280,7 @@ public class MailAccountParser extends DataParser {
     private static String stripSpecials(final String src) {
         final char[] chars = src.toCharArray();
         final StringBuilder sb = new StringBuilder(chars.length);
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
+        for (final char c : chars) {
             if (Character.isLetterOrDigit(c)) {
                 sb.append(c);
             }

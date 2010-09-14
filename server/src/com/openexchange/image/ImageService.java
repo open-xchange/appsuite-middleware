@@ -51,7 +51,6 @@ package com.openexchange.image;
 
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.image.internal.ImageData;
-import com.openexchange.image.internal.ImageRegistry;
 import com.openexchange.session.Session;
 
 /**

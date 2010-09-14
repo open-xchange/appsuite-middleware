@@ -119,7 +119,7 @@ public enum Attribute {
     private String attrName;
 
     private Attribute(final String name, final int id) {
-        this.attrName = name;
+        attrName = name;
         this.id = id;
     }
 
@@ -200,7 +200,7 @@ public enum Attribute {
         case POP3_PATH_LITERAL:
             return switcher.pop3Path();
         default:
-            throw new IllegalArgumentException(this.getName());
+            throw new IllegalArgumentException(getName());
         }
     }
 

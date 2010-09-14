@@ -49,7 +49,6 @@
 
 package com.openexchange.image.internal;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -63,7 +62,7 @@ final class SessionBoundImagesCleaner implements Runnable {
 
 	private final ConcurrentMap<String, ConcurrentMap<String, ImageData>> session2imageMaps;
 
-    private ConcurrentMap<String, String> uid2session;
+    private final ConcurrentMap<String, String> uid2session;
 
 	/**
 	 * Initializes a new {@link SessionBoundImagesCleaner}
@@ -71,10 +70,10 @@ final class SessionBoundImagesCleaner implements Runnable {
 	 * @param images
 	 *            The concurrent map to iterate
 	 */
-	SessionBoundImagesCleaner(final ConcurrentMap<String, ConcurrentMap<String, ImageData>> images, ConcurrentMap<String, String> sessions) {
+	SessionBoundImagesCleaner(final ConcurrentMap<String, ConcurrentMap<String, ImageData>> images, final ConcurrentMap<String, String> sessions) {
 		super();
-		this.session2imageMaps = images;
-		this.uid2session = sessions;
+		session2imageMaps = images;
+		uid2session = sessions;
 	}
 
 	public void run() {
@@ -107,7 +106,7 @@ final class SessionBoundImagesCleaner implements Runnable {
 						LOG.debug("Session expired for session ID " + entry.getKey()
 								+ ". Removing all associated images.");
 					}
-					for (ImageData imageData : entry.getValue().values()) {
+					for (final ImageData imageData : entry.getValue().values()) {
 					    uid2session.remove(imageData.getUniqueId());
                     }
 					iterator.remove();

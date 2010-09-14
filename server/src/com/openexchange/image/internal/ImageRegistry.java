@@ -246,8 +246,8 @@ public final class ImageRegistry {
      * @param session The session to clean images from
      */
     public void removeImageData(final Session session) {
-        Collection<ImageData> images = sessionBoundImagesMap.remove(session.getSessionID()).values();
-        for (ImageData imageData : images) {
+        final Collection<ImageData> images = sessionBoundImagesMap.remove(session.getSessionID()).values();
+        for (final ImageData imageData : images) {
             sessionIDMap.remove(imageData.getUniqueId());
         }
     }
@@ -303,7 +303,7 @@ public final class ImageRegistry {
      * @param uniqueID The image data's unique ID
      * @return The image data bound to specified session and registered to specified unique ID, or <code>null</code> if none present
      */
-    public ImageData getSessionBoundImageData(String uniqueID) {
+    public ImageData getSessionBoundImageData(final String uniqueID) {
         final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         return getImageData(service.getSession(getSessionForUID(uniqueID)), uniqueID);
     }

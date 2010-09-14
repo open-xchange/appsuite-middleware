@@ -227,8 +227,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws MailAccountException {
         final int[][] idsAndUsers = delegate.resolveLogin2IDs(login, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
-        for (int i = 0; i < idsAndUsers.length; i++) {
-            final int[] idAndUser = idsAndUsers[i];
+        for (final int[] idAndUser : idsAndUsers) {
             final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
             if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
                 l.add(candidate);
@@ -263,8 +262,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final InetSocketAddress server, final int cid) throws MailAccountException {
         final int[][] idsAndUsers = delegate.resolvePrimaryAddr2IDs(primaryAddress, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
-        for (int i = 0; i < idsAndUsers.length; i++) {
-            final int[] idAndUser = idsAndUsers[i];
+        for (final int[] idAndUser : idsAndUsers) {
             final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
             if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
                 l.add(candidate);
@@ -281,11 +279,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return account;
     }
 
-    public boolean checkCanDecryptPasswords(int user, int cid, String secret) throws MailAccountException {
+    public boolean checkCanDecryptPasswords(final int user, final int cid, final String secret) throws MailAccountException {
         return delegate.checkCanDecryptPasswords(user, cid, secret);
     }
 
-    public void migratePasswords(int user, int cid, String oldSecret, String newSecret) throws MailAccountException {
+    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws MailAccountException {
         delegate.migratePasswords(user, cid, oldSecret, newSecret);
     }
 

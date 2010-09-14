@@ -87,7 +87,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     private boolean running = true;
     private int useTimePointer;
-    private AtomicBoolean brokenCreate = new AtomicBoolean();
+    private final AtomicBoolean brokenCreate = new AtomicBoolean();
 
     /**
      * The longest time an object has been used.
@@ -115,7 +115,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
      * @param lifecycle Implementation of the interface for handling the life cycle of pooled objects.
      * @param config Configuration of the pool parameters.
      */
-    public ReentrantLockPool(PoolableLifecycle<T> lifecycle, Config config) {
+    public ReentrantLockPool(final PoolableLifecycle<T> lifecycle, final Config config) {
         super();
         minIdle = Math.max(0, config.minIdle);
         maxIdle = config.maxIdle;
@@ -131,7 +131,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         this.lifecycle = lifecycle;
         try {
             ensureMinIdle();
-        } catch (PoolingException e) {
+        } catch (final PoolingException e) {
             LOG.error("Problem while creating initial objects.", e);
         }
     }
@@ -140,7 +140,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return lifecycle;
     }
 
-    public void back(T pooled) throws PoolingException {
+    public void back(final T pooled) throws PoolingException {
         if (null == pooled) {
             throw new PoolingException("A null reference was returned to pool.");
         }
@@ -154,7 +154,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
      * @return if the object has been put to pool.
      * @throws PoolingException if the object does not belong to this pool.
      */
-    private boolean back(T pooled, boolean decrementActive) throws PoolingException {
+    private boolean back(final T pooled, final boolean decrementActive) throws PoolingException {
         final long startTime = System.currentTimeMillis();
         // checks
         final PooledData <T> metaData;
@@ -258,10 +258,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         throw new PoolingException("Pool exhausted.");
                     case BLOCK:
                         final String threadName = Thread.currentThread().getName();
-                        boolean writeWarning = System.currentTimeMillis() > (lastWarning + 60000l);
+                        final boolean writeWarning = System.currentTimeMillis() > (lastWarning + 60000l);
                         if (writeWarning) {
                             lastWarning = System.currentTimeMillis();
-                            PoolingException warn = new PoolingException("Thread " + threadName
+                            final PoolingException warn = new PoolingException("Thread " + threadName
                                 + " is sent to sleep until an object in the pool is available. " + data.numActive()
                                 + " objects are already in use.");
                             LOG.warn(warn.getMessage(), warn);
@@ -274,11 +274,11 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                             } else {
                                 idleAvailable.await();
                             }
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             LOG.error("Thread " + threadName + " was interrupted.", e);
                         }
                         if (writeWarning) {
-                            PoolingException warn = new PoolingException("Thread " + threadName + " slept for "
+                            final PoolingException warn = new PoolingException("Thread " + threadName + " slept for "
                                 + (System.currentTimeMillis() - sleepStartTime) + "ms.");
                             LOG.warn(warn.getMessage(), warn);
                         }
@@ -308,7 +308,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 try {
                     pooled = lifecycle.create();
                     brokenCreate.set(false);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     brokenCreate.set(true);
                     lock.lock();
                     try {
@@ -365,7 +365,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         throw new PoolingException("Pool has been stopped.");
     }
 
-    private static final long getWaitTime(long startTime) {
+    private static final long getWaitTime(final long startTime) {
         return System.currentTimeMillis() - startTime;
     }
 
@@ -449,12 +449,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     private final Runnable cleaner = new Runnable() {
         public void run() {
             try {
-                Thread thread = Thread.currentThread();
-                String origName = thread.getName();
+                final Thread thread = Thread.currentThread();
+                final String origName = thread.getName();
                 thread.setName("PoolCleaner");
                 ReentrantLockPool.this.run();
                 thread.setName(origName);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }

@@ -76,7 +76,7 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
      */
     public MailAccountReloader(final OXObjectFactory<MailAccount> factory, final String regionName) throws AbstractOXException {
         super(factory, regionName);
-        this.delegate = refresh();
+        delegate = refresh();
     }
 
     /**
@@ -84,7 +84,7 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
      */
     private void updateDelegate() throws RuntimeException {
         try {
-            this.delegate = refresh();
+            delegate = refresh();
         } catch (final AbstractOXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

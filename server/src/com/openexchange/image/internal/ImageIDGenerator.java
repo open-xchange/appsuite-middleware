@@ -86,8 +86,8 @@ final class ImageIDGenerator {
         final StringBuilder sb = new StringBuilder(64);
         final String[] requiredArguments = imageSource.getRequiredArguments();
         sb.append(imageSource.getRegistrationName());
-        for (int i = 0; i < requiredArguments.length; i++) {
-            sb.append(DELIM).append(imageArguments.get(requiredArguments[i]));
+        for (final String requiredArgument : requiredArguments) {
+            sb.append(DELIM).append(imageArguments.get(requiredArgument));
         }
         try {
             return new String(Base64.encodeBase64(sb.toString().getBytes("UTF-8"), false), "US-ASCII");

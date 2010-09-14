@@ -127,7 +127,7 @@ public final class OXJSONWriter extends JSONWriter {
      */
     public OXJSONWriter(final JSONObject jsonObject) throws JSONException {
         super(null);
-        this.jsonValue = jsonObject;
+        jsonValue = jsonObject;
         jsonObjectType = MODE_OBJ;
         mode = MODE_OBJ;
         pushObject(jsonObject);
@@ -144,7 +144,7 @@ public final class OXJSONWriter extends JSONWriter {
      */
     public OXJSONWriter(final JSONArray jsonArray) throws JSONException {
         super(null);
-        this.jsonValue = jsonArray;
+        jsonValue = jsonArray;
         jsonObjectType = MODE_ARR;
         pushArray(jsonArray);
     }
@@ -235,7 +235,7 @@ public final class OXJSONWriter extends JSONWriter {
      */
     @Override
     public JSONWriter value(final boolean b) throws JSONException {
-        return this.append(Boolean.valueOf(b));
+        return append(Boolean.valueOf(b));
     }
 
     /*
@@ -253,7 +253,7 @@ public final class OXJSONWriter extends JSONWriter {
      */
     @Override
     public JSONWriter value(final long l) throws JSONException {
-        return this.append(Long.valueOf(l));
+        return append(Long.valueOf(l));
     }
 
     /*
@@ -262,7 +262,7 @@ public final class OXJSONWriter extends JSONWriter {
      */
     @Override
     public JSONWriter value(final Object o) throws JSONException {
-        return this.append(o);
+        return append(o);
     }
 
     /**
@@ -420,7 +420,7 @@ public final class OXJSONWriter extends JSONWriter {
             }
         }
         stackObjs.push(new StackObject(MODE_OBJ, jo));
-        this.mode = MODE_KEY;
+        mode = MODE_KEY;
     }
 
     private String mode2string() {
