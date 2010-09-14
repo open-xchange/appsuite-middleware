@@ -56,7 +56,7 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 
 /**
- * {@link UpdateTaskPublisher} - The {@link UpdateTaskProviderService} for MAL Poll bundle.
+ * {@link UpdateTaskPublisher}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

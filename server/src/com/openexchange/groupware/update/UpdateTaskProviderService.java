@@ -64,6 +64,7 @@ public interface UpdateTaskProviderService {
      * 
      * @return A collection view of this provider's update tasks.
      */
+    @SuppressWarnings("deprecation")
     public Collection<? extends UpdateTask> getUpdateTasks();
 
 }
