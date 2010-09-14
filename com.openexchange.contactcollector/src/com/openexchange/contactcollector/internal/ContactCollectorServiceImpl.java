@@ -88,7 +88,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         memorizeAddresses(addresses, session, true);
     }
 
-    public void memorizeAddresses(final List<InternetAddress> addresses, final Session session, boolean background) {
+    public void memorizeAddresses(final List<InternetAddress> addresses, final Session session, final boolean background) {
         /*
          * Delegate to thread pool if available
          */
@@ -122,7 +122,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         }
     }
 
-    public void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws AbstractOXException, SQLException {
+    public void createCollectFolder(final Session session, final Context ctx, final String folderName, final Connection con) throws AbstractOXException, SQLException {
         new ContactCollectorFolderCreator().create(session, ctx, folderName, con);
     }
 

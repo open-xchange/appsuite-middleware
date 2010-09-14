@@ -95,7 +95,7 @@ public final class SessionCacheConfiguration implements Initialization {
             /*
              * Not found
              */
-            SessiondException e = SessionExceptionCodes.MISSING_PROPERTY.create("com.openexchange.sessiond.sessionCacheConfig");
+            final SessiondException e = SessionExceptionCodes.MISSING_PROPERTY.create("com.openexchange.sessiond.sessionCacheConfig");
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new StringBuilder(128).append("Cannot setup lateral session cache: ").append(e.getMessage()).toString(), e);
             }

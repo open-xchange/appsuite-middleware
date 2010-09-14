@@ -275,7 +275,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         final List<MessagingMessage> messages;
         if (null == query) {
             messages = new ArrayList<MessagingMessage>(messageIds.length);
-            for (int i = 0; i < messageIds.length; i++) {
+            for (final String messageId : messageIds) {
                 final FacebookMessagingMessage message = new FacebookMessagingMessage(getUserLocale());
                 for (final StaticFiller filler : staticFillers) {
                     filler.fill(message);
@@ -350,8 +350,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                  * Fill in proper order
                  */
                 messages = new ArrayList<MessagingMessage>(size);
-                for (int i = 0; i < messageIds.length; i++) {
-                    messages.add(orderMap.get(messageIds[i]));
+                for (final String messageId : messageIds) {
+                    messages.add(orderMap.get(messageId));
                 }
             }
             /*

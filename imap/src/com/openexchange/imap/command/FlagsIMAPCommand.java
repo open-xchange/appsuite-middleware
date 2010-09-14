@@ -50,8 +50,8 @@
 package com.openexchange.imap.command;
 
 import javax.mail.Flags;
-import javax.mail.MessagingException;
 import javax.mail.Flags.Flag;
+import javax.mail.MessagingException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -118,7 +118,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
         }
         this.enable = enable;
         this.silent = silent;
-        this.uid = true;
+        uid = true;
     }
 
     private void appendSystemFlags(final Flag[] systemFlags, final StringBuilder flagsStrBuilder) throws MessagingException {
@@ -175,7 +175,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
         }
         this.enable = enable;
         this.silent = silent;
-        this.uid = false;
+        uid = false;
     }
 
     /**
@@ -211,7 +211,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
             }
         }
         this.enable = enable;
-        this.uid = false;
+        uid = false;
         this.silent = silent;
     }
 

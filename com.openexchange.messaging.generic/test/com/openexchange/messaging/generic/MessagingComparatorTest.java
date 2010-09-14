@@ -135,7 +135,7 @@ public class MessagingComparatorTest extends TestCase {
     }
     
     public void testSentDate() throws MessagingException {
-        MailDateFormat dateFormat = new MailDateFormat();
+        final MailDateFormat dateFormat = new MailDateFormat();
         msg1.putHeader(new StringMessageHeader("Date",dateFormat.format(new Date(0))));
         msg2.putHeader(new StringMessageHeader("Date",dateFormat.format(new Date())));
         

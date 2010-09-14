@@ -49,8 +49,10 @@
 
 package com.openexchange.messaging.json;
 
+import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -58,9 +60,6 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.SimMessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
-import junit.framework.TestCase;
-
-import static com.openexchange.json.JSONAssertion.assertValidates;
 
 /**
  * {@link MessagingAccountWriterTest}
@@ -70,23 +69,23 @@ import static com.openexchange.json.JSONAssertion.assertValidates;
  */
 public class MessagingAccountWriterTest extends TestCase {
     public void testWriteAccount() throws JSONException {
-        SimMessagingAccount account = new SimMessagingAccount();
+        final SimMessagingAccount account = new SimMessagingAccount();
         account.setId(12);
         account.setDisplayName("My Twitter Account");
         
-        Map<String, Object> configuration = new HashMap<String, Object>();
+        final Map<String, Object> configuration = new HashMap<String, Object>();
         configuration.put("inputField", "My Input Value");
         account.setConfiguration(configuration);
         
-        SimMessagingService messagingService = new SimMessagingService();
+        final SimMessagingService messagingService = new SimMessagingService();
         
-        DynamicFormDescription description = new DynamicFormDescription().add(FormElement.input("inputField", "My cool config option"));
+        final DynamicFormDescription description = new DynamicFormDescription().add(FormElement.input("inputField", "My cool config option"));
         messagingService.setFormDescription(description);
         
         messagingService.setId("com.openexchange.twitter");
         account.setMessagingService(messagingService);
         
-        JSONAssertion assertion = new JSONAssertion()
+        final JSONAssertion assertion = new JSONAssertion()
             .isObject()
                 .hasKey("id").withValue(12)
                 .hasKey("displayName").withValue("My Twitter Account")
@@ -97,9 +96,9 @@ public class MessagingAccountWriterTest extends TestCase {
             .objectEnds()
         ;
         
-        MessagingAccountWriter writer = new MessagingAccountWriter();
+        final MessagingAccountWriter writer = new MessagingAccountWriter();
         
-        JSONObject object = writer.write(account);
+        final JSONObject object = writer.write(account);
         
         assertValidates(assertion, object);
         

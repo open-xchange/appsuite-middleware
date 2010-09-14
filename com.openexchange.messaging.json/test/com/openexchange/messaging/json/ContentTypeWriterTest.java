@@ -49,19 +49,18 @@
 
 package com.openexchange.messaging.json;
 
+import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.Arrays;
 import java.util.Collection;
+import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
-import junit.framework.TestCase;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
-
-import static com.openexchange.json.JSONAssertion.*;
 
 /**
  * {@link ContentTypeWriterTest}
@@ -71,25 +70,25 @@ import static com.openexchange.json.JSONAssertion.*;
 public class ContentTypeWriterTest extends TestCase{
 
     public void testWriteContentType() throws MessagingException, JSONException {
-        ContentType contentType = new MimeContentType();
+        final ContentType contentType = new MimeContentType();
         contentType.setPrimaryType("text");
         contentType.setSubType("plain");
         contentType.setCharsetParameter("UTF-8");
         contentType.setNameParameter("something.txt");
 
-        ContentTypeWriter writer = new ContentTypeWriter();
+        final ContentTypeWriter writer = new ContentTypeWriter();
 
-        SimEntry<String, Collection<MessagingHeader>> entry = entry( contentType );
+        final SimEntry<String, Collection<MessagingHeader>> entry = entry( contentType );
 
         assertTrue(writer.handles(entry));
         assertEquals("Content-Type", writer.writeKey(entry));
         
-        Object value = writer.writeValue(entry);
+        final Object value = writer.writeValue(entry);
         assertNotNull(value);
         
-        JSONObject jsonCType = (JSONObject) value;
+        final JSONObject jsonCType = (JSONObject) value;
         
-        JSONAssertion assertion = new JSONAssertion()
+        final JSONAssertion assertion = new JSONAssertion()
             .isObject()
                 .hasKey("type").withValue("text/plain")
                 .hasKey("params").withValueObject()
@@ -103,21 +102,21 @@ public class ContentTypeWriterTest extends TestCase{
     }
     
     public void testWriteBasicHeader() throws MessagingException, JSONException {
-        MessagingHeader contentType = new StringMessageHeader("Content-Type", "text/plain;charset=UTF-8;name=something.txt");
+        final MessagingHeader contentType = new StringMessageHeader("Content-Type", "text/plain;charset=UTF-8;name=something.txt");
 
-        ContentTypeWriter writer = new ContentTypeWriter();
+        final ContentTypeWriter writer = new ContentTypeWriter();
 
-        SimEntry<String, Collection<MessagingHeader>> entry = entry( contentType );
+        final SimEntry<String, Collection<MessagingHeader>> entry = entry( contentType );
 
         assertTrue(writer.handles(entry));
         assertEquals("Content-Type", writer.writeKey(entry));
         
-        Object value = writer.writeValue(entry);
+        final Object value = writer.writeValue(entry);
         assertNotNull(value);
         
-        JSONObject jsonCType = (JSONObject) value;
+        final JSONObject jsonCType = (JSONObject) value;
         
-        JSONAssertion assertion = new JSONAssertion()
+        final JSONAssertion assertion = new JSONAssertion()
             .isObject()
                 .hasKey("type").withValue("text/plain")
                 .hasKey("params").withValueObject()
@@ -130,7 +129,7 @@ public class ContentTypeWriterTest extends TestCase{
         
     }
 
-    private SimEntry<String, Collection<MessagingHeader>> entry(MessagingHeader header) {
-        return new SimEntry<String, Collection<MessagingHeader>>(header.getName(), Arrays.asList((MessagingHeader) header));
+    private SimEntry<String, Collection<MessagingHeader>> entry(final MessagingHeader header) {
+        return new SimEntry<String, Collection<MessagingHeader>>(header.getName(), Arrays.asList(header));
     }
 }

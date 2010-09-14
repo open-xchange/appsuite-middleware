@@ -99,7 +99,7 @@ public final class Autoboxing {
         return Long.valueOf(l);
     }
 
-    public static long l(Long l) {
+    public static long l(final Long l) {
         return l.longValue();
     }
 
@@ -117,7 +117,7 @@ public final class Autoboxing {
      * @param b {@link Boolean} object to be converted to a boolean value.
      * @return boolean value.
      */
-    public static boolean b(Boolean b) {
+    public static boolean b(final Boolean b) {
         return b.booleanValue();
     }
 
@@ -130,7 +130,7 @@ public final class Autoboxing {
         return Float.valueOf(f);
     }
 
-    public static float f(Float f) {
+    public static float f(final Float f) {
         return f.floatValue();
     }
 
@@ -139,8 +139,8 @@ public final class Autoboxing {
      * @param intArray int[] to be converted to Integer[]
      * @return Integer[]
      */
-    public static Integer[] i2I(int[] intArray) {
-        Integer[] integerArray = new Integer[intArray.length];
+    public static Integer[] i2I(final int[] intArray) {
+        final Integer[] integerArray = new Integer[intArray.length];
         for (int i = 0; i < intArray.length; i++) {
             integerArray[i] = I(intArray[i]);
         }
@@ -152,8 +152,8 @@ public final class Autoboxing {
      * @param integerArray Integer[] to be converted to int[]
      * @return int[]
      */
-    public static int[] I2i(Integer[] integerArray) {
-        int[] intArray = new int[integerArray.length];
+    public static int[] I2i(final Integer[] integerArray) {
+        final int[] intArray = new int[integerArray.length];
         for (int i = 0; i < intArray.length; i++) {
             intArray[i] = integerArray[i].intValue();
         }
@@ -165,10 +165,10 @@ public final class Autoboxing {
      * @param integerCollection List of Integers to be converted to int[]
      * @return int[]
      */
-    public static int[] I2i(Collection<Integer> integerCollection) {
-        int[] intArray = new int[integerCollection.size()];
+    public static int[] I2i(final Collection<Integer> integerCollection) {
+        final int[] intArray = new int[integerCollection.size()];
         int pos = 0;
-        for (Integer i : integerCollection) {
+        for (final Integer i : integerCollection) {
             intArray[pos++] = i.intValue();
         }
         return intArray;
@@ -179,8 +179,8 @@ public final class Autoboxing {
      * @param longArray long[] to be converted to Long[]
      * @return Long[]
      */
-    public static Long[] l2L(long[] longArray) {
-        Long[] longerArray = new Long[longArray.length];
+    public static Long[] l2L(final long[] longArray) {
+        final Long[] longerArray = new Long[longArray.length];
         for (int i = 0; i < longArray.length; i++) {
             longerArray[i] = L(longArray[i]);
         }
@@ -192,8 +192,8 @@ public final class Autoboxing {
      * @param source
      * @return
      */
-    public static Boolean[] O2B(Object[] source) {
-        Boolean[] target = new Boolean[source.length];
+    public static Boolean[] O2B(final Object[] source) {
+        final Boolean[] target = new Boolean[source.length];
         for (int i = 0; i < source.length; i++) {
             target[i] = (Boolean) source[i];
         }
@@ -205,8 +205,8 @@ public final class Autoboxing {
      * @param source
      * @return
      */
-    public static Number[] O2N(Object[] source) {
-        Number[] target = new Number[source.length];
+    public static Number[] O2N(final Object[] source) {
+        final Number[] target = new Number[source.length];
         for (int i = 0; i < source.length; i++) {
             target[i] = (Number) source[i];
         }
@@ -218,8 +218,8 @@ public final class Autoboxing {
      * @param source
      * @return
      */
-    public static String[] O2S(Object[] source) {
-        String[] target = new String[source.length];
+    public static String[] O2S(final Object[] source) {
+        final String[] target = new String[source.length];
         for (int i = 0; i < source.length; i++) {
             target[i] = (String) source[i];
         }
@@ -231,8 +231,8 @@ public final class Autoboxing {
      * @param source
      * @return
      */
-    public static Long[] O2L(Object[] source) {
-        Long[] target = new Long[source.length];
+    public static Long[] O2L(final Object[] source) {
+        final Long[] target = new Long[source.length];
         for (int i = 0; i < source.length; i++) {
             target[i] = (Long) source[i];
         }

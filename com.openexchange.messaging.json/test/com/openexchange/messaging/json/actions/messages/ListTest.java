@@ -49,6 +49,9 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -56,9 +59,6 @@ import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.SimMessageAccess.Call;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * {@link ListTest}
@@ -70,27 +70,27 @@ public class ListTest extends AbstractMessagingActionTest {
     // Success Cases
     
     public void testList() throws JSONException, AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("columns", "id, subject");
         
-        String folderId = "com.openexchange.test1://12/theFolderID";
+        final String folderId = "com.openexchange.test1://12/theFolderID";
         
         req.setData(new JSONArray("[{folder : '"+folderId+"', id : 'id1'}, {folder : '"+folderId+"', id : 'id2'}, {folder : '"+folderId+"', id : 'id3'}]"));
     
-        AJAXRequestResult result = perform(req);
+        final AJAXRequestResult result = perform(req);
         
         assertNotNull(result);
         
-        Object resultObject = result.getResultObject();
+        final Object resultObject = result.getResultObject();
         assertNotNull(resultObject);
         
         assertTrue(JSONArray.class.isInstance(resultObject));
         
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
         
         assertEquals("getMessages", call.getName());
         
-        Object[] args = call.getArgs();
+        final Object[] args = call.getArgs();
         assertEquals("theFolderID", args[0]);
         assertIDs(args[1], "id1", "id2", "id3");
         assertEqualFields(args[2], MessagingField.ID, MessagingField.SUBJECT);
@@ -100,7 +100,7 @@ public class ListTest extends AbstractMessagingActionTest {
     // Error Cases
     
     public void testInvalidBody() throws AbstractOXException, JSONException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
@@ -112,7 +112,7 @@ public class ListTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingBody() throws JSONException, AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
@@ -122,7 +122,7 @@ public class ListTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingServiceID() throws JSONException, AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
         req.putParameter("columns", "id, subject");
@@ -134,7 +134,7 @@ public class ListTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingFolderID() throws JSONException, AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
         req.putParameter("columns", "id, subject");
@@ -145,7 +145,7 @@ public class ListTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingAccountID() throws JSONException, AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("columns", "id, subject");
@@ -157,7 +157,7 @@ public class ListTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingColumns() throws JSONException, AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
@@ -169,7 +169,7 @@ public class ListTest extends AbstractMessagingActionTest {
     }
     
     public void testUnknownColumn() throws JSONException, AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");

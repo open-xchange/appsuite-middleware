@@ -224,8 +224,8 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         try {
             final String[] strings = mimeMessage.getFlags().getUserFlags();
             Flags newFlags = new Flags();
-            for (int i = 0; i < strings.length; i++) {
-                final String uf = strings[i];
+            for (final String string : strings) {
+                final String uf = string;
                 if (!InternalUtility.isColorLabel(uf) && !MessagingMessage.USER_FORWARDED.equalsIgnoreCase(uf) && !MessagingMessage.USER_READ_ACK.equalsIgnoreCase(uf)) {
                     newFlags.add(uf);
                 }

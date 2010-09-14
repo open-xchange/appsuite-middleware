@@ -68,8 +68,8 @@ public class JSON {
      * @return list that is result of transformation
      * @throws JSONException in case JSON cannot be read
      */
-    public static List<String> jsonArray2list(JSONArray array) throws JSONException {
-        List<String> list = new LinkedList<String>();
+    public static List<String> jsonArray2list(final JSONArray array) throws JSONException {
+        final List<String> list = new LinkedList<String>();
         for (int i = 0, size = array.length(); i < size; i++) {
             list.add(array.getString(i));
         }
@@ -81,9 +81,9 @@ public class JSON {
      * @param coll Collection to transform
      * @return array that is result of transformation
      */
-    public static JSONArray collection2jsonArray(Collection<? extends Object> coll) {
-        JSONArray array = new JSONArray();
-        for(Object obj: coll){
+    public static JSONArray collection2jsonArray(final Collection<? extends Object> coll) {
+        final JSONArray array = new JSONArray();
+        for(final Object obj: coll){
             array.put(obj);
         }
         return array;

@@ -212,7 +212,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
              * Return appropriate result
              */
             return new AJAXRequestResult(ret, 0 == lastModified ? null : new Date(lastModified)).addWarnings(warnings);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
     }

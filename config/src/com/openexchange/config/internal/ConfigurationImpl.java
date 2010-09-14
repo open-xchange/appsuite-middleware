@@ -62,8 +62,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,9 +82,9 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private static final String EXT = ".properties";
 
-    private Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
+    private final Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
 
-    private Map<String, String> texts = new ConcurrentHashMap<String, String>();
+    private final Map<String, String> texts = new ConcurrentHashMap<String, String>();
     
     private final File[] dirs;
 
@@ -150,22 +150,22 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
     }
 
-    private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles, Map<String, Properties> propertiesByFile) {
+    private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles, final Map<String, Properties> propertiesByFile) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
             LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
             return;
         }
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].isDirectory()) {
-                processDirectory(files[i], fileFilter, properties, propertiesFiles, propertiesByFile);
+        for (final File file : files) {
+            if (file.isDirectory()) {
+                processDirectory(file, fileFilter, properties, propertiesFiles, propertiesByFile);
             } else {
-                processPropertiesFile(files[i], properties, propertiesFiles, propertiesByFile);
+                processPropertiesFile(file, properties, propertiesFiles, propertiesByFile);
             }
         }
     }
 
-    private static void processPropertiesFile(final File propFile, final Map<String, String> properties, final Map<String, String> propertiesFiles, Map<String, Properties> propertiesByFile) {
+    private static void processPropertiesFile(final File propFile, final Map<String, String> properties, final Map<String, String> propertiesFiles, final Map<String, Properties> propertiesByFile) {
         try {
             final Properties tmp = loadProperties(propFile);
             propertiesByFile.put(propFile.getPath(), tmp);
@@ -275,7 +275,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public Properties getFile(final String filename, final PropertyListener listener) {
         String key = null;
-        for (String k : propertiesByFile.keySet()) {
+        for (final String k : propertiesByFile.keySet()) {
             if(k.endsWith(filename)) {
                 key = k;
                 break;
@@ -286,16 +286,16 @@ public final class ConfigurationImpl implements ConfigurationService {
             return new Properties();
         }
         
-        Properties tmp = propertiesByFile.get(key);
+        final Properties tmp = propertiesByFile.get(key);
         final Properties retval = new Properties();
         
-        for( Entry<Object, Object> entry : tmp.entrySet()) {
+        for( final Entry<Object, Object> entry : tmp.entrySet()) {
             retval.put(entry.getKey(), entry.getValue());
         }
         
         
         if(listener != null) {
-            for(Object k : retval.keySet()) {
+            for(final Object k : retval.keySet()) {
                 getProperty((String) k, listener);
             }
         }
@@ -375,15 +375,15 @@ public final class ConfigurationImpl implements ConfigurationService {
         return properties.size();
     }
 
-    public String getText(String filename) {
-        String text = texts.get(filename);
+    public String getText(final String filename) {
+        final String text = texts.get(filename);
         if(text != null) {
             return text;
         }
         
-        String[] directories = getDirectories();
-        for (String dir : directories) {
-            String s = traverse(new File(dir), filename);
+        final String[] directories = getDirectories();
+        for (final String dir : directories) {
+            final String s = traverse(new File(dir), filename);
             if(s != null) {
                 texts.put(filename, s);
                 return s;
@@ -392,34 +392,34 @@ public final class ConfigurationImpl implements ConfigurationService {
         return null;
     }
 
-    private String traverse(File file, String filename) {
+    private String traverse(final File file, final String filename) {
         if(file.getName().equals(filename) && file.isFile()) {
             BufferedReader r = null;
             try {
                 r = new BufferedReader(new FileReader(file));
-                StringBuilder builder = new StringBuilder();
+                final StringBuilder builder = new StringBuilder();
                 String s = null;
                 while((s = r.readLine()) != null) {
                     builder.append(s).append("\n");
                 }
                 return builder.toString();
-            } catch (IOException x) {
+            } catch (final IOException x) {
                 LOG.fatal("Can't read file: "+file);
                 return null;
             } finally {
                 if (r != null) {
                     try {
                         r.close();
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
             }
         }
-        File[] files = file.listFiles();
+        final File[] files = file.listFiles();
         if(files != null) {
-            for (File f : files) {
-                String s = traverse(f, filename);
+            for (final File f : files) {
+                final String s = traverse(f, filename);
                 if(s != null) {
                     return s;
                 }

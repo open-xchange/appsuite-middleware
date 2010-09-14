@@ -71,29 +71,29 @@ public class AllTest extends AbstractMessagingActionTest {
     // Success Cases
 
     public void testAll() throws AbstractOXException {
-        AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
+        final AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
 
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("folder", "theFolderID");
         requestData.putParameter("account", "12");
         requestData.putParameter("columns", "id,subject");
 
-        SimServerSession session = new SimServerSession(null, null, null);
-        AJAXRequestResult result = action.perform(requestData, session);
+        final SimServerSession session = new SimServerSession(null, null, null);
+        final AJAXRequestResult result = action.perform(requestData, session);
 
         assertNotNull(result);
 
-        JSONArray resultJSON = (JSONArray) result.getResultObject();
+        final JSONArray resultJSON = (JSONArray) result.getResultObject();
         assertEquals(1, resultJSON.length());
 
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
         assertNotNull(call);
 
         assertEquals(call.getName(), "getAllMessages");
 
-        Object[] args = call.getArgs();
+        final Object[] args = call.getArgs();
         assertEquals("theFolderID", args[0]);
         assertEquals(IndexRange.NULL, args[1]);
         assertEquals(null, args[2]);
@@ -103,9 +103,9 @@ public class AllTest extends AbstractMessagingActionTest {
     }
 
     public void testAllWithSorting() throws AbstractOXException {
-        AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
+        final AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
 
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("folder", "theFolderID");
@@ -113,20 +113,20 @@ public class AllTest extends AbstractMessagingActionTest {
         requestData.putParameter("sort", "subject");
         requestData.putParameter("columns", "id,subject");
 
-        SimServerSession session = new SimServerSession(null, null, null);
-        AJAXRequestResult result = action.perform(requestData, session);
+        final SimServerSession session = new SimServerSession(null, null, null);
+        final AJAXRequestResult result = action.perform(requestData, session);
 
         assertNotNull(result);
 
-        JSONArray resultJSON = (JSONArray) result.getResultObject();
+        final JSONArray resultJSON = (JSONArray) result.getResultObject();
         assertEquals(1, resultJSON.length());
 
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
         assertNotNull(call);
 
         assertEquals(call.getName(), "getAllMessages");
 
-        Object[] args = call.getArgs();
+        final Object[] args = call.getArgs();
         assertEquals("theFolderID", args[0]);
         assertEquals(IndexRange.NULL, args[1]);
         assertEquals(MessagingField.SUBJECT, args[2]);
@@ -135,9 +135,9 @@ public class AllTest extends AbstractMessagingActionTest {
     }
 
     public void testAllWithSortingAndDirection() throws AbstractOXException {
-        AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
+        final AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
 
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("folder", "theFolderID");
@@ -146,20 +146,20 @@ public class AllTest extends AbstractMessagingActionTest {
         requestData.putParameter("order", "desc");
         requestData.putParameter("columns", "id,subject");
 
-        SimServerSession session = new SimServerSession(null, null, null);
-        AJAXRequestResult result = action.perform(requestData, session);
+        final SimServerSession session = new SimServerSession(null, null, null);
+        final AJAXRequestResult result = action.perform(requestData, session);
 
         assertNotNull(result);
 
-        JSONArray resultJSON = (JSONArray) result.getResultObject();
+        final JSONArray resultJSON = (JSONArray) result.getResultObject();
         assertEquals(1, resultJSON.length());
 
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
         assertNotNull(call);
 
         assertEquals(call.getName(), "getAllMessages");
 
-        Object[] args = call.getArgs();
+        final Object[] args = call.getArgs();
         assertEquals("theFolderID", args[0]);
         assertEquals(IndexRange.NULL, args[1]);
         assertEquals(MessagingField.SUBJECT, args[2]);
@@ -202,7 +202,7 @@ public class AllTest extends AbstractMessagingActionTest {
     // Error Cases
 
     public void testUnknownSortingColumn() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("folder", "theFolderID");
@@ -215,7 +215,7 @@ public class AllTest extends AbstractMessagingActionTest {
     }
 
     public void testUnknownColumn() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("folder", "theFolderID");
@@ -226,7 +226,7 @@ public class AllTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingColumns() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("folder", "theFolderID");
@@ -241,7 +241,7 @@ public class AllTest extends AbstractMessagingActionTest {
     } */ // Later
 
     public void testAllWithInvalidDirection() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("folder", "theFolderID");
@@ -254,7 +254,7 @@ public class AllTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingServiceID() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("folder", "theFolderID");
         requestData.putParameter("account", "12");
@@ -265,7 +265,7 @@ public class AllTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingAccountID() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("folder", "theFolderID");
@@ -275,7 +275,7 @@ public class AllTest extends AbstractMessagingActionTest {
    }
     
     public void testMissingFolderID() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("account", "12");
@@ -286,7 +286,7 @@ public class AllTest extends AbstractMessagingActionTest {
     }
     
     public void testNumberFormatExceptionInAccountID() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
         requestData.putParameter("folder", "theFolderID");

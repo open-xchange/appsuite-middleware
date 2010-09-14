@@ -123,8 +123,7 @@ public class CacheKeyImpl implements CacheKey {
         final int prime = 31;
         int result = 1;
         result = prime * result + contextId;
-        for (int i = 0; i < keys.length; i++) {
-            final Serializable key = keys[i];
+        for (final Serializable key : keys) {
             result = prime * result + ((key == null) ? 0 : key.hashCode());
         }
         hash = result;

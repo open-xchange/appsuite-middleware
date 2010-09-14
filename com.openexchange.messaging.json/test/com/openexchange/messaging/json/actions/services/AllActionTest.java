@@ -66,46 +66,46 @@ public class AllActionTest extends TestCase {
 
     // Success Case
     public void testSuccess() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
-        SimMessagingService messagingService = new SimMessagingService();
+        final SimMessagingService messagingService = new SimMessagingService();
         messagingService.setId("com.openexchange.test");
 
         registry.add(messagingService);
 
-        AllAction action = new AllAction(registry);
+        final AllAction action = new AllAction(registry);
 
-        AJAXRequestResult result = action.perform(null, null);
+        final AJAXRequestResult result = action.perform(null, null);
 
         assertNotNull(result);
 
-        Object resultObject = result.getResultObject();
+        final Object resultObject = result.getResultObject();
         assertNotNull(resultObject);
 
         assertTrue(JSONArray.class.isInstance(resultObject));
 
-        JSONArray all = (JSONArray) resultObject;
+        final JSONArray all = (JSONArray) resultObject;
         assertEquals(1, all.length());
     }
 
     // Error Cases
 
     public void testMessagingException() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new MessagingException(null, -1, null, null));
 
-        SimMessagingService messagingService = new SimMessagingService();
+        final SimMessagingService messagingService = new SimMessagingService();
         messagingService.setId("com.openexchange.test");
 
         registry.add(messagingService);
 
-        AllAction action = new AllAction(registry);
+        final AllAction action = new AllAction(registry);
 
         try {
-            AJAXRequestResult result = action.perform(null, null);
+            final AJAXRequestResult result = action.perform(null, null);
             fail("Should not swallow exceptions");
             assertNull(result);
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             // Success
         }
     }

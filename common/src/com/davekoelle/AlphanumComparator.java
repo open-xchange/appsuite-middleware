@@ -70,8 +70,8 @@ public class AlphanumComparator implements Comparator<String> {
     public int compare(final String s1, final String s2) {
         int thisMarker = 0;
         int thatMarker = 0;
-        int s1Length = s1.length();
-        int s2Length = s2.length();
+        final int s1Length = s1.length();
+        final int s2Length = s2.length();
         while (thisMarker < s1Length && thatMarker < s2Length) {
             final String thisChunk = getChunk(s1, s1Length, thisMarker);
             thisMarker += thisChunk.length();
@@ -81,7 +81,7 @@ public class AlphanumComparator implements Comparator<String> {
             int result;
             if (Character.isDigit(thisChunk.charAt(0)) && Character.isDigit(thatChunk.charAt(0))) {
                 // Simple chunk comparison by length.
-                int thisChunkLength = thisChunk.length();
+                final int thisChunkLength = thisChunk.length();
                 result = thisChunkLength - thatChunk.length();
                 // If equal, the first different number counts
                 if (result == 0) {

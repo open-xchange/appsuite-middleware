@@ -139,7 +139,7 @@ public final class RightsCache {
         }
 
         public void setValue(final Rights value) {
-            this.rights = value;
+            rights = value;
         }
 
         public Class<Rights> getEntryClass() {

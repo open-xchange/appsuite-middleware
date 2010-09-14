@@ -139,7 +139,7 @@ public final class RootSubfolderCache {
         }
 
         public void setValue(final Boolean value) {
-            this.subfolderCreation = value;
+            subfolderCreation = value;
         }
 
         public Class<Boolean> getEntryClass() {

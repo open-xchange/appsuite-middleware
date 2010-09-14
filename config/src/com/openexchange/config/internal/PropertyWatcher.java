@@ -53,7 +53,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -214,8 +213,8 @@ public final class PropertyWatcher implements FileListener {
 
     private void notifyListeners(final boolean isDelete) {
         final PropertyEvent event = new PropertyEventImpl(name, value, isDelete ? PropertyEvent.Type.DELETED : PropertyEvent.Type.CHANGED);
-        for (final Iterator<PropertyListener> iter = listeners.values().iterator(); iter.hasNext();) {
-            iter.next().onPropertyChange(event);
+        for (final PropertyListener propertyListener : listeners.values()) {
+            propertyListener.onPropertyChange(event);
         }
     }
 

@@ -61,40 +61,40 @@ public class SimConfigurationService implements ConfigurationService {
     
     public Map<String, String> stringProperties = new HashMap<String, String>();
 
-    public boolean getBoolProperty(String name, boolean defaultValue) {
+    public boolean getBoolProperty(final String name, final boolean defaultValue) {
         // TODO Auto-generated method stub
         return false;
     }
 
-    public Properties getFile(String filename) {
+    public Properties getFile(final String filename) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public int getIntProperty(String name, int defaultValue) {
+    public int getIntProperty(final String name, final int defaultValue) {
         // TODO Auto-generated method stub
         return 0;
     }
 
-    public Properties getPropertiesInFolder(String folderName) {
+    public Properties getPropertiesInFolder(final String folderName) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public String getProperty(String name) {
+    public String getProperty(final String name) {
         return stringProperties.get(name);
     }
 
-    public String getProperty(String name, String defaultValue) {
+    public String getProperty(final String name, final String defaultValue) {
         return stringProperties.containsKey(name) ? stringProperties.get(name) : defaultValue;
     }
 
-    public String getProperty(String name, PropertyListener listener) {
+    public String getProperty(final String name, final PropertyListener listener) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public String getProperty(String name, String defaultValue, PropertyListener listener) {
+    public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -104,7 +104,7 @@ public class SimConfigurationService implements ConfigurationService {
         return null;
     }
 
-    public void removePropertyListener(String name, PropertyListener listener) {
+    public void removePropertyListener(final String name, final PropertyListener listener) {
         // TODO Auto-generated method stub
 
     }
@@ -117,7 +117,7 @@ public class SimConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getText(java.lang.String)
      */
-    public String getText(String filename) {
+    public String getText(final String filename) {
         // TODO Auto-generated method stub
         return null;
     }

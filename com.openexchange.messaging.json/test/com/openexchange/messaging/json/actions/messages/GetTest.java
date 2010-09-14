@@ -67,32 +67,32 @@ public class GetTest extends AbstractMessagingActionTest {
     // Success Cases
 
     public void testGet() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
         req.putParameter("id", "theID");
 
-        AJAXRequestResult result = perform(req);
+        final AJAXRequestResult result = perform(req);
 
         assertNotNull(result);
-        Object resultObject = result.getResultObject();
+        final Object resultObject = result.getResultObject();
         assertNotNull(resultObject);
         assertTrue(JSONObject.class.isInstance(resultObject));
 
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
 
         assertEquals("getMessage", call.getName());
 
-        Object[] args = call.getArgs();
+        final Object[] args = call.getArgs();
         assertEquals("theFolderID", args[0]);
         assertEquals("theID", args[1]);
         assertEquals(false, args[2]);
     }
 
     public void testPeek() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
@@ -100,13 +100,13 @@ public class GetTest extends AbstractMessagingActionTest {
         req.putParameter("peek", "true");
         req.putParameter("id", "theID");
 
-        AJAXRequestResult result = perform(req);
+        final AJAXRequestResult result = perform(req);
 
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
 
         assertEquals("getMessage", call.getName());
 
-        Object[] args = call.getArgs();
+        final Object[] args = call.getArgs();
         assertEquals("theFolderID", args[0]);
         assertEquals("theID", args[1]);
         assertEquals(true, args[2]);
@@ -115,7 +115,7 @@ public class GetTest extends AbstractMessagingActionTest {
     // Error Cases
 
     public void testMissingMessagingService() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
@@ -125,7 +125,7 @@ public class GetTest extends AbstractMessagingActionTest {
     }
 
     public void testMissingAccountID() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
@@ -135,7 +135,7 @@ public class GetTest extends AbstractMessagingActionTest {
     }
 
     public void testMissingFolder() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
@@ -145,7 +145,7 @@ public class GetTest extends AbstractMessagingActionTest {
     }
 
     public void testMissingID() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
@@ -155,7 +155,7 @@ public class GetTest extends AbstractMessagingActionTest {
     }
 
     public void testInvalidPeekParameter() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");

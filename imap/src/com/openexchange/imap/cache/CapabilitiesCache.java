@@ -88,7 +88,7 @@ public final class CapabilitiesCache {
 
         private final Map<String, String> map;
 
-        CapabilitiesResponse(ACLExtension aclExtension, IMAPCapabilities imapCapabilities, Map<String, String> map) {
+        CapabilitiesResponse(final ACLExtension aclExtension, final IMAPCapabilities imapCapabilities, final Map<String, String> map) {
             super();
             this.aclExtension = aclExtension;
             this.imapCapabilities = imapCapabilities;
@@ -158,7 +158,7 @@ public final class CapabilitiesCache {
         }
 
         public void setValue(final CapabilitiesResponse value) {
-            this.capRes = value;
+            capRes = value;
         }
 
         public Class<CapabilitiesResponse> getEntryClass() {

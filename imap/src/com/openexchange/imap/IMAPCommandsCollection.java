@@ -144,7 +144,7 @@ public final class IMAPCommandsCollection {
 
         Capabilities(final Collection<String> col) {
             super();
-            this.set = Collections.unmodifiableSet(new HashSet<String>(col));
+            set = Collections.unmodifiableSet(new HashSet<String>(col));
         }
 
         @Override

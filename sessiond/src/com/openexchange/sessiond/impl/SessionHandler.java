@@ -188,7 +188,7 @@ public final class SessionHandler {
      * @return The session ID associated with newly created session
      * @throws SessiondException If creating a new session fails
      */
-    protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login, String authId, String hash) throws SessiondException {
+    protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login, final String authId, final String hash) throws SessiondException {
         checkMaxSessPerUser(userId, context);
         checkAuthId(login, authId);
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
@@ -220,7 +220,7 @@ public final class SessionHandler {
         }
     }
 
-    private static void checkAuthId(String login, String authId) throws SessiondException {
+    private static void checkAuthId(final String login, final String authId) throws SessiondException {
         sessionData.checkAuthId(login, authId);
     }
 
@@ -286,7 +286,7 @@ public final class SessionHandler {
      * @param sessionId The session ID
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
-    protected static SessionControl getSession(String sessionId) {
+    protected static SessionControl getSession(final String sessionId) {
         if (DEBUG) {
             LOG.debug(new StringBuilder("getSession <").append(sessionId).append('>').toString());
         }
@@ -434,7 +434,7 @@ public final class SessionHandler {
         }
     }
 
-    public static void addThreadPoolService(ThreadPoolService service) {
+    public static void addThreadPoolService(final ThreadPoolService service) {
         sessionData.addThreadPoolService(service);
     }
 

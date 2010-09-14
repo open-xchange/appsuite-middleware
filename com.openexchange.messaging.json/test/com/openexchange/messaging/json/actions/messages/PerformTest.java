@@ -52,11 +52,10 @@ package com.openexchange.messaging.json.actions.messages;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingMessage;
-import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.SimMessageAccess.Call;
+import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 
@@ -71,7 +70,7 @@ public class PerformTest extends AbstractMessagingActionTest {
     // Success Cases
     
     public void testPerformStorageCall() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
@@ -80,11 +79,11 @@ public class PerformTest extends AbstractMessagingActionTest {
         
         perform(req);
         
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
         
         assertEquals("perform", call.getName());
         
-        Object[] args = call.getArgs();
+        final Object[] args = call.getArgs();
 
         assertEquals("theFolderID", args[0]);
         assertEquals("theID", args[1]);
@@ -93,7 +92,7 @@ public class PerformTest extends AbstractMessagingActionTest {
     }
     
     public void testPerformMessageCall() throws AbstractOXException, JSONException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
         req.putParameter("messageAction", "theAction");
@@ -102,31 +101,31 @@ public class PerformTest extends AbstractMessagingActionTest {
         
         perform(req);
         
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
         
         assertEquals("perform", call.getName());
         
-        Object[] args = call.getArgs();
+        final Object[] args = call.getArgs();
 
-        MessagingMessage message = (MessagingMessage) args[0];
+        final MessagingMessage message = (MessagingMessage) args[0];
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
         assertEquals("theAction", args[1]);
         
     }
     
     public void testPerformNullCall() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
         req.putParameter("messageAction", "theAction");
         
         perform(req);
         
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
         
         assertEquals("perform", call.getName());
         
-        Object[] args = call.getArgs();
+        final Object[] args = call.getArgs();
 
         assertEquals("theAction", args[0]);
     }
@@ -134,7 +133,7 @@ public class PerformTest extends AbstractMessagingActionTest {
     // Error Cases
     
     public void testMissingServiceID() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
         req.putParameter("id", "theID");
@@ -144,7 +143,7 @@ public class PerformTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingAccountID() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("id", "theID");
@@ -155,7 +154,7 @@ public class PerformTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingAction() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");

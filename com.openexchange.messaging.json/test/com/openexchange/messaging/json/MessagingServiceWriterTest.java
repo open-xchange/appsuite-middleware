@@ -49,10 +49,10 @@
 
 package com.openexchange.messaging.json;
 
-import java.util.Arrays;
+import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONArray;
+import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -60,9 +60,6 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.SimMessagingService;
-import junit.framework.TestCase;
-
-import static com.openexchange.json.JSONAssertion.assertValidates;
 
 /**
  * {@link MessagingServiceWriterTest}
@@ -72,9 +69,9 @@ import static com.openexchange.json.JSONAssertion.assertValidates;
  */
 public class MessagingServiceWriterTest extends TestCase{
     public void testSimpleWrite() throws JSONException {
-        SimMessagingService messagingService = new SimMessagingService();
+        final SimMessagingService messagingService = new SimMessagingService();
         
-        List<MessagingAction> actions = new LinkedList<MessagingAction>();
+        final List<MessagingAction> actions = new LinkedList<MessagingAction>();
         actions.add(new MessagingAction("powerize!", MessagingAction.Type.NONE));
         actions.add(new MessagingAction("send", MessagingAction.Type.MESSAGE));
         actions.add(new MessagingAction("retweet", MessagingAction.Type.STORAGE, "send"));
@@ -86,7 +83,7 @@ public class MessagingServiceWriterTest extends TestCase{
         messagingService.setMessageActions(actions);
         messagingService.setFormDescription(new DynamicFormDescription());
         
-        JSONAssertion assertion = new JSONAssertion().isObject()
+        final JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("id").withValue("com.openexchange.messaging.twitter")
             .hasKey("displayName").withValue("Twitter")
             .hasKey("messagingActions").withValueArray().withValues("powerize!", "send", "retweet", "reply").objectEnds()
@@ -94,7 +91,7 @@ public class MessagingServiceWriterTest extends TestCase{
             .objectEnds();
         
         
-        JSONObject messagingServiceJSON = new MessagingServiceWriter(Translator.EMPTY).write(messagingService);
+        final JSONObject messagingServiceJSON = new MessagingServiceWriter(Translator.EMPTY).write(messagingService);
         
         assertValidates(assertion, messagingServiceJSON);
         

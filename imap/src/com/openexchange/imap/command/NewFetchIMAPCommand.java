@@ -130,7 +130,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             /*
              * Create delegate
              */
-            this.delegate = new IntSeqNumFetcher(arr);
+            delegate = new IntSeqNumFetcher(arr);
         }
 
         public int getNextSeqNum(final int index) {
@@ -221,7 +221,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (loadBody) {
             throw new MessagingException("Loading body not supported.");
         }
-        this.separator = imapFolder.getSeparator();
+        separator = imapFolder.getSeparator();
         command = getFetchCommand(isRev1, fp, loadBody);
         set(arr, isSequential, keepOrder);
         fullname = imapFolder.getFullName();
@@ -368,7 +368,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (loadBody) {
             throw new MessagingException("Loading body not supported.");
         }
-        this.separator = imapFolder.getSeparator();
+        separator = imapFolder.getSeparator();
         if (0 == fetchLen) {
             returnDefaultValue = true;
         }
@@ -388,7 +388,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             sb.append("UID ");
         }
         sb.append("FETCH ");
-        final String arg = this.args[argsIndex];
+        final String arg = args[argsIndex];
         if (arg.length() > 32) {
             final int pos = arg.indexOf(',');
             if (pos == -1) {

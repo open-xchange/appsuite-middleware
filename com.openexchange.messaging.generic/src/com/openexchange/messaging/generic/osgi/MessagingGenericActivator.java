@@ -133,10 +133,10 @@ public class MessagingGenericActivator extends DeferredActivator {
                 final ServiceRegistry registry = getServiceRegistry();
                 registry.clearRegistry();
                 final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
+                for (final Class<?> classe : classes) {
+                    final Object service = getService(classe);
                     if (null != service) {
-                        registry.addService(classes[i], service);
+                        registry.addService(classe, service);
                     }
                 }
                 registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
@@ -188,15 +188,15 @@ public class MessagingGenericActivator extends DeferredActivator {
             // Secret Handling
             
             {
-                MessagingSecretHandling secretHandling = new MessagingSecretHandling() {
+                final MessagingSecretHandling secretHandling = new MessagingSecretHandling() {
                     @Override
                     protected Collection<MessagingService> getMessagingServices() {
-                        Object[] objects = messagingServiceTracker.getServices();
+                        final Object[] objects = messagingServiceTracker.getServices();
                         if(objects == null){
                             return Collections.emptyList();
                         }
-                        List<MessagingService> list = new ArrayList<MessagingService>(objects.length);
-                        for (Object o : objects) {
+                        final List<MessagingService> list = new ArrayList<MessagingService>(objects.length);
+                        for (final Object o : objects) {
                             list.add((MessagingService) o);
                         }
                         

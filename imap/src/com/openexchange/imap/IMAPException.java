@@ -756,7 +756,7 @@ public final class IMAPException extends MIMEMailException {
 
         private IMAPCode(final String message, final Category category, final int detailNumber) {
             this.message = message;
-            this.extend = null;
+            extend = null;
             this.detailNumber = detailNumber;
             this.category = category;
         }
@@ -764,8 +764,8 @@ public final class IMAPException extends MIMEMailException {
         private IMAPCode(final String message, final IMAPCode extend) {
             this.message = message;
             this.extend = extend;
-            this.detailNumber = extend.detailNumber;
-            this.category = extend.category;
+            detailNumber = extend.detailNumber;
+            category = extend.category;
         }
 
         private IMAPCode(final MailException.Code code, final IMAPCode extend) {

@@ -49,17 +49,15 @@
 
 package com.openexchange.messaging.json.cacheing;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import junit.framework.TestCase;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.SimMessageAccess;
 import com.openexchange.messaging.SimpleMessagingMessage;
-import junit.framework.TestCase;
 
 
 /**
@@ -70,44 +68,44 @@ import junit.framework.TestCase;
 public class CacheingMessageAccessTest extends TestCase {
 
     public void testGetTriesCache() throws MessagingException {
-        SimMessageAccess access = new SimMessageAccess();
-        TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
+        final SimMessageAccess access = new SimMessageAccess();
+        final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
         
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         messageAccess.setCached(message);
         
-        MessagingMessage retval = messageAccess.getMessage("folder", "id", true);
+        final MessagingMessage retval = messageAccess.getMessage("folder", "id", true);
         
         assertSame(message, retval);
     }
     
     public void testBulkLoadingTriesCache() throws MessagingException {
-        SimMessageAccess access = new SimMessageAccess();
-        TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
+        final SimMessageAccess access = new SimMessageAccess();
+        final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
         
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         messageAccess.setCached(message);
         
-        List<MessagingMessage> messages = messageAccess.getMessages("folder", new String[]{"a", "b", "c"}, null);
+        final List<MessagingMessage> messages = messageAccess.getMessages("folder", new String[]{"a", "b", "c"}, null);
         
         assertEquals(3, messages.size());
-        for (MessagingMessage messagingMessage : messages) {
+        for (final MessagingMessage messagingMessage : messages) {
             assertSame(message, messagingMessage);
         }
         
     }
     
     public void testGetFallbackOnCacheMiss() throws MessagingException {
-        SimMessageAccess access = new SimMessageAccess();
-        TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
+        final SimMessageAccess access = new SimMessageAccess();
+        final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
         
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         access.setTemplateMessage(message);
         
-        MessagingMessage retval = messageAccess.getMessage("folder", "id", true);
+        final MessagingMessage retval = messageAccess.getMessage("folder", "id", true);
         
         assertSame(message, retval);
-        List<MessagingMessage> rememberedMessages = messageAccess.getRememberedMessages();
+        final List<MessagingMessage> rememberedMessages = messageAccess.getRememberedMessages();
         
         assertEquals(1, rememberedMessages.size());
         
@@ -115,11 +113,11 @@ public class CacheingMessageAccessTest extends TestCase {
     }
     
     public void testBulkFallbackOnCacheMiss() throws MessagingException {
-        SimMessageAccess access = new SimMessageAccess();
-        TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
+        final SimMessageAccess access = new SimMessageAccess();
+        final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
         
-        SimpleMessagingMessage cachedMessage = new SimpleMessagingMessage();
-        SimpleMessagingMessage storedMessage = new SimpleMessagingMessage();
+        final SimpleMessagingMessage cachedMessage = new SimpleMessagingMessage();
+        final SimpleMessagingMessage storedMessage = new SimpleMessagingMessage();
         storedMessage.setId("b");
 
         messageAccess.setCached(cachedMessage);
@@ -129,7 +127,7 @@ public class CacheingMessageAccessTest extends TestCase {
         
         messageAccess.forgetCachedAfterFirstHit();
         
-        List<MessagingMessage> messages = messageAccess.getMessages("folder", new String[]{"a", "b"}, null);
+        final List<MessagingMessage> messages = messageAccess.getMessages("folder", new String[]{"a", "b"}, null);
         
         assertEquals(2, messages.size());
         
@@ -138,11 +136,11 @@ public class CacheingMessageAccessTest extends TestCase {
     }
     
     public void testAllRefreshesCache() throws MessagingException {
-        SimMessageAccess access = new SimMessageAccess();
-        TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
+        final SimMessageAccess access = new SimMessageAccess();
+        final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
         
-        SimpleMessagingMessage cachedMessage = new SimpleMessagingMessage();
-        SimpleMessagingMessage storedMessage = new SimpleMessagingMessage();
+        final SimpleMessagingMessage cachedMessage = new SimpleMessagingMessage();
+        final SimpleMessagingMessage storedMessage = new SimpleMessagingMessage();
 
         messageAccess.setCached(cachedMessage);
         messageAccess.forgetCachedAfterFirstHit();
@@ -151,7 +149,7 @@ public class CacheingMessageAccessTest extends TestCase {
         
         messageAccess.forgetCachedAfterFirstHit();
         
-        List<MessagingMessage> messages = messageAccess.getAllMessages("folder", IndexRange.NULL, null, null, null);
+        final List<MessagingMessage> messages = messageAccess.getAllMessages("folder", IndexRange.NULL, null, null, null);
         
         assertEquals(1, messages.size());
         
@@ -163,36 +161,37 @@ public class CacheingMessageAccessTest extends TestCase {
 
         
         private MessagingMessage cached;
-        private List<MessagingMessage> rememberedMessages = new LinkedList<MessagingMessage>();
+        private final List<MessagingMessage> rememberedMessages = new LinkedList<MessagingMessage>();
         private String folder;
         private String id;
         private boolean forgetAfterFirstHit;
         private String clearedFolder;
 
-        public TestCacheMessageAccess(MessagingMessageAccess delegate) {
+        public TestCacheMessageAccess(final MessagingMessageAccess delegate) {
             super(delegate, null, null, null);
         }
         
         public void forgetCachedAfterFirstHit() {
-            this.forgetAfterFirstHit = true;
+            forgetAfterFirstHit = true;
         }
 
         public List<MessagingMessage> getRememberedMessages() {
             return rememberedMessages;
         }
         
-        public void setCached(MessagingMessage message) {
-            this.cached = message;
+        public void setCached(final MessagingMessage message) {
+            cached = message;
         }
         
-        protected MessagingMessage remember(MessagingMessage message) {
+        @Override
+        protected MessagingMessage remember(final MessagingMessage message) {
             rememberedMessages.add( message );
             return message;
         }
         
         @Override
-        protected MessagingMessage get(String folder, String id) {
-            MessagingMessage retval = cached;
+        protected MessagingMessage get(final String folder, final String id) {
+            final MessagingMessage retval = cached;
             if(forgetAfterFirstHit) {
                 cached = null;
             }
@@ -202,8 +201,8 @@ public class CacheingMessageAccessTest extends TestCase {
         }
         
         @Override
-        protected void clear(String folderId) {
-            this.clearedFolder = folderId;
+        protected void clear(final String folderId) {
+            clearedFolder = folderId;
         }
         
         public String getClearedFolder() {

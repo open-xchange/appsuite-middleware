@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json;
 
+import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,15 +58,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingField;
-import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
@@ -74,8 +75,6 @@ import com.openexchange.messaging.SimpleMessagingMessage;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
-import junit.framework.TestCase;
-import static com.openexchange.json.JSONAssertion.*;
 
 /**
  * {@link MessagingMessageWriterTest}
@@ -86,7 +85,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
     public void testWriteSimpleFields() throws JSONException, MessagingException {
 
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setColorLabel(2);
         message.setFlags(12);
         message.setReceivedDate(1337);
@@ -98,9 +97,9 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setFolder("niceFolder17");
         message.setPicture("http://www.somesite.invalid/somepic.png");
 
-        JSONObject messageJSON = new MessagingMessageWriter().write(message, "com.openexchange.test2://account/folder/subfolder", null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, "com.openexchange.test2://account/folder/subfolder", null, null);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("colorLabel").withValue(2).hasKey("flags").withValue(12).hasKey(
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("colorLabel").withValue(2).hasKey("flags").withValue(12).hasKey(
             "receivedDate").withValue(1337).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f�nf").inAnyOrder().hasKey(
             "size").withValue(13).hasKey("threadLevel").withValue(15).hasKey("id").withValue("message123").hasKey("folder").withValue(
             "com.openexchange.test2://account/folder/subfolder/niceFolder17").hasKey("picture").withValue("http://www.somesite.invalid/somepic.png");
@@ -109,25 +108,25 @@ public class MessagingMessageWriterTest extends TestCase {
     }
 
     public void testHeaders() throws JSONException, MessagingException {
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
 
         headers.put("simpleHeader", header("simpleHeader", "Value1"));
         headers.put("multiHeader", header("multiHeader", "v1", "v2", "v3"));
 
         message.setHeaders(headers);
 
-        JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleHeader").withValue(
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleHeader").withValue(
             "Value1").hasKey("multiHeader").withValueArray().withValues("v1", "v2", "v3").inStrictOrder().objectEnds().objectEnds();
 
         assertValidates(assertion, messageJSON);
     }
     
     public void testMirrorHeadersInAttributesIfTheyAreMessagingFields() throws MessagingException, JSONException {
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         
         headers.put("Content-Type", header("Content-Type", "text/plain"));
         headers.put("From", header("From", "from.clark.kent@dailyplanet.com"));
@@ -141,11 +140,11 @@ public class MessagingMessageWriterTest extends TestCase {
         
         message.setHeaders(headers);
         
-        JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
         
         // Where happy if they are all included. Concrete header writing is tested elsewhere
         
-        for (MessagingField field : MessagingField.values()) {
+        for (final MessagingField field : MessagingField.values()) {
             if(field.getEquivalentHeader() != null) {
                 assertTrue("Missing field: "+field.toString()+" in ", messageJSON.has(field.toString()));
             }
@@ -158,35 +157,35 @@ public class MessagingMessageWriterTest extends TestCase {
             return 2;
         }
 
-        public boolean handles(Entry<String, Collection<MessagingHeader>> entry) {
+        public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
             return true;
         }
 
-        public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+        public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
             return entry.getKey();
         }
 
-        public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
             return new StringBuilder((String) entry.getValue().iterator().next().getValue()).reverse().toString();
         }
 
     }
 
     public void testSpecialHeader() throws MessagingException, JSONException {
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
 
         headers.put("simpleHeader", header("simpleHeader", "Value1"));
 
         message.setHeaders(headers);
 
-        MessagingMessageWriter writer = new MessagingMessageWriter();
+        final MessagingMessageWriter writer = new MessagingMessageWriter();
 
         writer.addHeaderWriter(new InverseWriter());
 
-        JSONObject messageJSON = writer.write(message, null, null, null);
+        final JSONObject messageJSON = writer.write(message, null, null, null);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleHeader").withValue(
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleHeader").withValue(
             "1eulaV").objectEnds().objectEnds();
 
         assertValidates(assertion, messageJSON);
@@ -194,76 +193,76 @@ public class MessagingMessageWriterTest extends TestCase {
     }
 
     public void testPlainMessage() throws MessagingException, JSONException {
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content");
 
-        JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue("content").objectEnds();
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue("content").objectEnds();
 
         assertValidates(assertion, messageJSON);
 
     }
     
     public void testReferenceContent() throws MessagingException, JSONException {
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContentReference("coolReferenceId");
 
-        JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValueObject().hasKey("ref").withValue("coolReferenceId").objectEnds().objectEnds();
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValueObject().hasKey("ref").withValue("coolReferenceId").objectEnds().objectEnds();
 
         assertValidates(assertion, messageJSON);
 
     }
 
     public void testBinaryMessage() throws MessagingException, JSONException, UnsupportedEncodingException {
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content".getBytes("UTF-8"));
 
-        JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue(Base64.encode("content")).objectEnds();
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue(Base64.encode("content")).objectEnds();
 
         assertValidates(assertion, messageJSON);
 
     }
 
     public void testMultipartMessage() throws UnsupportedEncodingException, MessagingException, JSONException {
-        SimpleMessagingMessage binMessage = new SimpleMessagingMessage();
+        final SimpleMessagingMessage binMessage = new SimpleMessagingMessage();
         binMessage.setSectionId("1");
         binMessage.setContent("content".getBytes("UTF-8"));
         binMessage.setDisposition(MessagingMessage.ATTACHMENT);
         binMessage.setFileName("content.txt");
 
-        SimpleMessagingMessage plainMessage = new SimpleMessagingMessage();
+        final SimpleMessagingMessage plainMessage = new SimpleMessagingMessage();
         plainMessage.setContent("content");
         plainMessage.setSectionId("2");
 
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent(binMessage, plainMessage);
 
         plainMessage.setParent((MultipartContent) message.getContent());
         binMessage.setParent((MultipartContent) message.getContent());
 
-        JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
 
         JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValueArray().objectEnds();
 
         assertValidates(assertion, messageJSON);
 
-        JSONArray array = messageJSON.getJSONArray("body");
+        final JSONArray array = messageJSON.getJSONArray("body");
 
         assertEquals(2, array.length());
 
-        JSONObject firstContent = array.getJSONObject(0);
+        final JSONObject firstContent = array.getJSONObject(0);
 
         assertion = new JSONAssertion().isObject().hasKey("sectionId").withValue("1").hasKey("body").withValue(Base64.encode("content")).hasKey(
             "disposition").withValue(MessagingMessage.ATTACHMENT).hasKey("fileName").withValue("content.txt").objectEnds();
 
         assertValidates(assertion, firstContent);
 
-        JSONObject secondContent = array.getJSONObject(1);
+        final JSONObject secondContent = array.getJSONObject(1);
 
         assertion = new JSONAssertion().isObject().hasKey("sectionId").withValue("2").hasKey("body").withValue("content").objectEnds();
 
@@ -276,39 +275,39 @@ public class MessagingMessageWriterTest extends TestCase {
             return 2;
         }
 
-        public boolean handles(MessagingPart part, MessagingContent content) {
+        public boolean handles(final MessagingPart part, final MessagingContent content) {
             return true;
         }
 
-        public Object write(MessagingPart part, MessagingContent content, ServerSession session, DisplayMode mode) throws MessagingException, JSONException {
+        public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws MessagingException, JSONException {
             return new StringBuilder(((StringContent) content).getData()).reverse().toString();
         }
 
     }
 
     public void testCustomContentWriter() throws MessagingException, JSONException {
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content");
 
-        MessagingMessageWriter writer = new MessagingMessageWriter();
+        final MessagingMessageWriter writer = new MessagingMessageWriter();
         writer.addContentWriter(new InverseContentWriter());
 
-        JSONObject messageJSON = writer.write(message, null, null, null);
+        final JSONObject messageJSON = writer.write(message, null, null, null);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue("tnetnoc").objectEnds();
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue("tnetnoc").objectEnds();
 
         assertValidates(assertion, messageJSON);
     }
 
     public void testWriteSimpleArrayFields() throws MessagingException, JSONException {
         // Test with one header equivalent field and all non-header fields
-        MessagingField[] fields = new MessagingField[] {
+        final MessagingField[] fields = new MessagingField[] {
             MessagingField.ID, MessagingField.FOLDER_ID, MessagingField.SUBJECT, MessagingField.SIZE, MessagingField.RECEIVED_DATE,
             MessagingField.FLAGS, MessagingField.THREAD_LEVEL, MessagingField.COLOR_LABEL, MessagingField.BODY, MessagingField.PICTURE};
 
         
         //TODO AccountName ? What is that?
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setId("msg123");
         message.setFolder("folder12");
         message.setSize(1337);
@@ -319,35 +318,35 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setContent("Supercontent!");
         message.setPicture("pic");
         
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         headers.put("Subject", header("Subject", "the subject"));
         message.setHeaders(headers);
 
-        JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", null, null);
+        final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", null, null);
 
-        JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", 1337l, 1234567l, 313, 12, 13, "Supercontent!", "pic").inStrictOrder();
+        final JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", 1337l, 1234567l, 313, 12, 13, "Supercontent!", "pic").inStrictOrder();
 
         assertValidates(assertion, fieldsJSON);
     }
     
     public void testWritePostiveNumbersAsNullIfNegative() throws MessagingException, JSONException {
      // Test with one header equivalent field and all non-header fields
-        MessagingField[] fields = new MessagingField[] {
+        final MessagingField[] fields = new MessagingField[] {
            MessagingField.SIZE, MessagingField.RECEIVED_DATE, MessagingField.THREAD_LEVEL};
 
         
         //TODO AccountName ? What is that?
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setSize(-1);
         message.setReceivedDate(-1);
         message.setThreadLevel(-1);
         message.setColorLabel(-1);
         
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         headers.put("Subject", header("Subject", "the subject"));
         message.setHeaders(headers);
 
-        JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", null, null);
+        final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", null, null);
 
         assertEquals(3, fieldsJSON.length());
         
@@ -358,30 +357,30 @@ public class MessagingMessageWriterTest extends TestCase {
     }
     
     public void testWriteHeaderArrayField() throws MessagingException, JSONException {
-        MessagingField[] fields = new MessagingField[] {
+        final MessagingField[] fields = new MessagingField[] {
             MessagingField.HEADERS};
 
         
-        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message = new SimpleMessagingMessage();
         
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>(    );
+        final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>(    );
         headers.put("Subject", header("Subject", "the subject"));
         message.setHeaders(headers);
 
-        JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, null, null, null);
+        final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, null, null, null);
 
         assertEquals(1, fieldsJSON.length());
         
-        JSONObject headersJSON = fieldsJSON.getJSONObject(0);
+        final JSONObject headersJSON = fieldsJSON.getJSONObject(0);
     
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("Subject").withValue("the subject");
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("Subject").withValue("the subject");
         
         assertValidates(assertion, headersJSON);
     }
     
 
-    private Collection<MessagingHeader> header(final String name, String... values) {
-        List<MessagingHeader> header = new ArrayList<MessagingHeader>();
+    private Collection<MessagingHeader> header(final String name, final String... values) {
+        final List<MessagingHeader> header = new ArrayList<MessagingHeader>();
         for (final String value : values) {
             header.add(new MessagingHeader() {
 

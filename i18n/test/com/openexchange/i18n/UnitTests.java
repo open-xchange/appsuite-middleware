@@ -62,7 +62,7 @@ public class UnitTests {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite();
         suite.addTestSuite(TranslationToI18NAdapterTest.class);
         return suite;
     }

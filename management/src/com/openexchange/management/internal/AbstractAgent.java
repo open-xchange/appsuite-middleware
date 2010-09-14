@@ -175,8 +175,7 @@ public abstract class AbstractAgent {
         }
 
         private static String makeSHAPasswd(final String raw) {
-            MessageDigest md;
-
+            final MessageDigest md;
             try {
                 md = MessageDigest.getInstance("SHA-1");
             } catch (final NoSuchAlgorithmException e) {

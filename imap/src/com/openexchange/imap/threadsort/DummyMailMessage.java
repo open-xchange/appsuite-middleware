@@ -88,7 +88,7 @@ final class DummyMailMessage extends MailMessage {
 
     @Override
     public void setMailId(final String id) {
-        this.mailId = id;
+        mailId = id;
     }
 
     @Override

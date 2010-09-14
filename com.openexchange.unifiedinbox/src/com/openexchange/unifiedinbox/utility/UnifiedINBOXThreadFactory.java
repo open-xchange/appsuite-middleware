@@ -83,7 +83,7 @@ public final class UnifiedINBOXThreadFactory implements java.util.concurrent.Thr
         // final java.lang.SecurityManager s = System.getSecurityManager();
         // group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
         this.namePrefix = namePrefix;
-        this.len = namePrefix.length() + 4;
+        len = namePrefix.length() + 4;
     }
 
     public Thread newThread(final Runnable r) {

@@ -58,8 +58,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.dataobjects.ReadOnlyMailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
+import com.openexchange.mail.dataobjects.ReadOnlyMailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccount;
@@ -233,8 +233,7 @@ public final class UnifiedINBOXFolderConverter {
                 UnifiedINBOXServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(arr.length);
-            for (int i = 0; i < arr.length; i++) {
-                final MailAccount mailAccount = arr[i];
+            for (final MailAccount mailAccount : arr) {
                 if (unifiedInboxAccountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
                     l.add(mailAccount);
                 }

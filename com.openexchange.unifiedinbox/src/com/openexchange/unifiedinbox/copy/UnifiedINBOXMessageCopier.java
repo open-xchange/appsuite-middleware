@@ -166,8 +166,8 @@ public final class UnifiedINBOXMessageCopier {
         final String destFullname = destFullnameArgument.getFullname();
         final int destAccountId = destFullnameArgument.getAccountId();
         if (move) {
-            for (int i = 0; i < mailIds.length; i++) {
-                tmp.setUIDString(mailIds[i]);
+            for (final String mailId : mailIds) {
+                tmp.setUIDString(mailId);
                 // Check if accounts and fullnames are equal
                 if (tmp.getAccountId() == destAccountId && tmp.getFullname().equals(destFullname)) {
                     throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);

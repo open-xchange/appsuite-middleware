@@ -49,9 +49,9 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.messaging.MessagingException;
-import junit.framework.TestCase;
 
 
 /**
@@ -62,18 +62,18 @@ import junit.framework.TestCase;
 public class MessagingRequestDataTest extends TestCase {
     
     public void testParsesLongFolderForm() throws MessagingException {
-        String messagingService = "com.openexchange.test1";
-        String account = "735";
-        String folder="some/folder";
+        final String messagingService = "com.openexchange.test1";
+        final String account = "735";
+        final String folder="some/folder";
         
-        String folderLong = messagingService+"://"+account+"/"+folder;
+        final String folderLong = messagingService+"://"+account+"/"+folder;
         
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("folder" , folderLong);
         
-        MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
+        final MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
         
-        MessagingFolderAddress addr = messagingRequest.getLongFolder();
+        final MessagingFolderAddress addr = messagingRequest.getLongFolder();
         
         assertNotNull(addr);
         
@@ -83,37 +83,37 @@ public class MessagingRequestDataTest extends TestCase {
     }
     
     public void testNumberFormatExceptionInAccount() {
-        String messagingService = "com.openexchange.test1";
-        String account = "735abc";
-        String folder="some/folder";
+        final String messagingService = "com.openexchange.test1";
+        final String account = "735abc";
+        final String folder="some/folder";
         
-        String folderLong = messagingService+"://"+account+"/"+folder;
+        final String folderLong = messagingService+"://"+account+"/"+folder;
         
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("folder" , folderLong);
         
-        MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
+        final MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
         
         try {
-            MessagingFolderAddress addr = messagingRequest.getLongFolder();
+            final MessagingFolderAddress addr = messagingRequest.getLongFolder();
             fail("Should have failed parsing account number");
-        } catch (MessagingException e) {
+        } catch (final MessagingException e) {
             // SUCCESS
         }
         
     }
     
     public void testFallsBackToFolderForMissingMessagingServiceAndAccountIDAndFolderAndID() throws MessagingException {
-        String messagingService = "com.openexchange.test1";
-        String account = "735";
-        String folder="some/folder";
+        final String messagingService = "com.openexchange.test1";
+        final String account = "735";
+        final String folder="some/folder";
         
-        String folderLong = messagingService+"://"+account+"/"+folder;
+        final String folderLong = messagingService+"://"+account+"/"+folder;
         
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("folder" , folderLong);
     
-        MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
+        final MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
         
         assertEquals(messagingService, messagingRequest.getMessagingServiceId());
         assertEquals(735, messagingRequest.getAccountID());
@@ -122,18 +122,18 @@ public class MessagingRequestDataTest extends TestCase {
     }
     
     public void testAssemblesLongFolder() throws MessagingException {
-        String messagingService = "com.openexchange.test1";
-        String account = "735";
-        String folder="some/folder";
+        final String messagingService = "com.openexchange.test1";
+        final String account = "735";
+        final String folder="some/folder";
 
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", messagingService);
         req.putParameter("account", account);
         req.putParameter("folder" , folder);
 
-        MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
+        final MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
         
-        MessagingFolderAddress addr = messagingRequest.getLongFolder();
+        final MessagingFolderAddress addr = messagingRequest.getLongFolder();
         
         assertNotNull(addr);
         

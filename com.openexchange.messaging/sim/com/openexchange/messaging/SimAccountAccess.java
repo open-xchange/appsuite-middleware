@@ -86,7 +86,7 @@ public class SimAccountAccess implements MessagingAccountAccess {
     }
 
     public void setMessageAccess(final SimMessageAccess access) {
-        this.messageAccess = access;
+        messageAccess = access;
     }
 
     public boolean isConnected() {

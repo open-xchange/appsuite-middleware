@@ -67,7 +67,7 @@ public final class FolderServlet extends MultipleAdapterServletNew {
     private static final long serialVersionUID = -5776196227866178935L;
 
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return true;
     }
 }

@@ -65,17 +65,17 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.login.LoginResult;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.login.LoginResult;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * {@link ContactCollectorFolderCreator}
@@ -95,25 +95,25 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
     }
 
     public void handleLogin(final LoginResult login) throws LoginException {
-        int cid = login.getSession().getContextId();
+        final int cid = login.getSession().getContextId();
         DatabaseService databaseService = null;
         Connection con = null;
         try {
             databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class, true);
             con = databaseService.getWritable(cid);
-            String folderName = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+            final String folderName = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             create(login.getSession(), login.getContext(), folderName, con);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             throw new LoginException(e);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LoginException(e);
-        } catch (SettingException e) {
+        } catch (final SettingException e) {
             throw new LoginException(e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LoginException(new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage()));
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new LoginException(e);
         } finally {
             if (databaseService != null)
@@ -121,7 +121,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         }
     }
     
-    public void create(Session session, Context ctx, String folderName, Connection con) throws AbstractOXException, SQLException {
+    public void create(final Session session, final Context ctx, final String folderName, final Connection con) throws AbstractOXException, SQLException {
         final int cid = session.getContextId();
         final int userId = session.getUserId();
     
@@ -156,7 +156,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
                     createNewContactFolder(userId, folderName, parent),
                     true,
                     System.currentTimeMillis()).getObjectID();
-        } catch (OXFolderException folderException) {
+        } catch (final OXFolderException folderException) {
             if (folderException.getDetailNumber() == OXFolderException.FolderCode.NO_DUPLICATE_FOLDER.getNumber()) {
                 LOG.info(new StringBuilder("Found Folder with name of contact collect folder. Guess this is the dedicated folder."));
                 collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);
@@ -174,7 +174,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         }
     }
     
-    private boolean isConfigured(ServerUserSetting setting, int cid, int userId) throws SettingException {
+    private boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws SettingException {
         return setting.getContactCollectionFolder(cid, userId) != null;
     }
 

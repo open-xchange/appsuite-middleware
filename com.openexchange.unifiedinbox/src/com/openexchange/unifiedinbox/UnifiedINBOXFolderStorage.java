@@ -55,7 +55,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -226,8 +225,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 true);
             final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(arr.length);
-            for (int i = 0; i < arr.length; i++) {
-                final MailAccount mailAccount = arr[i];
+            for (final MailAccount mailAccount : arr) {
                 if (unifiedINBOXAccountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
                     l.add(mailAccount);
                 }
@@ -382,8 +380,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 true);
             final MailAccount[] tmp = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
-            for (int i = 0; i < tmp.length; i++) {
-                final MailAccount mailAccount = tmp[i];
+            for (final MailAccount mailAccount : tmp) {
                 if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
                     l.add(mailAccount);
                 }
@@ -585,8 +582,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
     }
 
     private static String startsWithKnownFullname(final String fullname) {
-        for (final Iterator<String> iter = UnifiedINBOXAccess.KNOWN_FOLDERS.iterator(); iter.hasNext();) {
-            final String knownFullname = iter.next();
+        for (final String knownFullname : UnifiedINBOXAccess.KNOWN_FOLDERS) {
             if (fullname.startsWith(knownFullname)) {
                 // Cut off starting known fullname AND separator character
                 return fullname.substring(knownFullname.length() + 1);
@@ -596,8 +592,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
     }
 
     private static String getStartingKnownFullname(final String fullname) {
-        for (final Iterator<String> iter = UnifiedINBOXAccess.KNOWN_FOLDERS.iterator(); iter.hasNext();) {
-            final String knownFullname = iter.next();
+        for (final String knownFullname : UnifiedINBOXAccess.KNOWN_FOLDERS) {
             if (fullname.startsWith(knownFullname)) {
                 return knownFullname;
             }

@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.Session;
@@ -273,8 +274,7 @@ final class SessionContainer {
      */
     Map<String, Session> convert() {
         final Map<String, Session> retval = new HashMap<String, Session>(sessionIdMap.size());
-        for (final Iterator<Map.Entry<String, SessionControl>> iterator = sessionIdMap.entrySet().iterator(); iterator.hasNext();) {
-            final Map.Entry<String, SessionControl> e = iterator.next();
+        for (final Entry<String, SessionControl> e : sessionIdMap.entrySet()) {
             retval.put(e.getKey(), e.getValue().getSession());
         }
         return retval;

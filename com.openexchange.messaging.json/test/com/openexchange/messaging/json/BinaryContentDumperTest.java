@@ -53,10 +53,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import junit.framework.TestCase;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingException;
-import junit.framework.TestCase;
 
 /**
  * {@link BinaryContentDumperTest}
@@ -77,10 +76,10 @@ public class BinaryContentDumperTest extends TestCase {
     }
 
     public void testDump() throws MessagingException, IOException {
-        InputStream is = new ByteArrayInputStream("Hello World".getBytes("UTF-8"));
-        BinaryContent content = getBinaryContent(is);
+        final InputStream is = new ByteArrayInputStream("Hello World".getBytes("UTF-8"));
+        final BinaryContent content = getBinaryContent(is);
         
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
         
         new BinaryContentDumper().dump(content, bout);
         

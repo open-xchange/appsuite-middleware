@@ -80,8 +80,8 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
         try {
             final InternetAddress[] internetAddresses = QuotedInternetAddress.parse(addressList);
             final List<MimeAddressMessagingHeader> retval = new ArrayList<MimeAddressMessagingHeader>(internetAddresses.length);
-            for (int i = 0; i < internetAddresses.length; i++) {
-                retval.add(new MimeAddressMessagingHeader(name, (QuotedInternetAddress) internetAddresses[i]));
+            for (final InternetAddress internetAddresse : internetAddresses) {
+                retval.add(new MimeAddressMessagingHeader(name, (QuotedInternetAddress) internetAddresse));
             }
             return retval;
         } catch (final AddressException e) {

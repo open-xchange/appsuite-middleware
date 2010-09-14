@@ -119,9 +119,9 @@ public final class UnifiedINBOXUID {
      */
     public UnifiedINBOXUID setUIDString(final String unifiedINBOXUID) throws MailException {
         final MailPath mailPath = new MailPath(unifiedINBOXUID);
-        this.accountId = mailPath.getAccountId();
-        this.fullname = mailPath.getFolder();
-        this.id = mailPath.getMailID();
+        accountId = mailPath.getAccountId();
+        fullname = mailPath.getFolder();
+        id = mailPath.getMailID();
         return this;
     }
 

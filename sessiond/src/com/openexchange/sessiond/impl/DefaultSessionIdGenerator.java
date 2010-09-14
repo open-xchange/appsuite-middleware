@@ -94,8 +94,8 @@ public final class DefaultSessionIdGenerator extends SessionIdGenerator {
                 algorithm.update(buf);
                 digest = algorithm.digest();
             }
-            for (int i = 0; i < digest.length; i++) {
-                final String hex = Integer.toHexString(digest[i] & 0xff);
+            for (final byte element : digest) {
+                final String hex = Integer.toHexString(element & 0xff);
                 if (hex.length() < 2) {
                     builder.append('0');
                 }

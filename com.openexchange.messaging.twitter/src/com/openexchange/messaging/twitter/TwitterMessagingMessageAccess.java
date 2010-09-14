@@ -161,8 +161,8 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         try {
             final long[] ids = strings2longs(messageIds);
             final List<MessagingMessage> l = new ArrayList<MessagingMessage>(ids.length);
-            for (int i = 0; i < ids.length; i++) {
-                l.add(get(ids[i]));
+            for (final long id2 : ids) {
+                l.add(get(id2));
             }
             return l;
         } catch (final TwitterException e) {

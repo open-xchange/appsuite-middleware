@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.mail.FullnameArgument;
@@ -147,8 +146,7 @@ public final class UnifiedINBOXUtility {
     }
 
     private static boolean startsWithKnownFullname(final String fullname) {
-        for (final Iterator<String> iter = UnifiedINBOXAccess.KNOWN_FOLDERS.iterator(); iter.hasNext();) {
-            final String knownFullname = iter.next();
+        for (final String knownFullname : UnifiedINBOXAccess.KNOWN_FOLDERS) {
             if (fullname.startsWith(knownFullname)) {
                 return true;
             }

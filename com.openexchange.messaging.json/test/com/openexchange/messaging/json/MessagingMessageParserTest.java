@@ -55,10 +55,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,10 +71,8 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MultipartContent;
-import com.openexchange.messaging.SimpleContent;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.tools.encoding.Base64;
-import junit.framework.TestCase;
 
 
 /**
@@ -85,7 +83,7 @@ import junit.framework.TestCase;
 public class MessagingMessageParserTest extends TestCase {
     
     public void testParseSimpleFields() throws JSONException, MessagingException, IOException {
-        JSONObject messageJSON = new JSONObject();
+        final JSONObject messageJSON = new JSONObject();
         
         messageJSON.put("colorLabel", 12);
         messageJSON.put("id", "13");
@@ -94,7 +92,7 @@ public class MessagingMessageParserTest extends TestCase {
         messageJSON.put("size", 23);
         messageJSON.put("threadLevel", 3);
        
-        JSONArray userFlags = new JSONArray();
+        final JSONArray userFlags = new JSONArray();
         
         userFlags.put("flag1"); 
         userFlags.put("flag2");
@@ -104,7 +102,7 @@ public class MessagingMessageParserTest extends TestCase {
         messageJSON.put("folder", "niceFolder17");
         messageJSON.put("picture", "http://somesite.invalid/somepic.png");
         
-        MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
         
         assertNotNull(message);
         
@@ -112,11 +110,11 @@ public class MessagingMessageParserTest extends TestCase {
         assertEquals(12, message.getColorLabel());
         assertEquals(313, message.getFlags());
     
-        Collection<String> flags = message.getUserFlags();
+        final Collection<String> flags = message.getUserFlags();
         assertNotNull(flags);
         assertEquals(3, flags.size());
-        Iterator<String> iterator = flags.iterator();
-        Set<String> expectedFlags = new HashSet<String>(Arrays.asList("flag1", "flag2", "flag3"));
+        final Iterator<String> iterator = flags.iterator();
+        final Set<String> expectedFlags = new HashSet<String>(Arrays.asList("flag1", "flag2", "flag3"));
         while(iterator.hasNext()) {
             assertTrue(expectedFlags.remove(iterator.next()));
         }
@@ -132,18 +130,18 @@ public class MessagingMessageParserTest extends TestCase {
     
     
     public void testHeaders() throws JSONException, MessagingException, IOException {
-        JSONObject messageJSON = new JSONObject();
+        final JSONObject messageJSON = new JSONObject();
         
-        JSONObject headers = new JSONObject();
+        final JSONObject headers = new JSONObject();
         headers.put("singleValue", "Value1");
         
-        JSONArray multiValue = new JSONArray();
+        final JSONArray multiValue = new JSONArray();
         multiValue.put("1").put("2").put("3");
         headers.put("multiValue", multiValue);
         
         messageJSON.put("headers", headers);
         
-        MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
         
         assertNotNull(message);
         
@@ -156,7 +154,7 @@ public class MessagingMessageParserTest extends TestCase {
         
         assertEquals(3, header.size());
         
-        Iterator<MessagingHeader> iterator = header.iterator();
+        final Iterator<MessagingHeader> iterator = header.iterator();
         assertEquals("1", iterator.next().getValue());
         assertEquals("2", iterator.next().getValue());
         assertEquals("3", iterator.next().getValue());
@@ -166,37 +164,37 @@ public class MessagingMessageParserTest extends TestCase {
     
     
     public void testSpecialHeader() throws JSONException, MessagingException, IOException {
-        JSONObject messageJSON = new JSONObject();
+        final JSONObject messageJSON = new JSONObject();
         
-        JSONObject headers = new JSONObject();
+        final JSONObject headers = new JSONObject();
         headers.put("singleValue", "1eulaV");
         
         messageJSON.put("headers", headers);
         
-        MessagingMessageParser parser = new MessagingMessageParser();
+        final MessagingMessageParser parser = new MessagingMessageParser();
      
         parser.addHeaderParser(new InvertedHeaderParser());
-        MessagingMessage message = parser.parse(messageJSON, null);
+        final MessagingMessage message = parser.parse(messageJSON, null);
         
         assertNotNull(message);
         
-        Collection<MessagingHeader> header = message.getHeader("singleValue");
+        final Collection<MessagingHeader> header = message.getHeader("singleValue");
         assertNotNull(header);
         assertEquals("Value1", header.iterator().next().getValue());
     }
     
     public void testParseHeaderAsAttributeIfItIsAMessagingField() throws JSONException, MessagingException, IOException {
-        String date = "Sun, 7 Feb 2010 19:20:40 +0100 (CET)";
-        JSONObject messageJSON = new JSONObject("{'to':[{'address':'to.clark.kent@dailyplanet.com'}],'flags':0,'subject':'Subject-Value','bcc':[{'address':'bcc.clark.kent@dailyplanet.com'}],'contentType':{'params':{},'type':'text/plain'},'from':[{'address':'from.clark.kent@dailyplanet.com'}],'size':0,'threadLevel':0,'dispositionNotificationTo':[{'address':'disp.notification.to.clark.kent@dailyplanet.com'}],'priority':'12','sentDate':'"+date+"','cc':[{'address':'cc.clark.kent@dailyplanet.com'}]}");
+        final String date = "Sun, 7 Feb 2010 19:20:40 +0100 (CET)";
+        final JSONObject messageJSON = new JSONObject("{'to':[{'address':'to.clark.kent@dailyplanet.com'}],'flags':0,'subject':'Subject-Value','bcc':[{'address':'bcc.clark.kent@dailyplanet.com'}],'contentType':{'params':{},'type':'text/plain'},'from':[{'address':'from.clark.kent@dailyplanet.com'}],'size':0,'threadLevel':0,'dispositionNotificationTo':[{'address':'disp.notification.to.clark.kent@dailyplanet.com'}],'priority':'12','sentDate':'"+date+"','cc':[{'address':'cc.clark.kent@dailyplanet.com'}]}");
         
-        MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
         assertNotNull(message);
 
-        MessagingMessageGetSwitch get = new MessagingMessageGetSwitch();
+        final MessagingMessageGetSwitch get = new MessagingMessageGetSwitch();
         
-        for (MessagingField field : MessagingField.values()) {
+        for (final MessagingField field : MessagingField.values()) {
             if(field.getEquivalentHeader() != null) {
-                Object value = field.doSwitch(get, message);
+                final Object value = field.doSwitch(get, message);
                 assertNotNull(value);
             }
         }
@@ -208,19 +206,19 @@ public class MessagingMessageParserTest extends TestCase {
 
     
     public void testPlainBody() throws JSONException, MessagingException, IOException {
-        JSONObject messageJSON = new JSONObject();
+        final JSONObject messageJSON = new JSONObject();
 
         messageJSON.put("body", "I am the content");
         
-        JSONObject headers = new JSONObject();
+        final JSONObject headers = new JSONObject();
         headers.put("content-type", "text/plain");
         messageJSON.put("headers", headers);
         
-        MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
         
         assertNotNull(message);
         
-        MessagingContent content = message.getContent();
+        final MessagingContent content = message.getContent();
         assertNotNull(content);
         
         
@@ -228,7 +226,7 @@ public class MessagingMessageParserTest extends TestCase {
         assertEquals("I am the content", getStringData(content));
     }
     
-    private String getStringData(MessagingContent content) throws MessagingException, IOException {
+    private String getStringData(final MessagingContent content) throws MessagingException, IOException {
         if(StringContent.class.isInstance(content)) {
             return ((StringContent) content).getData();
         } else if (BinaryContent.class.isInstance(content)) {
@@ -239,19 +237,19 @@ public class MessagingMessageParserTest extends TestCase {
 
 
     public void testBinaryBodyInBase64() throws MessagingException, JSONException, IOException {
-        JSONObject messageJSON = new JSONObject();
+        final JSONObject messageJSON = new JSONObject();
 
         messageJSON.put("body", Base64.encode("I am the content"));
         
-        JSONObject headers = new JSONObject();
+        final JSONObject headers = new JSONObject();
         headers.put("content-type", "application/octet-stream");
         messageJSON.put("headers", headers);
         
-        MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
         
         assertNotNull(message);
         
-        MessagingContent content = message.getContent();
+        final MessagingContent content = message.getContent();
         assertNotNull(content);
         
         assertTrue(BinaryContent.class.isInstance(content));
@@ -261,22 +259,22 @@ public class MessagingMessageParserTest extends TestCase {
     }
     
     public void testBinaryBodyByReference() throws MessagingException, IOException, JSONException {
-        JSONObject messageJSON = new JSONObject();
+        final JSONObject messageJSON = new JSONObject();
 
         messageJSON.put("body", new JSONObject("{ref : '12'}"));
         
-        JSONObject headers = new JSONObject();
+        final JSONObject headers = new JSONObject();
         headers.put("content-type", "application/octet-stream");
         messageJSON.put("headers", headers);
         
-        SimInputStreamRegistry registry = new SimInputStreamRegistry();
+        final SimInputStreamRegistry registry = new SimInputStreamRegistry();
         
-        MessagingMessage message = new MessagingMessageParser().parse(messageJSON, registry);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, registry);
         
         assertEquals("12", registry.getId());
         assertNotNull(message);
         
-        MessagingContent content = message.getContent();
+        final MessagingContent content = message.getContent();
         assertNotNull(content);
         
         assertTrue(BinaryContent.class.isInstance(content));
@@ -285,36 +283,36 @@ public class MessagingMessageParserTest extends TestCase {
     }
     
     public void testMultipart() throws JSONException, MessagingException, IOException {
-        JSONObject messageJSON = new JSONObject("{headers : {'content-type' : 'multipart/mixed'}}");
+        final JSONObject messageJSON = new JSONObject("{headers : {'content-type' : 'multipart/mixed'}}");
 
-        JSONArray multipartJSON = new JSONArray();
+        final JSONArray multipartJSON = new JSONArray();
         
-        JSONObject body1 = new JSONObject("{body : 'simpleContent', headers: {content-type : 'text/plain'}, id: '1'}");
-        JSONObject body2 = new JSONObject("{body : '"+Base64.encode("binaryData")+"', headers: {content-type : 'application/octet-stream'}, id: '2'}");
+        final JSONObject body1 = new JSONObject("{body : 'simpleContent', headers: {content-type : 'text/plain'}, id: '1'}");
+        final JSONObject body2 = new JSONObject("{body : '"+Base64.encode("binaryData")+"', headers: {content-type : 'application/octet-stream'}, id: '2'}");
         multipartJSON.put(body1);
         multipartJSON.put(body2);
         
         
         messageJSON.put("body", multipartJSON);
 
-        MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
         
         assertNotNull(message);
         
-        MessagingContent content = message.getContent();
+        final MessagingContent content = message.getContent();
         assertNotNull(content);
         assertTrue(MultipartContent.class.isInstance(content));
         
-        MultipartContent multipart = (MultipartContent) content;
+        final MultipartContent multipart = (MultipartContent) content;
         
         assertEquals(2, multipart.getCount());
         
-        MessagingBodyPart textPart = multipart.get(0);
+        final MessagingBodyPart textPart = multipart.get(0);
         //assertEquals("1", textPart.getId());
         assertEquals("text/plain", textPart.getContentType().getBaseType());
         assertEquals("simpleContent", ((StringContent) textPart.getContent()).getData());
         
-        MessagingBodyPart binPart = multipart.get(1);
+        final MessagingBodyPart binPart = multipart.get(1);
         //assertEquals("2", binPart.getId());
         assertEquals("application/octet-stream", binPart.getContentType().getBaseType());
         assertEquals("binaryData", inputStream2String(((BinaryContent) binPart.getContent()).getData()));
@@ -328,39 +326,39 @@ public class MessagingMessageParserTest extends TestCase {
             return 2;
         }
 
-        public boolean handles(MessagingBodyPart partlyParsedMessage, Object content) throws MessagingException {
+        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws MessagingException {
             return partlyParsedMessage.getContentType().getBaseType().equals("text/plain");
         }
 
-        public MessagingContent parse(MessagingBodyPart partlyParsedMessage, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
+        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
             return new StringContent(new StringBuilder((String)content).reverse().toString());
         }
         
     }
     
     public void testSpecialBody() throws MessagingException, JSONException, IOException {
-        JSONObject messageJSON = new JSONObject();
+        final JSONObject messageJSON = new JSONObject();
 
         messageJSON.put("body", "tnetnoc eht ma I");
         
-        JSONObject headers = new JSONObject();
+        final JSONObject headers = new JSONObject();
         headers.put("content-type", "text/plain");
         messageJSON.put("headers", headers);
         
-        MessagingMessageParser parser = new MessagingMessageParser();
+        final MessagingMessageParser parser = new MessagingMessageParser();
         parser.addContentParser(new ReversedContentParser());
-        MessagingMessage message = parser.parse(messageJSON, null);
+        final MessagingMessage message = parser.parse(messageJSON, null);
         
         assertNotNull(message);
         
-        MessagingContent content = message.getContent();
+        final MessagingContent content = message.getContent();
         assertNotNull(content);
         
         assertEquals("I am the content", getStringData(content));
     }
     
-    private String inputStream2String(InputStream data) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    private String inputStream2String(final InputStream data) throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int b = 1;
         while((b = data.read()) != -1) {
             baos.write(b);
@@ -372,7 +370,7 @@ public class MessagingMessageParserTest extends TestCase {
 
         private Object id;
 
-        public InputStream get(Object id) throws MessagingException, IOException {
+        public InputStream get(final Object id) throws MessagingException, IOException {
             this.id = id;
             return new ByteArrayInputStream("Mock value".getBytes("UTF-8"));
         }

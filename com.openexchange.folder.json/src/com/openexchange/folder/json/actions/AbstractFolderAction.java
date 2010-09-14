@@ -161,8 +161,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         final Map<Integer, ContentType> availableContentTypes =
             ServiceRegistry.getInstance().getService(FolderService.class, true).getAvailableContentTypes();
         Map<String, ContentType> tmpMap = null;
-        for (int i = 0; i < sa.length; i++) {
-            final String str = sa[i];
+        for (final String str : sa) {
             final int module = getUnsignedInteger(str);
             if (module < 0) {
                 /*

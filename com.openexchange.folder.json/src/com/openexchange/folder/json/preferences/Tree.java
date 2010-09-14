@@ -90,19 +90,19 @@ public class Tree implements PreferencesItemService {
                 return NO_ID;
             }
 
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                 Integer tree = ServerUserSetting.getInstance().getFolderTree(ctx.getContextId(), user.getId());
                 if (null == tree) {
                     final ConfigurationService configurationService;
                     try {
                         configurationService = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
-                    } catch (ServiceException e) {
+                    } catch (final ServiceException e) {
                         throw new SettingException(e);
                     }
-                    String value = configurationService.getProperty(PROPERTY_NAME, "0");
+                    final String value = configurationService.getProperty(PROPERTY_NAME, "0");
                     try {
                         tree = Integer.valueOf(value);
-                    } catch (NumberFormatException e) {
+                    } catch (final NumberFormatException e) {
                         throw new SettingException(new ConfigurationException(
                             ConfigurationException.Code.PROPERTY_NOT_AN_INTEGER,
                             e,
@@ -112,7 +112,7 @@ public class Tree implements PreferencesItemService {
                 setting.setSingleValue(tree);
             }
 
-            public boolean isAvailable(UserConfiguration userConfig) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
 
@@ -120,12 +120,12 @@ public class Tree implements PreferencesItemService {
                 return true;
             }
 
-            public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
-                String value = setting.getSingleValue().toString();
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
+                final String value = setting.getSingleValue().toString();
                 final Integer tree;
                 try {
                     tree = I(Integer.parseInt(value));
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     throw new SettingException(Code.INVALID_VALUE, e, value, Strings.join(getPath(), "/"));
                 }
                 ServerUserSetting.getInstance().setFolderTree(ctx.getContextId(), user.getId(), tree);

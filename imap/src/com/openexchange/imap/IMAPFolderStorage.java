@@ -147,7 +147,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
-        this.accountId = imapAccess.getAccountId();
+        accountId = imapAccess.getAccountId();
         this.session = session;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());

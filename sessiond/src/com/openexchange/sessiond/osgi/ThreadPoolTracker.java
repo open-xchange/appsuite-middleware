@@ -64,22 +64,22 @@ public class ThreadPoolTracker implements ServiceTrackerCustomizer {
 
     private final BundleContext context;
 
-    public ThreadPoolTracker(BundleContext context) {
+    public ThreadPoolTracker(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        ThreadPoolService service = (ThreadPoolService) context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final ThreadPoolService service = (ThreadPoolService) context.getService(reference);
         SessionHandler.addThreadPoolService(service);
         return service;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         SessionHandler.removeThreadPoolService();
         context.ungetService(reference);
     }

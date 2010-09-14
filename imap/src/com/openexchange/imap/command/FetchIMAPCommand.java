@@ -59,9 +59,9 @@ import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Header;
 import javax.mail.Message;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
-import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetHeaders;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
@@ -122,7 +122,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             /*
              * Create delegate
              */
-            this.delegate = new IntSeqNumFetcher(arr);
+            delegate = new IntSeqNumFetcher(arr);
         }
 
         public int getNextSeqNum(final int index) {
@@ -211,7 +211,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
-        this.separator = imapFolder.getSeparator();
+        separator = imapFolder.getSeparator();
         command = getFetchCommand(isRev1, fp, loadBody);
         set(arr, isSequential, keepOrder);
     }
@@ -352,7 +352,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
-        this.separator = imapFolder.getSeparator();
+        separator = imapFolder.getSeparator();
         if (0 == fetchLen) {
             returnDefaultValue = true;
         }
@@ -371,7 +371,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             sb.append("UID ");
         }
         sb.append("FETCH ");
-        final String arg = this.args[argsIndex];
+        final String arg = args[argsIndex];
         if (arg.length() > 32) {
             final int pos = arg.indexOf(',');
             if (pos == -1) {

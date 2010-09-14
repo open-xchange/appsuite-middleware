@@ -50,8 +50,8 @@
 package com.openexchange.i18n;
 
 import junit.framework.TestCase;
-import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.i18n.impl.TranslationsI18N;
+import com.openexchange.i18n.parsing.Translations;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -66,7 +66,7 @@ public class TranslationToI18NAdapterTest extends TestCase {
 
     @Override
     public void setUp() {
-        Translations tr = new Translations();
+        final Translations tr = new Translations();
         tr.setTranslation("Key", "Schluessel");
         i18n = new TranslationsI18N(tr);
     }

@@ -73,7 +73,7 @@ public class SendTest extends AbstractMessagingActionTest {
     // Success Case
 
     public void testSendWithRecipients() throws JSONException, AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
         req.putParameter("recipients", "clark.kent@dailyplanet.com");
@@ -82,13 +82,13 @@ public class SendTest extends AbstractMessagingActionTest {
 
         perform(req);
         
-        SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1").getAccountTransport(12, new SimServerSession(null, null, null));
+        final SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1").getAccountTransport(12, new SimServerSession(null, null, null));
         
-        MessagingMessage message = transport.getMessage();
+        final MessagingMessage message = transport.getMessage();
         assertNotNull(message);
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
         
-        Collection<MessagingAddressHeader> recipients = transport.getRecipients();
+        final Collection<MessagingAddressHeader> recipients = transport.getRecipients();
         assertNotNull(recipients);
         assertEquals(1, recipients.size());
         assertEquals("clark.kent@dailyplanet.com", recipients.iterator().next().getAddress());
@@ -96,7 +96,7 @@ public class SendTest extends AbstractMessagingActionTest {
     }
 
     public void testSendWithoutRecipients() throws AbstractOXException, JSONException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
 
@@ -104,20 +104,20 @@ public class SendTest extends AbstractMessagingActionTest {
 
         perform(req);
         
-        SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1").getAccountTransport(12, new SimServerSession(null, null, null));
+        final SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1").getAccountTransport(12, new SimServerSession(null, null, null));
         
-        MessagingMessage message = transport.getMessage();
+        final MessagingMessage message = transport.getMessage();
         assertNotNull(message);
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
         
-        Collection<MessagingAddressHeader> recipients = transport.getRecipients();
+        final Collection<MessagingAddressHeader> recipients = transport.getRecipients();
         assertTrue(recipients == null);
     }
 
     // Error Cases
 
     public void testInvalidBody() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
 
@@ -127,7 +127,7 @@ public class SendTest extends AbstractMessagingActionTest {
     }
 
     public void testMissingBody() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
 
@@ -135,7 +135,7 @@ public class SendTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingMessagingServiceID() throws JSONException, AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("account", "12");
 
         req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));
@@ -144,7 +144,7 @@ public class SendTest extends AbstractMessagingActionTest {
     }
     
     public void testMissingAccountID() throws AbstractOXException, JSONException {
-        AJAXRequestData req = new AJAXRequestData();
+        final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
 
         req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));

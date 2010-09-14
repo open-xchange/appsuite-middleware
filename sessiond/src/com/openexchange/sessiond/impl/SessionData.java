@@ -395,7 +395,7 @@ final class SessionData {
     private ThreadPoolService threadPoolService;
 
     public void addThreadPoolService(final ThreadPoolService service) {
-        this.threadPoolService = service;
+        threadPoolService = service;
     }
 
     public void removeThreadPoolService() {

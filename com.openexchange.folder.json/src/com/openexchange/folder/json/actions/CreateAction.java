@@ -49,7 +49,6 @@
 
 package com.openexchange.folder.json.actions;
 
-import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;

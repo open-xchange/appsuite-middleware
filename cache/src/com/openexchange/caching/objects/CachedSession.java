@@ -53,8 +53,8 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * {@link CachedSession} - Holding cache-able information of a session.
@@ -108,7 +108,7 @@ public final class CachedSession implements Serializable {
      * @param login The full login; e.g. <code>test@foo</code>
      * @param parameters The session's parameters
      */
-    public CachedSession(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, String authId, final String hash, final Map<String, Object> parameters) {
+    public CachedSession(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, final Map<String, Object> parameters) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -125,8 +125,7 @@ public final class CachedSession implements Serializable {
         /*
          * Only fill with serializable objects
          */
-        for (final Iterator<Map.Entry<String, Object>> iterator = parameters.entrySet().iterator(); iterator.hasNext();) {
-            final Map.Entry<String, Object> entry = iterator.next();
+        for (final Entry<String, Object> entry : parameters.entrySet()) {
             final Object value = entry.getValue();
             final Object toCheck;
             final boolean isEmptyArray;

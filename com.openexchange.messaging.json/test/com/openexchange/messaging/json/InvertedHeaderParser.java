@@ -57,12 +57,12 @@ import com.openexchange.messaging.StringMessageHeader;
 
 public class InvertedHeaderParser implements MessagingHeaderParser {
 
-    public boolean handles(String key, Object value) {
+    public boolean handles(final String key, final Object value) {
         return true;
     }
 
-    public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) {
-        StringMessageHeader header = new StringMessageHeader(key, new StringBuilder((String)value).reverse().toString());
+    public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) {
+        final StringMessageHeader header = new StringMessageHeader(key, new StringBuilder((String)value).reverse().toString());
         headers.put(key, Arrays.asList((MessagingHeader)header));
     }
 

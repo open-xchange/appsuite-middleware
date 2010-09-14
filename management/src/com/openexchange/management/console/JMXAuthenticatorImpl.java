@@ -59,7 +59,7 @@ public final class JMXAuthenticatorImpl implements JMXAuthenticator {
     private final String login;
     private final String password;
 
-    public JMXAuthenticatorImpl(String login, String password) {
+    public JMXAuthenticatorImpl(final String login, final String password) {
         super();
         this.login = login;
         this.password = password;

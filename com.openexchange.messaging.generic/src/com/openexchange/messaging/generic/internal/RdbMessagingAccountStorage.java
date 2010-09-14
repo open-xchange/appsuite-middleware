@@ -585,8 +585,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         return true;
     }
 
-    private TIntArrayList getConfIDsForUser(int contextId, int userId, String serviceId) throws MessagingException {
-        TIntArrayList confIds = new TIntArrayList(20);
+    private TIntArrayList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws MessagingException {
+        final TIntArrayList confIds = new TIntArrayList(20);
         final DatabaseService databaseService = getService(CLAZZ_DB);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -602,13 +602,13 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int confId = rs.getInt(1);
+                final int confId = rs.getInt(1);
                 confIds.add(confId);
             }
 
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new MessagingException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -624,30 +624,30 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         if(secretProperties.isEmpty()) {
             return;
         }
-        TIntArrayList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
+        final TIntArrayList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
         final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
         final CryptoService cryptoService = getService(CryptoService.class);
         
-        Context ctx = getContext(session);
-        HashMap<String, Object> content = new HashMap<String, Object>();
+        final Context ctx = getContext(session);
+        final HashMap<String, Object> content = new HashMap<String, Object>();
         try {
             for (int i = 0, size = confIds.size(); i < size; i++) {
-                int confId = confIds.get(i);
+                final int confId = confIds.get(i);
                 content.clear();
                 genericConfStorageService.fill(ctx, confId, content);
-                HashMap<String, Object> update = new HashMap<String, Object>();
-                for (String field : secretProperties) {
-                    String encrypted = (String) content.get(field);
+                final HashMap<String, Object> update = new HashMap<String, Object>();
+                for (final String field : secretProperties) {
+                    final String encrypted = (String) content.get(field);
                     if(encrypted != null) {
-                        String transcripted = cryptoService.encrypt(cryptoService.decrypt(encrypted, oldSecret), newSecret);
+                        final String transcripted = cryptoService.encrypt(cryptoService.decrypt(encrypted, oldSecret), newSecret);
                         update.put(field, transcripted);
                     }
                 }
                 genericConfStorageService.update(ctx, confId, update);
             }
-        } catch (GenericConfigStorageException e) {
+        } catch (final GenericConfigStorageException e) {
             throw new MessagingException(e);
-        } catch (CryptoException e) {
+        } catch (final CryptoException e) {
             throw new MessagingException(e);
         }
     }

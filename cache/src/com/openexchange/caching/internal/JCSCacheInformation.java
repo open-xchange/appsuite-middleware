@@ -91,8 +91,8 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
         if ("*".equals(name)) {
             final String[] cacheNames = cacheHub.getCacheNames();
             final StringBuilder sb = new StringBuilder(512 * cacheNames.length);
-            for (int i = 0; i < cacheNames.length; i++) {
-                sb.append(cacheHub.getCache(cacheNames[i]).getStats()).append("\r\n\r\n");
+            for (final String cacheName : cacheNames) {
+                sb.append(cacheHub.getCache(cacheName).getStats()).append("\r\n\r\n");
             }
             return sb.toString();
         }

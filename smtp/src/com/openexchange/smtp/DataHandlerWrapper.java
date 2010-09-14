@@ -79,7 +79,7 @@ public final class DataHandlerWrapper extends DataHandler {
      */
     public DataHandlerWrapper(final DataHandler dataHandler, final String contentType) {
         super(dataHandler.getDataSource());
-        this.delegatee = dataHandler;
+        delegatee = dataHandler;
         this.contentType = contentType;
     }
 

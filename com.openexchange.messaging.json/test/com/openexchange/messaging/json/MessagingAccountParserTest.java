@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json;
 
+import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -57,7 +58,6 @@ import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
-import junit.framework.TestCase;
 
 
 /**
@@ -69,26 +69,26 @@ import junit.framework.TestCase;
 public class MessagingAccountParserTest extends TestCase {
     public void testParse() throws JSONException, MessagingException {
 
-        SimMessagingService messagingService = new SimMessagingService();
+        final SimMessagingService messagingService = new SimMessagingService();
         
-        DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
+        final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
         
         messagingService.setId("com.openexchange.twitter");
         messagingService.setFormDescription(formDescription);
         
-        SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
         serviceRegistry.add(messagingService);
         
-        JSONObject accountJSON = new JSONObject();
+        final JSONObject accountJSON = new JSONObject();
         accountJSON.put("id", 12);
         accountJSON.put("displayName", "My nice twitter feed");
         accountJSON.put("messagingService", "com.openexchange.twitter");
        
-        JSONObject configJSON = new JSONObject();
+        final JSONObject configJSON = new JSONObject();
         configJSON.put("inputField", "My nice input value");
         accountJSON.put("configuration", configJSON);
         
-        MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON);
+        final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON);
         
         assertNotNull("Account was null!", account);
         assertEquals(12, account.getId());
@@ -98,21 +98,21 @@ public class MessagingAccountParserTest extends TestCase {
     }
     
     public void testMandatoryFieldsOnly() throws MessagingException, JSONException {
-        SimMessagingService messagingService = new SimMessagingService();
+        final SimMessagingService messagingService = new SimMessagingService();
         
-        DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
+        final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
         
         messagingService.setId("com.openexchange.twitter");
         messagingService.setFormDescription(formDescription);
         
-        SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
         serviceRegistry.add(messagingService);
         
-        JSONObject accountJSON = new JSONObject();
+        final JSONObject accountJSON = new JSONObject();
         accountJSON.put("messagingService", "com.openexchange.twitter");
        
         
-        MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON);
+        final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON);
         
         assertNotNull("Account was null!", account);
         assertTrue("Expected unset ID, but was: "+account.getId(), 0 >= account.getId());
@@ -122,16 +122,16 @@ public class MessagingAccountParserTest extends TestCase {
     }
     
     public void testUnknownMessagingService() throws JSONException {
-        MessagingException exception = new MessagingException(null, 0, null, null);
-        SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
+        final MessagingException exception = new MessagingException(null, 0, null, null);
+        final SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
         serviceRegistry.setException(exception);
         
         try {
-            JSONObject accountJSON = new JSONObject();
+            final JSONObject accountJSON = new JSONObject();
             accountJSON.put("messagingService", "com.openexchange.twitter");
-            MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON);
+            final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON);
             fail("Should have failed with exception from message service lookup");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             assertSame(exception, x);
         }
     }

@@ -50,8 +50,8 @@
 package com.openexchange.sessiond.impl;
 
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.session.Session;
@@ -100,7 +100,7 @@ public final class SessionImpl implements Session {
      * @param randomToken The random token
      * @param localIp The local IP
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, String authId, String hash) {
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash) {
         this.userId = userId;
         this.loginName = loginName;
         this.password = password;
@@ -135,8 +135,7 @@ public final class SessionImpl implements Session {
         hash = cachedSession.getHash();
         final Map<String, Serializable> params = cachedSession.getParameters();
         parameters = new ConcurrentHashMap<String, Object>(params.size());
-        for (final Iterator<Map.Entry<String, Serializable>> iter = params.entrySet().iterator(); iter.hasNext();) {
-            final Map.Entry<String, Serializable> entry = iter.next();
+        for (final Entry<String, Serializable> entry : params.entrySet()) {
             parameters.put(entry.getKey(), entry.getValue());
         }
     }
@@ -236,7 +235,7 @@ public final class SessionImpl implements Session {
         return hash;
     }
     
-    public void setHash(String hash) {
+    public void setHash(final String hash) {
         this.hash = hash;
     }
 }

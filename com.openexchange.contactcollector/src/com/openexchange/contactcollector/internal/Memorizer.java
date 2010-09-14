@@ -273,12 +273,12 @@ public class Memorizer implements Runnable {
             return Collections.emptySet();
         }
         final Set<InternetAddress> set = new HashSet<InternetAddress>(aliases.length);
-        for (int i = 0; i < aliases.length; i++) {
+        for (final String aliase : aliases) {
             try {
-                set.add(new QuotedInternetAddress(aliases[i], false));
+                set.add(new QuotedInternetAddress(aliase, false));
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(MessageFormat.format("Alias could not be parsed to an internet address: {0}", aliases[i]), e);
+                    LOG.debug(MessageFormat.format("Alias could not be parsed to an internet address: {0}", aliase), e);
                 }
             }
         }
@@ -379,8 +379,8 @@ public class Memorizer implements Runnable {
                     // All context-known users' aliases
                     final int[] allUserIDs = userService.listAllUser(context);
                     final Set<InternetAddress> aliases = new HashSet<InternetAddress>(allUserIDs.length * 8);
-                    for (int i = 0; i < allUserIDs.length; i++) {
-                        aliases.addAll(getAliases(userService.getUser(allUserIDs[i], context)));
+                    for (final int allUserID : allUserIDs) {
+                        aliases.addAll(getAliases(userService.getUser(allUserID, context)));
                     }
                     return aliases;
                 }

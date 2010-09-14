@@ -75,7 +75,7 @@ public class SimAccountManager implements MessagingAccountManager {
     }
 
     public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        this.createdAccount = account;
+        createdAccount = account;
         this.session = session;
         exception();
         return createdAccount.getId();
@@ -92,7 +92,7 @@ public class SimAccountManager implements MessagingAccountManager {
     }
 
     public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        this.deletedAccount = account;
+        deletedAccount = account;
         this.session = session;
         exception();
     }
@@ -117,7 +117,7 @@ public class SimAccountManager implements MessagingAccountManager {
     }
 
     public void setException(final MessagingException messagingException) {
-        this.exception = messagingException;
+        exception = messagingException;
     }
     
     private void exception() throws MessagingException {
@@ -137,7 +137,7 @@ public class SimAccountManager implements MessagingAccountManager {
     }
 
     public void setAccountToGet(final MessagingAccount account) {
-        this.accountToGet = account;
+        accountToGet = account;
     }
 
 
@@ -147,13 +147,13 @@ public class SimAccountManager implements MessagingAccountManager {
 
 
     public void setAllAccounts(final MessagingAccount...list) {
-        this.accounts = Arrays.asList(list);
+        accounts = Arrays.asList(list);
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.messaging.MessagingAccountManager#checkSecretCanDecryptStrings(com.openexchange.session.Session, java.lang.String)
      */
-    public boolean checkSecretCanDecryptStrings(Session session, String secret) {
+    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -161,7 +161,7 @@ public class SimAccountManager implements MessagingAccountManager {
     /* (non-Javadoc)
      * @see com.openexchange.messaging.MessagingAccountManager#migrateToNewSecret(java.lang.String, java.lang.String, com.openexchange.session.Session)
      */
-    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) {
+    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
         // TODO Auto-generated method stub
         
     }

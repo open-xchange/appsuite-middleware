@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
+import junit.framework.TestCase;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -61,7 +62,6 @@ import com.openexchange.messaging.SimMessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
-import junit.framework.TestCase;
 
 /**
  * {@link GetTest}
@@ -72,12 +72,12 @@ public class GetTest extends TestCase {
 
     // Success Case
     public void testGet() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
-        SimAccountManager accManager = new SimAccountManager();
-        SimMessagingService service = new SimMessagingService();
+        final SimAccountManager accManager = new SimAccountManager();
+        final SimMessagingService service = new SimMessagingService();
 
-        SimMessagingAccount account = new SimMessagingAccount();
+        final SimMessagingAccount account = new SimMessagingAccount();
         account.setDisplayName("My Twitter Account");
         account.setMessagingService(service);
 
@@ -85,25 +85,25 @@ public class GetTest extends TestCase {
 
         service.setAccountManager(accManager);
 
-        DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
+        final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
 
         service.setId("com.openexchange.twitter");
         service.setFormDescription(formDescription);
         registry.add(service);
 
-        GetAction action = new GetAction(registry);
+        final GetAction action = new GetAction(registry);
 
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
 
-        AJAXRequestResult result = action.perform(requestData, session);
+        final AJAXRequestResult result = action.perform(requestData, session);
     
         assertNotNull(result);
         
-        Object resultObject = result.getResultObject();
+        final Object resultObject = result.getResultObject();
         assertNotNull(resultObject);
         assertTrue(JSONObject.class.isInstance(resultObject));
     
@@ -115,105 +115,105 @@ public class GetTest extends TestCase {
     
     public void testMissingParameterID() throws AbstractOXException {
         
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        GetAction action = new GetAction(null);
+        final GetAction action = new GetAction(null);
         
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
     }
     
     public void testMissingParameterMessagingService() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        GetAction action = new GetAction(null);
+        final GetAction action = new GetAction(null);
         
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
     }
     
     public void testNumberFormatExceptionInID() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        GetAction action = new GetAction(null);
+        final GetAction action = new GetAction(null);
         
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
 
     }
     
     public void testMessagingExceptionInRegistry() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new MessagingException(null, -1, null, null));
         
-        SimAccountManager accManager = new SimAccountManager();
-        SimMessagingService service = new SimMessagingService();
+        final SimAccountManager accManager = new SimAccountManager();
+        final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
         
         service.setId("com.openexchange.twitter");
         registry.add(service);
         
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        GetAction action = new GetAction(registry);
+        final GetAction action = new GetAction(registry);
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
         
     }
     
     public void testMessagingExceptionInAccountManager() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
-        SimAccountManager accManager = new SimAccountManager();
+        final SimAccountManager accManager = new SimAccountManager();
         accManager.setException(new MessagingException(null, -1, null, null));
         
-        SimMessagingService service = new SimMessagingService();
+        final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
         
         service.setId("com.openexchange.twitter");
         registry.add(service);
         
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        GetAction action = new GetAction(registry);
+        final GetAction action = new GetAction(registry);
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
         

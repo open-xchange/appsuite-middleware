@@ -65,13 +65,13 @@ public class Bug16158Test extends TestCase {
 
     SessionData sessionData;
     SimSession session;
-    private SessionFinder[] finders = new SessionFinder[2];
-    private Thread[] finderThreads = new Thread[finders.length];
-    private SessionRotator[] rotators = new SessionRotator[1];
-    private Thread[] rotatorThreads = new Thread[rotators.length];
+    private final SessionFinder[] finders = new SessionFinder[2];
+    private final Thread[] finderThreads = new Thread[finders.length];
+    private final SessionRotator[] rotators = new SessionRotator[1];
+    private final Thread[] rotatorThreads = new Thread[rotators.length];
     private SimThreadPoolService threadPoolService;
 
-    public Bug16158Test(String name) {
+    public Bug16158Test(final String name) {
         super(name);
     }
 
@@ -81,7 +81,7 @@ public class Bug16158Test extends TestCase {
         sessionData = new SessionData(100, 1);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
-        SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
+        final SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
         session = new SimSession();
         session.setSessionID(idGenerator.createSessionId(null, null));
         session.setLoginName("bug16158");
@@ -105,23 +105,23 @@ public class Bug16158Test extends TestCase {
     }
 
     public void testNotFoundSession() throws Throwable {
-        for (Thread finderThread : finderThreads) {
+        for (final Thread finderThread : finderThreads) {
             finderThread.start();
         }
-        for (Thread rotatorThread : rotatorThreads) {
+        for (final Thread rotatorThread : rotatorThreads) {
             rotatorThread.start();
         }
         Thread.sleep(RUNTIME);
-        for (SessionRotator rotator : rotators) {
+        for (final SessionRotator rotator : rotators) {
             rotator.stop();
         }
-        for (Thread rotatorThread : rotatorThreads) {
+        for (final Thread rotatorThread : rotatorThreads) {
             rotatorThread.join();
         }
-        for (SessionFinder finder : finders) {
+        for (final SessionFinder finder : finders) {
             finder.stop();
         }
-        for (Thread finderThread : finderThreads) {
+        for (final Thread finderThread : finderThreads) {
             finderThread.join();
         }
         /* testing for a proper result of this is is tricky. it may happen - due to scheduling of threads in front of the lock - that the
@@ -134,15 +134,15 @@ public class Bug16158Test extends TestCase {
          *   + no rotator has a timeout.
          */
         boolean wasTimeout = false;
-        for (SessionRotator rotator : rotators) {
+        for (final SessionRotator rotator : rotators) {
             wasTimeout |= rotator.hasTimeout();
         }
-        for (SessionFinder finder : finders) {
+        for (final SessionFinder finder : finders) {
             assertEquals("Expected shows timeout. Actual represents not found session.", wasTimeout, finder.hasNotFound());
         }
         if (wasTimeout) {
             int foundTimeouts = 0;
-            for (SessionRotator rotator : rotators) {
+            for (final SessionRotator rotator : rotators) {
                 if (rotator.hasTimeout()) {
                     foundTimeouts++;
                 }
@@ -166,10 +166,10 @@ public class Bug16158Test extends TestCase {
         public void run() {
             try {
                 while (run && !notFound) {
-                    SessionControl control = sessionData.getSession(session.getSessionID());
+                    final SessionControl control = sessionData.getSession(session.getSessionID());
                     notFound = null == control;
                 }
-            } catch (NullPointerException e) {
+            } catch (final NullPointerException e) {
                 e.printStackTrace();
                 notFound = true;
             }
@@ -192,10 +192,10 @@ public class Bug16158Test extends TestCase {
             while (run && !timeout) {
                 try {
                     Thread.sleep(1);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     e.printStackTrace();
                 }
-                List<SessionControl> removed = sessionData.rotate();
+                final List<SessionControl> removed = sessionData.rotate();
                 timeout = !removed.isEmpty();
             }
         }

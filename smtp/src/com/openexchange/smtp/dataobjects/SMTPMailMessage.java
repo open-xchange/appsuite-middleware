@@ -93,7 +93,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	 */
 	public SMTPMailMessage(final String htmlMailBody, final Session session, final Context ctx) {
 		super(session, ctx);
-		this.mailPart = new SMTPBodyPart(htmlMailBody);
+		mailPart = new SMTPBodyPart(htmlMailBody);
 		enclosedParts = new ArrayList<MailPart>();
 	}
 
@@ -182,7 +182,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 
 	@Override
 	public void setMailId(final String id) {
-		this.uid = id;
+		uid = id;
 	}
 
 }

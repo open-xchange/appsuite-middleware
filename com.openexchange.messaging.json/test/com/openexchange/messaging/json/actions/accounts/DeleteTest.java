@@ -69,25 +69,25 @@ public class DeleteTest extends TestCase {
     // Success Case
     
     public void testDelete() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
-        SimAccountManager accManager = new SimAccountManager();
-        SimMessagingService service = new SimMessagingService();
+        final SimAccountManager accManager = new SimAccountManager();
+        final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
         
         service.setId("com.openexchange.twitter");
         registry.add(service);
         
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        DeleteAction action = new DeleteAction(registry);
+        final DeleteAction action = new DeleteAction(registry);
         action.perform(requestData, session);
         
-        MessagingAccount account = accManager.getDeletedAccount();
+        final MessagingAccount account = accManager.getDeletedAccount();
         assertNotNull(account);
         assertEquals(12, account.getId());
     }
@@ -96,104 +96,104 @@ public class DeleteTest extends TestCase {
     
     public void testMissingParameterID() throws AbstractOXException {
         
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        DeleteAction action = new DeleteAction(null);
+        final DeleteAction action = new DeleteAction(null);
         
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
     }
     
     public void testMissingParameterMessagingService() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        DeleteAction action = new DeleteAction(null);
+        final DeleteAction action = new DeleteAction(null);
         
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
     }
     
     public void testNumberFormatExceptionInID() throws AbstractOXException {
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        DeleteAction action = new DeleteAction(null);
+        final DeleteAction action = new DeleteAction(null);
         
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
 
     }
     
     public void testMessagingExceptionInRegistry() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new MessagingException(null, -1, null, null));
         
-        SimAccountManager accManager = new SimAccountManager();
-        SimMessagingService service = new SimMessagingService();
+        final SimAccountManager accManager = new SimAccountManager();
+        final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
         
         service.setId("com.openexchange.twitter");
         registry.add(service);
         
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        DeleteAction action = new DeleteAction(registry);
+        final DeleteAction action = new DeleteAction(registry);
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
         
     }
     
     public void testMessagingExceptionInAccountManager() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
-        SimAccountManager accManager = new SimAccountManager();
+        final SimAccountManager accManager = new SimAccountManager();
         accManager.setException(new MessagingException(null, -1, null, null));
-        SimMessagingService service = new SimMessagingService();
+        final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
         
         service.setId("com.openexchange.twitter");
         registry.add(service);
         
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
         
-        SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(null, null, null);
         
-        DeleteAction action = new DeleteAction(registry);
+        final DeleteAction action = new DeleteAction(registry);
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             //SUCCESS
         }
         

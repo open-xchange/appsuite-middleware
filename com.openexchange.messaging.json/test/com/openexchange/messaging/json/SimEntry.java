@@ -60,9 +60,9 @@ import java.util.Map;
 public class SimEntry<T1, T2> implements Map.Entry<T1, T2>{
 
     private T2 value;
-    private T1 key;
+    private final T1 key;
 
-    public SimEntry(T1 key, T2 value) {
+    public SimEntry(final T1 key, final T2 value) {
         this.key = key;
         this.value = value;
     }
@@ -75,8 +75,8 @@ public class SimEntry<T1, T2> implements Map.Entry<T1, T2>{
         return value;
     }
 
-    public T2 setValue(T2 value) {
-        T2 old = this.value;
+    public T2 setValue(final T2 value) {
+        final T2 old = this.value;
         this.value = value;
         return old;
     }

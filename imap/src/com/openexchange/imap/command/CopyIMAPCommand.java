@@ -132,19 +132,19 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
     private CopyIMAPCommand(final IMAPFolder imapFolder, final long[] nums, final String destFolderName, final boolean isSequential, final boolean fast, final boolean uid) throws MessagingException {
         super(imapFolder);
-        this.uids = nums == null ? DEFAULT_RETVAL : nums;
+        uids = nums == null ? DEFAULT_RETVAL : nums;
         this.uid = uid;
         if (imapFolder.getMessageCount() == 0) {
             returnDefaultValue = true;
         } else {
-            returnDefaultValue = (this.uids.length == 0);
+            returnDefaultValue = (uids.length == 0);
         }
         this.fast = fast;
         this.destFolderName = prepareStringArgument(destFolderName);
-        length = this.uids.length;
-        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0]).append(':').append(
-            this.uids[length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
-            this.uids,
+        length = uids.length;
+        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(
+            uids[length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+            uids,
             false,
             (uid ? LENGTH_WITH_UID : LENGTH) + destFolderName.length()));
         if (fast) {
@@ -171,7 +171,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         }
         fast = true;
         uid = false;
-        this.uids = DEFAULT_RETVAL;
+        uids = DEFAULT_RETVAL;
         this.destFolderName = prepareStringArgument(destFolderName);
         retval = DEFAULT_RETVAL;
         args = ARGS_ALL;

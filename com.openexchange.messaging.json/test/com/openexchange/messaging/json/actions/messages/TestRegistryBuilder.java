@@ -69,25 +69,25 @@ public class TestRegistryBuilder {
 
     // Builds a service registry.
     public static MessagingServiceRegistry buildTestRegistry() {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         
         // Service 1
-        SimMessagingService service1 = new SimMessagingService();
+        final SimMessagingService service1 = new SimMessagingService();
         service1.setId("com.openexchange.test1");
         
-        SimAccountManager accManager1 = new SimAccountManager();
+        final SimAccountManager accManager1 = new SimAccountManager();
         
         // Account 1.1
-        SimMessagingAccount account11 = new SimMessagingAccount();
+        final SimMessagingAccount account11 = new SimMessagingAccount();
         account11.setDisplayName("acc1.1");
         account11.setId(11);
         account11.setMessagingService(service1);
         
-        SimpleMessagingMessage message11 = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message11 = new SimpleMessagingMessage();
         message11.setId("msg11");
         
-        SimAccountAccess accAccess11 = new SimAccountAccess();
-        SimMessageAccess access11 = new SimMessageAccess();
+        final SimAccountAccess accAccess11 = new SimAccountAccess();
+        final SimMessageAccess access11 = new SimMessageAccess();
         access11.setTemplateMessage(message11);
         accAccess11.setMessageAccess(access11);
         
@@ -95,16 +95,16 @@ public class TestRegistryBuilder {
         service1.setAccountTransport(11, new SimMessagingTransport());
         
         // Account 1.2
-        SimMessagingAccount account12 = new SimMessagingAccount();
+        final SimMessagingAccount account12 = new SimMessagingAccount();
         account12.setDisplayName("acc1.2");
         account12.setId(12);
         account12.setMessagingService(service1);
 
-        SimpleMessagingMessage message12 = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message12 = new SimpleMessagingMessage();
         message12.setId("msg12");
         
-        SimAccountAccess accAccess12 = new SimAccountAccess();
-        SimMessageAccess access12 = new SimMessageAccess();
+        final SimAccountAccess accAccess12 = new SimAccountAccess();
+        final SimMessageAccess access12 = new SimMessageAccess();
         access12.setTemplateMessage(message12);
         accAccess12.setMessageAccess(access12);
         
@@ -116,22 +116,22 @@ public class TestRegistryBuilder {
         service1.setAccountManager(accManager1);
         
         // Service 2
-        SimMessagingService service2 = new SimMessagingService();
+        final SimMessagingService service2 = new SimMessagingService();
         service2.setId("com.openexchange.test2");
  
-        SimAccountManager accManager2 = new SimAccountManager();
+        final SimAccountManager accManager2 = new SimAccountManager();
 
         // Account 2.1
-        SimMessagingAccount account21 = new SimMessagingAccount();
+        final SimMessagingAccount account21 = new SimMessagingAccount();
         account21.setDisplayName("acc2.1");
         account21.setId(21);
         account21.setMessagingService(service2);
         
-        SimpleMessagingMessage message21 = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message21 = new SimpleMessagingMessage();
         message21.setId("msg21");
 
-        SimAccountAccess accAccess21 = new SimAccountAccess();
-        SimMessageAccess access21 = new SimMessageAccess();
+        final SimAccountAccess accAccess21 = new SimAccountAccess();
+        final SimMessageAccess access21 = new SimMessageAccess();
         access21.setTemplateMessage(message21);
         accAccess21.setMessageAccess(access21);
         
@@ -139,16 +139,16 @@ public class TestRegistryBuilder {
         service2.setAccountTransport(21, new SimMessagingTransport());
 
         // Account 2.2
-        SimMessagingAccount account22 = new SimMessagingAccount();
+        final SimMessagingAccount account22 = new SimMessagingAccount();
         account22.setDisplayName("acc2.2");
         account22.setId(22);
         account22.setMessagingService(service2);
 
-        SimpleMessagingMessage message22 = new SimpleMessagingMessage();
+        final SimpleMessagingMessage message22 = new SimpleMessagingMessage();
         message21.setId("msg22");
 
-        SimAccountAccess accAccess22 = new SimAccountAccess();
-        SimMessageAccess access22 = new SimMessageAccess();
+        final SimAccountAccess accAccess22 = new SimAccountAccess();
+        final SimMessageAccess access22 = new SimMessageAccess();
         access22.setTemplateMessage(message22);
         accAccess22.setMessageAccess(access22);
         

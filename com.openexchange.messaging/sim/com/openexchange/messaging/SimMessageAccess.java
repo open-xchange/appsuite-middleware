@@ -92,7 +92,7 @@ public class SimMessageAccess implements MessagingMessageAccess {
         this.templateMessage = templateMessage;
     }
 
-    public MessagingPart getAttachment(String folder, String messageId, String sectionId) throws MessagingException {
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
         called.add(new Call("getAttachment", folder, messageId, sectionId));
         return templatePart;
     }
@@ -158,7 +158,7 @@ public class SimMessageAccess implements MessagingMessageAccess {
     /* (non-Javadoc)
      * @see com.openexchange.messaging.MessagingMessageAccess#resolveContent(java.lang.String, java.lang.String, java.lang.String)
      */
-    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
         // TODO Auto-generated method stub
         return null;
     }

@@ -52,13 +52,13 @@ package com.openexchange.messaging.json;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
-import junit.framework.TestCase;
 
 
 /**
@@ -68,30 +68,30 @@ import junit.framework.TestCase;
  */
 public class ContentTypeParserTest extends TestCase {
     public void testParseComplex() throws JSONException, MessagingException {
-        ContentTypeParser parser = new ContentTypeParser();
+        final ContentTypeParser parser = new ContentTypeParser();
         
         assertTrue(parser.handles("content-type", null));
         
-        JSONObject jsonCType = new JSONObject();
+        final JSONObject jsonCType = new JSONObject();
         jsonCType.put("type", "text/plain");
         
-        JSONObject params = new JSONObject();
+        final JSONObject params = new JSONObject();
         params.put("charset", "UTF-8");
         params.put("name", "something.txt");
         
         jsonCType.put("params", params);
         
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
     
         parser.parseAndAdd(headers, "content-type", jsonCType);
         
         assertTrue(!headers.isEmpty());
         
-        Collection<MessagingHeader> collection = headers.get(MimeContentType.getContentTypeName());
+        final Collection<MessagingHeader> collection = headers.get(MimeContentType.getContentTypeName());
         assertNotNull(collection);
         assertEquals(1, collection.size());
         
-        ContentType cType = (ContentType) collection.iterator().next();
+        final ContentType cType = (ContentType) collection.iterator().next();
         
         assertEquals("text/plain", cType.getBaseType());
         assertEquals("text", cType.getPrimaryType());
@@ -103,21 +103,21 @@ public class ContentTypeParserTest extends TestCase {
     
     
     public void testParseBasic() throws MessagingException, JSONException {
-        ContentTypeParser parser = new ContentTypeParser();
+        final ContentTypeParser parser = new ContentTypeParser();
         
-        String stringCType = "text/plain;charset=UTF-8;name=something.txt";
+        final String stringCType = "text/plain;charset=UTF-8;name=something.txt";
 
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         
         parser.parseAndAdd(headers, "content-type", stringCType);
         
         assertTrue(!headers.isEmpty());
         
-        Collection<MessagingHeader> collection = headers.get(MimeContentType.getContentTypeName());
+        final Collection<MessagingHeader> collection = headers.get(MimeContentType.getContentTypeName());
         assertNotNull(collection);
         assertEquals(1, collection.size());
         
-        ContentType cType = (ContentType) collection.iterator().next();
+        final ContentType cType = (ContentType) collection.iterator().next();
         
         assertEquals("text/plain", cType.getBaseType());
         assertEquals("text", cType.getPrimaryType());

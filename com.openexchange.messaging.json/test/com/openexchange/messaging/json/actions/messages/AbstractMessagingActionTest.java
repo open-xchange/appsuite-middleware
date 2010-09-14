@@ -51,6 +51,7 @@ package com.openexchange.messaging.json.actions.messages;
 
 import java.util.Arrays;
 import java.util.List;
+import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -62,7 +63,6 @@ import com.openexchange.messaging.SimMessageAccess;
 import com.openexchange.messaging.SimMessageAccess.Call;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
-import junit.framework.TestCase;
 
 
 /**
@@ -74,18 +74,18 @@ public abstract class AbstractMessagingActionTest extends TestCase {
     
     protected MessagingServiceRegistry registry = TestRegistryBuilder.buildTestRegistry();
 
-    protected AJAXRequestResult perform(AJAXRequestData req) throws AbstractOXException {
-        SimServerSession session = new SimServerSession(null, null, null);
+    protected AJAXRequestResult perform(final AJAXRequestData req) throws AbstractOXException {
+        final SimServerSession session = new SimServerSession(null, null, null);
         return getAction().perform(req, session);
     }
 
-    protected void assertFails(AJAXRequestData requestData) throws AbstractOXException {
-        AbstractMessagingAction action = getAction();
-        SimServerSession session = new SimServerSession(null, null, null);
+    protected void assertFails(final AJAXRequestData requestData) throws AbstractOXException {
+        final AbstractMessagingAction action = getAction();
+        final SimServerSession session = new SimServerSession(null, null, null);
         try {
-            AJAXRequestResult result = action.perform(requestData, session);
+            final AJAXRequestResult result = action.perform(requestData, session);
             fail("Should have thrown exception");
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             // SUCCESS
         }
 
@@ -94,21 +94,21 @@ public abstract class AbstractMessagingActionTest extends TestCase {
     
     protected abstract AbstractMessagingAction getAction();
     
-    protected void assertEqualFields(Object object, MessagingField...messagingFields) {
+    protected void assertEqualFields(final Object object, final MessagingField...messagingFields) {
         assertNotNull(object);
         assertEquals(Arrays.asList(messagingFields), Arrays.asList((MessagingField[]) object));
     }
     
-    protected void assertIDs(Object object, String...ids) {
+    protected void assertIDs(final Object object, final String...ids) {
         assertNotNull(object);
         assertEquals(Arrays.asList((String[]) object), Arrays.asList(ids));
     }
 
-    protected Call getMessagingAccessCall(String serviceId, int accountId) throws MessagingException {
-        MessagingService service = registry.getMessagingService(serviceId);
-        MessagingAccountAccess accountAccess = service.getAccountAccess(accountId, null);
-        SimMessageAccess messageAccess = (SimMessageAccess) accountAccess.getMessageAccess();
-        List<Call> calls = messageAccess.getCalls();
+    protected Call getMessagingAccessCall(final String serviceId, final int accountId) throws MessagingException {
+        final MessagingService service = registry.getMessagingService(serviceId);
+        final MessagingAccountAccess accountAccess = service.getAccountAccess(accountId, null);
+        final SimMessageAccess messageAccess = (SimMessageAccess) accountAccess.getMessageAccess();
+        final List<Call> calls = messageAccess.getCalls();
         if (calls.isEmpty()) {
             return null;
         }

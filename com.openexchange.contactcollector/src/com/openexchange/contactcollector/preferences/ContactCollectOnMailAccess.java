@@ -81,8 +81,8 @@ public class ContactCollectOnMailAccess implements PreferencesItemService {
                 return -1;
             }
 
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
-                Boolean value = ServerUserSetting.getInstance().isContactCollectOnMailAccess(ctx.getContextId(), user.getId());
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final Boolean value = ServerUserSetting.getInstance().isContactCollectOnMailAccess(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
 
@@ -95,8 +95,8 @@ public class ContactCollectOnMailAccess implements PreferencesItemService {
             }
 
             public void writeValue(
-                final Session session, Context ctx, User user, Setting setting) throws SettingException {
-                boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));
+                final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
+                final boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));
                 ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), user.getId(), value);
             }
         };

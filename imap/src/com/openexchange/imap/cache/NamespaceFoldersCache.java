@@ -256,7 +256,7 @@ public final class NamespaceFoldersCache {
         }
 
         public void setValue(final String[] value) {
-            this.fullnames = value;
+            fullnames = value;
         }
 
         public Class<String[]> getEntryClass() {

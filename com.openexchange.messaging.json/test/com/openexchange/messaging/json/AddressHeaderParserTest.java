@@ -54,14 +54,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
-import com.openexchange.messaging.StringMessageHeader;
-import junit.framework.TestCase;
 
 
 /**
@@ -71,9 +70,9 @@ import junit.framework.TestCase;
  */
 public class AddressHeaderParserTest extends TestCase {
     public void testResponsible() {
-        AddressHeaderParser parser = new AddressHeaderParser();
+        final AddressHeaderParser parser = new AddressHeaderParser();
         
-        List<String> headerNames = Arrays.asList(
+        final List<String> headerNames = Arrays.asList(
             "From",
             "To",
             "Cc",
@@ -88,27 +87,27 @@ public class AddressHeaderParserTest extends TestCase {
             "Resent-Cc",
             "Resent-Bcc");
         
-        for (String headerName : headerNames) {
+        for (final String headerName : headerNames) {
             assertTrue(parser.handles(headerName, null));
         }
     }
     
     public void testParseComplex() throws JSONException, MessagingException {
-        JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
+        final JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
         
-        AddressHeaderParser parser = new AddressHeaderParser();
+        final AddressHeaderParser parser = new AddressHeaderParser();
         
-        HashMap<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final HashMap<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         parser.parseAndAdd(headers, "From", object);
         
         assertTrue(headers.containsKey("From"));
         
-        Collection<MessagingHeader> parsed = headers.get("From");
+        final Collection<MessagingHeader> parsed = headers.get("From");
         assertNotNull(parsed);
         
         assertEquals(1, parsed.size());
         
-        MessagingAddressHeader header = (MessagingAddressHeader) parsed.iterator().next();
+        final MessagingAddressHeader header = (MessagingAddressHeader) parsed.iterator().next();
         
         assertEquals("Clark Kent", header.getPersonal());
         assertEquals("clark.kent@dailyplanet.com", header.getAddress());
@@ -116,43 +115,43 @@ public class AddressHeaderParserTest extends TestCase {
     
     public void testParseSimple() throws MessagingException, JSONException {
         
-        AddressHeaderParser parser = new AddressHeaderParser();
+        final AddressHeaderParser parser = new AddressHeaderParser();
         
-        HashMap<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final HashMap<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         parser.parseAndAdd(headers, "From", "Clark Kent <clark.kent@dailyplanet.com>");
         
         assertTrue(headers.containsKey("From"));
         
-        Collection<MessagingHeader> parsed = headers.get("From");
+        final Collection<MessagingHeader> parsed = headers.get("From");
         assertNotNull(parsed);
         
         assertEquals(1, parsed.size());
         
-        MessagingAddressHeader header = (MessagingAddressHeader) parsed.iterator().next();
+        final MessagingAddressHeader header = (MessagingAddressHeader) parsed.iterator().next();
         
         assertEquals("Clark Kent", header.getPersonal());
         assertEquals("clark.kent@dailyplanet.com", header.getAddress());
     }
     
     public void testParseList() throws MessagingException, JSONException {
-        JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
+        final JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
         
-        JSONArray array = new JSONArray("['Lois Lane <lois.lane@dailyplanet.com>']");
+        final JSONArray array = new JSONArray("['Lois Lane <lois.lane@dailyplanet.com>']");
         array.put(object);
         
-        AddressHeaderParser parser = new AddressHeaderParser();
+        final AddressHeaderParser parser = new AddressHeaderParser();
         
-        HashMap<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        final HashMap<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         parser.parseAndAdd(headers, "From", array);
         
         assertTrue(headers.containsKey("From"));
         
-        Collection<MessagingHeader> parsed = headers.get("From");
+        final Collection<MessagingHeader> parsed = headers.get("From");
         assertNotNull(parsed);
         
         assertEquals(2, parsed.size());
         
-        Iterator<MessagingHeader> iterator = parsed.iterator();
+        final Iterator<MessagingHeader> iterator = parsed.iterator();
         MessagingAddressHeader header = (MessagingAddressHeader) iterator.next();
         
         assertEquals("Lois Lane", header.getPersonal());

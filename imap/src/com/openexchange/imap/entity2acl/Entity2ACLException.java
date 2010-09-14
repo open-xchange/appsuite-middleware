@@ -123,7 +123,7 @@ public final class Entity2ACLException extends AbstractOXException {
         private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.category = category;
-            this.number = detailNumber;
+            number = detailNumber;
         }
 
         /**

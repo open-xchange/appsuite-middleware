@@ -81,19 +81,19 @@ public class ConfigTools {
      * @param span
      * @return
      */
-    public static long parseTimespan(String span) {
-        StringBuilder numberBuilder = new StringBuilder();
-        StringBuilder unitBuilder = new StringBuilder();
+    public static long parseTimespan(final String span) {
+        final StringBuilder numberBuilder = new StringBuilder();
+        final StringBuilder unitBuilder = new StringBuilder();
         int mode = 0;
         long tally = 0;
         
-        for(char c : span.toCharArray()) {
+        for(final char c : span.toCharArray()) {
             if(Character.isDigit(c)) {
                 if(mode == 0) {
                     numberBuilder.append(c);
                 } else {
-                    String unit = unitBuilder.toString().toUpperCase();
-                    Long factor = UNITS.get(unit);
+                    final String unit = unitBuilder.toString().toUpperCase();
+                    final Long factor = UNITS.get(unit);
                     if(factor == null) {
                         throw new IllegalArgumentException("I don't know unit "+unit);
                     }
@@ -111,8 +111,8 @@ public class ConfigTools {
             }
         }
         if(numberBuilder.length() != 0) {
-            String unit = unitBuilder.toString().toUpperCase();
-            Long factor = UNITS.get(unit);
+            final String unit = unitBuilder.toString().toUpperCase();
+            final Long factor = UNITS.get(unit);
             if(factor == null) {
                 throw new IllegalArgumentException("I don't know unit "+unit);
             }

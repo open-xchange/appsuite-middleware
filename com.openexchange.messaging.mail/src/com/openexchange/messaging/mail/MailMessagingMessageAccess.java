@@ -161,8 +161,8 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
             final MailMessage[] mails =
                 messageStorage.getAllMessages(folder, from(indexRange), fromSort(sortField), from(order), from(fields));
             final List<MessagingMessage> list = new ArrayList<MessagingMessage>();
-            for (int i = 0; i < mails.length; i++) {
-                list.add(from(mails[i]));
+            for (final MailMessage mail : mails) {
+                list.add(from(mail));
             }
             return list;
         } catch (final MailException e) {
@@ -182,8 +182,8 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         try {
             final MailMessage[] mails = messageStorage.getMessages(folder, messageIds, from(fields));
             final List<MessagingMessage> list = new ArrayList<MessagingMessage>();
-            for (int i = 0; i < mails.length; i++) {
-                list.add(from(mails[i]));
+            for (final MailMessage mail : mails) {
+                list.add(from(mail));
             }
             return list;
         } catch (final MailException e) {
@@ -239,8 +239,8 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
             final MailMessage[] mails =
                 messageStorage.searchMessages(folder, from(indexRange), fromSort(sortField), from(order), from(searchTerm), from(fields));
             final List<MessagingMessage> list = new ArrayList<MessagingMessage>();
-            for (int i = 0; i < mails.length; i++) {
-                list.add(from(mails[i]));
+            for (final MailMessage mail : mails) {
+                list.add(from(mail));
             }
             return list;
         } catch (final MailException e) {

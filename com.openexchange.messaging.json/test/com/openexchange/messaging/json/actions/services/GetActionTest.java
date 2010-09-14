@@ -49,13 +49,13 @@
 
 package com.openexchange.messaging.json.actions.services;
 
+import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
-import junit.framework.TestCase;
 
 /**
  * {@link GetActionTest}
@@ -66,22 +66,22 @@ public class GetActionTest extends TestCase {
 
     // Success Case
     public void testGet() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
-        SimMessagingService messagingService = new SimMessagingService();
+        final SimMessagingService messagingService = new SimMessagingService();
         messagingService.setId("com.openexchange.test");
 
         registry.add(messagingService);
 
-        GetAction action = new GetAction(registry);
+        final GetAction action = new GetAction(registry);
 
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "com.openexchange.test");
 
-        AJAXRequestResult result = action.perform(requestData, null);
+        final AJAXRequestResult result = action.perform(requestData, null);
         assertNotNull(result);
 
-        Object resultObject = result.getResultObject();
+        final Object resultObject = result.getResultObject();
         assertNotNull(resultObject);
 
     }
@@ -89,56 +89,56 @@ public class GetActionTest extends TestCase {
     // Error cases
 
     public void testUnknownId() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
-        GetAction action = new GetAction(registry);
+        final GetAction action = new GetAction(registry);
 
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "com.openexchange.test");
 
         try {
-            AJAXRequestResult result = action.perform(requestData, null);
+            final AJAXRequestResult result = action.perform(requestData, null);
             fail("Should fail");
             assertNull(result);
-        } catch (MessagingException e) {
+        } catch (final MessagingException e) {
             //SUCCESS
         }
 
     }
 
     public void testMissingParameter() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
-        GetAction action = new GetAction(registry);
-        AJAXRequestData requestData = new AJAXRequestData();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final GetAction action = new GetAction(registry);
+        final AJAXRequestData requestData = new AJAXRequestData();
         try {
-            AJAXRequestResult result = action.perform(requestData, null);
+            final AJAXRequestResult result = action.perform(requestData, null);
             fail("Should fail");
             assertNull(result);
-        } catch (MessagingException e) {
+        } catch (final MessagingException e) {
             //SUCCESS
             assertTrue(e.getMessage().contains("parameter"));
         }
     }
 
     public void testMessagingException() throws AbstractOXException {
-        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
-        SimMessagingService messagingService = new SimMessagingService();
+        final SimMessagingService messagingService = new SimMessagingService();
         messagingService.setId("com.openexchange.test");
 
         registry.add(messagingService);
         registry.setException(new MessagingException(null, -1, null, null));
 
-        GetAction action = new GetAction(registry);
+        final GetAction action = new GetAction(registry);
 
-        AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "com.openexchange.test");
 
         try {
-            AJAXRequestResult result = action.perform(requestData, null);
+            final AJAXRequestResult result = action.perform(requestData, null);
             fail("Should fail");
             assertNull(result);
-        } catch (MessagingException e) {
+        } catch (final MessagingException e) {
             //SUCCESS
         }
     }

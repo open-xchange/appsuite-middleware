@@ -188,7 +188,7 @@ public class Activator extends DeferredActivator {
                 /*
                  * Remember old module and apply new one
                  */
-                this.module = cmod;
+                module = cmod;
                 Constants.setModule(tmpModule);
             }
         }
@@ -199,7 +199,7 @@ public class Activator extends DeferredActivator {
                 /*
                  * Remember old path and apply new one
                  */
-                this.servletPath = cpath;
+                servletPath = cpath;
                 Constants.setServletPath(tmpServletPath);
             }
         }
