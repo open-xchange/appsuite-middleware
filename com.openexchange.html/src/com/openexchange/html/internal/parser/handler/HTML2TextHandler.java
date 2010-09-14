@@ -185,7 +185,7 @@ public final class HTML2TextHandler implements HTMLHandler {
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
      * @return This handler with behavior applied
      */
-    public HTML2TextHandler setAppendHref(boolean appendHref) {
+    public HTML2TextHandler setAppendHref(final boolean appendHref) {
         this.appendHref = appendHref;
         return this;
     }

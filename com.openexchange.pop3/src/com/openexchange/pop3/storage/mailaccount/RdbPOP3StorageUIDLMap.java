@@ -86,9 +86,9 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     public RdbPOP3StorageUIDLMap(final POP3Access pop3Access) {
         super();
         final Session s = pop3Access.getSession();
-        this.cid = s.getContextId();
-        this.user = s.getUserId();
-        this.accountId = pop3Access.getAccountId();
+        cid = s.getContextId();
+        user = s.getUserId();
+        accountId = pop3Access.getAccountId();
     }
 
     private static final String SQL_DROP_PROPERTIES = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";

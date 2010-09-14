@@ -106,7 +106,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
      */
     public POP3MessageStorage(final POP3Storage pop3Storage, final int accountId, final Session session) throws MailException {
         super();
-        this.pop3MessageStorage = pop3Storage.getMessageStorage();
+        pop3MessageStorage = pop3Storage.getMessageStorage();
         this.accountId = accountId;
         this.session = session;
     }

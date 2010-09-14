@@ -107,11 +107,11 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         this.pop3AccountId = pop3AccountId;
         this.delegatee = delegatee;
         this.storage = storage;
-        this.folderStorage = (MailAccountPOP3FolderStorage) storage.getFolderStorage();
-        this.path = storage.getPath();
-        this.separator = storage.getSeparator();
-        this.uidlMap = storage.getUIDLMap();
-        this.trashContainer = storage.getTrashContainer();
+        folderStorage = (MailAccountPOP3FolderStorage) storage.getFolderStorage();
+        path = storage.getPath();
+        separator = storage.getSeparator();
+        uidlMap = storage.getUIDLMap();
+        trashContainer = storage.getTrashContainer();
     }
 
     private MailAccount getMailAccount() throws MailException {

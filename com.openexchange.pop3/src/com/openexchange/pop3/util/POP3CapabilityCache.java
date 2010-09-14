@@ -303,7 +303,7 @@ public final class POP3CapabilityCache {
                     if (connectionTimeout > 0) {
                         try {
                             s.connect(key, connectionTimeout);
-                        } catch (java.net.SocketTimeoutException e) {
+                        } catch (final java.net.SocketTimeoutException e) {
                             throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, key, login);
                         }
                     } else {

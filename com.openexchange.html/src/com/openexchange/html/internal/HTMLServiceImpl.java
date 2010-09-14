@@ -112,7 +112,7 @@ public final class HTMLServiceImpl implements HTMLService {
      */
     public HTMLServiceImpl(final Properties properties, final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
-        this.tidyConfiguration = properties;
+        tidyConfiguration = properties;
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
     }

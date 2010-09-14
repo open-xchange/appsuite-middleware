@@ -172,8 +172,8 @@ public final class MALPollPushListener implements PushListener {
         running = new AtomicBoolean();
         this.session = session;
         this.ignoreOnGlobal = ignoreOnGlobal;
-        this.userId = session.getUserId();
-        this.contextId = session.getContextId();
+        userId = session.getUserId();
+        contextId = session.getContextId();
     }
 
     @Override
@@ -251,14 +251,14 @@ public final class MALPollPushListener implements PushListener {
             return;
         }
         try {
-            ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
-            Context context = contextService.getContext(contextId);
+            final ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+            final Context context = contextService.getContext(contextId);
             if (context.isReadOnly()) {
                 return;
             }
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             throw new PushException(e);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new PushException(e);
         }
         try {

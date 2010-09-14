@@ -56,8 +56,9 @@ import java.util.regex.Pattern;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.http.RequestToken;
-import com.gargoylesoftware.htmlunit.*;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
@@ -71,11 +72,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
  */
 public class TwitterOAuthTest {
     
-    public static void main(String[] args){
+    public static void main(final String[] args){
         final Twitter twitter = new Twitter();
         
-        String twitterId = "";
-        String password = "";
+        final String twitterId = "";
+        final String password = "";
         
         twitter.setOAuthConsumer("kZX3V4AmAWwC53yA5RjHbQ", "HvY7pVFFQSGPVu9LCoBMUhvMpS00qdtqBob99jucc");
         try {
@@ -83,24 +84,24 @@ public class TwitterOAuthTest {
             System.out.println(requestToken.getAuthorizationURL());
             
             
-            String url = requestToken.getAuthorizationURL();
-            String username = twitterId;            
-            String nameOfUserField = "session[username_or_email]";
-            String nameOfPasswordField = "session[password]";
-            String actionOfLoginForm = "http://twitter.com/oauth/authorize";
-            Pattern patternOfPin = Pattern.compile("oauth_pin\">(?:[^0-9]*)([0-9]*)");
-            int numberOfForm = 1;
+            final String url = requestToken.getAuthorizationURL();
+            final String username = twitterId;            
+            final String nameOfUserField = "session[username_or_email]";
+            final String nameOfPasswordField = "session[password]";
+            final String actionOfLoginForm = "http://twitter.com/oauth/authorize";
+            final Pattern patternOfPin = Pattern.compile("oauth_pin\">(?:[^0-9]*)([0-9]*)");
+            final int numberOfForm = 1;
             
             try {
-                BrowserVersion browser = BrowserVersion.FIREFOX_3;
+                final BrowserVersion browser = BrowserVersion.FIREFOX_3;
                 final WebClient webClient = new WebClient(browser);
                 // Get the page, fill in the credentials and submit the login form identified by its action
-                HtmlPage loginPage = webClient.getPage(url);
+                final HtmlPage loginPage = webClient.getPage(url);
                 HtmlForm loginForm = null;
                 int numberOfFormCounter = 1;
                 for (final HtmlForm form : loginPage.getForms()) {
-                    Pattern pattern = Pattern.compile(actionOfLoginForm);
-                    Matcher matcher = pattern.matcher(form.getActionAttribute());
+                    final Pattern pattern = Pattern.compile(actionOfLoginForm);
+                    final Matcher matcher = pattern.matcher(form.getActionAttribute());
                     System.out.println("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / "+numberOfForm);
                     if (matcher.matches() && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
                         loginForm = form;
@@ -113,10 +114,10 @@ public class TwitterOAuthTest {
                     final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
                     passwordfield.setValueAttribute(password);
                     final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);                    
-                    String pageWithPinString = pageAfterLogin.getWebResponse().getContentAsString();
+                    final String pageWithPinString = pageAfterLogin.getWebResponse().getContentAsString();
                     
                     
-                    Matcher matcher = patternOfPin.matcher(pageWithPinString);
+                    final Matcher matcher = patternOfPin.matcher(pageWithPinString);
                     System.out.println(pageWithPinString);
                     String pin = "";
                     if (matcher.find()){
@@ -134,7 +135,7 @@ public class TwitterOAuthTest {
                 
             }            
             
-        } catch (TwitterException e) {
+        } catch (final TwitterException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

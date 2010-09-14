@@ -129,12 +129,12 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         return new Attributes();
     }
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
-        int contextId = params.getContextId();
+    public void perform(final PerformParameters params) throws AbstractOXException {
+        final int contextId = params.getContextId();
         createTable("malPollHash", getCreateHashTable(), contextId);
         createTable("malPollUid", getCreateUIDsTable(), contextId);
         if (LOG.isInfoEnabled()) {

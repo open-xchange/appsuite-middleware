@@ -116,8 +116,8 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         super();
         rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
-        this.pair2uidl = new ConcurrentHashMap<FullnameUIDPair, String>();
-        this.uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
+        pair2uidl = new ConcurrentHashMap<FullnameUIDPair, String>();
+        uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
         mode = new int[] { 1 };
         final ClearMapsRunnable cmr = new ClearMapsRunnable(session, key, uidl2pair, pair2uidl, rwLock, mode);
         final ScheduledTimerTask timerTask =

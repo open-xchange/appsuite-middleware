@@ -66,9 +66,9 @@ import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -114,10 +114,10 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     MailAccountPOP3FolderStorage(final IMailFolderStorage delegatee, final MailAccountPOP3Storage storage, final POP3Access pop3Access) {
         super();
         this.storage = storage;
-        this.session = pop3Access.getSession();
+        session = pop3Access.getSession();
         this.delegatee = delegatee;
-        this.accountId = pop3Access.getAccountId();
-        this.path = storage.getPath();
+        accountId = pop3Access.getAccountId();
+        path = storage.getPath();
     }
 
     private MailAccountPOP3MessageStorage getMessageStorage() throws MailException {

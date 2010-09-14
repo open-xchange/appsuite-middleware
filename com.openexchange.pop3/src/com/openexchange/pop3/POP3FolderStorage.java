@@ -83,7 +83,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
      */
     public POP3FolderStorage(final POP3Storage pop3Storage) throws MailException {
         super();
-        this.pop3FolderStorage = pop3Storage.getFolderStorage();
+        pop3FolderStorage = pop3Storage.getFolderStorage();
     }
 
     @Override

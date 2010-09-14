@@ -215,7 +215,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         final char[] chars = src.toCharArray();
         final StringBuilder sb = new StringBuilder(chars.length);
         for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
+            final char c = chars[i];
             if (Character.isLetterOrDigit(c)) {
                 sb.append(c);
             }
@@ -456,7 +456,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             pop3Store = result.getPop3Store();
             final boolean containsWarnings = result.containsWarnings();
             if (containsWarnings) {
-                this.warnings.addAll(result.getWarnings());
+                warnings.addAll(result.getWarnings());
             }
             /*
              * Increase counter
@@ -538,10 +538,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 }
             }
         } catch (final MessagingException e) {
-            MailException e1 = MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession());
+            final MailException e1 = MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession());
             LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
             warnings.add(e1);
-        } catch (MailException e) {
+        } catch (final MailException e) {
             LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
             warnings.add(e);
         } finally {
