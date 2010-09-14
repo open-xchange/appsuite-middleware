@@ -171,17 +171,16 @@ public final class CapabilitiesCache {
      * 
      * @param imapStore The IMAP store
      * @param imapConfig The IMAP configuration
-     * @param load Whether capabilities should be detected if no cache entry present or not
      * @param session The session providing the session-bound cache
      * @param accontId The account ID
      * @return The cached capabilities or <code>null</code>
      * @throws MessagingException If <code>MYRIGHTS</code> command fails
      */
-    public static CapabilitiesResponse getCapabilitiesResponse(final IMAPStore imapStore, final IMAPConfig imapConfig, final boolean load, final Session session, final int accontId) throws MessagingException {
+    public static CapabilitiesResponse getCapabilitiesResponse(final IMAPStore imapStore, final IMAPConfig imapConfig, final Session session, final int accontId) throws MessagingException {
         final CapsCacheEntry entry = new CapsCacheEntry(session.getUserId());
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accontId);
         mailCache.get(entry);
-        if (load && (null == entry.getValue())) {
+        if (null == entry.getValue()) {
             final IMAPCapabilities imapCaps = new IMAPCapabilities();
             imapCaps.setACL(imapStore.hasCapability(IMAPCapabilities.CAP_ACL));
             imapCaps.setThreadReferences(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_REFERENCES));

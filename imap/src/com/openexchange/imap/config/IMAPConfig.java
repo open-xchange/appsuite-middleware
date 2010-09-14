@@ -188,7 +188,7 @@ public final class IMAPConfig extends MailConfig {
                 }
                 try {
                     final CapabilitiesResponse response =
-                        CapabilitiesCache.getCapabilitiesResponse(imapStore, this, true, session, accountId);
+                        CapabilitiesCache.getCapabilitiesResponse(imapStore, this, session, accountId);
                     imapCapabilities = response.getImapCapabilities();
                     capabilities = response.getMap();
                     aclExtension = response.getAclExtension();
