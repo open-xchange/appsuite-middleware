@@ -223,7 +223,7 @@ public class VCardExporter implements Exporter {
         try {
             perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
         } catch (final DBPoolingException e) {
-            throw new ImportExportException(e);
+            throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
         } catch (final SQLException e) {
             throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }

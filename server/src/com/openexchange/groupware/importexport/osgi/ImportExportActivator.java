@@ -47,30 +47,32 @@
  *
  */
 
-package com.openexchange.groupware.importexport.exceptions;
+package com.openexchange.groupware.importexport.osgi;
+
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.importexport.internal.ImportExportExceptionFactory;
 
 /**
- * A list of classes throwing ImportExportExceptions
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- * @author <a href="mailto:">Sebastian Kauss</a>
+ * {@link ImportExportActivator}
  *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ImportExportExceptionClasses {
-	public static final int IMPORTEXPORTEXCEPTIONFACTORY = 0;
-	
-	public static final int VCARDIMPORTER = 6;
-	
-	public static final int CSVCONTACTIMPORTER = 8;
-	public static final int CSVLIBRARY = 9;
-	public static final int CSVPARSER = 10;
-	public static final int IMPORTEREXPORTER = 11;
-	
-	public static final int MODULETYPETRANSLATOR = 12;
-	
-	public static final int IMPORTSERVLET = 13;
-	public static final int EXPORTSERVLET = 14;
-	public static final int OUTLOOKCSVCONTACTIMPORTER = 15;
-	
-	public static final int ABSTRACTIMPORTER = 16;
+public class ImportExportActivator implements BundleActivator {
+
+    private ComponentRegistration registration;
+
+    public ImportExportActivator() {
+        super();
+    }
+
+    public void start(BundleContext context) throws Exception {
+        registration = new ComponentRegistration(context, EnumComponent.IMPORT_EXPORT, "com.openexchange.grouwpare.importexport", ImportExportExceptionFactory.getInstance());
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        registration.unregister();
+    }
 }

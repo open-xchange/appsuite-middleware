@@ -198,7 +198,7 @@ public class ICalExporter implements Exporter {
         try {
             perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
         } catch (final DBPoolingException e) {
-            throw new ImportExportException(e);
+            throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
         } catch (final SQLException e) {
             throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
@@ -222,7 +222,7 @@ public class ICalExporter implements Exporter {
             try {
                 emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class, true);
             } catch (ServiceException e) {
-                throw ImportExportExceptionCodes.ICAL_SERVICE_MISSING.create(e);
+                throw ImportExportExceptionCodes.ICAL_EMITTER_SERVICE_MISSING.create(e);
             }
             final FolderObject fo;
             try {

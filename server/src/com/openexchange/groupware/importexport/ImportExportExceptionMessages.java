@@ -64,17 +64,31 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String UTF8_ENCODE_FAILED_MSG = "Could not encode as UTF-8";
 
+    public static final String NO_DATABASE_CONNECTION_MSG = "Can not get connection to database.";
+
     public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
 
     public static final String LOADING_FOLDER_FAILED_MSG = "Could not load folder %s";
 
-    public static final String ICAL_SERVICE_MISSING_MSG = "The necessary iCal emitter serivce is missing.";
+    public static final String ICAL_EMITTER_SERVICE_MISSING_MSG = "The necessary iCal emitter service is missing.";
 
     public static final String NUMBER_FAILED_MSG = "Parsing %1$s to a number failed.";
 
     public static final String ICAL_CONVERSION_FAILED_MSG = "Conversion to iCal failed.";
 
     public static final String VCARD_CONVERSION_FAILED_MSG = "Conversion to vCard failed.";
+
+    public static final String CANNOT_IMPORT_MSG = "Can not import the format %2$s into folder %1$s.";
+
+    public static final String CALENDAR_DISABLED_MSG = "Module calendar not enabled for user, cannot import appointments.";
+
+    public static final String TASKS_DISABLED_MSG = "Module tasks not enabled for user, cannot import tasks.";
+
+    public static final String ICAL_PARSER_SERVICE_MISSING_MSG = "The necessary iCal parser service is missing.";
+
+    public static final String RESOURCE_HARD_CONFLICT_MSG = "Failed importing appointment due to hard conflicting resource.";
+
+    public static final String WARNINGS_MSG = "Warnings when importing file: %i warnings";
 
     private ImportExportExceptionMessages() {
         super();

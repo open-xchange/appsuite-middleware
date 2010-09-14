@@ -67,18 +67,32 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     LOADING_CONTACTS_FAILED(LOADING_CONTACTS_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 102),
     /** Could not encode as UTF-8 */
     UTF8_ENCODE_FAILED(UTF8_ENCODE_FAILED_MSG, Category.CODE_ERROR, 104),
+    /** Can not get connection to database. */
+    NO_DATABASE_CONNECTION(NO_DATABASE_CONNECTION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 110),
     /** Invalid SQL Query: %s */
     SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 200),
     /** Could not load folder %s */
     LOADING_FOLDER_FAILED(LOADING_FOLDER_FAILED_MSG, Category.CODE_ERROR, 204),
     /** The necessary iCal emitter serivce is missing. */
-    ICAL_SERVICE_MISSING(ICAL_SERVICE_MISSING_MSG, Category.CODE_ERROR, 206),
+    ICAL_EMITTER_SERVICE_MISSING(ICAL_EMITTER_SERVICE_MISSING_MSG, Category.CODE_ERROR, 206),
     /** Parsing %1$s to a number failed. */
     NUMBER_FAILED(NUMBER_FAILED_MSG, Category.CODE_ERROR, 207),
     /** Conversion to iCal failed. */
     ICAL_CONVERSION_FAILED(ICAL_CONVERSION_FAILED_MSG, Category.CODE_ERROR, 208),
     /** Conversion to vCard failed. */
     VCARD_CONVERSION_FAILED(VCARD_CONVERSION_FAILED_MSG, Category.CODE_ERROR, 304),
+    /** Can not import the format %2$s into folder %1$s. */
+    CANNOT_IMPORT(CANNOT_IMPORT_MSG, Category.CODE_ERROR, 500),
+    /** Module Calendar not enabled for user, cannot import appointments. */
+    CALENDAR_DISABLED(CALENDAR_DISABLED_MSG, Category.PERMISSION, 507),
+    /** Module calendar not enabled for user, cannot import tasks. */
+    TASKS_DISABLED(TASKS_DISABLED_MSG, Category.PERMISSION, 508),
+    /** The necessary iCal parser service is missing. */
+    ICAL_PARSER_SERVICE_MISSING(ICAL_PARSER_SERVICE_MISSING_MSG, Category.CODE_ERROR, 512),
+    /** Failed importing appointment due to hard conflicting resource. */
+    RESOURCE_HARD_CONFLICT(RESOURCE_HARD_CONFLICT_MSG, Category.USER_INPUT, 513),
+    /** Warnings when importing file: %i warnings */
+    WARNINGS(WARNINGS_MSG, Category.WARNING, 514),
     ;
 
     private String message;
