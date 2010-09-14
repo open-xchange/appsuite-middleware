@@ -51,6 +51,9 @@ package com.openexchange.html;
 
 /**
  * A range inside HTML content.
+ * <p>
+ * The range begins at the specified <i>start</i> and extends to the character at index <i>end - 1</i>. Thus the length of the substring is
+ * <i>end-start</i>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
