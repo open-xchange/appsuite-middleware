@@ -54,10 +54,7 @@ import static com.openexchange.html.internal.css.CSSMatcher.checkCSSElements;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -265,17 +262,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
                                 sb.append(line).append(CRLF);
                             }
                             mapStr = sb.toString();
-                        } catch (final UnsupportedEncodingException e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
-                            }
-                            mapStr = new String(DEFAULT_WHITELIST);
-                        } catch (final FileNotFoundException e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
-                            }
-                            mapStr = new String(DEFAULT_WHITELIST);
-                        } catch (final IOException e) {
+                        } catch (final Exception e) {
                             if (LOG.isWarnEnabled()) {
                                 LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
                             }
@@ -284,7 +271,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
                             if (null != reader) {
                                 try {
                                     reader.close();
-                                } catch (final IOException e) {
+                                } catch (final Exception e) {
                                     LOG.error(e.getMessage(), e);
                                 }
                             }
