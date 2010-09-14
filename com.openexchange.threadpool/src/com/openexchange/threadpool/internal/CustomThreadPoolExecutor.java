@@ -1178,8 +1178,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         this.keepAliveTime = unit.toNanos(keepAliveTime);
         this.threadFactory = threadFactory;
         this.handler = handler;
-        this.delayedWorkQueue = new DelayedWorkQueue();
-        this.executeExistingDelayedTasksAfterShutdown = true;
+        delayedWorkQueue = new DelayedWorkQueue();
+        executeExistingDelayedTasksAfterShutdown = true;
         /*
          * Start consumer thread
          */
@@ -1784,7 +1784,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (time < 0) {
             throw new IllegalArgumentException();
         }
-        this.keepAliveTime = unit.toNanos(time);
+        keepAliveTime = unit.toNanos(time);
     }
 
     /**

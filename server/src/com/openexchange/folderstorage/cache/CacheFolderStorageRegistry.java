@@ -50,7 +50,6 @@
 package com.openexchange.folderstorage.cache;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -115,8 +114,8 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
                 success = CacheContentTypeRegistry.getInstance().addContentType(treeId, contentTypes[i], folderStorage);
             }
             if (!success) {
-                for (int i = 0; i < contentTypes.length; i++) {
-                    CacheContentTypeRegistry.getInstance().removeContentType(treeId, contentTypes[i]);
+                for (final ContentType contentType : contentTypes) {
+                    CacheContentTypeRegistry.getInstance().removeContentType(treeId, contentType);
                 }
                 return false;
             }
@@ -147,8 +146,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
             /*
              * Check general storages first
              */
-            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
-                final FolderStorage folderStorage = iterator.next();
+            for (final FolderStorage folderStorage : genStorages) {
                 if (folderStorage.getFolderType().servesTreeId(treeId)) {
                     return folderStorage;
                 }
@@ -174,8 +172,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
             /*
              * Check general storages first
              */
-            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
-                final FolderStorage folderStorage = iterator.next();
+            for (final FolderStorage folderStorage : genStorages) {
                 final FolderType folderType = folderStorage.getFolderType();
                 if (folderType.servesTreeId(treeId) && folderType.servesParentId(parentId)) {
                     return new FolderStorage[] { folderStorage };
@@ -203,8 +200,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
             /*
              * Check general storages first
              */
-            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
-                final FolderStorage folderStorage = iterator.next();
+            for (final FolderStorage folderStorage : genStorages) {
                 final FolderType folderType = folderStorage.getFolderType();
                 if (folderType.servesTreeId(treeId)) {
                     return new FolderStorage[] { folderStorage };
@@ -226,8 +222,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
             /*
              * Check general storages first
              */
-            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
-                final FolderStorage folderStorage = iterator.next();
+            for (final FolderStorage folderStorage : genStorages) {
                 if (!StoragePriority.HIGHEST.equals(folderStorage.getStoragePriority()) && folderStorage.getFolderType().servesTreeId(
                     treeId)) {
                     return new FolderStorage[] { folderStorage };

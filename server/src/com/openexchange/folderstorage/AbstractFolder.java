@@ -141,7 +141,7 @@ public abstract class AbstractFolder implements Folder {
                 clone.lastModified = new Date(lastModified.getTime());
             }
             if (permissions != null) {
-                final Permission[] thisPermissions = this.permissions;
+                final Permission[] thisPermissions = permissions;
                 final Permission[] clonePermissions = new Permission[thisPermissions.length];
                 for (int i = 0; i < thisPermissions.length; i++) {
                     clonePermissions[i] = (Permission) thisPermissions[i].clone();
@@ -251,7 +251,7 @@ public abstract class AbstractFolder implements Folder {
     }
 
     public void setParentID(final String parentId) {
-        this.parent = parentId;
+        parent = parentId;
     }
 
     public void setPermissions(final Permission[] permissions) {
@@ -259,11 +259,11 @@ public abstract class AbstractFolder implements Folder {
     }
 
     public void setSubfolderIDs(final String[] subfolderIds) {
-        this.subfolders = subfolderIds;
+        subfolders = subfolderIds;
     }
 
     public void setTreeID(final String id) {
-        this.treeId = id;
+        treeId = id;
     }
 
     public void setType(final Type type) {

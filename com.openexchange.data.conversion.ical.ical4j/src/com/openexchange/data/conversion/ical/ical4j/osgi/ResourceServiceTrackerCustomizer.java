@@ -52,7 +52,6 @@ package com.openexchange.data.conversion.ical.ical4j.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.resource.ResourceService;
 

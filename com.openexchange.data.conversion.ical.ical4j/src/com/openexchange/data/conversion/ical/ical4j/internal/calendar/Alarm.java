@@ -79,7 +79,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         return true;
     }
 
-    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         if(Task.class.isAssignableFrom(calendar.getClass())) {
             emitTaskAlarm((Task)calendar, (VToDo) component, warnings);
         }  else if ( Appointment.class.isAssignableFrom(calendar.getClass())) {

@@ -92,7 +92,7 @@ final class MovePerformer extends AbstractPerformer {
             super();
             this.id = id;
             this.name = name;
-            this.subfolders = new ArrayList<FolderInfo>();
+            subfolders = new ArrayList<FolderInfo>();
             subfoldersMap = new HashMap<String, FolderInfo>();
         }
 

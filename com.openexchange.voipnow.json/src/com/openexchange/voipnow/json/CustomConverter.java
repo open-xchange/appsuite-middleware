@@ -53,7 +53,6 @@ import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.apache.axis2.databinding.utils.ConverterUtil;
 
 public final class CustomConverter {
@@ -79,17 +78,17 @@ public final class CustomConverter {
 					.getDeclaredField("isCustomClassPresent");
 			isCustomClassPresent.setAccessible(true);
 			isCustomClassPresent.set(null, true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 		}
 	}
 
-	public static String convertToString(Calendar value) {
+	public static String convertToString(final Calendar value) {
 		// lexical form of the calendar is '-'? yyyy '-' mm '-' dd 'T' hh
 		// ':' mm ':' ss ('.' s+)? (zzzzzz)?
 		if (value.get(Calendar.ZONE_OFFSET) == -1) {
 			value.setTimeZone(TimeZone.getDefault());
 		}
-		StringBuffer dateString = new StringBuffer(28);
+		final StringBuffer dateString = new StringBuffer(28);
 		ConverterUtil.appendDate(dateString, value);
 		dateString.append("T");
 		// adding hours
@@ -98,30 +97,30 @@ public final class CustomConverter {
 		return dateString.toString();
 	}
 
-	public static String convertToString(Date value) {
+	public static String convertToString(final Date value) {
 		if (enabled.get()) {
 			final StringBuffer s = new StringBuffer(11);
-			Calendar calendar = Calendar.getInstance();
+			final Calendar calendar = Calendar.getInstance();
 			calendar.clear();
 			calendar.setTime(value);
 			ConverterUtil.appendDate(s, calendar);
 			return s.toString();
 		} else {
 			// lexical form of the date is '-'? yyyy '-' mm '-' dd zzzzzz?
-			Calendar calendar = Calendar.getInstance();
+			final Calendar calendar = Calendar.getInstance();
 			calendar.clear();
 			calendar.setTime(value);
 			if (!calendar.isSet(Calendar.ZONE_OFFSET)) {
 				calendar.setTimeZone(TimeZone.getDefault());
 			}
-			StringBuffer dateString = new StringBuffer(16);
+			final StringBuffer dateString = new StringBuffer(16);
 			ConverterUtil.appendDate(dateString, calendar);
 			ConverterUtil.appendTimeZone(calendar, dateString);
 			return dateString.toString();
 		}
 	}
 
-	public static void setEnabled(boolean enabled) {
+	public static void setEnabled(final boolean enabled) {
 		CustomConverter.enabled.set(enabled);
 	}
 

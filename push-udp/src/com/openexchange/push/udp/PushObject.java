@@ -86,8 +86,8 @@ public class PushObject extends AbstractPushObject {
         this.module = module;
         this.contextId = contextId;
         this.users = users;
-        this.remote = isRemote;
-        this.hash = hashCode0();
+        remote = isRemote;
+        hash = hashCode0();
         this.timestamp = timestamp;
     }
 

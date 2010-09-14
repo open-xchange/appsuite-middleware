@@ -97,7 +97,7 @@ public final class OutlookFolder implements Folder {
      */
     public OutlookFolder(final Folder source) {
         super();
-        this.realFolder = source;
+        realFolder = source;
         modifiedBy = -1;
     }
 
@@ -113,7 +113,7 @@ public final class OutlookFolder implements Folder {
             clone.realFolder = (Folder) (realFolder == null ? null : realFolder.clone());
             clone.lastModified = cloneDate(lastModified);
             if (permissions != null) {
-                final Permission[] thisPermissions = this.permissions;
+                final Permission[] thisPermissions = permissions;
                 final Permission[] clonePermissions = new Permission[thisPermissions.length];
                 for (int i = 0; i < thisPermissions.length; i++) {
                     clonePermissions[i] = (Permission) thisPermissions[i].clone();
@@ -238,11 +238,11 @@ public final class OutlookFolder implements Folder {
 
     public void setName(final String name) {
         this.name = name;
-        this.localizedName = null;
+        localizedName = null;
     }
 
     public void setParentID(final String parentId) {
-        this.parent = parentId;
+        parent = parentId;
     }
 
     public void setPermissions(final Permission[] permissions) {
@@ -250,11 +250,11 @@ public final class OutlookFolder implements Folder {
     }
 
     public void setSubfolderIDs(final String[] subfolderIds) {
-        this.subfolders = subfolderIds;
+        subfolders = subfolderIds;
     }
 
     public void setTreeID(final String id) {
-        this.treeId = id;
+        treeId = id;
     }
 
     public void setType(final Type type) {

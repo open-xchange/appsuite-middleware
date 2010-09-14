@@ -50,8 +50,6 @@
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import java.net.URISyntaxException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.parameter.CuType;
@@ -59,6 +57,8 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
@@ -74,14 +74,14 @@ public class RequestParticipants<T extends CalendarComponent, U extends Calendar
     private static Log LOG = LogFactory.getLog(RequestParticipants.class);
 
     @Override
-    protected void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component, U cObj) throws ConversionError {
+    protected void addUserAttendee(final int index, final UserParticipant userParticipant, final Context ctx, final T component, final U cObj) throws ConversionError {
         if (userParticipant.getIdentifier() == cObj.getCreatedBy()) {
             super.addUserAttendee(index, userParticipant, ctx, component, cObj);
         } else {
             final Attendee attendee = new Attendee();
             try {
                 attendee.setValue("mailto:" + resolveUserMail(index, userParticipant, ctx));
-                ParameterList parameters = attendee.getParameters();
+                final ParameterList parameters = attendee.getParameters();
                 parameters.add(CuType.INDIVIDUAL);
                 parameters.add(PartStat.NEEDS_ACTION);
                 parameters.add(Role.REQ_PARTICIPANT);

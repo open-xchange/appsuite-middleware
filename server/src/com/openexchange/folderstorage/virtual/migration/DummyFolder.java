@@ -234,7 +234,7 @@ final class DummyFolder implements Folder {
     }
 
     public void setParentID(final String parentId) {
-        this.parent = parentId;
+        parent = parentId;
     }
 
     public void setPermissions(final Permission[] permissions) {
@@ -258,7 +258,7 @@ final class DummyFolder implements Folder {
     }
 
     public void setTreeID(final String id) {
-        this.treeId = id;
+        treeId = id;
     }
 
     public void setType(final Type type) {

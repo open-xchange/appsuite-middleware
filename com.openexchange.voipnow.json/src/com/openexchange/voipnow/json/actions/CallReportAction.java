@@ -52,12 +52,10 @@ package com.openexchange.voipnow.json.actions;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.apache.axis2.AxisFault;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com._4psa.common_xsd._2_0_4.DateTime;
 import com._4psa.common_xsd._2_0_4.PositiveInteger;
 import com._4psa.reportdata_xsd._2_0_4.Call_type0;
@@ -232,8 +230,7 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
 				final Call_type0[] history = callReportResponseType.getCall();
 				final JSONArray historyObject = new JSONArray();
 				if (null != history) {
-					for (int i = 0; i < history.length; i++) {
-						final Call_type0 call = history[i];
+					for (final Call_type0 call : history) {
 						final JSONObject callObject = new JSONObject();
 						string("source", call.getSource(), callObject);
 						string("destination", call.getDestination(), callObject);
@@ -276,16 +273,16 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
         }
     }
     
-	private static void string(String key,
-			com._4psa.common_xsd._2_0_4.String value, JSONObject object)
+	private static void string(final String key,
+			final com._4psa.common_xsd._2_0_4.String value, final JSONObject object)
 			throws JSONException {
 		if (null != value) {
 			object.put(key, value.getString());
 		}
 	}
 
-	private static void date(String key, DateTime value, JSONObject object,
-			TimeZone timeZone) throws JSONException {
+	private static void date(final String key, final DateTime value, final JSONObject object,
+			final TimeZone timeZone) throws JSONException {
 		if (null != value) {
 			final Date dateValue = value.getDateTime().getTime();
 			DataWriter.writeParameter(key, dateValue, dateValue, timeZone,

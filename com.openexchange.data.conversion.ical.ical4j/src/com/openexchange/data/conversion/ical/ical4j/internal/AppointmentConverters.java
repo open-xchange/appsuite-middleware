@@ -133,22 +133,22 @@ public final class AppointmentConverters {
         tmp.add(new CreatedBy<VEvent, Appointment>());
         
         // All standard converters
-        List<AttributeConverter<VEvent, Appointment>> all = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
-        Participants<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();
+        final List<AttributeConverter<VEvent, Appointment>> all = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
+        final Participants<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();
         participants.setVerifier(new PrivateAppointmentsHaveNoParticipants());
         all.add(participants);
-        Sequence<VEvent, Appointment> sequence = new Sequence<VEvent, Appointment>();
+        final Sequence<VEvent, Appointment> sequence = new Sequence<VEvent, Appointment>();
         all.add(sequence);
         ALL = all.toArray(new AttributeConverter[all.size()]);
         
         // Special Participant Converters for IMip
-        List<AttributeConverter<VEvent, Appointment>> request = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
-        RequestParticipants<VEvent, Appointment> requestParticipants = new RequestParticipants<VEvent, Appointment>();
+        final List<AttributeConverter<VEvent, Appointment>> request = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
+        final RequestParticipants<VEvent, Appointment> requestParticipants = new RequestParticipants<VEvent, Appointment>();
         request.add(requestParticipants);
         REQUEST = request.toArray(new AttributeConverter[request.size()]);
         
-        List<AttributeConverter<VEvent, Appointment>> reply = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
-        ReplyParticipants<VEvent, Appointment> replyParticipants = new ReplyParticipants<VEvent, Appointment>();
+        final List<AttributeConverter<VEvent, Appointment>> reply = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
+        final ReplyParticipants<VEvent, Appointment> replyParticipants = new ReplyParticipants<VEvent, Appointment>();
         reply.add(replyParticipants);
         REPLY = reply.toArray(new AttributeConverter[reply.size()]);
 

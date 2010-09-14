@@ -75,7 +75,7 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
         super();
         threadNumber = new AtomicInteger();
         this.namePrefix = namePrefix;
-        this.len = namePrefix.length() + 7;
+        len = namePrefix.length() + 7;
     }
 
     public Thread newThread(final Runnable r) {

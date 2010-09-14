@@ -51,9 +51,7 @@ package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.VEvent;
-
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.Appointment;
@@ -84,7 +82,7 @@ public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<V
      * {@inheritDoc}
      */
     public void emit(final int index, final Appointment appointment, final VEvent vEvent,
-        final List<ConversionWarning> warnings, final Context ctx, Object... args) {
+        final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         // Ignore this always on output.
     }
 

@@ -103,7 +103,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
     public Object clone() {
         final LocalizedDatabaseFolder clone = (LocalizedDatabaseFolder) super.clone();
         // Locale-sensitive names
-        final ConcurrentMap<Locale, Future<String>> thisMap = this.localizedNames;
+        final ConcurrentMap<Locale, Future<String>> thisMap = localizedNames;
         if (null == localizedNames) {
             clone.localizedNames = null;
         } else {

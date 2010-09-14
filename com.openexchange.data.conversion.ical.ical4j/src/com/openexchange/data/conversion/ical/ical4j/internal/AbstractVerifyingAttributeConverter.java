@@ -49,9 +49,7 @@
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.List;
-
 import net.fortuna.ical4j.model.component.CalendarComponent;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.container.CalendarObject;
@@ -81,7 +79,7 @@ public abstract class AbstractVerifyingAttributeConverter<T extends CalendarComp
         this.verifier.verify(index, object, warnings);
     }
     
-    protected boolean isSet(U calendarObject, int value) {
+    protected boolean isSet(final U calendarObject, final int value) {
         return calendarObject.contains(value) && calendarObject.get(value) !=null;
     }
 

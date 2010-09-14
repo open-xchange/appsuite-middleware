@@ -146,7 +146,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      * integer as this write task's sequence number is less than, equal to, or greater than the specified write task's sequence number.
      */
     public final int compareTo(final AbstractWriteTask o) {
-        final long thisVal = this.sequenceNumber;
+        final long thisVal = sequenceNumber;
         final long anotherVal = o.sequenceNumber;
         return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
     }

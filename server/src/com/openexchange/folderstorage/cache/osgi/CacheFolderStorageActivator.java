@@ -143,10 +143,10 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 final ServiceRegistry registry = getServiceRegistry();
                 registry.clearRegistry();
                 final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
+                for (final Class<?> classe : classes) {
+                    final Object service = getService(classe);
                     if (null != service) {
-                        registry.addService(classes[i], service);
+                        registry.addService(classe, service);
                     }
                 }
             }

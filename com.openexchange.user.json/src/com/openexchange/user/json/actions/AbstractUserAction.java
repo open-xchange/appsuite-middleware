@@ -55,8 +55,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -268,10 +268,10 @@ public abstract class AbstractUserAction implements AJAXActionService {
         return columns;
     }
     
-    protected static void censor(ServerSession session, Contact...contacts) throws OXException {
-        ContactCensorship censorship = getContactCensorship(session);
+    protected static void censor(final ServerSession session, final Contact...contacts) throws OXException {
+        final ContactCensorship censorship = getContactCensorship(session);
         
-        for (Contact contact : contacts) {
+        for (final Contact contact : contacts) {
             if(contact.getInternalUserId() == session.getUserId()) {
                 continue;
             }
@@ -280,8 +280,8 @@ public abstract class AbstractUserAction implements AJAXActionService {
         
     }
     
-    protected static void censor(ServerSession session, User[] user) throws OXException {
-        UserCensorship censorship = getUserCensorship(session);
+    protected static void censor(final ServerSession session, final User[] user) throws OXException {
+        final UserCensorship censorship = getUserCensorship(session);
         for(int i = 0; i < user.length; i++) {
             if(user[i].getId() == session.getUserId()) {
                 continue;
@@ -290,24 +290,24 @@ public abstract class AbstractUserAction implements AJAXActionService {
         }
     }
     
-    protected static User censor(ServerSession session, User user) throws OXException {
+    protected static User censor(final ServerSession session, final User user) throws OXException {
         if(user.getId() == session.getUserId()) {
             return user;
         }
-        UserCensorship censorship = getUserCensorship(session);
+        final UserCensorship censorship = getUserCensorship(session);
         return censorship.censor(user);
     }
     
 
 
-    protected static ContactCensorship getContactCensorship(ServerSession session) throws OXException {
+    protected static ContactCensorship getContactCensorship(final ServerSession session) throws OXException {
         if( canSeeGlobalAddressBook(session) ) {
             return DO_NOTHING_CENSORSHIP;
         }
         return NO_GLOBAL_ADDRESSBOOK_CENSORSHIP;
     }
     
-    protected static UserCensorship getUserCensorship(ServerSession session) throws OXException {
+    protected static UserCensorship getUserCensorship(final ServerSession session) throws OXException {
          if( canSeeGlobalAddressBook(session) ) {
              return DO_NOTHING_USER_CENSORSHIP;
          }
@@ -315,9 +315,9 @@ public abstract class AbstractUserAction implements AJAXActionService {
          return NO_GLOBAL_ADDRESSBOOK_USER_CENSORSHIP;
     }
 
-    private static boolean canSeeGlobalAddressBook(ServerSession session) throws OXException {
-        OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
-        EffectivePermission folderPermission = folderAccess.getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, session.getUserId(), session.getUserConfiguration());
+    private static boolean canSeeGlobalAddressBook(final ServerSession session) throws OXException {
+        final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+        final EffectivePermission folderPermission = folderAccess.getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, session.getUserId(), session.getUserConfiguration());
         return folderPermission.canReadAllObjects() && folderPermission.isFolderVisible();
     }
 }

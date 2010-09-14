@@ -93,7 +93,7 @@ public final class VirtualId implements SortableId {
     public int compareTo(final SortableId o) {
         // Compare by ordinal
         if (o instanceof VirtualId) {
-            final int thisVal = this.ordinal;
+            final int thisVal = ordinal;
             final int anotherVal = ((VirtualId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }

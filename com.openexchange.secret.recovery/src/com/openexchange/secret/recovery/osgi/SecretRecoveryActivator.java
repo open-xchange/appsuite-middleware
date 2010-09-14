@@ -61,13 +61,13 @@ public class SecretRecoveryActivator implements BundleActivator {
 	private WhiteboardSecretInconsistencyDetector detector;
     private WhiteboardSecretMigrator migrator;
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
 	    detector = new WhiteboardSecretInconsistencyDetector(context);
 	    migrator = new WhiteboardSecretMigrator(context);
 	    
 	    context.registerService(SecretInconsistencyDetector.class.getName(), detector, null);
 	    
-	    Hashtable<Object, Object> properties = new Hashtable<Object, Object>();
+	    final Hashtable<Object, Object> properties = new Hashtable<Object, Object>();
 	    properties.put(Constants.SERVICE_RANKING, 1000);
 	    
 	    context.registerService(SecretMigrator.class.getName(), migrator, properties);
@@ -76,7 +76,7 @@ public class SecretRecoveryActivator implements BundleActivator {
 	    migrator.open();
 	}
 
-	public void stop(BundleContext context) throws Exception {
+	public void stop(final BundleContext context) throws Exception {
 	    detector.close();
 	    migrator.close();
 	}

@@ -90,7 +90,7 @@ public class DatabaseFolder extends AbstractFolder {
         super();
         this.cacheable = cacheable;
         global = true;
-        this.subscribed = true;
+        subscribed = true;
     }
 
     /**
@@ -118,27 +118,27 @@ public class DatabaseFolder extends AbstractFolder {
         super();
         this.cacheable = cacheable;
         global = true;
-        this.id = String.valueOf(folderObject.getObjectID());
-        this.name = folderObject.getFolderName();
-        this.parent = String.valueOf(folderObject.getParentFolderID());
-        this.type = getType(folderObject.getType());
-        this.contentType = getContentType(folderObject.getModule());
+        id = String.valueOf(folderObject.getObjectID());
+        name = folderObject.getFolderName();
+        parent = String.valueOf(folderObject.getParentFolderID());
+        type = getType(folderObject.getType());
+        contentType = getContentType(folderObject.getModule());
         final OCLPermission[] oclPermissions = folderObject.getPermissionsAsArray();
-        this.permissions = new Permission[oclPermissions.length];
+        permissions = new Permission[oclPermissions.length];
         for (int i = 0; i < oclPermissions.length; i++) {
-            this.permissions[i] = new DatabasePermission(oclPermissions[i]);
+            permissions[i] = new DatabasePermission(oclPermissions[i]);
         }
-        this.createdBy = folderObject.getCreatedBy();
-        this.modifiedBy = folderObject.getModifiedBy();
+        createdBy = folderObject.getCreatedBy();
+        modifiedBy = folderObject.getModifiedBy();
         {
             final Date d = folderObject.getCreationDate();
-            this.creationDate = null == d ? null : new Date(d.getTime());
+            creationDate = null == d ? null : new Date(d.getTime());
         }
         {
             final Date d = folderObject.getLastModified();
-            this.lastModified = null == d ? null : new Date(d.getTime());
+            lastModified = null == d ? null : new Date(d.getTime());
         }
-        this.subscribed = true;
+        subscribed = true;
         deefault = folderObject.isDefaultFolder();
         defaultType = deefault ? contentType.getModule() : 0;
     }
@@ -156,7 +156,7 @@ public class DatabaseFolder extends AbstractFolder {
      * 
      * @param cacheable The cachable flag.
      */
-    public void setCacheable(boolean cacheable) {
+    public void setCacheable(final boolean cacheable) {
         this.cacheable = cacheable;
     }
 

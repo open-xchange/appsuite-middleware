@@ -127,7 +127,7 @@ public final class EmitterTools {
         return retval;
     }
 
-    public static void setCalendarCollection(CalendarCollectionService calendarCollection) {
+    public static void setCalendarCollection(final CalendarCollectionService calendarCollection) {
         EmitterTools.calendarCollection = calendarCollection;
     }
 }

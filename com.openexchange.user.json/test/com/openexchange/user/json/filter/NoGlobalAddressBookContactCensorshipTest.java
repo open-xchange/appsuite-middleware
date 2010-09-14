@@ -58,9 +58,9 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.TestCase;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.user.json.field.UserField;
-import junit.framework.TestCase;
 
 
 /**
@@ -72,13 +72,13 @@ public class NoGlobalAddressBookContactCensorshipTest extends TestCase{
     
     
     public void testCensorsData() throws Exception {
-        Contact contact = getFilledContact();
+        final Contact contact = getFilledContact();
         
-        ContactCensorship censorship = new NoGlobalAdressBookContactCensorship();
+        final ContactCensorship censorship = new NoGlobalAdressBookContactCensorship();
         
         censorship.censor(contact);
         
-        for(UserField field : UserField.ALL_FIELDS) {
+        for(final UserField field : UserField.ALL_FIELDS) {
             if(UserField.isUserOnlyField(field.getColumn())){
                 continue;
             }
@@ -92,14 +92,14 @@ public class NoGlobalAddressBookContactCensorshipTest extends TestCase{
     }
 
     private Contact getFilledContact() throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        Contact contact = new Contact();
-        BeanInfo beanInfo = Introspector.getBeanInfo(Contact.class);
+        final Contact contact = new Contact();
+        final BeanInfo beanInfo = Introspector.getBeanInfo(Contact.class);
         
-        PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-        for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-            Method writeMethod = propertyDescriptor.getWriteMethod();
+        final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+        for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            final Method writeMethod = propertyDescriptor.getWriteMethod();
             if(writeMethod != null) {
-                Object value = DEFAULT_VALUES.get(writeMethod.getParameterTypes()[0]);
+                final Object value = DEFAULT_VALUES.get(writeMethod.getParameterTypes()[0]);
                 if(value != null) {
                     writeMethod.invoke(contact, value);
                 } else {

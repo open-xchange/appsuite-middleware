@@ -54,7 +54,6 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
@@ -73,11 +72,11 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
     private static final String CHECK = "check";
     private static final String MIGRATE = "migrate";
 
-    private SecretInconsistencyDetector detector;
-    private SecretMigrator migrator;
-    private SecretService secretService;
+    private final SecretInconsistencyDetector detector;
+    private final SecretMigrator migrator;
+    private final SecretService secretService;
     
-    public SecretRecoveryMultipleHandler(SecretInconsistencyDetector detector, SecretMigrator migrator, SecretService secretService) {
+    public SecretRecoveryMultipleHandler(final SecretInconsistencyDetector detector, final SecretMigrator migrator, final SecretService secretService) {
         this.detector = detector;
         this.migrator = migrator;
         this.secretService = secretService;
@@ -95,7 +94,7 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         if(action.equals(CHECK)) {
             return check(jsonObject, session);
         } else if (action.equals(MIGRATE)) {
@@ -105,16 +104,16 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
         }
     }
 
-    private Object check(JSONObject request, ServerSession session) throws AbstractOXException, JSONException {
-        boolean secretWorking = detector.isSecretWorking(session);
-        JSONObject object = new JSONObject();
+    private Object check(final JSONObject request, final ServerSession session) throws AbstractOXException, JSONException {
+        final boolean secretWorking = detector.isSecretWorking(session);
+        final JSONObject object = new JSONObject();
         object.put("secretWorks", secretWorking);
         return object;
     }
 
-    private Object migrate(JSONObject request, ServerSession session) throws JSONException, AbstractOXException {
-        String password = request.getString("password");
-        String secret = secretService.getSecret(session);
+    private Object migrate(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
+        final String password = request.getString("password");
+        final String secret = secretService.getSecret(session);
         
         migrator.migrate(password, secret, session);
         

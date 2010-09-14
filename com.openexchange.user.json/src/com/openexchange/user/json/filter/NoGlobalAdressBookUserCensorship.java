@@ -64,14 +64,14 @@ import com.openexchange.user.json.field.UserField;
  */
 public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
-    public User censor(User user) {
+    public User censor(final User user) {
         return new FilteredUser(user);
     }
     
     private static final class FilteredUser implements User {
         private User delegate = null;
         
-        private FilteredUser(User delegate) {
+        private FilteredUser(final User delegate) {
             super();
             this.delegate = delegate;
         }

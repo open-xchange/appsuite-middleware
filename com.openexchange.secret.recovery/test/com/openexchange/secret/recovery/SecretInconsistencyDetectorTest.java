@@ -49,19 +49,18 @@
 
 package com.openexchange.secret.recovery;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.SimUser;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.secret.SimSecretService;
 import com.openexchange.secret.recovery.impl.DefaultSecretInconsistencyDetector;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
-
-import static org.junit.Assert.*;
 
 /**
  * {@link SecretInconsistencyDetectorTest}
@@ -70,11 +69,11 @@ import static org.junit.Assert.*;
  */
 public class SecretInconsistencyDetectorTest {
     
-    private DefaultSecretInconsistencyDetector detector = new DefaultSecretInconsistencyDetector();
+    private final DefaultSecretInconsistencyDetector detector = new DefaultSecretInconsistencyDetector();
     private ServerSession session;
     
-    private Context ctx = new SimContext(1);
-    private SimUser user = new SimUser();
+    private final Context ctx = new SimContext(1);
+    private final SimUser user = new SimUser();
     
     @Before
     public void setUp() {
@@ -87,7 +86,7 @@ public class SecretInconsistencyDetectorTest {
         detector.addCheck(new FailingSecretConsistencyCheck());
         
         session = new SimServerSession(ctx, user, null);
-        boolean diagnosis = detector.isSecretWorking(session);
+        final boolean diagnosis = detector.isSecretWorking(session);
         assertFalse(diagnosis);
     }
     
@@ -97,14 +96,14 @@ public class SecretInconsistencyDetectorTest {
         detector.addCheck(new PassingSecretConsistencyCheck());
         
         session = new SimServerSession(ctx, user, null);
-        boolean diagnosis = detector.isSecretWorking(session);
+        final boolean diagnosis = detector.isSecretWorking(session);
         assertTrue(diagnosis);
     }   
     
     
     private static final class FailingSecretConsistencyCheck implements SecretConsistencyCheck {
 
-        public boolean checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException {
+        public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
             return false;
         }
         
@@ -112,7 +111,7 @@ public class SecretInconsistencyDetectorTest {
     
     private static final class PassingSecretConsistencyCheck implements SecretConsistencyCheck {
 
-        public boolean checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException {
+        public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
             return true;
         }
         

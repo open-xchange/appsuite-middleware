@@ -87,14 +87,14 @@ public final class DatabasePermission implements Permission {
      */
     public DatabasePermission(final OCLPermission oclPermission) {
         super();
-        this.admin = oclPermission.isFolderAdmin();
-        this.deletePermission = oclPermission.getDeletePermission();
-        this.entity = oclPermission.getEntity();
-        this.folderPermission = oclPermission.getFolderPermission();
-        this.group = oclPermission.isGroupPermission();
-        this.readPermission = oclPermission.getReadPermission();
-        this.system = oclPermission.getSystem();
-        this.writePermission = oclPermission.getWritePermission();
+        admin = oclPermission.isFolderAdmin();
+        deletePermission = oclPermission.getDeletePermission();
+        entity = oclPermission.getEntity();
+        folderPermission = oclPermission.getFolderPermission();
+        group = oclPermission.isGroupPermission();
+        readPermission = oclPermission.getReadPermission();
+        system = oclPermission.getSystem();
+        writePermission = oclPermission.getWritePermission();
     }
 
     @Override
@@ -195,7 +195,7 @@ public final class DatabasePermission implements Permission {
     }
 
     public void setDeletePermission(final int permission) {
-        this.deletePermission = permission;
+        deletePermission = permission;
     }
 
     public void setEntity(final int entity) {
@@ -203,7 +203,7 @@ public final class DatabasePermission implements Permission {
     }
 
     public void setFolderPermission(final int permission) {
-        this.folderPermission = permission;
+        folderPermission = permission;
     }
 
     public void setGroup(final boolean group) {
@@ -211,23 +211,23 @@ public final class DatabasePermission implements Permission {
     }
 
     public void setMaxPermissions() {
-        this.folderPermission = Permission.MAX_PERMISSION;
-        this.readPermission = Permission.MAX_PERMISSION;
-        this.deletePermission = Permission.MAX_PERMISSION;
-        this.writePermission = Permission.MAX_PERMISSION;
-        this.admin = true;
+        folderPermission = Permission.MAX_PERMISSION;
+        readPermission = Permission.MAX_PERMISSION;
+        deletePermission = Permission.MAX_PERMISSION;
+        writePermission = Permission.MAX_PERMISSION;
+        admin = true;
     }
 
     public void setNoPermissions() {
-        this.folderPermission = Permission.NO_PERMISSIONS;
-        this.readPermission = Permission.NO_PERMISSIONS;
-        this.deletePermission = Permission.NO_PERMISSIONS;
-        this.writePermission = Permission.NO_PERMISSIONS;
-        this.admin = false;
+        folderPermission = Permission.NO_PERMISSIONS;
+        readPermission = Permission.NO_PERMISSIONS;
+        deletePermission = Permission.NO_PERMISSIONS;
+        writePermission = Permission.NO_PERMISSIONS;
+        admin = false;
     }
 
     public void setReadPermission(final int permission) {
-        this.readPermission = permission;
+        readPermission = permission;
     }
 
     public void setSystem(final int system) {
@@ -235,7 +235,7 @@ public final class DatabasePermission implements Permission {
     }
 
     public void setWritePermission(final int permission) {
-        this.writePermission = permission;
+        writePermission = permission;
     }
 
     @Override

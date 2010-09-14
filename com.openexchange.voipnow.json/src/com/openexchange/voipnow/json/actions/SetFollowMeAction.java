@@ -155,8 +155,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 final Rules_type1[] rules = sequenceType0.getRules();
                 if (null != rules) {
                     followMeRulesIDs = new ArrayList<Integer>(rules.length);
-                    for (int i = 0; i < rules.length; i++) {
-                        final Rules_type1 rule = rules[i];
+                    for (final Rules_type1 rule : rules) {
                         if (followMeStr.equals(rule.getAction().getValue())) {
                             followMeRulesIDs.add(Integer.valueOf(rule.getRuleID().getPositiveInteger().intValue()));
                         }

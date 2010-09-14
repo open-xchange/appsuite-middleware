@@ -118,7 +118,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         return calendar.containsRecurrenceType();
     }
 
-    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         if(calendar.isException()) {
             return;
         }
@@ -310,7 +310,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         }
     }
 
-    private void setDayInMonthFromSetPos(int index, CalendarObject obj, Recur rrule) {
+    private void setDayInMonthFromSetPos(final int index, final CalendarObject obj, final Recur rrule) {
         if(!rrule.getSetPosList().isEmpty()) {
             int firstPos = (Integer) rrule.getSetPosList().get(0);
             if(firstPos == -1) {

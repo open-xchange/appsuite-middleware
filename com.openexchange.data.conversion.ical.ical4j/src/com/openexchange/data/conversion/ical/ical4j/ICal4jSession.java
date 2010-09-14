@@ -50,7 +50,6 @@
 package com.openexchange.data.conversion.ical.ical4j;
 
 import net.fortuna.ical4j.model.Calendar;
-
 import com.openexchange.data.conversion.ical.ICalSession;
 
 /**

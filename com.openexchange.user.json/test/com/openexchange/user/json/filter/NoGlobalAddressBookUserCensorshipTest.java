@@ -74,15 +74,15 @@ public class NoGlobalAddressBookUserCensorshipTest extends TestCase {
     public void testCensorsData() throws Exception {
         User user = getFilledUser();
         
-        UserCensorship censorship = new NoGlobalAdressBookUserCensorship();
+        final UserCensorship censorship = new NoGlobalAdressBookUserCensorship();
         
         user = censorship.censor(user);
         
-        for(UserField field : UserField.ALL_FIELDS) {
+        for(final UserField field : UserField.ALL_FIELDS) {
             if(!UserField.isUserOnlyField(field.getColumn())){
                 continue;
             }
-            Object value = get(field, user);
+            final Object value = get(field, user);
             if(UserField.UNPROTECTED_FIELDS.contains(field)) {
                 assertFalse("Should have remained untouched: "+field, value != null);
             } else {
@@ -92,7 +92,7 @@ public class NoGlobalAddressBookUserCensorshipTest extends TestCase {
         
     }
 
-    private Object get(UserField field, User user) {
+    private Object get(final UserField field, final User user) {
         switch(field) {
         case ALIASES: return user.getAliases();
         case TIME_ZONE: return user.getTimeZone();
@@ -105,14 +105,14 @@ public class NoGlobalAddressBookUserCensorshipTest extends TestCase {
     }
 
     private User getFilledUser() throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        User user = new UserImpl();
-        BeanInfo beanInfo = Introspector.getBeanInfo(UserImpl.class);
+        final User user = new UserImpl();
+        final BeanInfo beanInfo = Introspector.getBeanInfo(UserImpl.class);
         
-        PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-        for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-            Method writeMethod = propertyDescriptor.getWriteMethod();
+        final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+        for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            final Method writeMethod = propertyDescriptor.getWriteMethod();
             if(writeMethod != null) {
-                Object value = DEFAULT_VALUES.get(writeMethod.getParameterTypes()[0]);
+                final Object value = DEFAULT_VALUES.get(writeMethod.getParameterTypes()[0]);
                 if(value != null) {
                     writeMethod.invoke(user, value);
                 } else {

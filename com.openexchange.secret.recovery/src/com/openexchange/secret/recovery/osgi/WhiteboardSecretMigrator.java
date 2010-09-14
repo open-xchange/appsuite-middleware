@@ -62,17 +62,17 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhiteboardSecretMigrator extends ServiceTracker implements SecretMigrator {
-    public WhiteboardSecretMigrator(BundleContext context) {
+    public WhiteboardSecretMigrator(final BundleContext context) {
         super(context, SecretMigrator.class.getName(), null);
     }
 
-    public void migrate(String oldSecret, String newSecret, ServerSession session) throws AbstractOXException {
-        Object[] services = getServices();
-        for (Object object : services) {
+    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
+        final Object[] services = getServices();
+        for (final Object object : services) {
             if(object == this) {
                 continue;
             }
-            SecretMigrator migrator = (SecretMigrator) object;
+            final SecretMigrator migrator = (SecretMigrator) object;
             migrator.migrate(oldSecret, newSecret, session);
         }
     }

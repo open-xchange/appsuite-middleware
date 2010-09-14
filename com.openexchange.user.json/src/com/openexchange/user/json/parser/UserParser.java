@@ -116,9 +116,9 @@ public final class UserParser {
     public static Contact parseUserContact(final JSONObject userJSONObject, final TimeZone timeZone) throws AjaxException {
         try {
             final Contact contact = new Contact();
-            for (int i = 0; i < mapping.length; i++) {
-                if (mapping[i].jsonObjectContains(userJSONObject)) {
-                    mapping[i].setObject(contact, userJSONObject);
+            for (final JSONAttributeMapper element : mapping) {
+                if (element.jsonObjectContains(userJSONObject)) {
+                    element.setObject(contact, userJSONObject);
                 }
             }
             if (userJSONObject.has(UserField.DISTRIBUTIONLIST.getName())) {

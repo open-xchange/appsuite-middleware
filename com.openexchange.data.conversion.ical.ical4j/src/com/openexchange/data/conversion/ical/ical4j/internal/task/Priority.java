@@ -86,7 +86,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
      * {@inheritDoc}
      */
     public void emit(final int index, final Task task, final VToDo vToDo,
-        final List<ConversionWarning> warnings, final Context ctx, Object... args)
+        final List<ConversionWarning> warnings, final Context ctx, final Object... args)
         throws ConversionError {
         final net.fortuna.ical4j.model.property.Priority prio;
         switch(task.getPriority()) {

@@ -174,8 +174,8 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
                  * No filter
                  */
                 visibleFolders.addAll(Arrays.asList(subfolders));
-                for (int i = 0; i < subfolders.length; i++) {
-                    fillSubfolders(treeId, subfolders[i].getID(), filter, visibleFolders, listAction, openedStorages);
+                for (final UserizedFolder subfolder : subfolders) {
+                    fillSubfolders(treeId, subfolder.getID(), filter, visibleFolders, listAction, openedStorages);
                 }
             } else {
                 /*
@@ -189,8 +189,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
                         subfolders[i] = null;
                     }
                 }
-                for (int i = 0; i < subfolders.length; i++) {
-                    final UserizedFolder subfolder = subfolders[i];
+                for (final UserizedFolder subfolder : subfolders) {
                     if (null != subfolder) {
                         fillSubfolders(treeId, subfolder.getID(), filter, visibleFolders, listAction, openedStorages);
                     }

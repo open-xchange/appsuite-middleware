@@ -623,8 +623,8 @@ public enum UserField {
 
     public static final EnumSet<UserField> UNPROTECTED_FIELDS = EnumSet.of(ID, DISPLAY_NAME, FIRST_NAME, LAST_NAME, SECOND_NAME, SUFFIX);
     
-    public static boolean isProtected(int field) {
-        for (UserField uf : UNPROTECTED_FIELDS) {
+    public static boolean isProtected(final int field) {
+        for (final UserField uf : UNPROTECTED_FIELDS) {
             if(uf.getColumn() == field) {
                 return false;
             }

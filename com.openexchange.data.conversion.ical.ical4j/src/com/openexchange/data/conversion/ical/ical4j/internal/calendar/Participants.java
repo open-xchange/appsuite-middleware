@@ -111,7 +111,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         return cObj.containsParticipants();
     }
 
-    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
         for(final Participant p : cObj.getParticipants()) {
             switch(p.getType()) {
@@ -156,7 +156,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         final Attendee attendee = new Attendee();
         try {
             attendee.setValue("mailto:" + externalUserParticipant.getEmailAddress());
-            ParameterList parameters = attendee.getParameters();
+            final ParameterList parameters = attendee.getParameters();
             parameters.add(CuType.INDIVIDUAL);
             parameters.add(PartStat.NEEDS_ACTION);
             parameters.add(Role.REQ_PARTICIPANT);
@@ -167,16 +167,16 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
     }
 
-    protected void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component, U obj) throws ConversionError {
+    protected void addUserAttendee(final int index, final UserParticipant userParticipant, final Context ctx, final T component, final U obj) throws ConversionError {
         final Attendee attendee = new Attendee();
         try {
             String address;
             //This sets the attendees email-addresses to their DefaultSenderAddress if configured via com.openexchange.notification.fromSource in notification.properties
-            String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+            final String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
             if ("defaultSenderAddress".equals(senderSource)) { 
                 try {
                     address = UserSettingMailStorage.getInstance().loadUserSettingMail(userParticipant.getIdentifier(), ctx).getSendAddr();
-                } catch (UserConfigurationException e) {
+                } catch (final UserConfigurationException e) {
                     LOG.error(e.getMessage(), e);
                     address = resolveUserMail(index, userParticipant, ctx);
                 }
@@ -184,7 +184,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 address = resolveUserMail(index, userParticipant, ctx);
             }
             attendee.setValue("mailto:" + address);
-            ParameterList parameters = attendee.getParameters();
+            final ParameterList parameters = attendee.getParameters();
             parameters.add(Role.REQ_PARTICIPANT);
             parameters.add(CuType.INDIVIDUAL);
             switch (userParticipant.getConfirm()) {
@@ -206,15 +206,15 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
     }
 
-    protected String resolveUserMail(int index, UserParticipant userParticipant, Context ctx) throws ConversionError {
+    protected String resolveUserMail(final int index, final UserParticipant userParticipant, final Context ctx) throws ConversionError {
         String address = userParticipant.getEmailAddress();
         if (address == null) {
             try {
                 final User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
                 address = user.getMail();
-            } catch (UserException e) {
+            } catch (final UserException e) {
                 throw new ConversionError(index, e);
-            } catch (ServiceException e) {
+            } catch (final ServiceException e) {
                 throw new ConversionError(index, e);
             }
         }
@@ -232,7 +232,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         final Map<String, ICalParticipant> mails = new HashMap<String, ICalParticipant>();
         final List<String> resourceNames = new LinkedList<String>();
         
-        String comment = component.getProperty(Property.COMMENT) == null ? null : component.getProperty(Property.COMMENT).getValue();
+        final String comment = component.getProperty(Property.COMMENT) == null ? null : component.getProperty(Property.COMMENT).getValue();
 
         for(int i = 0, size = properties.size(); i < size; i++) {
             final Attendee attendee = (Attendee) properties.get(i);
@@ -245,7 +245,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 final URI uri = attendee.getCalAddress();
                 if("mailto".equalsIgnoreCase(uri.getScheme())) {
                     final String mail = uri.getSchemeSpecificPart();
-                    ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
+                    final ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
                     mails.put(mail, icalP);
                 }
             }
@@ -261,9 +261,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
 
         for(final User user : users) {
-            UserParticipant up = new UserParticipant(user.getId());
+            final UserParticipant up = new UserParticipant(user.getId());
             ICalParticipant icalP = null;
-            for (String alias: user.getAliases()) {
+            for (final String alias: user.getAliases()) {
                 icalP = mails.get(alias);
                 if (icalP != null) {
                     mails.remove(alias);
@@ -280,12 +280,12 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             cObj.addParticipant( new UserParticipant(user.getId()) ); //TODO Is that a bug? Which one?
         }
 
-        List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
+        final List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
         for(final String mail : mails.keySet()) {
             final ExternalUserParticipant external = new ExternalUserParticipant(mail);
             external.setDisplayName(null);
 
-            ICalParticipant icalP = mails.get(mail);
+            final ICalParticipant icalP = mails.get(mail);
             
             if (icalP.message != null)
                 external.setMessage(icalP.message);
@@ -335,10 +335,10 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
      * @param attendee
      * @return
      */
-    private ICalParticipant createIcalParticipant(Attendee attendee, String mail, String message) {
-        ICalParticipant retval = new ICalParticipant(mail, -1, message);
+    private ICalParticipant createIcalParticipant(final Attendee attendee, final String mail, final String message) {
+        final ICalParticipant retval = new ICalParticipant(mail, -1, message);
 
-        Parameter parameter = attendee.getParameter(Parameter.PARTSTAT);
+        final Parameter parameter = attendee.getParameter(Parameter.PARTSTAT);
         if (parameter != null) {
             if (parameter.equals(PartStat.ACCEPTED)) {
                 retval.status = CalendarObject.ACCEPT;
@@ -358,7 +358,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         public int status;
         public String message;
         
-        public ICalParticipant(String mail, int status, String message) {
+        public ICalParticipant(final String mail, final int status, final String message) {
             this.mail = mail;
             this.status = status;
             this.message = message;

@@ -188,8 +188,7 @@ public final class Insert {
         if (false && null != permissions && permissions.length > 0) {
             try {
                 stmt = con.prepareStatement(SQL_INSERT_PERM);
-                for (int i = 0; i < permissions.length; i++) {
-                    final Permission p = permissions[i];
+                for (final Permission p : permissions) {
                     int pos = 1;
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, tree);

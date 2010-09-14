@@ -105,7 +105,7 @@ public final class CacheSortableId implements SortableId {
 
     public int compareTo(final SortableId o) {
         if (o instanceof CacheSortableId) {
-            final int thisVal = this.ordinal;
+            final int thisVal = ordinal;
             final int anotherVal = ((CacheSortableId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }

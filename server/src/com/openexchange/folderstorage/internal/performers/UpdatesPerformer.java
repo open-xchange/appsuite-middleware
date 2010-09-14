@@ -203,12 +203,12 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                 for (final FolderStorage folderStorage : realFolderStorages) {
                     final String[] modifiedFolderIDs =
                         folderStorage.getModifiedFolderIDs(treeId, since, includeContentTypes, storageParameters);
-                    for (int i = 0; i < modifiedFolderIDs.length; i++) {
+                    for (final String modifiedFolderID : modifiedFolderIDs) {
                         try {
-                            modifiedFolders.add(folderStorage.getFolder(FolderStorage.REAL_TREE_ID, modifiedFolderIDs[i], storageParameters));
+                            modifiedFolders.add(folderStorage.getFolder(FolderStorage.REAL_TREE_ID, modifiedFolderID, storageParameters));
                         } catch (final FolderException e) {
                             LOG.error(
-                                new StringBuilder(128).append("Updated folder \"").append(modifiedFolderIDs[i]).append(
+                                new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
                                     "\" could not be fetched from storage \"").append(folderStorage.getClass().getName()).append("\":\n").append(
                                     e.getMessage()).toString(),
                                 e);
@@ -222,15 +222,15 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                         try {
                             final String[] modifiedFolderIDs =
                                 storage.getModifiedFolderIDs(treeId, since, includeContentTypes, storageParameters);
-                            for (int i = 0; i < modifiedFolderIDs.length; i++) {
+                            for (final String modifiedFolderID : modifiedFolderIDs) {
                                 try {
                                     modifiedFolders.add(storage.getFolder(
                                         FolderStorage.REAL_TREE_ID,
-                                        modifiedFolderIDs[i],
+                                        modifiedFolderID,
                                         storageParameters));
                                 } catch (final FolderException e) {
                                     LOG.error(
-                                        new StringBuilder(128).append("Updated folder \"").append(modifiedFolderIDs[i]).append(
+                                        new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
                                             "\" could not be fetched from storage \"").append(storage.getClass().getName()).append("\":\n").append(
                                             e.getMessage()).toString(),
                                         e);
@@ -244,7 +244,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                 storage.rollback(storageParameters);
                             }
                             throw e;
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             if (started) {
                                 storage.rollback(storageParameters);
                             }
@@ -382,9 +382,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                 final List<Folder> deletedFolders = new ArrayList<Folder>();
                 for (final FolderStorage folderStorage : realFolderStorages) {
                     final String[] deletedFolderIDs = folderStorage.getDeletedFolderIDs(treeId, since, storageParameters);
-                    for (int i = 0; i < deletedFolderIDs.length; i++) {
-                        // Pass storage type to fetch folder from backup tables
-                        final String folderId = deletedFolderIDs[i];
+                    for (final String folderId : deletedFolderIDs) {
                         if (treeChecker.containsVirtualFolder(folderId, treeId, StorageType.BACKUP)) {
                             deletedFolders.add(folderStorage.getFolder(
                                 FolderStorage.REAL_TREE_ID,

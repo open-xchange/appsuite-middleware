@@ -1062,8 +1062,7 @@ public final class MessagingFolderStorage implements FolderStorage {
 
     private void check4DuplicateFolder(final MessagingAccountAccess accountAccess, final String parentId, final String name2check) throws MessagingException {
         final MessagingFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(parentId, true);
-        for (int j = 0; j < subfolders.length; j++) {
-            final MessagingFolder subfolder = subfolders[j];
+        for (final MessagingFolder subfolder : subfolders) {
             if (name2check.equals(subfolder.getName())) {
                 throw MessagingExceptionCodes.DUPLICATE_FOLDER.create(name2check, parentId);
             }
@@ -1117,8 +1116,8 @@ public final class MessagingFolderStorage implements FolderStorage {
          */
         // Iterate subfolders
         final MessagingFolder[] tmp = srcAccess.getFolderAccess().getSubfolders(srcFullname, true);
-        for (int i = 0; i < tmp.length; i++) {
-            fullCopy(srcAccess, tmp[i].getId(), destAccess, destFullname, destSeparator, user, hasPermissions);
+        for (final MessagingFolder element : tmp) {
+            fullCopy(srcAccess, element.getId(), destAccess, destFullname, destSeparator, user, hasPermissions);
         }
         return destFullname;
     }

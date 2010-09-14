@@ -183,8 +183,8 @@ public class AJPv13TaskWatcher {
                      */
                     final Collection<com.openexchange.threadpool.Task<Object>> tasks =
                         new ArrayList<com.openexchange.threadpool.Task<Object>>();
-                    for (final Iterator<AJPv13Task> iter = this.tasks.iterator(); iter.hasNext();) {
-                        tasks.add(new TaskRunCallable(iter.next(), countWaiting, countProcessing, countExceeded, true, log));
+                    for (final AJPv13Task ajPv13Task : this.tasks) {
+                        tasks.add(new TaskRunCallable(ajPv13Task, countWaiting, countProcessing, countExceeded, true, log));
                     }
                     /*
                      * Invoke all and wait for being executed
@@ -224,8 +224,8 @@ public class AJPv13TaskWatcher {
                      */
                     final Collection<com.openexchange.threadpool.Task<Object>> tasks =
                         new ArrayList<com.openexchange.threadpool.Task<Object>>();
-                    for (final Iterator<AJPv13Task> iter = this.tasks.iterator(); iter.hasNext();) {
-                        tasks.add(new TaskRunCallable(iter.next(), logExceededTasks, log));
+                    for (final AJPv13Task ajPv13Task : this.tasks) {
+                        tasks.add(new TaskRunCallable(ajPv13Task, logExceededTasks, log));
                     }
                     /*
                      * Invoke all and wait for being executed

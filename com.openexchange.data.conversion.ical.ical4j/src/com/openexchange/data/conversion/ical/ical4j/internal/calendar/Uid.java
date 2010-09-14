@@ -72,7 +72,7 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
         return isSet(calendar, CalendarObject.UID) && calendar.getUid().length() != 0;
     }
 
-    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         component.getProperties().add(new net.fortuna.ical4j.model.property.Uid(calendar.getUid()));
     }
 

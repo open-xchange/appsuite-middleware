@@ -67,21 +67,21 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class Sequence<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
-    public void emit(int index, U u, T t, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
-        net.fortuna.ical4j.model.property.Sequence sequence = new net.fortuna.ical4j.model.property.Sequence();
+    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+        final net.fortuna.ical4j.model.property.Sequence sequence = new net.fortuna.ical4j.model.property.Sequence();
         sequence.setValue(String.valueOf(u.getSequence()));
         t.getProperties().add(sequence);
     }
 
-    public boolean hasProperty(T t) {
+    public boolean hasProperty(final T t) {
         return t.getProperty(Property.SEQUENCE) != null;
     }
 
-    public boolean isSet(U u) {
+    public boolean isSet(final U u) {
         return u.containsSequence();
     }
 
-    public void parse(int index, T t, U u, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final T t, final U u, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         u.setSequence(Integer.valueOf(t.getProperty(Property.SEQUENCE).getValue()));
     }
 

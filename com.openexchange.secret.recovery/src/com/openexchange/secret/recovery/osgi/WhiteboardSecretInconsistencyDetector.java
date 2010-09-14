@@ -66,10 +66,10 @@ import com.openexchange.secret.recovery.impl.DefaultSecretInconsistencyDetector;
  */
 public class WhiteboardSecretInconsistencyDetector extends DefaultSecretInconsistencyDetector {
 
-    private ServiceTracker tracker;
-    private WhiteboardSecretService secretService;
+    private final ServiceTracker tracker;
+    private final WhiteboardSecretService secretService;
     
-    public WhiteboardSecretInconsistencyDetector(BundleContext context) {
+    public WhiteboardSecretInconsistencyDetector(final BundleContext context) {
         tracker = new ServiceTracker(context, SecretConsistencyCheck.class.getName(), null);
         secretService = new WhiteboardSecretService(context);
     }
@@ -86,10 +86,10 @@ public class WhiteboardSecretInconsistencyDetector extends DefaultSecretInconsis
     
     @Override
     public List<SecretConsistencyCheck> getChecks() {
-        Object[] services = tracker.getServices();
-        List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>(services.length);
+        final Object[] services = tracker.getServices();
+        final List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>(services.length);
         
-        for (Object object : services) {
+        for (final Object object : services) {
             checks.add((SecretConsistencyCheck) object);
         }
         

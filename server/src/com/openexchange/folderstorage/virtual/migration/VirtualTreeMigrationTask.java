@@ -57,9 +57,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
@@ -101,9 +101,9 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
         return DEPENDENCIES;
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
-        int contextId = params.getContextId();
-        Schema schema = params.getSchema();
+    public void perform(final PerformParameters params) throws AbstractOXException {
+        final int contextId = params.getContextId();
+        final Schema schema = params.getSchema();
         final Map<Integer, List<Integer>> m = getAllUsers(contextId);
 
         final int size = m.size();
@@ -114,8 +114,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
         }
 
         int processed = 0;
-        for (final Iterator<Map.Entry<Integer, List<Integer>>> it = m.entrySet().iterator(); it.hasNext();) {
-            final Map.Entry<Integer, List<Integer>> me = it.next();
+        for (final Entry<Integer, List<Integer>> me : m.entrySet()) {
             final int currentContextId = me.getKey().intValue();
             try {
                 iterateUsersPerContext(me.getValue(), currentContextId);

@@ -80,7 +80,7 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
         return appointment.isMaster() && appointment.containsDeleteExceptions();
     }
 
-    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final java.util.Date[] dates = appointment.getDeleteException();
         if (null == dates) {
             return;

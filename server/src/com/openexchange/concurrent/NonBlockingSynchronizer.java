@@ -94,7 +94,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         running = new AtomicInteger();
         runLock = new ReentrantLock();
         this.runnable = runnable;
-        this.reentrant = new ConcurrentHashMap<Thread, Object>();
+        reentrant = new ConcurrentHashMap<Thread, Object>();
     }
 
     /**

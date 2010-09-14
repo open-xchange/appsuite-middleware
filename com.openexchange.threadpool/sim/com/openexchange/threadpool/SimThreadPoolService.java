@@ -70,7 +70,7 @@ public class SimThreadPoolService implements ThreadPoolService {
     public SimThreadPoolService() {
         super();
         executor = Executors.newSingleThreadExecutor();
-        this.corePoolSize = getCorePoolSize();
+        corePoolSize = getCorePoolSize();
     }
 
     private static int getCorePoolSize() {

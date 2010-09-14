@@ -114,12 +114,12 @@ public final class ParserTools {
         return isDateTime(component, property.getName());
     }
 
-    public static boolean isDateTime(final CalendarComponent component, String name) {
+    public static boolean isDateTime(final CalendarComponent component, final String name) {
         final DateProperty value = (DateProperty) component.getProperty(name);
         return isDateTime(value);
     }
 
-    public static boolean isDateTime(DateProperty value) {
+    public static boolean isDateTime(final DateProperty value) {
         return value.getDate() instanceof DateTime;
     }
 

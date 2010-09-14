@@ -147,31 +147,31 @@ public final class MailFolderImpl extends AbstractFolder {
     public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
         super();
         final String fullname = mailFolder.getFullname();
-        this.id = MailFolderUtility.prepareFullname(accountId, fullname);
-        this.name = "INBOX".equals(fullname) ? "Inbox" : mailFolder.getName();
+        id = MailFolderUtility.prepareFullname(accountId, fullname);
+        name = "INBOX".equals(fullname) ? "Inbox" : mailFolder.getName();
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
-        this.parent =
+        parent =
             mailFolder.isRootFolder() ? String.valueOf(1) : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
         final MailPermission[] mailPermissions = mailFolder.getPermissions();
-        this.permissions = new Permission[mailPermissions.length];
+        permissions = new Permission[mailPermissions.length];
         for (int i = 0; i < mailPermissions.length; i++) {
-            this.permissions[i] = new MailPermissionImpl(mailPermissions[i]);
+            permissions[i] = new MailPermissionImpl(mailPermissions[i]);
         }
         type = SystemType.getInstance();
-        this.subscribed = mailFolder.isSubscribed(); // || mailFolder.hasSubscribedSubfolders();
-        this.subscribedSubfolders = mailFolder.hasSubscribedSubfolders();
+        subscribed = mailFolder.isSubscribed(); // || mailFolder.hasSubscribedSubfolders();
+        subscribedSubfolders = mailFolder.hasSubscribedSubfolders();
         this.capabilities = capabilities;
         {
             final String value =
                 mailFolder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(mailFolder.getMessageCount()).append('/').append(
                     mailFolder.getUnreadMessageCount()).append(')').toString();
-            this.summary = value;
+            summary = value;
         }
-        this.deefault = /* mailFolder.isDefaultFolder(); */0 == accountId && mailFolder.isDefaultFolder();
-        this.total = mailFolder.getMessageCount();
-        this.nu = mailFolder.getNewMessageCount();
-        this.unread = mailFolder.getUnreadMessageCount();
-        this.deleted = mailFolder.getDeletedMessageCount();
+        deefault = /* mailFolder.isDefaultFolder(); */0 == accountId && mailFolder.isDefaultFolder();
+        total = mailFolder.getMessageCount();
+        nu = mailFolder.getNewMessageCount();
+        unread = mailFolder.getUnreadMessageCount();
+        deleted = mailFolder.getDeletedMessageCount();
         final MailPermission mp;
         if (mailFolder.isRootFolder()) {
             mailFolderType = MailFolderType.ROOT;
@@ -256,7 +256,7 @@ public final class MailFolderImpl extends AbstractFolder {
         /*
          * Trash folder must not be cacheable
          */
-        this.cacheable = !mailFolder.isTrash(); // || !mailFolderType.equals(MailFolderType.TRASH);
+        cacheable = !mailFolder.isTrash(); // || !mailFolderType.equals(MailFolderType.TRASH);
     }
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };

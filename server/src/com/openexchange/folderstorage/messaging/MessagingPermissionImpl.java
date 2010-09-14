@@ -89,14 +89,14 @@ public final class MessagingPermissionImpl implements Permission {
      */
     public MessagingPermissionImpl(final MessagingPermission messagingPermission) {
         super();
-        this.admin = messagingPermission.isAdmin();
-        this.deletePermission = messagingPermission.getDeletePermission();
-        this.entity = messagingPermission.getEntity();
-        this.folderPermission = messagingPermission.getFolderPermission();
-        this.group = messagingPermission.isGroup();
-        this.readPermission = messagingPermission.getReadPermission();
-        this.system = messagingPermission.getSystem();
-        this.writePermission = messagingPermission.getWritePermission();
+        admin = messagingPermission.isAdmin();
+        deletePermission = messagingPermission.getDeletePermission();
+        entity = messagingPermission.getEntity();
+        folderPermission = messagingPermission.getFolderPermission();
+        group = messagingPermission.isGroup();
+        readPermission = messagingPermission.getReadPermission();
+        system = messagingPermission.getSystem();
+        writePermission = messagingPermission.getWritePermission();
     }
 
     public boolean isVisible() {
@@ -201,7 +201,7 @@ public final class MessagingPermissionImpl implements Permission {
     }
 
     public void setDeletePermission(final int permission) {
-        this.deletePermission = permission;
+        deletePermission = permission;
     }
 
     public void setEntity(final int entity) {
@@ -209,7 +209,7 @@ public final class MessagingPermissionImpl implements Permission {
     }
 
     public void setFolderPermission(final int permission) {
-        this.folderPermission = permission;
+        folderPermission = permission;
     }
 
     public void setGroup(final boolean group) {
@@ -217,23 +217,23 @@ public final class MessagingPermissionImpl implements Permission {
     }
 
     public void setMaxPermissions() {
-        this.folderPermission = Permission.MAX_PERMISSION;
-        this.readPermission = Permission.MAX_PERMISSION;
-        this.deletePermission = Permission.MAX_PERMISSION;
-        this.writePermission = Permission.MAX_PERMISSION;
-        this.admin = true;
+        folderPermission = Permission.MAX_PERMISSION;
+        readPermission = Permission.MAX_PERMISSION;
+        deletePermission = Permission.MAX_PERMISSION;
+        writePermission = Permission.MAX_PERMISSION;
+        admin = true;
     }
 
     public void setNoPermissions() {
-        this.folderPermission = Permission.NO_PERMISSIONS;
-        this.readPermission = Permission.NO_PERMISSIONS;
-        this.deletePermission = Permission.NO_PERMISSIONS;
-        this.writePermission = Permission.NO_PERMISSIONS;
-        this.admin = false;
+        folderPermission = Permission.NO_PERMISSIONS;
+        readPermission = Permission.NO_PERMISSIONS;
+        deletePermission = Permission.NO_PERMISSIONS;
+        writePermission = Permission.NO_PERMISSIONS;
+        admin = false;
     }
 
     public void setReadPermission(final int permission) {
-        this.readPermission = permission;
+        readPermission = permission;
     }
 
     public void setSystem(final int system) {
@@ -241,7 +241,7 @@ public final class MessagingPermissionImpl implements Permission {
     }
 
     public void setWritePermission(final int permission) {
-        this.writePermission = permission;
+        writePermission = permission;
     }
 
     @Override

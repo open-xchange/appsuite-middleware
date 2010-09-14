@@ -1453,8 +1453,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                     final SortableId[] subfolders =
                         folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, FolderStorage.ROOT_ID, storageParameters);
                     final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
-                    for (int i = 0; i < subfolders.length; i++) {
-                        final String id = subfolders[i].getId();
+                    for (final SortableId subfolder : subfolders) {
+                        final String id = subfolder.getId();
                         if (!FolderStorage.PRIVATE_ID.equals(id)) { // Exclude private folder
                             put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
                         }

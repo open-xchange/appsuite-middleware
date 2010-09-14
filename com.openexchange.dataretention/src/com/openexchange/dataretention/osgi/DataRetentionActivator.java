@@ -71,7 +71,7 @@ public final class DataRetentionActivator implements BundleActivator {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         componentRegistration = new ComponentRegistration(
             context,
             DataRetentionException.DATA_RETENTION_COMPONENT,

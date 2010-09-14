@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -63,10 +62,10 @@ import com.openexchange.server.ServiceException;
 public interface UserResolver {
 
     UserResolver EMPTY = new UserResolver() {
-        public List<User> findUsers(List<String> mails, Context ctx) {
+        public List<User> findUsers(final List<String> mails, final Context ctx) {
             return new ArrayList<User>();
         }
-        public User loadUser(int userId, Context ctx) {
+        public User loadUser(final int userId, final Context ctx) {
             return null;
         }
     };

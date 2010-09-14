@@ -1084,8 +1084,8 @@ public final class MailFolderStorage implements FolderStorage {
             // Copy permissions
             final MailPermission[] perms = source.getPermissions();
             try {
-                for (int i = 0; i < perms.length; i++) {
-                    mfd.addPermission((MailPermission) perms[i].clone());
+                for (final MailPermission perm : perms) {
+                    mfd.addPermission((MailPermission) perm.clone());
                 }
             } catch (final CloneNotSupportedException e) {
                 throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
@@ -1123,8 +1123,8 @@ public final class MailFolderStorage implements FolderStorage {
          */
         // Iterate subfolders
         final MailFolder[] tmp = srcAccess.getFolderStorage().getSubfolders(srcFullname, true);
-        for (int i = 0; i < tmp.length; i++) {
-            fullCopy(srcAccess, tmp[i].getFullname(), destAccess, destFullname, destSeparator, user, hasPermissions);
+        for (final MailFolder element : tmp) {
+            fullCopy(srcAccess, element.getFullname(), destAccess, destFullname, destSeparator, user, hasPermissions);
         }
         return destFullname;
     }

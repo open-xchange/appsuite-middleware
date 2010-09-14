@@ -95,7 +95,7 @@ public final class MessagingId implements SortableId {
 
     public int compareTo(final SortableId o) {
         if (o instanceof MessagingId) {
-            final int thisVal = this.ordinal;
+            final int thisVal = ordinal;
             final int anotherVal = ((MessagingId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }

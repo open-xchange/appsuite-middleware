@@ -80,17 +80,17 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 
-    public void emit(int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx, Object... args) {
-        Organizer organizer = new Organizer();
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
+        final Organizer organizer = new Organizer();
         try {
-            String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+            final String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
             String address;
             if (calendar.containsOrganizer()) {
                 address = calendar.getOrganizer();
             } else if ("defaultSenderAddress".equals(senderSource)) { 
                 try {
                     address = UserSettingMailStorage.getInstance().loadUserSettingMail(calendar.getCreatedBy(), ctx).getSendAddr();
-                } catch (UserConfigurationException e) {
+                } catch (final UserConfigurationException e) {
                     LOG.error(e.getMessage(), e);
                     address = userResolver.loadUser(calendar.getCreatedBy(), ctx).getMail();
                 }
@@ -98,26 +98,26 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
                 address = userResolver.loadUser(calendar.getCreatedBy(), ctx).getMail();
             }
             organizer.setValue("mailto:" + address);
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             warnings.add(new ConversionWarning(index, "URI problem.", e));
-        } catch (UserException e) {
+        } catch (final UserException e) {
             warnings.add(new ConversionWarning(index, e));
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             warnings.add(new ConversionWarning(index, e));
         }
         component.getProperties().add(organizer);
     }
 
-    public boolean hasProperty(T component) {
+    public boolean hasProperty(final T component) {
         return null != component.getProperty(Property.ORGANIZER);
     }
 
-    public boolean isSet(U calendar) {
+    public boolean isSet(final U calendar) {
         return calendar.containsOrganizer() || calendar.containsCreatedBy();
     }
 
-    public void parse(int index, T component, U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
-        String organizer = component.getProperty(Property.ORGANIZER).getValue();
+    public void parse(final int index, final T component, final U calendar, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+        final String organizer = component.getProperty(Property.ORGANIZER).getValue();
         calendar.setOrganizer(organizer.toLowerCase().startsWith("mailto:") ? organizer.substring(7, organizer.length()) : organizer);
     }
 }

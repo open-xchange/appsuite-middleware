@@ -52,11 +52,10 @@ package com.openexchange.folderstorage.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -227,8 +226,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
     }
 
     public ContentType getByString(final String contentTypeString) {
-        for (final Iterator<Entry<String, Element>> iterator = registry.entrySet().iterator(); iterator.hasNext();) {
-            final Entry<String, Element> entry = iterator.next();
+        for (final Entry<String, Element> entry : registry.entrySet()) {
             final List<FolderStorage> generalStorages = entry.getValue().getGeneralStorages();
             /*
              * Iterate general storages' content types
@@ -237,8 +235,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
             for (final FolderStorage genStorage : generalStorages) {
                 final FolderStorage folderStorage = genStorage;
                 final ContentType[] supportedContentTypes = folderStorage.getSupportedContentTypes();
-                for (int i = 0; i < supportedContentTypes.length; i++) {
-                    final ContentType supportedContentType = supportedContentTypes[i];
+                for (final ContentType supportedContentType : supportedContentTypes) {
                     if (supportedContentType.toString().equals(contentTypeString) && (null == candidate || candidate.getPriority() > supportedContentType.getPriority())) {
                         candidate = supportedContentType;
                     }

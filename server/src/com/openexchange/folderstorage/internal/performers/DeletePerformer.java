@@ -215,8 +215,8 @@ public final class DeletePerformer extends AbstractPerformer {
             }
         }
         final SortableId[] subfolders = folderStorage.getSubfolders(treeId, folderId, storageParameters);
-        for (int i = 0; i < subfolders.length; i++) {
-            final String id = subfolders[i].getId();
+        for (final SortableId subfolder : subfolders) {
+            final String id = subfolder.getId();
             final FolderStorage subfolderStorage;
             if (folderStorage.getFolderType().servesFolderId(id)) {
                 subfolderStorage = folderStorage;

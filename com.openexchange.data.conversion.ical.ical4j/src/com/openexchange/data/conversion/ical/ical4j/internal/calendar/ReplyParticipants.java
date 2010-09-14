@@ -61,8 +61,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ITipContainer;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.ITipContainer;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -78,16 +78,16 @@ public class ReplyParticipants<T extends CalendarComponent, U extends CalendarOb
     private static Log LOG = LogFactory.getLog(ReplyParticipants.class);
 
     @Override
-    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         if (args == null || args.length == 0 || !ITipContainer.class.isInstance(args[0])) {
             warnings.add(new ConversionWarning(index, Code.INSUFFICIENT_INFORMATION));
             super.emit(index, cObj, component, warnings, ctx, args);
             return;
         }
         
-        ITipContainer iTip = (ITipContainer) args[0];
+        final ITipContainer iTip = (ITipContainer) args[0];
         
-        for (UserParticipant p : cObj.getUsers()) {
+        for (final UserParticipant p : cObj.getUsers()) {
             if (p.getType() == Participant.USER) {
                 if (p.getIdentifier() == iTip.getUserId()) {
                     addUserAttendee(index, p, ctx, component, cObj, iTip);
@@ -96,11 +96,11 @@ public class ReplyParticipants<T extends CalendarComponent, U extends CalendarOb
         }
     }
 
-    protected void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component, U cObj, ITipContainer iTip) throws ConversionError {
-        Attendee attendee = new Attendee();
+    protected void addUserAttendee(final int index, final UserParticipant userParticipant, final Context ctx, final T component, final U cObj, final ITipContainer iTip) throws ConversionError {
+        final Attendee attendee = new Attendee();
         try {
             attendee.setValue("mailto:" + resolveUserMail(index, userParticipant, ctx));
-            ParameterList parameters = attendee.getParameters();
+            final ParameterList parameters = attendee.getParameters();
             parameters.add(Role.REQ_PARTICIPANT);
             switch (userParticipant.getConfirm()) {
             case CalendarObject.ACCEPT:
@@ -119,7 +119,7 @@ public class ReplyParticipants<T extends CalendarComponent, U extends CalendarOb
         }
         
         if (userParticipant.getConfirmMessage() != null && !userParticipant.getConfirmMessage().equals("")) {
-            Comment comment = new Comment();
+            final Comment comment = new Comment();
             comment.setValue(userParticipant.getConfirmMessage());
             component.getProperties().add(comment);
         }

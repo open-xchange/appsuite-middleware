@@ -51,9 +51,7 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.CalendarComponent;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -68,7 +66,7 @@ public class Duration<T extends CalendarComponent, U extends CalendarObject> ext
         return false; // Always emitting endDate
     }
 
-    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         return; // Always emitting endDate
     }
 

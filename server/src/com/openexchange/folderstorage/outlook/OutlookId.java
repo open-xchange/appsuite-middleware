@@ -94,7 +94,7 @@ public final class OutlookId implements SortableId {
     public int compareTo(final SortableId o) {
         // Compare by ordinal
         if (o instanceof OutlookId) {
-            final int thisVal = this.ordinal;
+            final int thisVal = ordinal;
             final int anotherVal = ((OutlookId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }

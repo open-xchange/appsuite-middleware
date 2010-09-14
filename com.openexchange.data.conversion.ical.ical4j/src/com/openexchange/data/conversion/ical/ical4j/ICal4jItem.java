@@ -52,7 +52,6 @@ package com.openexchange.data.conversion.ical.ical4j;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Uid;
-
 import com.openexchange.data.conversion.ical.ICalItem;
 
 /**
@@ -69,11 +68,11 @@ public final class ICal4jItem implements ICalItem {
     }
 
     public String getUID() {
-        Property property = component.getProperty(Uid.UID);
+        final Property property = component.getProperty(Uid.UID);
         return null == property ? null : property.getValue();
     }
 
-    public void setUID(String value) {
+    public void setUID(final String value) {
         if (component.getProperties().contains(Property.UID)) {
             ((Uid) component.getProperty(Property.UID)).setValue(value);
         } else {

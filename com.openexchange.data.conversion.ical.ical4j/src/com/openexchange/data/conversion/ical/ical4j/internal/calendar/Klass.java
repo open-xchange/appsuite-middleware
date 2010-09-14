@@ -89,7 +89,7 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
      * {@inheritDoc}
      */
     public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings,
-            final Context ctx, Object... args) throws ConversionError {
+            final Context ctx, final Object... args) throws ConversionError {
         if (cObj.getPrivateFlag()) {
             component.getProperties().add(PRIVATE);
         } else {

@@ -63,8 +63,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
@@ -312,7 +310,7 @@ public class ICal4JParser implements ICalParser {
             		}
             	}
             }
-            StringReader chunkedReader = new StringReader(
+            final StringReader chunkedReader = new StringReader(
                 workaroundFor16613(
                     workaroundFor16367(chunk.toString())
                 )
@@ -328,14 +326,14 @@ public class ICal4JParser implements ICalParser {
     }
 
    
-    private String workaroundFor16367(String input) {
+    private String workaroundFor16367(final String input) {
         /* Bug in MS Exchange: If you use a CN element, it must have a value.
          * MS Exchange has an empty value, which we now replace properly. 
          */
         return input.replaceAll("CN=:", "CN=\"\":");
     }
     
-    private String workaroundFor16613(String input) {
+    private String workaroundFor16613(final String input) {
         /*
          * Bug in Groupwise: There is no attribute ID for ATTACH. Experimental
          * ones are allowed, but they would start with X-GW for Groupwise.

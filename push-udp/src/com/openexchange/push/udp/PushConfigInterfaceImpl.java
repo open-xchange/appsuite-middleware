@@ -121,9 +121,9 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
         }
 
         if (remoteAddressAndPort != null) {
-            for (int a = 0; a < remoteAddressAndPort.length; a++) {
+            for (final String element : remoteAddressAndPort) {
                 final RemoteHostObject remoteHostObject = new RemoteHostObject();
-                final String[] addressAndPort = remoteAddressAndPort[a].split(":");
+                final String[] addressAndPort = element.split(":");
                 try {
                     if (addressAndPort.length == 1) {
                         remoteHostObject.setHost(InetAddress.getByName(addressAndPort[0]));

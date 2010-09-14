@@ -51,8 +51,6 @@ package com.openexchange.secret.recovery.json.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.multiple.MultipleHandler;
@@ -77,19 +75,19 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            Whiteboard whiteboard = new Whiteboard(context);
+            final Whiteboard whiteboard = new Whiteboard(context);
             
             final SecretService secretService = whiteboard.getService(SecretService.class);
             final SecretMigrator migrator = whiteboard.getService(SecretMigrator.class);
@@ -99,7 +97,7 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
             SecretRecoveryServlet.migrator = migrator;
             SecretRecoveryServlet.secretService = secretService;
             
-            HttpService httpService = getService(HttpService.class);
+            final HttpService httpService = getService(HttpService.class);
             
             httpService.registerServlet("ajax/recovery/secret", new SecretRecoveryServlet(), null, null);
             
@@ -114,7 +112,7 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
                 }
                 
             }, null);
-        } catch (Exception x) {
+        } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
         }
     
@@ -122,7 +120,7 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
 
     @Override
     protected void stopBundle() throws Exception {
-        HttpService httpService = getService(HttpService.class);
+        final HttpService httpService = getService(HttpService.class);
         httpService.unregister("ajax/recovery/secret");
         registration.unregister();
     }

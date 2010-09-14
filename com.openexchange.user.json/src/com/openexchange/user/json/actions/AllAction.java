@@ -207,8 +207,8 @@ public final class AllAction extends AbstractUserAction {
                      */
                     final int[] allUserIds = userService.listAllUser(session.getContext());
                     final List<User> allUsers = new ArrayList<User>(allUserIds.length);
-                    for (int i = 0; i < allUserIds.length; i++) {
-                        allUsers.add(userService.getUser(allUserIds[i], session.getContext()));
+                    for (final int allUserId : allUserIds) {
+                        allUsers.add(userService.getUser(allUserId, session.getContext()));
                     }
                     Collections.sort(allUsers, Comparators.getComparator(
                         orderField,
@@ -231,8 +231,8 @@ public final class AllAction extends AbstractUserAction {
                  */
                 final int[] allUserIds = userService.listAllUser(session.getContext());
                 final List<User> allUsers = new ArrayList<User>(allUserIds.length);
-                for (int i = 0; i < allUserIds.length; i++) {
-                    allUsers.add(userService.getUser(allUserIds[i], session.getContext()));
+                for (final int allUserId : allUserIds) {
+                    allUsers.add(userService.getUser(allUserId, session.getContext()));
                 }
                 final int lhl = leftHandLimit < 0 ? 0 : leftHandLimit;
                 int rhl = rightHandLimit <= 0 ? 50000 : rightHandLimit;

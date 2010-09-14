@@ -116,12 +116,12 @@ public final class CSVRetentionData implements RetentionData {
     }
 
     public void setRecipientAddresses(final String[] addresses) {
-        this.recipients = new String[addresses.length];
+        recipients = new String[addresses.length];
         System.arraycopy(addresses, 0, recipients, 0, addresses.length);
     }
 
     public void setSenderAddress(final String sender) {
-        this.senderAddress = sender;
+        senderAddress = sender;
     }
 
     public void setStartTime(final Date startTime) {

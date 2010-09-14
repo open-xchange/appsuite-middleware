@@ -53,16 +53,13 @@ import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.isDateTime;
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDateConsideringDateType;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtStart;
-
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.Appointment;
@@ -85,7 +82,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final DtStart start = new DtStart();
         final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getStartDate()) : toDateTime(calendar.getStartDate());
         start.setDate(date);

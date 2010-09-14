@@ -59,8 +59,8 @@ import com.openexchange.user.json.field.UserField;
  */
 public class NoGlobalAdressBookContactCensorship implements ContactCensorship {
 
-    public void censor(Contact contact) {
-        for (int field : Contact.ALL_COLUMNS) {
+    public void censor(final Contact contact) {
+        for (final int field : Contact.ALL_COLUMNS) {
             if( UserField.isProtected(field)) {
                 contact.remove(field);
             }

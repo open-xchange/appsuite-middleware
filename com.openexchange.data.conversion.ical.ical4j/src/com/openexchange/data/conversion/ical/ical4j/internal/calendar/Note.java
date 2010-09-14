@@ -51,10 +51,8 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Description;
-
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
@@ -83,7 +81,7 @@ public final class Note<T extends CalendarComponent, U extends CalendarObject> e
     /**
      * {@inheritDoc}
      */
-    public void emit(final int index, final U calendarObject, final T calendarComponent, final List<ConversionWarning> warnings, final Context ctx, Object... args) {
+    public void emit(final int index, final U calendarObject, final T calendarComponent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         calendarComponent.getProperties().add(new Description(calendarObject.getNote()));
     }
 

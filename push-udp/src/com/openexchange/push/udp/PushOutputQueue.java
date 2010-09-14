@@ -189,10 +189,10 @@ public class PushOutputQueue implements Runnable {
         final int users[] = pushObject.getUsers();
         final int contextId = pushObject.getContextId();
         final int folderId = pushObject.getFolderId();
-        for (int a = 0; a < users.length; a++) {
+        for (final int user : users) {
 
-            if (RegisterHandler.isRegistered(users[a], contextId)) {
-                final RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a], contextId);
+            if (RegisterHandler.isRegistered(user, contextId)) {
+                final RegisterObject registerObj = RegisterHandler.getRegisterObject(user, contextId);
                 final StringBuilder sb = new StringBuilder();
                 sb.append(folderId);
                 sb.append('\1');
@@ -228,8 +228,8 @@ public class PushOutputQueue implements Runnable {
                     topic = "com/openexchange/remote/foldercontentchanged";
                 }
 
-                for (int a = 0; a < users.length; a++) {
-                    final RemoteEvent remoteEvent = factoryService.newRemoteEvent(folderId, users[a], contextId, action, module, timestamp);
+                for (final int user : users) {
+                    final RemoteEvent remoteEvent = factoryService.newRemoteEvent(folderId, user, contextId, action, module, timestamp);
                     final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>();
                     ht.put(RemoteEvent.EVENT_KEY, remoteEvent);
                     eventAdmin.postEvent(new Event(topic, ht));

@@ -65,12 +65,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDetector {
 
-    private List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>();
+    private final List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>();
     private SecretService secretService;
     
-    public boolean isSecretWorking(ServerSession session) throws AbstractOXException {
-        List<SecretConsistencyCheck> theChecks = getChecks();
-        for (SecretConsistencyCheck secretConsistencyCheck : theChecks) {
+    public boolean isSecretWorking(final ServerSession session) throws AbstractOXException {
+        final List<SecretConsistencyCheck> theChecks = getChecks();
+        for (final SecretConsistencyCheck secretConsistencyCheck : theChecks) {
             if(!secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session))) {
                 return false;
             }
@@ -78,7 +78,7 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
         return true;
     }
 
-    public void addCheck(SecretConsistencyCheck check) {
+    public void addCheck(final SecretConsistencyCheck check) {
         checks.add(check);
     }
     
@@ -90,7 +90,7 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
         return secretService;
     }
     
-    public void setSecretService(SecretService secretService) {
+    public void setSecretService(final SecretService secretService) {
         this.secretService = secretService;
     }
 }

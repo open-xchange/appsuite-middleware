@@ -89,7 +89,7 @@ public class PushDiscoverySender implements Runnable {
         if (hostname == null) {
             try {
                 hostname = InetAddress.getLocalHost();
-            } catch (UnknownHostException exc) {
+            } catch (final UnknownHostException exc) {
                 LOG.warn("unable to resolv local address", exc);
             }
         }
@@ -107,15 +107,15 @@ public class PushDiscoverySender implements Runnable {
     public void run() {
         try {
             LOG.debug("Sending multicast discovery package: \"" + packetData + "\".");
-            MulticastSocket multicastSocket = PushMulticastSocket.getPushMulticastSocket();
-            DatagramPacket datagramPacket = new DatagramPacket(packetBytes, packetBytes.length, multicastAddress, multicastPort);
+            final MulticastSocket multicastSocket = PushMulticastSocket.getPushMulticastSocket();
+            final DatagramPacket datagramPacket = new DatagramPacket(packetBytes, packetBytes.length, multicastAddress, multicastPort);
             multicastSocket.send(datagramPacket);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    public void startSender(TimerService service) {
+    public void startSender(final TimerService service) {
         task = service.scheduleAtFixedRate(this, 0, remoteHostFresh);
     }
 

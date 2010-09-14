@@ -52,10 +52,8 @@ package com.openexchange.data.conversion.ical.ical4j.internal.task;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Completed;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -88,7 +86,7 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
      * {@inheritDoc}
      */
     public void emit(final int index, final Task task, final VToDo vToDo,
-                     final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+                     final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final Completed completed = new Completed(EmitterTools.toDateTime(task.getDateCompleted()));
         vToDo.getProperties().add(completed);
     }

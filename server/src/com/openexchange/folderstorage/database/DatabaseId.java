@@ -109,7 +109,7 @@ public final class DatabaseId implements SortableId {
 
     public int compareTo(final SortableId o) {
         if (o instanceof DatabaseId) {
-            final int thisVal = this.ordinal;
+            final int thisVal = ordinal;
             final int anotherVal = ((DatabaseId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }

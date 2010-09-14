@@ -53,10 +53,10 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.RecurrenceId;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -87,7 +87,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
         return appointment.isException();
     }
 
-    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final java.util.Date changeException = appointment.getRecurrenceDatePosition();
         if (null == changeException) {
             return;
@@ -138,7 +138,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
     /**
      * TODO Refactor this to add {@link ChangeExceptions} dynamically depending on service in AppointmentConverters.
      */
-    public static void setCalendarCollection(CalendarCollectionService calendarCollection) {
+    public static void setCalendarCollection(final CalendarCollectionService calendarCollection) {
         ChangeExceptions.calendarCollection = calendarCollection;
     }
 }

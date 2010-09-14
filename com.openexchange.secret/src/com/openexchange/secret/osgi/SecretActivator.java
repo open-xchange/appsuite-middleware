@@ -64,7 +64,7 @@ import com.openexchange.secret.impl.SessionSecretService;
 public class SecretActivator implements BundleActivator {
 
 	public void start(final BundleContext context) throws Exception {
-	    Hashtable<String, Object> properties = new Hashtable<String, Object>();
+	    final Hashtable<String, Object> properties = new Hashtable<String, Object>();
 	    properties.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
 	    
 	    context.registerService(SecretService.class.getName(), new SessionSecretService(), properties);

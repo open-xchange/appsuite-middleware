@@ -49,7 +49,6 @@
 package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
 import java.util.List;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.ObjectVerifier;

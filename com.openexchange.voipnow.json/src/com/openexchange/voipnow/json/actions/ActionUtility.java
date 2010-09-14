@@ -70,8 +70,8 @@ public final class ActionUtility {
 
     private static String convertToHex(final byte[] data) {
         final StringBuilder buf = new StringBuilder(data.length << 1);
-        for (int i = 0; i < data.length; i++) {
-            int halfbyte = (data[i] >>> 4) & 0x0F;
+        for (final byte element : data) {
+            int halfbyte = (element >>> 4) & 0x0F;
             int two_halfs = 0;
             do {
                 if ((0 <= halfbyte) && (halfbyte <= 9)) {
@@ -79,7 +79,7 @@ public final class ActionUtility {
                 } else {
                     buf.append((char) ('a' + (halfbyte - 10)));
                 }
-                halfbyte = data[i] & 0x0F;
+                halfbyte = element & 0x0F;
             } while (two_halfs++ < 1);
         }
         return buf.toString();

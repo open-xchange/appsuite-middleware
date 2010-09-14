@@ -154,37 +154,37 @@ public final class MessagingFolderImpl extends AbstractFolder {
     public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final DefaultFolderFullnameProvider fullnameProvider) {
         super();
         final String fullname = messagingFolder.getId();
-        this.id = MessagingFolderIdentifier.getFQN(serviceId, accountId, fullname);
-        this.name = messagingFolder.getName();
+        id = MessagingFolderIdentifier.getFQN(serviceId, accountId, fullname);
+        name = messagingFolder.getName();
         final boolean isRootFolder = messagingFolder.isRootFolder();
         if (isRootFolder) { // Root folder
-            this.parent = PRIVATE_FOLDER_ID;
+            parent = PRIVATE_FOLDER_ID;
         } else {
-            this.parent = MessagingFolderIdentifier.getFQN(serviceId, accountId, messagingFolder.getParentId());
+            parent = MessagingFolderIdentifier.getFQN(serviceId, accountId, messagingFolder.getParentId());
         }
         {
             final List<MessagingPermission> messagingPermissions = messagingFolder.getPermissions();
             final int size = messagingPermissions.size();
-            this.permissions = new Permission[size];
+            permissions = new Permission[size];
             for (int i = 0; i < size; i++) {
-                this.permissions[i] = new MessagingPermissionImpl(messagingPermissions.get(i));
+                permissions[i] = new MessagingPermissionImpl(messagingPermissions.get(i));
             }
         }
         type = SystemType.getInstance();
-        this.subscribed = messagingFolder.isSubscribed();
-        this.subscribedSubfolders = messagingFolder.hasSubscribedSubfolders();
-        this.capabilities = parseCaps(messagingFolder.getCapabilities());
+        subscribed = messagingFolder.isSubscribed();
+        subscribedSubfolders = messagingFolder.hasSubscribedSubfolders();
+        capabilities = parseCaps(messagingFolder.getCapabilities());
         {
             final String value =
                 isRootFolder ? "" : new StringBuilder(16).append('(').append(messagingFolder.getMessageCount()).append('/').append(
                     messagingFolder.getUnreadMessageCount()).append(')').toString();
-            this.summary = value;
+            summary = value;
         }
-        this.deefault = /* messagingFolder.isDefaultFolder(); */0 == accountId && messagingFolder.isDefaultFolder();
-        this.total = messagingFolder.getMessageCount();
-        this.nu = messagingFolder.getNewMessageCount();
-        this.unread = messagingFolder.getUnreadMessageCount();
-        this.deleted = messagingFolder.getDeletedMessageCount();
+        deefault = /* messagingFolder.isDefaultFolder(); */0 == accountId && messagingFolder.isDefaultFolder();
+        total = messagingFolder.getMessageCount();
+        nu = messagingFolder.getNewMessageCount();
+        unread = messagingFolder.getUnreadMessageCount();
+        deleted = messagingFolder.getDeletedMessageCount();
         if (messagingFolder.containsDefaultFolderType()) {
             messagingFolderType = TYPES.get(messagingFolder.getDefaultFolderType());
         } else if (null != fullname) {
@@ -214,7 +214,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
         /*
          * Trash folder must not be cacheable
          */
-        this.cacheable = !messagingFolder.isDefaultFolder() || !messagingFolderType.equals(MessagingFolderType.TRASH);
+        cacheable = !messagingFolder.isDefaultFolder() || !messagingFolderType.equals(MessagingFolderType.TRASH);
     }
 
     @Override

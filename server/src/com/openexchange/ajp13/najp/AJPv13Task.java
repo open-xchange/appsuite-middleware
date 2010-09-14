@@ -157,7 +157,7 @@ public final class AJPv13Task implements Task<Object> {
      */
     private AJPv13Task(final Socket client, final AJPv13TaskMonitor listenerMonitor, final AJPv13TaskWatcher watcher) {
         super();
-        this.num = Long.valueOf(COUNTER.incrementAndGet());
+        num = Long.valueOf(COUNTER.incrementAndGet());
         this.client = client;
         this.listenerMonitor = listenerMonitor;
         this.watcher = watcher;

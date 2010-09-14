@@ -198,8 +198,8 @@ public final class Utility {
      * @return The fields with required field (possibly appended)
      */
     public static int[] checkForRequiredField(final int[] fields, final int requiredField) {
-        for (int i = 0; i < fields.length; i++) {
-            if (requiredField == fields[i]) {
+        for (final int field : fields) {
+            if (requiredField == field) {
                 /*
                  * Found
                  */

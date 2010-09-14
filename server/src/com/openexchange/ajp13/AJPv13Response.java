@@ -54,8 +54,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 
 /**
@@ -542,8 +542,8 @@ public class AJPv13Response {
 
     private static final int getNumOfCookieHeader(final String[][] formattedCookies) {
         int retval = 0;
-        for (int i = 0; i < formattedCookies.length; i++) {
-            retval += formattedCookies[i].length;
+        for (final String[] formattedCookie : formattedCookies) {
+            retval += formattedCookie.length;
         }
         return retval;
     }

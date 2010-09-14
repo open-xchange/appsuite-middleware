@@ -50,7 +50,6 @@
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.List;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 

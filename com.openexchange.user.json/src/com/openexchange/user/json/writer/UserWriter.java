@@ -56,8 +56,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -967,9 +967,8 @@ public final class UserWriter {
                 } else {
                     final JSONArray jsonArray = new JSONArray();
 
-                    for (int a = 0; a < links.length; a++) {
+                    for (final LinkEntryObject link : links) {
                         final JSONObject jsonLinkObject = new JSONObject();
-                        final LinkEntryObject link = links[a];
                         if (link.containsLinkID()) {
                             jsonLinkObject.put(UserField.ID.getName(), link.getLinkID());
                         }
@@ -988,9 +987,8 @@ public final class UserWriter {
                     jsonPutter.put(UserField.DISTRIBUTIONLIST.getName(), JSONObject.NULL);
                 } else {
                     final JSONArray jsonArray = new JSONArray();
-                    for (int a = 0; a < distributionList.length; a++) {
+                    for (final DistributionListEntryObject listEntry : distributionList) {
                         final JSONObject jsonDListObj = new JSONObject();
-                        final DistributionListEntryObject listEntry = distributionList[a];
                         /*
                          * Write entry to new JSON object
                          */
@@ -1202,11 +1200,11 @@ public final class UserWriter {
     public static JSONArray writeSingle2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
-        for (int i = 0; i < cols.length; i++) {
-            UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
+        for (final int col : cols) {
+            UserFieldWriter ufw = getUserFieldWriter(col, timeZoneId);
             if (null == ufw) {
                 if (WARN) {
-                    LOG.warn("Unknown field: " + cols[i], new Throwable());
+                    LOG.warn("Unknown field: " + col, new Throwable());
                 }
                 ufw = UNKNOWN_FIELD_FFW;
             }
@@ -1239,11 +1237,11 @@ public final class UserWriter {
     public static JSONArray writeMultiple2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
-        for (int i = 0; i < cols.length; i++) {
-            UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
+        for (final int col : cols) {
+            UserFieldWriter ufw = getUserFieldWriter(col, timeZoneId);
             if (null == ufw) {
                 if (WARN) {
-                    LOG.warn("Unknown field: " + cols[i], new Throwable());
+                    LOG.warn("Unknown field: " + col, new Throwable());
                 }
                 ufw = UNKNOWN_FIELD_FFW;
             }
@@ -1281,11 +1279,11 @@ public final class UserWriter {
     public static JSONObject writeSingle2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
-        for (int i = 0; i < cols.length; i++) {
-            UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
+        for (final int col : cols) {
+            UserFieldWriter ufw = getUserFieldWriter(col, timeZoneId);
             if (null == ufw) {
                 if (WARN) {
-                    LOG.warn("Unknown field: " + cols[i], new Throwable());
+                    LOG.warn("Unknown field: " + col, new Throwable());
                 }
                 ufw = UNKNOWN_FIELD_FFW;
             }
@@ -1318,11 +1316,11 @@ public final class UserWriter {
     public static JSONArray writeMultiple2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
-        for (int i = 0; i < cols.length; i++) {
-            UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
+        for (final int col : cols) {
+            UserFieldWriter ufw = getUserFieldWriter(col, timeZoneId);
             if (null == ufw) {
                 if (WARN) {
-                    LOG.warn("Unknown field: " + cols[i], new Throwable());
+                    LOG.warn("Unknown field: " + col, new Throwable());
                 }
                 ufw = UNKNOWN_FIELD_FFW;
             }

@@ -70,7 +70,7 @@ public class LastModified <T extends CalendarComponent, U extends CalendarObject
         return calendar.containsLastModified();
     }
 
-    public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final net.fortuna.ical4j.model.property.LastModified lastModified = new net.fortuna.ical4j.model.property.LastModified();
         lastModified.setDate(toDateTime(calendar.getLastModified()));
         t.getProperties().add(lastModified);

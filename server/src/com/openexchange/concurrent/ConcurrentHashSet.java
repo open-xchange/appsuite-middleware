@@ -172,8 +172,8 @@ public final class ConcurrentHashSet<E> implements Set<E>, Serializable {
 
     public boolean addAll(final Collection<? extends E> c) {
         boolean modified = false;
-        for (final Iterator<? extends E> e = c.iterator(); e.hasNext();) {
-            if (add(e.next())) {
+        for (final E name : c) {
+            if (add(name)) {
                 modified = true;
             }
         }
@@ -181,8 +181,8 @@ public final class ConcurrentHashSet<E> implements Set<E>, Serializable {
     }
 
     public boolean containsAll(final Collection<?> c) {
-        for (final Iterator<?> e = c.iterator(); e.hasNext();) {
-            if (!contains(e.next())) {
+        for (final Object name : c) {
+            if (!contains(name)) {
                 return false;
             }
         }
@@ -193,8 +193,8 @@ public final class ConcurrentHashSet<E> implements Set<E>, Serializable {
         boolean modified = false;
 
         if (size() > c.size()) {
-            for (final Iterator<?> i = c.iterator(); i.hasNext();) {
-                modified |= remove(i.next());
+            for (final Object name : c) {
+                modified |= remove(name);
             }
         } else {
             for (final Iterator<?> i = iterator(); i.hasNext();) {

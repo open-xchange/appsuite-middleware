@@ -104,7 +104,7 @@ public final class MailId implements SortableId {
 
     public int compareTo(final SortableId o) {
         if (o instanceof MailId) {
-            final int thisVal = this.ordinal;
+            final int thisVal = ordinal;
             final int anotherVal = ((MailId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }

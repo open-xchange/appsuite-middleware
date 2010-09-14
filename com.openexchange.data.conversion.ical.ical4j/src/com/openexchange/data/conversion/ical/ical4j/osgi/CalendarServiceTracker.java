@@ -70,7 +70,7 @@ public class CalendarServiceTracker implements ServiceTrackerCustomizer {
      * Initializes a new {@link CalendarServiceTracker}.
      * @param context 
      */
-    public CalendarServiceTracker(BundleContext context) {
+    public CalendarServiceTracker(final BundleContext context) {
         super();
         this.context = context;
     }
@@ -78,8 +78,8 @@ public class CalendarServiceTracker implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
-    public Object addingService(ServiceReference reference) {
-        CalendarCollectionService calendarCollection = (CalendarCollectionService) context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final CalendarCollectionService calendarCollection = (CalendarCollectionService) context.getService(reference);
         EmitterTools.setCalendarCollection(calendarCollection);
         ChangeExceptions.setCalendarCollection(calendarCollection);
         return calendarCollection;
@@ -88,14 +88,14 @@ public class CalendarServiceTracker implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
     /**
      * {@inheritDoc}
      */
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         ChangeExceptions.setCalendarCollection(null);
         EmitterTools.setCalendarCollection(null);
         context.ungetService(reference);

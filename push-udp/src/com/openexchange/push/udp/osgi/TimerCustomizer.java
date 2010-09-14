@@ -55,8 +55,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.push.udp.PushConfig;
-import com.openexchange.push.udp.PushInit;
 import com.openexchange.push.udp.PushDiscoverySender;
+import com.openexchange.push.udp.PushInit;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -75,14 +75,14 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer {
     /**
      * Initializes a new {@link TimerCustomizer}.
      */
-    public TimerCustomizer(BundleContext context) {
+    public TimerCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        TimerService timer = (TimerService) context.getService(reference);
-        PushConfig config = PushInit.getInstance().getConfig();
+    public Object addingService(final ServiceReference reference) {
+        final TimerService timer = (TimerService) context.getService(reference);
+        final PushConfig config = PushInit.getInstance().getConfig();
         if (config.isMultiCastEnabled()) {
             LOG.info("Starting push multicast discovery sender.");
             sender = new PushDiscoverySender(config);
@@ -93,11 +93,11 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer {
         return timer;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         if (null != sender) {
             LOG.info("Stopping push multicast discovery sender.");
             sender.stopSender();

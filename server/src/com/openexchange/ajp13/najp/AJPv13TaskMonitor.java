@@ -180,8 +180,8 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
 
     public double getAvgUseTime() {
         long duration = 0;
-        for (int i = 0; i < avgUseTimeArr.length; i++) {
-            duration += avgUseTimeArr[i];
+        for (final long element : avgUseTimeArr) {
+            duration += element;
         }
         return (((double) duration) / (avgUseTimeArr.length));
     }
@@ -288,8 +288,8 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
 
     public double getAvgProcessingTime() {
         long duration = 0;
-        for (int i = 0; i < avgProcessingTimeArr.length; i++) {
-            duration += avgProcessingTimeArr[i];
+        for (final long element : avgProcessingTimeArr) {
+            duration += element;
         }
         return (((double) duration) / avgProcessingTimeArr.length);
     }

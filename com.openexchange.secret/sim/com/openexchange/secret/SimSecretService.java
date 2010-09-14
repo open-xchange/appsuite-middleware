@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
  */
 public class SimSecretService implements SecretService {
 
-    public String getSecret(Session session) {
+    public String getSecret(final Session session) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -71,7 +71,7 @@ public class CreatedAndDTStamp <T extends CalendarComponent, U extends CalendarO
         return calendar.containsCreationDate();
     }
 
-    public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final Created created = new Created();
         created.setDate(toDateTime(calendar.getCreationDate()));
         t.getProperties().add(created);

@@ -77,7 +77,7 @@ public final class AJPv13Utility {
         final StringBuilder sb = new StringBuilder(1024);
         int c = 0;
         int l = 0;
-        for (int k = 0; k < bytes.length; k++) {
+        for (final byte b : bytes) {
             if (c % 16 == 0) {
                 sb.append('\r').append('\n');
                 c = 0;
@@ -91,7 +91,7 @@ public final class AJPv13Utility {
             } else {
                 sb.append(' ');
             }
-            final String s = Integer.toHexString(bytes[k] & 0xff).toUpperCase();
+            final String s = Integer.toHexString(b & 0xff).toUpperCase();
             if (s.length() == 1) {
                 sb.append('0');
             }

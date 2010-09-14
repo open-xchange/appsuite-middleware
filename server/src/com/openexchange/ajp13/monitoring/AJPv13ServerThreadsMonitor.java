@@ -100,8 +100,8 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
 
     public double getAvgUseTime() {
         long duration = 0;
-        for (int i = 0; i < avgUseTimeArr.length; i++) {
-            duration += avgUseTimeArr[i];
+        for (final long element : avgUseTimeArr) {
+            duration += element;
         }
         return (duration / avgUseTimeArr.length);
     }

@@ -74,12 +74,12 @@ public class SecretRecoveryServlet extends MultipleAdapterServlet {
     }
 
     @Override
-    protected boolean requiresBody(String action) {
+    protected boolean requiresBody(final String action) {
         return false;
     }
 
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return true;
     }
 

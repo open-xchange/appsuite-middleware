@@ -273,8 +273,7 @@ public class PushHandler implements EventHandler {
 
             final Set<Integer> hs = new HashSet<Integer>(oclp.length);
 
-            for (int a = 0; a < oclp.length; a++) {
-                final OCLPermission p = oclp[a];
+            for (final OCLPermission p : oclp) {
                 if (p.canReadOwnObjects() || p.canReadAllObjects()) {
                     if (p.isGroupPermission()) {
                         final Group g = groupStorage.getGroup(p.getEntity(), ctx);
@@ -301,8 +300,7 @@ public class PushHandler implements EventHandler {
 
             final Set<Integer> hs = new HashSet<Integer>(oclp.length);
 
-            for (int a = 0; a < oclp.length; a++) {
-                final OCLPermission p = oclp[a];
+            for (final OCLPermission p : oclp) {
                 if (p.isFolderVisible()) {
                     if (p.isGroupPermission()) {
                         final Group g = groupStorage.getGroup(p.getEntity(), ctx);
@@ -323,8 +321,8 @@ public class PushHandler implements EventHandler {
 
     protected void addMembers(final Group g, final Set<Integer> hs) {
         final int members[] = g.getMember();
-        for (int a = 0; a < members.length; a++) {
-            hs.add(Integer.valueOf(members[a]));
+        for (final int member : members) {
+            hs.add(Integer.valueOf(member));
         }
     }
 

@@ -285,8 +285,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             return new UserizedFolder[0];
         }
         final List<UserizedFolder> l = new ArrayList<UserizedFolder>(userizedFolders.length);
-        for (int i = 0; i < userizedFolders.length; i++) {
-            final UserizedFolder uf = userizedFolders[i];
+        for (final UserizedFolder uf : userizedFolders) {
             if (null != uf) {
                 l.add(uf);
             }

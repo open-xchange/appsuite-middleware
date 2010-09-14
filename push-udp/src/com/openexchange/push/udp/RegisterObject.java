@@ -73,7 +73,7 @@ public class RegisterObject extends AbstractPushObject {
         this.contextId = contextId;
         this.hostAddress = hostAddress;
         this.port = port;
-        this.remote = isSync;
+        remote = isSync;
         timestamp = new Date();
     }
 

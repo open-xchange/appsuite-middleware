@@ -66,7 +66,7 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
         return appointment.containsShownAs();
     }
 
-    public void emit(final int index, final Appointment appointment, final VEvent event, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
+    public void emit(final int index, final Appointment appointment, final VEvent event, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         switch(appointment.getShownAs()) {
             case Appointment.RESERVED :
                 event.getProperties().add(new Transp("OPAQUE"));

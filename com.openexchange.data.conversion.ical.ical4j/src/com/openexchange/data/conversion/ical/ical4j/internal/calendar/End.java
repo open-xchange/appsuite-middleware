@@ -52,13 +52,10 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
-
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtEnd;
-
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.Appointment;
@@ -81,7 +78,7 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
     /**
      * {@inheritDoc}
      */
-    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final DtEnd end = new DtEnd();
         final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getEndDate()) : toDateTime(calendar.getEndDate());
         end.setDate(date);
