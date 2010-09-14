@@ -88,7 +88,7 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
 
         // create contact folder
         folder = fMgr.generateFolder(
-            "publishedContacts",
+            "publishedContacts_"+new Date().getTime(),
             FolderObject.CONTACT,
             getClient().getValues().getPrivateContactFolder(),
             getClient().getValues().getUserId());
@@ -179,7 +179,9 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
 
     public void testShouldSetTheIconViaUpdates() throws Exception {
         //  check negative
+        fMgr.getFolderFromServer(folder);
         Date lastModified = new Date(fMgr.getLastResponse().getTimestamp().getTime() - 1);
+        
         fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { 3010 });
         FolderUpdatesResponse response = (FolderUpdatesResponse) fMgr.getLastResponse();
         int idPos = findPositionOfColumn(response.getColumns(), CalendarObject.OBJECT_ID);
@@ -194,7 +196,7 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
         publish();
 
         // check positive
-        lastModified = new Date(fMgr.getLastResponse().getTimestamp().getTime() - 1);
+        
         fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { 3010 });
         response = (FolderUpdatesResponse) fMgr.getLastResponse();
         arr = (JSONArray) response.getData();

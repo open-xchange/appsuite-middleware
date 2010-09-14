@@ -50,6 +50,7 @@
 package com.openexchange.ajax.publish.tests;
 
 import java.io.IOException;
+import java.util.Date;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -77,7 +78,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
 
     public void testOnePublicationOfOneContactFolderShouldNotBeAHassle() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
         //create contact folder
-        FolderObject folder = fMgr.generateFolder("publishedContacts", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject folder = fMgr.generateFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );
         
         //fill contact folder
@@ -109,7 +110,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
 
     public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
         //create contact folder
-        FolderObject folder = fMgr.generateFolder("publishedContacts", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject folder = fMgr.generateFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );
         
         //fill contact folder
