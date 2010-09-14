@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.cache;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -97,7 +97,7 @@ public final class SessionMailCache {
      * ##################################### MEMBER STUFF #####################################
      */
 
-    private final Map<CacheKey, Object> cache;
+    private final ConcurrentMap<CacheKey, Object> cache;
 
     /**
      * Default constructor
@@ -121,6 +121,22 @@ public final class SessionMailCache {
         } else {
             cache.put(entry.getKey(), entry.getValue());
         }
+    }
+
+    /**
+     * Puts specified <code>entry</code> into cache if no other entry is already present and {@link SessionMailCacheEntry#getValue()} is not <code>null</code>.
+     * <p>
+     * {@link SessionMailCacheEntry#getKey()} is used as key and {@link SessionMailCacheEntry#getValue()} as value.
+     * 
+     * @param entry The mail cache entry
+     * @return The entry previously associated with key or <code>null</code>
+     */
+    @SuppressWarnings("unchecked")
+    public <V> SessionMailCacheEntry<V> putIfAbsent(final SessionMailCacheEntry<V> entry) {
+        if (null == entry.getValue()) {
+            return (SessionMailCacheEntry<V>) cache.get(entry.getKey());
+        }
+        return (SessionMailCacheEntry<V>) cache.putIfAbsent(entry.getKey(), entry.getValue());
     }
 
     /**
