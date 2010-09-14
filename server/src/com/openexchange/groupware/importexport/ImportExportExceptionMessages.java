@@ -51,7 +51,6 @@ package com.openexchange.groupware.importexport;
 
 import com.openexchange.exceptions.LocalizableStrings;
 
-
 /**
  * {@link ImportExportExceptionMessages}
  *
@@ -59,11 +58,21 @@ import com.openexchange.exceptions.LocalizableStrings;
  */
 public class ImportExportExceptionMessages implements LocalizableStrings {
 
-    public static final String CANNOT_EXPORT_MSG = "Could not export the folder %s in the format %s.";
+    public static final String CANNOT_EXPORT_MSG = "Could not export the folder %1$s in the format %2$s.";
 
     public static final String LOADING_CONTACTS_FAILED_MSG = "Could not load contacts";
 
     public static final String UTF8_ENCODE_FAILED_MSG = "Could not encode as UTF-8";
+
+    public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
+
+    public static final String LOADING_FOLDER_FAILED_MSG = "Could not load folder %s";
+
+    public static final String ICAL_SERVICE_MISSING_MSG = "The necessary iCal emitter serivce is missing.";
+
+    public static final String NUMBER_FAILED_MSG = "Parsing %1$s to a number failed.";
+
+    public static final String ICAL_CONVERSION_FAILED_MSG = "Conversion to iCal failed.";
 
     private ImportExportExceptionMessages() {
         super();

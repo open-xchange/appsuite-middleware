@@ -61,12 +61,22 @@ import com.openexchange.groupware.importexport.internal.ImportExportExceptionFac
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public enum ImportExportExceptionCodes implements OXErrorMessage {
-    /** Could not export the folder %s in the format %s. */
+    /** Could not export the folder %1$s in the format %2$s. */
     CANNOT_EXPORT(CANNOT_EXPORT_MSG, Category.PERMISSION, 100),
     /** Could not load contacts */
     LOADING_CONTACTS_FAILED(LOADING_CONTACTS_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 102),
     /** Could not encode as UTF-8 */
     UTF8_ENCODE_FAILED(UTF8_ENCODE_FAILED_MSG, Category.CODE_ERROR, 104),
+    /** Invalid SQL Query: %s */
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 200),
+    /** Could not load folder %s */
+    LOADING_FOLDER_FAILED(LOADING_FOLDER_FAILED_MSG, Category.CODE_ERROR, 204),
+    /** The necessary iCal emitter serivce is missing. */
+    ICAL_SERVICE_MISSING(ICAL_SERVICE_MISSING_MSG, Category.CODE_ERROR, 206),
+    /** Parsing %1$s to a number failed. */
+    NUMBER_FAILED(NUMBER_FAILED_MSG, Category.CODE_ERROR, 207),
+    /** Conversion to iCal failed. */
+    ICAL_CONVERSION_FAILED(ICAL_CONVERSION_FAILED_MSG, Category.CODE_ERROR, 208),
     ;
 
     private String message;
