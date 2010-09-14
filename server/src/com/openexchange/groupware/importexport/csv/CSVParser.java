@@ -49,69 +49,49 @@
 
 package com.openexchange.groupware.importexport.csv;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 
 /**
- * This class represents a combined parser and lexer for CSV files.
- * It is designed rather simple with speed in mind.
- *
- * Note: Proper CSV files should have the dimensions M x N. If this
- * parser encounters a line that has not as many columns as the others,
- * it would not be right, but the behaviour can be switched to be
- * strict or not.
- *
- * Note: See also RFC 4180
- *
+ * This class represents a combined parser and lexer for CSV files. It is designed rather simple with speed in mind. Note: Proper CSV files
+ * should have the dimensions M x N. If this parser encounters a line that has not as many columns as the others, it would not be right, but
+ * the behaviour can be switched to be strict or not. Note: See also RFC 4180
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
  */
-@OXExceptionSource(
-    classId=ImportExportExceptionClasses.CSVPARSER,
-    component=EnumComponent.IMPORT_EXPORT)
-@OXThrowsMultiple(
-    category={Category.USER_INPUT, Category.CODE_ERROR},
-    desc={"",""},
-    exceptionId={0,1},
-    msg={
-        "Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file?",
-        "Illegal state: Found data after presumed last line."})
 public class CSVParser {
-    private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVParser.class);
-    private boolean isEscaping;
-    protected boolean isTolerant;
+
     public static final char LINE_DELIMITER = '\n';
     public static final char CELL_DELIMITER = ',';
     public static final char ESCAPER = '"';
     public static final int STARTING_LENGTH = -1;
+
+
+    private boolean isEscaping;
+    protected boolean isTolerant;
     private String file;
     private int numberOfCells, currentLineNumber;
     private StringBuilder currentCell = new StringBuilder();
     private List<String> currentLine = new LinkedList<String>();
-    private List< List<String> > structure = new LinkedList<List <String> >();
+    private List<List<String>> structure = new LinkedList<List<String>>();
     private int pointer;
     private char[] fileAsArray;
 
-    public CSVParser(final String file){
+    public CSVParser(final String file) {
         this();
         this.file = file;
     }
 
-    public CSVParser(){
+    public CSVParser() {
         isTolerant = false;
         numberOfCells = STARTING_LENGTH;
         currentLineNumber = 0;
         currentCell = new StringBuilder();
         currentLine = new LinkedList<String>();
-        structure = new LinkedList<List <String> >();
-
+        structure = new LinkedList<List<String>>();
     }
 
     public boolean isTolerant() {
@@ -120,6 +100,7 @@ public class CSVParser {
 
     /**
      * Sets the parser to behave tolerant to broken CSV formats
+     * 
      * @param isTolerant
      */
     public void setTolerant(final boolean isTolerant) {
@@ -128,49 +109,48 @@ public class CSVParser {
 
     /**
      * Convenience method, combines setContent() and parse().
-     *
+     * 
      * @param str - CSV to be parsed
      * @return
      * @throws ImportExportException
      */
-    public List< List<String> > parse(final String str) throws ImportExportException{
+    public List<List<String>> parse(final String str) throws ImportExportException {
         this.file = str;
         return parse();
     }
 
-    public List< List<String> > parse() throws ImportExportException{
-        if(file == null){
+    public List<List<String>> parse() throws ImportExportException {
+        if (file == null) {
             return null;
         }
         file = wellform(file);
-        //converting to char array to make it iterable
+        // converting to char array to make it iterable
         fileAsArray = file.toCharArray();
-        //preparations
-
+        // preparations
 
         pointer = 0;
-        for(; pointer < fileAsArray.length; pointer++){
-            switch(fileAsArray[pointer]){
-                case LINE_DELIMITER:
-                    handleLineDelimiter();
+        for (; pointer < fileAsArray.length; pointer++) {
+            switch (fileAsArray[pointer]) {
+            case LINE_DELIMITER:
+                handleLineDelimiter();
                 break;
 
-                case ESCAPER:
-                    handleEscaping();
+            case ESCAPER:
+                handleEscaping();
                 break;
 
-                case CELL_DELIMITER:
-                    handleCellDelimiter();
+            case CELL_DELIMITER:
+                handleCellDelimiter();
                 break;
 
-                default:
-                    handleDefault();
+            default:
+                handleDefault();
                 break;
             }
         }
 
-        if( ! (currentCell.length() == 0 && currentLine.isEmpty()) ){
-            throw EXCEPTIONS.create(1);
+        if (!(currentCell.length() == 0 && currentLine.isEmpty())) {
+            throw ImportExportExceptionCodes.DATA_AFTER_LAST_LINE.create();
         }
 
         return structure;
@@ -181,28 +161,23 @@ public class CSVParser {
     }
 
     protected void handleCellDelimiter() throws ImportExportException {
-        if(isEscaping){
+        if (isEscaping) {
             currentCell.append(CELL_DELIMITER);
         } else {
-            if( (numberOfCells == STARTING_LENGTH) ||
-                (numberOfCells != STARTING_LENGTH && currentLine.size() < numberOfCells)){
-                currentLine.add( currentCell.toString().trim() );
+            if ((numberOfCells == STARTING_LENGTH) || (numberOfCells != STARTING_LENGTH && currentLine.size() < numberOfCells)) {
+                currentLine.add(currentCell.toString().trim());
                 currentCell = new StringBuilder();
             } else {
                 if (!isTolerant()) {
-                    throw EXCEPTIONS.create(
-                        0,
-                        Integer.valueOf(numberOfCells),
-                        Integer.valueOf(currentLineNumber),
-                        Integer.valueOf(currentLine.size()));
+                    throw ImportExportExceptionCodes.BROKEN_CSV.create(I(numberOfCells), I(currentLineNumber), I(currentLine.size()));
                 }
             }
         }
     }
 
     protected void handleEscaping() {
-        if(isEscaping){
-            if( (pointer+1) < fileAsArray.length && fileAsArray[pointer+1] == ESCAPER){
+        if (isEscaping) {
+            if ((pointer + 1) < fileAsArray.length && fileAsArray[pointer + 1] == ESCAPER) {
                 currentCell.append(ESCAPER);
                 pointer++;
             } else {
@@ -214,52 +189,51 @@ public class CSVParser {
     }
 
     protected void handleLineDelimiter() throws ImportExportException {
-        if(isEscaping){
+        if (isEscaping) {
             currentCell.append(LINE_DELIMITER);
         } else {
             currentLineNumber++;
-            if(currentLine.size() < numberOfCells || numberOfCells == STARTING_LENGTH){
-                currentLine.add( currentCell.toString().trim() );
+            if (currentLine.size() < numberOfCells || numberOfCells == STARTING_LENGTH) {
+                currentLine.add(currentCell.toString().trim());
             } else {
-                if(! isTolerant() ) {
-                    throw EXCEPTIONS.create(0, Integer.valueOf(numberOfCells), Integer.valueOf(currentLineNumber), Integer.valueOf(currentLine.size()));
+                if (!isTolerant()) {
+                    throw ImportExportExceptionCodes.BROKEN_CSV.create(I(numberOfCells), I(currentLineNumber), I(currentLine.size()));
                 }
             }
             currentCell = new StringBuilder();
-            if(numberOfCells == STARTING_LENGTH ){
+            if (numberOfCells == STARTING_LENGTH) {
                 numberOfCells = currentLine.size();
                 structure.add(currentLine);
-            } else if(numberOfCells == currentLine.size() || isTolerant() ) {
-                for(int j = currentLine.size(); j < numberOfCells; j++){
+            } else if (numberOfCells == currentLine.size() || isTolerant()) {
+                for (int j = currentLine.size(); j < numberOfCells; j++) {
                     currentLine.add("");
                 }
                 structure.add(currentLine);
             } else {
-                throw EXCEPTIONS.create(0, Integer.valueOf(numberOfCells), Integer.valueOf(currentLineNumber), Integer.valueOf(currentLine.size()));
-                //unparsableLines.add(currentLineNumber-1);
+                throw ImportExportExceptionCodes.BROKEN_CSV.create(I(numberOfCells), I(currentLineNumber), I(currentLine.size()));
+                // unparsableLines.add(currentLineNumber-1);
             }
             currentLine = new LinkedList<String>();
         }
     }
 
-    public void setFileContent(final String content){
+    public void setFileContent(final String content) {
         this.file = content;
     }
 
     /**
-     * Returns a line from the CSV file given.
-     * Starts counting at 0.
+     * Returns a line from the CSV file given. Starts counting at 0.
      */
-    public String getLine(final int lineNumber){
+    public String getLine(final int lineNumber) {
         file = wellform(file);
         return file.split("\n")[lineNumber];
     }
 
-    protected String wellform(String str){
-        //changing all possible formats (Mac, DOS) to Unix
+    protected String wellform(String str) {
+        // changing all possible formats (Mac, DOS) to Unix
         str = str.replace("\r\n", "\n").replace("\r", "\n");
-        //adding ending to create well-formed file
-        if(! str.endsWith("\n")){
+        // adding ending to create well-formed file
+        if (!str.endsWith("\n")) {
             str = str + "\n";
         }
         return str;

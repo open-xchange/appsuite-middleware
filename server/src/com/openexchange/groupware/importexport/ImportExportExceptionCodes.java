@@ -117,6 +117,10 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     NO_FIELD_FOR_NAMING_IN_LINE(NO_FIELD_FOR_NAMING_IN_LINE_MSG, Category.USER_INPUT, 808),
     /** Could not read InputStream as string */
     IOEXCEPTION(IOEXCEPTION_MSG, Category.CODE_ERROR, 902),
+    /** Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file? */
+    BROKEN_CSV(BROKEN_CSV_MSG, Category.USER_INPUT, 1000),
+    /** Illegal state: Found data after presumed last line. */
+    DATA_AFTER_LAST_LINE(DATA_AFTER_LAST_LINE_MSG, Category.CODE_ERROR, 1001),
     ;
 
     private String message;
