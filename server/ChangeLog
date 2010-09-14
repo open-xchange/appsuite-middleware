@@ -1,3 +1,7 @@
+* 2010-09-14 - tobias.prinz@open-xchange.com
+
+ - Bugfix 16826: Publish-Templates now go through a whitelisting process to filter out potential harmful code.
+
 * 2010-09-14 - thorben.betten@open-xchange.com
 
  - Bugfix #16857: No folder deletion on special IMAP error code "NO_ADMINISTER_ACCESS_ON_INITIAL"

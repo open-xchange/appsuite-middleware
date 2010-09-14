@@ -59,6 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
@@ -89,7 +90,7 @@ public class ServletActivator extends DeferredActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = {
         HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class,
-        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class};
+        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HTMLService.class};
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -135,8 +136,9 @@ public class ServletActivator extends DeferredActivator {
         final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
         final UserService users = getService(UserService.class);
         final ConfigurationService configService = getService(ConfigurationService.class);
+        final HTMLService htmlService = getService(HTMLService.class);
 
-        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users || configService == null) {
+        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users || configService == null || htmlService == null) {
             return;
         }
 
@@ -148,6 +150,7 @@ public class ServletActivator extends DeferredActivator {
         MicroformatServlet.setUserService(users);
         MicroformatServlet.setStringTranslator(customizer);
         MicroformatServlet.setConfigService(configService);
+        MicroformatServlet.setHtmlService(htmlService);
         final MicroformatServlet microformatServlet = new MicroformatServlet();
         
         ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);

@@ -50,7 +50,9 @@
 package com.openexchange.publish.microformats;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -74,6 +76,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.html.HTMLService;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -115,6 +118,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static ContactInterfaceDiscoveryService contacts;
 
+    private static HTMLService htmlService;
+
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -153,6 +158,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     public static void setContactInterfaceDiscoveryService(final ContactInterfaceDiscoveryService service) {
         contacts = service;
+    }
+    
+    public static void setHtmlService(HTMLService htmlService2) {
+        htmlService = htmlService2;
     }
 
 
@@ -208,7 +217,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             }
             
             final OXTemplate template = publisher.loadTemplate(publication);
-            template.process(variables, new UncloseableWriter(resp.getWriter()));
+            StringWriter htmlWriter = new StringWriter();
+            template.process(variables, htmlWriter);
+            String html = htmlWriter.toString();
+            html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
+            html = htmlService.filterWhitelist(html);
+            resp.getWriter().write(html);
+            
 
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -262,6 +277,5 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     private String getPrivacyText(final User user){
         return translator.translate(user.getLocale(), MicroformatStrings.DISCLAIMER_PRIVACY);
     }
-
 
 }
