@@ -118,6 +118,10 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String DATA_AFTER_LAST_LINE_MSG = "Illegal state: Found data after presumed last line.";
 
+    public static final String NO_IMPORTER_MSG = "Cannot find an importer for format %s into folders %s";
+
+    public static final String NO_EXPORTER_MSG = "Cannot find an exporter for folder %s to format %s";
+
     private ImportExportExceptionMessages() {
         super();
     }

@@ -55,16 +55,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.tools.session.ServerSession;
-
-
 
 /** 
  * Selects the appropriate importer or exporter for an import or export.
@@ -74,28 +66,9 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
-@OXThrowsMultiple(
-    category = { 
-        Category.SUBSYSTEM_OR_SERVICE_DOWN,
-        Category.SUBSYSTEM_OR_SERVICE_DOWN
-    }, 
-    desc = { "" , "" }, 
-    exceptionId = { 0 , 1 }, 
-    msg = {
-        "Cannot find an importer for format %s into folders %s",
-        "Cannot find an exporter for folder %s to format %s" 
-    }
-)
-@OXExceptionSource(
-    classId=ImportExportExceptionClasses.IMPORTEREXPORTER, 
-    component=EnumComponent.IMPORT_EXPORT
-)
 public class ImporterExporter {
 
-    private final static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ImporterExporter.class);
-
     private List <Importer> importers;
-    
     private List <Exporter> exporters;
 
     public ImporterExporter() {
@@ -153,7 +126,7 @@ public class ImporterExporter {
                 return imp.importData(sessObj, format, is, folders, optionalParams);
             }
         }
-        throw EXCEPTIONS.create(0, format, folders);
+        throw ImportExportExceptionCodes.NO_IMPORTER.create(format, folders);
     }
 
     /**
@@ -173,7 +146,7 @@ public class ImporterExporter {
                 return exp.exportData(sessObj, format, folder, fieldsToBeExported, optionalParams);
             }
         }
-        throw EXCEPTIONS.create(1, folder, format);
+        throw ImportExportExceptionCodes.NO_EXPORTER.create(folder, format);
     }
 
     /**
@@ -195,7 +168,7 @@ public class ImporterExporter {
                 return exp.exportData(sessObj, format, folder, objectId, fieldsToBeExported, optionalParams);
             }
         }
-        throw EXCEPTIONS.create(1, folder, format);
+        throw ImportExportExceptionCodes.NO_EXPORTER.create(folder, format);
     }
 
     /**

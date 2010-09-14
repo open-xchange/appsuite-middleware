@@ -61,6 +61,7 @@ import com.openexchange.groupware.importexport.internal.ImportExportExceptionFac
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public enum ImportExportExceptionCodes implements OXErrorMessage {
+
     /** Could not export the folder %1$s in the format %2$s. */
     CANNOT_EXPORT(CANNOT_EXPORT_MSG, Category.PERMISSION, 100),
     /** Could not load contacts */
@@ -121,6 +122,10 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     BROKEN_CSV(BROKEN_CSV_MSG, Category.USER_INPUT, 1000),
     /** Illegal state: Found data after presumed last line. */
     DATA_AFTER_LAST_LINE(DATA_AFTER_LAST_LINE_MSG, Category.CODE_ERROR, 1001),
+    /** Cannot find an importer for format %s into folders %s */
+    NO_IMPORTER(NO_IMPORTER_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 1100),
+    /** Cannot find an exporter for folder %s to format %s */
+    NO_EXPORTER(NO_EXPORTER_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 1101),
     ;
 
     private String message;
