@@ -54,6 +54,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -164,7 +165,14 @@ public final class CustomCharsetProvider extends CharsetProvider {
     public boolean addAliasCharset(final Charset delegate, final String canonicalName, final String... aliases) {
         final AliasCharset aliasCharset = new AliasCharset(canonicalName, null == aliases || aliases.length == 0 ? null : aliases, delegate);
         String key = aliasCharset.name().toLowerCase();
-        boolean added = (null == name2charset.putIfAbsent(key, aliasCharset));
+        final ConcurrentMap<String, Charset> map = name2charset;
+        if (null == map) {
+            /*
+             * Not initialized, yet
+             */
+            return false;
+        }
+        boolean added = (null == map.putIfAbsent(key, aliasCharset));
         // Add aliases one-by-one
         final Set<String> aliasSet = aliasCharset.aliases();
         if (added && !aliasSet.isEmpty()) {
@@ -172,12 +180,12 @@ public final class CustomCharsetProvider extends CharsetProvider {
             for (final Iterator<String> iter = aliasSet.iterator(); added && iter.hasNext();) {
                 addedKeys.add(key);
                 key = iter.next().toLowerCase();
-                added = (null == name2charset.putIfAbsent(key, aliasCharset));
+                added = (null == map.putIfAbsent(key, aliasCharset));
             }
             if (!added) {
                 // Charset could not be added with all its aliases
                 for (final String removeMe : addedKeys) {
-                    name2charset.remove(removeMe);
+                    map.remove(removeMe);
                 }
             }
         }
@@ -220,8 +228,12 @@ public final class CustomCharsetProvider extends CharsetProvider {
      * @return <code>true</code> if an appropriate starts-with charset could be added to this provider; otherwise <code>false</code>
      */
     public boolean addStartsWithCharset(final Charset delegate, final String startsWithName) {
+        final ConcurrentMap<String, Charset> startsWithMap = startsWith2charset;
+        if (null == startsWithMap) {
+            return false;
+        }
         final StartsWithCharset startsWithCharset = new StartsWithCharset(startsWithName, delegate);
-        return (null == startsWith2charset.putIfAbsent(startsWithName.toLowerCase(), startsWithCharset));
+        return (null == startsWithMap.putIfAbsent(startsWithName.toLowerCase(), startsWithCharset));
     }
 
     /**
@@ -235,7 +247,14 @@ public final class CustomCharsetProvider extends CharsetProvider {
         /*
          * Get charset instance for given name (case insensitive)
          */
-        Charset retval = name2charset.get(charsetName.toLowerCase());
+        final ConcurrentMap<String, Charset> map = name2charset;
+        if (null == map) {
+            /*
+             * Not initialized, yet
+             */
+            return null;
+        }
+        Charset retval = map.get(charsetName.toLowerCase());
         if (null != retval) {
             // Direct hit
             return retval;
@@ -243,8 +262,9 @@ public final class CustomCharsetProvider extends CharsetProvider {
         /*
          * Traverse starts-with charsets
          */
-        if (!startsWith2charset.isEmpty()) {
-            for (final Iterator<Map.Entry<String, Charset>> iter = startsWith2charset.entrySet().iterator(); (null == retval) && iter.hasNext();) {
+        final ConcurrentMap<String, Charset> startsWithMap = startsWith2charset;
+        if (!startsWithMap.isEmpty()) {
+            for (final Iterator<Map.Entry<String, Charset>> iter = startsWithMap.entrySet().iterator(); (null == retval) && iter.hasNext();) {
                 final Map.Entry<String, Charset> entry = iter.next();
                 if (charsetName.toLowerCase().startsWith(entry.getKey())) {
                     retval = entry.getValue();
@@ -262,7 +282,14 @@ public final class CustomCharsetProvider extends CharsetProvider {
      */
     @Override
     public Iterator<Charset> charsets() {
-        final Set<Charset> set = new HashSet<Charset>(name2charset.values());
+        final ConcurrentMap<String, Charset> map = name2charset;
+        if (null == map) {
+            /*
+             * Not initialized, yet
+             */
+            return Collections.<Charset> emptyList().iterator();
+        }
+        final Set<Charset> set = new HashSet<Charset>(map.values());
         set.addAll(startsWith2charset.values());
         return unmodifiableIterator(set.iterator());
     }
