@@ -166,7 +166,7 @@ public final class MALPollActivator extends DeferredActivator {
                 }
             }
             /*
-             * Initialize & open tracker
+             * Initialize & open tracker for Sessiond service
              */
             {
                 final ServiceTrackerCustomizer trackerCustomizer =

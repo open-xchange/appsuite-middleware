@@ -59,17 +59,22 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
  * {@link UpdateTaskPublisher}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UpdateTaskPublisher implements UpdateTaskProviderService {
+public final class UpdateTaskPublisher implements UpdateTaskProviderService {
 
+    /**
+     * Initializes a new {@link UpdateTaskPublisher}.
+     */
     public UpdateTaskPublisher() {
         super();
     }
 
     public Collection<UpdateTask> getUpdateTasks() {
-        List<UpdateTask> tasks = new ArrayList<UpdateTask>(2);
+        final List<UpdateTask> tasks = new ArrayList<UpdateTask>(2);
         tasks.add(new MALPollCreateTableTask());
         tasks.add(new MALPollModifyTableTask());
         return tasks;
     }
+
 }
