@@ -117,49 +117,20 @@ public final class HTMLServiceImpl implements HTMLService {
         this.htmlEntityMap = htmlEntityMap;
     }
 
-    public String formatURLs(final String content) {
+    public String formatHrefLinks(final String content) {
         try {
-            final Matcher m = PATTERN_URL.matcher(content);
+            final Matcher m = PATTERN_LINK_WITH_GROUP.matcher(content);
             final MatcherReplacer mr = new MatcherReplacer(m, content);
             final StringBuilder sb = new StringBuilder(content.length());
             final StringBuilder tmp = new StringBuilder(256);
             while (m.find()) {
-                String url = m.group();
-                tmp.setLength(0);
-                final int mlen = url.length() - 1;
-                if ((mlen > 0) && (')' == url.charAt(mlen))) {  // Ends with a parenthesis
-                    /*
-                     * Keep starting parenthesis if present
-                     */
-                    if ('(' == url.charAt(0)) {
-                        url = url.substring(1, mlen);
-                        tmp.append('(');
-                    } else {
-                        url = url.substring(0, mlen);
-                    }
-                    tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
-                        "\" target=\"_blank\">").append(url).append("</a>").append(')');
-                    mr.appendLiteralReplacement(sb, tmp.toString());
-                } else if ((mlen > 0) && ('(' == url.charAt(0))) {  // Starts with a parenthesis
-                    final boolean appendParen;
-                    if (')' == url.charAt(mlen)) {
-                        url = url.substring(1, mlen);
-                        appendParen = true;
-                    } else {
-                        url = url.substring(1);
-                        tmp.append('(');
-                        appendParen = false;
-                    }
-                    tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
-                        "\" target=\"_blank\">").append(url).append("</a>");
-                    if (appendParen) {
-                        tmp.append(')');
-                    }
-                    mr.appendLiteralReplacement(sb, tmp.toString());
+                final String url = m.group(1);
+                if ((url == null) || (isSrcAttr(content, m.start(1)))) {
+                    mr.appendLiteralReplacement(sb, checkTarget(m.group()));
                 } else {
-                    tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
-                        "$0\" target=\"_blank\">$0</a>");
-                    mr.appendReplacement(sb, tmp.toString());
+                    tmp.setLength(0);
+                    appendLink(url, tmp);
+                    mr.appendLiteralReplacement(sb, tmp.toString());
                 }
             }
             mr.appendTail(sb);
@@ -170,6 +141,95 @@ public final class HTMLServiceImpl implements HTMLService {
             LOG.error(StackOverflowError.class.getName(), error);
         }
         return content;
+    }
+
+    private static final String STR_IMG_SRC = "src=";
+
+    private static boolean isSrcAttr(final String line, final int urlStart) {
+        return (urlStart >= 5) && ((STR_IMG_SRC.equalsIgnoreCase(line.substring(urlStart - 5, urlStart - 1))) || (STR_IMG_SRC.equalsIgnoreCase(line.substring(
+            urlStart - 4,
+            urlStart))));
+    }
+
+    private static final Pattern PATTERN_TARGET = Pattern.compile("(<a[^>]*?target=\"?)([^\\s\">]+)(\"?.*</a>)", Pattern.CASE_INSENSITIVE);
+
+    private static final String STR_BLANK = "_blank";
+
+    private static String checkTarget(final String anchorTag) {
+        final Matcher m = PATTERN_TARGET.matcher(anchorTag);
+        if (m.matches()) {
+            if (!STR_BLANK.equalsIgnoreCase(m.group(2))) {
+                final StringBuilder sb = new StringBuilder(128);
+                return sb.append(m.group(1)).append(STR_BLANK).append(m.group(3)).toString();
+            }
+            return anchorTag;
+        }
+        /*
+         * No target specified
+         */
+        final int pos = anchorTag.indexOf('>');
+        if (pos == -1) {
+            return anchorTag;
+        }
+        final StringBuilder sb = new StringBuilder(anchorTag.length() + 16);
+        return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(anchorTag.substring(pos)).toString();
+    }
+
+    public String formatURLs(final String content) {
+        try {
+            final Matcher m = PATTERN_URL.matcher(content);
+            final MatcherReplacer mr = new MatcherReplacer(m, content);
+            final StringBuilder sb = new StringBuilder(content.length());
+            final StringBuilder tmp = new StringBuilder(256);
+            while (m.find()) {
+                final String url = m.group();
+                tmp.setLength(0);
+                appendLink(url, tmp);
+                mr.appendLiteralReplacement(sb, tmp.toString());
+            }
+            mr.appendTail(sb);
+            return sb.toString();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final StackOverflowError error) {
+            LOG.error(StackOverflowError.class.getName(), error);
+        }
+        return content;
+    }
+
+    private static void appendLink(final String url, final StringBuilder builder) {
+        final int mlen = url.length() - 1;
+        if ((mlen > 0) && (')' == url.charAt(mlen))) { // Ends with a parenthesis
+            /*
+             * Keep starting parenthesis if present
+             */
+            if ('(' == url.charAt(0)) { // Starts with a parenthesis
+                appendAnchor(url.substring(1, mlen), builder);
+                builder.append('(');
+            } else {
+                appendAnchor(url.substring(0, mlen), builder);
+            }
+            /*
+             * Append closing parenthesis
+             */
+            builder.append(')');
+        } else if ((mlen >= 0) && ('(' == url.charAt(0))) { // Starts with a parenthesis, but does not end with a parenthesis
+            /*
+             * Append opening parenthesis
+             */
+            builder.append('(');
+            appendAnchor(url.substring(1), builder);
+        } else {
+            appendAnchor(url, builder);
+        }
+    }
+
+    private static void appendAnchor(final String url, final StringBuilder builder) {
+        builder.append("<a href=\"");
+        if (url.startsWith("www") || url.startsWith("news")) {
+            builder.append("http://");
+        }
+        builder.append(url).append("\" target=\"_blank\">").append(url).append("</a>");
     }
 
     public String filterWhitelist(final String htmlContent) {
@@ -185,7 +245,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return handler.getHTML();
     }
 
-    public String html2text(String htmlContent, boolean appendHref) {
+    public String html2text(final String htmlContent, final boolean appendHref) {
         final HTML2TextHandler handler = new HTML2TextHandler(this, htmlContent.length(), appendHref);
         HTMLParser.parse(htmlContent, handler);
         return handler.getText();

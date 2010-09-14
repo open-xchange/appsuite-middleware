@@ -102,6 +102,17 @@ public interface HTMLService {
     String formatURLs(String content);
 
     /**
+     * Searches for non-HTML links and convert them to valid HTML links.
+     * <p>
+     * Example: <code>http://www.somewhere.com</code> is converted to
+     * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>.
+     * 
+     * @param content The content to search in
+     * @return The given content with all non-HTML links converted to valid HTML links
+     */
+    String formatHrefLinks(final String content);
+
+    /**
      * Filters specified HTML content according to white-list filter.
      * <p>
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
