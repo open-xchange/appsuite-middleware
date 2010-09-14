@@ -59,7 +59,6 @@ package com.openexchange.groupware.importexport.exceptions;
 public class ImportExportExceptionClasses {
 	public static final int IMPORTEXPORTEXCEPTIONFACTORY = 0;
 	
-	public static final int IMPORTSERVLET = 13;
 	public static final int EXPORTSERVLET = 14;
 	public static final int OUTLOOKCSVCONTACTIMPORTER = 15;
 	
