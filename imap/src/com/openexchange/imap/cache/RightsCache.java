@@ -109,9 +109,9 @@ public final class RightsCache {
 
         private final String fullname;
 
-        private Rights rights;
+        private volatile Rights rights;
 
-        private CacheKey key;
+        private volatile CacheKey key;
 
         public RightsCacheEntry(final String fullname) {
             this(fullname, null);
@@ -124,10 +124,11 @@ public final class RightsCache {
         }
 
         private CacheKey getKeyInternal() {
-            if (null == key) {
-                key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.RIGHTS.getCode(), fullname);
+            CacheKey tmp = key;
+            if (null == tmp) {
+                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.RIGHTS.getCode(), fullname);
             }
-            return key;
+            return tmp;
         }
 
         public CacheKey getKey() {

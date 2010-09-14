@@ -110,9 +110,9 @@ public final class RootSubfolderCache {
 
         private static final Integer DUMMY = Integer.valueOf(1);
 
-        private Boolean subfolderCreation;
+        private volatile Boolean subfolderCreation;
 
-        private CacheKey key;
+        private volatile CacheKey key;
 
         public CreationCacheEntry() {
             this(Boolean.FALSE);
@@ -124,10 +124,11 @@ public final class RootSubfolderCache {
         }
 
         private CacheKey getKeyInternal() {
-            if (null == key) {
-                key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.ROOT_SUBFOLDER.getCode(), DUMMY);
+            CacheKey tmp = key;
+            if (null == tmp) {
+                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.ROOT_SUBFOLDER.getCode(), DUMMY);
             }
-            return key;
+            return tmp;
         }
 
         public CacheKey getKey() {

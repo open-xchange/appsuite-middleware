@@ -128,9 +128,9 @@ public final class CapabilitiesCache {
 
         private final int user;
 
-        private CapabilitiesResponse capRes;
+        private volatile CapabilitiesResponse capRes;
 
-        private CacheKey key;
+        private volatile CacheKey key;
 
         public CapsCacheEntry(final int user) {
             this(null, user);
@@ -143,10 +143,11 @@ public final class CapabilitiesCache {
         }
 
         private CacheKey getKeyInternal() {
-            if (null == key) {
-                key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.CAPS.getCode(), user);
+            CacheKey tmp = key;
+            if (null == tmp) {
+                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.CAPS.getCode(), user);
             }
-            return key;
+            return tmp;
         }
 
         public CacheKey getKey() {

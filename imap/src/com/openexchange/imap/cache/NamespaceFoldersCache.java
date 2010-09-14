@@ -224,9 +224,9 @@ public final class NamespaceFoldersCache {
 
         private final Integer namespaceKey;
 
-        private String[] fullnames;
+        private volatile String[] fullnames;
 
-        private CacheKey key;
+        private volatile CacheKey key;
 
         public NamespaceFoldersCacheEntry(final Integer namespaceKey) {
             this(namespaceKey, null);
@@ -239,12 +239,13 @@ public final class NamespaceFoldersCache {
         }
 
         private CacheKey getKeyInternal() {
-            if (null == key) {
-                key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(
+            CacheKey tmp = key;
+            if (null == tmp) {
+                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(
                     MailCacheCode.NAMESPACE_FOLDERS.getCode(),
                     namespaceKey);
             }
-            return key;
+            return tmp;
         }
 
         public CacheKey getKey() {

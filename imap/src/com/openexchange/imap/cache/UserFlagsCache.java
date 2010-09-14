@@ -120,9 +120,9 @@ public final class UserFlagsCache {
 
         private final String fullname;
 
-        private Boolean value;
+        private volatile Boolean value;
 
-        private CacheKey key;
+        private volatile CacheKey key;
 
         public UserFlagCacheEntry(final String fullname) {
             super();
@@ -130,10 +130,11 @@ public final class UserFlagsCache {
         }
 
         private CacheKey getKeyInternal() {
-            if (null == key) {
-                key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.USER_FLAGS.getCode(), fullname);
+            CacheKey tmp = key;
+            if (null == tmp) {
+                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.USER_FLAGS.getCode(), fullname);
             }
-            return key;
+            return tmp;
         }
 
         public CacheKey getKey() {
