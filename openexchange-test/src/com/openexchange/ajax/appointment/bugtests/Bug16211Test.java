@@ -191,10 +191,10 @@ public class Bug16211Test extends AbstractAJAXSession {
     @Override
     public void tearDown() throws Exception {
         // Delete Appointment
-        client2.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(
-            appointment.getObjectID(),
-            client2.getValues().getPrivateAppointmentFolder(),
-            new Date()));
+        GetRequest toDeleteReq = new GetRequest(personalAppointmentFolder.getObjectID(), appointment.getObjectID());
+        GetResponse toDeleteResp = client.execute(toDeleteReq);
+        Appointment toDelete = toDeleteResp.getAppointment(tz);
+        client.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete));
 
         // Delete folders
         client.execute(new DeleteRequest(API.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
