@@ -96,22 +96,11 @@ public final class MALPollDBUtility {
      */
     public static void insertMailIDs(final UUID hash, final Set<String> mailIds, final int cid) throws PushException {
         final DatabaseService databaseService = getDBService();
-        final Connection writableConnection;
-        try {
-            writableConnection = databaseService.getWritable(cid);
-            writableConnection.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
-            throw new PushException(e);
-        } catch (final SQLException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        final Connection writableConnection = getReadWriteConnection(cid, databaseService, false);
         try {
             final StringBuilder sb = new StringBuilder(CHUNK_SIZE * 16).append(SQL_INSERT_PREFIX);
             insert0(cid, hash, mailIds, CHUNK_SIZE, sb, writableConnection);
             writableConnection.commit(); // COMMIT
-        } catch (final SQLException e) {
-            rollback(writableConnection);
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             rollback(writableConnection);
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -210,24 +199,13 @@ public final class MALPollDBUtility {
      */
     public static void replaceMailIDs(final UUID hash, final Set<String> newIds, final Set<String> delIds, final int cid) throws PushException {
         final DatabaseService databaseService = getDBService();
-        final Connection writableConnection;
-        try {
-            writableConnection = databaseService.getWritable(cid);
-            writableConnection.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
-            throw new PushException(e);
-        } catch (final SQLException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        final Connection writableConnection = getReadWriteConnection(cid, databaseService, false);
         try {
             deletet0(cid, hash, delIds, CHUNK_SIZE, writableConnection);
             final StringBuilder sb = new StringBuilder(CHUNK_SIZE * 16).append(SQL_INSERT_PREFIX);
             insert0(cid, hash, newIds, CHUNK_SIZE, sb, writableConnection);
 
             writableConnection.commit(); // COMMIT
-        } catch (final SQLException e) {
-            rollback(writableConnection);
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             rollback(writableConnection);
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -258,7 +236,7 @@ public final class MALPollDBUtility {
             deleteEntries(cid, con, uuids);
             deleteUserData(cid, con, user);
             con.commit(); // COMMIT
-        } catch (final SQLException e) {
+        } catch (final Exception e) {
             rollback(con);
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -478,10 +456,21 @@ public final class MALPollDBUtility {
     }
 
     private static Connection getReadWriteConnection(final int cid, final DatabaseService databaseService) throws PushException {
+        return getReadWriteConnection(cid, databaseService, true);
+    }
+
+    private static Connection getReadWriteConnection(final int cid, final DatabaseService databaseService, final boolean autoCommit) throws PushException {
         try {
-            return databaseService.getWritable(cid);
+            if (autoCommit) {
+                return databaseService.getWritable(cid);
+            }
+            final Connection writableConnection = databaseService.getWritable(cid);
+            writableConnection.setAutoCommit(false); // BEGIN
+            return writableConnection;
         } catch (final DBPoolingException e) {
             throw new PushException(e);
+        } catch (final SQLException e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
