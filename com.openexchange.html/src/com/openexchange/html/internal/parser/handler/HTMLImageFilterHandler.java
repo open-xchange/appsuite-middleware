@@ -49,7 +49,6 @@
 
 package com.openexchange.html.internal.parser.handler;
 
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSSElements;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
@@ -61,6 +60,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.html.HTMLService;
+import com.openexchange.html.internal.HTMLServiceImpl;
 import com.openexchange.html.internal.parser.HTMLHandler;
 
 /**
@@ -126,6 +126,8 @@ public class HTMLImageFilterHandler implements HTMLHandler {
     }
 
     private final HTMLService htmlService;
+    
+    private final Pattern urlPattern;
 
     private final StringBuilder htmlBuilder;
 
@@ -140,6 +142,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
     public HTMLImageFilterHandler(final HTMLService htmlService, final int capacity) {
         super();
         this.htmlService = htmlService;
+        urlPattern = HTMLServiceImpl.PATTERN_URL;
         cssBuffer = new StringBuilder(256);
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
@@ -200,7 +203,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
              * Check for URL inside background attribute
              */
             try {
-                if (PATTERN_URL.matcher(attributes.get(BACKGROUND)).matches()) {
+                if (urlPattern.matcher(attributes.get(BACKGROUND)).matches()) {
                     attributes.put(BACKGROUND, BLANK);
                     imageURLFound = true;
                 }
@@ -221,7 +224,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
                  * Check for URL inside background attribute
                  */
                 try {
-                    if (PATTERN_URL.matcher(attributes.get(BACKGROUND)).matches()) {
+                    if (urlPattern.matcher(attributes.get(BACKGROUND)).matches()) {
                         attributes.put(BACKGROUND, BLANK);
                         imageURLFound = true;
                     }

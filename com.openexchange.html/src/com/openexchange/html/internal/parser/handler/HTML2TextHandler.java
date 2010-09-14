@@ -49,13 +49,13 @@
 
 package com.openexchange.html.internal.parser.handler;
 
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.html.HTMLService;
+import com.openexchange.html.internal.HTMLServiceImpl;
 import com.openexchange.html.internal.parser.HTMLHandler;
 
 /**
@@ -463,7 +463,7 @@ public final class HTML2TextHandler implements HTMLHandler {
                     textBuilder.append(htmlService.replaceHTMLEntities(preparedText));
                 }
             }
-            if (anchorTag && hrefContent != null && !text.equalsIgnoreCase(hrefContent) && !PATTERN_URL.matcher(text).matches()) {
+            if (anchorTag && hrefContent != null && !text.equalsIgnoreCase(hrefContent) && !HTMLServiceImpl.PATTERN_URL.matcher(text).matches()) {
                 textBuilder.append(" [").append(hrefContent).append("] ");
             }
         }

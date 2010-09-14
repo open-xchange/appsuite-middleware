@@ -50,7 +50,6 @@
 package com.openexchange.html;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * {@link HTMLService} - The HTML service provides several methods concerning processing of HTML content.
@@ -181,48 +180,6 @@ public interface HTMLService {
      * @see #htmlFormat(String, boolean)
      */
     String htmlFormat(String plainText);
-
-    /**
-     * The regular expression to match URLs inside text:<br>
-     * <code>\(?\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]</code>
-     * <p>
-     * Parentheses, if present, are allowed in the URL -- The leading one is absorbed, too.
-     * 
-     * <pre>
-     * String s = matcher.group();
-     * int mlen = s.length() - 1;
-     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
-     *     s = s.substring(1, mlen);
-     * }
-     * </pre>
-     */
-    Pattern getURLPattern();
-
-    /**
-     * The regular expression to match URLs and anchors inside text.
-     * 
-     * <pre>
-     * String s = matcher.group();
-     * int mlen = s.length() - 1;
-     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
-     *     s = s.substring(1, mlen);
-     * }
-     * </pre>
-     */
-    Pattern getLinkPattern();
-
-    /**
-     * The regular expression to match URLs and anchors inside text. The URLs are matched in capturing group #1.
-     * 
-     * <pre>
-     * String s = matcher.group(1);
-     * int mlen = s.length() - 1;
-     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
-     *     s = s.substring(1, mlen);
-     * }
-     * </pre>
-     */
-    Pattern getLinkWithGroupPattern();
 
     /**
      * Creates valid HTML from specified HTML content conform to W3C standards.
