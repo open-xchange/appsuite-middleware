@@ -108,9 +108,13 @@ public final class HTMLFilterHandler implements HTMLHandler {
     // A decimal digit: [0-9]
     private static final Pattern PAT_NUMERIC = Pattern.compile("\\p{Digit}+");
 
-    private static Map<String, Map<String, Set<String>>> shtmlMap;
+    private static volatile Map<String, Map<String, Set<String>>> shtmlMap;
 
-    private static Map<String, Set<String>> sstyleMap;
+    private static volatile Map<String, Set<String>> sstyleMap;
+
+    /*-
+     * ----------------- Member stuff -----------------
+     */
 
     private final HTMLService htmlService;
 
