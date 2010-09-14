@@ -189,6 +189,10 @@ public class Workflow {
             LOG.error(e);
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
         }
+        catch (ClassCastException e) {
+            LOG.error(e);
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+        }
         finally {
             MultiThreadedHttpConnectionManager manager = (MultiThreadedHttpConnectionManager) crawlerConnection.getHttpClient().getHttpConnectionManager();
             manager.shutdown();
