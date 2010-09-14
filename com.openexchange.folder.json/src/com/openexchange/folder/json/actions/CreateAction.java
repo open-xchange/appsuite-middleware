@@ -105,11 +105,7 @@ public final class CreateAction extends AbstractFolderAction {
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         final String newId = folderService.createFolder(folder, session);
-        /*
-         * Return appropriate result with last-modified time stamp
-         */
-        final Date lastModifiedUTC = folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC();
-        return new AJAXRequestResult(newId, lastModifiedUTC);
+        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC());
     }
 
 }
