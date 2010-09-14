@@ -51,12 +51,8 @@ package com.openexchange.tools.servlet;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 /**
  * {@link CharsetValidator}
@@ -80,15 +76,17 @@ final class CharsetValidator {
      * Member stuff
      */
 
-    private final ConcurrentMap<IgnoreCaseString, Future<Boolean>> map;
+    private final ConcurrentMap<IgnoreCaseString, Boolean> map;
 
     /**
      * Initializes a new {@link CharsetValidator}.
      */
     private CharsetValidator() {
         super();
-        map = new ConcurrentHashMap<IgnoreCaseString, Future<Boolean>>();
+        map = new ConcurrentHashMap<IgnoreCaseString, Boolean>(8);
     }
+
+    private static final String TEST = "foo";
 
     /**
      * Check charset.
@@ -98,35 +96,25 @@ final class CharsetValidator {
      */
     void checkCharset(final String charset) throws UnsupportedEncodingException {
         final IgnoreCaseString key = IgnoreCaseString.valueOf(charset);
-        Future<Boolean> future = map.get(key);
-        if (null == future) {
-            FutureTask<Boolean> ft = new FutureTask<Boolean>(new Callable<Boolean>() {
-
-                public Boolean call() throws Exception {
-                    "Bla".getBytes(charset);
-                    return Boolean.TRUE;
-                }
-            });
-            future = map.putIfAbsent(key, ft);
-            if (null == future) {
-                ft.run();
-                future = ft;
-            }
+        final Boolean b = map.get(key);
+        if (Boolean.FALSE == b) {
+            throw new UnsupportedEncodingException(charset);
         }
-        try {
-            future.get();
-        } catch (final InterruptedException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } catch (final ExecutionException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof UnsupportedEncodingException) {
-                throw (UnsupportedEncodingException) cause;
+        if (null == b) {
+            try {
+                TEST.getBytes(charset);
+                map.put(key, Boolean.TRUE);
+            } catch (final UnsupportedEncodingException e) {
+                /*
+                 * Put to map and re-throw exception
+                 */
+                map.put(key, Boolean.FALSE);
+                throw e;
             }
-            throw new IllegalStateException(cause.getMessage(), cause);
         }
     }
 
-    private final static class IgnoreCaseString implements Comparable<IgnoreCaseString>, Cloneable {
+    private static final class IgnoreCaseString implements Comparable<IgnoreCaseString>, Cloneable {
 
         /**
          * Initializes a new ignore-case string from specified string.
