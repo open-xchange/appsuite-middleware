@@ -78,16 +78,26 @@ final class ACLExtensionAutoDetector {
      * @return The IMAP server's ACL extension.
      */
     public static ACLExtension getACLExtension(final IMAPConfig imapConfig) {
-        return parse(imapConfig);
+        return parse(imapConfig.asMap(), imapConfig);
+    }
+
+    /**
+     * Determines the ACL extension dependent on IMAP server's capabilities.
+     * 
+     * @param capabilities The capabilities map
+     * @param imapConfig The IMAP configuration
+     * @return The IMAP server's ACL extension.
+     */
+    public static ACLExtension getACLExtension(final Map<String, String> capabilities, final IMAPConfig imapConfig) {
+        return parse(capabilities, imapConfig);
     }
 
     private static final char[] RFC4314_CARACTERS_UPPER = { 'K', 'X', 'T', 'E' };
 
-    private static ACLExtension parse(final IMAPConfig imapConfig) {
+    private static ACLExtension parse(final Map<String, String> capabilities, final IMAPConfig imapConfig) {
         /*
          * Examine CAPABILITY response
          */
-        final Map<String, String> capabilities = imapConfig.asMap();
         if (!capabilities.containsKey("ACL")) {
             if (DEBUG) {
                 LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(

@@ -54,8 +54,8 @@ import java.net.SocketTimeoutException;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -487,7 +487,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Add server's capabilities
              */
-            config.initializeCapabilities(imapStore);
+            config.initializeCapabilities(imapStore, session);
             /*
              * Increase counter
              */

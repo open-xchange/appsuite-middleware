@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.acl;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.imap.config.IMAPConfig;
 
@@ -99,6 +100,20 @@ public final class ACLExtensionFactory {
     public ACLExtension getACLExtension(final IMAPConfig imapConfig) {
         if (!instantiated.get()) {
             return ACLExtensionAutoDetector.getACLExtension(imapConfig);
+        }
+        return configured;
+    }
+
+    /**
+     * Gets the appropriate ACL extension for the IMAP server denoted by specified IMAP configuration.
+     * 
+     * @param capabilities The capabilities map
+     * @param imapConfig The IMAP configuration providing needed access data.
+     * @return The appropriate ACL extension
+     */
+    public ACLExtension getACLExtension(final Map<String, String> capabilities, final IMAPConfig imapConfig) {
+        if (!instantiated.get()) {
+            return ACLExtensionAutoDetector.getACLExtension(capabilities, imapConfig);
         }
         return configured;
     }

@@ -72,7 +72,11 @@ public enum MailCacheCode {
 	/**
 	 * Root folder allows subfolders
 	 */
-	ROOT_SUBFOLDER(4);
+	ROOT_SUBFOLDER(4),
+	/**
+	 * Capabilities
+	 */
+	CAPS(5);
 
 	private final int code;
 

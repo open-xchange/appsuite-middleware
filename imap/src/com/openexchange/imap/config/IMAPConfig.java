@@ -55,16 +55,16 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCapabilities;
-import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
+import com.openexchange.imap.cache.CapabilitiesCache;
+import com.openexchange.imap.cache.CapabilitiesCache.CapabilitiesResponse;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.mail.config.MailProperties;
-import com.sun.mail.imap.IMAPFolder;
+import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -177,33 +177,21 @@ public final class IMAPConfig extends MailConfig {
      * Initializes IMAP server's capabilities if not done, yet
      * 
      * @param imapStore The IMAP store from which to fetch the capabilities
+     * @param session The session possibly caching capabilities information
      * @throws MailConfigException If IMAP capabilities cannot be initialized
      */
-    public void initializeCapabilities(final IMAPStore imapStore) throws MailConfigException {
+    public void initializeCapabilities(final IMAPStore imapStore, final Session session) throws MailConfigException {
         if (imapCapabilities == null) {
             synchronized (this) {
                 if (imapCapabilities != null) {
                     return;
                 }
                 try {
-                    final IMAPCapabilities imapCaps = new IMAPCapabilities();
-                    imapCaps.setACL(imapStore.hasCapability(IMAPCapabilities.CAP_ACL));
-                    imapCaps.setThreadReferences(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_REFERENCES));
-                    imapCaps.setThreadOrderedSubject(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
-                    imapCaps.setQuota(imapStore.hasCapability(IMAPCapabilities.CAP_QUOTA));
-                    imapCaps.setSort(imapStore.hasCapability(IMAPCapabilities.CAP_SORT));
-                    imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
-                    imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
-                    imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
-                    imapCaps.setNamespace(imapStore.hasCapability(IMAPCapabilities.CAP_NAMESPACE));
-                    imapCaps.setIdle(imapStore.hasCapability(IMAPCapabilities.CAP_IDLE));
-                    imapCaps.setChildren(imapStore.hasCapability(IMAPCapabilities.CAP_CHILDREN));
-                    imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
-                    imapCapabilities = imapCaps;
-                    /*
-                     * Initialize set
-                     */
-                    capabilities = IMAPCommandsCollection.getCapabilities((IMAPFolder) imapStore.getFolder("INBOX"));
+                    final CapabilitiesResponse response =
+                        CapabilitiesCache.getCapabilitiesResponse(imapStore, this, true, session, accountId);
+                    imapCapabilities = response.getImapCapabilities();
+                    capabilities = response.getMap();
+                    aclExtension = response.getAclExtension();
                 } catch (final MessagingException e) {
                     throw new MailConfigException(e);
                 }
