@@ -110,6 +110,10 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Initializes a new {@link HTMLServiceImpl}.
+     * 
+     * @param tidyConfiguration The jTidy configuration
+     * @param htmlCharMap The HTML entity to string map
+     * @param htmlEntityMap The string to HTML entity map
      */
     public HTMLServiceImpl(final Properties tidyConfiguration, final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
