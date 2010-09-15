@@ -75,6 +75,7 @@ public final class GetAction extends AbstractUserAction {
      * The <tt>get</tt> action string.
      */
     public static final String ACTION = AJAXServlet.ACTION_GET;
+    private static final String MYSELF = "myself";
 
     /**
      * Initializes a new {@link GetAction}.
@@ -87,7 +88,13 @@ public final class GetAction extends AbstractUserAction {
         /*
          * Parse parameters
          */
-        final int userId = checkIntParameter("id", request);
+        String idParam = request.getParameter("id");
+        int userId;
+        if(MYSELF.equalsIgnoreCase(idParam)) {
+            userId = session.getUserId();
+        } else {
+            userId = checkIntParameter("id", request);
+        }
         /*
          * Obtain user from user service
          */
