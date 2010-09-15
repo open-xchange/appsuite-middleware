@@ -49,9 +49,10 @@
 
 package com.openexchange.groupware.attach;
 
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.*;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
-
+import com.openexchange.groupware.attach.impl.AttachmentExceptionFactory;
 
 /**
  * {@link AttachmentExceptionCodes}
@@ -60,6 +61,8 @@ import com.openexchange.groupware.AbstractOXException.Category;
  */
 public enum AttachmentExceptionCodes implements OXErrorMessage {
 
+    /** Invalid SQL Query: %s */
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 100),
     ;
 
     private final String message;
@@ -87,5 +90,13 @@ public enum AttachmentExceptionCodes implements OXErrorMessage {
 
     public Category getCategory() {
         return category;
+    }
+
+    public AttachmentException create(Object... args) {
+        return AttachmentExceptionFactory.getInstance().create(this, args);
+    }
+
+    public AttachmentException create(Throwable cause, Object... args) {
+        return AttachmentExceptionFactory.getInstance().create(this, cause, args);
     }
 }

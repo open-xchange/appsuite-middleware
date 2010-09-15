@@ -58,6 +58,7 @@ import com.openexchange.exceptions.LocalizableStrings;
  */
 public final class AttachmentExceptionMessages implements LocalizableStrings {
 
+    public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
 
     private AttachmentExceptionMessages() {
         super();
