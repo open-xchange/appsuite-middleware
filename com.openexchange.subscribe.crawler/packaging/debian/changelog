@@ -1,3 +1,9 @@
+open-xchange-subscribe-crawler (6.18.0.0-15) unstable; urgency=low
+
+  * Public PTF 2010-09-17
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Wed, 15 Sep 2010 19:03:21 +0200
+
 open-xchange-subscribe-crawler (6.18.0.0-14) unstable; urgency=low
 
   * Public PTF 2010-09-17
