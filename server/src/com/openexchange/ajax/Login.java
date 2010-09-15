@@ -562,7 +562,7 @@ public class Login extends AJAXServlet {
         return loginRequest;
     }
 
-    private static void appendModules(final Session session, final JSONObject json, final HttpServletRequest req) throws JSONException {
+    private static void appendModules(final Session session, final JSONObject json, final HttpServletRequest req) {
         final String modules = "modules";
         if (parseBoolean(req.getParameter(modules))) {
             try {
@@ -570,6 +570,8 @@ public class Login extends AJAXServlet {
                 SettingStorage.getInstance(session).readValues(setting);
                 json.put(modules, convert2JS(setting));
             } catch (final SettingException e) {
+                LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+            } catch (final JSONException e) {
                 LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
             }
         }
