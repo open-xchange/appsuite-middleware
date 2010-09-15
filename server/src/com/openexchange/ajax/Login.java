@@ -247,6 +247,8 @@ public class Login extends AJAXServlet {
                 try {
                     final JSONObject json = new JSONObject();
                     LoginWriter.write(session, json);
+                    // Append "config/modules"
+                    appendModules(session, json, req);
                     json.write(resp.getWriter());
                 } catch (final JSONException e) {
                     log(RESPONSE_ERROR, e);
@@ -298,16 +300,7 @@ public class Login extends AJAXServlet {
                             final JSONObject json = new JSONObject();
                             LoginWriter.write(session, json);
                             // Append "config/modules"
-                            final String modules = "modules";
-                            if (parseBoolean(req.getParameter(modules))) {
-                                try {
-                                    final Setting setting = ConfigTree.getSettingByPath(modules);
-                                    SettingStorage.getInstance(session).readValues(setting);
-                                    json.put(modules, convert2JS(setting));
-                                } catch (final SettingException e) {
-                                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
-                                }
-                            }
+                            appendModules(session, json, req);
                             response.setData(json);
                         }
                     } else if (cookieName.startsWith(secretCookieName)) {
@@ -468,16 +461,7 @@ public class Login extends AJAXServlet {
             final Session session = result.getSession();
             LoginWriter.write(session, json);
             // Append "config/modules"
-            final String modules = "modules";
-            if (parseBoolean(req.getParameter(modules))) {
-                try {
-                    final Setting setting = ConfigTree.getSettingByPath(modules);
-                    SettingStorage.getInstance(session).readValues(setting);
-                    json.put(modules, convert2JS(setting));
-                } catch (final SettingException e) {
-                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
-                }
-            }
+            appendModules(session, json, req);
             response.setData(json);
         } catch (final LoginException e) {
             if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
@@ -576,6 +560,19 @@ public class Login extends AJAXServlet {
             }
         };
         return loginRequest;
+    }
+
+    private static void appendModules(final Session session, final JSONObject json, final HttpServletRequest req) throws JSONException {
+        final String modules = "modules";
+        if (parseBoolean(req.getParameter(modules))) {
+            try {
+                final Setting setting = ConfigTree.getSettingByPath(modules);
+                SettingStorage.getInstance(session).readValues(setting);
+                json.put(modules, convert2JS(setting));
+            } catch (final SettingException e) {
+                LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+            }
+        }
     }
 
     /**
