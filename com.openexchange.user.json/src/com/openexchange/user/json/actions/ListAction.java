@@ -113,7 +113,12 @@ public final class ListAction extends AbstractUserAction {
                 final int len = jsonArray.length();
                 userIdArray = new int[len];
                 for (int a = 0; a < len; a++) {
-                    userIdArray[a] = jsonArray.getInt(a);
+                    Object object = jsonArray.get(a);
+                    if(MYSELF.equals(object)) {
+                        userIdArray[a] = session.getUserId();
+                    } else {
+                        userIdArray[a] = (Integer) object;
+                    }
                 }
             }
             final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);

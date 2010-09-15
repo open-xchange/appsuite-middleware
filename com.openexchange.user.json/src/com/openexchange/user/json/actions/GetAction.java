@@ -75,7 +75,6 @@ public final class GetAction extends AbstractUserAction {
      * The <tt>get</tt> action string.
      */
     public static final String ACTION = AJAXServlet.ACTION_GET;
-    private static final String MYSELF = "myself";
 
     /**
      * Initializes a new {@link GetAction}.

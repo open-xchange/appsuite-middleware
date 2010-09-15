@@ -83,7 +83,7 @@ import com.openexchange.user.json.filter.UserCensorship;
 public abstract class AbstractUserAction implements AJAXActionService {
 
     private static final String ALL = "*";
-
+    protected static final String MYSELF = "myself";
     /**
      * Initializes a new {@link AbstractUserAction}.
      */
