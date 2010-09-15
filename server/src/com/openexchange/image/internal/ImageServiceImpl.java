@@ -105,7 +105,7 @@ public final class ImageServiceImpl implements ImageService {
     }
 
     public void removeImageData(final Session session) {
-        ImageRegistry.getInstance().removeImageData(session);
+        ImageRegistry.getInstance().removeImageToSessionMappings(session);
     }
 
 }

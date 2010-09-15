@@ -51,7 +51,6 @@ package com.openexchange.image.internal;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.conversion.ConversionService;
@@ -105,8 +104,8 @@ public final class ImageRegistry {
     }
 
     private final ConcurrentMap<String, ConcurrentMap<String, ImageData>> sessionBoundImagesMap;
-
-    private final ConcurrentMap<String, String> sessionIDMap;
+    
+    private final SessionToImageRegistry sessions2images;
     
     private final Object sessionLock;
 
@@ -117,8 +116,8 @@ public final class ImageRegistry {
      */
     private ImageRegistry() {
         super();
+        sessions2images = SessionToImageRegistry.getInstance();
         sessionBoundImagesMap = new ConcurrentHashMap<String, ConcurrentMap<String, ImageData>>();
-        sessionIDMap = new ConcurrentHashMap<String, String>();
         sessionLock = new Object();
     }
 
@@ -132,7 +131,7 @@ public final class ImageRegistry {
         final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
         if (null != timer) {
             tasks = new ScheduledTimerTask[1];
-            tasks[0] = timer.scheduleWithFixedDelay(new SessionBoundImagesCleaner(sessionBoundImagesMap, sessionIDMap), INITIAL_DELAY, DELAY);
+            tasks[0] = timer.scheduleWithFixedDelay(new SessionBoundImagesCleaner(sessionBoundImagesMap), INITIAL_DELAY, DELAY);
         }
     }
 
@@ -202,7 +201,8 @@ public final class ImageRegistry {
             }
         }
         ImageData imageData;
-        final String id = ImageIDGenerator.generateId(imageSource, imageArguments);
+
+        final String id = ImageIDGenerator.generateId(imageSource, imageArguments, session.getAuthId());
         if (check && (imageData = m.get(id)) != null) {
             if (DEBUG) {
                 LOG.debug("Image data fetched from registry for UID: " + id);
@@ -211,11 +211,20 @@ public final class ImageRegistry {
         }
         imageData = new ImageData(imageSource, imageArguments, timeToLive, id);
         m.put(id, imageData);
-        sessionIDMap.put(id, session.getSessionID());
+        sessions2images.put(session.getSessionID(), id);
         if (DEBUG) {
             LOG.debug("Image data put into registry with UID: " + id);
         }
         return imageData;
+    }
+    
+    /**
+     * Removes imageId-sessionId pairs from the image registry.
+     * @param sessionId
+     * @return True if at least one imageId-sessionId pair has been removed.
+     */
+    public void removeImageToSessionMappings(final Session session) {
+        sessions2images.removeBySessionId(session.getSessionID());
     }
 
     /**
@@ -237,19 +246,7 @@ public final class ImageRegistry {
             }
         }
         m.put(imageData.getUniqueId(), imageData);
-        sessionIDMap.put(imageData.getUniqueId(), session.getSessionID());
-    }
-
-    /**
-     * Removes all images bound to specified session.
-     * 
-     * @param session The session to clean images from
-     */
-    public void removeImageData(final Session session) {
-        final Collection<ImageData> images = sessionBoundImagesMap.remove(session.getSessionID()).values();
-        for (final ImageData imageData : images) {
-            sessionIDMap.remove(imageData.getUniqueId());
-        }
+        sessions2images.put(session.getSessionID(), imageData.getUniqueId());
     }
 
     /**
@@ -295,7 +292,7 @@ public final class ImageRegistry {
      * @return The session ID the uid was filed under or null, if no such ID could be determined
      */
     public String getSessionForUID(final String uniqueID) {
-        return sessionIDMap.get(uniqueID);
+        return sessions2images.getSessionId(uniqueID);
     }
     
     /**

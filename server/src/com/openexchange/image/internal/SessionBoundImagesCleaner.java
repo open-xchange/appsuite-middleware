@@ -60,20 +60,17 @@ final class SessionBoundImagesCleaner implements Runnable {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SessionBoundImagesCleaner.class);
 
-	private final ConcurrentMap<String, ConcurrentMap<String, ImageData>> session2imageMaps;
-
-    private final ConcurrentMap<String, String> uid2session;
+	private final ConcurrentMap<String, ConcurrentMap<String, ImageData>> toIterate;
 
 	/**
 	 * Initializes a new {@link SessionBoundImagesCleaner}
 	 * 
-	 * @param images
+	 * @param session2imageMaps
 	 *            The concurrent map to iterate
 	 */
-	SessionBoundImagesCleaner(final ConcurrentMap<String, ConcurrentMap<String, ImageData>> images, final ConcurrentMap<String, String> sessions) {
+	SessionBoundImagesCleaner(final ConcurrentMap<String, ConcurrentMap<String, ImageData>> session2imageMaps) {
 		super();
-		session2imageMaps = images;
-		uid2session = sessions;
+		this.toIterate = session2imageMaps;
 	}
 
 	public void run() {
@@ -83,19 +80,17 @@ final class SessionBoundImagesCleaner implements Runnable {
 				/*
 				 * Session service gone
 				 */
-				session2imageMaps.clear();
-				uid2session.clear();
+				toIterate.clear();
 				return;
 			}
-			if (session2imageMaps.isEmpty()) {
+			if (toIterate.isEmpty()) {
 				/*
 				 * Nothing to iterate
 				 */
-			    uid2session.clear(); // Should be empty anyway
 				return;
 			}
 			final long now = System.currentTimeMillis();
-			for (final Iterator<Map.Entry<String, ConcurrentMap<String, ImageData>>> iterator = session2imageMaps.entrySet()
+			for (final Iterator<Map.Entry<String, ConcurrentMap<String, ImageData>>> iterator = toIterate.entrySet()
 					.iterator(); iterator.hasNext();) {
 				final Map.Entry<String, ConcurrentMap<String, ImageData>> entry = iterator.next();
 				if (service.getSession(entry.getKey()) == null) {
@@ -106,9 +101,6 @@ final class SessionBoundImagesCleaner implements Runnable {
 						LOG.debug("Session expired for session ID " + entry.getKey()
 								+ ". Removing all associated images.");
 					}
-					for (final ImageData imageData : entry.getValue().values()) {
-					    uid2session.remove(imageData.getUniqueId());
-                    }
 					iterator.remove();
 				} else {
     				final ConcurrentMap<String, ImageData> innerMap = entry.getValue();
@@ -119,7 +111,6 @@ final class SessionBoundImagesCleaner implements Runnable {
     						if (LOG.isDebugEnabled()) {
     							LOG.debug("Removing expired session-bound image with UID " + toCheck.getUniqueId());
     						}
-    						uid2session.remove(toCheck.getUniqueId());
     						inner.remove();
     					}
     				}

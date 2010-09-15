@@ -1,3 +1,7 @@
+* 2010-09-15 - steffen.templin@open-xchange.com
+
+ - Bugfix 16402: Receiving contact images should not cause 404 errors anymore.
+
 * 2010-09-14 - tobias.prinz@open-xchange.com
 
  - Bugfix 16826: Publish-Templates now go through a whitelisting process to filter out potential harmful code.

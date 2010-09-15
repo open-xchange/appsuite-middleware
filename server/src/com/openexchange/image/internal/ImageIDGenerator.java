@@ -80,15 +80,17 @@ final class ImageIDGenerator {
      * 
      * @param imageSource The image data source
      * @param imageArguments The data arguments for image data source
+     * @param authId The auth id of the session that needs the generated id
      * @return The generated ID
      */
-    static String generateId(final ImageDataSource imageSource, final DataArguments imageArguments) {
+    static String generateId(final ImageDataSource imageSource, final DataArguments imageArguments, final String authId) {
         final StringBuilder sb = new StringBuilder(64);
         final String[] requiredArguments = imageSource.getRequiredArguments();
         sb.append(imageSource.getRegistrationName());
-        for (final String requiredArgument : requiredArguments) {
-            sb.append(DELIM).append(imageArguments.get(requiredArgument));
+        for (String arg : requiredArguments) {
+            sb.append(DELIM).append(imageArguments.get(arg));
         }
+        sb.append(DELIM).append(authId);
         try {
             return new String(Base64.encodeBase64(sb.toString().getBytes("UTF-8"), false), "US-ASCII");
         } catch (final UnsupportedEncodingException e) {

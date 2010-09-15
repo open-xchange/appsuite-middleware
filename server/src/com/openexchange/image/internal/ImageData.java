@@ -82,16 +82,7 @@ public final class ImageData {
     private long lastAccessed;
 
     private final int timeToLive;
-
-    /**
-     * Initializes a new {@link ImageData} with its unique ID set to {@link DataArguments#getID()} and default time-to-live of 5 minutes.
-     * 
-     * @param imageSource The image data source
-     * @param imageArguments The image arguments
-     */
-    ImageData(final ImageDataSource imageSource, final DataArguments imageArguments) {
-        this(imageSource, imageArguments, DEFAULT_TTL, null);
-    }
+    
 
     /**
      * Initializes a new {@link ImageData} with its unique ID set to {@link DataArguments#getID()}.
@@ -106,8 +97,8 @@ public final class ImageData {
         if (imageArguments == null) {
             throw new IllegalArgumentException("image arguments are null");
         }
-        this.uniqueId = null == uniqueId ? ImageIDGenerator.generateId(imageSource, imageArguments) : uniqueId;
-        // uniqueId = imageArguments.getID();
+
+        this.uniqueId = uniqueId;
         this.imageArguments = imageArguments;
         this.imageSource = imageSource;
         hash = hashCode0();
