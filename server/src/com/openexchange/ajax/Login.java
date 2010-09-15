@@ -276,7 +276,7 @@ public class Login extends AJAXServlet {
                 final String sessionCookieName = SESSION_PREFIX + hash;
                 final String secretCookieName = SECRET_PREFIX + hash;
 
-                for (final Cookie cookie : cookies) {
+                NextCookie: for (final Cookie cookie : cookies) {
                     final String cookieName = cookie.getName();
                     if (cookieName.startsWith(sessionCookieName)) {
                         final String sessionId = cookie.getValue();
@@ -302,9 +302,21 @@ public class Login extends AJAXServlet {
                             // Append "config/modules"
                             appendModules(session, json, req);
                             response.setData(json);
+                            /*
+                             * Secret already found?
+                             */
+                            if (null != secret) {
+                                break NextCookie;
+                            }
                         }
                     } else if (cookieName.startsWith(secretCookieName)) {
                         secret = cookie.getValue();
+                        /*
+                         * Session already found?
+                         */
+                        if (null != session) {
+                            break NextCookie;
+                        }
                     }
                 }
                 if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
