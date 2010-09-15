@@ -464,7 +464,7 @@ public class Login extends AJAXServlet {
                     SettingStorage.getInstance(session).readValues(setting);
                     json.put(modules, convert2JS(setting));
                 } catch (final SettingException e) {
-                    LOG.warn("Modules could not be added to JSON response: " + e.getMessage(), e);
+                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
                 }
             }
             response.setData(json);
