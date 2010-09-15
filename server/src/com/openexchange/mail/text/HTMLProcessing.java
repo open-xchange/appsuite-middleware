@@ -726,9 +726,17 @@ public final class HTMLProcessing {
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
         do {
             sb.append(htmlContent.substring(lastMatch, m.start()));
-            sb.append(CC_START_IF).append(m.group(2)).append(CC_END_IF);
-            sb.append(m.group(3));
-            sb.append(CC_ENDIF);
+            sb.append(CC_START_IF).append(m.group(2));
+            final String wrappedContent = m.group(3);
+            if (!wrappedContent.startsWith("-->", 0)) {
+                sb.append(CC_END_IF);
+            }
+            sb.append(wrappedContent);
+            if (wrappedContent.endsWith("<!--")) {
+                sb.append(m.group(4));
+            } else {
+                sb.append(CC_ENDIF);
+            }
             lastMatch = m.end();
         } while (m.find());
         sb.append(htmlContent.substring(lastMatch));
