@@ -63,6 +63,7 @@ import org.junit.Test;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -77,12 +78,13 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 public class Bug8681forCSV extends AbstractContactTest {
+
     private static Context ctx;
 
     //workaround for JUnit 3 runner
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(Bug8681forCSV.class);
-	}
+    public static junit.framework.Test suite() {
+        return new JUnit4TestAdapter(Bug8681forCSV.class);
+    }
 
     @BeforeClass
 
@@ -91,15 +93,15 @@ public class Bug8681forCSV extends AbstractContactTest {
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
     }
     
-    @Test public void testOurCSV() throws UnsupportedEncodingException, AbstractOXException, SQLException, OXException, LdapException {
-		imp = new CSVContactImporter();
-		folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "bug8681 for csv");
-		
+    @Test public void testOurCSV() throws AbstractOXException, OXException, LdapException {
+        imp = new CSVContactImporter();
+        folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "bug8681 for csv");
+        
 
-		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
+        final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
         final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
             @Override
-			public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+            public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
                 final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
                 final UserConfiguration copy = (UserConfiguration) orig.clone();
                 copy.setContact(false);
@@ -108,27 +110,28 @@ public class Bug8681forCSV extends AbstractContactTest {
         };
         override.override();
         try {
-			final String csv = "Given name,Email 1\nPrinz, tobias.prinz@open-xchange.com\nLaguna, francisco.laguna@open-xchange.com";
-			imp.canImport(sessObj, Format.CSV, _folders(), null);
-			imp.importData(sessObj, Format.CSV, new ByteArrayInputStream(csv.getBytes()), _folders(), null);
-			fail("Could write contact without rights to use Contact module");
-		} catch(final ImportExportException e){
-			assertEquals(Category.PERMISSION, e.getCategory());
-			assertEquals("I_E-0806", e.getErrorCode());
-		} finally {
+            final String csv = "Given name,Email 1\nPrinz, tobias.prinz@open-xchange.com\nLaguna, francisco.laguna@open-xchange.com";
+            imp.canImport(sessObj, Format.CSV, _folders(), null);
+            imp.importData(sessObj, Format.CSV, new ByteArrayInputStream(csv.getBytes()), _folders(), null);
+            fail("Could write contact without rights to use Contact module");
+        } catch(final ImportExportException e){
+            assertEquals(Category.PERMISSION, e.getCategory());
+            assertEquals(ImportExportExceptionCodes.CONTACTS_DISABLED.getDetailNumber(), e.getDetailNumber());
+            assertEquals(EnumComponent.IMPORT_EXPORT.getAbbreviation(), e.getComponent().getAbbreviation());
+        } finally {
             override.takeBack();
             deleteTestFolder(folderId);
-		}
-	}
+        }
+    }
 
     @Test public void testOutlookCSV() throws AbstractOXException, SQLException, OXException{
-		imp = new OutlookCSVContactImporter();
-		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx,  "bug8681 for Outlook CSV");
+        imp = new OutlookCSVContactImporter();
+        folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx,  "bug8681 for Outlook CSV");
 
-		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
+        final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
         final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
             @Override
-			public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+            public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
                 final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
                 final UserConfiguration copy = (UserConfiguration) orig.clone();
                 copy.setContact(false);
@@ -136,19 +139,19 @@ public class Bug8681forCSV extends AbstractContactTest {
             }
         };
         override.override();
-		
-		try {
-			final String csv = "Given name,Email 1\nPrinz, tobias.prinz@open-xchange.com\nLaguna, francisco.laguna@open-xchange.com";
-			imp.canImport(sessObj, Format.OUTLOOK_CSV, _folders(), null);
-			imp.importData(sessObj, Format.OUTLOOK_CSV, new ByteArrayInputStream(csv.getBytes()), _folders(), null);
-			fail("Could write contact without rights to use Contact module");
-		} catch(final ImportExportException e){                                                                                                                           
-			assertEquals(Category.PERMISSION, e.getCategory());
-			assertEquals("I_E-0806", e.getErrorCode());
-		} finally {
-			override.takeBack();
-			deleteTestFolder(folderId);
-		}
-	}
+        
+        try {
+            final String csv = "Given name,Email 1\nPrinz, tobias.prinz@open-xchange.com\nLaguna, francisco.laguna@open-xchange.com";
+            imp.canImport(sessObj, Format.OUTLOOK_CSV, _folders(), null);
+            imp.importData(sessObj, Format.OUTLOOK_CSV, new ByteArrayInputStream(csv.getBytes()), _folders(), null);
+            fail("Could write contact without rights to use Contact module");
+        } catch(final ImportExportException e){                                                                                                                           
+            assertEquals(Category.PERMISSION, e.getCategory());
+            assertEquals("I_E-0806", e.getErrorCode());
+        } finally {
+            override.takeBack();
+            deleteTestFolder(folderId);
+        }
+    }
  
 }
