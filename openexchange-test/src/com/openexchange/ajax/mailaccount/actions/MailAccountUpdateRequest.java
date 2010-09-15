@@ -57,7 +57,7 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.servlet.fields.GetSwitch;
+import com.openexchange.mailaccount.json.fields.GetSwitch;
 
 
 /**

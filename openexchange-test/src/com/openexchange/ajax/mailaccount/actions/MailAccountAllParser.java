@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.servlet.fields.SetSwitch;
+import com.openexchange.mailaccount.json.fields.SetSwitch;
 
 
 /**

@@ -56,7 +56,7 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 
 
 /**
