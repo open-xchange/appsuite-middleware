@@ -51,59 +51,43 @@ package com.openexchange.groupware.attach.impl;
 
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.attach.Classes;
-
-@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_UPDATEATTACHMENTACTION, component=EnumComponent.ATTACHMENT)
+import com.openexchange.groupware.tx.TransactionException;
 
 public class UpdateAttachmentAction extends AttachmentListQueryAction {
 
-    private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(UpdateAttachmentAction.class);
-
     private List<AttachmentMetadata> oldAttachments;
 
-    @OXThrows(
-            category = Category.CODE_ERROR,
-            desc = "An invalid SQL query was sent to the Server. This can only be fixed in R&D.",
-            exceptionId = 0,
-            msg = "Invalid SQL query: %s"
-    )
     @Override
-    protected void undoAction() throws AbstractOXException {
-        if(oldAttachments.size() == 0) {
+    protected void undoAction() throws AttachmentException {
+        if (oldAttachments.size() == 0) {
             return;
         }
         try {
             doUpdates(getQueryCatalog().getUpdate(), oldAttachments, true);
         } catch (final UpdateException e) {
-            throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
+            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         }
     }
 
-    @OXThrows(
-            category = Category.CODE_ERROR,
-            desc = "An invalid SQL query was sent to the Server. This can only be fixed in R&D.",
-            exceptionId = 1,
-            msg = "Invalid SQL query: %s"
-    )
     public void perform() throws AbstractOXException {
-        if(getAttachments().size() == 0) {
+        if (getAttachments().size() == 0) {
             return;
         }
         try {
             doUpdates(getQueryCatalog().getUpdate(), getAttachments(), true);
         } catch (final UpdateException e) {
-            throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
+            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
         }
     }
 
     public void setOldAttachments(final List<AttachmentMetadata> attachments) {
         this.oldAttachments = attachments;
     }
-
 }
