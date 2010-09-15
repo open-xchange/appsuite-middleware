@@ -81,6 +81,10 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.settings.impl.ConfigTree;
+import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
@@ -449,7 +453,20 @@ public class Login extends AJAXServlet {
             result = LoginPerformer.getInstance().doLogin(request);
             // Write response
             JSONObject json = new JSONObject();
-            new LoginWriter().writeLogin(result.getSession(), json);
+            final Session session = result.getSession();
+            new LoginWriter().writeLogin(session, json);
+            // Append "config/modules"
+            final String modules = "modules";
+            final boolean appendModules = parseBoolean(req.getParameter(modules));
+            if (appendModules) {
+                try {
+                    final Setting setting = ConfigTree.getSettingByPath(modules);
+                    SettingStorage.getInstance(session).readValues(setting);
+                    json.put(modules, ConfigMenu.convert2JS(setting));
+                } catch (final SettingException e) {
+                    LOG.warn("Modules could not be added top JSON response: " + e.getMessage(), e);
+                }
+            }
             response.setData(json);
         } catch (final LoginException e) {
             if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
@@ -549,4 +566,9 @@ public class Login extends AJAXServlet {
         };
         return loginRequest;
     }
+
+    private static boolean parseBoolean(final String parameter) {
+        return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
+    }
+
 }
