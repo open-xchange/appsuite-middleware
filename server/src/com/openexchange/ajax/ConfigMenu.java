@@ -129,7 +129,7 @@ public class ConfigMenu extends SessionServlet {
      * @return java script object representing the setting tree.
      * @throws JSONException if the conversion to java script objects fails.
      */
-    private static Object convert2JS(Setting setting) throws JSONException {
+    public static Object convert2JS(Setting setting) throws JSONException {
         Object retval = null;
         if (setting.isLeaf()) {
             final Object[] multiValue = setting.getMultiValue();
