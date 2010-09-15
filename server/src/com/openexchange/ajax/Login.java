@@ -297,6 +297,17 @@ public class Login extends AJAXServlet {
                             }
                             final JSONObject json = new JSONObject();
                             LoginWriter.write(session, json);
+                            // Append "config/modules"
+                            final String modules = "modules";
+                            if (parseBoolean(req.getParameter(modules))) {
+                                try {
+                                    final Setting setting = ConfigTree.getSettingByPath(modules);
+                                    SettingStorage.getInstance(session).readValues(setting);
+                                    json.put(modules, convert2JS(setting));
+                                } catch (final SettingException e) {
+                                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                                }
+                            }
                             response.setData(json);
                         }
                     } else if (cookieName.startsWith(secretCookieName)) {
