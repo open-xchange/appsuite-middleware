@@ -87,18 +87,16 @@ public class TrustAllSecureSocketFactory implements SecureProtocolSocketFactory 
     }
 
     public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort, final HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
-        Socket socket;
         final int timeout = params.getConnectionTimeout();
-        if (timeout == 0) {
-            socket = createSocket(host, port, localAddress, localPort);
-        } else {
-            socket = delegate.createSocket();
+        if (timeout != 0) {
+            final Socket socket = delegate.createSocket();
             final SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
             final SocketAddress remoteaddr = new InetSocketAddress(host, port);
             socket.bind(localaddr);
             socket.connect(remoteaddr, timeout);
             return socket;
         }
+        final Socket socket = createSocket(host, port, localAddress, localPort);
 
         final int linger = params.getLinger();
         if (linger == 0) {
