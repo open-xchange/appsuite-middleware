@@ -90,13 +90,13 @@ public interface AttachmentBase extends Service {
      * @param ctx The Context
      * @return A sorted set of the file_ids
      */
-    public abstract SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx);
+    public abstract SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx) throws AttachmentException;
 
     public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException;
 
     public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, AttachmentField[] columns, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig)  throws OXException;
 
-    public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, int[] idsToFetch, AttachmentField[] fields, Context context, User user, UserConfiguration userConfig) throws OXException;
+    public abstract TimedResult<AttachmentMetadata> getAttachments(int folderId, int attachedId, int moduleId, int[] idsToFetch, AttachmentField[] fields, Context context, User user, UserConfiguration userConfig) throws OXException;
 
     public abstract Delta getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, Context context, User user, UserConfiguration userConfig) throws OXException;
 
@@ -138,9 +138,8 @@ public interface AttachmentBase extends Service {
     /**
      * Delete all Attachments in a Context.
      * @param context
-     * @throws TransactionException 
      */
-    public abstract void deleteAll(Context context) throws OXException;
+    public abstract void deleteAll(Context context) throws AttachmentException;
 
     /**
      * @return the last modified date of the newest attachment or <code>null</code> if no attachments exist.

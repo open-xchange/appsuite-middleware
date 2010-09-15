@@ -60,6 +60,30 @@ public final class AttachmentExceptionMessages implements LocalizableStrings {
 
     public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
 
+    public static final String SAVE_FAILED_MSG = "Could not save file to the file store.";
+
+    public static final String FILE_MISSING_MSG = "Attachments must contain a file.";
+
+    public static final String GENERATING_ID_FAILED_MSG = "Cannot generate ID for new attachment: %s";
+
+    public static final String READ_FAILED_MSG = "Could not retrieve file: %s";
+
+    public static final String ATTACHMENT_NOT_FOUND_MSG = "The attachment you requested no longer exists. Please refresh the view.";
+
+    public static final String DELETE_FAILED_MSG = "Could not delete attachment.";
+
+    public static final String ATTACHMENT_WITH_FILEID_NOT_FOUND_MSG = "Could not find an attachment with the file_id %s. Either the file is orphaned or belongs to another module.";
+
+    public static final String FILE_DELETE_FAILED_MSG = "Could not delete files from filestore. Context: %d.";
+
+    public static final String INVALID_CHARACTERS_MSG = "Validation failed: %s";
+
+    public static final String SEARCH_PROBLEM_MSG = "An error occurred executing the search in the database.";
+
+    public static final String FILESTORE_DOWN_MSG = "Unable to access the filestore.";
+
+    public static final String FILESTORE_WRITE_FAILED_MSG = "Writing to filestore failed.";
+
     private AttachmentExceptionMessages() {
         super();
     }

@@ -75,9 +75,7 @@ public abstract class FilestoreStorage {
      * @throws FilestoreException if an error occurs generating the URI.
      */
     public static URI createURI(final Context ctx) throws FilestoreException {
-        final int filestoreId = ctx.getFilestoreId();
-        final FilestoreStorage storage = getInstance();
-        final Filestore store = storage.getFilestore(filestoreId);
+        final Filestore store = getInstance().getFilestore(ctx.getFilestoreId());
         return FilestoreTools.createLocation(store, ctx);
     }
 

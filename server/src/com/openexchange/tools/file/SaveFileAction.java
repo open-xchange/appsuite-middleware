@@ -50,9 +50,9 @@
 package com.openexchange.tools.file;
 
 import java.io.InputStream;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.tx.AbstractUndoable;
 import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tools.file.external.FileStorageException;
 
 public class SaveFileAction extends AbstractUndoable implements UndoableAction {
 
@@ -63,15 +63,15 @@ public class SaveFileAction extends AbstractUndoable implements UndoableAction {
     private String id;
 
     public SaveFileAction() {
-
+        super();
     }
 
     @Override
-    protected void undoAction() throws AbstractOXException {
+    protected void undoAction() throws FileStorageException {
         storage.deleteFile(id);
     }
 
-    public void perform() throws AbstractOXException {
+    public void perform() throws FileStorageException {
         id = storage.saveNewFile(in);
     }
 

@@ -63,6 +63,30 @@ public enum AttachmentExceptionCodes implements OXErrorMessage {
 
     /** Invalid SQL Query: %s */
     SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 100),
+    /** Could not save file to the file store. */
+    SAVE_FAILED(SAVE_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 400),
+    /** Attachments must contain a file. */
+    FILE_MISSING(FILE_MISSING_MSG, Category.USER_INPUT, 401),
+    /** Cannot generate ID for new attachment: %s */
+    GENERATIING_ID_FAILED(GENERATING_ID_FAILED_MSG, Category.CODE_ERROR, 402),
+    /** Could not retrieve file: %s */
+    READ_FAILED(READ_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 404),
+    /** The attachment you requested no longer exists. Please refresh the view. */
+    ATTACHMENT_NOT_FOUND(ATTACHMENT_NOT_FOUND_MSG, Category.USER_INPUT, 405),
+    /** Could not delete attachment. */
+    DELETE_FAILED(DELETE_FAILED_MSG, Category.CODE_ERROR, 407),
+    /** Could not find an attachment with the file_id %s. Either the file is orphaned or belongs to another module. */
+    ATTACHMENT_WITH_FILEID_NOT_FOUND(ATTACHMENT_WITH_FILEID_NOT_FOUND_MSG, Category.CODE_ERROR, 408),
+    /** Could not delete files from filestore. Context: %d. */
+    FILE_DELETE_FAILED(FILE_DELETE_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 416),
+    /** Validation failed: %s */
+    INVALID_CHARACTERS(INVALID_CHARACTERS_MSG, Category.USER_INPUT, 418),
+    /** An error occurred executing the search in the database. */
+    SEARCH_PROBLEM(SEARCH_PROBLEM_MSG, Category.CODE_ERROR, 420),
+    /** Unable to access the filestore. */
+    FILESTORE_DOWN(FILESTORE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 421),
+    /** Writing to filestore failed. */
+    FILESTORE_WRITE_FAILED(FILESTORE_WRITE_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 422),
     ;
 
     private final String message;
