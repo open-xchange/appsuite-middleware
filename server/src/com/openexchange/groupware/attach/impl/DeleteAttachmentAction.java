@@ -51,89 +51,66 @@ package com.openexchange.groupware.attach.impl;
 
 import java.sql.SQLException;
 import java.util.Date;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.attach.Classes;
+import com.openexchange.groupware.tx.TransactionException;
 
-@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_DELETEATTACHMENTACTION, component=EnumComponent.ATTACHMENT)
 public class DeleteAttachmentAction extends AttachmentListQueryAction {
 
-	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(DeleteAttachmentAction.class);
-	
-	@OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the Server. This can only be fixed in R&D.",
-			exceptionId = 0,
-			msg = "Invalid SQL Query: %s"
-	)
-	@Override
-	protected void undoAction() throws AbstractOXException {
-		if(getAttachments().size() == 0) {
-			return;
-		}
-		try {
-			
-			doUpdates(new Update(getQueryCatalog().getDelete("del_attachment", getAttachments())) {
+    @Override
+    protected void undoAction() throws AttachmentException {
+        if (getAttachments().size() == 0) {
+            return;
+        }
+        try {
+            doUpdates(new Update(getQueryCatalog().getDelete("del_attachment", getAttachments())) {
+                @Override
+                public void fillStatement() throws SQLException {
+                    stmt.setInt(1, getContext().getContextId());
+                }
+            });
+            doUpdates(getQueryCatalog().getInsert(), getAttachments(), false);
+        } catch (final UpdateException e) {
+            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
+        }
+    }
 
-				@Override
-				public void fillStatement() throws SQLException {
-					stmt.setInt(1, getContext().getContextId());
-				}
-				
-			});
-			
-			doUpdates(getQueryCatalog().getInsert(), getAttachments(), false);
-		} catch (final UpdateException x) {
-			throw EXCEPTIONS.create(0, x.getSQLException(), x.getStatement());
-		}
-	}
+    public void perform() throws AttachmentException {
+        if (getAttachments().size() == 0) {
+            return;
+        }
+        final Date delDate = new Date();
+        final UpdateBlock[] updates = new UpdateBlock[getAttachments().size() + 1];
+        int i = 0;
+        for (final AttachmentMetadata m : getAttachments()) {
+            updates[i++] = new Update(getQueryCatalog().getInsertIntoDel()) {
 
-	@OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the Server. This can only be fixed in R&D.",
-			exceptionId = 1,
-			msg = "Invalid SQL Query: %s"
-	)
-	public void perform() throws AbstractOXException {
-		if(getAttachments().size() == 0) {
-			return;
-		}
-		final Date delDate = new Date();
-		final UpdateBlock[] updates = new UpdateBlock[getAttachments().size()+1];
-		int i = 0;
-		for(final AttachmentMetadata m : getAttachments()) {
-			updates[i++] = new Update(getQueryCatalog().getInsertIntoDel()){
+                @Override
+                public void fillStatement() throws SQLException {
+                    stmt.setInt(1, m.getId());
+                    stmt.setLong(2, delDate.getTime());
+                    stmt.setInt(3, getContext().getContextId());
+                    stmt.setInt(4, m.getAttachedId());
+                    stmt.setInt(5, m.getModuleId());
+                }
 
-				@Override
-				public void fillStatement() throws SQLException {
-					stmt.setInt(1, m.getId());
-					stmt.setLong(2, delDate.getTime());
-					stmt.setInt(3, getContext().getContextId());
-					stmt.setInt(4, m.getAttachedId());
-					stmt.setInt(5, m.getModuleId());
-				}
-				
-			};
-		}
-		updates[i++] = new Update(getQueryCatalog().getDelete("prg_attachment", getAttachments())) {
-
-			@Override
-			public void fillStatement() throws SQLException {
-				stmt.setInt(1,getContext().getContextId());
-			}
-			
-		};
-		
-		try {
-			doUpdates(updates);
-		} catch (final UpdateException x) {
-			throw EXCEPTIONS.create(1, x.getSQLException(), x.getStatement());
-		}
-	}
-
+            };
+        }
+        updates[i++] = new Update(getQueryCatalog().getDelete("prg_attachment", getAttachments())) {
+            @Override
+            public void fillStatement() throws SQLException {
+                stmt.setInt(1, getContext().getContextId());
+            }
+        };
+        try {
+            doUpdates(updates);
+        } catch (final UpdateException e) {
+            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+        } catch (TransactionException e) {
+            throw new AttachmentException(e);
+        }
+    }
 }
