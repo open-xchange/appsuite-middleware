@@ -60,9 +60,9 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public abstract class DeferredRegistryRegistration<R,P> extends ServiceTracker {
 
-    private P item;
+    private final P item;
 
-    public DeferredRegistryRegistration(BundleContext context, Class<R> registryClass, P item) {
+    public DeferredRegistryRegistration(final BundleContext context, final Class<R> registryClass, final P item) {
         super(context, registryClass.getName(), null);
         this.item = item;
     }
@@ -76,14 +76,14 @@ public abstract class DeferredRegistryRegistration<R,P> extends ServiceTracker {
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        R registry = (R) context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final R registry = (R) context.getService(reference);
         register(registry, item);
         return registry;
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         unregister((R) service, item);
     }
 }

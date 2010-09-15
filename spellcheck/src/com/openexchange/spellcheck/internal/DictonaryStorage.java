@@ -163,8 +163,7 @@ public final class DictonaryStorage {
 			/*
 			 * Gather all locales with same language
 			 */
-			for (final Iterator<Locale> iter = dictionaries.keySet().iterator(); iter.hasNext();) {
-				final Locale key = iter.next();
+			for (final Locale key : dictionaries.keySet()) {
 				if (locale.getLanguage().equals(key.getLanguage())) {
 					dic.addSpellDictionaries(dictionaries.get(key));
 				}
@@ -173,8 +172,7 @@ public final class DictonaryStorage {
 			/*
 			 * Gather all locales with same language
 			 */
-			for (final Iterator<Locale> iter = dictionaries.keySet().iterator(); iter.hasNext();) {
-				final Locale key = iter.next();
+			for (final Locale key : dictionaries.keySet()) {
 				if (locale.getLanguage().equals(key.getLanguage()) && locale.getCountry().equals(key.getCountry())) {
 					dic.addSpellDictionaries(dictionaries.get(key));
 				}
@@ -431,9 +429,9 @@ public final class DictonaryStorage {
 			 * Choose first possible charset
 			 */
 			final String prob[] = det.getProbableCharsets();
-			for (int i = 0; i < prob.length; i++) {
-				if (Charset.isSupported(prob[i])) {
-					return prob[i];
+			for (final String element : prob) {
+				if (Charset.isSupported(element)) {
+					return element;
 				}
 			}
 			return CHARSET_US_ASCII;

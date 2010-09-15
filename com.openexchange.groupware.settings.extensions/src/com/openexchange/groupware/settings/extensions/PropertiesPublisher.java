@@ -70,23 +70,23 @@ public class PropertiesPublisher {
 
     private final Log LOG = LogFactory.getLog(PropertiesPublisher.class);
 
-    public void publish(Properties properties) {
+    public void publish(final Properties properties) {
 
-        Set<Object> previousKeys = new HashSet<Object>(this.properties.keySet());
+        final Set<Object> previousKeys = new HashSet<Object>(this.properties.keySet());
 
-        for(Object key : properties.keySet()) {
-            String pathString = key.toString();
-            String[] path = pathString.split("/");
-            String value = properties.getProperty(key.toString());
+        for(final Object key : properties.keySet()) {
+            final String pathString = key.toString();
+            final String[] path = pathString.split("/");
+            final String value = properties.getProperty(key.toString());
 
 
             if(previousKeys.contains(key)) {
                 previousKeys.remove(key);
-                StaticValue prefItem = items.get(key);
+                final StaticValue prefItem = items.get(key);
                 LOG.debug("Updating property "+key+" with value "+value);
                 setValue(prefItem, value);                
             } else {
-                StaticValue prefItem = new StaticValue(path);
+                final StaticValue prefItem = new StaticValue(path);
                 setValue(prefItem, value);
                 LOG.debug("Publishing property "+key+" with value "+value);
                 publish( prefItem );
@@ -94,7 +94,7 @@ public class PropertiesPublisher {
             }
         }
 
-        for(Object key : previousKeys) {
+        for(final Object key : previousKeys) {
             LOG.debug("Removing property "+key);
             remove(items.get(key));
             items.remove(key);
@@ -104,20 +104,20 @@ public class PropertiesPublisher {
 
     }
 
-    public void setServicePublisher(ServicePublisher publisher) {
-        this.services = publisher;    
+    public void setServicePublisher(final ServicePublisher publisher) {
+        services = publisher;    
     }
 
-    private void setValue(StaticValue prefItem, String value) {
+    private void setValue(final StaticValue prefItem, final String value) {
         boolean valueSet = false;
         if(isMultiValue(value)) {
             try {
                 prefItem.setValue(parseMultiValue(value), true);
                 valueSet = true;
-            } catch (IllegalArgumentException x) {
+            } catch (final IllegalArgumentException x) {
                 // IGNORE set as single value
                 LOG.warn(x.getMessage(), x);
-            } catch (ArrayIndexOutOfBoundsException x) {
+            } catch (final ArrayIndexOutOfBoundsException x) {
                 // IGNORE set as single value
                 LOG.warn(x.getMessage(), x);
             }
@@ -128,10 +128,10 @@ public class PropertiesPublisher {
         }
     }
 
-    private String applyEscapes(String value) {
-        StringBuilder bob = new StringBuilder();
+    private String applyEscapes(final String value) {
+        final StringBuilder bob = new StringBuilder();
         boolean escape = false;
-        for(char c : value.toCharArray()) {
+        for(final char c : value.toCharArray()) {
             switch(c) {
                 case '\\' :
                     if(escape) {
@@ -152,32 +152,32 @@ public class PropertiesPublisher {
         return bob.toString();
     }
 
-    private Object[] parseMultiValue(String value) {
+    private Object[] parseMultiValue(final String value) {
 
         return new MultiValueParser(value).array();
     }
 
-    private boolean isMultiValue(String value) {
+    private boolean isMultiValue(final String value) {
         return value.matches("^\\s*\\[.*");
     }
 
 
-    private void publish(PreferencesItemService service) {
+    private void publish(final PreferencesItemService service) {
         services.publishService(PreferencesItemService.class, service);   
     }
 
-    private void remove(PreferencesItemService service) {
+    private void remove(final PreferencesItemService service) {
         services.removeService(PreferencesItemService.class, service);
     }
 
 
     private static final class StaticValue implements PreferencesItemService {
 
-        private String[] path;
+        private final String[] path;
         private Object value;
         private boolean multiple;
 
-        public StaticValue(String[] path) {
+        public StaticValue(final String[] path) {
             this.path = path;
         }
 
@@ -188,24 +188,24 @@ public class PropertiesPublisher {
         public IValueHandler getSharedValue() {
             return new ReadOnlyValue(){
 
-                public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                     StaticValue.this.setValue(setting);
                 }
 
-                public boolean isAvailable(UserConfiguration userConfig) {
+                public boolean isAvailable(final UserConfiguration userConfig) {
                     return true;
                 }
             };
         }
 
-        public void setValue(Object value, boolean multiple) {
+        public void setValue(final Object value, final boolean multiple) {
             this.value = value;
             this.multiple = multiple;
         }
 
-        public void setValue(Setting setting) {
+        public void setValue(final Setting setting) {
             if(multiple) {
-                for(Object component : (Object[]) value) {
+                for(final Object component : (Object[]) value) {
                     setting.addMultiValue(component);
                 }
             } else {
@@ -214,11 +214,11 @@ public class PropertiesPublisher {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            StaticValue that = (StaticValue) o;
+            final StaticValue that = (StaticValue) o;
 
             if (!Arrays.equals(path, that.path)) return false;
 
@@ -227,7 +227,7 @@ public class PropertiesPublisher {
 
         @Override
         public String toString() {
-            StringBuilder bob = new StringBuilder();
+            final StringBuilder bob = new StringBuilder();
             bob.append("Path: ").append(Arrays.asList(path));
             if(multiple) {
                 bob.append("Multiple: ").append(Arrays.asList((Object[])value));
@@ -250,9 +250,9 @@ public class PropertiesPublisher {
     private class MultiValueParser {
         List<Object> components = new ArrayList<Object>();
         int index = 0;
-        private char[] stream;
+        private final char[] stream;
 
-        public MultiValueParser(String value) {
+        public MultiValueParser(final String value) {
             stream = value.toCharArray();
         }
 
@@ -266,7 +266,7 @@ public class PropertiesPublisher {
         }
 
         private Object value() {
-            StringBuilder bob = new StringBuilder();
+            final StringBuilder bob = new StringBuilder();
             boolean escape = false;
             while(!eol()) {
                 switch(next()) {
@@ -310,7 +310,7 @@ public class PropertiesPublisher {
             throw new IllegalArgumentException("This doesn't look like a multivalue");
         }
 
-        private void consume(char c) {
+        private void consume(final char c) {
             if(!lookahead(c)) {
                 throw new IllegalArgumentException("This doesn't look like a multivalue");
             }
@@ -321,7 +321,7 @@ public class PropertiesPublisher {
             index++;
         }
 
-        private boolean lookahead(char c) {
+        private boolean lookahead(final char c) {
             return stream[index] == c;
         }
 

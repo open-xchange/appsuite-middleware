@@ -66,29 +66,29 @@ public class RegistryCustomizer<S> implements ServiceTrackerCustomizer {
 
     private final ServiceRegistry registry;
 
-    public RegistryCustomizer(BundleContext context, Class<S> clazz, ServiceRegistry registry) {
+    public RegistryCustomizer(final BundleContext context, final Class<S> clazz, final ServiceRegistry registry) {
         super();
         this.context = context;
         this.clazz = clazz;
         this.registry = registry;
     }
 
-    public Object addingService(ServiceReference reference) {
-        Object tmp = context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final Object tmp = context.getService(reference);
         if (!clazz.isAssignableFrom(tmp.getClass())) {
             context.ungetService(reference);
             return null;
         }
-        S service = (S) tmp;
+        final S service = (S) tmp;
         registry.addService(clazz, service);
         return service;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         registry.removeService(clazz);
         context.ungetService(reference);
     }

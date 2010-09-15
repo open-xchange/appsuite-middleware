@@ -65,23 +65,23 @@ import org.osgi.framework.BundleContext;
 public class ServiceDependentRegistration<T> extends ConditionalRegistration implements DynamicServiceStateListener {
 
     private Whiteboard whiteboard;
-    private List<Object> services = new ArrayList<Object>();
+    private final List<Object> services = new ArrayList<Object>();
 
-    public ServiceDependentRegistration(BundleContext context, String serviceName, T service, Dictionary dict, Whiteboard whiteboard) {
+    public ServiceDependentRegistration(final BundleContext context, final String serviceName, final T service, final Dictionary dict, final Whiteboard whiteboard) {
         super(context, serviceName, service, dict);
         this.whiteboard = whiteboard;
         this.service = configure(service);
     }
     
-    public ServiceDependentRegistration(BundleContext context, String serviceName, T service, Whiteboard whiteboard) {
+    public ServiceDependentRegistration(final BundleContext context, final String serviceName, final T service, final Whiteboard whiteboard) {
         this(context, serviceName, service, null, whiteboard);
     }
     
-    public ServiceDependentRegistration(BundleContext context, String serviceName, Whiteboard whiteboard) {
+    public ServiceDependentRegistration(final BundleContext context, final String serviceName, final Whiteboard whiteboard) {
         this(context, serviceName, (T) null, whiteboard);
     }
     
-    public ServiceDependentRegistration(BundleContext context, String serviceName, Dictionary dict, Whiteboard whiteboard) {
+    public ServiceDependentRegistration(final BundleContext context, final String serviceName, final Dictionary dict, final Whiteboard whiteboard) {
         this(context, serviceName, null, dict, whiteboard);
     }
     
@@ -89,35 +89,35 @@ public class ServiceDependentRegistration<T> extends ConditionalRegistration imp
      * Override to configure the service
      * @param service
      */
-    public T configure(T service) {
+    public T configure(final T service) {
         return service;
     }
 
-    public void addDependency(Object...services) {
+    public void addDependency(final Object...services) {
         this.services.addAll(Arrays.asList(services));
     }
     
-    public <T> T get(Class<T> clazz) {
+    public <T> T get(final Class<T> clazz) {
         return getAndDependOn(clazz);
     }
     
-    public <T> T getAndDependOn(Class<T> clazz) {
-        T service = whiteboard.getService(clazz, this);
+    public <T> T getAndDependOn(final Class<T> clazz) {
+        final T service = whiteboard.getService(clazz, this);
         addDependency(service);
         return service;
     }
     
     @Override
     protected boolean mustRegister() {
-        for(Object service : services) {
+        for(final Object service : services) {
             if (! whiteboard.isActive(service)) {
                 LOG.info("Missing service. Proxy is not active: "+service+ " needed by "+this.service);
                 return false;
             }
         }
-        boolean validateServices = validateServices();
+        final boolean validateServices = validateServices();
         if(validateServices) {
-            LOG.info("All is fine, registering service "+this.service+".");
+            LOG.info("All is fine, registering service "+service+".");
             return true;
         }
         return false;

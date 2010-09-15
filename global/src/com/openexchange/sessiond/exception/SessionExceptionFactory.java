@@ -77,7 +77,7 @@ public class SessionExceptionFactory extends Exceptions<SessiondException> {
     }
 
     @Override
-    protected SessiondException createException(ErrorMessage message, Throwable cause, Object... args) {
+    protected SessiondException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
         return new SessiondException(message, cause, args);
     }
 }

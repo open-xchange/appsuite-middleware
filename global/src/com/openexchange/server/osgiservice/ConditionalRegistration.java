@@ -72,11 +72,11 @@ public class ConditionalRegistration {
     
     protected static final Log LOG = LogFactory.getLog(ConditionalRegistration.class);
 
-    public ConditionalRegistration(BundleContext context, String serviceName, Object service, Dictionary dict) {
+    public ConditionalRegistration(final BundleContext context, final String serviceName, final Object service, final Dictionary dict) {
         this.context = context;
         this.serviceName = serviceName;
         this.service = service;
-        this.dictionary = dict;
+        dictionary = dict;
     }
     
     public void check() {
@@ -91,7 +91,7 @@ public class ConditionalRegistration {
     }
 
     private synchronized void unregister() {
-        if(this.registration != null) {
+        if(registration != null) {
             LOG.info("Unregistering "+service+" as "+serviceName+". ");
             registration.unregister();
             registration = null;

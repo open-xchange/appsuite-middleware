@@ -68,35 +68,35 @@ public class Whiteboard implements OXCloseable {
     
     private static final Log LOG = LogFactory.getLog(Whiteboard.class);
     
-    private List<OXCloseable> closeables = new LinkedList<OXCloseable>();
+    private final List<OXCloseable> closeables = new LinkedList<OXCloseable>();
 
-    private BundleContext context;
+    private final BundleContext context;
 
-    private DynamicWhiteboardFactory factory;
+    private final DynamicWhiteboardFactory factory;
     
-    public Whiteboard(BundleContext context) {
+    public Whiteboard(final BundleContext context) {
         this.context = context;
-        this.factory = new DynamicWhiteboardFactory(context);
+        factory = new DynamicWhiteboardFactory(context);
         closeables.add(factory);
     }
     
-    public <T> T getService(Class<T> klass) {
+    public <T> T getService(final Class<T> klass) {
         return factory.createWhiteboardService(context, klass, closeables, null);
     }
     
-    public <T> T getService(Class<T> klass, DynamicServiceStateListener listener) {
+    public <T> T getService(final Class<T> klass, final DynamicServiceStateListener listener) {
         return factory.createWhiteboardService(context, klass, closeables, listener);
     }
     
-    public boolean isActive(Object o) {
+    public boolean isActive(final Object o) {
         return factory.isActive(o);
     }
     
     public void close() throws AbstractOXException {
-        for(OXCloseable closeable : closeables) {
+        for(final OXCloseable closeable : closeables) {
             try {
                 closeable.close();
-            } catch (AbstractOXException x) {
+            } catch (final AbstractOXException x) {
                 LOG.error(x);
             }
         }

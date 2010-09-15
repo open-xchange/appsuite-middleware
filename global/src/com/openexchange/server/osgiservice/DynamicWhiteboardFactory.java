@@ -68,10 +68,10 @@ import com.openexchange.tools.global.OXCloseable;
  */
 public class DynamicWhiteboardFactory implements OXCloseable {
 
-    private ServiceTracker tracker;
+    private final ServiceTracker tracker;
 
     public DynamicWhiteboardFactory(final BundleContext context) {
-        this.tracker = new ServiceTracker(context, WhiteboardFactoryService.class.getName(), null);
+        tracker = new ServiceTracker(context, WhiteboardFactoryService.class.getName(), null);
         tracker.open();
     }
 
@@ -79,25 +79,25 @@ public class DynamicWhiteboardFactory implements OXCloseable {
         tracker.close();
     }
 
-    public <T> T createWhiteboardService(BundleContext context, Class<T> klass, Collection<OXCloseable> closeables, DynamicServiceStateListener listener) {
-        WhiteboardFactoryService<T> factory = getFactory(klass);
+    public <T> T createWhiteboardService(final BundleContext context, final Class<T> klass, final Collection<OXCloseable> closeables, final DynamicServiceStateListener listener) {
+        final WhiteboardFactoryService<T> factory = getFactory(klass);
         if (factory != null) {
             return factory.create(context, closeables);
         }
-        ServiceTrackerInvocationHandler handler = new ServiceTrackerInvocationHandler(context, klass, listener);
+        final ServiceTrackerInvocationHandler handler = new ServiceTrackerInvocationHandler(context, klass, listener);
         closeables.add(handler);
         return (T) Proxy.newProxyInstance(klass.getClassLoader(), new Class[] { klass }, handler);
     }
 
-    private <T> WhiteboardFactoryService<T> getFactory(Class<T> klass) {
-        Object[] services = tracker.getServices();
+    private <T> WhiteboardFactoryService<T> getFactory(final Class<T> klass) {
+        final Object[] services = tracker.getServices();
         if (services == null) {
             return null;
         }
-        for (int i = 0; i < services.length; i++) {
-            WhiteboardFactoryService factory = (WhiteboardFactoryService) services[i];
+        for (final Object service : services) {
+            final WhiteboardFactoryService factory = (WhiteboardFactoryService) service;
             if (factory.getType().equals(klass)) {
-                return (WhiteboardFactoryService<T>) factory;
+                return factory;
             }
         }
         return null;
@@ -115,13 +115,13 @@ public class DynamicWhiteboardFactory implements OXCloseable {
 
         private Class klass;
 
-        public ServiceTrackerInvocationHandler(BundleContext context, Class klass, final DynamicServiceStateListener listener) {
+        public ServiceTrackerInvocationHandler(final BundleContext context, final Class klass, final DynamicServiceStateListener listener) {
             this.klass = klass;
             tracker = new ServiceTracker(context, klass.getName(), null) {
 
                 @Override
-                public Object addingService(ServiceReference reference) {
-                    Object retval = super.addingService(reference);
+                public Object addingService(final ServiceReference reference) {
+                    final Object retval = super.addingService(reference);
                     if (listener != null) {
                         synchronized (this) {
                             adding = true;
@@ -137,7 +137,7 @@ public class DynamicWhiteboardFactory implements OXCloseable {
                     return retval;
                 }
 
-                private boolean supercedes(ServiceReference reference, ServiceReference otherReference) {
+                private boolean supercedes(final ServiceReference reference, final ServiceReference otherReference) {
                     if (null == otherReference) {
                         return true;
                     }
@@ -157,7 +157,7 @@ public class DynamicWhiteboardFactory implements OXCloseable {
                 }
 
                 @Override
-                public void removedService(ServiceReference reference, Object service) {
+                public void removedService(final ServiceReference reference, final Object service) {
                     super.removedService(reference, service);
                     if (listener != null) {
                         listener.stateChanged();
@@ -167,13 +167,13 @@ public class DynamicWhiteboardFactory implements OXCloseable {
             tracker.open();
         }
 
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
             if((args == null || args.length == 0) && TO_STRING.equals(method.getName())) {
                 return "OSGi Proxy ( "+klass.getName()+" ) "+hashCode();
             }
             try {
                 return method.invoke(getDelegate(), args);
-            } catch (InvocationTargetException x) {
+            } catch (final InvocationTargetException x) {
                 if(null == x.getCause()) {
                     throw x;
                 }
@@ -189,7 +189,7 @@ public class DynamicWhiteboardFactory implements OXCloseable {
                 // Wait a second for service to hopefully reappear before failing
                 try {
                     tracker.waitForService(1000);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     return null;
                 }
                 if (tracker.size() == 0) {
@@ -209,13 +209,13 @@ public class DynamicWhiteboardFactory implements OXCloseable {
 
     }
 
-    public boolean isActive(Object o) {
+    public boolean isActive(final Object o) {
         if (!Proxy.isProxyClass(o.getClass())) {
             return true;
         }
-        InvocationHandler invocationHandler = Proxy.getInvocationHandler(o);
+        final InvocationHandler invocationHandler = Proxy.getInvocationHandler(o);
         if (ServiceTrackerInvocationHandler.class.isInstance(invocationHandler)) {
-            ServiceTrackerInvocationHandler handler = (ServiceTrackerInvocationHandler) invocationHandler;
+            final ServiceTrackerInvocationHandler handler = (ServiceTrackerInvocationHandler) invocationHandler;
             return handler.isActive();
         }
         return true;

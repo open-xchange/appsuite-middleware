@@ -75,46 +75,46 @@ public class Activator implements BundleActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    public void start(BundleContext bundleContext) throws Exception {
+    public void start(final BundleContext bundleContext) throws Exception {
         services = new OSGiServicePublisher(bundleContext);
         propPublisher = new PropertiesPublisher();
         propPublisher.setServicePublisher(services);
-        this.context = bundleContext;
+        context = bundleContext;
         registerListenerForConfigurationService();
     }
 
-    public void stop(BundleContext bundleContext) throws Exception {
+    public void stop(final BundleContext bundleContext) throws Exception {
         unregisterListenerForConfigurationService();
         services.removeAllServices();
     }
 
-    public void handleConfigurationUpdate(ConfigurationService configuration) {
+    public void handleConfigurationUpdate(final ConfigurationService configuration) {
         LOG.info("Updating configtree");
-        Properties propertiesToPublishInConfigTree = configuration.getPropertiesInFolder(SETTINGS_FOLDER);
+        final Properties propertiesToPublishInConfigTree = configuration.getPropertiesInFolder(SETTINGS_FOLDER);
         propPublisher.publish( propertiesToPublishInConfigTree );
     }
 
     private void registerListenerForConfigurationService() {
-        this.serviceTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationTracker(context, this));
-        this.serviceTracker.open();
+        serviceTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationTracker(context, this));
+        serviceTracker.open();
     }
 
     private void unregisterListenerForConfigurationService() {
-        this.serviceTracker.close();
+        serviceTracker.close();
     }
 
 
     private static final class ConfigurationTracker implements ServiceTrackerCustomizer {
-        private BundleContext context;
-        private Activator activator;
+        private final BundleContext context;
+        private final Activator activator;
 
-        public ConfigurationTracker(BundleContext context, Activator activator) {
+        public ConfigurationTracker(final BundleContext context, final Activator activator) {
             this.context = context;
             this.activator = activator;
 
         }
 
-        public Object addingService(ServiceReference serviceReference) {
+        public Object addingService(final ServiceReference serviceReference) {
             final Object addedService = context.getService(serviceReference);
             if(ConfigurationService.class.isAssignableFrom(addedService.getClass())) {
                 activator.handleConfigurationUpdate((ConfigurationService) addedService);
@@ -122,11 +122,11 @@ public class Activator implements BundleActivator {
             return addedService;
         }
 
-        public void modifiedService(ServiceReference serviceReference, Object o) {
+        public void modifiedService(final ServiceReference serviceReference, final Object o) {
             // IGNORE
         }
 
-        public void removedService(ServiceReference serviceReference, Object o) {
+        public void removedService(final ServiceReference serviceReference, final Object o) {
             context.ungetService(serviceReference);
         }
     }

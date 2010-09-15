@@ -60,26 +60,26 @@ import java.util.HashMap;
  */
 public class OSGiServicePublisher implements ServicePublisher {
 
-    private Map<Object, ServiceRegistration> serviceRegistrations = new HashMap<Object, ServiceRegistration>();
+    private final Map<Object, ServiceRegistration> serviceRegistrations = new HashMap<Object, ServiceRegistration>();
     private BundleContext context = null;
 
-    public OSGiServicePublisher(BundleContext context) {
+    public OSGiServicePublisher(final BundleContext context) {
         this.context = context;
     }
 
-    public void publishService(Class<?> clazz, Object service) {
-        ServiceRegistration registration = context.registerService(clazz.getName(), service, null);
+    public void publishService(final Class<?> clazz, final Object service) {
+        final ServiceRegistration registration = context.registerService(clazz.getName(), service, null);
         serviceRegistrations.put(service, registration);
     }
 
-    public void removeService(Class<?> clazz, Object service) {
-        ServiceRegistration registration = serviceRegistrations.get(service);
+    public void removeService(final Class<?> clazz, final Object service) {
+        final ServiceRegistration registration = serviceRegistrations.get(service);
         serviceRegistrations.remove(service);
         registration.unregister();
     }
 
     public void removeAllServices() {
-        for(ServiceRegistration registration : serviceRegistrations.values()) {
+        for(final ServiceRegistration registration : serviceRegistrations.values()) {
             registration.unregister();
         }
         serviceRegistrations.clear();

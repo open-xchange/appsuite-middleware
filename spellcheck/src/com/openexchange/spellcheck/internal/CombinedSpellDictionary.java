@@ -92,8 +92,8 @@ public final class CombinedSpellDictionary implements SpellDictionary {
 	 *            The dictionaries to add
 	 */
 	public void addSpellDictionaries(final SpellDictionary... dicts) {
-		for (int i = 0; i < dicts.length; i++) {
-			this.dicts.add(dicts[i]);
+		for (final SpellDictionary dict : dicts) {
+			this.dicts.add(dict);
 		}
 	}
 

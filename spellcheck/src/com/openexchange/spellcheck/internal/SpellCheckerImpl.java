@@ -322,7 +322,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 		 */
 		private _SpellCheckError(final SpellCheckEvent event) {
 			super();
-			this.invalidWord = event.getInvalidWord();
+			invalidWord = event.getInvalidWord();
 			final List<?> suggestions = event.getSuggestions();
 			if (suggestions != null) {
 				this.suggestions = new ArrayList<String>(suggestions.size());
@@ -332,7 +332,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 			} else {
 				this.suggestions = null;
 			}
-			this.startPos = event.getWordContextPosition();
+			startPos = event.getWordContextPosition();
 		}
 
 		public String getInvalidWord() {

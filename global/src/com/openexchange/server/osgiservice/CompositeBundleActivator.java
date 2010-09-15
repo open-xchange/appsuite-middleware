@@ -86,7 +86,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
     public void stop(final BundleContext context) throws Exception {
         Exception first = null;
         while (!activated.isEmpty()) {
-            BundleActivator activator = activated.pop();
+            final BundleActivator activator = activated.pop();
             try {
                 activator.stop(context);
             } catch (final Exception e) {

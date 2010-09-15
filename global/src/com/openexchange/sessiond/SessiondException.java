@@ -65,7 +65,7 @@ public class SessiondException extends AbstractOXException {
         super(cause);
     }
 
-    public SessiondException(ErrorMessage message, Throwable cause, Object[] args) {
+    public SessiondException(final ErrorMessage message, final Throwable cause, final Object[] args) {
         super(message, cause);
         setMessageArgs(args);
     }

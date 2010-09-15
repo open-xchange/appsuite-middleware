@@ -63,12 +63,12 @@ public class I18nTranslator implements Translator {
 
     private final I18nService service;
 
-    public I18nTranslator(I18nService service) {
+    public I18nTranslator(final I18nService service) {
         super();
         this.service = service;
     }
 
-    public String translate(String toTranslate) {
+    public String translate(final String toTranslate) {
         if (!service.hasKey(toTranslate)) {
             LOG.warn("I18n service for locale " + service.getLocale() + " has no translation for \"" + toTranslate + "\".");
             return toTranslate;

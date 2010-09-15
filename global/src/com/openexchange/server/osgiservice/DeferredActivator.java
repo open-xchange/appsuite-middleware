@@ -89,7 +89,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             super();
             this.clazz = clazz;
             this.index = index;
-            this.stcServices = services;
+            stcServices = services;
         }
 
         public Object addingService(final ServiceReference reference) {

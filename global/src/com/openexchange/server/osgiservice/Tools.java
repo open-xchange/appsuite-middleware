@@ -65,12 +65,12 @@ public class Tools {
      * Generates an OR filter matching the services given in the classes varargs.
      * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
      */
-    public static final Filter generateServiceFilter(BundleContext context, Class<?>... classes) throws InvalidSyntaxException {
+    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
         if (classes.length < 2) {
             throw new IllegalArgumentException("At least the classes of 2 services must be given.");
         }
-        StringBuilder sb = new StringBuilder("(|(");
-        for (Class<?> clazz : classes) {
+        final StringBuilder sb = new StringBuilder("(|(");
+        for (final Class<?> clazz : classes) {
             sb.append(Constants.OBJECTCLASS);
             sb.append('=');
             sb.append(clazz.getName());

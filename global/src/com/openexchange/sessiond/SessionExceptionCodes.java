@@ -96,11 +96,11 @@ public enum SessionExceptionCodes implements OXErrorMessage {
     private final int number;
     private final String help;
 
-    private SessionExceptionCodes(String message, Category category, int number) {
+    private SessionExceptionCodes(final String message, final Category category, final int number) {
         this(message, category, number, null);
     }
 
-    private SessionExceptionCodes(String message, Category category, int number, String help) {
+    private SessionExceptionCodes(final String message, final Category category, final int number, final String help) {
         this.message = message;
         this.category = category;
         this.number = number;

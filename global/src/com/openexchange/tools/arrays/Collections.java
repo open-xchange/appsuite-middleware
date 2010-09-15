@@ -110,9 +110,9 @@ public final class Collections {
      * @param c collection of Integer to convert.
      * @return the converted int array.
      */
-    public static int[] toArray(Collection<Integer> c) {
-        int[] retval = new int[c.size()];
-        Iterator<Integer> iter = c.iterator();
+    public static int[] toArray(final Collection<Integer> c) {
+        final int[] retval = new int[c.size()];
+        final Iterator<Integer> iter = c.iterator();
         for (int i = 0; i < retval.length; i++) {
             retval[i] = iter.next().intValue();
         }
