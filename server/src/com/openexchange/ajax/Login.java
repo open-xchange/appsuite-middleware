@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -457,12 +458,11 @@ public class Login extends AJAXServlet {
             new LoginWriter().writeLogin(session, json);
             // Append "config/modules"
             final String modules = "modules";
-            final boolean appendModules = parseBoolean(req.getParameter(modules));
-            if (appendModules) {
+            if (parseBoolean(req.getParameter(modules))) {
                 try {
                     final Setting setting = ConfigTree.getSettingByPath(modules);
                     SettingStorage.getInstance(session).readValues(setting);
-                    json.put(modules, ConfigMenu.convert2JS(setting));
+                    json.put(modules, convert2JS(setting));
                 } catch (final SettingException e) {
                     LOG.warn("Modules could not be added top JSON response: " + e.getMessage(), e);
                 }
