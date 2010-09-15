@@ -52,6 +52,7 @@ package com.openexchange.multiple.internal;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.handlers.AppointmentFactoryService;
+import com.openexchange.multiple.handlers.ConfigFactoryService;
 import com.openexchange.multiple.handlers.ContactsFactoryService;
 import com.openexchange.multiple.handlers.GroupFactoryService;
 import com.openexchange.multiple.handlers.ReminderFactoryService;
@@ -94,6 +95,7 @@ public final class MultipleHandlerInit implements Initialization {
         registry.addFactoryService(new ReminderFactoryService());
         registry.addFactoryService(new ResourceFactoryService());
         registry.addFactoryService(new TasksFactoryService());
+        registry.addFactoryService(new ConfigFactoryService());
     }
 
     public void stop() throws AbstractOXException {

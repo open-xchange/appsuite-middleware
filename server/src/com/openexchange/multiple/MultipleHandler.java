@@ -68,6 +68,11 @@ public interface MultipleHandler {
      * The constant for the key to get the data element from passed {@link JSONObject JSON object} instance.
      */
     public static final String DATA = "data";
+    
+    /**
+     * The constant for the key to get a subpath after the original module definition
+     */
+    public static final String PATH = "__path";
 
     /**
      * Performs the multiple request identified by specified action string.
