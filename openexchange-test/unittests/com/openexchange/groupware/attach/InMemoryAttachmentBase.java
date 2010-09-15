@@ -104,7 +104,7 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         throw new UnsupportedOperationException();
     }
 
-    public TimedResult<?> getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, final AttachmentField[] fields, final Context context, final User user, final UserConfiguration userConfig) {
+    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, final AttachmentField[] fields, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
