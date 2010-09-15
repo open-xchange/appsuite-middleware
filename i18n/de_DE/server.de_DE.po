@@ -124,12 +124,10 @@ msgid "Trash folder"
 msgstr "Ordner Papierkorb"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:89
-
 msgid "Mail port"
 msgstr "Mail-Port"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:91
-
 msgid "Mail protocol"
 msgstr "Mail-Protokoll"
 
@@ -138,7 +136,6 @@ msgid "Secure mail connection"
 msgstr "Sichere Mailverbindung"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:95
-
 msgid "Mail server"
 msgstr "Mailserver"
 
@@ -383,8 +380,10 @@ msgstr "[Kein Betreff]"
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:98
-msgid "The available attachments for this E-Mail can be accessed via the links:"
-msgstr "Die für diese E-Mail verfügbaren Anhänge sind über diese Links verfügbar:"
+msgid ""
+"The available attachments for this E-Mail can be accessed via the links:"
+msgstr ""
+"Die für diese E-Mail verfügbaren Anhänge sind über diese Links verfügbar:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
@@ -3649,4 +3648,3 @@ msgstr "UTC"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:506
 msgid "Zulu"
 msgstr "Zulu"
-

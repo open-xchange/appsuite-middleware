@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-09-08 17:29+0200\n"
+"PO-Revision-Date: 2010-09-14 12:10+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -155,9 +155,6 @@ msgstr "Es wurde kein Datum für die Erinnerungsfunktion angegeben."
 
 msgid "An I/O error occurred"
 msgstr "Es trat ein E/A-Fehler auf."
-
-msgid "An I/O error occurred %1$s"
-msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
 msgid ""
 "An I/O error occurred while creating the socket connection to IMAP server (%1"
@@ -371,9 +368,6 @@ msgstr "Es kann nur eine Datei verarbeitet werden, nicht %s"
 msgid "Can only import into one folder at a time."
 msgstr "Es kann auf einmal nur in einen Ordner importiert werden."
 
-msgid "Can't access DBPool"
-msgstr "Kein Zugriff auf DBPool"
-
 msgid "Can't handle spam because MailService isn't available"
 msgstr "Spam kann nicht verarbeitet werden, da MailService nicht zur Verfügung steht."
 
@@ -385,9 +379,6 @@ msgstr "Erstellen eines eindeutigen Namens aus %s fehlgeschlagen."
 
 msgid "Cannot clone object %1$s."
 msgstr "Objekt %1$s kann nicht geklont werden."
-
-msgid "Cannot create URI from \"%1$s\"."
-msgstr "URI aus \"%1$s\" kann nicht erstellt werden."
 
 msgid "Cannot create directory \"%1$s\" for FileStorage."
 msgstr "Verzeichnis \"%1$s\" für FileStorage kann nicht erstellt werden."
@@ -419,9 +410,6 @@ msgstr "Kontext \"%s\" konnte nicht gefunden werden"
 
 msgid "Cannot find context %d."
 msgstr "Kontext %d konnte nicht gefunden werden."
-
-msgid "Cannot find filestore with id %1$d."
-msgstr "Dateispeicher mit ID %1$d konnte nicht gefunden werden."
 
 msgid "Cannot find folder for task %2$d and participant %1$d in context %3$d."
 msgstr ""
@@ -626,15 +614,6 @@ msgstr ""
 msgid "Could not delete files from filestore. Context: %d."
 msgstr "Dateien konnten nicht aus Dateispeicher gelöscht werden. Kontext: %d"
 
-msgid "Could not encode as UTF-8"
-msgstr "Kodierung nach UTF-8 fehlgeschlagen"
-
-msgid "Could not export the folder %s in the format %s."
-msgstr "Der Ordner %s konnte nicht in das Format %s exportiert werden."
-
-msgid "Could not find ICalEmitter service. Has the service been exported?"
-msgstr "Kein ICalEmitter-Dienst gefunden. Wurde der Dienst exportiert?"
-
 msgid ""
 "Could not find an attachment with the file_id %s. Either the file is "
 "orphaned or belongs to another module."
@@ -658,9 +637,6 @@ msgstr "Importieren in Ordner %s fehlgeschlagen"
 
 msgid "Could not import into the folder %s."
 msgstr "Importieren in Ordner %s fehlgeschlagen"
-
-msgid "Could not load contacts"
-msgstr "Kontakte konnten nicht geladen werden"
 
 msgid "Could not load folder %s"
 msgstr "Ordner %s konnte nicht geladen werden"
@@ -1115,9 +1091,6 @@ msgstr "Zwei Benutzer mit gleicher ID %1$s im Kontext %2$d gefunden"
 
 msgid "FreeBusyResults calculation problem with oid: %1$d"
 msgstr "Problem bei der Berechnung von FreeBusyResults mit oid: %1$d"
-
-msgid "Got SQL Exception"
-msgstr "SQL-Ausnahme erhalten"
 
 msgid "Got a -1 ID from IDGenerator"
 msgstr "-1 ID von IDGenerator erhalten"
@@ -1963,9 +1936,6 @@ msgstr "Problem beim Analysieren der vcard, Grund: %s"
 
 msgid "Problem while reading ICal file: %s."
 msgstr "Problem beim Lesen der ICal-Datei: %s."
-
-msgid "Problem with URI when creating context specific filestore location."
-msgstr "Problem mit URI beim Anlegen Kontext-spezifischen Speicherorts"
 
 msgid "Problem with a thread."
 msgstr "Problem mit einem Thread"
@@ -2976,9 +2946,6 @@ msgstr ""
 msgid "Writing the setting %1$s is not permitted."
 msgstr "Schreiben der Einstellung %1$s nicht erlaubt"
 
-msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
-msgstr "Ungültiger Dateispeicher %1$d für Kontext %2$d benötigt Dateispeicher %3$d."
-
 msgid "Wrong message header: %1$s"
 msgstr "Ungültiger Nachrichten-Header: %1$s"
 
@@ -3523,7 +3490,15 @@ msgstr ""
 
 #. The access token for twitter user %1$s could not be obtained.
 msgid "The access token for twitter user %1$s could not be obtained."
-msgstr "Das Zugriffs-Token für den Twitter-Benutzer %1$s konnte nicht erhalten werden."
+msgstr ""
+"Das Zugriffs-Token für den Twitter-Benutzer %1$s konnte nicht erhalten "
+"werden."
+
+#. The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.
+msgid ""
+"The configured consumer key/consumer secret pair is invalid. Please provide "
+"a valid consumer key/consumer secret through configuration."
+msgstr "Der konfigurierte Consumer Key bzw. das Consumer Secret Pair ist ungültig. Bitte stellen Sie über die Konfiguration einen gültigen Consumer Key bzw. ein Consumer Secret Pair bereit."
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 msgid "Missing main extension attribute for user %1$s in context %2$s."
@@ -3635,16 +3610,8 @@ msgstr ""
 msgid "The session parameter is missing."
 msgstr "Fehlender Session-Parameter"
 
-msgid ""
-"Every AJAX request must contain a parameter named \"session\" that value "
-"contains the identifier of the session cookie."
-msgstr "Jede AJAX-Anfrage muss einen Parameter namens \"session\" enthalten, dessen Wert die ID des session cookies enthält."
-
 msgid "Your session %s expired. Please start a new browser session."
 msgstr "Ihre Sitzung %s ist abgelaufen. Bitte starten Sie eine neue Browser-Sitzung."
-
-msgid "A session with the given identifier can not be found."
-msgstr "Eine Sitzung mit der angegebenen ID konnte nicht gefunden werden."
 
 msgid "Context is locked."
 msgstr "Kontext ist gesperrt"
@@ -3655,11 +3622,6 @@ msgid ""
 msgstr ""
 "Anfrage an Server wurde abgelehnt. Die ursprüngliche Client IP-Adresse hat "
 "sich geändert. Bitte erneut versuchen."
-
-msgid ""
-"The client IP address of all session requests are checked to see whether "
-"they match the IP address when the session was created."
-msgstr "Die Client IP-Adresse aller Sitzungen wird dahingehend überprüft, ob sie mit der IP-Adresse zum Zeitpunkt der Erstellung der Sitzung übereinstimmt."
 
 msgid "Session secret is different. Given %1$s differs from %2$s in session."
 msgstr ""
@@ -3707,6 +3669,12 @@ msgstr "Die Registrierung von Consistency MBean ist fehlgeschlagen."
 
 msgid "Unregistration of consistency MBean failed."
 msgstr "Die Abmeldung für Consistency MBean ist fehlgeschlagen."
+
+#. This message will be logged if a context is disabled and some user of that context tries to login.
+#. %1$d is replaced with the unique context identifier.
+#. %2$s is replaced with the context name.
+msgid "Context %1$d, %1$s is disabled."
+msgstr "Kontext %1$d, %1$s ist deaktiviert."
 
 #. The server is unable to connect to the configuration database.
 msgid "Cannot get connection to config DB."
@@ -3928,124 +3896,84 @@ msgstr ""
 msgid "No mail folder allowed below a public folder."
 msgstr "In einem öffentlichen Ordner darf kein Mailordner angelegt werden."
 
+msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
+msgstr "Ungültiger Dateispeicher %1$d für Kontext %2$d benötigt Dateispeicher %3$d."
+
+msgid "Cannot find filestore with id %1$d."
+msgstr "Dateispeicher mit ID %1$d konnte nicht gefunden werden."
+
+msgid "Cannot create URI from \"%1$s\"."
+msgstr "URI aus \"%1$s\" kann nicht erstellt werden."
+
+msgid "Could not export the folder %1$s in the format %2$s."
+msgstr "Der Ordner %1$s konnte nicht in das Format %2$s exportiert werden."
+
+msgid "Could not load contacts"
+msgstr "Kontakte konnten nicht geladen werden"
+
+msgid "Could not encode as UTF-8"
+msgstr "Kodierung nach UTF-8 fehlgeschlagen"
+
+msgid "The necessary iCal emitter serivce is missing."
+msgstr "Benötigter iCal-Emitter-Dienst ist nicht vorhanden."
+
+msgid "Parsing %1$s to a number failed."
+msgstr "%1$s ist keine Zahl."
+
+msgid "Conversion to iCal failed."
+msgstr "Die Konvertierung nach iCal ist fehlgeschlagen."
+
 msgid "Some fields have values, that are too long"
 msgstr "Die Werte einiger Felder sind zu lang"
-
-msgid "The user entered values that are too long for the database schema."
-msgstr "Die vom Benutzer eingegebenen Werte sind zu lang für das Datenbankschema."
-
-msgid "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D"
-msgstr "Der SQL-Server erhielt eine fehlerhafte SQL-Anfrage. Dies kann nur von der Entwicklung behoben werden."
 
 msgid "Cannot pre-fetch results."
 msgstr "Ergebnisse können nicht vorab geholt werden"
 
-msgid ""
-"Thrown when a result cannot be prefetched. This indicates a problem with the "
-"DB Connection. Have a look at the underlying SQLException"
-msgstr "Ausgegeben, wenn ein Ergebnis nicht vorab abgefragt werden kann. Dies deutet auf ein Problem mit der DB-Verbindung hin. Werfen Sie einen Blick auf die zugrundeliegende SQLException."
-
 msgid "The requested item does not exist."
 msgstr "Das angeforderte Objekt ist nicht vorhanden."
-
-msgid "The infoitem does not exist, so the permissions cannot be loaded."
-msgstr "Der Info-Eintrag ist nicht vorhanden. Die Berechtigungen können somit nicht geladen werden."
 
 msgid "Could not load documents to check the permissions"
 msgstr "Dokumente konnten nicht zum Prüfen der Berechtigungen geladen werden"
 
-msgid ""
-"To check permissions infoitems must be loaded to find their folderId and "
-"creator."
-msgstr "Zum Prüfen der Berechtigungen müssen Info-Einträge geladen werden, um ihre Ordner-ID und den Ersteller herauszufinden."
-
 msgid "The folder %d is not an Infostore folder"
 msgstr "Der Ordner %d ist kein InfoStore-Ordner"
 
-msgid "The client tries to put an infoitem into a non infoitem folder."
-msgstr "Versuch des Client, einen Info-Eintrag in einem nicht für Info-Einträge vorgesehenen Ordner abzulegen."
-
 msgid "You do not have sufficient read permissions to read objects in this folder.."
 msgstr ""
-"Sie haben nicht die entsprechenden Lese-Berechtigungen zum Lesen von Objekten in "
-"diesem Ordner"
-
-msgid "The user does not have read permissions on the requested Infoitem."
-msgstr "Der Benutzer hat keine Lese-Berechtigungen für den angeforderten Info-Eintrag."
+"Sie haben nicht die entsprechenden Lese-Berechtigungen zum Lesen von "
+"Objekten in diesem Ordner"
 
 msgid "You do not have sufficient permissions to create objects in this folder."
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Anlegen von Objekten "
 "in diesem Ordner"
 
-msgid "The user must not create objects in the given folder."
-msgstr "Der Benutzer darf im angegebenen Ordner keine Objekte anlegen."
-
 msgid "You are not allowed to update this item."
 msgstr "Sie haben keine Berechtigung zum Aktualisieren des Objekts"
-
-msgid "The user doesn't have the required write permissions to update the infoitem."
-msgstr "Der Benutzer hat nicht die nötigen Schreib-Berechtigungen zum Aktualisieren des Info-Eintrags."
 
 msgid "You are not allowed to create objects in the target folder."
 msgstr "Sie haben keine Berechtigung, Objekte im Zielordner anzulegen"
 
-msgid ""
-"The user isn't allowed to create objects in the target folder when moving an "
-"infoitem."
-msgstr "Der Benutzer hat beim Verschieben eines Info-Eintrags keine Berechtigung, Objekte im Zielordner anzulegen"
-
 msgid "Could not delete all objects."
 msgstr "Objekte konnten nicht alle gelöscht werden"
-
-msgid ""
-"Not all infoitems in the given folder could be deleted. This may be due to "
-"the infoitems being modified since the last request, or the objects might "
-"not even exist anymore or the user doesn't have enough delete permissions on "
-"certain objects."
-msgstr "Nicht alle Info-Einträge im angegebenen Ordner konnten gelöscht werden. Entweder wurden die Info-Einträge seit der letzten Anfrage geändert, die Objekte existieren nicht mehr oder der Benutzer hat keine ausreichenden Lösch-Berechtigungen auf bestimmte Objekte."
 
 msgid "You do not have sufficient permission to delete this version."
 msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Löschen dieser Version."
 
-msgid ""
-"The user must be allowed to delete the object in order to delete a version "
-"of it."
-msgstr "Zum Löschen einer Objektversion benötigt der Benutzer die Berechtigung zum Löschen des Objekts."
-
 msgid "Could not iterate result."
 msgstr "Ergebnis kann nicht iteriert werden."
-
-msgid "The system couldn't iterate the result dataset."
-msgstr "Das System konnte das Ergebnis-Datenset nicht iterieren."
 
 msgid "This document is locked."
 msgstr "Das Dokument ist gesperrt."
 
-msgid ""
-"The infoitem was locked by some other user. Only the user that locked the "
-"item can modify a locked infoitem."
-msgstr "Der Info-Eintrag wurde von einem anderen Benutzer gesperrt. Nur dieser kann das gesperrte Objekt ändern."
-
 msgid "You cannot unlock this document."
 msgstr "Sie können die Sperre für dieses Dokument nicht aufheben."
-
-msgid ""
-"The infoitem was locked by some other user. Only the user that locked the "
-"item and the creator of the item can unlock a locked infoitem."
-msgstr "Der Info-Eintrag wurde von einem anderen Benutzer gesperrt. Nur dieser und der Ersteller des Eintrags können den gesperrten Eintrag entsperren."
 
 msgid "You need write permissions to lock a document."
 msgstr "Zum Sperren eines Dokuments benötigen Sie Schreibrechte."
 
-msgid "The user does not have sufficient write permissions to lock this infoitem."
-msgstr "Der Benutzer hat nicht nicht die entsprechenden Schreib-Berechtigungen zum Sperren dieses Info-Eintrags."
-
 msgid "Could not generate new ID."
 msgstr "Neue ID konnte nicht generiert werden"
-
-msgid "The IDGenerator threw a SQL error."
-msgstr "Der IDGenerator gab einen SQL-Fehler aus."
 
 msgid ""
 "You are not allowed to delete objects in the source folder, so this document "
@@ -4054,20 +3982,11 @@ msgstr ""
 "Sie haben keine Berechtigung, Objekte im Quellordner zu löschen, d.h. das "
 "Dokument kann nicht verschoben werden."
 
-msgid "Need delete permissions in original folder to move an item."
-msgstr "Zum Verschieben eines Objekts werden Lösch-Berechtigungen im Original-Ordner benötigt."
-
 msgid "You need write permissions to unlock a document."
 msgstr "Zum Entsperren eines Dokuments benötigen Sie Schreibrechte."
 
-msgid "The user does not have sufficient write permissions to unlock this infoitem."
-msgstr "Der Benutzer hat keine ausreichenden Schreib-Berechtigungen zum Entsperren dieses info-Eintrags."
-
 msgid "The document you requested doesn't exist."
 msgstr "Das von Ihnen angeforderte Objekt ist nicht vorhanden"
-
-msgid "The document could not be loaded because it doesn't exist."
-msgstr "Das Dokument ist nicht vorhanden und kann somit nicht geladen werden."
 
 msgid ""
 "Files attached to InfoStore items must have unique names. File name: %s. The "
@@ -4077,20 +3996,11 @@ msgstr ""
 "Dateiname: %s. Das andere Dokument mit diesem Dateinamen ist %s."
 
 msgid ""
-"To remain consistent in WebDAV file versions in a given folder must not "
-"contain a file with the same filen name. The user must either choose a "
-"different file name, or rename the other file."
-msgstr "Für die Konsistenz in WebDAV dürfen Dateiversionen in einem angegebenen Ordner keine Dateien mit demselben Namen enthalten. Der Benutzer muss entweder einen anderen Dateinamen wählen oder die andere Datei umbenennen."
-
-msgid ""
 "Could not determine number of versions for infoitem %s in context %s. "
 "Invalid Query: %s"
 msgstr ""
 "Anzahl der Versionen für  Info-Eintrag %s in Kontext %s konnte nicht "
 "bestimmt werden. Ungültige Anfrage: %s"
-
-msgid "The query to count the versions in a document failed."
-msgstr "Anfrage zum Zählen von Dokumentversionen ist fehlgeschlagen."
 
 msgid "You do not have the permissions to delete at least one of the info items."
 msgstr ""
@@ -4101,45 +4011,19 @@ msgid "Illegal argument: Document %d contains no file"
 msgstr "Unzulässiges Argument: Dokument %d enthält keine Datei"
 
 msgid ""
-"A WebdavPath for a document without an attached file was requested. In "
-"WebDAV only infoitems with files are visible. This points to a problem with "
-"the cola supply for the developer and can only be fixed by R&D."
-msgstr "Es wurde ein WebdavPath für ein Dokument ohne Anhang angefordert. In WebDAV sind nur Info-Einträge mit Dateien sichtbar. Dies kann nur von der Entwicklung behoben werden."
-
-msgid ""
 "Folder %d has two subfolders named %s. The database for context %d is not "
 "consistent."
 msgstr ""
 "Der Ordner %d enthält zwei Unterordner namens %s. Die Datenbank für Kontext %"
 "d ist nicht konsistent."
 
-msgid ""
-"A folder contains two folders with the same folder name. This points to an "
-"inconsistency in the database, as the second folder by the same name should "
-"not have been created. This will certainly cause some headaches in R&D."
-msgstr "Ein Ordner enthält zwei Ordner mit dem gleichen Namen. Dies deutet auf eine Inkonsistenz in der Datenbank hin, da der zweite Ordner mit dem gleichen Namen nicht erstellt hätte werden dürfen. Dies kann nur in der Entwicklung behoben werden."
-
-msgid ""
-"The administrator configured a minimum length for a search pattern and the "
-"users pattern is shorter than this minimum."
-msgstr "Der Administrator hat für das Suchmuster eine Minimallänge konfiguriert. Das Muster des Benutzers ist kleiner als das Minimum."
-
 msgid "Could not delete DocumentMetadata %d. Please try again."
 msgstr "DocumentMetadata %d konnte nicht gelöscht werden. Bitte erneut versuchen."
-
-msgid ""
-"The DocumentMetadata entry in the DB for the given resource could not be "
-"created. This is mostly due to someone else modifying the entry. This can "
-"also mean, that the entry has been deleted already."
-msgstr "Der DocumentMetadata-Eintrag in der DB für die angebene Ressource konnte nicht erstellt werden. Dies liegt wahrscheinlich daran, dass der Eintrag von einem anderen Benutzer geändert wurde. Dies kann auch bedeuten, dass der Eintrag mittlerweile gelöscht wurde."
 
 msgid "The document could not be updated because it was modified. Reload the view."
 msgstr ""
 "Das Dokument konnte nicht aktualisiert werden, da es geändert wurde. "
 "Aktualisieren Sie die Ansicht."
-
-msgid "The document could not be updated because it was modified."
-msgstr "Das Dokument konnte nicht aktualisiert werden, da es geändert wurde."
 
 msgid ""
 "The document was updated in between do and undo. The Database is now "
@@ -4148,23 +4032,10 @@ msgstr ""
 "Das Dokument wurde zwischen dem Durchführen und Widerrufen der Aktion "
 "aktualisiert. Die Datenbank ist nun möglicherweise inkonsistent."
 
-msgid ""
-"The document was updated in between do and undo. The Database is now "
-"probalby inconsistent."
-msgstr ""
-"Das Dokument wurde zwischen dem Durchführen und Widerrufen der Aktion "
-"aktualisiert. Die Datenbank ist nun möglicherweise inkonsistent."
-
 msgid "This folder is a virtual folder. It cannot contain documents."
 msgstr ""
 "Bei diesem Ordner handelt es sich um einen virtuellen Ordner. Er kann keine "
 "Dokumente enthalten."
-
-msgid ""
-"The folders to which this user has access, but that belong to other users, "
-"are collected in a virtual folder. This virtual folder cannot contain "
-"documents itself."
-msgstr "Die Ordner, auf die dieser Benutzer Zugriff hat, die jedoch einem anderen Benutzer gehören, werden in einem virtuellen Ordner gesammelt. Dieser virtuelle Ordner kann selbst keine Dokumente enthalten."
 
 msgid ""
 "This transaction could not be fully undone. Some components are probably not "
