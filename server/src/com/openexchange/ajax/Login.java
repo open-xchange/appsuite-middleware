@@ -567,6 +567,13 @@ public class Login extends AJAXServlet {
         return loginRequest;
     }
 
+    /**
+     * Parses the specified parameter to a <code>boolean</code> value.
+     * 
+     * @param parameter The parameter value
+     * @return <code>true</code> if parameter is <b>not</b> <code>null</code> and is (ignore-case) one of the values <code>"true"</code>,
+     *         <code>"1"</code>, <code>"yes"</code> or <code>"on"</code>; otherwise <code>false</code>
+     */
     private static boolean parseBoolean(final String parameter) {
         return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
     }
