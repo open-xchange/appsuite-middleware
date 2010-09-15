@@ -60,14 +60,36 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LoginWriter {
+public final class LoginWriter {
 
+    /**
+     * Initializes a new {@link LoginWriter}.
+     */
     public LoginWriter() {
         super();
     }
 
+    /**
+     * Writes JSON login response.
+     * 
+     * @param session The session
+     * @param json The JSON object to write to
+     * @throws JSONException If writing to JSON object fails
+     */
     public void writeLogin(Session session, JSONObject json) throws JSONException {
+        write(session, json);
+    }
+
+    /**
+     * Writes JSON login response.
+     * 
+     * @param session The session
+     * @param json The JSON object to write to
+     * @throws JSONException If writing to JSON object fails
+     */
+    public static void write(Session session, JSONObject json) throws JSONException {
         json.put(AJAXServlet.PARAMETER_SESSION, session.getSessionID());
         json.put(LoginFields.PARAM_RANDOM, session.getRandomToken());
     }
+
 }
