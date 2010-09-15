@@ -84,11 +84,9 @@ public class HTMLServiceActivator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(HTMLServiceActivator.class);
 
-    private List<ServiceRegistration> serviceRegistrations;
-
     private List<ServiceTracker> trackers;
 
-    private ServiceRegistration htmlServiceRegistration;
+    private ServiceRegistration registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -108,7 +106,6 @@ public class HTMLServiceActivator extends DeferredActivator {
     @Override
     public void startBundle() throws Exception {
         try {
-            serviceRegistrations = new ArrayList<ServiceRegistration>(2);
             /*
              * Configure
              */
@@ -152,15 +149,6 @@ public class HTMLServiceActivator extends DeferredActivator {
                 }
                 trackers = null;
             }
-            if (null != serviceRegistrations) {
-                /*
-                 * Unregister
-                 */
-                while (!serviceRegistrations.isEmpty()) {
-                    serviceRegistrations.remove(0).unregister();
-                }
-                serviceRegistrations = null;
-            }
             /*
              * Restore
              */
@@ -195,7 +183,7 @@ public class HTMLServiceActivator extends DeferredActivator {
         /*
          * Register HTML service
          */
-        htmlServiceRegistration =
+        registration =
             context.registerService(HTMLService.class.getName(), new HTMLServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
     }
 
@@ -513,9 +501,9 @@ public class HTMLServiceActivator extends DeferredActivator {
     }
 
     private void restore() {
-        if (null != htmlServiceRegistration) {
-            htmlServiceRegistration.unregister();
-            htmlServiceRegistration = null;
+        if (null != registration) {
+            registration.unregister();
+            registration = null;
         }
         ServiceRegistry.getInstance().removeService(ConfigurationService.class);
     }
