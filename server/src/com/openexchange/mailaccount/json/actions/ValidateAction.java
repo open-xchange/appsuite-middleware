@@ -1,0 +1,352 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mailaccount.json.actions;
+
+import java.security.GeneralSecurityException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.json.writer.FolderWriter;
+import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.TransportProviderRegistry;
+import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mail.utils.MailPasswordUtil;
+import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountExceptionFactory;
+import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.json.parser.MailAccountParser;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
+
+
+/**
+ * {@link ValidateAction}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class ValidateAction extends AbstractMailAccountAction {
+    
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ValidateAction.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    public static final String ACTION = AJAXServlet.ACTION_VALIDATE;
+
+    /**
+     * Initializes a new {@link ValidateAction}.
+     */
+    public ValidateAction() {
+        super();
+    }
+
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+        final JSONObject jData = (JSONObject) request.getData();
+
+        try {
+            if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+                throw MailAccountExceptionFactory.getInstance().create(
+                    MailAccountExceptionMessages.NOT_ENABLED,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
+            final MailAccountDescription accountDescription = new MailAccountDescription();
+            new MailAccountParser().parse(accountDescription, jData);
+
+            if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
+                /*
+                 * ID is delivered, but password not set. Thus load from storage version.
+                 */
+                final MailAccountStorageService storageService =
+                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+
+                final String encodedPassword =
+                    storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
+                accountDescription.setPassword(MailPasswordUtil.decrypt(encodedPassword, getSecret(session)));
+            }
+
+            checkNeededFields(accountDescription);
+            if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
+                // Deny validation of Unified INBOX account
+                throw MailAccountExceptionMessages.VALIDATION_FAILED.create();
+            }
+            // Check for tree parameter
+            final boolean tree;
+            {
+                final String tmp = request.getParameter("tree");
+                tree = Boolean.parseBoolean(tmp);
+            }
+            if (tree) {
+                return new AJAXRequestResult(actionValidateTree(accountDescription, session));
+            }
+            return new AJAXRequestResult(actionValidateBoolean(accountDescription, session));
+        } catch (final AbstractOXException e) {
+            throw new MailAccountException(e);
+        } catch (final JSONException e) {
+            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+        } catch (final GeneralSecurityException e) {
+            throw new OXException(MailAccountExceptionFactory.getInstance().create(
+                MailAccountExceptionMessages.UNEXPECTED_ERROR,
+                e,
+                e.getMessage()));
+        }
+    }
+    
+    private static JSONObject actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session) throws OXException, MailException, JSONException {
+        if (!actionValidateBoolean(accountDescription, session).booleanValue()) {
+            // TODO: How to indicate error if folder tree requested?
+            return null;
+        }
+        // Create a mail access instance
+        final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session);
+        return actionValidateTree0(mailAccess, session);
+    }
+
+    private static JSONObject actionValidateTree0(final MailAccess<?, ?> mailAccess, final ServerSession session) throws JSONException {
+        // Now try to connect
+        boolean close = false;
+        try {
+            mailAccess.connect();
+            close = true;
+            // Compose folder tree
+            final JSONObject root = FolderWriter.writeMailFolder(-1, mailAccess.getRootFolder(), mailAccess.getMailConfig(), session);
+            // Recursive call
+            addSubfolders(
+                root,
+                mailAccess.getFolderStorage().getSubfolders(MailFolder.DEFAULT_FOLDER_ID, true),
+                mailAccess,
+                mailAccess.getMailConfig(),
+                session);
+            return root;
+        } catch (final AbstractOXException e) {
+            if (DEBUG) {
+                LOG.debug("Composing mail account's folder tree failed.", e);
+            }
+            // TODO: How to indicate error if folder tree requested?
+            return null;
+        } finally {
+            if (close) {
+                mailAccess.close(false);
+            }
+        }
+    }
+
+    private static void addSubfolders(final JSONObject parent, final MailFolder[] subfolders, final MailAccess<?, ?> mailAccess, final MailConfig mailConfig, final ServerSession session) throws JSONException, MailException {
+        if (subfolders.length == 0) {
+            return;
+        }
+
+        final JSONArray subfolderArray = new JSONArray();
+        parent.put("subfolder_array", subfolderArray);
+
+        for (final MailFolder subfolder : subfolders) {
+            final JSONObject subfolderObject = FolderWriter.writeMailFolder(-1, subfolder, mailConfig, session);
+            subfolderArray.put(subfolderObject);
+            // Recursive call
+            addSubfolders(
+                subfolderObject,
+                mailAccess.getFolderStorage().getSubfolders(subfolder.getFullname(), true),
+                mailAccess,
+                mailConfig,
+                session);
+        }
+    }
+
+    private static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session) throws OXException {
+        try {
+            // Validate mail server
+            boolean validated = checkMailServerURL(accountDescription, session);
+            // Failed?
+            if (!validated) {
+                return Boolean.FALSE;
+            }
+            // Now check transport server URL, if a transport server is present
+            final String transportServer = accountDescription.getTransportServer();
+            if (null != transportServer && transportServer.length() > 0) {
+                validated = checkTransportServerURL(accountDescription, session);
+            }
+            return Boolean.valueOf(validated);
+        } catch (final AbstractOXException e) {
+            throw new OXException(e);
+        }
+    }
+
+    private static MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription, final ServerSession session) throws MailException {
+        final String mailServerURL = accountDescription.generateMailServerURL();
+        // Get the appropriate mail provider by mail server URL
+        final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
+        if (null == mailProvider) {
+            if (DEBUG) {
+                LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
+            }
+            return null;
+        }
+        // Set marker
+        session.setParameter("mail-account.request", "validate");
+        try {
+            // Create a mail access instance
+            final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
+            final MailConfig mailConfig = mailAccess.getMailConfig();
+            // Set login and password
+            mailConfig.setLogin(accountDescription.getLogin());
+            mailConfig.setPassword(accountDescription.getPassword());
+            // Set server and port
+            final String server;
+            {
+                final String[] tmp = MailConfig.parseProtocol(mailServerURL);
+                server = tmp == null ? mailServerURL : tmp[1];
+            }
+            final int pos = server.indexOf(':');
+            if (pos == -1) {
+                mailConfig.setPort(143);
+                mailConfig.setServer(server);
+            } else {
+                final String sPort = server.substring(pos + 1);
+                try {
+                    mailConfig.setPort(Integer.parseInt(sPort));
+                } catch (final NumberFormatException e) {
+                    LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
+                        "\". Using fallback 143 instead."), e);
+                    mailConfig.setPort(143);
+                }
+                mailConfig.setServer(server.substring(0, pos));
+            }
+            mailConfig.setSecure(accountDescription.isMailSecure());
+            mailAccess.setCacheable(false);
+            return mailAccess;
+        } finally {
+            // Unset marker
+            session.setParameter("mail-account.request", null);
+        }
+    }
+
+    private static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session) throws MailException {
+        // Create a mail access instance
+        final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session);
+        if (null == mailAccess) {
+            return false;
+        }
+        // Now try to connect
+        return mailAccess.ping();
+    }
+
+    private static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session) throws MailException {
+        final String transportServerURL = accountDescription.generateTransportServerURL();
+        // Get the appropriate transport provider by transport server URL
+        final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
+        if (null == transportProvider) {
+            if (DEBUG) {
+                LOG.debug("Validating mail account failed. No transport provider found for URL: " + transportServerURL);
+            }
+            return false;
+        }
+        // Create a transport access instance
+        final MailTransport mailTransport = transportProvider.createNewMailTransport(session);
+        final TransportConfig transportConfig = mailTransport.getTransportConfig();
+        // Set login and password
+        transportConfig.setLogin(accountDescription.getTransportLogin());
+        transportConfig.setPassword(accountDescription.getTransportPassword());
+        // Set server and port
+        final String server;
+        {
+            final String[] tmp = TransportConfig.parseProtocol(transportServerURL);
+            server = tmp == null ? transportServerURL : tmp[1];
+        }
+        final int pos = server.indexOf(':');
+        if (pos == -1) {
+            transportConfig.setPort(25);
+            transportConfig.setServer(server);
+        } else {
+            final String sPort = server.substring(pos + 1);
+            try {
+                transportConfig.setPort(Integer.parseInt(sPort));
+            } catch (final NumberFormatException e) {
+                LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
+                    "\". Using fallback 25 instead."), e);
+                transportConfig.setPort(25);
+            }
+            transportConfig.setServer(server.substring(0, pos));
+        }
+        transportConfig.setSecure(accountDescription.isTransportSecure());
+        boolean validated = true;
+        // Now try to connect
+        boolean close = false;
+        try {
+            mailTransport.ping();
+            close = true;
+        } catch (final AbstractOXException e) {
+            if (DEBUG) {
+                LOG.debug("Validating transport account failed.", e);
+            }
+            validated = false;
+        } finally {
+            if (close) {
+                mailTransport.close();
+            }
+        }
+        return validated;
+    }
+
+}

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailaccount.servlet.parser;
+package com.openexchange.mailaccount.json.parser;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,8 +58,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
-import com.openexchange.mailaccount.servlet.fields.SetSwitch;
+import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.fields.SetSwitch;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**

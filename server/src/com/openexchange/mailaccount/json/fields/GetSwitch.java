@@ -47,230 +47,172 @@
  *
  */
 
-package com.openexchange.mailaccount.servlet.fields;
+package com.openexchange.mailaccount.json.fields;
 
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
 
 /**
- * {@link SetSwitch}
+ * {@link GetSwitch}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SetSwitch implements AttributeSwitch {
+public class GetSwitch implements AttributeSwitch {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SetSwitch.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GetSwitch.class);
 
     private final MailAccountDescription desc;
 
-    private Object value;
-
-    public SetSwitch(final MailAccountDescription desc) {
-        super();
+    public GetSwitch(final MailAccountDescription desc) {
         this.desc = desc;
     }
 
-    public void setValue(final Object value) {
-        this.value = value;
-    }
-
     public Object confirmedHam() {
-        desc.setConfirmedHam((String) value);
-        return null;
+        return desc.getConfirmedHam();
     }
 
     public Object confirmedSpam() {
-        desc.setConfirmedSpam((String) value);
-        return null;
+        return desc.getConfirmedSpam();
     }
 
     public Object drafts() {
-        desc.setDrafts((String) value);
-        return null;
+        return desc.getDrafts();
     }
 
     public Object id() {
-        desc.setId(((Integer) value).intValue());
-        return null;
+        return Integer.valueOf(desc.getId());
     }
 
     public Object login() {
-        desc.setLogin((String) value);
-        return null;
+        return desc.getLogin();
     }
 
     public Object mailURL() {
-        desc.parseMailServerURL((String) value);
-        return null;
+        return desc.generateMailServerURL();
     }
 
     public Object name() {
-        desc.setName((String) value);
-        return null;
+        return desc.getName();
     }
 
     public Object password() {
-        desc.setPassword((String) value);
-        return null;
+        return desc.getPassword();
     }
 
     public Object primaryAddress() {
-        desc.setPrimaryAddress((String) value);
-        return null;
+        return desc.getPrimaryAddress();
     }
 
     public Object personal() {
-        desc.setPersonal((String) value);
-        return null;
+        return desc.getPersonal();
     }
 
     public Object sent() {
-        desc.setSent((String) value);
-        return null;
+        return desc.getSent();
     }
 
     public Object spam() {
-        desc.setSpam((String) value);
-        return null;
+        return desc.getSpam();
     }
 
     public Object spamHandler() {
-        desc.setSpamHandler((String) value);
-        return null;
+        return desc.getSpamHandler();
     }
 
     public Object transportURL() {
-        desc.parseTransportServerURL((String) value);
-        return null;
+        return desc.generateTransportServerURL();
     }
 
     public Object trash() {
-        desc.setTrash((String) value);
-        return null;
+        return desc.getTrash();
     }
 
     public Object mailPort() {
-        try {
-            desc.setMailPort(Integer.parseInt(value.toString()));
-        } catch (final NumberFormatException e) {
-            LOG.error(
-                new StringBuilder("Mail port is not a number: ").append(value).append(". Setting to fallback port 143.").toString(),
-                e);
-            desc.setMailPort(143);
-        }
-        return null;
+        return Integer.valueOf(desc.getMailPort());
     }
 
     public Object mailProtocol() {
-        desc.setMailProtocol((String) value);
-        return null;
+        return desc.getMailProtocol();
     }
 
     public Object mailSecure() {
-        desc.setMailSecure(Boolean.parseBoolean(value.toString()));
-        return null;
+        return Boolean.valueOf(desc.isMailSecure());
     }
 
     public Object mailServer() {
-        desc.setMailServer((String) value);
-        return null;
+        return desc.getMailServer();
     }
 
     public Object transportPort() {
-        try {
-            desc.setTransportPort(Integer.parseInt(value.toString()));
-        } catch (final NumberFormatException e) {
-            LOG.error(
-                new StringBuilder("Transport port is not a number: ").append(value).append(". Setting to fallback port 25.").toString(),
-                e);
-            desc.setTransportPort(25);
-        }
-        return null;
+        return Integer.valueOf(desc.getTransportPort());
     }
 
     public Object transportProtocol() {
-        desc.setTransportProtocol((String) value);
-        return null;
+        return desc.getTransportProtocol();
     }
 
     public Object transportSecure() {
-        desc.setTransportSecure(Boolean.parseBoolean(value.toString()));
-        return null;
+        return Boolean.valueOf(desc.isTransportSecure());
     }
 
     public Object transportServer() {
-        desc.setTransportServer((String) value);
-        return null;
+        return desc.getTransportServer();
     }
 
     public Object transportLogin() {
-        desc.setTransportLogin((String) value);
-        return null;
+        return desc.getTransportLogin();
     }
 
     public Object transportPassword() {
-        desc.setTransportPassword((String) value);
-        return null;
+        return desc.getTransportPassword();
     }
 
     public Object unifiedINBOXEnabled() {
-        desc.setUnifiedINBOXEnabled(((Boolean) value).booleanValue());
-        return null;
+        return Boolean.valueOf(desc.isUnifiedINBOXEnabled());
     }
 
     public Object confirmedHamFullname() {
-        desc.setConfirmedHamFullname((String) value);
-        return null;
+        return desc.getConfirmedHamFullname();
     }
 
     public Object confirmedSpamFullname() {
-        desc.setConfirmedSpamFullname((String) value);
-        return null;
+        return desc.getConfirmedSpamFullname();
     }
 
     public Object draftsFullname() {
-        desc.setDraftsFullname((String) value);
-        return null;
+        return desc.getDraftsFullname();
     }
 
     public Object sentFullname() {
-        desc.setSentFullname((String) value);
-        return null;
+        return desc.getSentFullname();
     }
 
     public Object spamFullname() {
-        desc.setSpamFullname((String) value);
-        return null;
+        return desc.getSpamFullname();
     }
 
     public Object trashFullname() {
-        desc.setTrashFullname((String) value);
-        return null;
+        return desc.getTrashFullname();
     }
 
     public Object pop3DeleteWriteThrough() {
-        desc.addProperty("pop3.deletewt", value.toString());
-        return null;
+        return Boolean.valueOf(desc.getProperties().get("pop3.deletewt"));
     }
 
     public Object pop3ExpungeOnQuit() {
-        desc.addProperty("pop3.expunge", value.toString());
-        return null;
+        return Boolean.valueOf(desc.getProperties().get("pop3.expunge"));
     }
 
     public Object pop3RefreshRate() {
-        desc.addProperty("pop3.refreshrate", (String) value);
-        return null;
+        return desc.getProperties().get("pop3.refreshrate");
     }
 
     public Object pop3Path() {
-        desc.addProperty("pop3.path", (String) value);
-        return null;
+        return desc.getProperties().get("pop3.path");
     }
 
     public Object pop3Storage() {
-        desc.addProperty("pop3.storage", (String) value);
-        return null;
+        return desc.getProperties().get("pop3.storage");
     }
-
+    
 }

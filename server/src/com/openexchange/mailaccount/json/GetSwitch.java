@@ -47,169 +47,172 @@
  *
  */
 
-package com.openexchange.mailaccount.servlet.fields;
+package com.openexchange.mailaccount.json;
 
 import com.openexchange.mailaccount.AttributeSwitch;
-import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountDescription;
 
 /**
- * {@link MailAccountGetSwitch}
+ * {@link GetSwitch}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MailAccountGetSwitch implements AttributeSwitch {
+public class GetSwitch implements AttributeSwitch {
 
-    private final MailAccount account;
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GetSwitch.class);
 
-    public MailAccountGetSwitch(final MailAccount desc) {
-        account = desc;
+    private final MailAccountDescription desc;
+
+    public GetSwitch(final MailAccountDescription desc) {
+        this.desc = desc;
     }
 
     public Object confirmedHam() {
-        return account.getConfirmedHam();
+        return desc.getConfirmedHam();
     }
 
     public Object confirmedSpam() {
-        return account.getConfirmedSpam();
+        return desc.getConfirmedSpam();
     }
 
     public Object drafts() {
-        return account.getDrafts();
+        return desc.getDrafts();
     }
 
     public Object id() {
-        return Integer.valueOf(account.getId());
+        return Integer.valueOf(desc.getId());
     }
 
     public Object login() {
-        return account.getLogin();
+        return desc.getLogin();
     }
 
     public Object mailURL() {
-        return account.generateMailServerURL();
+        return desc.generateMailServerURL();
     }
 
     public Object name() {
-        return account.getName();
+        return desc.getName();
     }
 
     public Object password() {
-        return account.getPassword();
+        return desc.getPassword();
     }
 
     public Object primaryAddress() {
-        return account.getPrimaryAddress();
+        return desc.getPrimaryAddress();
     }
-    
+
     public Object personal() {
-        return account.getPersonal();
+        return desc.getPersonal();
     }
 
     public Object sent() {
-        return account.getSent();
+        return desc.getSent();
     }
 
     public Object spam() {
-        return account.getSpam();
+        return desc.getSpam();
     }
 
     public Object spamHandler() {
-        return account.getSpamHandler();
+        return desc.getSpamHandler();
     }
 
     public Object transportURL() {
-        return account.generateTransportServerURL();
+        return desc.generateTransportServerURL();
     }
 
     public Object trash() {
-        return account.getTrash();
+        return desc.getTrash();
     }
 
     public Object mailPort() {
-        return Integer.valueOf(account.getMailPort());
+        return Integer.valueOf(desc.getMailPort());
     }
 
     public Object mailProtocol() {
-        return account.getMailProtocol();
+        return desc.getMailProtocol();
     }
 
     public Object mailSecure() {
-        return Boolean.valueOf(account.isMailSecure());
+        return Boolean.valueOf(desc.isMailSecure());
     }
 
     public Object mailServer() {
-        return account.getMailServer();
+        return desc.getMailServer();
     }
 
     public Object transportPort() {
-        return Integer.valueOf(account.getTransportPort());
+        return Integer.valueOf(desc.getTransportPort());
     }
 
     public Object transportProtocol() {
-        return account.getTransportProtocol();
+        return desc.getTransportProtocol();
     }
 
     public Object transportSecure() {
-        return Boolean.valueOf(account.isTransportSecure());
+        return Boolean.valueOf(desc.isTransportSecure());
     }
 
     public Object transportServer() {
-        return account.getTransportServer();
+        return desc.getTransportServer();
     }
 
     public Object transportLogin() {
-        return account.getTransportLogin();
+        return desc.getTransportLogin();
     }
 
     public Object transportPassword() {
-        return account.getTransportPassword();
+        return desc.getTransportPassword();
     }
 
     public Object unifiedINBOXEnabled() {
-        return Boolean.valueOf(account.isUnifiedINBOXEnabled());
+        return Boolean.valueOf(desc.isUnifiedINBOXEnabled());
     }
 
     public Object confirmedHamFullname() {
-        return account.getConfirmedHamFullname();
+        return desc.getConfirmedHamFullname();
     }
 
     public Object confirmedSpamFullname() {
-        return account.getConfirmedSpamFullname();
+        return desc.getConfirmedSpamFullname();
     }
 
     public Object draftsFullname() {
-        return account.getDraftsFullname();
+        return desc.getDraftsFullname();
     }
 
     public Object sentFullname() {
-        return account.getSentFullname();
+        return desc.getSentFullname();
     }
 
     public Object spamFullname() {
-        return account.getSpamFullname();
+        return desc.getSpamFullname();
     }
 
     public Object trashFullname() {
-        return account.getTrashFullname();
+        return desc.getTrashFullname();
     }
 
     public Object pop3DeleteWriteThrough() {
-        return account.getProperties().get("pop3.deletewt");
+        return Boolean.valueOf(desc.getProperties().get("pop3.deletewt"));
     }
 
     public Object pop3ExpungeOnQuit() {
-        return account.getProperties().get("pop3.expunge");
+        return Boolean.valueOf(desc.getProperties().get("pop3.expunge"));
     }
 
     public Object pop3RefreshRate() {
-        return account.getProperties().get("pop3.refreshrate");
+        return desc.getProperties().get("pop3.refreshrate");
     }
 
     public Object pop3Path() {
-        return account.getProperties().get("pop3.path");
+        return desc.getProperties().get("pop3.path");
     }
 
     public Object pop3Storage() {
-        return account.getProperties().get("pop3.storage");
+        return desc.getProperties().get("pop3.storage");
     }
+    
 }

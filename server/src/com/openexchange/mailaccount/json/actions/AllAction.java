@@ -47,64 +47,64 @@
  *
  */
 
-package com.openexchange.multiple.internal;
+package com.openexchange.mailaccount.json.actions;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mailaccount.json.multiple.MailAccountMultipleHandlerFactory;
-import com.openexchange.multiple.handlers.AppointmentFactoryService;
-import com.openexchange.multiple.handlers.ConfigFactoryService;
-import com.openexchange.multiple.handlers.ContactsFactoryService;
-import com.openexchange.multiple.handlers.GroupFactoryService;
-import com.openexchange.multiple.handlers.ReminderFactoryService;
-import com.openexchange.multiple.handlers.ResourceFactoryService;
-import com.openexchange.multiple.handlers.TasksFactoryService;
-import com.openexchange.server.Initialization;
+import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link MultipleHandlerInit} - Initialization for multiple handlers.
- * <p>
- * Should be done in activator if refactored to reside in own package.
- * 
+ * {@link AllAction}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MultipleHandlerInit implements Initialization {
+public final class AllAction extends AbstractMailAccountAction {
 
-    private final AtomicBoolean started;
+    public static final String ACTION = AJAXServlet.ACTION_ALL;
 
     /**
-     * Initializes a new {@link MultipleHandlerInit}.
+     * Initializes a new {@link AllAction}.
      */
-    public MultipleHandlerInit() {
+    public AllAction() {
         super();
-        started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
-        if (!started.compareAndSet(false, true)) {
-            return;
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+        final String colString = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+
+        final List<Attribute> attributes = getColumns(colString);
+        try {
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+
+            MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+
+            final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
+            final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
+
+            for (final MailAccount userMailAccount : userMailAccounts) {
+                final MailAccount mailAccount = userMailAccount;
+                if (!isUnifiedINBOXAccount(mailAccount) && (multipleEnabled || isDefaultMailAccount(mailAccount))) {
+                    tmp.add(mailAccount);
+                }
+            }
+            userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
+
+            return new AJAXRequestResult(MailAccountWriter.writeArray(userMailAccounts, attributes));
+        } catch (final AbstractOXException e) {
+            throw new OXException(e);
         }
-        final MultipleHandlerRegistry registry = new MultipleHandlerRegistryImpl();
-        ServerServiceRegistry.getInstance().addService(MultipleHandlerRegistry.class, registry);
-        /*
-         * Add known handlers
-         */
-        registry.addFactoryService(new AppointmentFactoryService());
-        registry.addFactoryService(new ContactsFactoryService());
-        registry.addFactoryService(new GroupFactoryService());
-        registry.addFactoryService(new ReminderFactoryService());
-        registry.addFactoryService(new ResourceFactoryService());
-        registry.addFactoryService(new TasksFactoryService());
-        registry.addFactoryService(new ConfigFactoryService());
-        registry.addFactoryService(new MailAccountMultipleHandlerFactory());
     }
-
-    public void stop() throws AbstractOXException {
-        if (!started.compareAndSet(true, false)) {
-            return;
-        }
-        ServerServiceRegistry.getInstance().removeService(MultipleHandlerRegistry.class);
-    }
-
+    
 }

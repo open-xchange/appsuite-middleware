@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailaccount.servlet.writer;
+package com.openexchange.mailaccount.json.writer;
 
 import java.util.List;
 import java.util.Map;
@@ -56,8 +56,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
-import com.openexchange.mailaccount.servlet.fields.MailAccountGetSwitch;
+import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 
 /**
  * {@link MailAccountWriter} - Writes mail account as JSON data.

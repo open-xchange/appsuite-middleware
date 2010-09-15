@@ -53,7 +53,7 @@ import gnu.trove.TIntObjectHashMap;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
-import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.fields.MailAccountFields;
 
 /**
  * {@link Attribute}.

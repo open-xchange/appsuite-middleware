@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailaccount.servlet.request;
+package com.openexchange.mailaccount.json.request;
 
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -86,9 +86,9 @@ import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
-import com.openexchange.mailaccount.servlet.parser.MailAccountParser;
-import com.openexchange.mailaccount.servlet.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.parser.MailAccountParser;
+import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIteratorException;

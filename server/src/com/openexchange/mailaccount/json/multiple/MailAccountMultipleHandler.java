@@ -47,64 +47,75 @@
  *
  */
 
-package com.openexchange.multiple.internal;
+package com.openexchange.mailaccount.json.multiple;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map.Entry;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mailaccount.json.multiple.MailAccountMultipleHandlerFactory;
-import com.openexchange.multiple.handlers.AppointmentFactoryService;
-import com.openexchange.multiple.handlers.ConfigFactoryService;
-import com.openexchange.multiple.handlers.ContactsFactoryService;
-import com.openexchange.multiple.handlers.GroupFactoryService;
-import com.openexchange.multiple.handlers.ReminderFactoryService;
-import com.openexchange.multiple.handlers.ResourceFactoryService;
-import com.openexchange.multiple.handlers.TasksFactoryService;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.mailaccount.json.actions.MailAccountActionFactory;
+import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MultipleHandlerInit} - Initialization for multiple handlers.
- * <p>
- * Should be done in activator if refactored to reside in own package.
+ * {@link MailAccountMultipleHandler} - The multiple handler for mail account module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MultipleHandlerInit implements Initialization {
+public final class MailAccountMultipleHandler implements MultipleHandler {
 
-    private final AtomicBoolean started;
-
+    private AJAXRequestResult result;
+    
     /**
-     * Initializes a new {@link MultipleHandlerInit}.
+     * Initializes a new {@link MailAccountMultipleHandler}.
      */
-    public MultipleHandlerInit() {
+    public MailAccountMultipleHandler() {
         super();
-        started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
-        if (!started.compareAndSet(false, true)) {
-            return;
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
+        final AJAXActionService actionService = MailAccountActionFactory.getInstance().createActionService(action);
+        if (null == actionService) {
+            throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
-        final MultipleHandlerRegistry registry = new MultipleHandlerRegistryImpl();
-        ServerServiceRegistry.getInstance().addService(MultipleHandlerRegistry.class, registry);
-        /*
-         * Add known handlers
-         */
-        registry.addFactoryService(new AppointmentFactoryService());
-        registry.addFactoryService(new ContactsFactoryService());
-        registry.addFactoryService(new GroupFactoryService());
-        registry.addFactoryService(new ReminderFactoryService());
-        registry.addFactoryService(new ResourceFactoryService());
-        registry.addFactoryService(new TasksFactoryService());
-        registry.addFactoryService(new ConfigFactoryService());
-        registry.addFactoryService(new MailAccountMultipleHandlerFactory());
+        final AJAXRequestData request = new AJAXRequestData();
+        request.setSecure(secure);
+        for (final Entry<String, Object> entry : jsonObject.entrySet()) {
+            final String key = entry.getKey();
+            if (DATA.equals(key)) {
+                request.setData(entry.getValue());
+            } else {
+                request.putParameter(key, entry.getValue().toString());
+            }
+        }
+        result = actionService.perform(request, session);
+        return result.getResultObject();
     }
 
-    public void stop() throws AbstractOXException {
-        if (!started.compareAndSet(true, false)) {
-            return;
+    public Date getTimestamp() {
+        if (null == result) {
+            return null;
         }
-        ServerServiceRegistry.getInstance().removeService(MultipleHandlerRegistry.class);
+        final Date timestamp = result.getTimestamp();
+        return null == timestamp ? null : new Date(timestamp.getTime());
+    }
+
+    public void close() {
+        result = null;
+    }
+
+    public Collection<AbstractOXException> getWarnings() {
+        if (null == result) {
+            return Collections.<AbstractOXException> emptySet();
+        }
+        return result.getWarnings();
     }
 
 }

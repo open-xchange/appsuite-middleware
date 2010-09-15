@@ -47,53 +47,80 @@
  *
  */
 
-package com.openexchange.mailaccount.servlet;
+package com.openexchange.mailaccount.json;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
- * Registers the mail account servlet.
+ * {@link Tools} - A utility class for folder storage processing.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountServletInit implements Initialization {
-
-    private static final Log LOG = LogFactory.getLog(MailAccountServletInit.class);
-
-    private static final String ALIAS = "ajax/account";
-
-    private final AtomicBoolean started = new AtomicBoolean();
+public final class Tools {
 
     /**
-     * Initializes a new {@link MailAccountServletInit}.
+     * Initializes a new {@link Tools}.
      */
-    public MailAccountServletInit() {
+    private Tools() {
         super();
     }
 
-    public void start() throws AbstractOXException {
-        if (!started.compareAndSet(false, true)) {
-            return;
+    /**
+     * The radix for base <code>10</code>.
+     */
+    private static final int RADIX = 10;
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     * 
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static final int getUnsignedInteger(final String s) {
+        if (s == null) {
+            return -1;
         }
-        try {
-            HttpServletManager.registerServlet(ALIAS, new MailAccountServlet(), null);
-            LOG.info("Mail account servlet successfully registered.");
-        } catch (final ServletException e) {
-            LOG.error("Mail account servlet could not be registered on server start-up.", e);
+
+        final int max = s.length();
+
+        if (max <= 0) {
+            return -1;
         }
+        if (s.charAt(0) == '-') {
+            return -1;
+        }
+
+        int result = 0;
+        int i = 0;
+
+        final int limit = -Integer.MAX_VALUE;
+        final int multmin = limit / RADIX;
+        int digit;
+
+        if (i < max) {
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return -1;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return -1;
+            }
+            if (result < multmin) {
+                return -1;
+            }
+            result *= RADIX;
+            if (result < limit + digit) {
+                return -1;
+            }
+            result -= digit;
+        }
+        return -result;
     }
 
-    public void stop() throws AbstractOXException {
-        if (!started.compareAndSet(true, false)) {
-            return;
-        }
-        HttpServletManager.unregisterServlet(ALIAS);
-        LOG.info("Mail account servlet successfully unregistered.");
-    }
 }

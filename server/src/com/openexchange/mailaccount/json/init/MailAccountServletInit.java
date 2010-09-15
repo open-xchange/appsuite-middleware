@@ -47,64 +47,54 @@
  *
  */
 
-package com.openexchange.multiple.internal;
+package com.openexchange.mailaccount.json.init;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.servlet.ServletException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mailaccount.json.multiple.MailAccountMultipleHandlerFactory;
-import com.openexchange.multiple.handlers.AppointmentFactoryService;
-import com.openexchange.multiple.handlers.ConfigFactoryService;
-import com.openexchange.multiple.handlers.ContactsFactoryService;
-import com.openexchange.multiple.handlers.GroupFactoryService;
-import com.openexchange.multiple.handlers.ReminderFactoryService;
-import com.openexchange.multiple.handlers.ResourceFactoryService;
-import com.openexchange.multiple.handlers.TasksFactoryService;
+import com.openexchange.mailaccount.json.servlet.MailAccountServlet;
 import com.openexchange.server.Initialization;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
- * {@link MultipleHandlerInit} - Initialization for multiple handlers.
- * <p>
- * Should be done in activator if refactored to reside in own package.
+ * Registers the mail account servlet.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MultipleHandlerInit implements Initialization {
+public final class MailAccountServletInit implements Initialization {
 
-    private final AtomicBoolean started;
+    private static final Log LOG = LogFactory.getLog(MailAccountServletInit.class);
+
+    private static final String ALIAS = "ajax/account";
+
+    private final AtomicBoolean started = new AtomicBoolean();
 
     /**
-     * Initializes a new {@link MultipleHandlerInit}.
+     * Initializes a new {@link MailAccountServletInit}.
      */
-    public MultipleHandlerInit() {
+    public MailAccountServletInit() {
         super();
-        started = new AtomicBoolean();
     }
 
     public void start() throws AbstractOXException {
         if (!started.compareAndSet(false, true)) {
             return;
         }
-        final MultipleHandlerRegistry registry = new MultipleHandlerRegistryImpl();
-        ServerServiceRegistry.getInstance().addService(MultipleHandlerRegistry.class, registry);
-        /*
-         * Add known handlers
-         */
-        registry.addFactoryService(new AppointmentFactoryService());
-        registry.addFactoryService(new ContactsFactoryService());
-        registry.addFactoryService(new GroupFactoryService());
-        registry.addFactoryService(new ReminderFactoryService());
-        registry.addFactoryService(new ResourceFactoryService());
-        registry.addFactoryService(new TasksFactoryService());
-        registry.addFactoryService(new ConfigFactoryService());
-        registry.addFactoryService(new MailAccountMultipleHandlerFactory());
+        try {
+            HttpServletManager.registerServlet(ALIAS, new MailAccountServlet(), null);
+            LOG.info("Mail account servlet successfully registered.");
+        } catch (final ServletException e) {
+            LOG.error("Mail account servlet could not be registered on server start-up.", e);
+        }
     }
 
     public void stop() throws AbstractOXException {
         if (!started.compareAndSet(true, false)) {
             return;
         }
-        ServerServiceRegistry.getInstance().removeService(MultipleHandlerRegistry.class);
+        HttpServletManager.unregisterServlet(ALIAS);
+        LOG.info("Mail account servlet successfully unregistered.");
     }
-
 }
