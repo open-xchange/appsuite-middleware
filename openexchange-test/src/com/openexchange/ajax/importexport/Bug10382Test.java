@@ -50,6 +50,7 @@
 package com.openexchange.ajax.importexport;
 
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
@@ -57,41 +58,54 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 
 /**
  * Test class for bug 10382.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug10382Test extends AbstractAJAXSession {
 
-    /**
-     * @param name
-     */
+    private AJAXClient client;
+
+    private AJAXClient client2;
+
     public Bug10382Test(final String name) {
         super(name);
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        client2 = new AJAXClient(User.User2);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        client2.logout();
+        super.tearDown();
+    }
+
     /**
-     * Tries to import an iCal.
-     * TODO Use a user in a context with only webmail package available.
+     * Tries to import an iCal. TODO Use a user in a context with only webmail package available.
+     * 
      * @throws Throwable if an exception occurs.
      */
     public void testBug() throws Throwable {
-        final AJAXClient client = getClient();
         final Appointment appointment = new Appointment();
         appointment.setTitle("Bug10382Test");
-        final ICalImportResponse response = Executor.execute(client,
-            new ICalImportRequest(21, Tools.toICal(client, appointment),
+        final ICalImportResponse response = Executor.execute(client, new ICalImportRequest(
+            client2.getValues().getPrivateAppointmentFolder(),
+            Tools.toICal(client, appointment),
             false));
-        if (!response.hasError()) {
-            fail("ICal imported without permissions.");
-        }
+        assertTrue("ICal imported without permissions.", response.hasError());
         final AbstractOXException exception = response.getException();
-        if (exception.getComponent() != EnumComponent.IMPORT_EXPORT) {
-            fail("Wrong component in exception.");
-        }
-        if (exception.getDetailNumber() != 1100) {
-            fail("Wrong error code in exception.");
-        }
+        assertEquals("Wrong component in exception.", EnumComponent.IMPORT_EXPORT, exception.getComponent());
+        assertEquals(
+            "Wrong error code in exception.",
+            ImportExportExceptionCodes.NO_IMPORTER.getDetailNumber(),
+            exception.getDetailNumber());
     }
 }
