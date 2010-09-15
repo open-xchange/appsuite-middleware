@@ -111,9 +111,9 @@ public final class HTMLServiceImpl implements HTMLService {
     /**
      * Initializes a new {@link HTMLServiceImpl}.
      */
-    public HTMLServiceImpl(final Properties properties, final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
+    public HTMLServiceImpl(final Properties tidyConfiguration, final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
-        tidyConfiguration = properties;
+        this.tidyConfiguration = tidyConfiguration;
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
     }
