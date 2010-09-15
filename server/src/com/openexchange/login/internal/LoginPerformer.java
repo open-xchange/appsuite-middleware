@@ -290,18 +290,29 @@ public final class LoginPerformer {
 
     private static void triggerLoginHandlers(final LoginResult login) {
         final ThreadPoolService executor = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
-            final LoginHandlerService handler = it.next();
-            executor.submit(new LoginPerformerTask() {
-                public Object call() {
-                    try {
-                        handler.handleLogin(login);
-                    } catch (final LoginException e) {
-                        logError(e);
-                    }
-                    return null;
+        if (null == executor) {
+            for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
+                try {
+                    it.next().handleLogin(login);
+                } catch (final LoginException e) {
+                    logError(e);
                 }
-            }, CallerRunsBehavior.getInstance());
+            }
+        } else {
+            for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
+                final LoginHandlerService handler = it.next();
+                executor.submit(new LoginPerformerTask() {
+
+                    public Object call() {
+                        try {
+                            handler.handleLogin(login);
+                        } catch (final LoginException e) {
+                            logError(e);
+                        }
+                        return null;
+                    }
+                }, CallerRunsBehavior.getInstance());
+            }
         }
     }
 
