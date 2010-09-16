@@ -64,7 +64,6 @@ import com.openexchange.tools.service.SpecificServiceChooser;
  * {@link OverridableAttachmentAuthorization}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class OverridableAttachmentAuthorization implements AttachmentAuthorization {
 
@@ -74,11 +73,10 @@ public class OverridableAttachmentAuthorization implements AttachmentAuthorizati
         super();
         this.chooser = chooser;
     }
-    
+
     public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         getDelegate(folderId, ctx.getContextId()).checkMayAttach(folderId, objectId, user, userConfig, ctx);
     }
-
 
     public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         getDelegate(folderId, ctx.getContextId()).checkMayDetach(folderId, objectId, user, userConfig, ctx);
@@ -87,7 +85,7 @@ public class OverridableAttachmentAuthorization implements AttachmentAuthorizati
     public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         getDelegate(folderId, ctx.getContextId()).checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
     }
-    
+
     private AttachmentAuthorization getDelegate(int folderId, int contextId) throws AttachmentException {
         try {
             return chooser.choose(contextId, folderId);
@@ -95,5 +93,4 @@ public class OverridableAttachmentAuthorization implements AttachmentAuthorizati
             throw AttachmentExceptionCodes.AUTHORIZATION_SERVICE_CONFLICT.create(I(contextId), I(folderId));
         }
     }
-
 }
