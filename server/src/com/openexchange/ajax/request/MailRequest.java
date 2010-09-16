@@ -231,11 +231,13 @@ public final class MailRequest {
     }
 
     private void performMultipleInternal(final MailServletInterface mailInterface) throws JSONException {
-        final long start = System.currentTimeMillis();
-        collectObj.performOperations(session, writer, mailInterface);
         if (LOG.isDebugEnabled()) {
+            final long start = System.currentTimeMillis();
+            collectObj.performOperations(session, writer, mailInterface);
             LOG.debug(new StringBuilder(128).append("Multiple '").append(getOpName(collectObj.getOperation())).append(
                 "' mail request successfully performed: ").append(System.currentTimeMillis() - start).append("msec").toString());
+        } else {
+            collectObj.performOperations(session, writer, mailInterface);
         }
     }
 
