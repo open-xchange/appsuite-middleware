@@ -51,62 +51,41 @@ package com.openexchange.groupware.attach.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.attach.Classes;
 
-@OXExceptionSource(
-		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION,
-		component = EnumComponent.ATTACHMENT
-)
 public class FireDetachedEventAction extends AttachmentEventAction {
 
-	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(FireDetachedEventAction.class);
-	
-	@OXThrowsMultiple(
-			category = { Category.INTERNAL_ERROR, Category.INTERNAL_ERROR },
-			desc = { "Changes done to the object this attachment was added to could not be undone. Your database is probably inconsistent, run the consistency tool.", "An error occurred attaching to the given object." },
-			exceptionId = { 0,1 },
-			msg = { "Changes were made to the object of this attachment and cannot be undone. Your database is probably inconsistent, run the consistency tool.","An error occurred attaching to the given object." }
-	)
-	@Override
-	protected void undoAction() throws AbstractOXException {
-		final List<AttachmentMetadata> processed = new ArrayList<AttachmentMetadata>();
-		try {
-			fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
-		} catch (final AbstractOXException e) {
-			try {
-				fireDetached(processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
-			} catch (final Exception e1) {
-				throw EXCEPTIONS.create(0);
-			}
-			throw e;
-		} catch (final Exception e) {
-			throw EXCEPTIONS.create(1,e);
-		}
-	}
-	
-	@OXThrows(
-			category = Category.INTERNAL_ERROR,
-			desc = "The object could not be detached because the update to an underlying object failed.",
-			exceptionId = 2,
-			msg = "The object could not be detached because the update to an underlying object failed."
-			
-	)
-	public void perform() throws AbstractOXException {
-		try {
-			fireDetached(getAttachments(), getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
-		} catch (final AbstractOXException e) {
-			throw e;
-		} catch (final Exception e) {
-			throw EXCEPTIONS.create(2,e);
-		}
-	}
+    private static final Log LOG = LogFactory.getLog(FireDetachedEventAction.class);
 
+    @Override
+    protected void undoAction() throws AbstractOXException {
+        final List<AttachmentMetadata> processed = new ArrayList<AttachmentMetadata>();
+        try {
+            fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
+        } catch (final AbstractOXException e) {
+            try {
+                fireDetached(processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
+            } catch (final Exception e1) {
+                LOG.error(e.getMessage(), e);
+                throw AttachmentExceptionCodes.UNDONE_FAILED.create(e1);
+            }
+            throw e;
+        } catch (final Exception e) {
+            throw AttachmentExceptionCodes.ATTACH_FAILED.create(e);
+        }
+    }
+
+    public void perform() throws AbstractOXException {
+        try {
+            fireDetached(getAttachments(), getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
+        } catch (final AbstractOXException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw AttachmentExceptionCodes.DETACH_FAILED.create(e);
+        }
+    }
 }

@@ -84,6 +84,12 @@ public final class AttachmentExceptionMessages implements LocalizableStrings {
 
     public static final String FILESTORE_WRITE_FAILED_MSG = "Writing to filestore failed.";
 
+    public static final String UNDONE_FAILED_MSG = "Changes done to the object this attachment was added to could not be undone. Your database is probably inconsistent, run the consistency tool.";
+
+    public static final String ATTACH_FAILED_MSG = "An error occurred attaching to the given object.";
+
+    public static final String DETACH_FAILED_MSG = "The object could not be detached because the update to an underlying object failed.";
+
     private AttachmentExceptionMessages() {
         super();
     }

@@ -87,6 +87,12 @@ public enum AttachmentExceptionCodes implements OXErrorMessage {
     FILESTORE_DOWN(FILESTORE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 421),
     /** Writing to filestore failed. */
     FILESTORE_WRITE_FAILED(FILESTORE_WRITE_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 422),
+    /** Changes done to the object this attachment was added to could not be undone. Your database is probably inconsistent, run the consistency tool. */
+    UNDONE_FAILED(UNDONE_FAILED_MSG, Category.CODE_ERROR, 600),
+    /** An error occurred attaching to the given object. */
+    ATTACH_FAILED(ATTACH_FAILED_MSG, Category.CODE_ERROR, 601),
+    /** The Object could not be detached because the update to an underlying object failed. */
+    DETACH_FAILED(DETACH_FAILED_MSG, Category.CODE_ERROR, 602),
     ;
 
     private final String message;
