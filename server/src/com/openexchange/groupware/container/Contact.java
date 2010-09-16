@@ -59,7 +59,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
  * {@link Contact} - Represents a contact.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - clone, hashCode, equals, toString, display name checking
@@ -286,12 +286,12 @@ public class Contact extends CommonObject implements Serializable{
      * This attribute identifier has only a sorting purpose. This does not represent a contact attribute. This identifier can be specified
      * only for the sorting column. The sorting is the done the following way: Use one of {@link #SUR_NAME}, {@link #DISPLAY_NAME},
      * {@link #COMPANY}, {@link #EMAIL1} or {@link #EMAIL2} in this order whichever is first not null. Use the selected value for sorting
-     * with the AlphanumComparator. 
+     * with the AlphanumComparator.
      */
     public static final int SPECIAL_SORTING = 607;
-    
+
     public static final int USE_COUNT = 608;
-    
+
     /**
      * The same as USAGE_COUNT, but with respect to the global addressbook (only for searching purpose).
      */
@@ -741,9 +741,9 @@ public class Contact extends CommonObject implements Serializable{
     protected boolean b_number_of_dlists;
 
     protected int number_of_dlists;
-    
+
     protected int useCount;
-    
+
     protected boolean b_useCount;
 
     protected DistributionListEntryObject[] dlists;
@@ -1165,7 +1165,7 @@ public class Contact extends CommonObject implements Serializable{
     public boolean getMarkAsDistribtuionlist() {
         return mark_as_distributionlist;
     }
-    
+
     public int getUseCount() {
         return useCount;
     }
@@ -1702,7 +1702,7 @@ public class Contact extends CommonObject implements Serializable{
     public void markAsDistributionlist() {
         setMarkAsDistributionlist(true);
     }
-    
+
     public void setUseCount(final int useCount) {
         this.useCount = useCount;
         b_useCount = true;
@@ -1933,7 +1933,7 @@ public class Contact extends CommonObject implements Serializable{
         fax_business = null;
         b_fax_business = false;
     }
-    
+
     public void removeFileAs() {
         file_as = null;
         b_file_as = false;
@@ -2048,7 +2048,7 @@ public class Contact extends CommonObject implements Serializable{
         instant_messenger2 = null;
         b_instant_messenger2 = false;
     }
-    
+
     public void removeImageLastModified() {
         image_last_modified = null;
         b_image_last_modified = false;
@@ -2225,7 +2225,7 @@ public class Contact extends CommonObject implements Serializable{
         internal_userId = 0;
         b_internal_userId = false;
     }
-    
+
     public void removeUseCount() {
         useCount = 0;
         b_useCount = false;
@@ -2648,7 +2648,7 @@ public class Contact extends CommonObject implements Serializable{
     public boolean containsMarkAsDistributionlist() {
         return b_mark_as_distributionlist;
     }
-    
+
     public boolean containsUseCount() {
         return b_useCount;
     }
@@ -4240,7 +4240,7 @@ public class Contact extends CommonObject implements Serializable{
 
         }
     }
-    
+
     public boolean canFormDisplayName(){
         return contains(DISPLAY_NAME)
             || contains(SUR_NAME)
@@ -4252,8 +4252,8 @@ public class Contact extends CommonObject implements Serializable{
             || contains(NICKNAME)
             || contains(MIDDLE_NAME);
     }
-    
-    
+
+
     @Override
     public String toString(){
         final StringBuilder name = new StringBuilder();
@@ -4315,7 +4315,7 @@ public class Contact extends CommonObject implements Serializable{
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        
+
         for(int col : Contact.ALL_COLUMNS){
             if(contains(col))
                 result = prime * result + get(col).hashCode();
@@ -4353,8 +4353,8 @@ public class Contact extends CommonObject implements Serializable{
         Contact other = (Contact) obj;
         return matches(other, CONTENT_COLUMNS);
     }
-    
-    private boolean matches(Contact other, int[] fields){
+
+    public boolean matches(Contact other, int[] fields){
         for(int col: fields){
             if(! contains(col) && other.contains(col))
                 return false;
@@ -4369,11 +4369,9 @@ public class Contact extends CommonObject implements Serializable{
                     continue;
                 }
                 if(! thisValue.equals(otherValue))
-                    return false; 
+                    return false;
             }
         }
         return true;
     }
-    
-    
 }
