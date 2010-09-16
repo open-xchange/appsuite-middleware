@@ -56,6 +56,7 @@ import com.openexchange.multiple.handlers.AppointmentFactoryService;
 import com.openexchange.multiple.handlers.ConfigFactoryService;
 import com.openexchange.multiple.handlers.ContactsFactoryService;
 import com.openexchange.multiple.handlers.GroupFactoryService;
+import com.openexchange.multiple.handlers.QuotaFactoryService;
 import com.openexchange.multiple.handlers.ReminderFactoryService;
 import com.openexchange.multiple.handlers.ResourceFactoryService;
 import com.openexchange.multiple.handlers.TasksFactoryService;
@@ -90,6 +91,7 @@ public final class MultipleHandlerInit implements Initialization {
         /*
          * Add known handlers
          */
+        registry.addFactoryService(new QuotaFactoryService());
         registry.addFactoryService(new AppointmentFactoryService());
         registry.addFactoryService(new ContactsFactoryService());
         registry.addFactoryService(new GroupFactoryService());

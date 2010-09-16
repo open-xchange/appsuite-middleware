@@ -66,7 +66,6 @@ import com.openexchange.ajax.request.FolderRequest;
 import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
-import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.AbstractOXException;
@@ -95,8 +94,6 @@ public class Multiple extends SessionServlet {
     protected static final String MODULE_FOLDER = "folder";
 
     protected static final String MODULE_FOLDERS = "folders";
-
-    protected static final String MODULE_QUOTA = "quota";
 
     private static final String ATTRIBUTE_MAIL_INTERFACE = "mi";
 
@@ -239,10 +236,6 @@ public class Multiple extends SessionServlet {
                     ResponseWriter.writeException(e, jsonWriter);
                     jsonWriter.endObject();
                 }
-            } else if (MODULE_QUOTA.equals(module)) {
-                writeMailRequest(req);
-                final QuotaRequest quotaRequest = new QuotaRequest(session, jsonWriter);
-                quotaRequest.action(action);
             } else if (MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module)) {
                 writeMailRequest(req);
                 final FolderRequest folderequest = new FolderRequest(session, jsonWriter);

@@ -47,63 +47,73 @@
  *
  */
 
-package com.openexchange.ajax;
+package com.openexchange.multiple.handlers;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONValue;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.tools.session.ServerSession;
 
-public class Quota extends SessionServlet {
+/**
+ * {@link QuotaFactoryService} - Factory service for quota module.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class QuotaFactoryService implements MultipleHandlerFactoryService {
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(Quota.class);
+    /**
+     * Initializes a new {@link QuotaFactoryService}.
+     */
+    public QuotaFactoryService() {
+        super();
+    }
 
-    private static final long serialVersionUID = 6477434510302882905L;
+    public MultipleHandler createMultipleHandler() {
+        return new QuotaHandler();
+    }
 
-	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
-			IOException {
-        final Response response = new Response();
-        try {
-            final String action = req.getParameter(PARAMETER_ACTION);
-            if (null == action) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
-            }
-            final ServerSession session = getSessionObject(req);
+    public String getSupportedModule() {
+        return "quota";
+    }
 
-            final QuotaRequest fsReq = new QuotaRequest(session);
-            final JSONValue responseObj = fsReq.action(action);
+    private static final class QuotaHandler implements MultipleHandler {
 
-            // response.setTimestamp(fsReq.getTimestamp());
-            response.setData(responseObj);
-        } catch (final JSONException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                /*
-                 * Throw proper I/O error since a serious socket error could
-                 * been occurred which prevents further communication. Just
-                 * throwing a JSON error possibly hides this fact by trying to
-                 * write to/read from a broken socket connection.
-                 */
-                throw (IOException) cause;
-            }
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-            LOG.error(oje.getMessage(), oje);
-            response.setException(oje);
-        } catch (final AbstractOXException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
+        private Date timestamp;
+
+        public QuotaHandler() {
+            super();
         }
-        writeResponse(response, res);
-	}
+
+        public void close() {
+            // Nothing to do
+        }
+
+        public Date getTimestamp() {
+            return timestamp;
+        }
+
+        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
+            try {
+                final QuotaRequest request = new QuotaRequest(session);
+                final JSONValue retval = request.action(action);
+                return retval;
+            } catch (final AbstractOXException e) {
+                org.apache.commons.logging.LogFactory.getLog(QuotaFactoryService.QuotaHandler.class).error(e.getMessage(), e);
+                throw e;
+            }
+        }
+
+        public Collection<AbstractOXException> getWarnings() {
+            return Collections.<AbstractOXException> emptySet();
+        }
+
+    }
 
 }

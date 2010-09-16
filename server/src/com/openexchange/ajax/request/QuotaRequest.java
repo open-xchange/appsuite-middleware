@@ -54,23 +54,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * FIXME replace QuotaFileStorage FileStorage
  */
-public class QuotaRequest extends CommonRequest {
+public class QuotaRequest {
 
     private static final Log LOG = LogFactory.getLog(QuotaRequest.class);
 
@@ -80,66 +78,57 @@ public class QuotaRequest extends CommonRequest {
 
     private final ServerSession session;
 
-    public QuotaRequest(final ServerSession session, final JSONWriter w) {
-        super(w);
+    /**
+     * Initializes a new {@link QuotaRequest}.
+     * 
+     * @param session The session
+     */
+    public QuotaRequest(final ServerSession session) {
+        super();
         try {
             final Context ctx = session.getContext();
             this.qfs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
         } catch (final AbstractOXException e) {
             this.fsException = e;
         }
-
         this.session = session;
     }
 
-    public boolean action(final String action) {
+    /**
+     * Performs specified action
+     * 
+     * @param action The action to perform
+     * @return The result
+     * @throws AbstractOXException If action fails
+     * @throws JSONException If a JSON error occurs
+     */
+    public JSONValue action(final String action) throws AbstractOXException, JSONException {
         if (AJAXServlet.ACTION_GET.equals(action)) {
-            filestore();
-            return true;
+            return filestore();
         } else if ("filestore".equals(action)) {
-            filestore();
-            return true;
+            return filestore();
         } else if ("mail".equals(action)) {
-            mail();
-            return true;
+            return mail();
         }
-        return false;
+        throw new AjaxException(AjaxException.Code.UnknownAction, action);
     }
 
-    private void exception(final AbstractOXException exception) {
-        final Response resp = new Response();
-        resp.setException(exception);
-        try {
-            LOG.error(exception.getMessage(), exception);
-            ResponseWriter.write(resp, w);
-        } catch (final JSONException e) {
-            LOG.error(e);
-        }
-    }
-
-    private void filestore() {
+    private JSONObject filestore() throws AbstractOXException, JSONException {
         if (fsException != null) {
-            exception(fsException);
-            return;
+            throw fsException;
         }
-        try {
-            final long use = qfs.getUsage();
-            final long quota = qfs.getQuota();
-            final JSONObject data = new JSONObject();
-            data.put("quota", quota);
-            data.put("use", use);
-            /*
-             * Write JSON object into writer as data content of a response object
-             */
-            w.object();
-            w.key(ResponseFields.DATA).value(data);
-            w.endObject();
-        } catch (final Exception e) {
-            handle(e);
-        }
+        final long use = qfs.getUsage();
+        final long quota = qfs.getQuota();
+        final JSONObject data = new JSONObject();
+        data.put("quota", quota);
+        data.put("use", use);
+        /*
+         * Return JSON object
+         */
+        return data;
     }
 
-    private void mail() {
+    private JSONObject mail() throws JSONException {
         MailServletInterface mi = null;
         try {
             long[][] quotaInfo = null;
@@ -167,11 +156,7 @@ public class QuotaRequest extends CommonRequest {
             /*
              * Write JSON object into writer as data content of a response object
              */
-            w.object();
-            w.key(ResponseFields.DATA).value(data);
-            w.endObject();
-        } catch (final Exception e) {
-            handle(e);
+            return data;
         } finally {
             try {
                 if (mi != null) {
