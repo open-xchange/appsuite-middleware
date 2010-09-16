@@ -53,6 +53,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -80,16 +81,24 @@ import com.openexchange.mail.mime.ContentType;
  */
 public class ServletRequestWrapper implements ServletRequest {
 
-    private static final Set<String> singleValueHeaders = new HashSet<String>();
-
+    /**
+     * The name of the "Content-Type" header.
+     */
     public static final String CONTENT_TYPE = "content-type";
 
+    /**
+     * The name of the "Content-Length" header.
+     */
     public static final String CONTENT_LENGTH = "content-length";
 
-    static {
-        singleValueHeaders.add(CONTENT_TYPE);
-        singleValueHeaders.add(CONTENT_LENGTH);
-    }
+    /**
+     * A set for known single-value headers. Those headers which occur only once in HTTP headers.
+     */
+    private static final Set<String> SINGLE_VALUE_HEADERS = new HashSet<String>(Arrays.asList(CONTENT_TYPE, CONTENT_LENGTH));
+
+    /*-
+     * ------------------- Member stuff ---------------------
+     */
 
     private final Map<String, Object> attributes;
 
@@ -185,7 +194,7 @@ public class ServletRequestWrapper implements ServletRequest {
         if (isContentType) {
             handleContentType(value);
         }
-        if (headers.containsKey(name) && !singleValueHeaders.contains(name)) {
+        if (headers.containsKey(name) && !SINGLE_VALUE_HEADERS.contains(name)) {
             /*
              * Header may carry multiple values
              */
