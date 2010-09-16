@@ -117,7 +117,7 @@ public interface OXUtilInterface extends Remote {
     public static final String DEFAULT_DRIVER = "com.mysql.jdbc.Driver";
     public static final int DEFAULT_MAXUNITS = 1000;
     public static final boolean DEFAULT_POOL_HARD_LIMIT = false;
-    public static final int DEFAULT_POOL_INITIAL = 2;
+    public static final int DEFAULT_POOL_INITIAL = 0;
     public static final int DEFAULT_POOL_MAX = 100;
     public static final String DEFAULT_USER = "openexchange";
     public static final String DEFAULT_HOSTNAME = "localhost";

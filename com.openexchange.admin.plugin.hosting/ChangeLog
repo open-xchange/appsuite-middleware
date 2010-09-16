@@ -1,3 +1,7 @@
+* 2010-09-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #16865: Default for the initial amount of connection to a new database is zero.
+
 * 2010-08-25 - marcus.klein@open-xchange.com
 
  - Bugfix #16721: NullPointerException does not occur anymore if some filestore is empty.

@@ -242,8 +242,7 @@
                 <path refid="rmi.classpath"/>
             	<pathelement path="test-classes"/>
             </classpath>
-			<test name="com.openexchange.admin.rmi.ContextTest" todir="${test.xml.dir}"/>
-			<test name="com.openexchange.admin.rmi.UtilTest" todir="${test.xml.dir}"/>
+			<test name="com.openexchange.admin.rmi.AllTests" todir="${test.xml.dir}"/>
             <formatter type="xml"/>
             <sysproperty key="rmi_test_host" value="${rmi_test_host}"/>
             <sysproperty key="rmi_test_dbhost" value="${rmi_test_dbhost}"/>
