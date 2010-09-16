@@ -56,7 +56,7 @@ import java.util.Set;
 
 
 /**
- * {@link ContentTypeRestriction}
+ * {@link ContentTypeRestriction} - A {@link Restriction} for <i>Content-Type</i> header.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
