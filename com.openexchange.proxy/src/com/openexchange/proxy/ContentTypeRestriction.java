@@ -49,78 +49,63 @@
 
 package com.openexchange.proxy;
 
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import com.openexchange.session.Session;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+
 
 /**
- * {@link ProxyRegistration} - A registration.
- * 
+ * {@link ContentTypeRestriction}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ProxyRegistration {
+public class ContentTypeRestriction implements Restriction {
 
-    private final URL url;
-
-    private final Session session;
-
-    private final Collection<Restriction> restrictions;
+    private final Set<String> contentTypes;
 
     /**
-     * Initializes a new {@link ProxyRegistration}.
+     * Initializes a new {@link ContentTypeRestriction}.
      * 
-     * @param url The URL
-     * @param session The session
-     * @param restrictions The restrictions
+     * @param contentTypes The allowed content types
      */
-    public ProxyRegistration(final URL url, final Session session, final Collection<Restriction> restrictions) {
+    public ContentTypeRestriction(final Set<String> contentTypes) {
         super();
-        this.url = url;
-        this.session = session;
-        this.restrictions = restrictions == null ? Collections.<Restriction> emptyList() : restrictions;
+        if (contentTypes == null || contentTypes.isEmpty()) {
+            this.contentTypes = Collections.<String> emptySet();
+        } else {
+            this.contentTypes = new HashSet<String>(contentTypes.size());
+            for (final String contentType : contentTypes) {
+                this.contentTypes.add(contentType.toLowerCase(Locale.ENGLISH));
+            }
+        }
     }
 
     /**
-     * Initializes a new {@link ProxyRegistration}.
+     * Initializes a new {@link ContentTypeRestriction}.
      * 
-     * @param url The URL
-     * @param session The session
-     * @param restrictions The restrictions
+     * @param contentTypes The allowed content types
      */
-    public ProxyRegistration(final URL url, final Session session, final Restriction... restrictions) {
+    public ContentTypeRestriction(final String... contentTypes) {
         super();
-        this.url = url;
-        this.session = session;
-        this.restrictions = Arrays.asList(restrictions);
+        if (contentTypes == null) {
+            this.contentTypes = Collections.<String> emptySet();
+        } else {
+            this.contentTypes = new HashSet<String>(contentTypes.length);
+            for (final String contentType : contentTypes) {
+                this.contentTypes.add(contentType.toLowerCase(Locale.ENGLISH));
+            }
+        }
     }
 
-    /**
-     * Gets the URL to proxy.
-     * 
-     * @return The URL
-     */
-    public URL getURL() {
-        return url;
+    public boolean allow(final Response response) {
+        final Header header = response.getResponseHeader("Content-Type");
+        final String value = header.getValue();
+        return value != null && contentTypes.contains(value.toLowerCase(Locale.ENGLISH));
     }
 
-    /**
-     * Gets the session associated with this registration.
-     * 
-     * @return The session associated with this registration
-     */
-    public Session getSession() {
-        return session;
-    }
-
-    /**
-     * Gets the restrictions.
-     * 
-     * @return The restrictions
-     */
-    public Collection<Restriction> getRestrictions() {
-        return Collections.unmodifiableCollection(restrictions);
+    public String getDescription() {
+        return "Content-Type header must be one of: " + contentTypes.toString();
     }
 
 }

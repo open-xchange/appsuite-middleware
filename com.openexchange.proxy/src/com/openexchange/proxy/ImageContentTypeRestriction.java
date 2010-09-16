@@ -49,78 +49,18 @@
 
 package com.openexchange.proxy;
 
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import com.openexchange.session.Session;
-
 /**
- * {@link ProxyRegistration} - A registration.
+ * {@link ImageContentTypeRestriction} - A {@link ContentTypeRestriction} for images.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ProxyRegistration {
-
-    private final URL url;
-
-    private final Session session;
-
-    private final Collection<Restriction> restrictions;
+public final class ImageContentTypeRestriction extends ContentTypeRestriction {
 
     /**
-     * Initializes a new {@link ProxyRegistration}.
-     * 
-     * @param url The URL
-     * @param session The session
-     * @param restrictions The restrictions
+     * Initializes a new {@link ImageContentTypeRestriction}.
      */
-    public ProxyRegistration(final URL url, final Session session, final Collection<Restriction> restrictions) {
-        super();
-        this.url = url;
-        this.session = session;
-        this.restrictions = restrictions == null ? Collections.<Restriction> emptyList() : restrictions;
-    }
-
-    /**
-     * Initializes a new {@link ProxyRegistration}.
-     * 
-     * @param url The URL
-     * @param session The session
-     * @param restrictions The restrictions
-     */
-    public ProxyRegistration(final URL url, final Session session, final Restriction... restrictions) {
-        super();
-        this.url = url;
-        this.session = session;
-        this.restrictions = Arrays.asList(restrictions);
-    }
-
-    /**
-     * Gets the URL to proxy.
-     * 
-     * @return The URL
-     */
-    public URL getURL() {
-        return url;
-    }
-
-    /**
-     * Gets the session associated with this registration.
-     * 
-     * @return The session associated with this registration
-     */
-    public Session getSession() {
-        return session;
-    }
-
-    /**
-     * Gets the restrictions.
-     * 
-     * @return The restrictions
-     */
-    public Collection<Restriction> getRestrictions() {
-        return Collections.unmodifiableCollection(restrictions);
+    public ImageContentTypeRestriction() {
+        super("image/*");
     }
 
 }
