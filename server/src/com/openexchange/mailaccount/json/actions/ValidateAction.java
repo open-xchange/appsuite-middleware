@@ -50,7 +50,6 @@
 package com.openexchange.mailaccount.json.actions;
 
 import java.security.GeneralSecurityException;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -63,8 +62,6 @@ import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.json.writer.FolderWriter;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
@@ -86,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ValidateAction extends AbstractMailAccountAction {
+public final class ValidateAction extends AbstractMailAccountTreeAction {
     
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ValidateAction.class);
 
@@ -162,56 +159,6 @@ public final class ValidateAction extends AbstractMailAccountAction {
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session);
         return actionValidateTree0(mailAccess, session);
-    }
-
-    private static JSONObject actionValidateTree0(final MailAccess<?, ?> mailAccess, final ServerSession session) throws JSONException {
-        // Now try to connect
-        boolean close = false;
-        try {
-            mailAccess.connect();
-            close = true;
-            // Compose folder tree
-            final JSONObject root = FolderWriter.writeMailFolder(-1, mailAccess.getRootFolder(), mailAccess.getMailConfig(), session);
-            // Recursive call
-            addSubfolders(
-                root,
-                mailAccess.getFolderStorage().getSubfolders(MailFolder.DEFAULT_FOLDER_ID, true),
-                mailAccess,
-                mailAccess.getMailConfig(),
-                session);
-            return root;
-        } catch (final AbstractOXException e) {
-            if (DEBUG) {
-                LOG.debug("Composing mail account's folder tree failed.", e);
-            }
-            // TODO: How to indicate error if folder tree requested?
-            return null;
-        } finally {
-            if (close) {
-                mailAccess.close(false);
-            }
-        }
-    }
-
-    private static void addSubfolders(final JSONObject parent, final MailFolder[] subfolders, final MailAccess<?, ?> mailAccess, final MailConfig mailConfig, final ServerSession session) throws JSONException, MailException {
-        if (subfolders.length == 0) {
-            return;
-        }
-
-        final JSONArray subfolderArray = new JSONArray();
-        parent.put("subfolder_array", subfolderArray);
-
-        for (final MailFolder subfolder : subfolders) {
-            final JSONObject subfolderObject = FolderWriter.writeMailFolder(-1, subfolder, mailConfig, session);
-            subfolderArray.put(subfolderObject);
-            // Recursive call
-            addSubfolders(
-                subfolderObject,
-                mailAccess.getFolderStorage().getSubfolders(subfolder.getFullname(), true),
-                mailAccess,
-                mailConfig,
-                session);
-        }
     }
 
     private static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session) throws OXException {

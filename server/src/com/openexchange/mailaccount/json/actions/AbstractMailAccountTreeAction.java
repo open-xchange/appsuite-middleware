@@ -49,70 +49,80 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.OXException;
+import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.json.writer.FolderWriter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetTreeAction}
+ * {@link AbstractMailAccountTreeAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GetTreeAction extends AbstractMailAccountTreeAction {
+public abstract class AbstractMailAccountTreeAction extends AbstractMailAccountAction {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GetTreeAction.class);
-
-    public static final String ACTION = "get_tree";
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractMailAccountTreeAction.class);
 
     /**
-     * Initializes a new {@link GetTreeAction}.
+     * Initializes a new {@link AbstractMailAccountTreeAction}.
      */
-    public GetTreeAction() {
+    protected AbstractMailAccountTreeAction() {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, request);
-
+    protected static JSONObject actionValidateTree0(final MailAccess<?, ?> mailAccess, final ServerSession session) throws JSONException {
+        // Now try to connect
+        boolean close = false;
         try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-
-            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
-
-            if (isUnifiedINBOXAccount(mailAccount)) {
-                // Treat as no hit
-                throw MailAccountExceptionMessages.NOT_FOUND.create(
-                    Integer.valueOf(id),
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
+            mailAccess.connect();
+            close = true;
+            // Compose folder tree
+            final JSONObject root = FolderWriter.writeMailFolder(-1, mailAccess.getRootFolder(), mailAccess.getMailConfig(), session);
+            // Recursive call
+            addSubfolders(
+                root,
+                mailAccess.getFolderStorage().getSubfolders(MailFolder.DEFAULT_FOLDER_ID, true),
+                mailAccess,
+                mailAccess.getMailConfig(),
+                session);
+            return root;
+        } catch (final AbstractOXException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Composing mail account's folder tree failed.", e);
             }
-
-            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
+            // TODO: How to indicate error if folder tree requested?
+            return null;
+        } finally {
+            if (close) {
+                mailAccess.close(false);
             }
+        }
+    }
 
-            // Create a mail access instance
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-            return new AJAXRequestResult(actionValidateTree0(mailAccess, session));
-        } catch (final AbstractOXException exc) {
-            throw new OXException(exc);
-        } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+    protected static void addSubfolders(final JSONObject parent, final MailFolder[] subfolders, final MailAccess<?, ?> mailAccess, final MailConfig mailConfig, final ServerSession session) throws JSONException, MailException {
+        if (subfolders.length == 0) {
+            return;
+        }
+
+        final JSONArray subfolderArray = new JSONArray();
+        parent.put("subfolder_array", subfolderArray);
+
+        for (final MailFolder subfolder : subfolders) {
+            final JSONObject subfolderObject = FolderWriter.writeMailFolder(-1, subfolder, mailConfig, session);
+            subfolderArray.put(subfolderObject);
+            // Recursive call
+            addSubfolders(
+                subfolderObject,
+                mailAccess.getFolderStorage().getSubfolders(subfolder.getFullname(), true),
+                mailAccess,
+                mailConfig,
+                session);
         }
     }
 
