@@ -169,6 +169,10 @@ public class MailFolder implements Serializable {
 
     private boolean b_permissions;
 
+    private boolean shared;
+
+    private boolean b_shared;
+
     /**
      * Virtual name of mailbox's root folder
      * 
@@ -1033,7 +1037,7 @@ public class MailFolder implements Serializable {
      * Removes the supports-user-flags flag.
      */
     public void removeSupportsUserFlags() {
-        b_supportsUserFlags = false;
+        supportsUserFlags = false;
         b_supportsUserFlags = false;
     }
 
@@ -1045,6 +1049,42 @@ public class MailFolder implements Serializable {
     public void setSupportsUserFlags(final boolean supportsUserFlags) {
         this.supportsUserFlags = supportsUserFlags;
         b_supportsUserFlags = true;
+    }
+
+    /**
+     * Checks if this folder is shared.
+     * 
+     * @return <code>true</code> if this folder is shared; otherwise <code>false</code>
+     */
+    public boolean isShared() {
+        return shared;
+    }
+
+    /**
+     * Checks if the shared flag was set.
+     * 
+     * @return <code>true</code> if shared flag is set; otherwise <code>false</code>
+     */
+    public boolean containsShared() {
+        return b_shared;
+    }
+
+    /**
+     * Removes the supports-user-flags flag.
+     */
+    public void removeShared() {
+        shared = false;
+        b_shared = false;
+    }
+
+    /**
+     * Sets the shared flag.
+     * 
+     * @param shared The shared flag to set
+     */
+    public void setShared(final boolean shared) {
+        this.shared = shared;
+        b_shared = true;
     }
 
 }
