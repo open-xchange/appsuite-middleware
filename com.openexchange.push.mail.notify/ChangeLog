@@ -1,3 +1,8 @@
+* 2010-09-16 - wolfgang.rosenauer@open-xchange.com
+
+ - Bugfix: allow imapLoginDelimiter to be null
+ - Minor string changes
+
 * 2010-06-22 - choeger@open-xchange.com
 
  - Bugfix #16001 - mail push bundle does not work on installations with cyrus virtdomains switched on

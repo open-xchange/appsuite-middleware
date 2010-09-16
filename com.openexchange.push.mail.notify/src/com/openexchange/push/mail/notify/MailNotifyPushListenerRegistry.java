@@ -174,7 +174,7 @@ public final class MailNotifyPushListenerRegistry {
                 l.open();
             } catch (final PushException e) {
                 org.apache.commons.logging.LogFactory.getLog(MailNotifyPushListenerRegistry.class).error(
-                    MessageFormat.format("Opening MAL Poll listener failed. Removing listener from registry: {0}", l.toString()),
+                    MessageFormat.format("Opening mail push UDP listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();
             }

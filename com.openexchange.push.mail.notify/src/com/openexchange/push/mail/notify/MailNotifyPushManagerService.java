@@ -67,7 +67,7 @@ public final class MailNotifyPushManagerService implements PushManagerService {
      */
     public MailNotifyPushManagerService() {
         super();
-        name = "OneAndOne Push Manager";
+        name = "Mail Push Manager";
     }
 
     public PushListener startListener(final Session session) throws PushException {

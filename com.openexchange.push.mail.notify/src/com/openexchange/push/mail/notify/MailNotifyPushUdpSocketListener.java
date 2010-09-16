@@ -74,7 +74,9 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
         String packetDataString = new String(datagramPacket.getData());
         // user name at position 3, see above
         packetDataString = packetDataString.split("\0")[3];
-        packetDataString = packetDataString.substring(0, packetDataString.indexOf(imapLoginDelimiter));
+        if (null != imapLoginDelimiter) {
+        	packetDataString = packetDataString.substring(0, packetDataString.indexOf(imapLoginDelimiter));
+        }
         LOG.debug("Username=" + packetDataString);
         if (null != packetDataString && packetDataString.length() > 0) {
             return packetDataString;
