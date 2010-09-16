@@ -79,17 +79,12 @@ import com.openexchange.ajax.request.ServletRequestAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentConfig;
-import com.openexchange.groupware.attach.AttachmentException;
-import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
-import com.openexchange.groupware.attach.Classes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
@@ -97,13 +92,12 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
-import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
@@ -118,7 +112,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_AJAX_ATTACHMENT, component = EnumComponent.ATTACHMENT)
 public class Attachment extends PermissionServlet {
 
     private static final String MIME_TEXT_HTML_CHARSET_UTF8 = "text/html; charset=UTF-8";
@@ -128,8 +121,6 @@ public class Attachment extends PermissionServlet {
     private static final String PREFIX_JSON = "json_";
 
     private static final long serialVersionUID = -5819944675070929520L;
-
-    private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(Attachment.class);
 
     private static transient final AttachmentParser PARSER = new AttachmentParser();
 
@@ -178,7 +169,7 @@ public class Attachment extends PermissionServlet {
 
         if (ACTION_DOCUMENT.equals(action)) {
             try {
-                require(req, res, PARAMETER_FOLDERID, PARAMETER_ATTACHEDID, PARAMETER_MODULE, PARAMETER_ID);
+                require(req, PARAMETER_FOLDERID, PARAMETER_ATTACHEDID, PARAMETER_MODULE, PARAMETER_ID);
             } catch (final UploadException e) {
                 handle(res, e, action);
                 return;
@@ -186,10 +177,10 @@ public class Attachment extends PermissionServlet {
             int folderId, attachedId, moduleId, id;
             final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
             try {
-                folderId = requireNumber(req, res, action, contentType, PARAMETER_FOLDERID);
-                attachedId = requireNumber(req, res, action, contentType, PARAMETER_ATTACHEDID);
-                moduleId = requireNumber(req, res, action, contentType, PARAMETER_MODULE);
-                id = requireNumber(req, res, action, contentType, PARAMETER_ID);
+                folderId = requireNumber(req, res, action, PARAMETER_FOLDERID);
+                attachedId = requireNumber(req, res, action, PARAMETER_ATTACHEDID);
+                moduleId = requireNumber(req, res, action, PARAMETER_MODULE);
+                id = requireNumber(req, res, action, PARAMETER_ID);
 
             } catch (final OXAborted x) {
                 return;
@@ -199,7 +190,6 @@ public class Attachment extends PermissionServlet {
                 res,
                 req.getHeader("user-agent"),
                 isIE(req),
-                isIE7(req),
                 folderId,
                 attachedId,
                 moduleId,
@@ -230,14 +220,12 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    @OXThrows(category = AbstractOXException.Category.CODE_ERROR, desc = "", exceptionId = 1, msg = "Invalid parameter sent in request. Parameter '%s' was '%s' which does not look like a number")
-    private int requireNumber(final HttpServletRequest req, final HttpServletResponse res, final String action, final String contentType, final String parameter) {
+    private int requireNumber(final HttpServletRequest req, final HttpServletResponse res, final String action, final String parameter) {
         final String value = req.getParameter(parameter);
         try {
             return Integer.parseInt(value);
         } catch (final NumberFormatException nfe) {
-            final AttachmentException t = EXCEPTIONS.create(1, parameter, value);
-            handle(res, t, action);
+            handle(res, AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value), action);
             throw new OXAborted();
         }
     }
@@ -357,9 +345,9 @@ public class Attachment extends PermissionServlet {
             try {
                 res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
 
-				throw new UploadServletException(res, substituteJS(
-						ResponseWriter.getJSON(resp).toString(), "error"),
-						x.getMessage(), x);
+                throw new UploadServletException(res, substituteJS(
+                        ResponseWriter.getJSON(resp).toString(), "error"),
+                        x.getMessage(), x);
             } catch (final JSONException e) {
                 LOG.error("Giving up", e);
             }
@@ -384,7 +372,7 @@ public class Attachment extends PermissionServlet {
 
     }
 
-    private void document(final HttpServletResponse res, final String userAgent, final boolean ie, final boolean ie7, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
+    private void document(final HttpServletResponse res, final String userAgent, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
         InputStream documentData = null;
         OutputStream os = null;
 
@@ -437,7 +425,7 @@ public class Attachment extends PermissionServlet {
             // in a new window. To call the JS callback routine from a popup we
             // can use parent.callback_error() but
             // must use window.opener.callback_error()
-			rollback(t, res, ResponseFields.ERROR);
+            rollback(t, res, ResponseFields.ERROR);
             return;
         } finally {
             if (documentData != null) {
@@ -509,7 +497,7 @@ public class Attachment extends PermissionServlet {
             result.put(ResponseFields.DATA, arr);
             result.put(ResponseFields.TIMESTAMP, timestamp);
             w = res.getWriter();
-			w.print(substituteJS(result.toString(), ACTION_ATTACH));
+            w.print(substituteJS(result.toString(), ACTION_ATTACH));
             ATTACHMENT_BASE.commit();
         } catch (final OXException t) {
             try {
@@ -598,7 +586,7 @@ public class Attachment extends PermissionServlet {
         try {
             writer = new UnsynchronizedStringWriter();
             ResponseWriter.write(resp, writer);
-			res.getWriter().write(substituteJS(writer.toString(), action));
+            res.getWriter().write(substituteJS(writer.toString(), action));
         } catch (final JSONException e) {
             LOG.error("", t);
         } catch (final IOException e) {
@@ -618,17 +606,7 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private void checkSingleSize(final long size, final UserSettingMail userSettingMail) throws UploadException {
-        final long maxSize = userSettingMail.getUploadQuotaPerFile();
-        if (maxSize < 1) {
-            return;
-        }
-        if (size > maxSize) {
-            throw new UploadSizeExceededException(size, maxSize, true);
-        }
-    }
-
-    protected void require(final HttpServletRequest req, final HttpServletResponse res, final String... parameters) throws UploadException {
+    protected void require(final HttpServletRequest req, final String... parameters) throws UploadException {
         for (final String param : parameters) {
             if (req.getParameter(param) == null) {
                 throw new UploadException(UploadCode.MISSING_PARAM, null, param);

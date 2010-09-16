@@ -228,11 +228,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return retval;
     }
 
-    public TimedResult<?> getAttachments(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return getAttachments(folderId, attachedId, moduleId, QUERIES.getFields(), null, ASC, ctx, user, userConfig);
     }
 
-    public TimedResult<?> getAttachments(final int folderId, final int attachedId, final int moduleId, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
         checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
@@ -289,11 +289,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             Integer.valueOf(ctx.getContextId())));
     }
 
-    public Delta<?> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return getDelta(folderId, attachedId, moduleId, ts, ignoreDeleted, QUERIES.getFields(), null, ASC, ctx, user, null);
     }
 
-    public Delta<?> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);

@@ -93,6 +93,8 @@ public enum AttachmentExceptionCodes implements OXErrorMessage {
     ATTACH_FAILED(ATTACH_FAILED_MSG, Category.CODE_ERROR, 601),
     /** The Object could not be detached because the update to an underlying object failed. */
     DETACH_FAILED(DETACH_FAILED_MSG, Category.CODE_ERROR, 602),
+    /** Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number. */
+    INVALID_REQUEST_PARAMETER(INVALID_REQUEST_PARAMETER_MSG, Category.USER_INPUT, 701),
     /** Conflicting services registered for context %1$i and folder %2$i */
     SERVICE_CONFLICT(SERVICE_CONFLICT_MSG, Category.SETUP_ERROR, 900),
     ;

@@ -92,15 +92,15 @@ public interface AttachmentBase extends Service {
      */
     public abstract SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx) throws AttachmentException;
 
-    public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException;
+    public abstract TimedResult<AttachmentMetadata> getAttachments(int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException;
 
-    public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, AttachmentField[] columns, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig)  throws OXException;
+    public abstract TimedResult<AttachmentMetadata> getAttachments(int folderId, int attachedId, int moduleId, AttachmentField[] columns, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig)  throws OXException;
 
     public abstract TimedResult<AttachmentMetadata> getAttachments(int folderId, int attachedId, int moduleId, int[] idsToFetch, AttachmentField[] fields, Context context, User user, UserConfiguration userConfig) throws OXException;
 
-    public abstract Delta getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, Context context, User user, UserConfiguration userConfig) throws OXException;
+    public abstract Delta<AttachmentMetadata> getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, Context context, User user, UserConfiguration userConfig) throws OXException;
 
-    public abstract Delta getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, AttachmentField[] fields, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig) throws OXException;
+    public abstract Delta<AttachmentMetadata> getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, AttachmentField[] fields, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig) throws OXException;
 
     public abstract void registerAttachmentListener(AttachmentListener listener, int moduleId);
 

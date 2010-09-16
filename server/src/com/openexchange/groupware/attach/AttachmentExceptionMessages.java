@@ -90,6 +90,8 @@ public final class AttachmentExceptionMessages implements LocalizableStrings {
 
     public static final String DETACH_FAILED_MSG = "The object could not be detached because the update to an underlying object failed.";
 
+    public static final String INVALID_REQUEST_PARAMETER_MSG = "Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number.";
+
     public static final String SERVICE_CONFLICT_MSG = "Conflicting services registered for context %1$i and folder %2$i";
 
     private AttachmentExceptionMessages() {

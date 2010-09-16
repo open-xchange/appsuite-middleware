@@ -61,16 +61,11 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
 import com.openexchange.ajax.writer.AttachmentWriter;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentException;
-import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.attach.Classes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -87,47 +82,51 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST, component = EnumComponent.ATTACHMENT)
 public class AttachmentRequest extends CommonRequest {
 
     private static final AttachmentParser PARSER = new AttachmentParser();
 
-
     private static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
 
     private static final Log LOG = LogFactory.getLog(AttachmentRequest.class);
-    private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(AttachmentRequest.class);
 
     private final UserConfiguration userConfig;
+
     private final User user;
+
     private final Context ctx;
+
     private final Session session;
 
     public AttachmentRequest(final Session session, final Context ctx, final JSONWriter w) {
-        this(new ServerSessionAdapter(session,ctx),w);
+        this(new ServerSessionAdapter(session, ctx), w);
     }
 
     public AttachmentRequest(final ServerSession session, final JSONWriter w) {
         super(w);
         this.ctx = session.getContext();
         this.user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-        this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-                session.getContext());
+        this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
         this.session = session;
     }
 
     public static boolean hasPermission(final UserConfiguration userConfig) {
-        return true; // FIXME
+        return userConfig.hasCalendar() || userConfig.hasContact() || userConfig.hasTask();
     }
 
-    public boolean action(final String action, final SimpleRequest req){
+    public boolean action(final String action, final SimpleRequest req) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Attachments: " + action + ' ' + req);
         }
         try {
 
             if (AJAXServlet.ACTION_GET.equals(action)) {
-                if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ATTACHEDID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ID)) {
+                if (!checkRequired(
+                    req,
+                    AJAXServlet.PARAMETER_FOLDERID,
+                    AJAXServlet.PARAMETER_ATTACHEDID,
+                    AJAXServlet.PARAMETER_MODULE,
+                    AJAXServlet.PARAMETER_ID)) {
                     return true;
                 }
                 final int folderId = requireNumber(req, AJAXServlet.PARAMETER_FOLDERID);
@@ -135,10 +134,15 @@ public class AttachmentRequest extends CommonRequest {
                 final int moduleId = requireNumber(req, AJAXServlet.PARAMETER_MODULE);
                 final int id = requireNumber(req, AJAXServlet.PARAMETER_ID);
 
-                get(folderId,attachedId,moduleId,id);
+                get(folderId, attachedId, moduleId, id);
                 return true;
             } else if (AJAXServlet.ACTION_UPDATES.equals(action)) {
-                if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID, AJAXServlet.PARAMETER_TIMESTAMP)) {
+                if (!checkRequired(
+                    req,
+                    AJAXServlet.PARAMETER_FOLDERID,
+                    AJAXServlet.PARAMETER_MODULE,
+                    AJAXServlet.PARAMETER_ATTACHEDID,
+                    AJAXServlet.PARAMETER_TIMESTAMP)) {
                     return true;
                 }
                 final int folderId = requireNumber(req, AJAXServlet.PARAMETER_FOLDERID);
@@ -155,12 +159,12 @@ public class AttachmentRequest extends CommonRequest {
                 final AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
 
                 AttachmentField sort = null;
-                if(null != req.getParameter(AJAXServlet.PARAMETER_SORT)) {
+                if (null != req.getParameter(AJAXServlet.PARAMETER_SORT)) {
                     sort = AttachmentField.get(Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_SORT)));
                 }
 
                 int order = AttachmentBase.ASC;
-                if("DESC".equalsIgnoreCase(req.getParameter(AJAXServlet.PARAMETER_ORDER))) {
+                if ("DESC".equalsIgnoreCase(req.getParameter(AJAXServlet.PARAMETER_ORDER))) {
                     order = AttachmentBase.DESC;
                 }
 
@@ -168,7 +172,7 @@ public class AttachmentRequest extends CommonRequest {
 
                 final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
 
-                updates(folderId,attachedId,moduleId,timestamp, "deleted".equals(delete), columns, sort, order, timeZoneId);
+                updates(folderId, attachedId, moduleId, timestamp, "deleted".equals(delete), columns, sort, order, timeZoneId);
                 return true;
             } else if (AJAXServlet.ACTION_ALL.equals(action)) {
                 if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID)) {
@@ -181,17 +185,17 @@ public class AttachmentRequest extends CommonRequest {
                 final AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
 
                 AttachmentField sort = null;
-                if(null != req.getParameter(AJAXServlet.PARAMETER_SORT)) {
+                if (null != req.getParameter(AJAXServlet.PARAMETER_SORT)) {
                     sort = AttachmentField.get(Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_SORT)));
                 }
 
                 int order = AttachmentBase.ASC;
-                if("DESC".equalsIgnoreCase(req.getParameter(AJAXServlet.PARAMETER_ORDER))) {
+                if ("DESC".equalsIgnoreCase(req.getParameter(AJAXServlet.PARAMETER_ORDER))) {
                     order = AttachmentBase.DESC;
                 }
-                all(folderId,attachedId,moduleId,columns,sort,order);
+                all(folderId, attachedId, moduleId, columns, sort, order);
                 return true;
-            } else  if (AJAXServlet.ACTION_DETACH.equals(action) || AJAXServlet.ACTION_LIST.equals(action)) {
+            } else if (AJAXServlet.ACTION_DETACH.equals(action) || AJAXServlet.ACTION_LIST.equals(action)) {
                 if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID)) {
                     return true;
                 }
@@ -202,7 +206,7 @@ public class AttachmentRequest extends CommonRequest {
                 final JSONArray idsArray = (JSONArray) req.getBody();
 
                 final int[] ids = new int[idsArray.length()];
-                for(int i = 0; i < idsArray.length(); i++) {
+                for (int i = 0; i < idsArray.length(); i++) {
                     try {
                         ids[i] = idsArray.getInt(i);
                     } catch (final JSONException e) {
@@ -216,18 +220,18 @@ public class AttachmentRequest extends CommonRequest {
                     }
                 }
 
-                if(AJAXServlet.ACTION_DETACH.equals(action)) {
+                if (AJAXServlet.ACTION_DETACH.equals(action)) {
                     detach(folderId, attachedId, moduleId, ids);
                 } else {
                     final AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
-                    list(folderId,attachedId,moduleId,ids,columns);
+                    list(folderId, attachedId, moduleId, ids, columns);
                 }
                 return true;
             }
         }
-        /*catch (IOException x) {
-            LOG.info("Lost contact to client: ",x);
-        }*/
+        /*
+         * catch (IOException x) { LOG.info("Lost contact to client: ",x); }
+         */
         catch (final UnknownColumnException e) {
             handle(e);
         } catch (final OXAborted x) {
@@ -241,16 +245,14 @@ public class AttachmentRequest extends CommonRequest {
         final String value = req.getParameter(parameter);
         try {
             return Integer.parseInt(value);
-        } catch(final NumberFormatException  nfe) {
+        } catch (final NumberFormatException nfe) {
             numberError(parameter, value);
             throw new OXAborted();
         }
     }
 
-    @OXThrows(category = AbstractOXException.Category.CODE_ERROR, desc = "", exceptionId = 1, msg = "Invalid parameter sent in request. Parameter '%s' was '%s' which does not look like a number")
     public void numberError(final String parameter, final String value) {
-        final AttachmentException t = EXCEPTIONS.create(1, parameter, value);
-        handle(t);
+        handle(AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value));
     }
 
     // Actions
@@ -259,7 +261,7 @@ public class AttachmentRequest extends CommonRequest {
         try {
             ATTACHMENT_BASE.startTransaction();
 
-            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(folderId,attachedId,moduleId,id,ctx,user,userConfig);
+            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(folderId, attachedId, moduleId, id, ctx, user, userConfig);
 
             final AttachmentWriter aWriter = new AttachmentWriter(w);
             aWriter.timedResult(attachment.getCreationDate().getTime());
@@ -283,28 +285,43 @@ public class AttachmentRequest extends CommonRequest {
         }
     }
 
-
     private void updates(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] fields, final AttachmentField sort, final int order, final String timeZoneId) {
 
-        SearchIterator iter = null;
-        SearchIterator iter2 = null;
+        SearchIterator<AttachmentMetadata> iter = null;
+        SearchIterator<AttachmentMetadata> iter2 = null;
 
         try {
             ATTACHMENT_BASE.startTransaction();
-            Delta delta;
-            if(sort != null) {
-                delta = ATTACHMENT_BASE.getDelta(folderId,attachedId,moduleId,ts,ignoreDeleted,fields,sort,order,ctx,user,userConfig);
+            Delta<AttachmentMetadata> delta;
+            if (sort != null) {
+                delta = ATTACHMENT_BASE.getDelta(
+                    folderId,
+                    attachedId,
+                    moduleId,
+                    ts,
+                    ignoreDeleted,
+                    fields,
+                    sort,
+                    order,
+                    ctx,
+                    user,
+                    userConfig);
             } else {
-                delta = ATTACHMENT_BASE.getDelta(folderId,attachedId,moduleId,ts,ignoreDeleted,ctx,user,userConfig);
+                delta = ATTACHMENT_BASE.getDelta(folderId, attachedId, moduleId, ts, ignoreDeleted, ctx, user, userConfig);
             }
             iter = delta.results();
             iter2 = delta.getDeleted();
 
             final AttachmentWriter aWriter = new AttachmentWriter(w);
             aWriter.timedResult(delta.sequenceNumber());
-            aWriter.writeDelta(iter, iter2, fields,ignoreDeleted, null == timeZoneId ? TimeZoneUtils.getTimeZone(user.getTimeZone()) : TimeZoneUtils.getTimeZone(timeZoneId));
+            aWriter.writeDelta(
+                iter,
+                iter2,
+                fields,
+                ignoreDeleted,
+                null == timeZoneId ? TimeZoneUtils.getTimeZone(user.getTimeZone()) : TimeZoneUtils.getTimeZone(timeZoneId));
             aWriter.endTimedResult();
-            //w.flush();
+            // w.flush();
             ATTACHMENT_BASE.commit();
         } catch (final Throwable t) {
             try {
@@ -319,14 +336,14 @@ public class AttachmentRequest extends CommonRequest {
             } catch (final TransactionException e) {
                 LOG.error(e.getMessage(), e);
             }
-            if (iter!=null) {
+            if (iter != null) {
                 try {
                     iter.close();
                 } catch (final SearchIteratorException e1) {
                     LOG.error(e1.getMessage(), e1);
                 }
             }
-            if (iter2!=null) {
+            if (iter2 != null) {
                 try {
                     iter2.close();
                 } catch (final SearchIteratorException e) {
@@ -338,22 +355,22 @@ public class AttachmentRequest extends CommonRequest {
 
     private void all(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] fields, final AttachmentField sort, final int order) {
 
-        SearchIterator iter = null;
+        SearchIterator<AttachmentMetadata> iter = null;
 
         try {
             ATTACHMENT_BASE.startTransaction();
-            TimedResult result;
-            if(sort != null) {
-                result = ATTACHMENT_BASE.getAttachments(folderId,attachedId,moduleId,fields,sort,order,ctx,user,userConfig);
+            TimedResult<AttachmentMetadata> result;
+            if (sort != null) {
+                result = ATTACHMENT_BASE.getAttachments(folderId, attachedId, moduleId, fields, sort, order, ctx, user, userConfig);
             } else {
-                result = ATTACHMENT_BASE.getAttachments(folderId,attachedId,moduleId,ctx,user,userConfig);
+                result = ATTACHMENT_BASE.getAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
             }
             iter = result.results();
             final AttachmentWriter aWriter = new AttachmentWriter(w);
             aWriter.timedResult(result.sequenceNumber());
-            aWriter.writeAttachments(iter,fields,TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            aWriter.writeAttachments(iter, fields, TimeZoneUtils.getTimeZone(user.getTimeZone()));
             aWriter.endTimedResult();
-            //w.flush();
+            // w.flush();
             ATTACHMENT_BASE.commit();
         } catch (final Throwable t) {
             try {
@@ -368,7 +385,7 @@ public class AttachmentRequest extends CommonRequest {
             } catch (final TransactionException e) {
                 LOG.error(e.getMessage(), e);
             }
-            if (iter!=null) {
+            if (iter != null) {
                 try {
                     iter.close();
                 } catch (final SearchIteratorException e) {
@@ -383,14 +400,14 @@ public class AttachmentRequest extends CommonRequest {
         try {
             ATTACHMENT_BASE.startTransaction();
 
-            timestamp = ATTACHMENT_BASE.detachFromObject(folderId,attachedId,moduleId,ids,session,ctx,user,userConfig);
+            timestamp = ATTACHMENT_BASE.detachFromObject(folderId, attachedId, moduleId, ids, session, ctx, user, userConfig);
 
             ATTACHMENT_BASE.commit();
         } catch (final Throwable t) {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final TransactionException e) {
-                LOG.debug("",e);
+                LOG.debug("", e);
             }
             handle(t);
             return;
@@ -406,28 +423,28 @@ public class AttachmentRequest extends CommonRequest {
         resp.setData("");
         resp.setTimestamp(new Date(timestamp));
         try {
-            Response.write(resp, w);
+            ResponseWriter.write(resp, w);
         } catch (final JSONException e) {
-            LOG.debug("Cannot contact client",e);
+            LOG.debug("Cannot contact client", e);
         }
     }
 
     private void list(final int folderId, final int attachedId, final int moduleId, final int[] ids, final AttachmentField[] fields) {
 
-        SearchIterator iter = null;
+        SearchIterator<AttachmentMetadata> iter = null;
 
         try {
             ATTACHMENT_BASE.startTransaction();
 
-            final TimedResult result = ATTACHMENT_BASE.getAttachments(folderId,attachedId,moduleId,ids, fields, ctx,user,userConfig);
+            final TimedResult<AttachmentMetadata> result = ATTACHMENT_BASE.getAttachments(folderId, attachedId, moduleId, ids, fields, ctx, user, userConfig);
 
-            iter=result.results();
+            iter = result.results();
 
             final AttachmentWriter aWriter = new AttachmentWriter(w);
             aWriter.timedResult(result.sequenceNumber());
-            aWriter.writeAttachments(iter,fields,TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            aWriter.writeAttachments(iter, fields, TimeZoneUtils.getTimeZone(user.getTimeZone()));
             aWriter.endTimedResult();
-            //w.flush();
+            // w.flush();
 
             ATTACHMENT_BASE.commit();
         } catch (final Throwable t) {
@@ -444,7 +461,7 @@ public class AttachmentRequest extends CommonRequest {
                 LOG.error(e.getMessage(), e);
             }
 
-            if (iter!=null) {
+            if (iter != null) {
                 try {
                     iter.close();
                 } catch (final SearchIteratorException e) {

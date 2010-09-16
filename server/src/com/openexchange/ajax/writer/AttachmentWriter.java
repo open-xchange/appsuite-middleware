@@ -61,7 +61,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 
-public class AttachmentWriter extends TimedWriter {
+public class AttachmentWriter extends TimedWriter<AttachmentMetadata> {
     
     public AttachmentWriter(final JSONWriter writer) {
         super(writer);
