@@ -194,13 +194,13 @@ public class ServletRequestWrapper implements ServletRequest {
         if (isContentType) {
             handleContentType(value);
         }
-        if (headers.containsKey(name) && !SINGLE_VALUE_HEADERS.contains(name)) {
+        final String[] prevValues = headers.get(name);
+        if (null != prevValues && !SINGLE_VALUE_HEADERS.contains(name)) {
             /*
              * Header may carry multiple values
              */
-            final String[] oldValues = headers.get(name);
-            final String[] newValues = new String[oldValues.length + 1];
-            System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
+            final String[] newValues = new String[prevValues.length + 1];
+            System.arraycopy(prevValues, 0, newValues, 0, prevValues.length);
             newValues[newValues.length - 1] = value;
             headers.put(name, newValues);
         } else {
