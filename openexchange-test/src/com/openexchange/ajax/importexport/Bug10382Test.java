@@ -102,7 +102,7 @@ public class Bug10382Test extends AbstractAJAXSession {
             false));
         assertTrue("ICal imported without permissions.", response.hasError());
         final AbstractOXException exception = response.getException();
-        assertEquals("Wrong component in exception.", EnumComponent.IMPORT_EXPORT, exception.getComponent());
+        assertEquals("Wrong component in exception.", EnumComponent.IMPORT_EXPORT.getAbbreviation(), exception.getComponent().getAbbreviation());
         assertEquals(
             "Wrong error code in exception.",
             ImportExportExceptionCodes.NO_IMPORTER.getDetailNumber(),
