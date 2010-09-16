@@ -51,7 +51,9 @@ package com.openexchange.tools;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -102,6 +104,19 @@ public final class Arrays {
         for (final Integer i : tmp) {
             retval[pos++] = i.intValue();
         }
+        return retval;
+    }
+
+    public static <T> T[] remove(T[] removeFrom, T... toRemove) {
+        List<T> tmp = new ArrayList<T>();
+        for (T copy : removeFrom) {
+            tmp.add(copy);
+        }
+        for (T remove : toRemove) {
+            tmp.remove(remove);
+        }
+        @SuppressWarnings("unchecked")
+        T[] retval = tmp.toArray((T[]) Array.newInstance(removeFrom.getClass().getComponentType(), tmp.size()));
         return retval;
     }
 
