@@ -61,9 +61,9 @@ public class AllTests {
     public static Test suite() {
         TestSuite suite = new TestSuite(AllTests.class.getName());
         //$JUnit-BEGIN$
-        suite.addTest(UtilTest.suite());
-        suite.addTest(Bug16865Test.suite());
         suite.addTest(ContextTest.suite());
+        suite.addTest(Bug16865Test.suite());
+        suite.addTest(UtilTest.suite());
         //$JUnit-END$
         return suite;
     }
