@@ -107,7 +107,7 @@ public class AjaxException extends AbstractOXException {
          */
         UnknownAction("Unknown AJAX action: %s.", Category.CODE_ERROR, 1),
         /**
-         * Missing the following field: %s
+         * Missing the following request parameter: %s
          */
         MISSING_PARAMETER("Missing the following request parameter: %s", Category.CODE_ERROR, 2),
         /**
@@ -159,9 +159,9 @@ public class AjaxException extends AbstractOXException {
          */
         NonSecureDenied("Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure connection.", Category.CODE_ERROR, 14),
         /**
-         * The action "%1$s" is disabled due to the server configuration
+         * The action "%1$s" is disabled due to server configuration
          */
-        DisabledAction("The action \"%1$s\" is disabled due to the server configuration", Category.PERMISSION, 15),
+        DisabledAction("The action \"%1$s\" is disabled due to server configuration", Category.PERMISSION, 15),
         ;
         
         /**
