@@ -239,6 +239,20 @@ public final class IMAPFolderConverter {
                 final boolean exists = imapFolder.exists(); // Fires: LIST "" INBOX/sub1
                 mailFolder.setExists(exists);
                 mailFolder.setSeparator(imapFolder.getSeparator());
+                // Shared?
+                {
+                    final String[] userNamespaces =
+                        NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId());
+                    final char sep = mailFolder.getSeparator();
+                    boolean shared = false;
+                    for (int i = 0; !shared && i < userNamespaces.length; i++) {
+                        final String userNamespace = userNamespaces[i];
+                        if (imapFullname.equals(userNamespace) || imapFullname.startsWith(new StringBuilder(userNamespace).append(sep).toString())) {
+                            shared = true;
+                        }
+                    }
+                    mailFolder.setShared(true);
+                }
                 /*-
                  * -------------------------------------------------------------------
                  * -------------------------##################------------------------
