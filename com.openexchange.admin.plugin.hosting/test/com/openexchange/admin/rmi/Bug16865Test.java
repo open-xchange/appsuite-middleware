@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi;
 
-import static com.openexchange.java.Autoboxing.I;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import java.rmi.Naming;
@@ -91,7 +90,7 @@ public final class Bug16865Test {
                 }
             }
             assertNotNull("Just registered database not found.", test);
-            assertEquals("Initial number of database connections must be zero by default.", I(0), test.getPoolInitial());
+            assertEquals("Initial number of database connections must be zero by default.", Integer.valueOf(0), test.getPoolInitial());
         } finally {
             util.unregisterDatabase(created, cred);
         }
