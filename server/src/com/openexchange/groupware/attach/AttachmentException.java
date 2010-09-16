@@ -52,16 +52,10 @@ package com.openexchange.groupware.attach;
 import com.openexchange.api2.OXException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 
 public class AttachmentException extends OXException {
 
     private static final long serialVersionUID = -5210881621553596187L;
-
-    public AttachmentException(final Category category, final int number, final String message, final Throwable cause, final Object[] msgArgs) {
-        super(EnumComponent.ATTACHMENT, category,number,message,cause);
-        setMessageArgs(msgArgs);
-    }
 
     public AttachmentException(final AbstractOXException e) {
         super(e);
