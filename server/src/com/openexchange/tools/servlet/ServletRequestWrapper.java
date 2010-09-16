@@ -53,6 +53,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -288,7 +289,7 @@ public class ServletRequestWrapper implements ServletRequest {
     }
 
     public String[] getParameterValues(final String name) {
-        return parameters.get(name);
+        return clone(parameters.get(name));
     }
 
     public String getParameter(final String name) {
@@ -301,7 +302,7 @@ public class ServletRequestWrapper implements ServletRequest {
     }
 
     public Map<?, ?> getParameterMap() {
-        return parameters;
+        return Collections.unmodifiableMap(parameters);
     }
 
     public Object getAttribute(final String name) {
@@ -576,6 +577,16 @@ public class ServletRequestWrapper implements ServletRequest {
                 return iter.next();
             }
         };
+    }
+
+    private static String[] clone(final String[] src) {
+        if (null == src) {
+            return null;
+        }
+        final int len = src.length;
+        final String[] clone = new String[len];
+        System.arraycopy(src, 0, clone, 0, len);
+        return clone;
     }
 
 }
