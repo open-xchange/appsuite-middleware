@@ -251,7 +251,7 @@ public final class IMAPFolderConverter {
                             shared = true;
                         }
                     }
-                    mailFolder.setShared(true);
+                    mailFolder.setShared(shared);
                 }
                 /*-
                  * -------------------------------------------------------------------
