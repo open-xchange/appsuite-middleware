@@ -54,72 +54,78 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * OXPermissionException
+ * {@link OXPermissionException}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class OXPermissionException extends OXException {
 
-	private static final long serialVersionUID = 8893780895314747686L;
-	
+    private static final long serialVersionUID = 8893780895314747686L;
+
+    /**
+     * Initializes a new {@link OXPermissionException}.
+     * 
+     * @param code The code for the exception
+     * @param messageArgs The arguments that will be formatted into the message
+     */
     public OXPermissionException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
-	
+
     /**
      * Initializes a new exception using the information provided by the code.
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
+     * 
+     * @param code The code for the exception
+     * @param cause The cause of the exception
+     * @param messageArgs The arguments that will be formatted into the message
      */
-    public OXPermissionException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.PERMISSION, code.category, code.number,
-            null == code.message ? cause.getMessage() : code.message, cause);
+    public OXPermissionException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(
+            EnumComponent.PERMISSION,
+            code.getCategory(),
+            code.getNumber(),
+            null == code.getMessage() ? cause.getMessage() : code.getMessage(),
+            cause);
         setMessageArgs(messageArgs);
     }
-	
+
     /**
      * Constructor with all parameters.
-     * @param component Component.
-     * @param category Category.
-     * @param number detail number.
-     * @param message message of the exception.
-     * @param cause the cause.
-     * @param messageArgs arguments for the exception message.
+     * 
+     * @param component The component.
+     * @param category The category.
+     * @param number The detail number.
+     * @param message The message of the exception.
+     * @param cause The cause.
+     * @param messageArgs The arguments for the exception message.
      */
-    public OXPermissionException(final EnumComponent component, final Category category,
-        final int number, final String message, final Throwable cause, final Object... messageArgs) {
+    public OXPermissionException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... messageArgs) {
         super(component, category, number, message, cause);
         super.setMessageArgs(messageArgs);
     }
 
-	/**
-	 * Initializes a new exception using the information provides by the cause.
-	 * 
-	 * @param cause
-	 *            the cause of the exception.
-	 */
-	public OXPermissionException(final AbstractOXException cause) {
-		super(cause);
-	}
-	
+    /**
+     * Initializes a new exception using the information provides by the cause.
+     * 
+     * @param cause The cause of the exception.
+     */
+    public OXPermissionException(final AbstractOXException cause) {
+        super(cause);
+    }
+
     /**
      * Error codes for permission exceptions.
-     * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
      */
     public enum Code {
         /**
          * No permission for module: %s.
          */
-        NoPermissionForModul("No permission for module: %s.",
-            Category.USER_INPUT, 1),
-        
-		/**
+        NoPermissionForModul("No permission for module: %s.", Category.USER_INPUT, 1),
+
+        /**
          * No folder permission.
          */
-        NoFolderPermission("No folder permission.",
-            Category.PERMISSION, 2);		
+        NoFolderPermission("No folder permission.", Category.PERMISSION, 2);
 
         /**
          * Message of the exception.
@@ -138,27 +144,27 @@ public class OXPermissionException extends OXException {
 
         /**
          * Default constructor.
+         * 
          * @param message message.
          * @param category category.
          * @param detailNumber detail number.
          */
-        private Code(final String message, final Category category,
-            final int detailNumber) {
+        private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.category = category;
             this.number = detailNumber;
         }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public String getMessage() {
-			return message;
-		}
+        public String getMessage() {
+            return message;
+        }
 
-		public int getNumber() {
-			return number;
-		}
-	}
+        public int getNumber() {
+            return number;
+        }
+    }
 }
