@@ -57,8 +57,8 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 
 /**
  * {@link MailAccountMultipleHandlerFactory}
- * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountMultipleHandlerFactory implements MultipleHandlerFactoryService {
 
