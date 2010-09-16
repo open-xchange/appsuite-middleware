@@ -615,6 +615,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         mailFolder.removeOwnPermission();
         mailFolder.addPermission(mp);
         mailFolder.setOwnPermission(mp);
+        mailFolder.setShared(false);
         // POP3 does not support subscription
         mailFolder.setSubscribed(true);
         mailFolder.setSubscribedSubfolders(mailFolder.hasSubfolders());
