@@ -195,7 +195,9 @@ public class ServletRequestWrapper implements ServletRequest {
             handleContentType(value);
         }
         final String[] prevValues = headers.get(name);
-        if (null != prevValues && !SINGLE_VALUE_HEADERS.contains(name)) {
+        if (null == prevValues || SINGLE_VALUE_HEADERS.contains(name)) {
+            headers.put(name, new String[] { value });
+        } else {
             /*
              * Header may carry multiple values
              */
@@ -203,8 +205,6 @@ public class ServletRequestWrapper implements ServletRequest {
             System.arraycopy(prevValues, 0, newValues, 0, prevValues.length);
             newValues[newValues.length - 1] = value;
             headers.put(name, newValues);
-        } else {
-            headers.put(name, new String[] { value });
         }
     }
 
