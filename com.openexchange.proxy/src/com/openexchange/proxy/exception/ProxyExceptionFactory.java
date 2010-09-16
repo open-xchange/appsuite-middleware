@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,49 @@
  *
  */
 
-package com.openexchange.proxy.osgi;
+package com.openexchange.proxy.exception;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.proxy.ProxyException;
+import com.openexchange.proxy.ProxyExceptionCodes;
 
-public class Activator implements BundleActivator {
+/**
+ * {@link ProxyExceptionFactory} - Factory for creating {@link ProxyException}.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class ProxyExceptionFactory extends Exceptions<ProxyException> {
 
-	private List<ServiceTracker> tracker = new LinkedList<ServiceTracker>();
+    private static final ProxyExceptionFactory SINGLETON = new ProxyExceptionFactory();
 
-	public void start(BundleContext context) throws Exception {
-		ServletRegisterer customizer = new ServletRegisterer(context);
-        tracker.add(new ServiceTracker(context, HttpService.class.getName(), customizer));
-        tracker.add(new ServiceTracker(context, ConfigurationService.class.getName(), customizer));
-        
-        for (ServiceTracker serviceTracker : tracker) {
-            serviceTracker.open();
-        }
-	}
+    /**
+     * Prevent instantiation.
+     */
+    private ProxyExceptionFactory() {
+        super();
+    }
 
-	public void stop(BundleContext context) throws Exception {
-	    for (ServiceTracker serviceTracker : tracker) {
-            serviceTracker.close();
-        }
-	}
-	
+    /**
+     * @return the singleton instance.
+     */
+    public static ProxyExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected ProxyException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
+        return new ProxyException(message, cause, args);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void knownExceptions() {
+        declareAll(ProxyExceptionCodes.values());
+    }
 }
