@@ -54,6 +54,7 @@ import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mailaccount.Constants;
 import com.openexchange.mailaccount.json.servlet.MailAccountServlet;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.servlet.http.HttpServletManager;
@@ -67,7 +68,7 @@ public final class MailAccountServletInit implements Initialization {
 
     private static final Log LOG = LogFactory.getLog(MailAccountServletInit.class);
 
-    private static final String ALIAS = "ajax/account";
+    private static final String ALIAS = "ajax/" + Constants.getModule();
 
     private final AtomicBoolean started = new AtomicBoolean();
 
