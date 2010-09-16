@@ -2029,6 +2029,8 @@ public final class OutlookFolderStorage implements FolderStorage {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (FolderStorage.SHARED_ID.equals(id)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
+        } else if ("9".equals(id)) { // InfoStore folder
+            folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isDefaultMailFolder(folder)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isNonPrimaryMailAccountFolder(folder)) {
