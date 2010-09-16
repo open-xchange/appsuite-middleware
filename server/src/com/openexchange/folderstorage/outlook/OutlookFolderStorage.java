@@ -2043,7 +2043,22 @@ public final class OutlookFolderStorage implements FolderStorage {
     private static final int MODULE_MAIL = MailContentType.getInstance().getModule();
 
     private static boolean isDefaultMailFolder(final OutlookFolder folder) {
-        return folder.isDefault() && (MODULE_MAIL == folder.getContentType().getModule());
+        if (!folder.isDefault() || (MODULE_MAIL != folder.getContentType().getModule())) {
+            return false;
+        }
+        /*
+         * Check for primary account
+         */
+        final String id = folder.getID();
+        try {
+            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(id);
+            return (MailAccount.DEFAULT_ID == arg.getAccountId());
+        } catch (final RuntimeException e) {
+            /*
+             * Parsing failed
+             */
+            return false;
+        }
     }
 
     private static boolean isNonPrimaryMailAccountFolder(final OutlookFolder folder) {
