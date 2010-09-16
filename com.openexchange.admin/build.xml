@@ -111,16 +111,16 @@
         <filter token="oxosgibundle"           value="${bundlesdir}/${osgibundle}"/>
         <filter token="oxadminbundle"           value="${bundlesdir}/${bundle.name}"/>
         <filter token="oxcommonbundle"           value="${bundlesdir}/${commonBundle}"/>
-           <filter token="oxserverbundle"           value="${bundlesdir}/${serverbundle}"/>
-           <filter token="oxglobalbundle"           value="${bundlesdir}/${globalbundle}"/>
-           <filter token="oxconfigbundle"           value="${bundlesdir}/${configbundle}"/>
-           <filter token="oxsessiondbundle"       value="${bundlesdir}/${sessiondbundle}"/>
+        <filter token="oxserverbundle"           value="${bundlesdir}/${serverbundle}"/>
+        <filter token="oxglobalbundle"           value="${bundlesdir}/${globalbundle}"/>
+        <filter token="oxconfigbundle"           value="${bundlesdir}/${configbundle}"/>
+        <filter token="oxsessiondbundle"       value="${bundlesdir}/${sessiondbundle}"/>
         <filter token="oxmonitoringbundle"       value="${bundlesdir}/${monitoringbundle}"/>
         <filter token="oxmanagementbundle"       value="${bundlesdir}/${managementbundle}"/>
         <filter token="servletbundle"           value="${bundlesdir}/${servletbundle}"/>
-           <filter token="loggingbundle"           value="${bundlesdir}/${commonsloggingbundle}"/>
-           <filter token="osgiservicesbundle"       value="${bundlesdir}/${osgiservicesbundle}"/>
-           <filter token="oxcommonbundlelib"       value="${bundlesdir}/${commonBundle}/lib"/>
+        <filter token="loggingbundle"           value="${bundlesdir}/${commonsloggingbundle}"/>
+        <filter token="osgiservicesbundle"       value="${bundlesdir}/${osgiservicesbundle}"/>
+        <filter token="oxcommonbundlelib"       value="${bundlesdir}/${commonBundle}/lib"/>
     </filterset>
 
 
@@ -133,19 +133,19 @@
 
     <target name="compile-console">
         <subant failonerror="true" inheritall="false" target="compile">
-                <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
         </subant>
     </target>
 
     <target name="install-console">
         <subant failonerror="true" inheritall="false" target="install">
-                <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
         </subant>
     </target>
 
     <target name="clean-console">
         <subant failonerror="true" inheritall="false" target="clean">
-                <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
         </subant>
     </target>
 
@@ -157,7 +157,7 @@
 
     <target name="compile-context-plugin" if="ctx.available">
         <subant failonerror="true" inheritall="false" target="compile">
-                <fileset dir="../" includes="open-xchange-admin-plugin-context_light/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-plugin-context_light/build.xml"/>
         </subant>
     </target>
 
@@ -166,7 +166,7 @@
 
     <target name="compile-mail-plugin" if="mail.available">
         <subant failonerror="true" inheritall="false" target="compile">
-                <fileset dir="../" includes="open-xchange-admin-plugin-mail/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-plugin-mail/build.xml"/>
         </subant>
     </target>
 
@@ -184,7 +184,7 @@
 
     <target name="compile-sw-update-plugin" depends="compile-mail-plugin,compile-context-plugin" if="swupdate.complete">
         <subant failonerror="true" inheritall="false" target="compile">
-                <fileset dir="../" includes="open-xchange-admin-plugin-sw-update/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-plugin-sw-update/build.xml"/>
         </subant>
     </target>
 
@@ -193,40 +193,40 @@
 
     <target name="compile-license-plugin" depends="compile-sw-update-plugin" if="swupdate.complete">
         <subant failonerror="true" inheritall="false" target="compile">
-                <fileset dir="../" includes="open-xchange-admin-plugin-license/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-plugin-license/build.xml"/>
         </subant>
     </target>
     <!-- END FIXME -->
 
     <target name="compile-plugins" depends="compile-license-plugin">
         <subant failonerror="true" inheritall="false" target="compile">
-                <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
         </subant>
     </target>
 
     <target name="jar-plugins">
         <subant failonerror="true" inheritall="false" target="jar">
-                <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
         </subant>
     </target>
 
     <target name="install-plugins">
         <subant failonerror="true" inheritall="false" target="install">
-                <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
         </subant>
     </target>
 
     <target name="clean-plugins">
         <subant failonerror="true" inheritall="false" target="clean">
-                <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
         </subant>
     </target>
 
-   <target name="dist-plugins">
+    <target name="dist-plugins">
         <subant failonerror="true" inheritall="false" target="dist">
-                   <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
-           </subant>
-   </target>
+            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+        </subant>
+    </target>
 
     <target name="manifest">
         <copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
@@ -267,7 +267,6 @@
         <antcall target="jar-plugins"></antcall>
     </target>
 
-
     <target name="client" depends="compile">
         <mkdir dir="jar"/>
         <jar update="true" jarfile="jar/${client.jar}"
@@ -276,7 +275,6 @@
          basedir="classes"/>
         <copy file="${bundlesdir}/${commonsclijar}" tofile="jar/${cli.jar}"/>
     </target>
-
 
     <target name="doc">
         <property name="plugdocpath" value="open-xchange-admin-plugin**/src/com/openexchange/admin/rmi"/>
@@ -307,7 +305,6 @@
             <link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
         </javadoc>
     </target>
-
 
     <target name="clean">
         <delete dir="classes"/>
@@ -444,6 +441,5 @@
             <sysproperty key="rmi_test_host" value="${rmi_test_host}"/>
         </junit>
     </target>
-
 
 </project>
