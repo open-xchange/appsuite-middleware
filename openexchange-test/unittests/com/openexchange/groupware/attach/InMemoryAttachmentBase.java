@@ -96,11 +96,11 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         return locations;
     }
 
-    public TimedResult<?> getAttachments(final int folderId, final int attachedId, final int moduleId, final Context context, final User user, final UserConfiguration userConfig) {
+    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
-    public TimedResult<?> getAttachments(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
+    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
@@ -108,11 +108,11 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         throw new UnsupportedOperationException();
     }
 
-    public Delta<?> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context context, final User user, final UserConfiguration userConfig) {
+    public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
-    public Delta<?> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] fields, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
+    public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] fields, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
