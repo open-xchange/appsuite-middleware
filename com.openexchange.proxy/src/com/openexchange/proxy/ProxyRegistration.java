@@ -74,7 +74,7 @@ public final class ProxyRegistration {
      * @param session The session
      * @param restrictions The restrictions
      */
-    private ProxyRegistration(final URL url, final Session session, final Collection<Restriction> restrictions) {
+    public ProxyRegistration(final URL url, final Session session, final Collection<Restriction> restrictions) {
         super();
         this.url = url;
         this.session = session;
