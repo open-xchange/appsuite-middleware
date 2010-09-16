@@ -110,9 +110,9 @@ public class OXPermissionException extends OXException {
      */
     public enum Code {
         /**
-         * No permission for modul: %s.
+         * No permission for module: %s.
          */
-        NoPermissionForModul("No permission for modul: %s.",
+        NoPermissionForModul("No permission for module: %s.",
             Category.USER_INPUT, 1),
         
 		/**
