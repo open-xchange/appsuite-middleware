@@ -112,6 +112,5 @@ public class DoNotDuplicateEmptyContactsTest extends OXMFContactLifeCycleTest {
         subMgr.refreshAction(subscription.getId());
         contacts = cMgr.allAction(subFolder.getObjectID());
         assertEquals("Should only contain one contact even after refreshing", 1, contacts.length);
-
     }
 }
