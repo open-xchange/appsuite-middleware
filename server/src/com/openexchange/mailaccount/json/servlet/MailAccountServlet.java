@@ -71,7 +71,7 @@ public class MailAccountServlet extends MultipleAdapterServletNew {
     }
 
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return session.getUserConfiguration().hasWebMail() && session.getUserConfiguration().isMultipleMailAccounts();
     }
 
