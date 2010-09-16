@@ -90,7 +90,7 @@ public class OverridableAttachmentAuthorization implements AttachmentAuthorizati
         try {
             return chooser.choose(contextId, folderId);
         } catch (ServicePriorityConflictException e) {
-            throw AttachmentExceptionCodes.AUTHORIZATION_SERVICE_CONFLICT.create(I(contextId), I(folderId));
+            throw AttachmentExceptionCodes.SERVICE_CONFLICT.create(I(contextId), I(folderId));
         }
     }
 }

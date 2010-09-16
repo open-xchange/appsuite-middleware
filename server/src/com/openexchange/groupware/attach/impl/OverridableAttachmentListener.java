@@ -49,29 +49,21 @@
 
 package com.openexchange.groupware.attach.impl;
 
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentException;
-import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentListener;
-import com.openexchange.groupware.attach.Classes;
 import com.openexchange.tools.service.ServicePriorityConflictException;
 import com.openexchange.tools.service.SpecificServiceChooser;
 
 /**
  * {@link OverridableAttachmentListener}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@OXExceptionSource(
-    classId = Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTLISTENER,
-    component = EnumComponent.ATTACHMENT
-)
 public class OverridableAttachmentListener implements AttachmentListener {
-    private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(OverridableAttachmentListener.class);
+
     private SpecificServiceChooser<AttachmentListener> chooser;
 
     public OverridableAttachmentListener(SpecificServiceChooser<AttachmentListener> chooser) {
@@ -86,16 +78,13 @@ public class OverridableAttachmentListener implements AttachmentListener {
         return getDelegate(e).detached(e);
     }
 
-    @OXThrows(category=Category.SETUP_ERROR, desc="", exceptionId=0, msg="Conflicting services registered for context %i and folder %i")
     private AttachmentListener getDelegate(AttachmentEvent e) throws AttachmentException {
         int contextId = e.getContext().getContextId();
         int folderId = e.getFolderId();
         try {
             return chooser.choose(contextId, folderId);
         } catch (ServicePriorityConflictException e1) {
-            throw EXCEPTIONS.create(0, contextId, folderId);
+            throw AttachmentExceptionCodes.SERVICE_CONFLICT.create(I(contextId), I(folderId));
         }
-        
     }
-
 }

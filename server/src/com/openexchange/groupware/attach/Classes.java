@@ -52,8 +52,6 @@ package com.openexchange.groupware.attach;
 public class Classes {
 	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_ATTACHMENTEXCEPTIONFACTORY = 0;
 	
-    public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTLISTENER = 10;
-
     public static final int COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST = 7;
     public static final int COM_OPENEXCHANGE_AJAX_ATTACHMENT = 8;
 }
