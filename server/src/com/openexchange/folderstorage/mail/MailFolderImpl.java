@@ -253,10 +253,14 @@ public final class MailFolderImpl extends AbstractFolder {
             permissionBits |= BIT_USER_FLAG;
         }
         bits = permissionBits;
-        /*
-         * Trash folder must not be cacheable
-         */
-        cacheable = !mailFolder.isTrash(); // || !mailFolderType.equals(MailFolderType.TRASH);
+        if (mailFolder.containsShared() && mailFolder.isShared()) {
+            cacheable = false;
+        } else {
+            /*
+             * Trash folder must not be cacheable
+             */
+            cacheable = !mailFolder.isTrash(); // || !mailFolderType.equals(MailFolderType.TRASH);
+        }
     }
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };

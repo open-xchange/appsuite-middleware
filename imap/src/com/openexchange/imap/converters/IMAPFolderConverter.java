@@ -247,7 +247,7 @@ public final class IMAPFolderConverter {
                     boolean shared = false;
                     for (int i = 0; !shared && i < userNamespaces.length; i++) {
                         final String userNamespace = userNamespaces[i];
-                        if (/*imapFullname.equals(userNamespace) || */imapFullname.startsWith(new StringBuilder(userNamespace).append(sep).toString())) {
+                        if (imapFullname.equals(userNamespace) || imapFullname.startsWith(new StringBuilder(userNamespace).append(sep).toString())) {
                             shared = true;
                         }
                     }
