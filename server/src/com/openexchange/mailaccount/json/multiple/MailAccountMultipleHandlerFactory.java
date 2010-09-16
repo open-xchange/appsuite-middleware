@@ -56,12 +56,15 @@ import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 
 /**
- * {@link MailAccountMultipleHandlerFactory}
+ * {@link MailAccountMultipleHandlerFactory} - The factory service for mail account module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountMultipleHandlerFactory implements MultipleHandlerFactoryService {
 
+    /**
+     * Initializes a new {@link MailAccountMultipleHandlerFactory}.
+     */
     public MailAccountMultipleHandlerFactory() {
         super();
     }

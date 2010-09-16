@@ -58,8 +58,8 @@ import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link MailAccountActionFactory}
- * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountActionFactory implements AJAXActionServiceFactory {
 
@@ -72,6 +72,11 @@ public final class MailAccountActionFactory implements AJAXActionServiceFactory 
         actions = initActions();
     }
 
+    /**
+     * Gets the {@link MailAccountActionFactory} instance.
+     * 
+     * @return The {@link MailAccountActionFactory} instance
+     */
     public static final MailAccountActionFactory getInstance() {
         return SINGLETON;
     }
