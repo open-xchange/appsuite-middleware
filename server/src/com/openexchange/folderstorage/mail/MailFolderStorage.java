@@ -1269,13 +1269,13 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    private static Map<String, Map<?, ?>> subfolders(final String fullname, final MailAccess mailAccess) throws MailException {
+    private static Map<String, Map<?, ?>> subfolders(final String fullname, final MailAccess<?, ?> mailAccess) throws MailException {
         final Map<String, Map<?, ?>> m = new HashMap<String, Map<?, ?>>();
         subfoldersRecursively(fullname, m, mailAccess);
         return m;
     }
 
-    private static void subfoldersRecursively(final String parent, final Map<String, Map<?, ?>> m, final MailAccess mailAccess) throws MailException {
+    private static void subfoldersRecursively(final String parent, final Map<String, Map<?, ?>> m, final MailAccess<?, ?> mailAccess) throws MailException {
         final MailFolder[] mailFolders = mailAccess.getFolderStorage().getSubfolders(parent, true);
         if (null == mailFolders || 0 == mailFolders.length) {
             final Map<String, Map<?, ?>> emptyMap = Collections.emptyMap();
