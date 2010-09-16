@@ -139,7 +139,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         return list;
     }
 
-    public int getThreshhold(Object session) throws AbstractOXException {
+    public int getThreshold(Object session) throws AbstractOXException {
         return 2;
     }
 

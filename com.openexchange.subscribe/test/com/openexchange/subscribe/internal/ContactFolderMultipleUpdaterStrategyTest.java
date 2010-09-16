@@ -109,13 +109,13 @@ private SimContactSQLImpl contactStore = new SimContactSQLImpl();
         
         int score = strategy.calculateSimilarityScore(contact, contact2, session);
         
-        assertTrue("First name should not be enough", score < strategy.getThreshhold(session));
+        assertTrue("First name should not be enough", score < strategy.getThreshold(session));
 
         // First Name and Last Name is enough
         contact2.setSurName("Dampf");
         
         score = strategy.calculateSimilarityScore(contact, contact2, session);
-        assertTrue("First name and last name is enough", score > strategy.getThreshhold(session));
+        assertTrue("First name and last name is enough", score > strategy.getThreshold(session));
         
         // Prefer first name, last name and birth date
         contact.setBirthday(new Date(2));
@@ -144,7 +144,7 @@ private SimContactSQLImpl contactStore = new SimContactSQLImpl();
         
         int score = strategy.calculateSimilarityScore(contact, contact2, session);
         
-        assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshhold(session));
+        assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshold(session));
     }
     
     public void testNameChangedButMailAdressStayedTheSame() throws AbstractOXException {
@@ -165,7 +165,7 @@ private SimContactSQLImpl contactStore = new SimContactSQLImpl();
 
         int score = strategy.calculateSimilarityScore(contact, contact2, session);
         
-        assertTrue("First name and email address should suffice", score >= strategy.getThreshhold(session));
+        assertTrue("First name and email address should suffice", score >= strategy.getThreshold(session));
 
         
     }
@@ -209,7 +209,7 @@ private SimContactSQLImpl contactStore = new SimContactSQLImpl();
         
         int score = strategy.calculateSimilarityScore(contact, contact2, session);
         
-        assertTrue("These contacts were separated and should not score so high", score <= strategy.getThreshhold(session));
+        assertTrue("These contacts were separated and should not score so high", score <= strategy.getThreshold(session));
         
     }
     
@@ -233,7 +233,7 @@ private SimContactSQLImpl contactStore = new SimContactSQLImpl();
         
         int score = strategy.calculateSimilarityScore(contact, contact2, session);
         
-        assertTrue("These contacts are associated and should score high regardless of similarity", score >= strategy.getThreshhold(contact2));
+        assertTrue("These contacts are associated and should score high regardless of similarity", score >= strategy.getThreshold(contact2));
         
         strategy.update(contact, contact2, session);                
         Contact updatedContact = contactStore.getContactByUUID(uuid);
@@ -259,7 +259,7 @@ private SimContactSQLImpl contactStore = new SimContactSQLImpl();
         
         int score = strategy.calculateSimilarityScore(contact, contact2, session);
         
-        assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshhold(contact2));                        
+        assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshold(contact2));                        
     }
     
     public void testSecondContactHasUUIDButIsNotOnThisSystem() throws AbstractOXException {
@@ -278,7 +278,7 @@ private SimContactSQLImpl contactStore = new SimContactSQLImpl();
         
         int score = strategy.calculateSimilarityScore(contact, contact2, session);
         
-        assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshhold(contact2)); 
+        assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshold(contact2)); 
         assertTrue("These two contacts should not be associated as the second one is not even on this system. Trying to associate them would only produce errors", contactStore.getAssociationBetween(contact, contact2).equals(ContactUnificationState.UNDEFINED));
     }
     
@@ -298,7 +298,7 @@ private SimContactSQLImpl contactStore = new SimContactSQLImpl();
         
         int score = strategy.calculateSimilarityScore(contact, contact2, session);
         
-        assertTrue("These two contacts are similar and should be merged", score >= strategy.getThreshhold(contact2)); 
+        assertTrue("These two contacts are similar and should be merged", score >= strategy.getThreshold(contact2)); 
         assertTrue("These two contacts should not be associated as the second one is not even on this system. Trying to associate them would only produce errors", contactStore.getAssociationBetween(contact, contact2).equals(ContactUnificationState.UNDEFINED));
     }
 }

@@ -85,7 +85,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     public int calculateSimilarityScore(Contact original, Contact candidate, Object session) throws AbstractOXException {
         int score = 0;
-        int threshhold = getThreshhold(session);
+        int threshhold = getThreshold(session);
         boolean contactsAreAbleToBeAssociated = false;
         FinalContactInterface contactStore = (FinalContactInterface) getFromSession(SQL_INTERFACE, session);
         
@@ -208,7 +208,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         return retval;
     }
 
-    public int getThreshhold(Object session) throws AbstractOXException {
+    public int getThreshold(Object session) throws AbstractOXException {
         return 9;
     }
 

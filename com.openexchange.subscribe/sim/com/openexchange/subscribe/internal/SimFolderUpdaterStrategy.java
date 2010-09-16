@@ -114,7 +114,7 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
         return dataSet;
     }
 
-    public int getThreshhold(Object session) throws AbstractOXException {
+    public int getThreshold(Object session) throws AbstractOXException {
         return 3;
     }
 

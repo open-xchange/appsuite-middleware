@@ -93,13 +93,13 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
 
         int score = strategy.calculateSimilarityScore(contact, contact2, null);
         
-        assertTrue("First name should not be enough", score < strategy.getThreshhold(null));
+        assertTrue("First name should not be enough", score < strategy.getThreshold(null));
 
         // First Name and Last Name is enough
         contact2.setSurName("Dampf");
         
         score = strategy.calculateSimilarityScore(contact, contact2, null);
-        assertTrue("First name and last name is not enough", score > strategy.getThreshhold(null));
+        assertTrue("First name and last name is not enough", score > strategy.getThreshold(null));
         
         // Prefer first name, last name and birth date
         contact.setBirthday(new Date(2));
@@ -124,7 +124,7 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         
         int score = strategy.calculateSimilarityScore(contact, contact2, null);
         
-        assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshhold(null));
+        assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshold(null));
     }
     
     public void testNameChangedButMailAdressStayedTheSame() throws AbstractOXException {
@@ -141,7 +141,7 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
 
         int score = strategy.calculateSimilarityScore(contact, contact2, null);
         
-        assertTrue("First name and email address should suffice", score >= strategy.getThreshhold(null));
+        assertTrue("First name and email address should suffice", score >= strategy.getThreshold(null));
 
         
     }
@@ -157,7 +157,7 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         
         int score = strategy.calculateSimilarityScore(contact, contact2, null);
         
-        assertTrue("Two objects with similar content should match", score > strategy.getThreshhold(null));
+        assertTrue("Two objects with similar content should match", score > strategy.getThreshold(null));
     }
     
     
@@ -166,7 +166,7 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         Contact contact2 = new Contact();        
         int score = strategy.calculateSimilarityScore(contact, contact2, null);
         
-        assertTrue("Two completely empty objects should match, too", score > strategy.getThreshhold(null));
+        assertTrue("Two completely empty objects should match, too", score > strategy.getThreshold(null));
     }
     
 }

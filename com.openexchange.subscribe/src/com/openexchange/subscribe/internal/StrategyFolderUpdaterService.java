@@ -118,7 +118,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
                 maxScore = currentScore;
             }
         }
-        if(maxScore > strategy.getThreshhold(session))
+        if(maxScore > strategy.getThreshold(session))
             return maxElement;
        return null;
     }

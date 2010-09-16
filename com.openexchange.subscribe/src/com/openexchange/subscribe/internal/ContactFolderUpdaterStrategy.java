@@ -49,6 +49,9 @@
 
 package com.openexchange.subscribe.internal;
 
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i2I;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,6 +64,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSession;
+import com.openexchange.tools.Arrays;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -79,9 +83,11 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.BIRTHDAY, Contact.DISPLAY_NAME, Contact.EMAIL1,
         Contact.EMAIL2, Contact.EMAIL3, Contact.USERFIELD20 };
 
-    public int calculateSimilarityScore(Contact original, Contact candidate, Object session) throws AbstractOXException {
+    private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
+
+    public int calculateSimilarityScore(Contact original, Contact candidate, Object session) {
         int score = 0;
-        int threshhold = getThreshhold(session);
+        int threshold = getThreshold(session);
         
         // For the sake of simplicity we assume that equal names mean equal contacts
         // TODO: This needs to be diversified in the form of "unique-in-context" later (if there is only one "Max Mustermann" in a folder it
@@ -109,8 +115,8 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             score += 5;
         }
         
-        if( score < threshhold && original.equalsContentwise(candidate)) { //the score check is only to speed the process up
-            score = threshhold + 1;
+        if( score < threshold && original.matches(candidate, MATCH_COLUMNS)) { //the score check is only to speed the process up
+            score = threshold + 1;
         }
         return score;
     }
@@ -143,12 +149,11 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     protected boolean eq(Object o1, Object o2) {
         if (o1 == null || o2 == null) {
             return false;
-        } else {
-            return o1.equals(o2);
         }
+        return o1.equals(o2);
     }
 
-    public void closeSession(Object session) throws AbstractOXException {
+    public void closeSession(Object session) {
 
     }
 
@@ -171,7 +176,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return retval;
     }
 
-    public int getThreshhold(Object session) throws AbstractOXException {
+    public int getThreshold(Object session) {
         return 9;
     }
 

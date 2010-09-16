@@ -141,7 +141,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         return retval;
     }
 
-    public int getThreshhold(Object session) throws AbstractOXException {
+    public int getThreshold(Object session) throws AbstractOXException {
         return 9;
     }
 

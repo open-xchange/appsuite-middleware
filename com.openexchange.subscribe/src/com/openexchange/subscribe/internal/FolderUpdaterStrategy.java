@@ -75,7 +75,7 @@ public interface FolderUpdaterStrategy<T> {
 
     int calculateSimilarityScore(T original, T candidate, Object session) throws AbstractOXException;
 
-    int getThreshhold(Object session) throws AbstractOXException;
+    int getThreshold(Object session) throws AbstractOXException;
 
     void closeSession(Object session) throws AbstractOXException;
 
