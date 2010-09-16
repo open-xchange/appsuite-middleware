@@ -62,9 +62,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.folderstorage.ContentType;
@@ -104,6 +106,8 @@ import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.event.EventPool;
+import com.openexchange.mail.event.PooledEvent;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.StorageUtility;
@@ -282,6 +286,7 @@ public final class MailFolderStorage implements FolderStorage {
             }
             final String fullname = mailAccess.getFolderStorage().createFolder(mfd);
             folder.setID(prepareFullname(arg.getAccountId(), fullname));
+            postEvent(arg.getAccountId(), mfd.getParentFullname(), false, storageParameters);
         } catch (final MailException e) {
             throw new FolderException(e);
         }
@@ -298,25 +303,42 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             final FullnameArgument arg = prepareMailFolderParam(folderId);
-            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(arg.getAccountId(), storageParameters.getSession(), accesses);
+            final int accountId = arg.getAccountId();
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, storageParameters.getSession(), accesses);
             openMailAccess(mailAccess);
 
             final String fullname = arg.getFullname();
             /*
              * Only backup if fullname does not denote trash (sub)folder
              */
-            mailAccess.getFolderStorage().clearFolder(fullname, (fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
+            final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
+            final boolean hardDelete = fullname.startsWith(trashFullname);
+            mailAccess.getFolderStorage().clearFolder(fullname, hardDelete);
+            postEvent(accountId, fullname, true, storageParameters);
+            if (!hardDelete) {
+                postEvent(accountId, trashFullname, true, storageParameters);
+            }
             try {
                 /*
                  * Update message cache
                  */
                 MailMessageCache.getInstance().removeFolderMessages(
-                    arg.getAccountId(),
+                    accountId,
                     fullname,
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
+            }
+            if (fullname.startsWith(trashFullname)) {
+                // Special handling
+                final MailFolder[] subf = mailAccess.getFolderStorage().getSubfolders(fullname, true);
+                for (int i = 0; i < subf.length; i++) {
+                    final String subFullname = subf[i].getFullname();
+                    mailAccess.getFolderStorage().deleteFolder(subFullname, true);
+                    postEvent(accountId, subFullname, false, storageParameters);
+                }
+                postEvent(accountId, trashFullname, false, storageParameters);
             }
         } catch (final MailException e) {
             throw new FolderException(e);
@@ -334,26 +356,35 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             final FullnameArgument arg = prepareMailFolderParam(folderId);
-            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(arg.getAccountId(), storageParameters.getSession(), accesses);
+            final int accountId = arg.getAccountId();
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, storageParameters.getSession(), accesses);
             openMailAccess(mailAccess);
 
             final String fullname = arg.getFullname();
             /*
              * Only backup if fullname does not denote trash (sub)folder
              */
-            mailAccess.getFolderStorage().deleteFolder(fullname, (fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
+            final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
+            final boolean hardDelete = fullname.startsWith(trashFullname);
+            mailAccess.getFolderStorage().deleteFolder(fullname, hardDelete);
             try {
                 /*
                  * Update message cache
                  */
                 MailMessageCache.getInstance().removeFolderMessages(
-                    arg.getAccountId(),
+                    accountId,
                     fullname,
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
             }
+            if (!hardDelete) {
+                // New folder in trash folder
+                postEvent(accountId, trashFullname, false, storageParameters);
+            }
+            final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
+            postEvent4Subfolders(accountId, subfolders, storageParameters);
         } catch (final MailException e) {
             throw new FolderException(e);
         }
@@ -1009,8 +1040,11 @@ public final class MailFolderStorage implements FolderStorage {
                         newFullname.append(oldName);
                     }
                     if (!newParent.equals(oldParent)) { // move & rename
+                        final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
                         fullname = mailAccess.getFolderStorage().moveFolder(fullname, newFullname.toString());
                         folder.setID(prepareFullname(accountId, fullname));
+                        postEvent4Subfolders(accountId, subfolders, storageParameters);
+                        postEvent(accountId, newParent, false, storageParameters);
                         movePerformed = true;
                     }
                 } else {
@@ -1044,10 +1078,13 @@ public final class MailFolderStorage implements FolderStorage {
                                 p.getSeparator(),
                                 storageParameters.getUserId(),
                                 otherAccess.getMailConfig().getCapabilities().hasPermissions());
+                        postEvent(parentAccountID, newParent, false, storageParameters);
                         // Delete source
+                        final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
                         mailAccess.getFolderStorage().deleteFolder(fullname, true);
                         // Perform other updates
                         otherAccess.getFolderStorage().updateFolder(destFullname, mfd);
+                        postEvent4Subfolders(accountId, subfolders, storageParameters);
                     } finally {
                         otherAccess.close(true);
                     }
@@ -1061,12 +1098,14 @@ public final class MailFolderStorage implements FolderStorage {
                 if (!newName.equals(oldName)) { // rename
                     fullname = mailAccess.getFolderStorage().renameFolder(fullname, newName);
                     folder.setID(prepareFullname(accountId, fullname));
+                    postEvent(accountId, fullname, false, storageParameters);
                 }
             }
             /*
              * Handle update of permission or subscription
              */
             mailAccess.getFolderStorage().updateFolder(fullname, mfd);
+            postEvent(accountId, fullname, false, storageParameters);
         } catch (final MailException e) {
             throw new FolderException(e);
         }
@@ -1217,4 +1256,64 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    private static void postEvent4Subfolders(final int accountId, final Map<String, Map<?, ?>> subfolders, final StorageParameters params) {
+        final int size = subfolders.size();
+        final Iterator<Entry<String, Map<?, ?>>> iter = subfolders.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            final Entry<String, Map<?, ?>> entry = iter.next();
+            final @SuppressWarnings("unchecked") Map<String, Map<?, ?>> m = (Map<String, Map<?, ?>>) entry.getValue();
+            if (!m.isEmpty()) {
+                postEvent4Subfolders(accountId, m, params);
+            }
+            postEvent(accountId, entry.getKey(), false, params);
+        }
+    }
+
+    private static Map<String, Map<?, ?>> subfolders(final String fullname, final MailAccess mailAccess) throws MailException {
+        final Map<String, Map<?, ?>> m = new HashMap<String, Map<?, ?>>();
+        subfoldersRecursively(fullname, m, mailAccess);
+        return m;
+    }
+
+    private static void subfoldersRecursively(final String parent, final Map<String, Map<?, ?>> m, final MailAccess mailAccess) throws MailException {
+        final MailFolder[] mailFolders = mailAccess.getFolderStorage().getSubfolders(parent, true);
+        if (null == mailFolders || 0 == mailFolders.length) {
+            final Map<String, Map<?, ?>> emptyMap = Collections.emptyMap();
+            m.put(parent, emptyMap);
+        } else {
+            final Map<String, Map<?, ?>> subMap = new HashMap<String, Map<?, ?>>();
+            final int size = mailFolders.length;
+            for (int i = 0; i < size; i++) {
+                final String fullname = mailFolders[i].getFullname();
+                subfoldersRecursively(fullname, subMap, mailAccess);
+            }
+            m.put(parent, subMap);
+        }
+    }
+
+    private static void postEvent(final int accountId, final String fullname, final boolean contentRelated, final StorageParameters params) {
+        postEvent(accountId, fullname, contentRelated, false, params);
+    }
+
+    private static void postEvent(final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final StorageParameters params) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        EventPool.getInstance().put(
+            new PooledEvent(params.getContextId(), params.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, params.getSession()));
+    }
+
+    private static void postEvent(final String topic, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final StorageParameters params) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        EventPool.getInstance().put(new PooledEvent(topic, params.getContextId(), params.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, params.getSession()));
+    }
+    
 }
