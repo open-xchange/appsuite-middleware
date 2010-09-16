@@ -93,6 +93,8 @@ public enum AttachmentExceptionCodes implements OXErrorMessage {
     ATTACH_FAILED(ATTACH_FAILED_MSG, Category.CODE_ERROR, 601),
     /** The Object could not be detached because the update to an underlying object failed. */
     DETACH_FAILED(DETACH_FAILED_MSG, Category.CODE_ERROR, 602),
+    /** Conflicting services registered for context %1$i and folder %2$i */
+    AUTHORIZATION_SERVICE_CONFLICT(AUTHORIZATION_SERVICE_CONFLICT_MSG, Category.SETUP_ERROR, 900),
     ;
 
     private final String message;

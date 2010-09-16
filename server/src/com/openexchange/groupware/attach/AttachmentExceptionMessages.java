@@ -90,6 +90,8 @@ public final class AttachmentExceptionMessages implements LocalizableStrings {
 
     public static final String DETACH_FAILED_MSG = "The object could not be detached because the update to an underlying object failed.";
 
+    public static final String AUTHORIZATION_SERVICE_CONFLICT_MSG = "Conflicting services registered for context %1$i and folder %2$i";
+
     private AttachmentExceptionMessages() {
         super();
     }

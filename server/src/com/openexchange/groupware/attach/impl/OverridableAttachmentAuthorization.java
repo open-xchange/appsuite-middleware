@@ -49,21 +49,16 @@
 
 package com.openexchange.groupware.attach.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentException;
-import com.openexchange.groupware.attach.AttachmentExceptionFactory;
-import com.openexchange.groupware.attach.Classes;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.service.ServicePriorityConflictException;
 import com.openexchange.tools.service.SpecificServiceChooser;
-
 
 /**
  * {@link OverridableAttachmentAuthorization}
@@ -71,13 +66,8 @@ import com.openexchange.tools.service.SpecificServiceChooser;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-@OXExceptionSource(
-    classId = Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_OVERRIDABLEATTACHMENTAUTHORIZATION,
-    component = EnumComponent.ATTACHMENT
-)
 public class OverridableAttachmentAuthorization implements AttachmentAuthorization {
 
-    private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(OverridableAttachmentAuthorization.class);
     private SpecificServiceChooser<AttachmentAuthorization> chooser;
 
     public OverridableAttachmentAuthorization(SpecificServiceChooser<AttachmentAuthorization> chooser) {
@@ -98,12 +88,11 @@ public class OverridableAttachmentAuthorization implements AttachmentAuthorizati
         getDelegate(folderId, ctx.getContextId()).checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
     }
     
-    @OXThrows(category=Category.SETUP_ERROR, desc="", exceptionId=0, msg="Conflicting services registered for context %i and folder %i")
     private AttachmentAuthorization getDelegate(int folderId, int contextId) throws AttachmentException {
         try {
             return chooser.choose(contextId, folderId);
         } catch (ServicePriorityConflictException e) {
-            throw EXCEPTIONS.create(0, contextId, folderId);
+            throw AttachmentExceptionCodes.AUTHORIZATION_SERVICE_CONFLICT.create(I(contextId), I(folderId));
         }
     }
 
