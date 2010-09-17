@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-09-14 12:10+0200\n"
+"PO-Revision-Date: 2010-09-17 11:31+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -194,9 +194,6 @@ msgstr ""
 "Fehler im Protokoll an Mailserver %1$s mit Login %2$s (Benutzer=%3$s, "
 "Kontext=%4$s). Fehlermeldung: %5$s"
 
-msgid "An error occurred attaching to the given object."
-msgstr "Fehler beim Anhängen an das angegebene Objekt"
-
 msgid ""
 "An error occurred during the load of deleted objects from a folder. Context %"
 "1$d Folder %2$d User %3$d"
@@ -293,9 +290,6 @@ msgstr ""
 "Anhang %1$s konnte nicht in E-Mail %2$s des E-Mail-Ordners %3$s gefunden "
 "werden."
 
-msgid "Attachments must contain a file."
-msgstr "Anlagen müssen eine Datei enthalten"
-
 msgid "Attribute \"%1$s\" is not set in FolderObject instance %2$s in context %3$s"
 msgstr ""
 "Attribut \"%1$s\" ist nicht in der FolderObject-Instanz %2$s im Kontext %3$s "
@@ -319,16 +313,6 @@ msgstr ""
 
 msgid "Bad value %1$s in parameter %2$s"
 msgstr "Ungültiger Wert %1$s in Parameter %2$s"
-
-msgid ""
-"Broken CSV file: Lines have different number of cells, line #1 has %d, line #"
-"%d has %d. Is this really a CSV file?"
-msgstr ""
-"Kaputte CSV-Datei: Zeilen haben unterschiedliche Zellenanzahl, Zeile #1 hat %"
-"d, Zeile #%d hat %d. Handelt es sich wirklich um eine CSV-Datei?"
-
-msgid "Broken file uploaded: %s"
-msgstr "Kaputte Datei hochgeladen: %s"
 
 msgid "Cache %s could not be initialized due to following error: %s"
 msgstr "Cache %s konnte aufgrund folgenden Fehlers nicht initialisiert werden: %s"
@@ -362,12 +346,6 @@ msgstr "Fehler beim Auflösen der Ressource: %1$s"
 msgid "Can not resolve user: %d"
 msgstr "Fehler beim Auflösen des Benutzers: %d"
 
-msgid "Can only handle one file, not %s"
-msgstr "Es kann nur eine Datei verarbeitet werden, nicht %s"
-
-msgid "Can only import into one folder at a time."
-msgstr "Es kann auf einmal nur in einen Ordner importiert werden."
-
 msgid "Can't handle spam because MailService isn't available"
 msgstr "Spam kann nicht verarbeitet werden, da MailService nicht zur Verfügung steht."
 
@@ -398,12 +376,6 @@ msgstr ""
 
 msgid "Cannot decrease number of attachments below zero."
 msgstr "Anzahl der Anlagen kann nicht weniger Null sein"
-
-msgid "Cannot find an exporter for folder %s to format %s"
-msgstr "Kein Exportier-Tool für Ordner %s in das Format %s gefunden"
-
-msgid "Cannot find an importer for format %s into folders %s"
-msgstr "Kein Importier-Tool für Ordner %s in das Format %s gefunden"
 
 msgid "Cannot find context \"%s\"."
 msgstr "Kontext \"%s\" konnte nicht gefunden werden"
@@ -443,19 +415,11 @@ msgstr "Benutzer mit der E-Mail %s konnte nicht gefunden werden"
 msgid "Cannot find user with identifier %1$s in context %2$d."
 msgstr "Benutzer mit ID %1$s konnte nicht im Kontext %2$d gefunden werden."
 
-msgid "Cannot generate ID for new attachment: %s"
-msgstr "ID für neue Anlage konnte nicht erzeugt werden: %s"
-
 msgid "Cannot get connection to database."
 msgstr "Verbindung zur Datenbank kann nicht hergestellt werden."
 
 msgid "Cannot get database connection."
 msgstr "Verbindung zur Datenbank kann nicht hergestellt werden."
-
-msgid "Cannot import this kind of data. Use method canImport() first."
-msgstr ""
-"Dieser Datentyp kann nicht importiert werden. Verwenden Sie zuerst die "
-"Methode canImport()."
 
 msgid "Cannot initialize mail module"
 msgstr "E-Mail-Modul kann nicht initialisiert werden"
@@ -472,9 +436,6 @@ msgstr "Klasse \"%1$s\" kann nicht geladen werden"
 msgid "Cannot read file \"%1$s\"."
 msgstr "Datei \"%1$s\" kann nicht gelesen werden."
 
-msgid "Cannot read given InputStream."
-msgstr "Angegebener InputStream kann nicht gelesen werden."
-
 msgid "Cannot remove lock file."
 msgstr "Lock-Datei konnte nicht entfernt werden."
 
@@ -486,28 +447,6 @@ msgstr "Mailadmin für Kontext %d kann nicht aufgelöst werden."
 
 msgid "Cannot send event to event system."
 msgstr "Event kann nicht an das Event-System geschickt werden."
-
-msgid "Cannot translate id=%d to a constant from FolderObject."
-msgstr "ID=%d konnte nicht in eine Konstante aus FolderObject übersetzt werden"
-
-msgid "Cannot translate id=%d to a constant from Types."
-msgstr "ID=%d konnte nicht in eine Konstante aus 'Types' übersetzt werden"
-
-msgid ""
-"Changes done to the object this attachment was added to could not be undone. "
-"Your database is probably inconsistent, run the consistency tool."
-msgstr ""
-"Änderungen am Objekt zu dem die Anlage hinzugefügt wurde konnten nicht "
-"rückgängig gemacht werden. Ihre Datenbank ist möglicherweise inkonsistent. "
-"Lassen Sie das Konsistenz-Tool ausführen."
-
-msgid ""
-"Changes were made to the object of this attachment and cannot be undone. "
-"Your database is probably inconsistent, run the consistency tool."
-msgstr ""
-"Das Objekt dieser Anlage wurde geändert. Die Änderung kann nicht rückgängig "
-"gemacht werden. Ihre Datenbank ist möglicherweise inkonsistent, lassen Sie "
-"das Konsistenz-Tool laufen."
 
 msgid "Changing an exception into a series is not supported."
 msgstr "Das Ändern einer Ausnahme in eine Serie wird nicht unterstützt."
@@ -540,9 +479,6 @@ msgstr "Konfigurationsfehler: %1$s"
 
 msgid "Configuration for user %1$s could not be found in context %2$d"
 msgstr "Konfiguration für Benutzer %1$s konnte nicht im Kontext %2$d gefunden werden."
-
-msgid "Conflicting services registered for context %i and folder %i"
-msgstr "Dienste-Konflikt für Kontext %i und Ordner %i gemeldet"
 
 msgid ""
 "Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4"
@@ -600,82 +536,13 @@ msgstr "Angegebene Zeichenkette %s konnte nicht in ein Datum konvertiert werden.
 msgid "Could not create a PartModifier instance from name %1$s"
 msgstr "PartModifier-Instanz konnte nicht aus dem Namen %1$s erstellt werden"
 
-msgid "Could not create folder id from string %s"
-msgstr "Ordner-ID konnte nicht aus der Zeichenkette %s erstellt werden"
-
-msgid "Could not delete attachment."
-msgstr "Anlage konnte nicht gelöscht werden"
-
-msgid "Could not delete file from file store. Filestore: %s Context: %s"
-msgstr ""
-"Datei konnte nicht aus Dateispeicher gelöscht werden. Dateispeicher : %s "
-"Kontext: %s"
-
-msgid "Could not delete files from filestore. Context: %d."
-msgstr "Dateien konnten nicht aus Dateispeicher gelöscht werden. Kontext: %d"
-
-msgid ""
-"Could not find an attachment with the file_id %s. Either the file is "
-"orphaned or belongs to another module."
-msgstr ""
-"Anlage mit der file_id %s konnte nicht gefunden werden. Entweder die Datei "
-"ist verwaist oder gehört zu einem anderen Modul."
-
 msgid "Could not find participant for this object."
 msgstr "Es konnte kein Teilnehmer für dieses Objekt gefunden werden."
-
-msgid "Could not find suitable ICalParser. Is an ICalParser exported as a service?"
-msgstr ""
-"Kein passender ICalParser gefunden. Wurde ein ICalParser als Dienst "
-"exportiert?"
-
-msgid "Could not find the following fields %s"
-msgstr "Folgende Felder konnten nicht gefunden werden %s"
-
-msgid "Could not import into folder %s"
-msgstr "Importieren in Ordner %s fehlgeschlagen"
-
-msgid "Could not import into the folder %s."
-msgstr "Importieren in Ordner %s fehlgeschlagen"
-
-msgid "Could not load folder %s"
-msgstr "Ordner %s konnte nicht geladen werden"
-
-msgid "Could not read InputStream as string"
-msgstr "InputStream konnte nicht als Zeichenkette gelesen werden"
-
-msgid "Could not recognize format of the following data: %s"
-msgstr "Format folgender Daten wurde nicht erkannt: %s"
-
-msgid "Could not remove attachments from database. Context: %d."
-msgstr "Anhänge konnten nicht aus Datenbank entfernt werden. Kontext: %d."
-
-msgid "Could not retrieve file: %s"
-msgstr "Datei konnte nicht geholt werden: %s"
-
-msgid "Could not save file to the file store."
-msgstr "Datei konnte nicht in Dateispeicher gespeichert werden"
 
 msgid "Could not set the field %s because this is not an OX contact field"
 msgstr ""
 "Feld %s konnte nicht gesetzt werden, da es sich um kein OX-Kontaktfeld "
 "handelt."
-
-msgid "Could not translate a single column title. Is this a valid CSV file?"
-msgstr ""
-"Keiner der Spaltentitel konnte übersetzt werden. Handelt es sich um eine "
-"gültige CSV-Datei?"
-
-msgid "Could not translate a single field of information, did not insert entry %s."
-msgstr ""
-"Keines der Informationsfelder konnte übersetzt werden. Eintrag %s wurde "
-"nicht eingefügt."
-
-msgid "Could not use UTF-8 encoding."
-msgstr "UTF-8-Kodierung konnte nicht verwendet werden."
-
-msgid "Couldn't convert object: %s"
-msgstr "Objekt konnte nicht konvertiert werden: %s"
 
 msgid "Couldn't find servlet class \"%s\""
 msgstr "Servlet-Klasse \"%s\" konnte nicht gefunden werden"
@@ -691,9 +558,6 @@ msgstr "Zählen der Aufgaben gab kein Ergebnis zurück"
 
 msgid "Cowardly refusing to convert confidential classified objects."
 msgstr "Konvertierung eines als vertraulich markierten Eintrags wird verweigert."
-
-msgid "Cowardly refusing to import an entry flagged as confidential."
-msgstr "Import eines als vertraulich markierten Eintrag wird verweigert."
 
 msgid ""
 "Critical Error occurred. This folder contains a contact with no id. Context %"
@@ -788,9 +652,6 @@ msgstr "Leeres Element \"CLASS\"."
 msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 msgstr "Leeres SEND_BODY_CHUNK-Paket DARF NICHT geschickt werden"
 
-msgid "Empty file uploaded."
-msgstr "Leere Datei hochgeladen"
-
 msgid "Empty passwords are not allowed."
 msgstr "Leere Passwörter sind nicht erlaubt."
 
@@ -869,11 +730,6 @@ msgid ""
 msgstr ""
 "FATAL:: Wiederkehrende Position kann nicht aufgelöst werden, da weder die "
 "wiederkehrende Position noch die wiederkehrende Datumsposition bekannt ist."
-
-msgid "Failed importing appointment due to hard conflicting resource."
-msgstr ""
-"Aufgrund eines Ressourcenkonflikts ist das Importieren des Termins "
-"fehlgeschlagen."
 
 msgid "Fatal error. (DAILY) Missing or wrong Interval value: %d"
 msgstr "Fataler Fehler. (TÄGLICH) Fehlender oder ungültiger Wert für Intervall: %d"
@@ -1147,9 +1003,6 @@ msgstr "Auflösen des IMAP-Login %1$s in einen Benutzer fehlgeschlagen"
 msgid "Identifier of the object is missing."
 msgstr "Fehlende Objekt-ID"
 
-msgid "Illegal state: Found data after presumed last line."
-msgstr "Unzulässiger Status. Daten nach erwarteter letzter Zeile gefunden."
-
 msgid "Illegal system flag argument %1$s. Flag must be to the power of 2"
 msgstr "Ungültiges System-Flag-Argument %1$s. Flag muss Potenz 2 haben."
 
@@ -1255,12 +1108,6 @@ msgstr "Ungültige E-Mail-Adresse: '%s'. Bitte korrigieren Sie die E-Mail-Adress
 msgid "Invalid Magic bytes: %1$s."
 msgstr "Ungültige Magic Bytes: %1$s"
 
-msgid "Invalid SQL Query: %s"
-msgstr "Ungültige SQL-Anfrage: %s"
-
-msgid "Invalid SQL query: %s"
-msgstr "Ungültige SQL-Anfrage: %s"
-
 msgid "Invalid action %1$s."
 msgstr "Ungültige Aktion %1$s"
 
@@ -1311,13 +1158,6 @@ msgstr "Ungültiger Parameter \"%1$s\": %2$s"
 
 msgid "Invalid parameter name: %1$s"
 msgstr "Ungültiger Parametername: %1$s"
-
-msgid ""
-"Invalid parameter sent in request. Parameter '%s' was '%s' which does not "
-"look like a number"
-msgstr ""
-"Ungültiger Parameter in Anfrage. Parameter '%s' war '%s', sollte jedoch eine "
-"Zahl sein"
 
 msgid "Invalid parameter: %s"
 msgstr "Ungültiger Parameter: %s"
@@ -1493,11 +1333,6 @@ msgstr ""
 msgid "Missing Push UDP configuration."
 msgstr "Fehlende Push UDP-Konfiguration."
 
-msgid "Missing ability to encode or decode UTF-8 on server, cannot read file."
-msgstr ""
-"Kodierung bzw. Dekodierung von UTF-8 nicht möglich auf Server. Datei kann "
-"nicht gelesen werden."
-
 msgid "Missing affiliation id"
 msgstr "Zugehörigkeits-ID fehlt"
 
@@ -1573,28 +1408,6 @@ msgstr "Upload-Bild fehlt"
 msgid "Module %1$s is unknown in context %2$s"
 msgstr "Modul %1$s im Kontext %2$s nicht bekannt"
 
-msgid "Module Calendar not enabled for user, cannot import appointments."
-msgstr ""
-"Das Kalender-Modul ist für den Benutzer nicht aktiviert. Die Termine können "
-"nicht importiert werden."
-
-msgid ""
-"Module Contacts is not enabled for this user, cannot store contacts "
-"contained in VCard."
-msgstr ""
-"Das Kontakte-Modul ist für diesen Benutzer nicht aktiviert. Die in VCard "
-"enthaltenen Kontakte können nicht gespeichert werden."
-
-msgid "Module Contacts not enabled for user, cannot import contacts"
-msgstr ""
-"Das Kontakte-Modul ist für den Benutzer nicht aktiviert. Kontakte können "
-"nicht importiert werden."
-
-msgid "Module Tasks not enabled for user, cannot import tasks."
-msgstr ""
-"Das Aufgaben-Modul ist für den Benutzer nicht aktiviert. Aufgaben können "
-"nicht importiert werden."
-
 msgid "Module is not a number: %1$s."
 msgstr "Modul ist keine Zahl: %1$s."
 
@@ -1642,12 +1455,6 @@ msgstr "Zum Abrufen des Wertes von %s wird mindestens ein ContactObject benötig
 
 msgid "New password contains invalid characters"
 msgstr "Neues Passwort enthält ungültige Zeichen"
-
-msgid "No ICal to import found."
-msgstr "Kein ICal zum Importieren gefunden"
-
-msgid "No VCard to import found."
-msgstr "Keine VCard zum Importieren gefunden"
 
 msgid "No admin user found in context %1$s"
 msgstr "Kein Adminbenutzer im Kontext %1$s gefunden"
@@ -1698,20 +1505,6 @@ msgstr "Kein Standardordner gefunden im Modul %1$s für Benutzer %2$s im Kontext
 msgid "No delete access on mail folder: %1$s."
 msgstr "Kein Löschzugriff auf E-Mail-Ordner %1$s"
 
-msgid ""
-"No field can be found that could be used to name contacts in this file: no "
-"name, no company nor e-mail."
-msgstr ""
-"Kein Feld gefunden, das als Kontaktname verwendet werden kann: kein Name, "
-"keine Firma, keine E-Mail."
-
-msgid ""
-"No field was set that might give the contact in line %s a display name: no "
-"name, no company nor e-mail."
-msgstr ""
-"Kein Feld gesetzt, das dem Kontakt in Zeile %s einen Display-Namen geben "
-"kann: kein Name, keine Firma, keine E-Mail."
-
 msgid "No folder permission."
 msgstr "Keine Ordnerberechtigung"
 
@@ -1729,7 +1522,7 @@ msgstr "Es ist kein Mail-Account für den Benutzer admin im Kontext %1$s vorhand
 msgid "No mail module access permitted"
 msgstr "Kein Zugriff auf das E-Mail-Modul erlaubt"
 
-msgid "No permission for modul: %s."
+msgid "No permission for module: %s."
 msgstr "Keine Berechtigung für das Modul: %s."
 
 msgid "No permission to modify resources in context %1$s"
@@ -1925,17 +1718,8 @@ msgstr "Problem beim Setzen von Auto-Commit auf den Wert true"
 msgid "Problem while communicating with external authorization."
 msgstr "Problem beim Kommunizieren mit externer Autorisierung"
 
-msgid "Problem while converting the vcard to a contact, reason: %s"
-msgstr "Probleme beim Konvertieren der vcard in einen Kontakt, Grund: %s"
-
 msgid "Problem while initialising configuration tree."
 msgstr "Problem beim Initialisieren des Konfigurationsbaums"
-
-msgid "Problem while parsing the vcard, reason: %s"
-msgstr "Problem beim Analysieren der vcard, Grund: %s"
-
-msgid "Problem while reading ICal file: %s."
-msgstr "Problem beim Lesen der ICal-Datei: %s."
 
 msgid "Problem with a thread."
 msgstr "Problem mit einem Thread"
@@ -1945,9 +1729,6 @@ msgstr "Problem beim Schreiben in Stream."
 
 msgid "Process was interrupted. Please try again."
 msgstr "Vorgang wurde unterbrochen. Bitte erneut versuchen."
-
-msgid "Programming error - folder %s"
-msgstr "Programmierfehler - Ordner %s"
 
 #. %1$s is replaced with the name of the required property that is not found.
 msgid "Property \"%1$s\" is not defined."
@@ -2035,9 +1816,6 @@ msgstr "SQL-Problem: \"%s\""
 
 msgid "SQL Problem: \"%s\"."
 msgstr "SQL-Problem: \"%s\"."
-
-msgid "SQL Problem: %1$s"
-msgstr "SQL-Problem: %1$s"
 
 msgid "SQL problem while deleting task: %s."
 msgstr "SQL-Problem beim Löschen der Aufgabe: %s."
@@ -2131,9 +1909,6 @@ msgstr "Speicher bereits geschlossen: %1$s"
 msgid "String parse exception: No ending 0x00 found"
 msgstr "String Parse-Ausnahme: Keine Endung 0x00 gefunden"
 
-msgid "Subsystem down"
-msgstr "Das Subsystem ist inaktiv"
-
 msgid "System folder %1$s cannot be moved in context %2$s"
 msgstr "Der Systemordner %1$s kann im Kontext %2$s nicht verschoben werden"
 
@@ -2154,26 +1929,14 @@ msgstr ""
 msgid "Tasks are disable for you (%d)."
 msgstr "Aufgaben sind für Sie deaktiviert (%d)"
 
-msgid "The Action \"%1$s\" is disabled due to the server configuration"
-msgstr "Die Aktion \"%1$s\" wurde aufgrund der Server-Konfiguration deaktiviert."
-
 msgid "The IP address of host \"%1$s\" could not be determined"
 msgstr "Die IP-Adresse des Host \"%1$s\" konnte nicht bestimmt werden"
 
-msgid ""
-"The Object could not be detached because the update to an underlying object "
-"failed."
-msgstr ""
-"Das Objekt konnte nicht losgelöst werden, da das Update an einem "
-"zugrundeliegenden Objekt fehlschlug."
+msgid "The action \"%1$s\" is disabled due to server configuration"
+msgstr "Die Aktion \"%1$s\" wurde aufgrund der Server-Konfiguration deaktiviert."
 
 msgid "The allowed Quota is reached."
 msgstr "Die zulässige Quota ist erreicht."
-
-msgid "The attachment you requested no longer exists. Please refresh the view."
-msgstr ""
-"Die von Ihnen angeforderte Anlage ist nicht mehr vorhanden. Aktualisieren "
-"Sie die Ansicht."
 
 msgid ""
 "The attribute %1$s contains too much characters. Current length %3$d is more "
@@ -2200,9 +1963,6 @@ msgstr "Die Standard-Elementattribute konnten nicht abgerufen werden"
 msgid "The directory already exists."
 msgstr "Das Verzeichnis ist bereits vorhanden."
 
-msgid "The element %s is not supported."
-msgstr "Das Element %s wird nicht unterstützt."
-
 msgid ""
 "The entered value for costs is not within the allowed range. Please use a "
 "value from -130000.00 to 130000.00."
@@ -2210,17 +1970,8 @@ msgstr ""
 "Der eingegebene Kostenwert liegt nicht im zulässigen Bereich. Bitte "
 "verwenden Sie einen Wert von -130000.00 bis 130000.00."
 
-msgid "The file you selected does not exist."
-msgstr "Die von Ihnen gewählte Datei ist nicht vorhanden"
-
 msgid "The folder %s doesn't exist."
 msgstr "Der Ordner %s ist nicht vorhanden."
-
-msgid "The following field(s) are too long to be imported: %s"
-msgstr "Folgende Felder sind zu lang und können nicht importiert werden: %s"
-
-msgid "The following field(s) were too long and needed to be truncated: %s"
-msgstr "Folgende Felder sind zu lang und mussten gekürzt werden: %s"
 
 msgid "The given value for mode \"%s\" is not a possible one"
 msgstr "Der angegebene Typ für den Modus \"%s\" wird nicht unterstützt."
@@ -2254,13 +2005,6 @@ msgid ""
 msgstr ""
 "Der von Ihnen eingegebene Name ist nicht verfügbar. Wählen Sie einen anderen "
 "Anzeigenamen. Kontext %1$d Objekt %2$d"
-
-msgid ""
-"The object could not be detached because the update to an underlying object "
-"failed."
-msgstr ""
-"Das Objekt konnte nicht losgelöst werden, da das Update an einem "
-"zugrundeliegenden Objekt fehlschlug."
 
 #. The object has been changed in the meantime.
 msgid "The object has been changed in the meantime."
@@ -2713,9 +2457,6 @@ msgstr "Unbekannter Lösch-Event-Typ: %1$d"
 msgid "Unknown field: %1$s"
 msgstr "Unbekanntes Feld: %1$s"
 
-msgid "Unknown format: %s"
-msgstr "Unbekanntes Format: %s"
-
 msgid "Unknown module: %1$d"
 msgstr "Unbekanntes Modul: %1$d"
 
@@ -2804,9 +2545,6 @@ msgstr "Upload-Quota (%1$s) überstiegen"
 
 msgid "Upload quota (%1$s) exceeded for file %2$s (size=%3$s)"
 msgstr "Upload-Quota (%1$s) für Datei %2$s (Größe=%3$s) überstiegen"
-
-msgid "Uploaded file is of type %s, cannot handle that"
-msgstr "Hochgeladene Datei ist vom Typ %s. Dieser kann nicht verarbeitet werden."
 
 msgid "User %1$s from context %2$s is not known on IMAP server \"%3$s\"."
 msgstr ""
@@ -2904,14 +2642,8 @@ msgstr "Entfernen der Benutzerkonfiguration aus dem Cache fehlgeschlagen: %1$s"
 msgid "User contacts can not be deleted."
 msgstr "Benutzerkontakte können nicht gelöscht werden."
 
-msgid "User input error %s"
-msgstr "Benutzer-Eingabefehler: %s"
-
 msgid "User is missing for the reminder."
 msgstr "Fehlender Benutzer für Erinnerung"
-
-msgid "Validation failed: %s"
-msgstr "Validierung fehlgeschlagen: %s"
 
 msgid "Validation of calendar failed."
 msgstr "Die Validierung des Kalenders ist fehlgeschlagen."
@@ -2932,9 +2664,6 @@ msgstr ""
 
 msgid "Versit error: %1$s"
 msgstr "Versit-Fehler: %1$s"
-
-msgid "Warnings when importing file: %i warnings"
-msgstr "Datei-Import-Warnung: %i Warnungen"
 
 msgid ""
 "Was not able to calculate next upcoming reminder for series appointment %2$d "
@@ -3365,6 +3094,22 @@ msgstr "Keine Anlage mit der ID %1$s in Nachricht %2$s im Ordner %3$s gefunden."
 msgid "Message %1$s not found in folder %2$s."
 msgstr "Nachricht %1$s nicht im Ordner %2$s gefunden."
 
+#. Duplicate proxy registration: %1$s
+msgid "Duplicate proxy registration: %1$s"
+msgstr "Proxy-Registrationsduplikat: %1$s"
+
+#. Malformed URL: %1$s
+msgid "Malformed URL: %1$s"
+msgstr "Inkorrekte URL: %1$s"
+
+#. HTTP request to VoipNow server %1$s failed. Status line: %2$s
+msgid "HTTP request to VoipNow server %1$s failed. Status line: %2$s"
+msgstr "HTTP-Anfrage an VoipNow-Server %1$s fehlgeschlagen. Statuszeile: %2$s"
+
+#. Malformed URI: %1$s
+msgid "Malformed URI: %1$s"
+msgstr "Inkorrekte URI: %1$s"
+
 #. Missing property: %1$s
 msgid "Missing property: %1$s"
 msgstr "Fehlende Eigenschaft: %1$s"
@@ -3498,7 +3243,10 @@ msgstr ""
 msgid ""
 "The configured consumer key/consumer secret pair is invalid. Please provide "
 "a valid consumer key/consumer secret through configuration."
-msgstr "Der konfigurierte Consumer Key bzw. das Consumer Secret Pair ist ungültig. Bitte stellen Sie über die Konfiguration einen gültigen Consumer Key bzw. ein Consumer Secret Pair bereit."
+msgstr ""
+"Der konfigurierte Consumer Key bzw. das Consumer Secret Pair ist ungültig. "
+"Bitte stellen Sie über die Konfiguration einen gültigen Consumer Key bzw. "
+"ein Consumer Secret Pair bereit."
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 msgid "Missing main extension attribute for user %1$s in context %2$s."
@@ -3896,6 +3644,77 @@ msgstr ""
 msgid "No mail folder allowed below a public folder."
 msgstr "In einem öffentlichen Ordner darf kein Mailordner angelegt werden."
 
+msgid "Invalid SQL Query: %s"
+msgstr "Ungültige SQL-Anfrage: %s"
+
+msgid "Could not save file to the file store."
+msgstr "Datei konnte nicht in Dateispeicher gespeichert werden"
+
+msgid "Attachments must contain a file."
+msgstr "Anlagen müssen eine Datei enthalten"
+
+msgid "Cannot generate ID for new attachment: %s"
+msgstr "ID für neue Anlage konnte nicht erzeugt werden: %s"
+
+msgid "Could not retrieve file: %s"
+msgstr "Datei konnte nicht geholt werden: %s"
+
+msgid "The attachment you requested no longer exists. Please refresh the view."
+msgstr ""
+"Die von Ihnen angeforderte Anlage ist nicht mehr vorhanden. Aktualisieren "
+"Sie die Ansicht."
+
+msgid "Could not delete attachment."
+msgstr "Anlage konnte nicht gelöscht werden"
+
+msgid ""
+"Could not find an attachment with the file_id %s. Either the file is "
+"orphaned or belongs to another module."
+msgstr ""
+"Anlage mit der file_id %s konnte nicht gefunden werden. Entweder die Datei "
+"ist verwaist oder gehört zu einem anderen Modul."
+
+msgid "Could not delete files from filestore. Context: %d."
+msgstr "Dateien konnten nicht aus Dateispeicher gelöscht werden. Kontext: %d"
+
+msgid "Validation failed: %s"
+msgstr "Validierung fehlgeschlagen: %s"
+
+msgid "An error occurred executing the search in the database."
+msgstr "Fehler beim Verarbeiten der Suchanfrage in der Datenbank."
+
+msgid "Unable to access the filestore."
+msgstr "Zugriff auf Datenspeicher nicht möglich."
+
+msgid "Writing to filestore failed."
+msgstr "Schreiben in den Datenspeicher fehlgeschlagen."
+
+msgid ""
+"Changes done to the object this attachment was added to could not be undone. "
+"Your database is probably inconsistent, run the consistency tool."
+msgstr ""
+"Änderungen am Objekt zu dem die Anlage hinzugefügt wurde konnten nicht "
+"rückgängig gemacht werden. Ihre Datenbank ist möglicherweise inkonsistent. "
+"Lassen Sie das Konsistenz-Tool ausführen."
+
+msgid "An error occurred attaching to the given object."
+msgstr "Fehler beim Anhängen an das angegebene Objekt"
+
+msgid ""
+"The object could not be detached because the update to an underlying object "
+"failed."
+msgstr ""
+"Das Objekt konnte nicht losgelöst werden, da das Update an einem "
+"zugrundeliegenden Objekt fehlschlug."
+
+msgid ""
+"Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does "
+"not look like a number."
+msgstr "Ungültiger Parameter in Anfrage. Parameter '%1$s' war '%2$s', sollte jedoch eine Zahl sein."
+
+msgid "Conflicting services registered for context %1$i and folder %2$i"
+msgstr "Dienste-Konflikt für Kontext %1$i und Ordner %2$i gemeldet"
+
 msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
 msgstr "Ungültiger Dateispeicher %1$d für Kontext %2$d benötigt Dateispeicher %3$d."
 
@@ -3914,7 +3733,13 @@ msgstr "Kontakte konnten nicht geladen werden"
 msgid "Could not encode as UTF-8"
 msgstr "Kodierung nach UTF-8 fehlgeschlagen"
 
-msgid "The necessary iCal emitter serivce is missing."
+msgid "Can not get connection to database."
+msgstr "Verbindung zur Datenbank kann nicht hergestellt werden."
+
+msgid "Could not load folder %s"
+msgstr "Ordner %s konnte nicht geladen werden"
+
+msgid "The necessary iCal emitter service is missing."
 msgstr "Benötigter iCal-Emitter-Dienst ist nicht vorhanden."
 
 msgid "Parsing %1$s to a number failed."
@@ -3922,6 +3747,117 @@ msgstr "%1$s ist keine Zahl."
 
 msgid "Conversion to iCal failed."
 msgstr "Die Konvertierung nach iCal ist fehlgeschlagen."
+
+msgid "Conversion to vCard failed."
+msgstr "Die Konvertierung nach vCard ist fehlgeschlagen."
+
+msgid "Can not import the format %2$s into folder %1$s."
+msgstr "Das Format %2$s konnte nicht in den Ordner %1$s importiert werden."
+
+msgid "Module calendar not enabled for user, cannot import appointments."
+msgstr ""
+"Das Kalender-Modul ist für den Benutzer nicht aktiviert. Die Termine können "
+"nicht importiert werden."
+
+msgid "Module tasks not enabled for user, cannot import tasks."
+msgstr ""
+"Das Aufgaben-Modul ist für den Benutzer nicht aktiviert. Aufgaben können "
+"nicht importiert werden."
+
+msgid "The necessary iCal parser service is missing."
+msgstr "Benötigter iCal-Parser-Dienst ist nicht vorhanden."
+
+msgid "Failed importing appointment due to hard conflicting resource."
+msgstr ""
+"Aufgrund eines Ressourcenkonflikts ist das Importieren des Termins "
+"fehlgeschlagen."
+
+msgid "Warnings when importing file: %i warnings"
+msgstr "Datei-Import-Warnung: %i Warnungen"
+
+msgid "Could not recognize format of the following data: %s"
+msgstr "Format folgender Daten wurde nicht erkannt: %s"
+
+msgid "Module contacts not enabled for user, cannot import contacts."
+msgstr ""
+"Das Kontakte-Modul ist für den Benutzer nicht aktiviert. Kontakte können "
+"nicht importiert werden."
+
+msgid "No VCard to import found."
+msgstr "Keine VCard zum Importieren gefunden"
+
+msgid "Problem while parsing the vcard, reason: %s"
+msgstr "Problem beim Analysieren der vcard, Grund: %s"
+
+msgid "Problem while converting the vcard to a contact, reason: %s"
+msgstr "Probleme beim Konvertieren der vcard in einen Kontakt, Grund: %s"
+
+msgid "Can only import into one folder at a time."
+msgstr "Es kann auf einmal nur in einen Ordner importiert werden."
+
+msgid "Could not find the following fields %s"
+msgstr "Folgende Felder konnten nicht gefunden werden %s"
+
+msgid "Could not translate a single column title. Is this a valid CSV file?"
+msgstr ""
+"Keiner der Spaltentitel konnte übersetzt werden. Handelt es sich um eine "
+"gültige CSV-Datei?"
+
+msgid "Could not translate a single field of information, did not insert entry %s."
+msgstr ""
+"Keines der Informationsfelder konnte übersetzt werden. Eintrag %s wurde "
+"nicht eingefügt."
+
+msgid ""
+"No field can be found that could be used to name contacts in this file: no "
+"name, no company nor e-mail."
+msgstr ""
+"Kein Feld gefunden, das als Kontaktname verwendet werden kann: kein Name, "
+"keine Firma, keine E-Mail."
+
+msgid ""
+"No field was set that might give the contact in line %s a display name: no "
+"name, no company nor e-mail."
+msgstr ""
+"Kein Feld gesetzt, das dem Kontakt in Zeile %s einen Display-Namen geben "
+"kann: kein Name, keine Firma, keine E-Mail."
+
+msgid "Could not read InputStream as string"
+msgstr "InputStream konnte nicht als Zeichenkette gelesen werden"
+
+msgid ""
+"Broken CSV file: Lines have different number of cells, line #1 has %d, line #"
+"%d has %d. Is this really a CSV file?"
+msgstr ""
+"Kaputte CSV-Datei: Zeilen haben unterschiedliche Zellenanzahl, Zeile #1 hat %"
+"d, Zeile #%d hat %d. Handelt es sich wirklich um eine CSV-Datei?"
+
+msgid "Illegal state: Found data after presumed last line."
+msgstr "Unzulässiger Status. Daten nach erwarteter letzter Zeile gefunden."
+
+msgid "Cannot find an importer for format %s into folders %s"
+msgstr "Kein Importier-Tool für Ordner %s in das Format %s gefunden"
+
+msgid "Cannot find an exporter for folder %s to format %s"
+msgstr "Kein Exportier-Tool für Ordner %s in das Format %s gefunden"
+
+msgid "Cannot translate id=%d to a constant from Types."
+msgstr "ID=%d konnte nicht in eine Konstante aus 'Types' übersetzt werden"
+
+msgid "Cannot translate id=%d to a constant from FolderObject."
+msgstr "ID=%d konnte nicht in eine Konstante aus FolderObject übersetzt werden"
+
+msgid "Can only handle one file, not %s"
+msgstr "Es kann nur eine Datei verarbeitet werden, nicht %s"
+
+msgid "Unknown format: %s"
+msgstr "Unbekanntes Format: %s"
+
+msgid "Empty file uploaded."
+msgstr "Leere Datei hochgeladen"
+
+msgid "The file you selected does not exist."
+msgstr "Die von Ihnen gewählte Datei ist nicht vorhanden"
 
 msgid "Some fields have values, that are too long"
 msgstr "Die Werte einiger Felder sind zu lang"
