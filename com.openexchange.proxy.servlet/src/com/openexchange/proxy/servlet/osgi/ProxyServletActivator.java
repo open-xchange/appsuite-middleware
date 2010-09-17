@@ -63,7 +63,11 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.proxy.servlet.ProxyEventHandler;
 import com.openexchange.proxy.servlet.ProxyRegistryImpl;
+import com.openexchange.proxy.servlet.services.ServiceRegistry;
+import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link ProxyServletActivator}
@@ -84,6 +88,8 @@ public class ProxyServletActivator implements BundleActivator {
             }
             trackers = new ArrayList<ServiceTracker>(1);
             trackers.add(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
+            trackers.add(new ServiceTracker(context, TimerService.class.getName(), new TimerServiceCustomizer(context)));
+            trackers.add(new ServiceTracker(context, SessiondService.class.getName(), new RegistryServiceTrackerCustomizer<SessiondService>(context, ServiceRegistry.getInstance(), SessiondService.class)));
             for (final ServiceTracker serviceTracker : trackers) {
                 serviceTracker.open();
             }
