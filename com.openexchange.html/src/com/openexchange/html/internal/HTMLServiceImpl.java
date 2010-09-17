@@ -210,13 +210,13 @@ public final class HTMLServiceImpl implements HTMLService {
                     sb.append("src=\"").append(uri.toString()).append('"');
                 }
             } catch (final MalformedURLException e) {
-                LOG.error("Invalid URL found in \"img\" tag: " + imgTag, e);
+                LOG.warn("Invalid URL found in \"img\" tag: " + imgTag, e);
                 sb.append(srcMatcher.group());
             } catch (final ProxyException e) {
-                LOG.error("Proxy registration failed for \"img\" tag: " + imgTag, e);
+                LOG.warn("Proxy registration failed for \"img\" tag: " + imgTag, e);
                 sb.append(srcMatcher.group());
             } catch (final Exception e) {
-                LOG.error("URL replacement failed for \"img\" tag: " + imgTag, e);
+                LOG.warn("URL replacement failed for \"img\" tag: " + imgTag, e);
                 sb.append(srcMatcher.group());
             }
             lastMatch = srcMatcher.end();
