@@ -62,10 +62,12 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.FacebookURLConnectionContent;
+import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingMessage;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
 import com.openexchange.messaging.generic.Utility;
@@ -75,6 +77,8 @@ import com.openexchange.messaging.generic.internet.MimeDateMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
 import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
+import com.openexchange.server.ServiceException;
+import com.openexchange.session.Session;
 
 /**
  * {@link FacebookFQLStreamParser} - Parses a given facebook stream element into a MIME message.
@@ -232,7 +236,7 @@ public final class FacebookFQLStreamParser {
                     }
                 }
             }
-            
+
         });
         m.put("link", new AttachmentHandler() {
 
@@ -560,7 +564,7 @@ public final class FacebookFQLStreamParser {
      * @return The resulting MIME message
      * @throws MessagingException If parsing fails
      */
-    public static FacebookMessagingMessage parseStreamDOMElement(final Element streamElement, final Locale locale) throws MessagingException {
+    public static FacebookMessagingMessage parseStreamDOMElement(final Element streamElement, final Locale locale, final Session session) throws MessagingException {
         if (!streamElement.hasChildNodes()) {
             return null;
         }
@@ -672,7 +676,15 @@ public final class FacebookFQLStreamParser {
             logger.debug("Stream element lead to empty message:\n" + Utility.prettyPrintXML(streamElement));
         }
         message.setSize(size);
-        final String htmlContent = messageText.toString();
+        final String htmlContent;
+        try {
+            htmlContent =
+                FacebookMessagingServiceRegistry.getServiceRegistry().getService(HTMLService.class, true).replaceImages(
+                    messageText.toString(),
+                    session);
+        } catch (final ServiceException e) {
+            throw new MessagingException(e);
+        }
         final String subject = FacebookMessagingUtility.abbreviate(htmlContent, 140);
         message.setHeader(new MimeStringMessagingHeader(MessagingHeader.KnownHeader.SUBJECT.toString(), subject));
         message.setToString(subject);

@@ -206,7 +206,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             final FQLQuery query =
                 FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), SET_FULL, facebookUserId);
             final List<Object> results = fireFQLQuery(query.getCharSequence(), facebookRestClient);
-            message = FacebookFQLStreamParser.parseStreamDOMElement((Element) results.iterator().next(), getUserLocale());
+            message = FacebookFQLStreamParser.parseStreamDOMElement((Element) results.iterator().next(), getUserLocale(), session);
             if (null == message) {
                 throw MessagingExceptionCodes.MESSAGE_NOT_FOUND.create(id, folder);
             }
@@ -422,7 +422,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
     }
 
     private FacebookMessagingMessage parseFromElement(final List<StaticFiller> staticFillers, final Element element) throws MessagingException {
-        final FacebookMessagingMessage message = FacebookFQLStreamParser.parseStreamDOMElement(element, getUserLocale());
+        final FacebookMessagingMessage message = FacebookFQLStreamParser.parseStreamDOMElement(element, getUserLocale(), session);
         if (null != message) {
             for (final StaticFiller filler : staticFillers) {
                 filler.fill(message);
