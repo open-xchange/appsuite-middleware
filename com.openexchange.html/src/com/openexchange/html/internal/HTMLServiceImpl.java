@@ -188,9 +188,9 @@ public final class HTMLServiceImpl implements HTMLService {
                 String urlStr = srcMatcher.group(1);
                 if (urlStr == null) {
                     urlStr = srcMatcher.group(++group);
-                }
-                if (urlStr == null) {
-                    urlStr = srcMatcher.group(++group);
+                    if (urlStr == null) {
+                        urlStr = srcMatcher.group(++group);
+                    }
                 }
                 /*
                  * Add proxy registration
