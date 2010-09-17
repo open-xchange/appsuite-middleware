@@ -236,6 +236,9 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                 LOG.debug(new StringBuilder().append("VisibleSubfoldersPerformer.doVisibleSubfolders() took ").append(duration).append(
                     "msec").toString());
             }
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
             return ret;
         } catch (final FolderException e) {
             if (started) {
