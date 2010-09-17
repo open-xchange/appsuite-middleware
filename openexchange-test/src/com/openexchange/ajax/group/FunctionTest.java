@@ -51,7 +51,6 @@ package com.openexchange.ajax.group;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -103,13 +102,12 @@ public final class FunctionTest extends AbstractAJAXSession {
     @Override
     protected void tearDown() throws Exception {
         for(int id: groupsToDelete)
-            GroupTools.delete(getClient(), new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
+            getClient().execute(new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
         super.tearDown();
     }
 
     public void testSearch() throws Throwable {
-        SearchResponse response = GroupTools.search(getClient(),
-                new SearchRequest("*"));
+        SearchResponse response = getClient().execute(new SearchRequest("*"));
         final Group[] groups = response.getGroups();
         LOG.info("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
@@ -121,15 +119,13 @@ public final class FunctionTest extends AbstractAJAXSession {
     }
 
     public void testRealSearch() throws Throwable {
-        final Group[] groups = GroupTools.search(getClient(),
-            new SearchRequest("*l*")).getGroups();
+        final Group[] groups = getClient().execute(new SearchRequest("*l*")).getGroups();
         LOG.info("Found " + groups.length + " groups.");
         assertNotNull(groups);
     }
 
     public void testList() throws Throwable {
-        Group[] groups = GroupTools.search(getClient(),
-            new SearchRequest("*")).getGroups();
+        Group[] groups = getClient().execute(new SearchRequest("*")).getGroups();
         LOG.info("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
@@ -137,7 +133,7 @@ public final class FunctionTest extends AbstractAJAXSession {
         for (int i = 0; i < groupIds.length; i++) {
             groupIds[i] = groups[i].getIdentifier();
         }
-        ListResponse listResponse = GroupTools.list(getClient(), new ListRequest(groupIds));
+        ListResponse listResponse = getClient().execute(new ListRequest(groupIds));
         groups = listResponse
             .getGroups();
         LOG.info("Listed " + groups.length + " groups.");
@@ -151,8 +147,8 @@ public final class FunctionTest extends AbstractAJAXSession {
     }
     
     public void testUpdatesViaComparingWithSearch() throws Exception {
-        Group[] groupsViaSearch = GroupTools.search(getClient(),new SearchRequest("*")).getGroups();
-        UpdatesResponse response = GroupTools.updates(getClient(), new UpdatesRequest(new Date(0), false));
+        Group[] groupsViaSearch = getClient().execute(new SearchRequest("*")).getGroups();
+        UpdatesResponse response = getClient().execute(new UpdatesRequest(new Date(0), false));
         List<Group> groupsViaUpdates = response.getModified();
         assertEquals("Should find the same amount of groups via *-search as via updates since day 0", groupsViaSearch.length, groupsViaUpdates.size());
     }
@@ -163,14 +159,14 @@ public final class FunctionTest extends AbstractAJAXSession {
         group.setSimpleName("simplename_"+new Date().getTime());
         group.setDisplayName("Group Updates Test"+new Date());
         
-        CreateResponse createResponse = GroupTools.create(getClient(), new CreateRequest(group,true));
+        CreateResponse createResponse = getClient().execute(new CreateRequest(group,true));
         int id = createResponse.getId();
         group.setIdentifier(id);
         groupsToDelete.add(id);
         group.setLastModified(createResponse.getTimestamp());
         Date lm = new Date(group.getLastModified().getTime() - 1);
                 
-        UpdatesResponse updatesResponseAfterCreate = GroupTools.updates(getClient(), new UpdatesRequest(lm, true));
+        UpdatesResponse updatesResponseAfterCreate = getClient().execute(new UpdatesRequest(lm, true));
         int numberNewAfterCreation = updatesResponseAfterCreate.getNew().size();
         int numberModifiedAfterCreation = updatesResponseAfterCreate.getModified().size();
         int numberDeletedAfterCreation = updatesResponseAfterCreate.getDeleted().size();
@@ -178,11 +174,11 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertEquals("Amount of deleted elements should not change after creation", 0+GROUP0, numberDeletedAfterCreation);
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterCreation, numberModifiedAfterCreation);
         
-        DeleteResponse deleteResponse = GroupTools.delete(getClient(), new DeleteRequest(group, true));
+        DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(group, true));
         if(deleteResponse.hasError())
             groupsToDelete.remove(id);
         
-        UpdatesResponse updatesResponseAfterDeletion = GroupTools.updates(getClient(), new UpdatesRequest(lm, true));
+        UpdatesResponse updatesResponseAfterDeletion = getClient().execute(new UpdatesRequest(lm, true));
         int numberNewAfterDeletion = updatesResponseAfterDeletion.getNew().size();
         int numberModifiedAfterDeletion = updatesResponseAfterDeletion.getModified().size();
         int numberDeletedAfterDeletion = updatesResponseAfterDeletion.getDeleted().size();
@@ -201,15 +197,13 @@ public final class FunctionTest extends AbstractAJAXSession {
     }
 
     public void testGet() throws Throwable {
-        final Group groups[] = GroupTools.search(getClient(),
-            new SearchRequest("*")).getGroups();
+        final Group groups[] = getClient().execute(new SearchRequest("*")).getGroups();
         LOG.info("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
         final int pos = new Random(System.currentTimeMillis()).nextInt(groups
             .length);
-        GetResponse response = GroupTools.get(getClient(),
-                new GetRequest(groups[pos].getIdentifier()));
+        GetResponse response = getClient().execute(new GetRequest(groups[pos].getIdentifier()));
         final Group group = response.getGroup();
         LOG.info("Loaded group: " + group.toString());
         JSONObject entry = (JSONObject) response.getData();
@@ -228,17 +222,17 @@ public final class FunctionTest extends AbstractAJAXSession {
         group.setMember(new int[] { client1.getValues().getUserId() });
         final CreateRequest request = new CreateRequest(group);
         try {
-            final CreateResponse response = GroupTools.create(client1, request);
+            final CreateResponse response = client1.execute(request);
             group.setIdentifier(response.getId());
             group.setLastModified(response.getTimestamp());
             LOG.info("Created group with identifier: " + group.getIdentifier());
             final ChangeRequest change = new ChangeRequest(group);
-            final ChangeResponse changed = GroupTools.change(client1, change);
+            final ChangeResponse changed = client1.execute(change);
             group.setLastModified(changed.getTimestamp());
             LOG.info("Changed group with identifier: " + group.getIdentifier());
         } finally {
             if (-1 != group.getIdentifier()) {
-                GroupTools.delete(client1, new DeleteRequest(
+                client1.execute(new DeleteRequest(
                     group.getIdentifier(), group.getLastModified()));
             }
         }
