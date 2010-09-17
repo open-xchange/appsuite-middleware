@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target name="OX Platform">
+<locations>
+<location path="${eclipse_home}" type="Directory"/>
+</locations>
+<includeBundles>
+<plugin id="org.apache.commons.logging.source"/>
+<plugin id="org.apache.commons.logging"/>
+<plugin id="org.eclipse.osgi.util.source"/>
+<plugin id="javax.servlet.source"/>
+<plugin id="org.eclipse.equinox.event.source"/>
+<plugin id="org.apache.commons.cli"/>
+<plugin id="org.apache.commons.lang"/>
+<plugin id="org.eclipse.osgi"/>
+<plugin id="org.eclipse.osgi.source"/>
+<plugin id="org.eclipse.equinox.event"/>
+<plugin id="org.eclipse.osgi.util"/>
+<plugin id="org.eclipse.osgi.services"/>
+<plugin id="javax.servlet"/>
+<plugin id="org.eclipse.osgi.services.source"/>
+</includeBundles>
+</target>
