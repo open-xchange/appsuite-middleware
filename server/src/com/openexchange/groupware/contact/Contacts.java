@@ -50,6 +50,7 @@
 package com.openexchange.groupware.contact;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -101,6 +102,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -140,6 +142,7 @@ public final class Contacts {
 
     public static final int DATA_TRUNCATION = 54;
 
+    @Deprecated
     private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(Contacts.class);
 
     private static final Log LOG = LogFactory.getLog(Contacts.class);
@@ -148,19 +151,10 @@ public final class Contacts {
 
     public static Mapper[] mapping;
 
-    /**
-     * Prevent instantiation
-     */
     private Contacts() {
         super();
     }
 
-    @OXThrows(
-        category = Category.USER_INPUT,
-        desc = "The entered E-Mail address is not conform to RFC822 and therefore it is not accepted.",
-        exceptionId = 0,
-        msg = "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
-    )
     private static void validateEmailAddress(final Contact co) throws OXException {
         if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
@@ -175,37 +169,18 @@ public final class Contacts {
                     new QuotedInternetAddress(email).validate();
                 }
             } catch (final AddressException e) {
-                throw EXCEPTIONS.create(0, e, email);
+                throw ContactExceptionCodes.INVALID_EMAIL.create(e, email);
             }
         }
     }
 
-    @OXThrowsMultiple(
-        category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT },
-        desc = { "1", "2", "70" },
-        exceptionId = { 1, 2, 70 },
-        msg = {
-            "Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d.",
-            "This gif image is too large. It can not be scaled and will not be accepted", "Mime type is null"
-        }
-    )
-    private static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException, IOException {
+    private static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, IOException, ContactException {
         if (null == mime) {
-            throw EXCEPTIONS.create(70, new Object[0]);
+            throw ContactExceptionCodes.MIME_TYPE_NOT_DEFINED.create();
         }
-        /*-
-         * TODO check acme giff scale
-         *
-         * int scaledWidth = 76; int scaledHeight = 76; int max_size = 33750;
-         */
         final int scaledWidth = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_WIDTH));
         final int scaledHeight = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_HEIGHT));
         final long max_size = Long.parseLong(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE));
-
-        /*
-         * for (int i=0;i<allowed_mime.length;i++){ System.out.println(new StringBuiler("--> "+allowed_mime[i]+" vs "+mime)); }
-         */
-        boolean check = false;
 
         if ((mime.toLowerCase().indexOf("jpg") != -1) || (mime.toLowerCase().indexOf("jpeg") != -1)) {
             mime = "image/jpg";
@@ -216,12 +191,11 @@ public final class Contacts {
         }
 
         final String fileType = mime.substring(mime.indexOf('/') + 1);
-
+        boolean check = false;
         {
             final Set<String> allowedMime = new HashSet<String>(Arrays.asList(ImageIO.getReaderFormatNames()));
             check = allowedMime.contains(fileType);
         }
-
         if (mime.toLowerCase().contains("gif")) {
             check = true;
         }
@@ -229,27 +203,16 @@ public final class Contacts {
             check = false;
         }
         if (!check) {
-
-            // final int ilkb = img.length / 1024;
-            // final int mskb = max_size / 1024;
-
-            throw EXCEPTIONS.createOXConflictException(1, mime, Integer.valueOf(img.length), Long.valueOf(max_size));
-            // throw new OXException("This is a not supported file type for an
-            // Image or it is to large! MimeType ="+mime+" / Image Size =
-            // "+img.length+" / max. allowed Image size = "+max_size);
+            throw new OXConflictException(ContactExceptionCodes.IMAGE_SCALE_PROBLEM.create(mime, I(img.length), L(max_size)));
         }
 
         BufferedImage bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(img));
         if (null == bi) {
             // No appropriate ImageReader found
-
             final BufferedImage targetImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.SCALE_SMOOTH);
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
             ImageIO.write(targetImage, fileType, out);
             bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
-
-            // LOG.warn(new StringBuilder("No appropriate ImageReader found for format name \"").append(fileType).append('"'));
-            // throw EXCEPTIONS.createOXConflictException(1, mime, Integer.valueOf(img.length), Integer.valueOf(max_size));
         }
 
         final int origHeigh = bi.getHeight();
@@ -261,11 +224,6 @@ public final class Contacts {
                 " / width=").append(origWidth).append(" / height=").append(origHeigh).append(" / byte[] size=").append(img.length);
             LOG.debug(logi.toString());
         }
-        /*
-         * if ((origHeigh > scaledHeight || origWidth > scaledWidth) && mime.toLowerCase().contains("gif")){ throw
-         * EXCEPTIONS.createOXConflictException(2); //throw new OXException("This gif Image is to large. It can not be scaled and will not
-         * be accepted"); }else if ((origHeigh > scaledHeight || origWidth > scaledWidth) && !mime.toLowerCase().contains("gif")){
-         */
         if ((origHeigh > scaledHeight) || (origWidth > scaledWidth)) {
             float ratio = 0;
             int sWd = 0;
@@ -273,7 +231,6 @@ public final class Contacts {
 
             if (origWidth == origHeigh) {
                 ratio = 1;
-
                 if (scaledHeight < scaledWidth) {
                     sWd = scaledHeight;
                     sHd = scaledHeight;
@@ -289,7 +246,6 @@ public final class Contacts {
                         origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
                         ratio).toString());
                 }
-
             } else if (origWidth > origHeigh) {
                 final float w1 = origWidth;
                 final float h1 = origHeigh;
@@ -346,19 +302,15 @@ public final class Contacts {
             try {
                 ImageIO.write(scaledBufferedImage, fileType, baos);
             } catch (final Exception fallback) {
-                /**
-                 * This is just a basic fallback i try when he is not able to scale the image with the given mimetype. then we try the
-                 * common jpg.
-                 */
+                // This is just a basic fallback i try when he is not able to scale the image with the given mimetype. then we try the
+                // common jpg.
                 LOG.debug("Unable to Scale the Image with default Parameters. Gonna try fallback");
             } finally {
                 if (baos.toByteArray().length < 1) {
                     ImageIO.write(scaledBufferedImage, "JPG", baos);
                 }
             }
-
             final byte[] back = baos.toByteArray();
-
             return back;
         }
         return img;

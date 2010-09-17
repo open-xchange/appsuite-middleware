@@ -50,6 +50,7 @@
 package com.openexchange.groupware.contact;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
@@ -97,6 +98,7 @@ public class ContactException extends OXException {
      * @param cause The initial cause
      * @param msgParams The message arguments
      */
+    @Deprecated
     public ContactException(final Category category, final int id, final String message, final Throwable cause, final Object... msgParams) {
         super(EnumComponent.CONTACT, category, id, message, cause, msgParams);
     }
@@ -118,8 +120,13 @@ public class ContactException extends OXException {
      * @param id The unique number
      * @param msgParams The message arguments
      */
+    @Deprecated
     public ContactException(final Category category, final String message, final int id, final Object... msgParams) {
         this(category, id, message, null, msgParams);
     }
 
+    public ContactException(ErrorMessage message, Throwable cause, Object... args) {
+        super(message, cause);
+        setMessageArgs(args);
+    }
 }

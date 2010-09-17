@@ -53,76 +53,74 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
-public class ContactExceptionFactory extends AbstractOXExceptionFactory{
+@Deprecated
+public class ContactExceptionFactory extends AbstractOXExceptionFactory<ContactException> {
 
-	public ContactExceptionFactory(final Class clazz) {
-		super(clazz);
-	}
-	
-	private static final int CLASS = Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTEXCEPTIONFACTORY;
-	
-	@Override
-	protected AbstractOXException buildException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
-		/*
-		if(component != Component.CONTACT || component != Component.LINKING) {
-			throw new IllegalArgumentException("This factory can only build exceptions for the Contacts");
-		}
-		*/
-		return new ContactException(category,number,message,cause,msgArgs);
-	}
-	
-	@Override
-	protected int getClassId() {
-		return CLASS;
-	}
-	
-	public ContactException create(final int id, final Object...msgParams) {
-		return (ContactException) createException(id, msgParams);
-	}
-	public ContactException create(final int id, final Throwable cause, final Object...msgParams) {
-		return (ContactException) createException(id,cause, msgParams);
-	}
-	
-	public OXConflictException createOXConflictException(final int id, final Object...msgParams) {
-		return new OXConflictException((ContactException) createException(id,msgParams));
-	}
-	public OXConflictException createOXConflictException(final int id, final Throwable cause, final Object...msgParams) {
-		return new OXConflictException((ContactException) createException(id,cause, msgParams));
-	}
-	
-	public OXObjectNotFoundException createOXObjectNotFoundException(final int id, final Object...msgParams) {
-		return new OXObjectNotFoundException((ContactException) createException(id, msgParams));
-	}
-	public OXObjectNotFoundException createOXObjectNotFoundException(final int id, final Throwable cause, final Object...msgParams) {
-		return new OXObjectNotFoundException( (ContactException) createException(id,cause, msgParams));
-	}
-	
-	public OXConcurrentModificationException createOXConcurrentModificationException(final int id, final Object...msgParams) {
-		return new OXConcurrentModificationException((ContactException) createException(id,msgParams));
-	}
-	public OXConcurrentModificationException createOXConcurrentModificationException(final int id, final Throwable cause, final Object...msgParams) {
-		return new OXConcurrentModificationException( (ContactException) createException(id,cause, msgParams));
-	}
-	
-	public OXPermissionException createOXPermissionException(final int id, final Object...msgParams) {
-		return new OXPermissionException((ContactException) createException(id,msgParams));
-	}
-	public OXPermissionException createOXPermissionException(final int id, final Throwable cause, final Object...msgParams) {
-		return new OXPermissionException( (ContactException) createException(id,cause, msgParams));
-	}
-	
-	public SearchIteratorException createSearchIteratorException(final int id, final Object...msgParams) {
-		return new SearchIteratorException((ContactException) createException(id, msgParams));
-	}
-	public SearchIteratorException createSearchIteratorException(final int id, final Throwable cause, final Object...msgParams) {
-		return new SearchIteratorException( (ContactException) createException(id,cause, msgParams));
-	}
+    public ContactExceptionFactory(final Class<?> clazz) {
+        super(clazz);
+    }
 
-	
+    private static final int CLASS = Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTEXCEPTIONFACTORY;
+
+    @Override
+    protected ContactException buildException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
+        return new ContactException(category,number,message,cause,msgArgs);
+    }
+
+    @Override
+    protected int getClassId() {
+        return CLASS;
+    }
+
+    public ContactException create(final int id, final Object...msgParams) {
+        return createException(id, msgParams);
+    }
+    public ContactException create(final int id, final Throwable cause, final Object...msgParams) {
+        return createException(id,cause, msgParams);
+    }
+
+    public OXConflictException createOXConflictException(final int id, final Object...msgParams) {
+        return new OXConflictException(createException(id,msgParams));
+    }
+
+    public OXConflictException createOXConflictException(final int id, final Throwable cause, final Object...msgParams) {
+        return new OXConflictException(createException(id,cause, msgParams));
+    }
+
+    public OXObjectNotFoundException createOXObjectNotFoundException(final int id, final Object...msgParams) {
+        return new OXObjectNotFoundException(createException(id, msgParams));
+    }
+
+    public OXObjectNotFoundException createOXObjectNotFoundException(final int id, final Throwable cause, final Object...msgParams) {
+        return new OXObjectNotFoundException(createException(id,cause, msgParams));
+    }
+
+    public OXConcurrentModificationException createOXConcurrentModificationException(final int id, final Object...msgParams) {
+        return new OXConcurrentModificationException(createException(id,msgParams));
+    }
+
+    public OXConcurrentModificationException createOXConcurrentModificationException(final int id, final Throwable cause, final Object...msgParams) {
+        return new OXConcurrentModificationException(createException(id,cause, msgParams));
+    }
+
+    public OXPermissionException createOXPermissionException(final int id, final Object...msgParams) {
+        return new OXPermissionException(createException(id,msgParams));
+    }
+
+    public OXPermissionException createOXPermissionException(final int id, final Throwable cause, final Object...msgParams) {
+        return new OXPermissionException(createException(id,cause, msgParams));
+    }
+
+    public SearchIteratorException createSearchIteratorException(final int id, final Object...msgParams) {
+        return new SearchIteratorException(createException(id, msgParams));
+    }
+
+    public SearchIteratorException createSearchIteratorException(final int id, final Throwable cause, final Object...msgParams) {
+        return new SearchIteratorException(createException(id,cause, msgParams));
+    }
 }
