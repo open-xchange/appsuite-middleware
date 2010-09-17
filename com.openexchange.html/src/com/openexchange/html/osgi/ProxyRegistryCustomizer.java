@@ -74,8 +74,7 @@ public final class ProxyRegistryCustomizer implements ServiceTrackerCustomizer {
 
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
-        ProxyRegistry proxyRegistry = (ProxyRegistry) service;
-        ProxyRegistryProvider.getInstance().setProxyRegistry(proxyRegistry);
+        ProxyRegistryProvider.getInstance().setProxyRegistry((ProxyRegistry) service);
         return service;
     }
 
