@@ -124,22 +124,6 @@ public final class SessionMailCache {
     }
 
     /**
-     * Puts specified <code>entry</code> into cache if no other entry is already present and {@link SessionMailCacheEntry#getValue()} is not <code>null</code>.
-     * <p>
-     * {@link SessionMailCacheEntry#getKey()} is used as key and {@link SessionMailCacheEntry#getValue()} as value.
-     * 
-     * @param entry The mail cache entry
-     * @return The entry previously associated with key or <code>null</code>
-     */
-    @SuppressWarnings("unchecked")
-    public <V> SessionMailCacheEntry<V> putIfAbsent(final SessionMailCacheEntry<V> entry) {
-        if (null == entry.getValue()) {
-            return (SessionMailCacheEntry<V>) cache.get(entry.getKey());
-        }
-        return (SessionMailCacheEntry<V>) cache.putIfAbsent(entry.getKey(), entry.getValue());
-    }
-
-    /**
      * Gets the entry acquired through {@link SessionMailCacheEntry#getKey()}. If present it's applied to <code>entry</code> via
      * {@link SessionMailCacheEntry#setValue(Object)}.
      * 
