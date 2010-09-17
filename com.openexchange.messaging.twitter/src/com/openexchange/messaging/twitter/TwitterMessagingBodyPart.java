@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingBodyPart;
@@ -71,6 +72,8 @@ import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.generic.Utility;
 import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 import com.openexchange.messaging.generic.internet.MimeContentType;
+import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.twitter.Status;
 
 /**
@@ -125,7 +128,7 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
      * @param html <code>true</code> to convert status to HTML; otherwise <code>false</code> for text-plain
      * @param parent The parental multipart
      */
-    public TwitterMessagingBodyPart(final Status status, final boolean html, final MultipartContent parent) {
+    public TwitterMessagingBodyPart(final Status status, final boolean html, final MultipartContent parent, final Session session) {
         super();
         this.parent = parent;
         contentType = html ? CONTENT_TYPE_HTML : CONTENT_TYPE_PLAIN;
@@ -145,7 +148,9 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
                 final Matcher m = PATTERN_BODY.matcher(htmlContent);
                 htmlContent = m.replaceAll(MessageFormat.format("$1\r\n    <img src=\"{0}\" />", status.getUser().getProfileImageURL()));
             }
-            content = new StringContent(htmlContent);
+            
+            final HTMLService htmlService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(HTMLService.class);
+            content = new StringContent(null == htmlService ? htmlContent: htmlService.replaceImages(htmlContent, session));
             sectionId = "2";
             size = htmlContent.length();
         } else {

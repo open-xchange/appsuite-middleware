@@ -102,6 +102,8 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
 
     private final int cid;
 
+    private final Session session;
+
     /**
      * Initializes a new {@link TwitterMessagingMessageAccess}.
      */
@@ -111,6 +113,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         id = account.getId();
         user = session.getUserId();
         cid = session.getContextId();
+        this.session = session;
     }
 
     public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
@@ -153,7 +156,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
     }
     
     private TwitterMessagingMessage get(final long id) throws TwitterException {
-        return new TwitterMessagingMessage(twitterAccess.showStatus(id));
+        return new TwitterMessagingMessage(twitterAccess.showStatus(id), session);
     }
 
     public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
@@ -233,7 +236,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 final List<Status> friendsTimeline = twitterAccess.getFriendsTimeline();
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
-                    final TwitterMessagingMessage message = new TwitterMessagingMessage(status);
+                    final TwitterMessagingMessage message = new TwitterMessagingMessage(status, session);
                     if (searchTerm.matches(message)) {
                         msgs.add(message);
                     }
@@ -242,7 +245,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 final List<Status> friendsTimeline = twitterAccess.getFriendsTimeline();
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
-                    final TwitterMessagingMessage message = new TwitterMessagingMessage(status);
+                    final TwitterMessagingMessage message = new TwitterMessagingMessage(status, session);
                     msgs.add(message);
                }
             }
