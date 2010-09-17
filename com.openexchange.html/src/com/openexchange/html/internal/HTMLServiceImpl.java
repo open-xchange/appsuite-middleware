@@ -155,7 +155,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 do {
                     sb.append(content.substring(lastMatch, imgMatcher.start()));
                     final String imgTag = imgMatcher.group();
-                    sb.append(replaceSrcAttribute(imgTag, session, sb, proxyRegistry));
+                    replaceSrcAttribute(imgTag, session, sb, proxyRegistry);
                     lastMatch = imgMatcher.end();
                 } while (imgMatcher.find());
                 sb.append(content.substring(lastMatch));
