@@ -72,6 +72,7 @@ import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.HTMLServiceImpl;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -114,6 +115,7 @@ public class HTMLServiceActivator extends DeferredActivator {
              * Service trackers
              */
             trackers = new ArrayList<ServiceTracker>(2);
+            trackers.add(new ServiceTracker(context, ProxyRegistry.class.getName(), new ProxyRegistryCustomizer(context)));
             /*
              * Open trackers
              */

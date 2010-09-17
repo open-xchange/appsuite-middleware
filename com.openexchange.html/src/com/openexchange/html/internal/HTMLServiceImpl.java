@@ -55,6 +55,9 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +73,11 @@ import com.openexchange.html.internal.parser.HTMLParser;
 import com.openexchange.html.internal.parser.handler.HTML2TextHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
+import com.openexchange.proxy.ImageContentTypeRestriction;
+import com.openexchange.proxy.ProxyException;
+import com.openexchange.proxy.ProxyRegistration;
+import com.openexchange.proxy.ProxyRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -120,6 +128,93 @@ public final class HTMLServiceImpl implements HTMLService {
         this.tidyConfiguration = tidyConfiguration;
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
+    }
+
+    private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    public String replaceImages(final String content, final Session session) {
+        if (null == content) {
+            return null;
+        }
+        try {
+            final Matcher imgMatcher = IMG_PATTERN.matcher(content);
+            if (imgMatcher.find()) {
+                /*
+                 * Check presence of ProxyRegistry
+                 */
+                final ProxyRegistry proxyRegistry = ProxyRegistryProvider.getInstance().getProxyRegistry();
+                if (null == proxyRegistry) {
+                    LOG.warn("Missing ProxyRegistry service. Replacing image URL skipped.");
+                    return content;
+                }
+                /*
+                 * Start replacing
+                 */
+                final StringBuilder sb = new StringBuilder(content.length());
+                int lastMatch = 0;
+                do {
+                    sb.append(content.substring(lastMatch, imgMatcher.start()));
+                    final String imgTag = imgMatcher.group();
+                    sb.append(replaceSrcAttribute(imgTag, session, sb, proxyRegistry));
+                    lastMatch = imgMatcher.end();
+                } while (imgMatcher.find());
+                sb.append(content.substring(lastMatch));
+                return sb.toString();
+            }
+
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return content;
+    }
+
+    private static final Pattern SRC_PATTERN = Pattern.compile(
+        "(?:src=\"([^\"]*)\")|(?:src='([^']*)')|(?:src=[^\"']([^\\s>]*))",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static String replaceSrcAttribute(final String imgTag, final Session session, final StringBuilder sb, final ProxyRegistry proxyRegistry) {
+        final Matcher srcMatcher = SRC_PATTERN.matcher(imgTag);
+        int lastMatch = 0;
+        if (srcMatcher.find()) {
+            /*
+             * 'src' attribute found
+             */
+            sb.append(imgTag.substring(lastMatch, srcMatcher.start()));
+            try {
+                /*
+                 * Extract URL
+                 */
+                int group = 1;
+                String urlStr = srcMatcher.group(1);
+                if (urlStr == null) {
+                    urlStr = srcMatcher.group(++group);
+                }
+                if (urlStr == null) {
+                    urlStr = srcMatcher.group(++group);
+                }
+                /*
+                 * Add proxy registration
+                 */
+                final URL imageUrl = new URL(urlStr);
+                final URI uri = proxyRegistry.register(new ProxyRegistration(imageUrl, session, ImageContentTypeRestriction.getInstance()));
+                /*
+                 * Compose replacement
+                 */
+                sb.append("src=\"").append(uri.toString()).append('"');
+            } catch (final MalformedURLException e) {
+                LOG.error("Invalid URL found in \"img\" tag: " + imgTag, e);
+                sb.append(srcMatcher.group());
+            } catch (final ProxyException e) {
+                LOG.error("Proxy registration failed for \"img\" tag: " + imgTag, e);
+                sb.append(srcMatcher.group());
+            } catch (final Exception e) {
+                LOG.error("URL replacement failed for \"img\" tag: " + imgTag, e);
+                sb.append(srcMatcher.group());
+            }
+            lastMatch = srcMatcher.end();
+        }
+        sb.append(imgTag.substring(lastMatch));
+        return sb.toString();
     }
 
     public String formatHrefLinks(final String content) {
