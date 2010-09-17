@@ -87,6 +87,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     NEGATIVE_OBJECT_ID(NEGATIVE_OBJECT_ID_MSG, Category.CODE_ERROR, 121),
     /** No changes found. No update requiered. Context %1$d Object %2$d */
     NO_CHANGES(NO_CHANGES_MSG, Category.USER_INPUT, 122),
+    /** Contact %1$d not found in context %2$d. */
+    CONTACT_NOT_FOUND(CONTACT_NOT_FOUND_MSG, Category.CODE_ERROR, 125),
     /** Unable to pick up a connection from the DBPool */
     INIT_CONNECTION_FROM_DBPOOL(INIT_CONNECTION_FROM_DBPOOL_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 151),
     /** The image you tried to attach is not a valid picture. It may be broken or is not a valid file. */

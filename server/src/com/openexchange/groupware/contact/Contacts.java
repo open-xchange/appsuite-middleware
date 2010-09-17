@@ -1155,12 +1155,6 @@ public final class Contacts {
         return co;
     }
 
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR, Category.CODE_ERROR },
-        desc = { "25", "26" },
-        exceptionId = { 25, 26 },
-        msg = { "Contact %1$d not found in context %2$d.", "Unable to load contact %1$d in context %2$d." }
-    )
     private static Contact fillContactObject(final ContactSql contactSQL, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException {
         final Contact co = new Contact();
         Statement stmt = null;
@@ -1177,10 +1171,10 @@ public final class Contacts {
                     }
                 }
             } else {
-                throw EXCEPTIONS.createOXObjectNotFoundException(25, I(objectId), I(ctx.getContextId()));
+                throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create( I(objectId), I(ctx.getContextId())));
             }
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(26, e, I(objectId), I(ctx.getContextId()));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -1191,7 +1185,6 @@ public final class Contacts {
         deleteContact(id, cid, writecon, false);
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "27", exceptionId = 27, msg = "Unable to delete Contact: Context %1$d Contact %2$d")
     public static void deleteContact(final int id, final int cid, final Connection writecon, final boolean admin_delete) throws OXException {
         Statement del = null;
         try {
@@ -1209,25 +1202,16 @@ public final class Contacts {
             }
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(27, se, Integer.valueOf(cid), Integer.valueOf(id));
-            // throw new OXException("ERROR DURING CONTACT DELETE cid="+cid+"
-            // oid="+id, se);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(del));
         } finally {
-            try {
-                if (del != null) {
-                    del.close();
-                }
-            } catch (final SQLException see) {
-                LOG.warn(ERR_UNABLE_TO_CLOSE_CON, see);
-            }
+            closeSQLStuff(del);
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "28", exceptionId = 28, msg = "Unable to load dristributionlist: Context %1$d Contact %2$d")
     public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user, final Context ctx, final Connection readcon) throws OXException {
 
-        Statement smt = null;
+        Statement stmt = null;
         ResultSet rs = null;
         DistributionListEntryObject[] r = null;
 
@@ -1235,8 +1219,8 @@ public final class Contacts {
 
             final ContactSql cs = new ContactMySql(ctx, user);
 
-            smt = readcon.createStatement();
-            rs = smt.executeQuery(cs.iFfillDistributionListArray(id, ctx.getContextId()));
+            stmt = readcon.createStatement();
+            rs = stmt.executeQuery(cs.iFfillDistributionListArray(id, ctx.getContextId()));
 
             rs.last();
             final int size = rs.getRow();
@@ -1291,98 +1275,70 @@ public final class Contacts {
             }
             r = new DistributionListEntryObject[cnt];
             System.arraycopy(dleos, 0, r, 0, cnt);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(28, se, Integer.valueOf(ctx.getContextId()), Integer.valueOf(id));
-            // throw new OXException("ERROR DURING DISTRIBUTION LIST LOAD
-            // cid="+ctx.getContextId()+" oid="+id, se);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (smt != null) {
-                    smt.close();
-                }
-            } catch (final SQLException see) {
-                LOG.warn(ERR_UNABLE_TO_CLOSE, see);
-            }
+            closeSQLStuff(rs, stmt);
         }
         return r;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "29", "60" }, exceptionId = { 29, 60 }, msg = {
-        "Unable to save dristributionlist: Context %1$d Contact %2$d", "This contact has no folder id: Entry %1$d Context %2$d" })
     public static void writeDistributionListArrayInsert(final DistributionListEntryObject[] dleos, final int id, final int cid, final Connection writecon) throws OXException {
 
         DistributionListEntryObject dleo = null;
 
+        PreparedStatement ps = null;
         try {
 
             final ContactSql cs = new ContactMySql(null);
-
+            ps = writecon.prepareStatement(cs.iFwriteDistributionListArrayInsert());
             for (int i = 0; i < dleos.length; i++) {
                 dleo = dleos[i];
-                PreparedStatement ps = null;
+                ps.setInt(1, id);
 
-                try {
-                    ps = writecon.prepareStatement(cs.iFwriteDistributionListArrayInsert());
-                    ps.setInt(1, id);
-
-                    if (dleo.containsEntryID() && (dleo.getEntryID() > 0)) {
-                        ps.setInt(2, dleo.getEntryID());
-                        ps.setInt(3, dleo.getEmailfield());
-                        /*
-                         * if (dleo.getFolderID() == 0){ throw EXCEPTIONS.createOXConflictException (60,dleo.getEntryID(),cid); }
-                         */
-                        ps.setInt(9, dleo.getFolderID());
-                    } else {
-                        ps.setNull(2, java.sql.Types.INTEGER);
-                        ps.setNull(3, java.sql.Types.INTEGER);
-                        ps.setNull(9, java.sql.Types.INTEGER);
-                    }
-                    if (dleo.containsDisplayname()) {
-                        ps.setString(4, dleo.getDisplayname());
-                    } else if ((dleo.containsLastname() && (dleo.getLastname() != null)) && (dleo.containsFistname() && (dleo.getFirstname() != null))) {
-                        ps.setString(4, dleo.getLastname() + ", " + dleo.getFirstname());
-                    } else if ((dleo.containsLastname() && (dleo.getLastname() != null)) && !dleo.containsFistname()) {
-                        ps.setString(4, dleo.getLastname());
-                    } else {
-                        ps.setString(4, "unknown");
-                    }
-                    if (dleo.containsLastname() && (dleo.getLastname() != null)) {
-                        ps.setString(5, dleo.getLastname());
-                    } else {
-                        ps.setNull(5, java.sql.Types.VARCHAR);
-                    }
-                    if (dleo.containsFistname() && (dleo.getFirstname() != null)) {
-                        ps.setString(6, dleo.getFirstname());
-                    } else {
-                        ps.setNull(6, java.sql.Types.VARCHAR);
-                    }
-                    ps.setString(7, dleo.getEmailaddress());
-                    ps.setInt(8, cid);
-
-                    if (DEBUG) {
-                        LOG.debug(new StringBuilder("WRITE DLIST ").append(ps.toString()));
-                    }
-
-                    ps.execute();
-                } finally {
-                    try {
-                        if (ps != null) {
-                            ps.close();
-                        }
-                    } catch (final SQLException see) {
-                        LOG.warn(ERR_UNABLE_TO_CLOSE_CON, see);
-                    }
+                if (dleo.containsEntryID() && (dleo.getEntryID() > 0)) {
+                    ps.setInt(2, dleo.getEntryID());
+                    ps.setInt(3, dleo.getEmailfield());
+                    ps.setInt(9, dleo.getFolderID());
+                } else {
+                    ps.setNull(2, java.sql.Types.INTEGER);
+                    ps.setNull(3, java.sql.Types.INTEGER);
+                    ps.setNull(9, java.sql.Types.INTEGER);
                 }
+                if (dleo.containsDisplayname()) {
+                    ps.setString(4, dleo.getDisplayname());
+                } else if ((dleo.containsLastname() && (dleo.getLastname() != null)) && (dleo.containsFistname() && (dleo.getFirstname() != null))) {
+                    ps.setString(4, dleo.getLastname() + ", " + dleo.getFirstname());
+                } else if ((dleo.containsLastname() && (dleo.getLastname() != null)) && !dleo.containsFistname()) {
+                    ps.setString(4, dleo.getLastname());
+                } else {
+                    ps.setString(4, "unknown");
+                }
+                if (dleo.containsLastname() && (dleo.getLastname() != null)) {
+                    ps.setString(5, dleo.getLastname());
+                } else {
+                    ps.setNull(5, java.sql.Types.VARCHAR);
+                }
+                if (dleo.containsFistname() && (dleo.getFirstname() != null)) {
+                    ps.setString(6, dleo.getFirstname());
+                } else {
+                    ps.setNull(6, java.sql.Types.VARCHAR);
+                }
+                ps.setString(7, dleo.getEmailaddress());
+                ps.setInt(8, cid);
+
+                if (DEBUG) {
+                    LOG.debug(new StringBuilder("WRITE DLIST ").append(ps.toString()));
+                }
+
+                ps.execute();
             }
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(29, se, Integer.valueOf(cid), Integer.valueOf(id));
-            // throw new OXException("ERROR DURING DISTRIBUTION LIST SAVE, DLIST
-            // NOT SAVED cid="+cid+" oid="+id, se);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+        } finally {
+            closeSQLStuff(ps);
         }
     }
 
@@ -1409,61 +1365,21 @@ public final class Contacts {
         int update_count = 0;
         int delete_count = 0;
 
-        for (int i = 0; i < dleos.length; i++) { // this for;next goes to all
-            // new
-            // entries from the client
+        for (int i = 0; i < dleos.length; i++) { // this for;next goes to all new entries from the client
             new_one = dleos[i];
 
-            if (new_one.containsEntryID() && (new_one.getEntryID() > 0)) { // this
-                // is a
-                // real
-                // contact
-                // entry
-                // in
-                // the
-                // distributionlist
+            if (new_one.containsEntryID() && (new_one.getEntryID() > 0)) { // this is a real contact entry in the distributionlist
                 boolean actions = false;
 
                 if (old_dleos != null) {
-                    for (int u = 0; u < old_dleos.length; u++) { // this
-                        // for;next
-                        // goes to all old
-                        // entries from the
-                        // server
-                        if (old_dleos[u] != null) { // maybe we have some empty
-                            // entries here from
-                            // previous checks
+                    for (int u = 0; u < old_dleos.length; u++) { // this for;next goes to all old entries from the server
+                        if (old_dleos[u] != null) { // maybe we have some empty entries here from previous checks
                             old_one = old_dleos[u];
 
-                            if (new_one.searchDlistObject(old_one)) { // this
-                                // will
-                                // search
-                                // the
-                                // current
-                                // entry
-                                // in
-                                // the
-                                // old
-                                // dlist
-                                if (!new_one.compareDlistObject(old_one)) { // is
-                                    // this
-                                    // true
-                                    // the
-                                    // dlistentrie
-                                    // has
-                                    // not
-                                    // changed,
-                                    // is
-                                    // it
-                                    // false
-                                    // the
-                                    // dlistentry
-                                    // missmatches
-                                    // the
-                                    // old
-                                    // one
-                                    // ok the dlist has changed and needs to get
-                                    // updated
+                            if (new_one.searchDlistObject(old_one)) { // this will search the current entry in the old dlist
+                                if (!new_one.compareDlistObject(old_one)) {
+                                    // is this true the dlistentrie has not changed, is it false the dlistentry missmatches the old one
+                                    // ok the dlist has changed and needs to get updated
                                     updates[insert_count] = new_one;
                                     update_count++;
                                     actions = true;
@@ -1471,61 +1387,39 @@ public final class Contacts {
                                     actions = true;
                                     // ignore this entry cuz it has not changed
                                 }
-                                // ok we have found a entry in the old list and
-                                // we have done something with him
-                                // no we must remove him from the old list cuz
-                                // maybe he needs get deleted
+                                // ok we have found a entry in the old list and we have done something with him no we must remove him from
+                                // the old list cuz maybe he needs get deleted
                                 old_dleos[u] = null;
-                                break; // when is the entry is found we can
-                                // leave the old list for the nex new
-                                // entry
+                                break; // when is the entry is found we can leave the old list for the nex new entry
                             }
                             // this old entry does not match the new one
                             actions = false;
                         }
                     }
                 }
-                // we checked the old list and nothing was found. this means we
-                // have to insert this entry cuz it is new
+                // we checked the old list and nothing was found. this means we have to insert this entry cuz it is new
                 if (!actions) {
                     inserts[insert_count] = new_one;
                     insert_count++;
                 }
-            } else { // this is an independent entry in a distributionlist
-                // and they get a normal insert
+            } else { // this is an independent entry in a distributionlist and they get a normal insert
                 inserts[insert_count] = new_one;
                 insert_count++;
             }
         }
 
-        // the new list is fully checked, now we have to make sure that old
-        // entries get deleted
+        // the new list is fully checked, now we have to make sure that old entries get deleted
         if (old_dleos != null) {
-            for (int u = 0; u < old_dleos.length; u++) { // this for;next
-                // goes to all
-                // old entries from the
-                // server
+            for (int u = 0; u < old_dleos.length; u++) { // this for;next goes to all old entries from the server
                 old_one = old_dleos[u];
-                if ((old_one != null) && old_one.containsEntryID() && (old_one.getEntryID() > 0)) { // maybe
-                    // we
-                    // have
-                    // some
-                    // empty
-                    // entries
-                    // here
-                    // from
-                    // previous
-                    // checks
-                    // if (old_one.containsEntryID() && old_one.getEntryID() >
-                    // 0){
+                if ((old_one != null) && old_one.containsEntryID() && (old_one.getEntryID() > 0)) {
+                    // maybe we have some empty entries here from previous checks
                     deletes[delete_count] = old_one;
                     delete_count++;
-                    // }
                 }
             }
         }
-        // all is checked, we have 3 arrays now INSERT, UPDATE and DELETE. just
-        // make the stuff now
+        // all is checked, we have 3 arrays now INSERT, UPDATE and DELETE. just make the stuff now
 
         final DistributionListEntryObject[] insertcut = new DistributionListEntryObject[insert_count];
         System.arraycopy(inserts, 0, insertcut, 0, insert_count);
@@ -1536,103 +1430,78 @@ public final class Contacts {
         final DistributionListEntryObject[] deletecut = new DistributionListEntryObject[delete_count];
         System.arraycopy(deletes, 0, deletecut, 0, delete_count);
 
-        try {
-            deleteDistributionListEntriesByIds(id, deletecut, cid, writecon);
-            updateDistributionListEntriesByIds(id, updatecut, cid, writecon);
-            writeDistributionListArrayInsert(insertcut, id, cid, writecon);
-        } catch (final OXException x) {
-            throw x;
-            // throw new OXException("UNABLE TO UPDATE DISTRIBUTION LIST
-            // cid="+cid+" oid="+id,x);
-        }
+        deleteDistributionListEntriesByIds(id, deletecut, cid, writecon);
+        updateDistributionListEntriesByIds(id, updatecut, cid, writecon);
+        writeDistributionListArrayInsert(insertcut, id, cid, writecon);
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "30", "61" }, exceptionId = { 30, 61 }, msg = {
-        "Unable to update dristributionlist : Context %1$d Contact %2$d", "This Contact has no FolderID: Entry %1$d Context %2$d" })
     public static void updateDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
         if (dleos.length > 0) {
 
             DistributionListEntryObject dleo = null;
 
+            PreparedStatement ps = null;
             try {
                 final ContactSql cs = new ContactMySql(null);
+                ps = writecon.prepareStatement(cs.iFupdateDistributionListEntriesByIds());
                 for (int i = 0; i < dleos.length; i++) {
                     dleo = dleos[i];
 
-                    PreparedStatement ps = null;
-                    try {
+                    ps.setInt(1, id);
+                    ps.setInt(9, id);
 
-                        ps = writecon.prepareStatement(cs.iFupdateDistributionListEntriesByIds());
-                        ps.setInt(1, id);
-                        ps.setInt(9, id);
-
-                        if (dleo.containsEntryID() && (dleo.getEntryID() > 0)) {
-                            ps.setInt(2, dleo.getEntryID());
-                            ps.setInt(3, dleo.getEmailfield());
-                            ps.setInt(10, dleo.getEntryID());
-                            ps.setInt(11, dleo.getEmailfield());
-                            /*
-                             * if (dleo.getFolderID() == 0){ throw EXCEPTIONS.createOXConflictException (61,dleo.getEntryID(),cid); }
-                             */
-                            ps.setInt(4, dleo.getFolderID());
-                        } else {
-                            ps.setNull(2, java.sql.Types.INTEGER);
-                            ps.setNull(3, java.sql.Types.INTEGER);
-                            ps.setNull(10, java.sql.Types.INTEGER);
-                            ps.setNull(11, java.sql.Types.INTEGER);
-                            ps.setNull(4, java.sql.Types.INTEGER);
-                        }
-                        if (dleo.containsDisplayname()) {
-                            ps.setString(5, dleo.getDisplayname());
-                        } else if (dleo.containsLastname() && dleo.containsFistname()) {
-                            ps.setString(5, dleo.getLastname() + ", " + dleo.getFirstname());
-                        } else if (dleo.containsLastname() && !dleo.containsFistname()) {
-                            ps.setString(5, dleo.getLastname());
-                        } else {
-                            ps.setString(5, "unknown");
-                        }
-                        if (dleo.containsLastname()) {
-                            ps.setString(6, dleo.getLastname());
-                        } else {
-                            ps.setNull(6, java.sql.Types.VARCHAR);
-                        }
-                        if (dleo.containsFistname()) {
-                            ps.setString(7, dleo.getFirstname());
-                        } else {
-                            ps.setNull(7, java.sql.Types.VARCHAR);
-                        }
-                        ps.setString(8, dleo.getEmailaddress());
-                        ps.setInt(12, cid);
-
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder("UPDATE DLIST ").append(ps.toString()));
-                        }
-
-                        ps.execute();
-
-                    } finally {
-                        try {
-                            if (ps != null) {
-                                ps.close();
-                            }
-                        } catch (final SQLException see) {
-                            LOG.warn(ERR_UNABLE_TO_CLOSE_CON, see);
-                        }
+                    if (dleo.containsEntryID() && (dleo.getEntryID() > 0)) {
+                        ps.setInt(2, dleo.getEntryID());
+                        ps.setInt(3, dleo.getEmailfield());
+                        ps.setInt(10, dleo.getEntryID());
+                        ps.setInt(11, dleo.getEmailfield());
+                        ps.setInt(4, dleo.getFolderID());
+                    } else {
+                        ps.setNull(2, java.sql.Types.INTEGER);
+                        ps.setNull(3, java.sql.Types.INTEGER);
+                        ps.setNull(10, java.sql.Types.INTEGER);
+                        ps.setNull(11, java.sql.Types.INTEGER);
+                        ps.setNull(4, java.sql.Types.INTEGER);
                     }
+                    if (dleo.containsDisplayname()) {
+                        ps.setString(5, dleo.getDisplayname());
+                    } else if (dleo.containsLastname() && dleo.containsFistname()) {
+                        ps.setString(5, dleo.getLastname() + ", " + dleo.getFirstname());
+                    } else if (dleo.containsLastname() && !dleo.containsFistname()) {
+                        ps.setString(5, dleo.getLastname());
+                    } else {
+                        ps.setString(5, "unknown");
+                    }
+                    if (dleo.containsLastname()) {
+                        ps.setString(6, dleo.getLastname());
+                    } else {
+                        ps.setNull(6, java.sql.Types.VARCHAR);
+                    }
+                    if (dleo.containsFistname()) {
+                        ps.setString(7, dleo.getFirstname());
+                    } else {
+                        ps.setNull(7, java.sql.Types.VARCHAR);
+                    }
+                    ps.setString(8, dleo.getEmailaddress());
+                    ps.setInt(12, cid);
+
+                    if (DEBUG) {
+                        LOG.debug(new StringBuilder("UPDATE DLIST ").append(ps.toString()));
+                    }
+
+                    ps.execute();
+
                 }
             } catch (final ContextException d) {
                 throw new ContactException(d);
-            } catch (final SQLException se) {
-                throw EXCEPTIONS.create(30, se, Integer.valueOf(cid), Integer.valueOf(id));
-                // throw new OXException("ERROR DURING DISTRIBUTION LIST UPDATE,
-                // DLIST NOT UPDATED cid="+cid+" oid="+id, se);
+            } catch (final SQLException e) {
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+            } finally {
+                closeSQLStuff(ps);
             }
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "48", "31" }, exceptionId = { 48, 31 }, msg = {
-        "Unable to delete dristributionlist by id : Context %1$d Contact %2$d",
-        "Unable to delete dristributionlist by id : Context %1$d Contact %2$d" })
     public static void deleteDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
 
         PreparedStatement ps = null;
@@ -1648,62 +1517,41 @@ public final class Contacts {
             ps.execute();
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(48, se, Integer.valueOf(cid), Integer.valueOf(id));
-            // throw new OXException("ERROR DURING DISTRIBUTION LIST
-            // deleteDistributionListEntriesByIds, DLIST NOT UPDATED cid="+cid+"
-            // oid="+id, se);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (final SQLException see) {
-                LOG.warn(ERR_UNABLE_TO_CLOSE_CON, see);
-            }
+            closeSQLStuff(ps);
         }
 
         if (dleos.length > 0) {
             try {
+                ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds2());
                 for (int i = 0; i < dleos.length; i++) {
                     dleo = dleos[i];
-                    ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds2());
 
-                    try {
-                        ps.setInt(1, id);
+                    ps.setInt(1, id);
 
-                        if (dleo.containsEntryID() && (dleo.getEntryID() > 0)) {
-                            ps.setInt(2, dleo.getEntryID());
-                            ps.setInt(3, dleo.getEmailfield());
-                        }
-                        ps.setInt(4, cid);
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
-                        }
-                        ps.execute();
-                    } finally {
-                        try {
-                            if (ps != null) {
-                                ps.close();
-                            }
-                        } catch (final SQLException see) {
-                            LOG.warn(ERR_UNABLE_TO_CLOSE_CON, see);
-                        }
+                    if (dleo.containsEntryID() && (dleo.getEntryID() > 0)) {
+                        ps.setInt(2, dleo.getEntryID());
+                        ps.setInt(3, dleo.getEmailfield());
                     }
+                    ps.setInt(4, cid);
+                    if (DEBUG) {
+                        LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
+                    }
+                    ps.execute();
                 }
-            } catch (final SQLException se) {
-                throw EXCEPTIONS.create(31, se, Integer.valueOf(cid), Integer.valueOf(id));
-                // throw new OXException("ERROR DURING DISTRIBUTION LIST
-                // deleteDistributionListEntriesByIds, DLIST NOT UPDATED
-                // cid="+cid+" oid="+id, se);
+            } catch (final SQLException e) {
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+            } finally {
+                closeSQLStuff(ps);
             }
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "32", exceptionId = 32, msg = "Unable to load linked contacts : Context %1$d Contact %2$d")
     public static LinkEntryObject[] fillLinkArray(final Contact co, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readcon) throws OXException {
 
-        Statement smt = null;
+        Statement stmt = null;
         ResultSet rs = null;
         LinkEntryObject[] r = null;
         final ContactSql cs = new ContactMySql(ctx, user);
@@ -1711,8 +1559,8 @@ public final class Contacts {
         try {
             final int id = co.getObjectID();
 
-            smt = readcon.createStatement();
-            rs = smt.executeQuery(cs.iFgetFillLinkArrayString(id, ctx.getContextId()));
+            stmt = readcon.createStatement();
+            rs = stmt.executeQuery(cs.iFgetFillLinkArrayString(id, ctx.getContextId()));
 
             rs.last();
             final int size = rs.getRow();
@@ -1743,9 +1591,6 @@ public final class Contacts {
                 linkid = rs.getInt(2);
                 if (!rs.wasNull()) {
                     leo.setLinkID(linkid);
-                    /*
-                     * if (!performContactReadCheckByID(linkid, user,group,so)){ continue; }
-                     */
                 }
 
                 leos[cnt] = leo;
@@ -1754,62 +1599,40 @@ public final class Contacts {
 
             r = new LinkEntryObject[cnt];
             System.arraycopy(leos, 0, r, 0, cnt);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(32, se, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
-            // throw new OXException("ERROR DURING fillLinkArray
-            // cid="+ctx.getContextId()+" oid="+co.getObjectID(), se);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (smt != null) {
-                    smt.close();
-                }
-            } catch (final SQLException see) {
-                LOG.warn(ERR_UNABLE_TO_CLOSE_CON, see);
-            }
+            closeSQLStuff(rs, stmt);
         }
 
         return r;
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "33", exceptionId = 33, msg = "Unable to save Linking between Contacts : Context %1$d Contact %2$d")
     public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid, final Connection writecon) throws OXException {
         LinkEntryObject leo = null;
 
+        PreparedStatement ps = null;
         try {
             final ContactSql cs = new ContactMySql(null);
+            ps = writecon.prepareStatement(cs.iFwriteContactLinkArrayInsert());
             for (int i = 0; i < leos.length; i++) {
-                PreparedStatement ps = null;
-                try {
-                    leo = leos[i];
-                    ps = writecon.prepareStatement(cs.iFwriteContactLinkArrayInsert());
-                    ps.setInt(1, id);
-                    ps.setInt(2, leo.getLinkID());
-                    ps.setString(3, leo.getContactDisplayname());
-                    ps.setString(4, leo.getLinkDisplayname());
-                    ps.setInt(5, cid);
-                    if (DEBUG) {
-                        LOG.debug(new StringBuilder("INSERT LINKAGE ").append(ps.toString()));
-                    }
-                    ps.execute();
-                } finally {
-                    try {
-                        if (ps != null) {
-                            ps.close();
-                        }
-                    } catch (final SQLException see) {
-                        LOG.warn(ERR_UNABLE_TO_CLOSE_CON, see);
-                    }
+                leo = leos[i];
+                ps.setInt(1, id);
+                ps.setInt(2, leo.getLinkID());
+                ps.setString(3, leo.getContactDisplayname());
+                ps.setString(4, leo.getLinkDisplayname());
+                ps.setInt(5, cid);
+                if (DEBUG) {
+                    LOG.debug(new StringBuilder("INSERT LINKAGE ").append(ps.toString()));
                 }
+                ps.execute();
             }
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(33, se, Integer.valueOf(cid), Integer.valueOf(id));
-            // throw new OXException("ERROR DURING DISTRIBUTION LIST UPDATE,
-            // DLIST NOT UPDATED cid="+cid+" oid="+id, se);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+        } finally {
+            closeSQLStuff(ps);
         }
     }
 
@@ -1869,50 +1692,33 @@ public final class Contacts {
         final LinkEntryObject[] insertcut = new LinkEntryObject[insert_count];
         System.arraycopy(inserts, 0, insertcut, 0, insert_count);
 
-        try {
-            deleteLinkEntriesByIds(id, deletecut, cid, writecon);
-            writeContactLinkArrayInsert(insertcut, id, cid, writecon);
-        } catch (final OXException x) {
-            throw x;
-            // throw new OXException("UNABLE TO UPDATE CONTACT LIST cid="+cid+"
-            // oid="+id,x);
-        }
+        deleteLinkEntriesByIds(id, deletecut, cid, writecon);
+        writeContactLinkArrayInsert(insertcut, id, cid, writecon);
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "34", exceptionId = 34, msg = "Unable to delete linking between contacts : Context %1$d Contact %2$d")
     public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws OXException {
         if (leos.length > 0) {
             LinkEntryObject leo = null;
+            PreparedStatement ps = null;
             try {
                 final ContactSql cs = new ContactMySql(null);
+                ps = writecon.prepareStatement(cs.iFgetdeleteLinkEntriesByIdsString());
                 for (int i = 0; i < leos.length; i++) {
                     leo = leos[i];
-                    PreparedStatement ps = null;
-                    try {
-                        ps = writecon.prepareStatement(cs.iFgetdeleteLinkEntriesByIdsString());
-                        ps.setInt(1, id);
-                        ps.setInt(2, leo.getLinkID());
-                        ps.setInt(3, cid);
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(ps.toString()));
-                        }
-                        ps.execute();
-                    } finally {
-                        try {
-                            if (ps != null) {
-                                ps.close();
-                            }
-                        } catch (final SQLException see) {
-                            LOG.warn(ERR_UNABLE_TO_CLOSE_CON, see);
-                        }
+                    ps.setInt(1, id);
+                    ps.setInt(2, leo.getLinkID());
+                    ps.setInt(3, cid);
+                    if (DEBUG) {
+                        LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(ps.toString()));
                     }
+                    ps.execute();
                 }
             } catch (final ContextException d) {
                 throw new ContactException(d);
-            } catch (final SQLException se) {
-                throw EXCEPTIONS.create(34, se, Integer.valueOf(cid), Integer.valueOf(id));
-                // throw new OXException("ERROR DURING LINK LIST UPDATE, LINK
-                // NOT UPDATED cid="+cid+" oid="+id, se);
+            } catch (final SQLException e) {
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+            } finally {
+                closeSQLStuff(ps);
             }
         }
     }
@@ -1949,35 +1755,32 @@ public final class Contacts {
     }
 
     public static String getContactImageContentType(final int id, final int cid, final Connection readcon) throws SQLException, OXException {
-        Statement smt = null;
+        Statement stmt = null;
         ResultSet rs = null;
         try {
             final ContactSql cs = new ContactMySql(null);
-            smt = readcon.createStatement();
-            rs = smt.executeQuery(cs.iFgetContactImageContentType(id, cid));
+            stmt = readcon.createStatement();
+            rs = stmt.executeQuery(cs.iFgetContactImageContentType(id, cid));
             if (rs.next()) {
                 return rs.getString(1);
             }
             return null;
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final SQLException sxe) {
-            throw sxe;
         } finally {
-            DBUtils.closeSQLStuff(rs, smt);
+            closeSQLStuff(rs, stmt);
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "35", exceptionId = 35, msg = "Unable to load contact image: Context %1$d Contact %2$d")
     public static void getContactImage(final int contact_id, final Contact co, final int cid, final Connection readcon) throws OXException {
         Date last_mod = null;
 
-        Statement smt = null;
+        Statement stmt = null;
         ResultSet rs = null;
         try {
             final ContactSql cs = new ContactMySql(null);
-            smt = readcon.createStatement();
-            rs = smt.executeQuery(cs.iFgetContactImage(contact_id, cid));
+            stmt = readcon.createStatement();
+            rs = stmt.executeQuery(cs.iFgetContactImage(contact_id, cid));
             if (rs.next()) {
                 final byte[] bb = rs.getBytes(1);
                 if (!rs.wasNull()) {
@@ -1989,35 +1792,19 @@ public final class Contacts {
             }
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(35, se, Integer.valueOf(cid), Integer.valueOf(contact_id));
-            // throw new OXException("ERROR DURING CONTACT IMAGE LOAD
-            // cid="+cid+" oid="+contact_id, se);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (smt != null) {
-                    smt.close();
-                }
-            } catch (final SQLException see) {
-                LOG.warn(ERR_UNABLE_TO_CLOSE, see);
-            }
+            closeSQLStuff(rs, stmt);
         }
     }
 
     @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { "36", "37" }, exceptionId = { 36, 37 }, msg = {
         "Unable to save contact image. The image appears to be broken.", "Unable to save contact Image: Context %1$d Contact %2$d" })
     public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException {
-        // System.out.println("contact_id -> "+contact_id+" img -> "+img+" cid
-        // -> "+cid+" mime -> "+mime+" img.length -> "+img.length+" mime.length
-        // -> "+mime.length());
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
             throw EXCEPTIONS.createOXConflictException(36);
-            // throw new OXConflictException("Wrong Data in Image Save");
         }
-
         PreparedStatement ps = null;
         try {
             final ContactSql cs = new ContactMySql(null);
@@ -2032,18 +1819,10 @@ public final class Contacts {
             ps.execute();
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(37, se, Integer.valueOf(cid), Integer.valueOf(contact_id));
-            // throw new OXException("ERROR DURING CONTACT IMAGE SAVE
-            // cid="+cid+" oid="+contact_id, se);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (final SQLException see) {
-                LOG.error("Unable to close Statement", see);
-            }
+            closeSQLStuff(ps);
         }
     }
 
