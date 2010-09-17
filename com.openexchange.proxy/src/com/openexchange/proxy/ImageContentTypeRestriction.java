@@ -57,13 +57,22 @@ package com.openexchange.proxy;
  */
 public final class ImageContentTypeRestriction extends ContentTypeRestriction {
 
-    private static final String IMAGE_PATTERN = "image/*";
+    private static final ImageContentTypeRestriction INSTANCE = new ImageContentTypeRestriction();
+
+    /**
+     * Gets the singleton instance.
+     * 
+     * @return The singleton instance
+     */
+    public static ImageContentTypeRestriction getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * Initializes a new {@link ImageContentTypeRestriction}.
      */
-    public ImageContentTypeRestriction() {
-        super(IMAGE_PATTERN);
+    private ImageContentTypeRestriction() {
+        super("image/*");
     }
 
 }
