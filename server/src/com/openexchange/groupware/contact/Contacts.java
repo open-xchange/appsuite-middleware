@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.getStatement;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -76,6 +77,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -174,7 +176,7 @@ public final class Contacts {
         }
     }
 
-    private static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, IOException, ContactException {
+    private static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, ContactException {
         if (null == mime) {
             throw ContactExceptionCodes.MIME_TYPE_NOT_DEFINED.create();
         }
@@ -205,14 +207,18 @@ public final class Contacts {
         if (!check) {
             throw new OXConflictException(ContactExceptionCodes.IMAGE_SCALE_PROBLEM.create(mime, I(img.length), L(max_size)));
         }
-
-        BufferedImage bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(img));
-        if (null == bi) {
-            // No appropriate ImageReader found
-            final BufferedImage targetImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.SCALE_SMOOTH);
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
-            ImageIO.write(targetImage, fileType, out);
-            bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+        BufferedImage bi = null;
+        try {
+            bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(img));
+            if (null == bi) {
+                // No appropriate ImageReader found
+                final BufferedImage targetImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.SCALE_SMOOTH);
+                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
+                ImageIO.write(targetImage, fileType, out);
+                bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+            }
+        } catch (IOException e) {
+            throw ContactExceptionCodes.IMAGE_DOWNSCALE_FAILED.create(e);
         }
 
         final int origHeigh = bi.getHeight();
@@ -307,7 +313,11 @@ public final class Contacts {
                 LOG.debug("Unable to Scale the Image with default Parameters. Gonna try fallback");
             } finally {
                 if (baos.toByteArray().length < 1) {
-                    ImageIO.write(scaledBufferedImage, "JPG", baos);
+                    try {
+                        ImageIO.write(scaledBufferedImage, "JPG", baos);
+                    } catch (IOException e) {
+                        throw ContactExceptionCodes.IMAGE_DOWNSCALE_FAILED.create(e);
+                    }
                 }
             }
             final byte[] back = baos.toByteArray();
@@ -316,38 +326,12 @@ public final class Contacts {
         return img;
     }
 
-    @OXThrowsMultiple(
-        category = { Category.USER_INPUT },
-        desc = { "72" },
-        exceptionId = { 72 },
-        msg = { "Image size too large. Image size: %1$d. Max. size: %2$d." }
-    )
     private static void checkImageSize(final int imageSize, final int maxSize) throws ContactException {
         if (maxSize > 0 && imageSize > maxSize) {
-            throw EXCEPTIONS.create(72, Integer.valueOf(imageSize), Integer.valueOf(maxSize));
+            throw ContactExceptionCodes.IMAGE_TOO_LARGE.create(I(imageSize), I(maxSize));
         }
     }
 
-    @OXThrowsMultiple(
-        category = {
-            Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR,
-            Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT
-        },
-        desc = { "3", "4", "5", "6", "7", "8", "9", "51", "53", "58", "62", "71" },
-        exceptionId = { 3, 4, 5, 6, 7, 8, 9, 51, 53, 58, 62, 71 },
-        msg = {
-            ContactException.NON_CONTACT_FOLDER_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            "Unable to insert contacts! Context: %d", "Got a -1 ID from IDGenerator",
-            "Unable to scale image down.",
-            "Unable to insert Contact. Context: %d",
-            ContactException.INIT_CONNECTION_FROM_DBPOOL,
-            ContactException.INIT_CONNECTION_FROM_DBPOOL,
-            "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
-            "Mandatory field last name is not set.", ContactException.PFLAG_IN_PUBLIC_FOLDER
-        }
-    )
     public static void performContactStorageInsert(final Contact co, final int user, final Session so, boolean override) throws OXConflictException, OXException {
 
         final StringBuilder insert_fields = new StringBuilder();
@@ -372,11 +356,7 @@ public final class Contacts {
 
             final FolderObject contactFolder = oxfs.getFolderObject(fid);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(
-                    3,
-                    Integer.valueOf(fid),
-                    Integer.valueOf(so.getContextId()),
-                    Integer.valueOf(user));
+                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(so.getContextId()), I(user)));
             }
 
             final EffectivePermission oclPerm = oxfs.getFolderPermission(
@@ -385,26 +365,14 @@ public final class Contacts {
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
 
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw EXCEPTIONS.createOXPermissionException(
-                    4,
-                    Integer.valueOf(fid),
-                    Integer.valueOf(so.getContextId()),
-                    Integer.valueOf(user));
+                throw new OXPermissionException(ContactExceptionCodes.NO_PERMISSION.create(I(fid), I(so.getContextId()), I(user)));
             }
             if (!oclPerm.canCreateObjects()) {
-                throw EXCEPTIONS.createOXPermissionException(
-                    5,
-                    Integer.valueOf(fid),
-                    Integer.valueOf(so.getContextId()),
-                    Integer.valueOf(user));
+                throw new OXPermissionException(ContactExceptionCodes.NO_PERMISSION.create(I(fid), I(so.getContextId()), I(user)));
             }
 
             if ((contactFolder.getType() != FolderObject.PRIVATE) && co.getPrivateFlag()) {
-                throw EXCEPTIONS.createOXConflictException(
-                    71,
-                    Integer.valueOf(fid),
-                    Integer.valueOf(so.getContextId()),
-                    Integer.valueOf(user));
+                throw new OXConflictException(ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(I(fid), I(so.getContextId()), I(user)));
             }
             if (!co.containsFileAs()) {
                 co.setFileAs(co.getDisplayName());
@@ -431,7 +399,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final DBPoolingException d) {
-            throw EXCEPTIONS.create(51, d);
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(d);
         } catch (final OXConflictException oe) {
             throw oe;
         } catch (final OXException oe) {
@@ -458,7 +426,7 @@ public final class Contacts {
                 LOG.trace("Got ID from Generator -> " + id);
             }
             if (id == -1) {
-                throw EXCEPTIONS.create(7);
+                throw ContactExceptionCodes.ID_GENERATION_FAILED.create();
             }
             co.setObjectID(id);
 
@@ -497,14 +465,12 @@ public final class Contacts {
                 if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                     try {
                         co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
-                    } catch (final OXConflictException ex) {
-                        throw ex;
-                    } catch (final OXException ex) {
-                        throw ex;
-                    } catch (final IOException ex) {
-                        throw EXCEPTIONS.create(8, ex);
-                    } catch (final Exception ex) {
-                        throw EXCEPTIONS.create(58, ex);
+                    } catch (final OXConflictException e) {
+                        throw e;
+                    } catch (final ContactException e) {
+                        throw e;
+                    } catch (final Exception e) {
+                        throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
                     }
                 } else {
                     checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
@@ -522,12 +488,10 @@ public final class Contacts {
                 }
             }
             throw ox;
-        } catch (final DBPoolingException oe) {
-            /*
-             * A DBPoolingException occurs when trying to fetch a connection from pool, therefore corresponding "writecon" variable can only
-             * be null at this location: No rollback needed/possible on connection
-             */
-            throw EXCEPTIONS.create(53, oe);
+        } catch (final DBPoolingException e) {
+            // A DBPoolingException occurs when trying to fetch a connection from pool, therefore corresponding "writecon" variable can only
+            // be null at this location: No rollback needed/possible on connection
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final DataTruncation se) {
             if (null != writecon) {
                 try {
@@ -545,21 +509,11 @@ public final class Contacts {
                     LOG.error(ERR_UABLE_TO_ROLLBACK, see);
                 }
             }
-            throw EXCEPTIONS.create(9, se, Integer.valueOf(so.getContextId()));
+            throw ContactExceptionCodes.INVALID_SQL_QUERY.create(se, getStatement(ps));
         } finally {
-            if (null != ps) {
-                try {
-                    ps.close();
-                } catch (final SQLException sq) {
-                    LOG.error("UNABLE TO CLOSE STATEMENT ", sq);
-                }
-            }
+            closeSQLStuff(ps);
             if (null != writecon) {
-                try {
-                    writecon.setAutoCommit(true);
-                } catch (final Exception ex) {
-                    LOG.error("Unable to set setAutoCommit = true");
-                }
+                autocommit(writecon);
                 try {
                     DBPool.closeWriterSilent(ct, writecon);
                 } catch (final Exception ex) {
@@ -573,15 +527,15 @@ public final class Contacts {
         category = {
             Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION,
             Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CONCURRENT_MODIFICATION, Category.CODE_ERROR,
-            Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
+            Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
             Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION,
             Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT, Category.PERMISSION
         },
         desc = {
-            "10", "11", "12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "23", "24", "55", "56", "59", "63", "66",
+            "10", "11", "12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "24", "55", "56", "59", "63", "66",
             "67", "69", "73", "74", "75", "64", "76"
         },
-        exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56, 59, 63, 66, 67, 69, 73, 74, 75, 64, 76 },
+        exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 24, 55, 56, 59, 63, 66, 67, 69, 73, 74, 75, 64, 76 },
         msg = {
             ContactException.NON_CONTACT_FOLDER_MSG,
             ContactException.NO_PERMISSION_MSG,
@@ -594,8 +548,9 @@ public final class Contacts {
             "Unable to move this contact because it is marked as private: Context %1$d Object %2$d",
             "You are not allowed to mark this contact as private contact: Context %1$d Object %2$d",
             ContactException.OBJECT_HAS_CHANGED_MSG,
-            "Unable to update contact. Context %1$d Object %2$d", "An error occurred: Object id is -1",
-            "No changes found. No update requiered. Context %1$d Object %2$d", "Unable to scale image down.",
+            "Unable to update contact. Context %1$d Object %2$d",
+            "An error occurred: Object id is -1",
+            "No changes found. No update requiered. Context %1$d Object %2$d",
             "Unable to update contact. Context %1$d Object %2$d",
             ContactException.INIT_CONNECTION_FROM_DBPOOL,
             "One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
@@ -947,14 +902,10 @@ public final class Contacts {
                     if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                         try {
                             co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
-                        } catch (final OXConflictException ex) {
-                            throw ex;
-                        } catch (final OXException ex) {
-                            throw ex;
-                        } catch (final IOException ex) {
-                            throw EXCEPTIONS.create(23, ex);
-                            // throw new OXException("Unable to scale contact
-                            // Image down.", ex);
+                        } catch (final OXConflictException e) {
+                            throw e;
+                        } catch (final ContactException e) {
+                            throw e;
                         } catch (final Exception ex) {
                             throw EXCEPTIONS.create(59, ex);
                         }
@@ -1214,8 +1165,10 @@ public final class Contacts {
                     if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                         try {
                             contact.setImage1(scaleContactImage(contact.getImage1(), contact.getImageContentType()));
-                        } catch (final IOException ex) {
-                            throw EXCEPTIONS.create(23, ex);
+                        } catch (OXConflictException e) {
+                            throw e;
+                        } catch (ContactException e) {
+                            throw e;
                         } catch (final Exception ex) {
                             throw EXCEPTIONS.create(59, ex);
                         }

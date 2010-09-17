@@ -65,8 +65,26 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     INVALID_EMAIL(INVALID_EMAIL_MSG, Category.USER_INPUT, 100),
     /** Unable to scale this contact image. Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d. */
     IMAGE_SCALE_PROBLEM(IMAGE_SCALE_PROBLEM_MSG, Category.USER_INPUT, 101),
+    /** You are not allowed to store this contact in a non-contact folder: folder id %1$d in context %2$d with user %3$d */
+    NON_CONTACT_FOLDER(NON_CONTACT_FOLDER_MSG, Category.PERMISSION, 103),
+    /** You do not have permission to create objects in this folder %1$d in context %2$d with user %3$d */
+    NO_PERMISSION(NO_PERMISSION_MSG, Category.PERMISSION, 104),
+    /** Got a -1 ID from IDGenerator */
+    ID_GENERATION_FAILED(ID_GENERATION_FAILED_MSG, Category.CODE_ERROR, 107),
+    /** Unable to scale image down. */
+    IMAGE_DOWNSCALE_FAILED(IMAGE_DOWNSCALE_FAILED_MSG, Category.CODE_ERROR, 108),
+    /** Invalid SQL Query: %s */
+    INVALID_SQL_QUERY(INVALID_SQL_QUERY_MSG, Category.CODE_ERROR, 109),
+    /** Unable to pick up a connection from the DBPool */
+    INIT_CONNECTION_FROM_DBPOOL(INIT_CONNECTION_FROM_DBPOOL_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 151),
+    /** The image you tried to attach is not a valid picture. It may be broken or is not a valid file. */
+    NOT_VALID_IMAGE(NOT_VALID_IMAGE_MSG, Category.TRY_AGAIN, 158),
     /** Mime type is not defined. */
     MIME_TYPE_NOT_DEFINED(MIME_TYPE_NOT_DEFINED_MSG, Category.USER_INPUT, 170),
+    /** A contact with private flag cannot be stored in a public folder. Folder: %1$d context %2$d user %3$d */
+    PFLAG_IN_PUBLIC_FOLDER(PFLAG_IN_PUBLIC_FOLDER_MSG, Category.USER_INPUT, 171),
+    /** Image size too large. Image size: %1$d. Max. size: %2$d. */
+    IMAGE_TOO_LARGE(IMAGE_TOO_LARGE_MSG, Category.USER_INPUT, 172)
     ;
 
     private String message;
