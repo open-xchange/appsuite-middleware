@@ -61,6 +61,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -193,14 +194,21 @@ public final class HTMLServiceImpl implements HTMLService {
                     }
                 }
                 /*
-                 * Add proxy registration
+                 * Check for an inline image
                  */
-                final URL imageUrl = new URL(urlStr);
-                final URI uri = proxyRegistry.register(new ProxyRegistration(imageUrl, session, ImageContentTypeRestriction.getInstance()));
-                /*
-                 * Compose replacement
-                 */
-                sb.append("src=\"").append(uri.toString()).append('"');
+                if (urlStr.toLowerCase(Locale.ENGLISH).startsWith("cid", 0)) {
+                    sb.append(srcMatcher.group());
+                } else {
+                    /*
+                     * Add proxy registration
+                     */
+                    final URL imageUrl = new URL(urlStr);
+                    final URI uri = proxyRegistry.register(new ProxyRegistration(imageUrl, session, ImageContentTypeRestriction.getInstance()));
+                    /*
+                     * Compose replacement
+                     */
+                    sb.append("src=\"").append(uri.toString()).append('"');
+                }
             } catch (final MalformedURLException e) {
                 LOG.error("Invalid URL found in \"img\" tag: " + imgTag, e);
                 sb.append(srcMatcher.group());
