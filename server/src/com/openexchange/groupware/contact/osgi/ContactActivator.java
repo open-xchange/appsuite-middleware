@@ -47,45 +47,32 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.groupware.contact.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.contact.internal.ContactExceptionFactory;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link ContactActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class ContactActivator implements BundleActivator {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.tx.osgi.TransactionActivator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.filestore.osgi.FilestoreActivator(),
-        new com.openexchange.context.osgi.ContextActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
-        new com.openexchange.groupware.contact.osgi.ContactActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
-        new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
-        new com.openexchange.consistency.osgi.ConsistencyActivator()
-    };
+    private ComponentRegistration registration;
 
-    public Activator() {
+    public ContactActivator() {
         super();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public void start(BundleContext context) throws Exception {
+        registration = new ComponentRegistration(context, EnumComponent.CONTACT, "com.openexchange.groupware.contact", ContactExceptionFactory.getInstance());
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        registration.unregister();
     }
 }
