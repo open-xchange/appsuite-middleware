@@ -61,7 +61,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 public enum InfostoreExceptionCodes implements OXErrorMessage {
     TOO_LONG_VALUES(TOO_LONG_VALUES_MSG, Category.TRUNCATED, 100),
     /** Invalid SQL Query: %s */
-    SQL_PROBLEM(INVALID_SQL_QUERY_MSG, Category.CODE_ERROR, 200),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 200),
     /** Cannot pre-fetch results. */
     PREFETCH_FAILED(PREFETCH_FAILED_MSG, Category.TRY_AGAIN, 219),
     /** The requested item does not exist. */

@@ -60,7 +60,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
 
     public static final String TOO_LONG_VALUES_MSG = "Some fields have values, that are too long";
 
-    public static final String INVALID_SQL_QUERY_MSG = "Invalid SQL Query: %s";
+    public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
 
     public static final String PREFETCH_FAILED_MSG = "Cannot pre-fetch results.";
 
