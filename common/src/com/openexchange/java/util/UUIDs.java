@@ -97,6 +97,42 @@ public final class UUIDs {
     }
 
     /**
+     * Gets the UUID from specified unformatted string.
+     * 
+     * @param unformattedString The unformatted string; e.g. <code>067e61623b6f4ae2a1712470b63dff00</code>
+     * @return The UUID
+     */
+    public static UUID fromUnformattedString(final String unformattedString) {
+        return toUUID(decodeHex(unformattedString.toCharArray()));
+    }
+
+    private static byte[] decodeHex(final char[] data) throws IllegalArgumentException {
+        final int len = data.length;
+        if ((len & 0x01) != 0) {
+            throw new IllegalArgumentException("Odd number of characters.");
+        }
+        final byte[] out = new byte[len >> 1];
+        // two characters form the hex value.
+        for (int i = 0, j = 0; j < len; i++) {
+            int f = toDigit(data[j], j) << 4;
+            j++;
+            f = f | toDigit(data[j], j);
+            j++;
+            out[i] = (byte) (f & 0xFF);
+        }
+
+        return out;
+    }
+
+    private static int toDigit(final char ch, final int index) throws IllegalArgumentException {
+        final int digit = Character.digit(ch, 16);
+        if (digit == -1) {
+            throw new IllegalArgumentException("Illegal hexadecimal charcter " + ch + " at index " + index);
+        }
+        return digit;
+    }
+
+    /**
      * Gets the byte array of specified {@link UUID} instance.
      * 
      * @param uuid The {@link UUID} instance
