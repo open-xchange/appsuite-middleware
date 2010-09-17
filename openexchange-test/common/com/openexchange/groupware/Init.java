@@ -109,6 +109,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
+import com.openexchange.groupware.contact.internal.ContactExceptionFactory;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.importexport.internal.ImportExportExceptionFactory;
@@ -314,6 +315,7 @@ public final class Init {
         startAndInjectContextService();
         startAndInjectUserService();
         startAndInjectResourceService();
+        startAndInjectContactService();
         startAndInjectContactCollector();
         startAndInjectMailAccountStorageService();
         startAndInjectMailBundle();
@@ -512,6 +514,11 @@ public final class Init {
          * Register IMAP bundle
          */
         MailProviderRegistry.registerMailProvider("imap_imaps", IMAPProvider.getInstance());
+    }
+
+    private static void startAndInjectContactService() throws ComponentAlreadyRegisteredException {
+        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
+        registry.registerComponent(EnumComponent.CONTACT, "com.openexchange.groupware.contact", ContactExceptionFactory.getInstance());
     }
 
     private static void startAndInjectContactCollector() throws Exception {
