@@ -49,7 +49,7 @@
 
 package com.openexchange.proxy;
 
-import java.net.URL;
+import java.net.URI;
 
 /**
  * {@link ProxyRegistry} - The registry for proxy registrations.
@@ -65,6 +65,6 @@ public interface ProxyRegistry {
      * @return The URL to use to access the resource
      * @throws ProxyException If registration fails
      */
-    URL register(ProxyRegistration registration) throws ProxyException;
+    URI register(ProxyRegistration registration) throws ProxyException;
 
 }
