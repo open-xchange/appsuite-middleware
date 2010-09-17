@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.UUID;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -102,7 +101,7 @@ public class ProxyServlet extends SessionServlet {
         final String sessionId = req.getParameter(AJAXServlet.PARAMETER_SESSION);
         final String uuidStr = req.getParameter(AJAXServlet.PARAMETER_UID);
 
-        final ProxyRegistration registration = ProxyRegistryImpl.getInstance().getRegistration(sessionId, UUID.fromString(uuidStr));
+        final ProxyRegistration registration = ProxyRegistryImpl.getInstance().getRegistration(sessionId, UUIDs.fromUnformattedString(uuidStr));
         if (null == registration) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
