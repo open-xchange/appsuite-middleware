@@ -1,3 +1,7 @@
+* 2010-09-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #15476: Replacing image URLs with a safe proxied URI in RSS messages
+
 * 2010-09-15 - steffen.templin@open-xchange.com
 
  - Bugfix 16402: Receiving contact images should not cause 404 errors anymore.
