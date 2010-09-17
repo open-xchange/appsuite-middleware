@@ -50,17 +50,20 @@
 package com.openexchange.proxy;
 
 /**
- * {@link ImageContentTypeRestriction} - A {@link ContentTypeRestriction} for images.
+ * {@link ImageContentTypeRestriction} - A {@link ContentTypeRestriction} for images. <code>"Content-Type"</code> header must match pattern
+ * <code>"image/*"</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageContentTypeRestriction extends ContentTypeRestriction {
 
+    private static final String IMAGE_PATTERN = "image/*";
+
     /**
      * Initializes a new {@link ImageContentTypeRestriction}.
      */
     public ImageContentTypeRestriction() {
-        super("image/*");
+        super(IMAGE_PATTERN);
     }
 
 }

@@ -53,14 +53,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
+import java.util.regex.Pattern;
 
 /**
  * {@link ContentTypeRestriction} - A {@link Restriction} for <i>Content-Type</i> header.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContentTypeRestriction implements Restriction {
+
+    private static final String CONTENT_TYPE = "Content-Type";
 
     private final Set<String> contentTypes;
 
@@ -99,13 +101,60 @@ public class ContentTypeRestriction implements Restriction {
     }
 
     public boolean allow(final Response response) {
-        final Header header = response.getResponseHeader("Content-Type");
+        final Header header = response.getResponseHeader(CONTENT_TYPE);
         final String value = header.getValue();
-        return value != null && contentTypes.contains(value.toLowerCase(Locale.ENGLISH));
+        if (null == value) {
+            /*
+             * Content-Type header missing
+             */
+            return false;
+        }
+        final String lowerCase = value.toLowerCase(Locale.ENGLISH).trim();
+        for (final String allowedContentType : contentTypes) {
+            if (containsWildcardChar(allowedContentType)) {
+                if (Pattern.compile(wildcardToRegex(allowedContentType)).matcher(lowerCase).matches()) {
+                    return true;
+                }
+            } else if (lowerCase.startsWith(allowedContentType)) {
+                return true;
+            }
+        }
+        /*
+         * No match found
+         */
+        return false;
+    }
+
+    private static boolean containsWildcardChar(final String toCheck) {
+        return toCheck.indexOf('*') >= 0 || toCheck.indexOf('?') >= 0;
+    }
+
+    /**
+     * Converts specified wildcard string to a regular expression
+     * 
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    private static String wildcardToRegex(final String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
     public String getDescription() {
-        return "Content-Type header must be one of: " + contentTypes.toString();
+        return "Content-Type header must be equal or match one of: " + contentTypes.toString();
     }
 
 }
