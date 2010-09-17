@@ -886,25 +886,22 @@ public final class Contacts {
             try {
                 original = getContactById(contact.getObjectID(), userId, groups, ctx, userConfig, readcon);
             } catch (Exception e) {
-                throw EXCEPTIONS.createOXObjectNotFoundException(16, e, I(ctx.getContextId()), I(contact.getObjectID()));
+                throw new OXObjectNotFoundException(ContactExceptionCodes.LOAD_OLD_CONTACT_FAILED.create(e, I(ctx.getContextId()), I(contact.getObjectID())));
             }
             // Check if contact really exists in specified folder
             if (contact.containsEmail1() && ctx.getMailadmin() != userId && original.getInternalUserId() == userId) {
                 // User tries to edit his primary email address which is allowed by administrator only since this email address is used in
                 // various places throughout the system. Therefore it is denied.
-                throw EXCEPTIONS.createOXPermissionException(73, I(ctx.getContextId()), I(contact.getObjectID()), I(userId));
+                throw new OXPermissionException(ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(I(ctx.getContextId()), I(contact.getObjectID()), I(userId)));
             }
 
-            // ++++ MOVE ++++ Check Rights for destination
+            // user address operation
             if (contact.getParentFolderID() != FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-                throw EXCEPTIONS.createOXPermissionException(69, I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId));
+                throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId)));
             }
             // ALL RIGHTS CHECK SO FAR, CHECK FOR MODIFY ONLY OWN
             if (original.getCreatedBy() != userId) {
-                throw EXCEPTIONS.createOXConflictException(17, I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId));
-            }
-            if (contact.getPrivateFlag() || original.getPrivateFlag()) {
-                throw EXCEPTIONS.createOXConflictException(65, I(ctx.getContextId()), I(contact.getObjectID()));
+                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId)));
             }
 
             final java.util.Date server_date = original.getLastModified();
@@ -912,16 +909,16 @@ public final class Contacts {
                 LOG.debug("Compare Dates for Contact Update\nClient-Date=" + lastModified.getTime() + "\nServer-Date=" + server_date.getTime());
             }
             if ((lastModified != null) && (lastModified.getTime() > -1) && (lastModified.getTime() < server_date.getTime())) {
-                throw EXCEPTIONS.createOXConcurrentModificationException(19);
+                throw new OXConcurrentModificationException(ContactExceptionCodes.OBJECT_HAS_CHANGED.create());
             }
             if (contact.containsDisplayName() && (null == contact.getDisplayName() || "".equals(contact.getDisplayName()))) {
-                throw EXCEPTIONS.create(66);
+                throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();
             }
             if (contact.containsSurName() && (null == contact.getSurName() || "".equals(contact.getSurName()))) {
-                throw EXCEPTIONS.create(75);
+                throw ContactExceptionCodes.LAST_NAME_MANDATORY.create();
             }
             if (contact.containsGivenName() && (null == contact.getGivenName() || "".equals(contact.getGivenName()))) {
-                throw EXCEPTIONS.create(64);
+                throw ContactExceptionCodes.FIRST_NAME_MANDATORY.create();
             }
 
             // Check for duplicate display name.
@@ -943,11 +940,11 @@ public final class Contacts {
                     while (rs.next()) {
                         String displayName = rs.getString(10); // ContactMySql.PREFIXED_FIELDS (7) + cols[3]
                         if (contact.getDisplayName().equalsIgnoreCase(displayName)) {
-                            throw EXCEPTIONS.create(67, I(ctx.getContextId()), I(contact.getObjectID()));
+                            throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(I(ctx.getContextId()), I(contact.getObjectID()));
                         }
                     }
-                } catch (final SQLException sq) {
-                    throw EXCEPTIONS.create(66, sq, I(ctx.getContextId()), I(contact.getObjectID()));
+                } catch (final SQLException e) {
+                    throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
                 } finally {
                     closeSQLStuff(rs, stmt);
                 }
@@ -958,8 +955,8 @@ public final class Contacts {
 
             // Check for bad characters
             checkCharacters(contact);
-        } catch (final DBPoolingException o) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(o);
+        } catch (final DBPoolingException e) {
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } finally {
             try {
                 DBPool.closeReaderSilent(ctx, readcon);
@@ -988,7 +985,7 @@ public final class Contacts {
             System.arraycopy(mod, 0, modtrim, 0, cnt);
 
             if (modtrim.length <= 0) {
-                throw EXCEPTIONS.create(22, I(ctx.getContextId()), I(contact.getObjectID()));
+                throw ContactExceptionCodes.NO_CHANGES.create(I(ctx.getContextId()), I(contact.getObjectID()));
             }
 
             for (int i = 0; i < modtrim.length; i++) {
@@ -998,7 +995,7 @@ public final class Contacts {
             }
             final int id = contact.getObjectID();
             if (id == -1) {
-                throw EXCEPTIONS.createOXConflictException(21);
+                throw new OXConflictException(ContactExceptionCodes.NEGATIVE_OBJECT_ID.create());
             }
             final long lmd = System.currentTimeMillis();
 
@@ -1076,21 +1073,21 @@ public final class Contacts {
                     ctx.getContextId());
             }
             writecon.commit();
-        } catch (final OXException ox) {
+        } catch (final OXException e) {
             rollback(writecon);
-            throw ox;
-        } catch (final DBPoolingException oe) {
-            throw EXCEPTIONS.create(55, oe);
+            throw e;
+        } catch (final DBPoolingException e) {
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final DataTruncation se) {
             rollback(writecon);
             throw Contacts.getTruncation(writecon, se, "prg_contacts", contact);
-        } catch (final SQLException se) {
+        } catch (final SQLException e) {
             rollback(writecon);
-            throw EXCEPTIONS.create(24, I(ctx.getContextId()), I(contact.getObjectID()));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
         } finally {
             closeSQLStuff(ps);
-            autocommit(writecon);
             if (null != writecon) {
+                autocommit(writecon);
                 try {
                     DBPool.closeWriterSilent(ctx, writecon);
                 } catch (final Exception ex) {
