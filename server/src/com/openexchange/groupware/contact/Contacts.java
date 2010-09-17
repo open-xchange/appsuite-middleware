@@ -104,7 +104,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -365,10 +364,10 @@ public final class Contacts {
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
 
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw new OXPermissionException(ContactExceptionCodes.NO_PERMISSION.create(I(fid), I(so.getContextId()), I(user)));
+                throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(so.getContextId()), I(user)));
             }
             if (!oclPerm.canCreateObjects()) {
-                throw new OXPermissionException(ContactExceptionCodes.NO_PERMISSION.create(I(fid), I(so.getContextId()), I(user)));
+                throw new OXPermissionException(ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(fid), I(so.getContextId()), I(user)));
             }
 
             if ((contactFolder.getType() != FolderObject.PRIVATE) && co.getPrivateFlag()) {
@@ -465,10 +464,6 @@ public final class Contacts {
                 if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                     try {
                         co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
-                    } catch (final OXConflictException e) {
-                        throw e;
-                    } catch (final ContactException e) {
-                        throw e;
                     } catch (final Exception e) {
                         throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
                     }
@@ -509,7 +504,7 @@ public final class Contacts {
                     LOG.error(ERR_UABLE_TO_ROLLBACK, see);
                 }
             }
-            throw ContactExceptionCodes.INVALID_SQL_QUERY.create(se, getStatement(ps));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(se, getStatement(ps));
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -523,57 +518,7 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(
-        category = {
-            Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION,
-            Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CONCURRENT_MODIFICATION, Category.CODE_ERROR,
-            Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
-            Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION,
-            Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT, Category.PERMISSION
-        },
-        desc = {
-            "10", "11", "12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "24", "55", "56", "59", "63", "66",
-            "67", "69", "73", "74", "75", "64", "76"
-        },
-        exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 24, 55, 56, 59, 63, 66, 67, 69, 73, 74, 75, 64, 76 },
-        msg = {
-            ContactException.NON_CONTACT_FOLDER_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            ContactException.NON_CONTACT_FOLDER_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            "Unable to synchronize the old contact with the new changes: Context %1$d Object %2$d",
-            ContactException.NO_PERMISSION_MSG,
-            "Unable to move this contact because it is marked as private: Context %1$d Object %2$d",
-            "You are not allowed to mark this contact as private contact: Context %1$d Object %2$d",
-            ContactException.OBJECT_HAS_CHANGED_MSG,
-            "Unable to update contact. Context %1$d Object %2$d",
-            "An error occurred: Object id is -1",
-            "No changes found. No update requiered. Context %1$d Object %2$d",
-            "Unable to update contact. Context %1$d Object %2$d",
-            ContactException.INIT_CONNECTION_FROM_DBPOOL,
-            "One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
-            "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
-            "Mandatory field last name is not set.",
-            "Your display name is mandatory. Please enter it.",
-            "The name you entered is not available. Choose another display name. Context %1$d Object %2$d",
-            ContactException.NO_DELETE_PERMISSION_MSG,
-            "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d",
-            ContactException.NOT_IN_FOLDER,
-            "Your last name is mandatory. Please enter it.",
-            "Your first name is mandatory. Please enter it.",
-            "You are not allowed to modify contact %1$d in context %2$d."
-        }
-    )
     public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
-        // TODO
-        /*
-         * if ((!co.containsSurName() || co.getSurName() == null || co.getSurName().length() < 1) && (!co.containsDisplayName() ||
-         * co.getDisplayName() == null || co.getDisplayName().length() < 1)){ throw
-         * EXCEPTIONS.createOXConflictException(63,ctx.getContextId()); }
-         */
-
         validateEmailAddress(co);
 
         boolean can_edit_only_own = false;
@@ -593,19 +538,28 @@ public final class Contacts {
 
             try {
                 original = getContactById(co.getObjectID(), user, group, ctx, uc, readcon);
-            } catch (final Exception e) {
-                throw EXCEPTIONS.createOXObjectNotFoundException(16, e, I(ctx.getContextId()), I(co.getObjectID()));
+            } catch (final OXException e) {
+                throw new OXObjectNotFoundException(ContactExceptionCodes.LOAD_OLD_CONTACT_FAILED.create(
+                    e,
+                    I(ctx.getContextId()),
+                    I(co.getObjectID())));
             }
 
             // Check if contact really exists in specified folder
             if (fid != original.getParentFolderID()) {
-                throw EXCEPTIONS.createOXPermissionException(74, I(co.getObjectID()), I(fid), I(ctx.getContextId()));
+                throw new OXPermissionException(ContactExceptionCodes.NOT_IN_FOLDER.create(
+                    I(co.getObjectID()),
+                    I(fid),
+                    I(ctx.getContextId())));
             }
 
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user && original.getInternalUserId() == user) {
                 // User tries to edit his primary email address which is allowed by administrator only since this email address is used in
                 // various places throughout the system. Therefore it is denied.
-                throw EXCEPTIONS.createOXPermissionException(73, I(ctx.getContextId()), I(co.getObjectID()), I(user));
+                throw new OXPermissionException(ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(
+                    I(ctx.getContextId()),
+                    I(co.getObjectID()),
+                    I(user)));
             }
 
             // Check Rights for Source Folder
@@ -614,19 +568,22 @@ public final class Contacts {
 
             final FolderObject contactFolder = new OXFolderAccess(readcon, ctx).getFolderObject(folder_comesfrom);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(10, I(folder_comesfrom), I(ctx.getContextId()), I(user));
+                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(
+                    I(folder_comesfrom),
+                    I(ctx.getContextId()),
+                    I(user)));
             }
             final OXFolderAccess oxfs = new OXFolderAccess(readcon, ctx);
             final EffectivePermission oclPerm = oxfs.getFolderPermission(folder_comesfrom, user, uc);
 
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw EXCEPTIONS.createOXPermissionException(11, I(folder_comesfrom), I(ctx.getContextId()), I(user));
+                throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folder_comesfrom), I(ctx.getContextId()), I(user)));
             }
             if (!oclPerm.canWriteAllObjects()) {
                 if (oclPerm.canWriteOwnObjects()) {
                     can_edit_only_own = true;
                 } else {
-                    throw EXCEPTIONS.createOXPermissionException(12, I(co.getParentFolderID()), I(ctx.getContextId()), I(user));
+                    throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(co.getParentFolderID()), I(ctx.getContextId()), I(user)));
                 }
             }
 
@@ -637,7 +594,7 @@ public final class Contacts {
                     if (oclPerm.canDeleteOwnObjects()) {
                         can_delete_only_own = true;
                     } else {
-                        throw EXCEPTIONS.createOXPermissionException(69, I(folder_comesfrom), I(ctx.getContextId()), I(user));
+                        throw new OXPermissionException(ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(folder_comesfrom), I(ctx.getContextId()), I(user)));
                     }
                 }
 
@@ -645,88 +602,60 @@ public final class Contacts {
 
                 // Can create in destination?
                 if (!op.canCreateObjects()) {
-                    throw EXCEPTIONS.createOXPermissionException(12, I(folder_whereto), I(ctx.getContextId()), I(user));
+                    throw new OXPermissionException(ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(folder_whereto), I(ctx.getContextId()), I(user)));
                 }
                 final FolderObject destination = new OXFolderAccess(readcon, ctx).getFolderObject(folder_whereto);
                 if (destination.getModule() != FolderObject.CONTACT) {
-                    throw EXCEPTIONS.createOXConflictException(13, I(folder_whereto), I(ctx.getContextId()), I(user));
+                    throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folder_whereto), I(ctx.getContextId()), I(user)));
                 }
                 if (op.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                    throw EXCEPTIONS.createOXPermissionException(14, I(folder_whereto), I(ctx.getContextId()), I(user));
+                    throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folder_whereto), I(ctx.getContextId()), I(user)));
                 }
                 if (!oclPerm.canCreateObjects()) {
-                    throw EXCEPTIONS.createOXPermissionException(15, I(folder_whereto), I(ctx.getContextId()), I(user));
+                    throw new OXPermissionException(ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(folder_whereto), I(ctx.getContextId()), I(user)));
                 }
-                /*-
-                 * 
-                if (!op.canWriteAllObjects()) {
-                    if (op.canWriteOwnObjects()) {
-                        can_edit_only_own = true;f
-                    } else {
-                        throw EXCEPTIONS.createOXPermissionException(
-                            15,
-                            Integer.valueOf(folder_whereto),
-                            Integer.valueOf(ctx.getContextId()),
-                            Integer.valueOf(user));
-                        // throw new OXConflictException("NOT ALLOWED TO MODIFIE
-                        // CONTACT cid="+ctx.getContextId()+" fid="+fid);
-                    }
-                }
-                 */
                 // Following if-block should deal with all cases of move and private flag. Optimized with binary algebra
                 if (contactFolder.getType() == FolderObject.PRIVATE && destination.getType() == FolderObject.PUBLIC) {
                     if (co.containsPrivateFlag() && co.getPrivateFlag() || !original.getPrivateFlag() && co.containsPrivateFlag()) {
-                        throw EXCEPTIONS.createOXConflictException(65, I(ctx.getContextId()), I(co.getObjectID()));
+                        throw new OXConflictException(ContactExceptionCodes.NO_PRIVATE_MOVE.create(I(ctx.getContextId()), I(co.getObjectID())));
                     }
                 } else if (contactFolder.getType() == FolderObject.PUBLIC && destination.getType() == FolderObject.PUBLIC && co.containsPrivateFlag()) {
-                    throw EXCEPTIONS.createOXConflictException(18, I(ctx.getContextId()), I(co.getObjectID()));
+                    throw new OXConflictException(ContactExceptionCodes.MARK_PRIVATE_NOT_ALLOWED.create(I(ctx.getContextId()), I(co.getObjectID())));
                 }
-                
             }
 
-            /*
-             * ALL RIGHTS CHECK SO FAR, CHECK FOR READ ONLY OWN
-             */
-
+            // ALL RIGHTS CHECK SO FAR, CHECK FOR READ ONLY OWN
             if (can_edit_only_own && (original.getCreatedBy() != user)) {
-                throw EXCEPTIONS.createOXConflictException(17, I(fid), I(ctx.getContextId()), I(user));
+                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(user)));
             }
             if (can_delete_only_own && (original.getCreatedBy() != user)) {
-                throw EXCEPTIONS.createOXConflictException(69, I(fid), I(ctx.getContextId()), I(user));
+                throw new OXConflictException(ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fid), I(ctx.getContextId()), I(user)));
             }
             if ((contactFolder.getType() != FolderObject.PRIVATE) && (co.getPrivateFlag())) {
-                throw EXCEPTIONS.createOXConflictException(18, I(ctx.getContextId()), I(co.getObjectID()));
+                throw new OXConflictException(ContactExceptionCodes.MARK_PRIVATE_NOT_ALLOWED.create(I(ctx.getContextId()), I(co.getObjectID())));
             }
             if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag() && (original.getCreatedBy() != user)) {
-                throw EXCEPTIONS.createOXPermissionException(76, I(co.getObjectID()), I(ctx.getContextId()));
+                throw new OXPermissionException(ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(co.getObjectID()), I(ctx.getContextId())));
             }
 
             final java.util.Date server_date = original.getLastModified();
-
-            try {
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(
-                        "Compare Dates for Contact Update\nClient-Date=" + client_date.getTime() + "\nServer-Date=" + server_date.getTime()));
-                }
-
-                if ((client_date != null) && (client_date.getTime() > -1) && (client_date.getTime() < server_date.getTime())) {
-                    throw EXCEPTIONS.createOXConcurrentModificationException(19);
-                    // throw new OXConcurrentModificationException("CONTACT HAS
-                    // CHANGED ON SERVER SIDE SINCE THE LAST VISIT");
-                }
-            } catch (final OXConcurrentModificationException xoxo) {
-                throw xoxo;
+            if (DEBUG) {
+                LOG.debug(new StringBuilder(
+                    "Compare Dates for Contact Update\nClient-Date=" + client_date.getTime() + "\nServer-Date=" + server_date.getTime()));
+            }
+            if ((client_date != null) && (client_date.getTime() > -1) && (client_date.getTime() < server_date.getTime())) {
+                throw new OXConcurrentModificationException(ContactExceptionCodes.OBJECT_HAS_CHANGED.create());
             }
 
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == co.getParentFolderID()) {
                 if (co.containsDisplayName() && (null == co.getDisplayName() || "".equals(co.getDisplayName()))) {
-                    throw EXCEPTIONS.create(66);
+                    throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();
                 }
                 if (co.containsSurName() && (null == co.getSurName() || "".equals(co.getSurName()))) {
-                    throw EXCEPTIONS.create(75);
+                    throw ContactExceptionCodes.LAST_NAME_MANDATORY.create();
                 }
                 if (co.containsGivenName() && (null == co.getGivenName() || "".equals(co.getGivenName()))) {
-                    throw EXCEPTIONS.create(64);
+                    throw ContactExceptionCodes.FIRST_NAME_MANDATORY.create();
                 }
             }
 
@@ -750,30 +679,16 @@ public final class Contacts {
                     stmt = csql.getSqlStatement(readcon);
                     rs = ((PreparedStatement) stmt).executeQuery();
                     if (rs.next()) {
-                        throw EXCEPTIONS.create(67, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
+                        throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(I(ctx.getContextId()), I(co.getObjectID()));
                     }
-                } catch (final SQLException sq) {
-                    throw EXCEPTIONS.create(66, sq, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
+                } catch (final SQLException e) {
+                    throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
                 } finally {
-                    try {
-                        if (rs != null) {
-                            rs.close();
-                        }
-                        if (stmt != null) {
-                            stmt.close();
-                        }
-                    } catch (final SQLException sxe) {
-                        LOG.error(ERR_UNABLE_TO_CLOSE, sxe);
-                    }
+                    closeSQLStuff(rs, stmt);
                 }
             }
-            /*
-             * if (co.getSurName() == null || co.getSurName().length() < 1){ co.setSurName(co.getDisplayName()); }
-             */
             if ((!co.containsFileAs() || ((co.getFileAs() != null) && (co.getFileAs().length() > 0))) && (co.getDisplayName() != null)) {
                 co.setFileAs(co.getDisplayName());
-                // } if (co.getDisplayName() == null){
-                // co.setFileAs(null);
             }
 
             /*
@@ -781,16 +696,8 @@ public final class Contacts {
              */
             checkCharacters(co);
 
-        } catch (final OXConcurrentModificationException cme) {
-            throw cme;
-        } catch (final OXObjectNotFoundException oe2) {
-            throw oe2;
-        } catch (final OXException oe3) {
-            throw oe3;
-        } catch (final DBPoolingException oe) {
-            throw EXCEPTIONS.create(20, oe);
-            // throw new OXException("UNABLE TO UPDATE CONTACT OBJECT
-            // cid="+ctx.getContextId()+" oid="+co.getObjectID(), oe);
+        } catch (final DBPoolingException e) {
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } finally {
             try {
                 DBPool.closeReaderSilent(ctx, readcon);
@@ -808,9 +715,7 @@ public final class Contacts {
             int cnt = 0;
             for (int i = 0; i < 650; i++) {
                 if ((mapping[i] != null) && !mapping[i].compare(co, original)) {
-                    /*
-                     * Check if modified field is DISPLAY-NAME and contact denotes a system user
-                     */
+                    // Check if modified field is DISPLAY-NAME and contact denotes a system user
                     if (i == Contact.DISPLAY_NAME && original.getInternalUserId() > 0) {
                         modifiedDisplayName = true;
                     }
@@ -822,7 +727,7 @@ public final class Contacts {
             System.arraycopy(mod, 0, modtrim, 0, cnt);
 
             if (modtrim.length <= 0) {
-                throw EXCEPTIONS.create(22, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
+                throw ContactExceptionCodes.NO_CHANGES.create(I(ctx.getContextId()), I(co.getObjectID()));
             }
 
             for (int i = 0; i < modtrim.length; i++) {
@@ -832,7 +737,7 @@ public final class Contacts {
             }
             final int id = co.getObjectID();
             if (id == -1) {
-                throw EXCEPTIONS.createOXConflictException(21);
+                throw new OXConflictException(ContactExceptionCodes.NEGATIVE_OBJECT_ID.create());
             }
             final long lmd = System.currentTimeMillis();
 
@@ -859,9 +764,7 @@ public final class Contacts {
             }
 
             if (co.getParentFolderID() != fid) {
-                /*
-                 * Fake a deletion on MOVE operation for MS Outlook prior to performing actual UPDATE
-                 */
+                // Fake a deletion on MOVE operation for MS Outlook prior to performing actual UPDATE
                 final Statement stmt = writecon.createStatement();
                 try {
                     cs.iFbackupContact(stmt, ctx.getContextId(), co.getObjectID(), user);
@@ -877,37 +780,24 @@ public final class Contacts {
             ps.execute();
 
             if (co.containsNumberOfDistributionLists() && (co.getSizeOfDistributionListArray() > 0)) {
-                // if (co.getSizeOfDistributionListArray() > 0){
                 writeDistributionListArrayUpdate(
                     co.getDistributionList(),
                     original.getDistributionList(),
                     co.getObjectID(),
                     ctx.getContextId(),
                     writecon);
-                // }
             }
             if (co.containsNumberOfLinks() && (co.getSizeOfLinks() > 0)) {
-                // if (co.getSizeOfLinks() > 0){
                 writeContactLinkArrayUpdate(co.getLinks(), original.getLinks(), co.getObjectID(), ctx.getContextId(), writecon);
-                // }
             }
-
-            /*
-             * containsImage = true && image = stuff -> create image containsImage = true && image = null -> delete image containsImage =
-             * false -> nothing to do
-             */
 
             if (co.containsImage1()) {
                 if (co.getImage1() != null) {
                     if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                         try {
                             co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
-                        } catch (final OXConflictException e) {
-                            throw e;
-                        } catch (final ContactException e) {
-                            throw e;
-                        } catch (final Exception ex) {
-                            throw EXCEPTIONS.create(59, ex);
+                        } catch (final Exception e) {
+                            throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
                         }
                     } else {
                         checkImageSize(
@@ -929,9 +819,7 @@ public final class Contacts {
                     }
                 }
             }
-            /*
-             * Check for DISPLAY-NAME update
-             */
+            // Check for DISPLAY-NAME update
             if (modifiedDisplayName) {
                 OXFolderAdminHelper.propagateUserModification(
                     original.getInternalUserId(),
@@ -951,8 +839,8 @@ public final class Contacts {
                 }
             }
             throw ox;
-        } catch (final DBPoolingException oe) {
-            throw EXCEPTIONS.create(55, oe);
+        } catch (final DBPoolingException e) {
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final DataTruncation se) {
             if (null != writecon) {
                 try {
@@ -962,7 +850,7 @@ public final class Contacts {
                 }
             }
             throw Contacts.getTruncation(writecon, se, "prg_contacts", co);
-        } catch (final SQLException se) {
+        } catch (final SQLException e) {
             if (null != writecon) {
                 try {
                     writecon.rollback();
@@ -970,23 +858,11 @@ public final class Contacts {
                     LOG.error("Uable to rollback SQL Update", see);
                 }
             }
-            throw EXCEPTIONS.create(24, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
-            // throw new OXException("ERROR: Unable to Update Contacts!
-            // cid="+ctx.getContextId()+" oid="+co.getObjectID(),se);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
         } finally {
-            if (null != ps) {
-                try {
-                    ps.close();
-                } catch (final Exception sq) {
-                    LOG.error("UNABLE TO CLOSE STATEMENT", sq);
-                }
-            }
+            closeSQLStuff(ps);
             if (null != writecon) {
-                try {
-                    writecon.setAutoCommit(true);
-                } catch (final Exception ex) {
-                    LOG.error("Unable to set setAutoCommit = true");
-                }
+                autocommit(writecon);
                 try {
                     DBPool.closeWriterSilent(ctx, writecon);
                 } catch (final Exception ex) {
@@ -1082,8 +958,8 @@ public final class Contacts {
 
             // Check for bad characters
             checkCharacters(contact);
-        } catch (final DBPoolingException oe) {
-            throw EXCEPTIONS.create(20, oe);
+        } catch (final DBPoolingException o) {
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(o);
         } finally {
             try {
                 DBPool.closeReaderSilent(ctx, readcon);
@@ -1169,8 +1045,8 @@ public final class Contacts {
                             throw e;
                         } catch (ContactException e) {
                             throw e;
-                        } catch (final Exception ex) {
-                            throw EXCEPTIONS.create(59, ex);
+                        } catch (final Exception e) {
+                            throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
                         }
                     } else {
                         checkImageSize(contact.getImage1().length, Integer.parseInt(ContactConfig.getInstance().getProperty(

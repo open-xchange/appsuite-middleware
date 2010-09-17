@@ -67,24 +67,54 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     IMAGE_SCALE_PROBLEM(IMAGE_SCALE_PROBLEM_MSG, Category.USER_INPUT, 101),
     /** You are not allowed to store this contact in a non-contact folder: folder id %1$d in context %2$d with user %3$d */
     NON_CONTACT_FOLDER(NON_CONTACT_FOLDER_MSG, Category.PERMISSION, 103),
-    /** You do not have permission to create objects in this folder %1$d in context %2$d with user %3$d */
-    NO_PERMISSION(NO_PERMISSION_MSG, Category.PERMISSION, 104),
+    /** You do not have permission to access objects in this folder %1$d in context %2$d with user %3$d */
+    NO_ACCESS_PERMISSION(NO_ACCESS_PERMISSION_MSG, Category.PERMISSION, 104),
     /** Got a -1 ID from IDGenerator */
     ID_GENERATION_FAILED(ID_GENERATION_FAILED_MSG, Category.CODE_ERROR, 107),
     /** Unable to scale image down. */
     IMAGE_DOWNSCALE_FAILED(IMAGE_DOWNSCALE_FAILED_MSG, Category.CODE_ERROR, 108),
     /** Invalid SQL Query: %s */
-    INVALID_SQL_QUERY(INVALID_SQL_QUERY_MSG, Category.CODE_ERROR, 109),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 109),
+    /** You do not have permission to create objects in this folder %1$d in context %2$d with user %3$d */
+    NO_CREATE_PERMISSION(NO_CREATE_PERMISSION_MSG, Category.PERMISSION, 112),
+    /** Unable to synchronize the old contact with the new changes: Context %1$d Object %2$d */
+    LOAD_OLD_CONTACT_FAILED(LOAD_OLD_CONTACT_FAILED_MSG, Category.CODE_ERROR, 116),
+    /** You are not allowed to mark this contact as private contact: Context %1$d Object %2$d */
+    MARK_PRIVATE_NOT_ALLOWED(MARK_PRIVATE_NOT_ALLOWED_MSG, Category.PERMISSION, 118),
+    /**Edit Conflict. Your change cannot be completed because somebody else" + " has made a conflicting change to the same item. Please refresh or " + "synchronize and try again. */
+    OBJECT_HAS_CHANGED(OBJECT_HAS_CHANGED_MSG, Category.CONCURRENT_MODIFICATION, 119),
+    /** An error occurred: Object id is -1 */
+    NEGATIVE_OBJECT_ID(NEGATIVE_OBJECT_ID_MSG, Category.CODE_ERROR, 121),
+    /** No changes found. No update requiered. Context %1$d Object %2$d */
+    NO_CHANGES(NO_CHANGES_MSG, Category.USER_INPUT, 122),
     /** Unable to pick up a connection from the DBPool */
     INIT_CONNECTION_FROM_DBPOOL(INIT_CONNECTION_FROM_DBPOOL_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 151),
     /** The image you tried to attach is not a valid picture. It may be broken or is not a valid file. */
     NOT_VALID_IMAGE(NOT_VALID_IMAGE_MSG, Category.TRY_AGAIN, 158),
+    /** Your first name is mandatory. Please enter it. */
+    FIRST_NAME_MANDATORY(FIRST_NAME_MANDATORY_MSG, Category.USER_INPUT, 164),
+    /** Unable to move this contact because it is marked as private: Context %1$d Object %2$d */
+    NO_PRIVATE_MOVE(NO_PRIVATE_MOVE_MSG, Category.PERMISSION, 165),
+    /** Your display name is mandatory. Please enter it. */
+    DISPLAY_NAME_MANDATORY(DISPLAY_NAME_IN_USE_MSG, Category.USER_INPUT, 166),
+    /** The name you entered is not available. Choose another display name. Context %1$d Object %2$d */
+    DISPLAY_NAME_IN_USE(DISPLAY_NAME_IN_USE_MSG, Category.TRY_AGAIN, 167),
+    /** You do not have permission to delete objects from folder %1$d in context %2$d with user %3$d */
+    NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG, Category.PERMISSION, 169),
     /** Mime type is not defined. */
     MIME_TYPE_NOT_DEFINED(MIME_TYPE_NOT_DEFINED_MSG, Category.USER_INPUT, 170),
     /** A contact with private flag cannot be stored in a public folder. Folder: %1$d context %2$d user %3$d */
     PFLAG_IN_PUBLIC_FOLDER(PFLAG_IN_PUBLIC_FOLDER_MSG, Category.USER_INPUT, 171),
     /** Image size too large. Image size: %1$d. Max. size: %2$d. */
-    IMAGE_TOO_LARGE(IMAGE_TOO_LARGE_MSG, Category.USER_INPUT, 172)
+    IMAGE_TOO_LARGE(IMAGE_TOO_LARGE_MSG, Category.USER_INPUT, 172),
+    /** Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d */
+    NO_PRIMARY_EMAIL_EDIT(NO_PRIMARY_EMAIL_EDIT_MSG, Category.PERMISSION, 173),
+    /** The contact %1$d is not located in folder %2$s (%3$d) */
+    NOT_IN_FOLDER(NOT_IN_FOLDER_MSG, Category.PERMISSION, 174),
+    /** Your last name is mandatory. Please enter it. */
+    LAST_NAME_MANDATORY(LAST_NAME_MANDATORY_MSG, Category.USER_INPUT, 175),
+    /** You are not allowed to modify contact %1$d in context %2$d. */
+    NO_CHANGE_PERMISSION(NO_CHANGE_PERMISSION_MSG, Category.PERMISSION, 176),
     ;
 
     private String message;

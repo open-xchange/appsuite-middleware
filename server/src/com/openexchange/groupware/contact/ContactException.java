@@ -60,13 +60,13 @@ public class ContactException extends OXException {
 
     public static final String NON_CONTACT_FOLDER_MSG = ContactExceptionMessages.NON_CONTACT_FOLDER_MSG;
 
-    public static final String NO_PERMISSION_MSG = ContactExceptionMessages.NO_PERMISSION_MSG;
+    public static final String NO_PERMISSION_MSG = ContactExceptionMessages.NO_ACCESS_PERMISSION_MSG;
 
     public static final String NO_READ_PERMISSION_MSG = "You do not have permission to read objects in folder %1$d in context %2$d with user %3$d";
 
-    public static final String OBJECT_HAS_CHANGED_MSG = "Edit Conflict. Your change cannot be completed because somebody else" + " has made a conflicting change to the same item. Please refresh or " + "synchronize and try again.";
+    public static final String OBJECT_HAS_CHANGED_MSG = ContactExceptionMessages.OBJECT_HAS_CHANGED_MSG;
 
-    public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from folder %1$d in context %2$d with user %3$d";
+    public static final String NO_DELETE_PERMISSION_MSG = ContactExceptionMessages.NO_DELETE_PERMISSION_MSG;
 
     public static final String EVENT_QUEUE = "Unable to initialize Event queue";
 
@@ -74,10 +74,7 @@ public class ContactException extends OXException {
 
     public static final String PFLAG_IN_PUBLIC_FOLDER = ContactExceptionMessages.PFLAG_IN_PUBLIC_FOLDER_MSG;
 
-    /**
-     * The contact %1$d is not located in folder %2$s (%3$d)
-     */
-    public static final String NOT_IN_FOLDER = "The contact %1$d is not located in folder %2$s (%3$d)";
+    public static final String NOT_IN_FOLDER = ContactExceptionMessages.NOT_IN_FOLDER_MSG;
 
     /**
      * Invalid email address: %1$s
