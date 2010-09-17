@@ -35,6 +35,7 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="proxyjar" value="com.openexchange.proxy.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar"/>
+	<property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
 
 	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
 
@@ -55,6 +56,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${proxyjar}"/>
     	<pathelement location="${bundlesdir}/${serverjar}"/>
+    	<pathelement location="${bundlesdir}/${threadpooljar}"/>
     	<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}"/> -->
     	<fileset refid="3rdpartyjars"/>
     </path>
