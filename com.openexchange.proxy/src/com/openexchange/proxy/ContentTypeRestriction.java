@@ -157,4 +157,9 @@ public class ContentTypeRestriction implements Restriction {
         return "Content-Type header must be equal or match one of: " + contentTypes.toString();
     }
 
+    @Override
+    public String toString() {
+        return getDescription();
+    }
+
 }
