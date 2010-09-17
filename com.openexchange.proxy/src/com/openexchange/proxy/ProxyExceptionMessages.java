@@ -70,6 +70,9 @@ public final class ProxyExceptionMessages implements LocalizableStrings {
     // HTTP request to VoipNow server %1$s failed. Status line: %2$s
     public static final String HTTP_REQUEST_FAILED_MSG = "HTTP request to VoipNow server %1$s failed. Status line: %2$s";
 
+    // Malformed URI: %1$s
+    public static final String MALFORMED_URI_MSG = "Malformed URI: %1$s";
+
     /**
      * Initializes a new {@link ProxyExceptionMessages}.
      */

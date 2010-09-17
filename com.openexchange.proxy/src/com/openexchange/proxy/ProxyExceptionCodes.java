@@ -75,7 +75,11 @@ public enum ProxyExceptionCodes implements OXErrorMessage {
     /**
      * HTTP request to VoipNow server %1$s failed. Status line: %2$s
      */
-    HTTP_REQUEST_FAILED(ProxyExceptionMessages.HTTP_REQUEST_FAILED_MSG, Category.CODE_ERROR, 4);
+    HTTP_REQUEST_FAILED(ProxyExceptionMessages.HTTP_REQUEST_FAILED_MSG, Category.CODE_ERROR, 4),
+    /**
+     * Malformed URI: %1$s
+     */
+    MALFORMED_URI(ProxyExceptionMessages.MALFORMED_URI_MSG, Category.CODE_ERROR, 5);
 
     private final Category category;
 
