@@ -111,7 +111,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
          */
         final String uriStr =
             new StringBuilder(Constants.PATH).append('?').append(AJAXServlet.PARAMETER_SESSION).append('=').append(sessionId).append('&').append(
-                AJAXServlet.PARAMETER_UID).append('=').append(uuid.toString()).toString();
+                AJAXServlet.PARAMETER_UID).append('=').append(UUIDs.getUnformattedString(uuid)).toString();
         try {
             return new URI(uriStr);
         } catch (URISyntaxException e) {

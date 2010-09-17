@@ -99,7 +99,15 @@ public class ProxyServlet extends SessionServlet {
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final String sessionId = req.getParameter(AJAXServlet.PARAMETER_SESSION);
+        if (null == sessionId) {
+            resp.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Missing parameter \"session\"");
+            return;
+        }
         final String uuidStr = req.getParameter(AJAXServlet.PARAMETER_UID);
+        if (null == uuidStr) {
+            resp.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Missing parameter \"uid\"");
+            return;
+        }
 
         final ProxyRegistration registration = ProxyRegistryImpl.getInstance().getRegistration(sessionId, UUIDs.fromUnformattedString(uuidStr));
         if (null == registration) {
