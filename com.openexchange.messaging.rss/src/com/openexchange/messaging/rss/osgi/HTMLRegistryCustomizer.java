@@ -47,49 +47,44 @@
  *
  */
 
-package com.openexchange.messaging.rss;
+package com.openexchange.messaging.rss.osgi;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.session.Session;
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndFeed;
-
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.html.HTMLService;
+import com.openexchange.messaging.rss.HTMLServiceProvider;
 
 /**
- * {@link FeedAdapter}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link HTMLRegistryCustomizer}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FeedAdapter {
-    
-    private final SyndFeed feed;
-    
-    private final Map<String, SyndMessage> messages = new LinkedHashMap<String, SyndMessage>();
-    
-    public FeedAdapter(final SyndFeed feed, final String folder, final Session session) throws MessagingException {
-        this.feed = feed;
-    
-        final List<SyndEntry> entries = feed.getEntries();
-        for (final SyndEntry syndEntry : entries) {
-            remember(new SyndMessage(feed, syndEntry, folder, session));
-        }
+public final class HTMLRegistryCustomizer implements ServiceTrackerCustomizer {
+
+    private final BundleContext context;
+
+    /**
+     * Initializes a new {@link HTMLRegistryCustomizer}.
+     */
+    public HTMLRegistryCustomizer(final BundleContext context) {
+        super();
+        this.context = context;
     }
 
-    private void remember(final SyndMessage syndMessage) {
-        messages.put(syndMessage.getId(), syndMessage);
+    public Object addingService(final ServiceReference reference) {
+        final Object service = context.getService(reference);
+        HTMLServiceProvider.getInstance().setHTMLService((HTMLService) service);
+        return service;
     }
-    
-    public SyndMessage get(final String id) {
-        return messages.get(id);
+
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nope
     }
-    
-    public List<SyndMessage> getMessages() {
-        return new ArrayList<SyndMessage>(messages.values());
+
+    public void removedService(final ServiceReference reference, final Object service) {
+        HTMLServiceProvider.getInstance().setHTMLService(null);
+        context.ungetService(reference);
     }
-    
-    
+
 }

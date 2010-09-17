@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
@@ -71,6 +72,7 @@ import com.openexchange.messaging.generic.Utility;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
+import com.openexchange.session.Session;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -85,7 +87,7 @@ public class SyndMessage implements MessagingMessage {
     private final String folder;
     private final SyndFeed feed;
      
-    public SyndMessage(final SyndFeed feed, final SyndEntry syndEntry, final String folder) throws MessagingException {
+    public SyndMessage(final SyndFeed feed, final SyndEntry syndEntry, final String folder, final Session session) throws MessagingException {
         entry = syndEntry;
         this.folder = folder;
         this.feed = feed;
@@ -97,15 +99,15 @@ public class SyndMessage implements MessagingMessage {
         
         if(contents.size() > 0) {
             final SyndContent content = contents.get(0);
-            setContent(content);
+            setContent(content, session);
         } else if (entry.getDescription() != null){
-            setContent(entry.getDescription());
+            setContent(entry.getDescription(), session);
         } else if (entry.getTitle() != null) {
-            setContent(entry.getTitleEx());
+            setContent(entry.getTitleEx(), session);
         }
     }
 
-    private void setContent(final SyndContent content) throws MessagingException {
+    private void setContent(final SyndContent content, final Session session) throws MessagingException {
         String type = content.getType();
         if(type == null) {
             type = "text/plain";
@@ -118,7 +120,7 @@ public class SyndMessage implements MessagingMessage {
         
         if( isHTML(type) ) {
             final String textVersion = Utility.textFormat(content.getValue());
-            
+
             final MimeMultipartContent multipart = new MimeMultipartContent();
             final MimeMessagingBodyPart textPart = new MimeMessagingBodyPart();
             textPart.setContent(new StringContent(textVersion), "text/plain");
@@ -126,7 +128,12 @@ public class SyndMessage implements MessagingMessage {
             multipart.addBodyPart(textPart);
             
             final MimeMessagingBodyPart htmlPart = new MimeMessagingBodyPart();
-            htmlPart.setContent(new StringContent(content.getValue()), type);
+            final HTMLService htmlService = HTMLServiceProvider.getInstance().getHTMLService();
+            if (null == htmlService) {
+                htmlPart.setContent(new StringContent(content.getValue()), type);
+            } else {
+                htmlPart.setContent(new StringContent(htmlService.replaceImages(content.getValue(), session)), type);
+            }
             
             multipart.addBodyPart(htmlPart);
             
@@ -139,7 +146,6 @@ public class SyndMessage implements MessagingMessage {
             addHeader(KnownHeader.CONTENT_TYPE, contentType);
             this.content = new StringContent(content.getValue());
         }
-        
     }
 
     private boolean isHTML(final String type) {

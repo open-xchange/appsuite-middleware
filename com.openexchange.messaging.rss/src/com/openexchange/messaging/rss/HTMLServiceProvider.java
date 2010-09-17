@@ -49,47 +49,38 @@
 
 package com.openexchange.messaging.rss;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.session.Session;
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndFeed;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.html.HTMLService;
 
 /**
- * {@link FeedAdapter}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link HTMLServiceProvider}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FeedAdapter {
-    
-    private final SyndFeed feed;
-    
-    private final Map<String, SyndMessage> messages = new LinkedHashMap<String, SyndMessage>();
-    
-    public FeedAdapter(final SyndFeed feed, final String folder, final Session session) throws MessagingException {
-        this.feed = feed;
-    
-        final List<SyndEntry> entries = feed.getEntries();
-        for (final SyndEntry syndEntry : entries) {
-            remember(new SyndMessage(feed, syndEntry, folder, session));
-        }
+public final class HTMLServiceProvider {
+
+    private static final HTMLServiceProvider INSTANCE = new HTMLServiceProvider();
+
+    public static HTMLServiceProvider getInstance() {
+        return INSTANCE;
     }
 
-    private void remember(final SyndMessage syndMessage) {
-        messages.put(syndMessage.getId(), syndMessage);
+    private final AtomicReference<HTMLService> ref;
+
+    /**
+     * Initializes a new {@link HTMLServiceProvider}.
+     */
+    private HTMLServiceProvider() {
+        super();
+        ref = new AtomicReference<HTMLService>();
     }
-    
-    public SyndMessage get(final String id) {
-        return messages.get(id);
+
+    public HTMLService getHTMLService() {
+        return ref.get();
     }
-    
-    public List<SyndMessage> getMessages() {
-        return new ArrayList<SyndMessage>(messages.values());
+
+    public void setHTMLService(final HTMLService htmlService) {
+        ref.set(htmlService);
     }
-    
-    
+
 }

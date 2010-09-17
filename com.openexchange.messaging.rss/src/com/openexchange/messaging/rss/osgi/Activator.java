@@ -49,10 +49,14 @@
 
 package com.openexchange.messaging.rss.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
 
@@ -64,9 +68,17 @@ import com.openexchange.messaging.rss.RSSMessagingService;
 public class Activator implements BundleActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
+
+    private List<ServiceTracker> trackers;
     
 	public void start(final BundleContext context) throws Exception {
 	    try {
+	        trackers = new ArrayList<ServiceTracker>(1);
+	        trackers.add(new ServiceTracker(context, HTMLService.class.getName(), new HTMLRegistryCustomizer(context)));
+	        for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
+	        
 	        context.registerService(MessagingService.class.getName(), new RSSMessagingService(), null);
 	    } catch (final Exception x) {
 	        LOG.error(x.getMessage(), x);
@@ -75,6 +87,13 @@ public class Activator implements BundleActivator {
 	}
 
 	public void stop(final BundleContext context) throws Exception {
+	    if (null != trackers) {
+	        for (final ServiceTracker tracker : trackers) {
+                tracker.close();
+            }
+	        trackers = null;
+        }
+	    
 	    // Services are deregistered automatically by the framework
 	}
 

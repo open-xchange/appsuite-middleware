@@ -229,7 +229,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         final String url = (String) accounts.getAccount(accountId, session).getConfiguration().get("url");
         
         try {
-            return feed = new FeedAdapter(feedFetcher.retrieveFeed(new URL(url)), "");
+            return feed = new FeedAdapter(feedFetcher.retrieveFeed(new URL(url)), "", session);
         } catch (final Exception e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
