@@ -231,13 +231,13 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
              */
             ThreadPools.pollCompletionService(completionService, size, getMaxRunningMillis(), FACTORY);
             final UserizedFolder[] ret = trimArray(subfolders);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
                 LOG.debug(new StringBuilder().append("VisibleSubfoldersPerformer.doVisibleSubfolders() took ").append(duration).append(
                     "msec").toString());
-            }
-            if (started) {
-                folderStorage.commitTransaction(storageParameters);
             }
             return ret;
         } catch (final FolderException e) {
