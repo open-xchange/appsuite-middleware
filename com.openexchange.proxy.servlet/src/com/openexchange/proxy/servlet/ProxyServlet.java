@@ -51,9 +51,9 @@ package com.openexchange.proxy.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -195,12 +195,13 @@ public class ProxyServlet extends SessionServlet {
              */
             final InputStream responseStream = httpMethod.getResponseBodyAsStream();
             try {
-                final OutputStream outputStream = resp.getOutputStream();
+                final ServletOutputStream outputStream = resp.getOutputStream();
                 final byte[] buf = new byte[8192];
                 int read = -1;
                 while ((read = responseStream.read(buf)) != -1) {
                     outputStream.write(buf, 0, read);
                 }
+                outputStream.flush();
             } finally {
                 try {
                     responseStream.close();
