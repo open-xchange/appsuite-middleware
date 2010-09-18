@@ -187,6 +187,10 @@ public class ProxyServlet extends SessionServlet {
                 }
             }
             /*
+             * Set status
+             */
+            resp.setStatus(httpMethod.getStatusCode());
+            /*
              * Add response header
              */
             header2Response(httpMethod, resp);
@@ -209,10 +213,6 @@ public class ProxyServlet extends SessionServlet {
                     org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class).error(e.getMessage(), e);
                 }
             }
-            /*
-             * Set status
-             */
-            resp.setStatus(httpMethod.getStatusCode());
         } finally {
             httpMethod.releaseConnection();
         }
