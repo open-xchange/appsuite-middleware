@@ -65,7 +65,7 @@ public interface Restriction {
     boolean allow(Response response);
 
     /**
-     * Gets a meaningful description for this restriction.
+     * Gets a displayable description for this restriction.
      * 
      * @return The description for this restriction
      */
