@@ -79,14 +79,14 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
         return INSTANCE;
     }
 
-    private final ConcurrentMap<String, ConcurrentMap<UUID, ProxyRegistration>> registry;
+    private final ConcurrentMap<String, ConcurrentMap<UUID, ProxyRegistrationEntry>> registry;
 
     /**
      * Initializes a new {@link ProxyRegistryImpl}.
      */
     private ProxyRegistryImpl() {
         super();
-        registry = new ConcurrentHashMap<String, ConcurrentMap<UUID, ProxyRegistration>>();
+        registry = new ConcurrentHashMap<String, ConcurrentMap<UUID, ProxyRegistrationEntry>>();
     }
 
     public URI register(final ProxyRegistration registration) throws ProxyException {
@@ -94,9 +94,9 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
          * Register
          */
         final String sessionId = registration.getSession().getSessionID();
-        ConcurrentMap<UUID, ProxyRegistration> map = registry.get(sessionId);
+        ConcurrentMap<UUID, ProxyRegistrationEntry> map = registry.get(sessionId);
         if (null == map) {
-            final ConcurrentMap<UUID, ProxyRegistration> newmap = new ConcurrentHashMap<UUID, ProxyRegistration>();
+            final ConcurrentMap<UUID, ProxyRegistrationEntry> newmap = new ConcurrentHashMap<UUID, ProxyRegistrationEntry>();
             map = registry.putIfAbsent(sessionId, newmap);
             if (null == map) {
                 map = newmap;
@@ -106,33 +106,33 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
          * Generate UUID for registration
          */
         final UUID uuid = UUID.randomUUID();
-        map.put(uuid, registration);
+        map.put(uuid, new ProxyRegistrationEntry(registration));
         /*
          * Generate URI
          */
-        final String uriStr =
-            new StringBuilder(Constants.PATH).append('?').append(AJAXServlet.PARAMETER_SESSION).append('=').append(sessionId).append('&').append(
-                AJAXServlet.PARAMETER_UID).append('=').append(UUIDs.getUnformattedString(uuid)).toString();
+        final String uriStr = new StringBuilder(Constants.PATH).append('?').append(AJAXServlet.PARAMETER_SESSION).append('=').append(
+            sessionId).append('&').append(AJAXServlet.PARAMETER_UID).append('=').append(UUIDs.getUnformattedString(uuid)).toString();
         try {
             return new URI(uriStr);
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw ProxyExceptionCodes.MALFORMED_URI.create(uriStr);
         }
     }
 
     /**
-     * Gets the registration for specified session ID and UUID.
+     * Gets the registration for specified session identifier and UUID.
      * 
-     * @param sessionId The session ID
+     * @param sessionId The session identifier
      * @param uuid The UUID
      * @return The registration or <code>null</code>
      */
     public ProxyRegistration getRegistration(final String sessionId, final UUID uuid) {
-        final ConcurrentMap<UUID, ProxyRegistration> map = registry.get(sessionId);
+        final ConcurrentMap<UUID, ProxyRegistrationEntry> map = registry.get(sessionId);
         if (null == map) {
             return null;
         }
-        return map.get(uuid);
+        final ProxyRegistrationEntry entry = map.get(uuid);
+        return null == entry ? null : entry.getProxyRegistration();
     }
 
     /**
@@ -145,9 +145,9 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
     }
 
     /**
-     * Drops all registrations associated with specified session ID.
+     * Drops all registrations associated with specified session identifier.
      * 
-     * @param sessionId The session ID
+     * @param sessionId The session identifier
      */
     public void dropRegistrationsFor(final String sessionId) {
         registry.remove(sessionId);
