@@ -50,7 +50,7 @@
 package com.openexchange.proxy;
 
 /**
- * {@link Restriction} - A restriction.
+ * {@link Restriction} - A restriction for a HTTP response.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
