@@ -51,6 +51,7 @@ package com.openexchange.proxy.servlet;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -136,9 +137,18 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
     }
 
     /**
-     * Gets an iterator for contained session IDs.
+     * Gets the values contained in this registry.
      * 
-     * @return An iterator for contained session IDs
+     * @return The values contained in this registry
+     */
+    public Collection<ConcurrentMap<UUID, ProxyRegistrationEntry>> values() {
+        return registry.values();
+    }
+
+    /**
+     * Gets an iterator for contained session identifiers.
+     * 
+     * @return An iterator for contained session identifiers
      */
     public Iterator<String> sessionIds() {
         return registry.keySet().iterator();

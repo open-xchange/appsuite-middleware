@@ -49,9 +49,15 @@
 
 package com.openexchange.proxy.servlet.osgi;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.proxy.servlet.ProxyRegistrationEntry;
+import com.openexchange.proxy.servlet.ProxyRegistryImpl;
 import com.openexchange.proxy.servlet.services.ServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -96,15 +102,35 @@ public final class TimerServiceCustomizer implements ServiceTrackerCustomizer {
     }
 
     private void scheduleTask(final TimerService timerService) {
-        // final Runnable task = new Runnable() {
-        //
-        // public void run() {
-        // final SessiondService sessiondService = ServiceRegistry.getInstance().getService(SessiondService.class);
-        // if (null != sessiondService) {
-        // }
-        // }
-        // };
-        scheduledTimerTask = null;
+        if (null == scheduledTimerTask) {
+            final Runnable task = new Runnable() {
+
+                public void run() {
+                    final Collection<ConcurrentMap<UUID, ProxyRegistrationEntry>> values = ProxyRegistryImpl.getInstance().values();
+                    if (values.isEmpty()) {
+                        return;
+                    }
+                    final long now = System.currentTimeMillis();
+                    for (final Iterator<ConcurrentMap<UUID, ProxyRegistrationEntry>> valuesIter = values.iterator(); valuesIter.hasNext();) {
+                        final ConcurrentMap<UUID, ProxyRegistrationEntry> map = valuesIter.next();
+                        for (final Iterator<ProxyRegistrationEntry> entriesIter = map.values().iterator(); entriesIter.hasNext();) {
+                            final ProxyRegistrationEntry entry = entriesIter.next();
+                            final long ttl = entry.getTTL();
+                            if ((ttl >= 0) && ((now - entry.getTimestamp()) > ttl)) {
+                                /*
+                                 * Exceeds time-to-live
+                                 */
+                                entriesIter.remove();
+                            }
+                        }
+                        if (map.isEmpty()) {
+                            valuesIter.remove();
+                        }
+                    }
+                }
+            };
+            scheduledTimerTask = timerService.scheduleWithFixedDelay(task, 1000, 300000);
+        }
     }
 
     private void dropTask(final TimerService timerService) {

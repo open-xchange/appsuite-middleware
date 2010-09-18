@@ -60,15 +60,34 @@ public final class ProxyRegistrationEntry {
 
     private final ProxyRegistration proxyRegistration;
 
+    private final long ttl;
+
     private final long timestamp;
 
     /**
      * Initializes a new {@link ProxyRegistrationEntry}.
      */
     public ProxyRegistrationEntry(final ProxyRegistration proxyRegistration) {
+        this(proxyRegistration, -1L);
+    }
+
+    /**
+     * Initializes a new {@link ProxyRegistrationEntry}.
+     */
+    public ProxyRegistrationEntry(final ProxyRegistration proxyRegistration, final long ttl) {
         super();
+        this.ttl = ttl;
         this.proxyRegistration = proxyRegistration;
         timestamp = System.currentTimeMillis();
+    }
+
+    /**
+     * Gets the time-to-live for this entry. A negative value means this entry is bound to associated session's life time.
+     * 
+     * @return The time-to-live or a negative value
+     */
+    public long getTTL() {
+        return ttl;
     }
 
     /**
@@ -81,9 +100,9 @@ public final class ProxyRegistrationEntry {
     }
 
     /**
-     * Gets the time stamp.
+     * Gets the time stamp when this entry was registered.
      * 
-     * @return The time stamp
+     * @return The register time stamp
      */
     public long getTimestamp() {
         return timestamp;
