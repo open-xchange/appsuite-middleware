@@ -224,12 +224,16 @@ public class ProxyServlet extends SessionServlet {
          */
         final Header ctHeader = method.getResponseHeader("Content-Type");
         if (null != ctHeader) {
+            /*-
+             * 
             final String value = ctHeader.getValue();
             if ("text/html".equals(value)) {
                 resp.setContentType("text/html; charset=" + resp.getCharacterEncoding());
             } else {
                 resp.setContentType(value);
             }
+            */
+            resp.setContentType(ctHeader.getValue());
         }
         final long length = method.getResponseContentLength(); // Content-Length
         if (length > 0) {
