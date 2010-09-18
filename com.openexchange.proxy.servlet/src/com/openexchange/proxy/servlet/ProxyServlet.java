@@ -217,7 +217,7 @@ public class ProxyServlet extends SessionServlet {
         }
     }
 
-    private void header2Response(final HttpMethodBase method, final HttpServletResponse resp) {
+    private static void header2Response(final HttpMethodBase method, final HttpServletResponse resp) {
         /*
          * By now only considers Content-Type and Content-Length header
          */
