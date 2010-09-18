@@ -109,13 +109,13 @@ public class ContentTypeRestriction implements Restriction {
              */
             return false;
         }
-        final String lowerCase = value.toLowerCase(Locale.ENGLISH).trim();
+        final String lcValue = value.toLowerCase(Locale.ENGLISH).trim();
         for (final String allowedContentType : contentTypes) {
             if (containsWildcardChar(allowedContentType)) {
-                if (Pattern.compile(wildcardToRegex(allowedContentType)).matcher(lowerCase).matches()) {
+                if (Pattern.compile(wildcardToRegex(allowedContentType)).matcher(lcValue).matches()) {
                     return true;
                 }
-            } else if (lowerCase.startsWith(allowedContentType)) {
+            } else if (lcValue.startsWith(allowedContentType)) {
                 return true;
             }
         }
