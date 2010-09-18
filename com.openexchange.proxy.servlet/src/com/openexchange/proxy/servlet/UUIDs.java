@@ -101,6 +101,7 @@ public final class UUIDs {
      * 
      * @param unformattedString The unformatted string; e.g. <code>067e61623b6f4ae2a1712470b63dff00</code>
      * @return The UUID
+     * @throws IllegalArgumentException If specified string has an odd length or contains an illegal hexadecimal character
      */
     public static UUID fromUnformattedString(final String unformattedString) {
         return toUUID(decodeHex(unformattedString.toCharArray()));
@@ -112,7 +113,6 @@ public final class UUIDs {
             throw new IllegalArgumentException("Odd number of characters.");
         }
         final byte[] out = new byte[len >> 1];
-        // two characters form the hex value.
         for (int i = 0, j = 0; j < len; i++) {
             int f = toDigit(data[j], j) << 4;
             j++;
@@ -120,14 +120,14 @@ public final class UUIDs {
             j++;
             out[i] = (byte) (f & 0xFF);
         }
-
         return out;
     }
 
     private static int toDigit(final char ch, final int index) throws IllegalArgumentException {
         final int digit = Character.digit(ch, 16);
         if (digit == -1) {
-            throw new IllegalArgumentException("Illegal hexadecimal charcter " + ch + " at index " + index);
+            throw new IllegalArgumentException(
+                new StringBuilder("Illegal hexadecimal character \"").append(ch).append("\" at index ").append(index).toString());
         }
         return digit;
     }
