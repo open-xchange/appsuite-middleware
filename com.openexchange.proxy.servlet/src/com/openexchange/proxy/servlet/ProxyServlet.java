@@ -218,7 +218,26 @@ public class ProxyServlet extends SessionServlet {
     }
 
     private void header2Response(final HttpMethodBase method, final HttpServletResponse resp) {
+        /*
+         * By now only considers Content-Type and Content-Length header
+         */
+        final Header ctHeader = method.getResponseHeader("Content-Type");
+        if (null != ctHeader) {
+            final String value = ctHeader.getValue();
+            if ("text/html".equals(value)) {
+                resp.setContentType("text/html; charset=" + resp.getCharacterEncoding());
+            } else {
+                resp.setContentType(value);
+            }
+        }
+        final long length = method.getResponseContentLength(); // Content-Length
+        if (length > 0) {
+            resp.setContentLength((int) length);
+        }
 
+        /*-
+         * Enable this to consider all header
+         * 
         for (final Header header : method.getResponseHeaders()) {
 
             final String name = header.getName();
@@ -232,12 +251,13 @@ public class ProxyServlet extends SessionServlet {
                 }
             } else if ("Content-Length".equals(name)) {
                 // set content length
-                final long length = method.getResponseContentLength();
-                if (length > 0) {
-                    resp.setContentLength((int) length);
+                final long len = method.getResponseContentLength();
+                if (len > 0) {
+                    resp.setContentLength((int) len);
                 }
             }
         }
+        */
     }
 
 }
