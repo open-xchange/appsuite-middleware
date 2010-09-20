@@ -49,6 +49,9 @@
 
 package com.openexchange.proxy;
 
+import java.util.Locale;
+import java.util.regex.Pattern;
+
 /**
  * {@link ImageContentTypeRestriction} - A {@link ContentTypeRestriction} for images. <code>"Content-Type"</code> header must match pattern
  * <code>"image/*"</code>.
@@ -69,10 +72,44 @@ public final class ImageContentTypeRestriction extends ContentTypeRestriction {
     }
 
     /**
+     * The regex pattern for <code>"image/*"</code>.
+     */
+    private final Pattern pattern;
+
+    /**
      * Initializes a new {@link ImageContentTypeRestriction}.
      */
     private ImageContentTypeRestriction() {
-        super("image/*");
+        super();
+        pattern = Pattern.compile(wildcardToRegex("image/*"));
+    }
+
+    @Override
+    public boolean allow(final Response response) {
+        final Header header = response.getResponseHeader(CONTENT_TYPE);
+        final String lcValue;
+        {
+            final String value = header.getValue();
+            if (null == value) {
+                /*
+                 * Content-Type header missing
+                 */
+                return false;
+            }
+            lcValue = value.toLowerCase(Locale.ENGLISH).trim();
+        }
+        if (pattern.matcher(lcValue).matches()) {
+            return true;
+        }
+        /*
+         * No match found
+         */
+        return false;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Content-Type header must match: image/*";
     }
 
 }

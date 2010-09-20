@@ -185,7 +185,7 @@ public final class HTMLServiceImpl implements HTMLService {
                  * Extract URL
                  */
                 int group = 1;
-                String urlStr = srcMatcher.group(1);
+                String urlStr = srcMatcher.group(group);
                 if (urlStr == null) {
                     urlStr = srcMatcher.group(++group);
                     if (urlStr == null) {
