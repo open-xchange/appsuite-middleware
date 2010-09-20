@@ -93,7 +93,7 @@ public class ContentTypeRestriction implements Restriction {
      */
     public ContentTypeRestriction(final String... contentTypes) {
         super();
-        if (contentTypes == null) {
+        if (contentTypes == null || 0 == contentTypes.length) {
             this.contentTypes = Collections.<String> emptySet();
         } else {
             this.contentTypes = new HashSet<String>(contentTypes.length);
