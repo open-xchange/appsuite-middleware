@@ -53,7 +53,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import com.openexchange.session.Session;
 
 /**
  * {@link ProxyRegistration} - A registration.
@@ -64,7 +63,7 @@ public final class ProxyRegistration {
 
     private final URL url;
 
-    private final Session session;
+    private final String sessionId;
 
     private final Collection<Restriction> restrictions;
 
@@ -72,13 +71,13 @@ public final class ProxyRegistration {
      * Initializes a new {@link ProxyRegistration}.
      * 
      * @param url The URL
-     * @param session The session
+     * @param sessionId The identifier of the session associated with this registration
      * @param restrictions The restrictions
      */
-    public ProxyRegistration(final URL url, final Session session, final Collection<Restriction> restrictions) {
+    public ProxyRegistration(final URL url, final String sessionId, final Collection<Restriction> restrictions) {
         super();
         this.url = url;
-        this.session = session;
+        this.sessionId = sessionId;
         this.restrictions = restrictions == null ? Collections.<Restriction> emptyList() : Collections.unmodifiableCollection(restrictions);
     }
 
@@ -86,13 +85,13 @@ public final class ProxyRegistration {
      * Initializes a new {@link ProxyRegistration}.
      * 
      * @param url The URL
-     * @param session The session
+     * @param sessionId The identifier of the session associated with this registration
      * @param restrictions The restrictions
      */
-    public ProxyRegistration(final URL url, final Session session, final Restriction... restrictions) {
+    public ProxyRegistration(final URL url, final String sessionId, final Restriction... restrictions) {
         super();
         this.url = url;
-        this.session = session;
+        this.sessionId = sessionId;
         this.restrictions =
             restrictions == null || restrictions.length == 0 ? Collections.<Restriction> emptyList() : Collections.unmodifiableCollection(Arrays.asList(restrictions));
     }
@@ -107,12 +106,12 @@ public final class ProxyRegistration {
     }
 
     /**
-     * Gets the session associated with this registration.
+     * Gets the identifier of the session associated with this registration.
      * 
-     * @return The session associated with this registration
+     * @return The identifier of the session associated with this registration
      */
-    public Session getSession() {
-        return session;
+    public String getSessionId() {
+        return sessionId;
     }
 
     /**

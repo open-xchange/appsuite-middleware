@@ -132,7 +132,7 @@ public class SyndMessage implements MessagingMessage {
             if (null == htmlService) {
                 htmlPart.setContent(new StringContent(content.getValue()), type);
             } else {
-                htmlPart.setContent(new StringContent(htmlService.replaceImages(content.getValue(), session)), type);
+                htmlPart.setContent(new StringContent(htmlService.replaceImages(content.getValue(), session.getSessionID())), type);
             }
             
             multipart.addBodyPart(htmlPart);

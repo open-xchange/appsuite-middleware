@@ -94,7 +94,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
         /*
          * Register
          */
-        final String sessionId = registration.getSession().getSessionID();
+        final String sessionId = registration.getSessionId();
         ConcurrentMap<UUID, ProxyRegistrationEntry> map = registry.get(sessionId);
         if (null == map) {
             final ConcurrentMap<UUID, ProxyRegistrationEntry> newmap = new ConcurrentHashMap<UUID, ProxyRegistrationEntry>();

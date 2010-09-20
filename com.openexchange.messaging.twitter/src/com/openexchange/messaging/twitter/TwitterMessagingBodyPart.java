@@ -150,7 +150,7 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
             }
             
             final HTMLService htmlService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(HTMLService.class);
-            content = new StringContent(null == htmlService ? htmlContent: htmlService.replaceImages(htmlContent, session));
+            content = new StringContent(null == htmlService ? htmlContent: htmlService.replaceImages(htmlContent, session.getSessionID()));
             sectionId = "2";
             size = htmlContent.length();
         } else {

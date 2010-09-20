@@ -50,7 +50,6 @@
 package com.openexchange.html;
 
 import java.util.List;
-import com.openexchange.session.Session;
 
 /**
  * {@link HTMLService} - The HTML service provides several methods concerning processing of HTML content.
@@ -63,10 +62,10 @@ public interface HTMLService {
      * Replaces image URLs with a proxy URI to ensure safe loading of image content.
      * 
      * @param content The HTML content
-     * @param session The session needed to register appropriate proxy URI
+     * @param sessionId The identifier of the session needed to register appropriate proxy URI
      * @return The HTML content with image URLs replaced
      */
-    String replaceImages(String content, Session session);
+    String replaceImages(String content, String sessionId);
 
     /**
      * Converts found URLs inside specified content to valid links.

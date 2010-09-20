@@ -78,7 +78,6 @@ import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyException;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
-import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -133,7 +132,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    public String replaceImages(final String content, final Session session) {
+    public String replaceImages(final String content, final String sessionId) {
         if (null == content) {
             return null;
         }
@@ -156,7 +155,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 do {
                     sb.append(content.substring(lastMatch, imgMatcher.start()));
                     final String imgTag = imgMatcher.group();
-                    replaceSrcAttribute(imgTag, session, sb, proxyRegistry);
+                    replaceSrcAttribute(imgTag, sessionId, sb, proxyRegistry);
                     lastMatch = imgMatcher.end();
                 } while (imgMatcher.find());
                 sb.append(content.substring(lastMatch));
@@ -173,7 +172,7 @@ public final class HTMLServiceImpl implements HTMLService {
         "(?:src=\"([^\"]*)\")|(?:src='([^']*)')|(?:src=[^\"']([^\\s>]*))",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static String replaceSrcAttribute(final String imgTag, final Session session, final StringBuilder sb, final ProxyRegistry proxyRegistry) {
+    private static String replaceSrcAttribute(final String imgTag, final String sessionId, final StringBuilder sb, final ProxyRegistry proxyRegistry) {
         final Matcher srcMatcher = SRC_PATTERN.matcher(imgTag);
         int lastMatch = 0;
         if (srcMatcher.find()) {
@@ -203,7 +202,7 @@ public final class HTMLServiceImpl implements HTMLService {
                      * Add proxy registration
                      */
                     final URL imageUrl = new URL(urlStr);
-                    final URI uri = proxyRegistry.register(new ProxyRegistration(imageUrl, session, ImageContentTypeRestriction.getInstance()));
+                    final URI uri = proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance()));
                     /*
                      * Compose replacement
                      */

@@ -681,7 +681,7 @@ public final class FacebookFQLStreamParser {
             htmlContent =
                 FacebookMessagingServiceRegistry.getServiceRegistry().getService(HTMLService.class, true).replaceImages(
                     messageText.toString(),
-                    session);
+                    session.getSessionID());
         } catch (final ServiceException e) {
             throw new MessagingException(e);
         }
