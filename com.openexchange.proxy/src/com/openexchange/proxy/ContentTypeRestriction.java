@@ -135,7 +135,7 @@ public class ContentTypeRestriction implements Restriction {
      * Checks if specified string contains any of the wild-card characters <code>'*'</code> or <code>'?'</code>.
      * 
      * @param toCheck The string to check
-     * @return <code>true</code> if specified string contains any wild-card character; otherwsie <code>false</code>
+     * @return <code>true</code> if specified string contains any wild-card character; otherwise <code>false</code>
      */
     protected static boolean containsWildcardChar(final String toCheck) {
         return toCheck.indexOf('*') >= 0 || toCheck.indexOf('?') >= 0;
