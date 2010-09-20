@@ -79,7 +79,7 @@ public final class ProxyRegistration {
         super();
         this.url = url;
         this.session = session;
-        this.restrictions = restrictions == null ? Collections.<Restriction> emptyList() : restrictions;
+        this.restrictions = restrictions == null ? Collections.<Restriction> emptyList() : Collections.unmodifiableCollection(restrictions);
     }
 
     /**
@@ -93,7 +93,8 @@ public final class ProxyRegistration {
         super();
         this.url = url;
         this.session = session;
-        this.restrictions = Arrays.asList(restrictions);
+        this.restrictions =
+            restrictions == null || restrictions.length == 0 ? Collections.<Restriction> emptyList() : Collections.unmodifiableCollection(Arrays.asList(restrictions));
     }
 
     /**

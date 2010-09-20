@@ -52,7 +52,8 @@ package com.openexchange.proxy.servlet;
 import com.openexchange.proxy.ProxyRegistration;
 
 /**
- * {@link ProxyRegistrationEntry} - A registration entry.
+ * {@link ProxyRegistrationEntry} - A registration entry which wraps a {@link ProxyRegistration registration} and provides registration time
+ * stamp and time-to-live.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -65,14 +66,19 @@ public final class ProxyRegistrationEntry {
     private final long timestamp;
 
     /**
-     * Initializes a new {@link ProxyRegistrationEntry}.
+     * Initializes a new {@link ProxyRegistrationEntry} bound to session.
+     * 
+     * @param proxyRegistration The proxy registration
      */
     public ProxyRegistrationEntry(final ProxyRegistration proxyRegistration) {
         this(proxyRegistration, -1L);
     }
 
     /**
-     * Initializes a new {@link ProxyRegistrationEntry}.
+     * Initializes a new {@link ProxyRegistrationEntry} with given time-to-live.
+     * 
+     * @param proxyRegistration The proxy registration
+     * @param ttl The time-to-live value; a negative value means bound to session life time.
      */
     public ProxyRegistrationEntry(final ProxyRegistration proxyRegistration, final long ttl) {
         super();
