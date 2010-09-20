@@ -79,7 +79,11 @@ public enum ProxyExceptionCodes implements OXErrorMessage {
     /**
      * Malformed URI: %1$s
      */
-    MALFORMED_URI(ProxyExceptionMessages.MALFORMED_URI_MSG, Category.CODE_ERROR, 5);
+    MALFORMED_URI(ProxyExceptionMessages.MALFORMED_URI_MSG, Category.CODE_ERROR, 5),
+    /**
+     * Invalid session identifier: %1$s
+     */
+    INVALID_SESSION_ID(ProxyExceptionMessages.INVALID_SESSION_ID_MSG, Category.CODE_ERROR, 6);
 
     private final Category category;
 

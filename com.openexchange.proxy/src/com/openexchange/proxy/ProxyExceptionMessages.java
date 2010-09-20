@@ -73,6 +73,9 @@ public final class ProxyExceptionMessages implements LocalizableStrings {
     // Malformed URI: %1$s
     public static final String MALFORMED_URI_MSG = "Malformed URI: %1$s";
 
+    // Invalid session identifier: %1$s
+    public static final String INVALID_SESSION_ID_MSG = "Invalid session identifier: %1$s";
+
     /**
      * Initializes a new {@link ProxyExceptionMessages}.
      */
