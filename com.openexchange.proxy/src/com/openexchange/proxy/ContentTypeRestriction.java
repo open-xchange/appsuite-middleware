@@ -105,14 +105,17 @@ public class ContentTypeRestriction implements Restriction {
 
     public boolean allow(final Response response) {
         final Header header = response.getResponseHeader(CONTENT_TYPE);
-        final String value = header.getValue();
-        if (null == value) {
-            /*
-             * Content-Type header missing
-             */
-            return false;
+        final String lcValue;
+        {
+            final String value = header.getValue();
+            if (null == value) {
+                /*
+                 * Content-Type header missing
+                 */
+                return false;
+            }
+            lcValue = value.toLowerCase(Locale.ENGLISH).trim();
         }
-        final String lcValue = value.toLowerCase(Locale.ENGLISH).trim();
         for (final String allowedContentType : contentTypes) {
             if (containsWildcardChar(allowedContentType)) {
                 if (Pattern.compile(wildcardToRegex(allowedContentType)).matcher(lcValue).matches()) {
