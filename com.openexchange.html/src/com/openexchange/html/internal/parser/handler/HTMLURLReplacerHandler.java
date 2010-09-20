@@ -221,7 +221,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         String urlStr = url;
         urlStr = URLDecoder.decode(urlStr, "ISO-8859-1");
         /*
-         * Contains non-ascii in host part? http://www.schn&#246;sel.de
+         * Contains non-ascii in host part?
          */
         try {
             final URL urlInst = new URL(urlStr);
