@@ -131,7 +131,13 @@ public class ContentTypeRestriction implements Restriction {
         return false;
     }
 
-    private static boolean containsWildcardChar(final String toCheck) {
+    /**
+     * Checks if specified string contains any of the wild-card characters <code>'*'</code> or <code>'?'</code>.
+     * 
+     * @param toCheck The string to check
+     * @return <code>true</code> if specified string contains any wild-card character; otherwsie <code>false</code>
+     */
+    protected static boolean containsWildcardChar(final String toCheck) {
         return toCheck.indexOf('*') >= 0 || toCheck.indexOf('?') >= 0;
     }
 
@@ -141,7 +147,7 @@ public class ContentTypeRestriction implements Restriction {
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */
-    private static String wildcardToRegex(final String wildcard) {
+    protected static String wildcardToRegex(final String wildcard) {
         final StringBuilder s = new StringBuilder(wildcard.length());
         s.append('^');
         final int len = wildcard.length();
