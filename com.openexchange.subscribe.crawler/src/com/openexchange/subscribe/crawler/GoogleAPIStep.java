@@ -110,8 +110,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             final ContactsService myService = new ContactsService("com.openexchange");
             myService.setUserCredentials(username, password);
             feedUrl = new URL("http://www.google.com/m8/feeds/contacts/" + username + "/full?max-results=5000");
-            final ContactFeed resultFeed = myService.getFeed(feedUrl, ContactFeed.class);
-            System.out.println("***** Number of contacts returned by Google : " + resultFeed.getEntries().size());
+            final ContactFeed resultFeed = myService.getFeed(feedUrl, ContactFeed.class);           
             for (int i = 0; i < resultFeed.getEntries().size(); i++) {
                 final Contact contact = new Contact();
                 final ContactEntry entry = resultFeed.getEntries().get(i);
