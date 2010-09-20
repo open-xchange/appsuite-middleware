@@ -65,7 +65,10 @@ import java.util.regex.Pattern;
  */
 public class ContentTypeRestriction implements Restriction {
 
-    private static final String CONTENT_TYPE = "Content-Type";
+    /**
+     * The Content-Type header name.
+     */
+    protected static final String CONTENT_TYPE = "Content-Type";
 
     private final Set<String> contentTypes;
 
