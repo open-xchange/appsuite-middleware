@@ -61,6 +61,9 @@ import com.openexchange.proxy.ProxyException;
 import com.openexchange.proxy.ProxyExceptionCodes;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
+import com.openexchange.proxy.servlet.services.ServiceRegistry;
+import com.openexchange.server.ServiceException;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link ProxyRegistryImpl} - The servlet implementation of {@link ProxyRegistry}.
@@ -91,10 +94,21 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
     }
 
     public URI register(final ProxyRegistration registration) throws ProxyException {
-        /*
-         * Register
-         */
         final String sessionId = registration.getSessionId();
+        /*
+         * Check session identifier
+         */
+        try {
+            final SessiondService sessiondService = ServiceRegistry.getInstance().getService(SessiondService.class, true);
+            if (!sessiondService.refreshSession(sessionId)) {
+                throw ProxyExceptionCodes.INVALID_SESSION_ID.create(sessionId);
+            }
+        } catch (final ServiceException e) {
+            throw new ProxyException(e);
+        }
+        /*
+         * Register in appropriate map
+         */
         ConcurrentMap<UUID, ProxyRegistrationEntry> map = registry.get(sessionId);
         if (null == map) {
             final ConcurrentMap<UUID, ProxyRegistrationEntry> newmap = new ConcurrentHashMap<UUID, ProxyRegistrationEntry>();
@@ -111,8 +125,9 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
         /*
          * Generate URI
          */
-        final String uriStr = new StringBuilder(Constants.PATH).append('?').append(AJAXServlet.PARAMETER_SESSION).append('=').append(
-            sessionId).append('&').append(AJAXServlet.PARAMETER_UID).append('=').append(UUIDs.getUnformattedString(uuid)).toString();
+        final String uriStr =
+            new StringBuilder(Constants.PATH).append('?').append(AJAXServlet.PARAMETER_SESSION).append('=').append(sessionId).append('&').append(
+                AJAXServlet.PARAMETER_UID).append('=').append(UUIDs.getUnformattedString(uuid)).toString();
         try {
             return new URI(uriStr);
         } catch (final URISyntaxException e) {
