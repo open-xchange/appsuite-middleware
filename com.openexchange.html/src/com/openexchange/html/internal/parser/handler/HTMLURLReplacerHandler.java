@@ -49,7 +49,7 @@
 
 package com.openexchange.html.internal.parser.handler;
 
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
+import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL_SOLE;
 import gnu.inet.encoding.IDNAException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -172,7 +172,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
     }
 
     private String checkURLs(final String attributeValue) {
-        final Matcher m = PATTERN_URL.matcher(attributeValue);
+        final Matcher m = PATTERN_URL_SOLE.matcher(attributeValue);
         if (!m.matches()) {
             return attributeValue;
         }
@@ -187,30 +187,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
 
     private void replaceURL(final String url, final StringBuilder builder) {
         try {
-            final int mlen = url.length() - 1;
-            if ((mlen > 0) && (')' == url.charAt(mlen))) { // Ends with a parenthesis
-                /*
-                 * Keep starting parenthesis if present
-                 */
-                if ('(' == url.charAt(0)) { // Starts with a parenthesis
-                    replaceURL0(url.substring(1, mlen), builder);
-                    builder.append('(');
-                } else {
-                    replaceURL0(url.substring(0, mlen), builder);
-                }
-                /*
-                 * Append closing parenthesis
-                 */
-                builder.append(')');
-            } else if ((mlen >= 0) && ('(' == url.charAt(0))) { // Starts with a parenthesis, but does not end with a parenthesis
-                /*
-                 * Append opening parenthesis
-                 */
-                builder.append('(');
-                replaceURL0(url.substring(1), builder);
-            } else {
-                replaceURL0(url, builder);
-            }
+            replaceURL0(url, builder);
         } catch (final Exception e) {
             LOG.warn("URL replacement failed.", e);
             builder.append(url);

@@ -436,8 +436,17 @@ public final class HTMLServiceImpl implements HTMLService {
         return htmlFormat(plainText, true);
     }
 
-    private static final String REGEX_URL =
-        "\\(?\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
+    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
+
+    /**
+     * The regular expression to match URLs inside text:<br>
+     * <code>\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]</code>
+     * <p>
+     * Parentheses, if present, are allowed in the URL -- The leading one is <b>not</b> absorbed.
+     */
+    public static final Pattern PATTERN_URL_SOLE = Pattern.compile(REGEX_URL_SOLE);
+
+    private static final String REGEX_URL = "\\(?" + REGEX_URL_SOLE;
 
     /**
      * The regular expression to match URLs inside text:<br>
