@@ -70,7 +70,10 @@ public class ContentTypeRestriction implements Restriction {
      */
     protected static final String CONTENT_TYPE = "Content-Type";
 
-    private final Set<String> contentTypes;
+    /**
+     * The set of allowed content type values/patterns.
+     */
+    protected final Set<String> contentTypes;
 
     /**
      * Initializes a new {@link ContentTypeRestriction}.
