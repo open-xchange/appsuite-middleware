@@ -171,17 +171,17 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         htmlBuilder.append('>');
     }
 
-    private String checkURLs(final String attributeValie) {
-        final Matcher m = PATTERN_URL.matcher(attributeValie);
+    private String checkURLs(final String attributeValue) {
+        final Matcher m = PATTERN_URL.matcher(attributeValue);
         if (!m.matches()) {
-            return attributeValie;
+            return attributeValue;
         }
         urlBuilder.setLength(0);
         int lastMatch = 0;
-        urlBuilder.append(attributeValie.substring(lastMatch, m.start()));
+        urlBuilder.append(attributeValue.substring(lastMatch, m.start()));
         replaceURL(m.group(), urlBuilder);
         lastMatch = m.end();
-        urlBuilder.append(attributeValie.substring(lastMatch));
+        urlBuilder.append(attributeValue.substring(lastMatch));
         return urlBuilder.toString();
     }
 
