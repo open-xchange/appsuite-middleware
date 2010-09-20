@@ -1,3 +1,7 @@
+* 2010-09-20 - thorben.betten@open-xchange.com
+
+ - Bugfix #16800: Replacing non-ascii URLs with proper puny-code-encoded URLs
+
 * 2010-09-17 - thorben.betten@open-xchange.com
 
  - Bugfix #15476: Replacing image URLs with a safe proxied URI in RSS messages

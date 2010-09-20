@@ -32,6 +32,7 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="configreadjar" value="com.openexchange.configread.jar" />
 	<property name="proxyjar" value="com.openexchange.proxy.jar" />
+	<property name="libidnjar" value="libidn-1.9.jar"/>
 
 	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
 
@@ -49,6 +50,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${configreadjar}"/>
     	<pathelement location="${bundlesdir}/${proxyjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${libidnjar}"/>
     	<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}"/> -->
     	<fileset refid="3rdpartyjars"/>
     </path>

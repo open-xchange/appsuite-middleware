@@ -74,6 +74,7 @@ import com.openexchange.html.internal.parser.HTMLParser;
 import com.openexchange.html.internal.parser.handler.HTML2TextHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
+import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyException;
 import com.openexchange.proxy.ProxyRegistration;
@@ -575,7 +576,13 @@ public final class HTMLServiceImpl implements HTMLService {
             }
         }
         html = processDownlevelRevealedConditionalComments(html);
-        return removeXHTMLCData(html);
+        html = removeXHTMLCData(html);
+        /*
+         * Check URLs
+         */
+        final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
+        HTMLParser.parse(html, handler);
+        return handler.getHTML();
     }
 
     private static final Pattern PATTERN_XHTML_CDATA;
