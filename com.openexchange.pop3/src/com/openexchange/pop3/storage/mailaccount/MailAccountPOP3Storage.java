@@ -243,11 +243,27 @@ public class MailAccountPOP3Storage implements POP3Storage {
     public void drop() throws MailException {
         if (null != path) {
             if (defaultMailAccess.isConnected()) {
-                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+                try {
+                    defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+                } catch (final MailException e) {
+                    if (MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                        // Ignore
+                        LOG.trace(e.getMessage(), e);
+                    } else {
+                        throw e;
+                    }
+                }
             } else {
                 defaultMailAccess.connect(false);
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+                } catch (final MailException e) {
+                    if (MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                        // Ignore
+                        LOG.trace(e.getMessage(), e);
+                    } else {
+                        throw e;
+                    }
                 } finally {
                     defaultMailAccess.close(true);
                 }
