@@ -57,6 +57,9 @@ import java.util.regex.Pattern;
 
 /**
  * {@link ContentTypeRestriction} - A {@link Restriction} for <i>Content-Type</i> header.
+ * <p>
+ * It is allowed to specify certain values like <code>"text/plain"</code> or <code>"image/jpeg"</code>, but wild-card patterns are
+ * supported, too: <code>"text/*"</code> or <code>"text/htm*"</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
