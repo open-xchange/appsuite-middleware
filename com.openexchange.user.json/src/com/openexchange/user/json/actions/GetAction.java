@@ -89,7 +89,7 @@ public final class GetAction extends AbstractUserAction {
          */
         String idParam = request.getParameter("id");
         int userId;
-        if(MYSELF.equalsIgnoreCase(idParam)) {
+        if(null == idParam) {
             userId = session.getUserId();
         } else {
             userId = checkIntParameter("id", request);

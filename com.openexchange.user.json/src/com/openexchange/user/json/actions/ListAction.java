@@ -113,11 +113,10 @@ public final class ListAction extends AbstractUserAction {
                 final int len = jsonArray.length();
                 userIdArray = new int[len];
                 for (int a = 0; a < len; a++) {
-                    Object object = jsonArray.get(a);
-                    if(MYSELF.equals(object)) {
+                    if (jsonArray.isNull(a)) {
                         userIdArray[a] = session.getUserId();
                     } else {
-                        userIdArray[a] = (Integer) object;
+                        userIdArray[a] = jsonArray.getInt(a);
                     }
                 }
             }
