@@ -103,6 +103,10 @@ public class AJAXConfig extends AbstractConfig {
          */
         LOGIN("login"),
         /**
+         * Imap login of the first user.
+         */
+        IMAP_LOGIN("imap_login"),
+        /**
          * User password.
          */
         PASSWORD("password"),
@@ -122,6 +126,10 @@ public class AJAXConfig extends AbstractConfig {
          * Fourth user login.
          */
         FOURTHLOGIN("fourthlogin"),
+        /**
+         * OXAdmin login.
+         */
+        OXADMIN("oxadmin"),
         /**
          * Whether SP3 or SP4 data
          */
