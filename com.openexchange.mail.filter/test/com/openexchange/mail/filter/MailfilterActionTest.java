@@ -5,7 +5,7 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mailfilter.ajax.SessionWrapper.Credentials;
+import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
@@ -27,7 +27,7 @@ public class MailfilterActionTest extends MailfilterAction {
     public void testGetRightPasswordNothing() throws OXMailfilterException {
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final String credsPW = "pw2";
-        final Credentials creds = new Credentials("","",credsPW);
+        final Credentials creds = new Credentials("", credsPW, 0, 0);
         try {
             getRightPassword(config, creds);
             Assert.fail("No exception thrown");
@@ -41,7 +41,7 @@ public class MailfilterActionTest extends MailfilterAction {
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.SESSION.name);
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final String credsPW = "pw2";
-        final Credentials creds = new Credentials("","",credsPW);
+        final Credentials creds = new Credentials("", credsPW, 0, 0);
         final String rightPassword = getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + credsPW + "\"", credsPW, rightPassword);
     }
@@ -51,7 +51,7 @@ public class MailfilterActionTest extends MailfilterAction {
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.GLOBAL.name);
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final String credsPW = "pw2";
-        final Credentials creds = new Credentials("","",credsPW);
+        final Credentials creds = new Credentials("", credsPW, 0, 0);
         try {
             getRightPassword(config, creds);
             Assert.fail("No exception thrown");
@@ -67,7 +67,7 @@ public class MailfilterActionTest extends MailfilterAction {
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property, masterPW);
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final String credsPW = "pw2";
-        final Credentials creds = new Credentials("","",credsPW);
+        final Credentials creds = new Credentials("", credsPW, 0, 0);
         final String rightPassword = getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + masterPW + "\"", masterPW, rightPassword);
     }

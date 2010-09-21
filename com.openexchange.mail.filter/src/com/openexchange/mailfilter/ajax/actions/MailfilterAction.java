@@ -84,7 +84,7 @@ import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mailfilter.ajax.Parameter;
-import com.openexchange.mailfilter.ajax.SessionWrapper.Credentials;
+import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest.Parameters;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;

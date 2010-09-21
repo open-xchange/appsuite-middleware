@@ -75,7 +75,7 @@ import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
-import com.openexchange.mailfilter.ajax.SessionWrapper.Credentials;
+import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;
 

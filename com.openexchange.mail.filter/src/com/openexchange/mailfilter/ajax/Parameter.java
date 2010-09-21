@@ -60,6 +60,7 @@ import java.util.Map;
 public enum Parameter {
 
     ACTION("action", true),
+    USERNAME("username", false),
     FLAG("flag", false);
     
     private final String name;

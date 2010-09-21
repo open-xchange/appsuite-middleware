@@ -1,3 +1,8 @@
+* 2010-09-21 - steffen.templin@open-xchange.com
+
+ - Bugfix #16747: After removal of the admin mode oxadmin is able to manage 
+ 				  the users sieve scripts again within a normal groupware session.
+
 * 2010-08-31 - dennis.sieben@open-xchange.com
 
   - Added possibility to define the password source. It is now possible to

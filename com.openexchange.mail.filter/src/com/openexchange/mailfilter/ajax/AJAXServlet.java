@@ -50,20 +50,25 @@
 package com.openexchange.mailfilter.ajax;
 
 import java.io.IOException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mailfilter.ajax.SessionWrapper.Credentials;
 import com.openexchange.mailfilter.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
+import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.server.ServiceException;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondException;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -75,7 +80,9 @@ public abstract class AJAXServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3006497622205429579L;
 
-    private static final Log LOG = LogFactory.getLog(AJAXServlet.class);
+    private static final Log LOG = LogFactory.getLog(AJAXServlet.class);   
+    
+    private static final String PARAMETER_SESSION = com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 
     /**
      * The content type if the response body contains javascript data. Set it
@@ -91,31 +98,29 @@ public abstract class AJAXServlet extends HttpServlet {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
-    protected static SessionWrapper getSession(final HttpServletRequest req) throws SessiondException, OXMailfilterException {
-        return new SessionWrapper(req);
-    }
-
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response response = new Response();
         try {
-            final AbstractRequest request = createRequest();
-            request.setSession(new AbstractRequest.Session() {
-                final SessionWrapper session = getSession(req);
+            final String sessionId = req.getParameter(PARAMETER_SESSION);
+            final Cookie[] cookies = req.getCookies();
+            final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            if (null == service) {
+                throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
+            }
+            final Session session = service.getSession(sessionId);
+            if (null != session) {
+                String secret = SessionServlet.extractSecret(session.getHash(), cookies);
                 
-                public Object getAttribute(final String name) {
-                    return session.getParameter(name);
+                // Check if session is valid
+                if (!session.getSecret().equals(secret)) {
+                    throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
                 }
-                public void setAttribute(final String name, final Object value) {
-                    session.setParameter(name, value);
-                }
-                public void removeAttribute(final String name) {
-                    session.removeParameter(name);
-                }
-                public Credentials getCredentails() {
-                    return session.getCredentials();
-                }
-            });
+            }
+            
+            final AbstractRequest request = createRequest();
+            request.setSession(session);
+
             request.setParameters(new AbstractRequest.Parameters() {
                 public String getParameter(final Parameter param) throws AjaxException {
                     final String value = req.getParameter(param.getName());
@@ -155,26 +160,25 @@ public abstract class AJAXServlet extends HttpServlet {
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response response = new Response();
         try {
-            final AbstractRequest request = createRequest();
-            request.setSession(new AbstractRequest.Session() {
-                final SessionWrapper session = getSession(req);
+            final String sessionId = req.getParameter(PARAMETER_SESSION);
+            final Cookie[] cookies = req.getCookies();
+            final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            if (null == service) {
+                throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
+            }
+            final Session session = service.getSession(sessionId);
+            if (null != session) {
+                String secret = SessionServlet.extractSecret(session.getHash(), cookies);
                 
-                public Object getAttribute(final String name) {
-                    return session.getParameter(name);
+                // Check if session is valid
+                if (!session.getSecret().equals(secret)) {
+                    throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
                 }
-
-                public void setAttribute(final String name, final Object value) {
-                    session.setParameter(name, value);
-                }
-
-                public void removeAttribute(final String name) {
-                    session.removeParameter(name);
-                }
-
-                public Credentials getCredentails() {
-                    return session.getCredentials();
-                }
-            });
+            }
+            
+            final AbstractRequest request = createRequest();
+            request.setSession(session);
+            
             request.setParameters(new AbstractRequest.Parameters() {
                 public String getParameter(final Parameter param) throws AjaxException {
                     final String value = req.getParameter(param.getName());

@@ -51,8 +51,9 @@ package com.openexchange.mailfilter.ajax.actions;
 
 import com.openexchange.mailfilter.ajax.Action;
 import com.openexchange.mailfilter.ajax.Parameter;
-import com.openexchange.mailfilter.ajax.SessionWrapper.Credentials;
+import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -61,8 +62,6 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractRequest {
-
-    // private static final String CREDENTIALS = "credentials";
 
     private Session session;
 
@@ -126,7 +125,17 @@ public abstract class AbstractRequest {
     }
 
     public Credentials getCredentials() throws SessiondException, OXMailfilterException {
-        return this.session.getCredentails();
+        final String loginName = session.getLoginName();
+        final String password = session.getPassword();
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+        
+        try {
+            final String username = getUsername();
+            return new Credentials(loginName, password, userId, contextId, username);
+        } catch (AjaxException e) {
+            return new Credentials(loginName, password, userId, contextId);
+        }        
     }
     
     /**
@@ -148,15 +157,15 @@ public abstract class AbstractRequest {
         }
         return retval;
     }
-
-    public interface Session {
-        Object getAttribute(String name) throws OXMailfilterException, SessiondException;
+    
+    private String getUsername() throws AjaxException {
+        final Parameter pUsername = Parameter.USERNAME;        
+        final String username = parameters.getParameter(pUsername);
+        if (username == null) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, pUsername);
+        }
         
-        Credentials getCredentails() throws SessiondException, OXMailfilterException;
-
-        void setAttribute(String name, Object value) throws OXMailfilterException, SessiondException;
-
-        void removeAttribute(String name) throws OXMailfilterException, SessiondException;
+        return username;
     }
 
     public interface Parameters {
