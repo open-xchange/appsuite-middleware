@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,15 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Sep 16 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16865: Default for the initial amount of connection to a new database is zero.
+* Wed Aug 25 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16721: NullPointerException does not occur anymore if some filestore is empty.
+* Mon Aug 23 2010 - choeger@open-xchange.com
+ - SoftwareChange_Request-371: added -XX:MaxPermSize=128M in oxinstaller for
+   /opt/open-xchange/etc/groupware/ox-scriptconf.sh
+* Wed Aug 11 2010 - tobias.prinz@open-xchange.com
+ - Bugfix 16353: #listcontext is now more time efficient.
 * Thu Jul 29 2010 - tobias.prinz@open-xchange.com
  - Bugfix 16585: #getFilestores is now more time efficient.
 * Tue Jul 27 2010 - dennis.sieben@open-xchange.com
