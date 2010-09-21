@@ -61,6 +61,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.multiple.PathAware;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -79,7 +80,9 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
         return "config";
     }
     
-    private static final class ConfigMultipleHandler implements MultipleHandler {
+    private static final class ConfigMultipleHandler implements MultipleHandler, PathAware {
+
+        private String path;
 
         public void close() {
             
@@ -94,17 +97,7 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
         }
 
         public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
-            String path = jsonObject.optString(PATH);
-            if(path == null) {
-                path = "";
-            }
-            if (path.length() > 0 && path.charAt(0) == '/') {
-                path = path.substring(1);
-            }
-            if (path.endsWith("/")) {
-                path = path.substring(0, path.length() - 1);
-            }
-            
+           
             final SettingStorage stor = SettingStorage.getInstance(session);
             Setting setting = ConfigTree.getSettingByPath(path);
             stor.readValues(setting);
@@ -149,6 +142,19 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
                 retval = json;
             }
             return retval;
+        }
+
+        public void setPath(String path) {
+            if(path == null) {
+                path = "";
+            }
+            if (path.length() > 0 && path.charAt(0) == '/') {
+                path = path.substring(1);
+            }
+            if (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
+            this.path = path;
         }
 
         

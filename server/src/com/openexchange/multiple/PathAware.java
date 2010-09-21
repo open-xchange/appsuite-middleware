@@ -47,53 +47,14 @@
  *
  */
 
-package com.openexchange.multiple.internal;
+package com.openexchange.multiple;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
 
 /**
- * {@link MultipleHandlerRegistryImpl} - Implementation backed by a {@link ConcurrentMap concurrent map}.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link PathAware}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class MultipleHandlerRegistryImpl implements com.openexchange.multiple.internal.MultipleHandlerRegistry {
-
-    /*
-     * Member section
-     */
-
-    private final ConcurrentMap<String, MultipleHandlerFactoryService> registry;
-
-    /**
-     * Initializes a new {@link MultipleHandlerRegistryImpl}.
-     */
-    MultipleHandlerRegistryImpl() {
-        super();
-        registry = new ConcurrentHashMap<String, MultipleHandlerFactoryService>();
-    }
-
-    public boolean addFactoryService(final MultipleHandlerFactoryService factoryService) {
-        return (null == registry.putIfAbsent(factoryService.getSupportedModule(), factoryService));
-    }
-
-    public MultipleHandlerFactoryService getFactoryService(final String module) {
-        MultipleHandlerFactoryService candidate = registry.get(module);
-        if(candidate == null) {
-            // Maybe prefixed
-            for (Map.Entry<String, MultipleHandlerFactoryService> entry : registry.entrySet()) {
-                if(module.startsWith(entry.getKey())) {
-                    return entry.getValue();
-                }
-            }
-        }
-        return candidate;
-    }
-
-    public void removeFactoryService(final String module) {
-        registry.remove(module);
-    }
-
+public interface PathAware {
+    public void setPath(String path);
 }

@@ -74,6 +74,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.exceptions.LoggingLogic;
@@ -322,7 +323,12 @@ public class Multiple extends SessionServlet {
         if (null != registry) {
             final MultipleHandlerFactoryService factoryService = registry.getFactoryService(module);
             if (null != factoryService) {
-                return factoryService.createMultipleHandler();
+                MultipleHandler multipleHandler = factoryService.createMultipleHandler();
+                if(PathAware.class.isInstance(multipleHandler)) {
+                    PathAware pa = (PathAware) multipleHandler;
+                    pa.setPath(module.substring(factoryService.getSupportedModule().length()));
+                }
+                return multipleHandler;
             }
         }
         return null;
