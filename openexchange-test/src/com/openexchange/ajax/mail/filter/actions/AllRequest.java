@@ -69,6 +69,8 @@ public class AllRequest extends AbstractMailFilterRequest {
 	private final String servletPath;
 
 	private final boolean failOnError;
+	
+	private String userName = null;
 
 	/**
 	 * Default constructor.
@@ -85,6 +87,17 @@ public class AllRequest extends AbstractMailFilterRequest {
 		this.servletPath = servletPath;
 		this.failOnError = failOnError;
 	}
+	
+	public AllRequest(final String servletPath, final String userName, final boolean failOnError) {
+        super();
+        this.servletPath = servletPath;
+        this.userName = userName;
+        this.failOnError = failOnError;
+    }
+	
+	public AllRequest(final String servletPath, final String userName) {
+	    this(servletPath, userName, true);
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -113,6 +126,9 @@ public class AllRequest extends AbstractMailFilterRequest {
 	public Parameter[] getParameters() {
 		final List<Parameter> params = new ArrayList<Parameter>();
 		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
+		if (userName != null) {
+		    params.add(new Parameter("username", userName));
+		}
 		return params.toArray(new Parameter[params.size()]);
 	}
 

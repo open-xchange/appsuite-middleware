@@ -248,6 +248,13 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
         return allResponse.getRules();
     }
+    
+    public static Rule[] listRulesForUser(final AJAXSession ajaxSession, final String userName) throws Exception {
+        final AllRequest allRequest = new AllRequest(AbstractMailFilterRequest.URL, userName);
+        final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);        
+        
+        return allResponse.getRules();
+    }
 
     public static void compareRule(final Rule rule1, final Rule rule2) throws Exception {
         OXTestToolkit.assertEqualsAndNotNull("id is not equals", rule1.getId(), rule2.getId());
