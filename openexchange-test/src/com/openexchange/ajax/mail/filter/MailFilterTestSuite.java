@@ -75,6 +75,7 @@ public final class MailFilterTestSuite {
         suite.addTestSuite(ConfigTest.class);
         suite.addTestSuite(NewTest.class);
         suite.addTestSuite(UpdateTest.class);
+        suite.addTestSuite(AdminListTest.class);
         return suite;
     }
 }
