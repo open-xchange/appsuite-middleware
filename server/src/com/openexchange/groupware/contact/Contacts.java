@@ -154,7 +154,7 @@ public final class Contacts {
         super();
     }
 
-    private static void validateEmailAddress(final Contact co) throws OXException {
+    private static void validateEmailAddress(final Contact co) throws ContactException {
         if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
             try {
@@ -332,7 +332,7 @@ public final class Contacts {
         }
     }
 
-    public static void performContactStorageInsert(final Contact co, final int user, final Session so, boolean override) throws OXConflictException, OXException {
+    public static void performContactStorageInsert(final Contact co, final int user, final Session so, boolean override) throws OXConflictException, ContactException {
 
         final StringBuilder insert_fields = new StringBuilder();
         final StringBuilder insert_values = new StringBuilder();
@@ -402,8 +402,8 @@ public final class Contacts {
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(d);
         } catch (final OXConflictException oe) {
             throw oe;
-        } catch (final OXException oe) {
-            throw oe;
+        } catch (final OXException e) {
+            throw new ContactException(e);
         } finally {
             try {
                 DBPool.closeReaderSilent(ct, readcon);
@@ -475,36 +475,15 @@ public final class Contacts {
                 writeContactImage(co.getObjectID(), co.getImage1(), so.getContextId(), co.getImageContentType(), writecon);
             }
             writecon.commit();
-        } catch (final OXException ox) {
-            if (null != writecon) {
-                try {
-                    writecon.rollback();
-                } catch (final SQLException see) {
-                    LOG.error(ERR_UABLE_TO_ROLLBACK, see);
-                }
-            }
-            throw ox;
         } catch (final DBPoolingException e) {
             // A DBPoolingException occurs when trying to fetch a connection from pool, therefore corresponding "writecon" variable can only
             // be null at this location: No rollback needed/possible on connection
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final DataTruncation se) {
-            if (null != writecon) {
-                try {
-                    writecon.rollback();
-                } catch (final SQLException see) {
-                    LOG.error(ERR_UABLE_TO_ROLLBACK, see);
-                }
-            }
+            rollback(writecon);
             throw Contacts.getTruncation(writecon, se, "prg_contacts", co);
         } catch (final SQLException se) {
-            if (null != writecon) {
-                try {
-                    writecon.rollback();
-                } catch (final SQLException see) {
-                    LOG.error(ERR_UABLE_TO_ROLLBACK, see);
-                }
-            }
+            rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(se, getStatement(ps));
         } finally {
             closeSQLStuff(ps);
@@ -519,7 +498,7 @@ public final class Contacts {
         }
     }
 
-    public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
+    public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXPermissionException {
         validateEmailAddress(co);
 
         boolean can_edit_only_own = false;
@@ -532,7 +511,6 @@ public final class Contacts {
         final ContactSql cs = new ContactMySql(ctx, user);
 
         Contact original = null;
-        Connection writecon = null;
         Connection readcon = null;
         try {
             readcon = DBPool.pickup(ctx);
@@ -699,6 +677,8 @@ public final class Contacts {
 
         } catch (final DBPoolingException e) {
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
+        } catch (OXException e) {
+            throw new ContactException(e);
         } finally {
             try {
                 DBPool.closeReaderSilent(ctx, readcon);
@@ -707,6 +687,7 @@ public final class Contacts {
             }
         }
 
+        Connection writecon = null;
         PreparedStatement ps = null;
         final StringBuilder update = new StringBuilder();
 
@@ -831,35 +812,32 @@ public final class Contacts {
                     ctx.getContextId());
             }
             writecon.commit();
-        } catch (final OXException ox) {
-            if (null != writecon) {
-                try {
-                    writecon.rollback();
-                } catch (final SQLException see) {
-                    LOG.error(ERR_UABLE_TO_ROLLBACK, see);
-                }
-            }
+        } catch (final OXConflictException ox) {
+            rollback(writecon);
+            throw ox;
+        } catch (final ContactException ox) {
+            rollback(writecon);
+            throw ox;
+        } catch (final OXObjectNotFoundException ox) {
+            rollback(writecon);
+            throw ox;
+        } catch (final OXConcurrentModificationException ox) {
+            rollback(writecon);
+            throw ox;
+        } catch (final OXPermissionException ox) {
+            rollback(writecon);
             throw ox;
         } catch (final DBPoolingException e) {
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final DataTruncation se) {
-            if (null != writecon) {
-                try {
-                    writecon.rollback();
-                } catch (final SQLException see) {
-                    LOG.error("Uable to rollback SQL Update", see);
-                }
-            }
+            rollback(writecon);
             throw Contacts.getTruncation(writecon, se, "prg_contacts", co);
         } catch (final SQLException e) {
-            if (null != writecon) {
-                try {
-                    writecon.rollback();
-                } catch (final SQLException see) {
-                    LOG.error("Uable to rollback SQL Update", see);
-                }
-            }
+            rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+        } catch (OXException e) {
+            rollback(writecon);
+            throw new ContactException(e);
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -873,7 +851,7 @@ public final class Contacts {
         }
     }
 
-    public static void performUserContactStorageUpdate(Contact contact, java.util.Date lastModified, int userId, int[] groups, Context ctx, UserConfiguration userConfig) throws ContactException, OXException {
+    public static void performUserContactStorageUpdate(Contact contact, java.util.Date lastModified, int userId, int[] groups, Context ctx, UserConfiguration userConfig) throws ContactException, OXPermissionException, OXObjectNotFoundException, OXConflictException, OXConcurrentModificationException {
         validateEmailAddress(contact);
         if (!contact.containsParentFolderID() || (contact.getParentFolderID() == 0)) {
             contact.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -1074,9 +1052,21 @@ public final class Contacts {
                     ctx.getContextId());
             }
             writecon.commit();
-        } catch (final OXException e) {
+        } catch (final OXConflictException e) {
             rollback(writecon);
             throw e;
+        } catch (final OXPermissionException e) {
+            rollback(writecon);
+            throw e;
+        } catch (final OXObjectNotFoundException e) {
+            rollback(writecon);
+            throw e;
+        } catch (final OXConcurrentModificationException e) {
+            rollback(writecon);
+            throw e;
+        } catch (final ContactException ox) {
+            rollback(writecon);
+            throw ox;
         } catch (final DBPoolingException e) {
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final DataTruncation se) {
@@ -1085,6 +1075,9 @@ public final class Contacts {
         } catch (final SQLException e) {
             rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+        } catch (OXException e) {
+            rollback(writecon);
+            throw new ContactException(e);
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -1098,7 +1091,7 @@ public final class Contacts {
         }
     }
 
-    public static Contact getUserById(final int userId, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
+    public static Contact getUserById(final int userId, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
 
         Contact co = null;
         final ContactSql contactSQL = new ContactMySql(ctx, user);
@@ -1120,7 +1113,7 @@ public final class Contacts {
         return co;
     }
 
-    public static Contact getContactById(final int objectId, final Session session) throws OXException, ContextException, DBPoolingException {
+    public static Contact getContactById(final int objectId, final Session session) throws ContactException, ContextException, DBPoolingException, OXObjectNotFoundException {
         final Context ctx = ContextStorage.getStorageContext(session);
         final int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
         final Connection readCon = DBPool.pickup(ctx);
@@ -1134,7 +1127,7 @@ public final class Contacts {
         return co;
     }
 
-    public static Contact getContactById(final int objectId, final int userId, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
+    public static Contact getContactById(final int objectId, final int userId, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
 
         Contact co = null;
         final ContactSql contactSQL = new ContactMySql(ctx, userId);
@@ -1156,7 +1149,7 @@ public final class Contacts {
         return co;
     }
 
-    private static Contact fillContactObject(final ContactSql contactSQL, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException {
+    private static Contact fillContactObject(final ContactSql contactSQL, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws ContactException, OXObjectNotFoundException {
         final Contact co = new Contact();
         Statement stmt = null;
         ResultSet rs = null;
@@ -1182,11 +1175,11 @@ public final class Contacts {
         return co;
     }
 
-    public static void deleteContact(final int id, final int cid, final Connection writecon) throws OXException {
+    public static void deleteContact(final int id, final int cid, final Connection writecon) throws ContactException {
         deleteContact(id, cid, writecon, false);
     }
 
-    public static void deleteContact(final int id, final int cid, final Connection writecon, final boolean admin_delete) throws OXException {
+    public static void deleteContact(final int id, final int cid, final Connection writecon, final boolean admin_delete) throws ContactException {
         Statement del = null;
         try {
             del = writecon.createStatement();
@@ -1210,7 +1203,7 @@ public final class Contacts {
         }
     }
 
-    public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user, final Context ctx, final Connection readcon) throws OXException {
+    public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user, final Context ctx, final Connection readcon) throws ContactException {
 
         Statement stmt = null;
         ResultSet rs = null;
@@ -1284,7 +1277,7 @@ public final class Contacts {
         return r;
     }
 
-    public static void writeDistributionListArrayInsert(final DistributionListEntryObject[] dleos, final int id, final int cid, final Connection writecon) throws OXException {
+    public static void writeDistributionListArrayInsert(final DistributionListEntryObject[] dleos, final int id, final int cid, final Connection writecon) throws ContactException {
 
         DistributionListEntryObject dleo = null;
 
@@ -1343,7 +1336,7 @@ public final class Contacts {
         }
     }
 
-    public static void writeDistributionListArrayUpdate(final DistributionListEntryObject[] dleos, final DistributionListEntryObject[] old_dleos, final int id, final int cid, final Connection writecon) throws OXException {
+    public static void writeDistributionListArrayUpdate(final DistributionListEntryObject[] dleos, final DistributionListEntryObject[] old_dleos, final int id, final int cid, final Connection writecon) throws ContactException {
         DistributionListEntryObject new_one = null;
         DistributionListEntryObject old_one = null;
 
@@ -1428,7 +1421,7 @@ public final class Contacts {
         writeDistributionListArrayInsert(insertcut, id, cid, writecon);
     }
 
-    public static void updateDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
+    public static void updateDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws ContactException {
         if (dleos.length > 0) {
 
             DistributionListEntryObject dleo = null;
@@ -1495,7 +1488,7 @@ public final class Contacts {
         }
     }
 
-    public static void deleteDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
+    public static void deleteDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws ContactException {
 
         PreparedStatement ps = null;
         DistributionListEntryObject dleo = null;
@@ -1542,7 +1535,7 @@ public final class Contacts {
         }
     }
 
-    public static LinkEntryObject[] fillLinkArray(final Contact co, final int user, final Context ctx, final Connection readcon) throws OXException {
+    public static LinkEntryObject[] fillLinkArray(final Contact co, final int user, final Context ctx, final Connection readcon) throws ContactException {
 
         Statement stmt = null;
         ResultSet rs = null;
@@ -1601,7 +1594,7 @@ public final class Contacts {
         return r;
     }
 
-    public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid, final Connection writecon) throws OXException {
+    public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid, final Connection writecon) throws ContactException {
         LinkEntryObject leo = null;
 
         PreparedStatement ps = null;
@@ -1629,7 +1622,7 @@ public final class Contacts {
         }
     }
 
-    public static void writeContactLinkArrayUpdate(final LinkEntryObject[] leos, final LinkEntryObject[] original, final int id, final int cid, final Connection writecon) throws OXException {
+    public static void writeContactLinkArrayUpdate(final LinkEntryObject[] leos, final LinkEntryObject[] original, final int id, final int cid, final Connection writecon) throws ContactException {
 
         final int sizey = (null == leos ? 0 : leos.length) + (null == original ? 0 : original.length);
         final LinkEntryObject[] inserts = new LinkEntryObject[sizey];
@@ -1682,7 +1675,7 @@ public final class Contacts {
         writeContactLinkArrayInsert(insertcut, id, cid, writecon);
     }
 
-    public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws OXException {
+    public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws ContactException {
         if (leos.length > 0) {
             LinkEntryObject leo = null;
             PreparedStatement ps = null;
@@ -1709,14 +1702,14 @@ public final class Contacts {
         }
     }
 
-    public static Date getContactImageLastModified(final int id, final int cid, final Connection readcon) throws SQLException, OXException {
+    public static Date getContactImageLastModified(final int id, final int cid, final Connection readcon) throws SQLException, ContactException {
         Date last_mod = null;
-        Statement smt = null;
+        Statement stmt = null;
         ResultSet rs = null;
         try {
             final ContactSql cs = new ContactMySql(null);
-            smt = readcon.createStatement();
-            rs = smt.executeQuery(cs.iFgetContactImageLastModified(id, cid));
+            stmt = readcon.createStatement();
+            rs = stmt.executeQuery(cs.iFgetContactImageLastModified(id, cid));
             if (rs.next()) {
                 last_mod = new Date(rs.getLong(1));
             }
@@ -1725,22 +1718,13 @@ public final class Contacts {
         } catch (final SQLException sxe) {
             throw sxe;
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (smt != null) {
-                    smt.close();
-                }
-            } catch (final SQLException see) {
-                LOG.error(ERR_UNABLE_TO_CLOSE, see);
-            }
+            closeSQLStuff(rs, stmt);
         }
 
         return last_mod;
     }
 
-    public static String getContactImageContentType(final int id, final int cid, final Connection readcon) throws SQLException, OXException {
+    public static String getContactImageContentType(final int id, final int cid, final Connection readcon) throws SQLException, ContactException {
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -1758,7 +1742,7 @@ public final class Contacts {
         }
     }
 
-    public static void getContactImage(final int contact_id, final Contact co, final int cid, final Connection readcon) throws OXException {
+    public static void getContactImage(final int contact_id, final Contact co, final int cid, final Connection readcon) throws ContactException {
         Date last_mod = null;
 
         Statement stmt = null;
@@ -1785,11 +1769,9 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { "36", "37" }, exceptionId = { 36, 37 }, msg = {
-        "Unable to save contact image. The image appears to be broken.", "Unable to save contact Image: Context %1$d Contact %2$d" })
-    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException {
+    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXConflictException, ContactException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
-            throw EXCEPTIONS.createOXConflictException(36);
+            throw new OXConflictException(ContactExceptionCodes.IMAGE_BROKEN.create());
         }
         PreparedStatement ps = null;
         try {
@@ -1812,14 +1794,10 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { "38", "39" }, exceptionId = { 38, 39 }, msg = {
-        "Unable to update contact image. The image appears to be broken.", "Unable to update contact image: Context %1$d Contact %2$d" })
-    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException {
+    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXConflictException, ContactException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
-            throw EXCEPTIONS.createOXConflictException(38);
-            // throw new OXConflictException("Wrong Data in Image Save");
+            throw new OXConflictException(ContactExceptionCodes.IMAGE_BROKEN.create());
         }
-
         PreparedStatement ps = null;
         try {
             final ContactSql cs = new ContactMySql(null);
@@ -1836,26 +1814,18 @@ public final class Contacts {
             ps.execute();
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(39, se, Integer.valueOf(cid), Integer.valueOf(contact_id));
-            // throw new OXException("ERROR DURING CONTACT IMAGE UPDATE
-            // cid="+cid+" oid="+contact_id, se);
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (final SQLException see) {
-                LOG.error("Unable to close Statement", see);
-            }
+            closeSQLStuff(ps);
         }
     }
 
-    public static boolean performContactReadCheckByID(final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws DBPoolingException {
+    public static boolean performContactReadCheckByID(final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws DBPoolingException {
 
         Connection readCon = null;
         ResultSet rs = null;
-        Statement st = null;
+        Statement stmt = null;
         try {
 
             final ContactSql cs = new ContactMySql(ctx, user);
@@ -1863,8 +1833,8 @@ public final class Contacts {
             cs.setObjectID(objectId);
 
             readCon = DBPool.pickup(ctx);
-            st = cs.getSqlStatement(readCon);
-            rs = ((PreparedStatement) st).executeQuery();
+            stmt = cs.getSqlStatement(readCon);
+            rs = ((PreparedStatement) stmt).executeQuery();
 
             int fid = -1;
             int created_from = -1;
@@ -1884,23 +1854,14 @@ public final class Contacts {
                 return false;
             }
             if ((fid != -1) && (created_from != -1)) {
-                return performContactReadCheck(fid, created_from, user, group, ctx, uc, readCon);
+                return performContactReadCheck(fid, created_from, user, ctx, uc, readCon);
             }
             return false;
         } catch (final SQLException e) {
             LOG.error("UNABLE TO performContactReadCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
             return false;
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (st != null) {
-                    st.close();
-                }
-            } catch (final SQLException see) {
-                LOG.error("Unablel to close Statement or ResultSet", see);
-            }
+            closeSQLStuff(rs, stmt);
             try {
                 if (readCon != null) {
                     DBPool.closeReaderSilent(ctx, readCon);
@@ -1911,8 +1872,7 @@ public final class Contacts {
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "50", exceptionId = 50, msg = ContactException.INIT_CONNECTION_FROM_DBPOOL)
-    public static boolean performContactReadCheckByID(final int folderId, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
+    public static boolean performContactReadCheckByID(final int folderId, final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws ContactException {
         if (ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).hasSpecificContactInterface(
             folderId,
             ctx.getContextId())) {
@@ -1921,7 +1881,7 @@ public final class Contacts {
 
         Connection readCon = null;
         ResultSet rs = null;
-        Statement st = null;
+        Statement stmt = null;
         try {
 
             final ContactSql cs = new ContactMySql(ctx, user);
@@ -1929,8 +1889,8 @@ public final class Contacts {
             cs.setObjectID(objectId);
 
             readCon = DBPool.pickup(ctx);
-            st = cs.getSqlStatement(readCon);
-            rs = ((PreparedStatement) st).executeQuery();
+            stmt = cs.getSqlStatement(readCon);
+            rs = ((PreparedStatement) stmt).executeQuery();
 
             int fid = -1;
             int created_from = -1;
@@ -1953,25 +1913,16 @@ public final class Contacts {
                 return false;
             }
             if ((fid != -1) && (created_from != -1)) {
-                return performContactReadCheck(fid, created_from, user, group, ctx, uc, readCon);
+                return performContactReadCheck(fid, created_from, user, ctx, uc, readCon);
             }
             return false;
         } catch (final DBPoolingException e) {
-            throw EXCEPTIONS.create(50, e);
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final SQLException e) {
             LOG.error("UNABLE TO performContactReadCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
             return false;
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (st != null) {
-                    st.close();
-                }
-            } catch (final SQLException see) {
-                LOG.error("Unablel to close Statement or ResultSet", see);
-            }
+            closeSQLStuff(rs, stmt);
             try {
                 if (readCon != null) {
                     DBPool.closeReaderSilent(ctx, readCon);
@@ -1982,7 +1933,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean performContactReadCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) {
+    public static boolean performContactReadCheck(final int folderId, final int created_from, final int user, final Context ctx, final UserConfiguration uc, final Connection readCon) {
 
         try {
             final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
@@ -2008,12 +1959,11 @@ public final class Contacts {
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "49", exceptionId = 49, msg = ContactException.INIT_CONNECTION_FROM_DBPOOL)
-    public static boolean performContactWriteCheckByID(final int folderId, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
+    public static boolean performContactWriteCheckByID(final int folderId, final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws ContactException {
 
         Connection readCon = null;
         ResultSet rs = null;
-        Statement st = null;
+        Statement stmt = null;
         try {
 
             final ContactSql cs = new ContactMySql(ctx, user);
@@ -2021,8 +1971,8 @@ public final class Contacts {
             cs.setObjectID(objectId);
 
             readCon = DBPool.pickup(ctx);
-            st = cs.getSqlStatement(readCon);
-            rs = ((PreparedStatement) st).executeQuery();
+            stmt = cs.getSqlStatement(readCon);
+            rs = ((PreparedStatement) stmt).executeQuery();
 
             int fid = -1;
             int created_from = -1;
@@ -2046,25 +1996,16 @@ public final class Contacts {
             }
 
             if ((fid != -1) && (created_from != -1)) {
-                return performContactWriteCheck(fid, created_from, user, group, ctx, uc, readCon);
+                return performContactWriteCheck(fid, created_from, user, ctx, uc, readCon);
             }
             return false;
         } catch (final DBPoolingException e) {
-            throw EXCEPTIONS.create(49, e);
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final SQLException e) {
             LOG.error("UNABLE TO performContactWriteCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
             return false;
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (st != null) {
-                    st.close();
-                }
-            } catch (final SQLException see) {
-                LOG.error("Unablel to close Statement or ResultSet", see);
-            }
+            closeSQLStuff(rs, stmt);
             try {
                 if (readCon != null) {
                     DBPool.closeReaderSilent(ctx, readCon);
@@ -2075,7 +2016,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean performContactWriteCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) {
+    public static boolean performContactWriteCheck(final int folderId, final int created_from, final int user, final Context ctx, final UserConfiguration uc, final Connection readCon) {
         try {
             final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
@@ -2099,7 +2040,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so) throws OXException, DBPoolingException {
+    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so) throws ContactException, DBPoolingException {
         Connection readCon = null;
         Context ct = null;
         try {
@@ -2108,32 +2049,32 @@ public final class Contacts {
             return containsForeignObjectInFolder(fid, uid, so, readCon);
         } catch (final ContextException d) {
             throw new ContactException(d);
+        } finally {
+            DBPool.closeReaderSilent(ct, readCon);
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "40", exceptionId = 40, msg = "Unable to perform contact folder check for readable content: Context %1$d Folder %2$d")
-    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so, final Connection readCon) throws OXException {
+    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so, final Connection readCon) throws ContactException {
         ResultSet rs = null;
-        Statement st = null;
+        Statement stmt = null;
         try {
-            st = readCon.createStatement();
+            stmt = readCon.createStatement();
             final ContactSql cs = new ContactMySql(null);
-            rs = st.executeQuery(cs.iFcontainsForeignObjectInFolder(fid, uid, so.getContextId()));
+            rs = stmt.executeQuery(cs.iFcontainsForeignObjectInFolder(fid, uid, so.getContextId()));
             if (rs.next()) {
                 return true;
             }
             return false;
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(40, se, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
-            // throw new OXException("UNABLE TO PERFORM ForeignObjectCheck");
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            closeSQLStuff(rs, st);
+            closeSQLStuff(rs, stmt);
         }
     }
 
-    public static boolean containsAnyObjectInFolder(final int fid, final Context cx) throws OXException {
+    public static boolean containsAnyObjectInFolder(final int fid, final Context cx) throws ContactException {
         Connection readCon = null;
         ResultSet rs = null;
         Statement st = null;
@@ -2151,15 +2092,12 @@ public final class Contacts {
         } catch (final SQLException se) {
             LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
             return false;
-            // throw EXCEPTIONS.create(41, se, cx.getContextId(), fid);
-            // throw new OXException("UNABLE TO PERFORM
-            // containsAnyObjectCheck");
         } finally {
             closeResources(rs, st, readCon, true, cx);
         }
     }
 
-    public static boolean containsAnyObjectInFolder(final int fid, final Connection readCon, final Context cx) throws OXException {
+    public static boolean containsAnyObjectInFolder(final int fid, final Connection readCon, final Context cx) throws ContactException {
         ResultSet rs = null;
         Statement st = null;
         try {
@@ -2172,9 +2110,6 @@ public final class Contacts {
         } catch (final SQLException se) {
             LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
             return false;
-            // throw EXCEPTIONS.create(41, se, cx.getContextId(), fid);
-            // throw new OXException("UNABLE TO PERFORM
-            // containsAnyObjectCheck");
         } finally {
             closeSQLStuff(rs, st);
         }
@@ -2309,23 +2244,17 @@ public final class Contacts {
         trashDistributionList(id, cid, writecon, true);
     }
 
-    public static void trashDistributionList(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
-        final Statement smt = writecon.createStatement();
+    public static void trashDistributionList(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, ContactException {
+        final Statement stmt = writecon.createStatement();
         try {
             final ContactSql cs = new ContactMySql(null);
-            cs.iFtrashDistributionList(delete, id, cid, smt);
+            cs.iFtrashDistributionList(delete, id, cid, stmt);
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
         } finally {
-            try {
-                if (smt != null) {
-                    smt.close();
-                }
-            } catch (final SQLException see) {
-                LOG.error("Unable to close Statement");
-            }
+            closeSQLStuff(stmt);
         }
     }
 
@@ -2333,47 +2262,35 @@ public final class Contacts {
         trashLinks(id, cid, writecon, true);
     }
 
-    public static void trashLinks(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
-        final Statement smt = writecon.createStatement();
+    public static void trashLinks(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, ContactException {
+        final Statement stmt = writecon.createStatement();
         try {
             final ContactSql cs = new ContactMySql(null);
-            cs.iFtrashLinks(delete, smt, id, cid);
+            cs.iFtrashLinks(delete, stmt, id, cid);
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
         } finally {
-            try {
-                if (smt != null) {
-                    smt.close();
-                }
-            } catch (final SQLException see) {
-                LOG.error("Unable to close Statement");
-            }
+            closeSQLStuff(stmt);
         }
     }
 
-    public static void deleteImage(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
+    public static void deleteImage(final int id, final int cid, final Connection writecon) throws SQLException, ContactException {
         trashImage(id, cid, writecon, true);
     }
 
-    public static void trashImage(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
-        final Statement smt = writecon.createStatement();
+    public static void trashImage(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, ContactException {
+        final Statement stmt = writecon.createStatement();
         try {
             final ContactSql cs = new ContactMySql(null);
-            cs.iFtrashImage(delete, smt, id, cid);
+            cs.iFtrashImage(delete, stmt, id, cid);
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
         } finally {
-            try {
-                if (smt != null) {
-                    smt.close();
-                }
-            } catch (final SQLException see) {
-                LOG.error("Unable to close Statement");
-            }
+            closeSQLStuff(stmt);
         }
     }
 
@@ -2522,7 +2439,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.TRUNCATED, desc = "54", exceptionId = DATA_TRUNCATION, msg = "Import failed. Some data entered exceed the database field limit. Please shorten following entries: %1$s Character Limit: %2$s Sent %3$s")
-    public static OXException getTruncation(final Connection con, final DataTruncation se, final String table, final Contact co) {
+    public static ContactException getTruncation(final Connection con, final DataTruncation se, final String table, final Contact co) {
 
         final String[] fields = DBUtils.parseTruncatedFields(se);
         final StringBuilder sFields = new StringBuilder();
@@ -2562,25 +2479,25 @@ public final class Contacts {
                 }
             }
         }
-        final OXException oxx;
+        final ContactException retval;
         if (truncateds.length > 0) {
-            oxx = EXCEPTIONS.create(
+            retval = EXCEPTIONS.create(
                 DATA_TRUNCATION,
                 se,
                 sFields.toString(),
                 Integer.valueOf(truncateds[0].getMaxSize()),
                 Integer.valueOf(truncateds[0].getLength()));
         } else {
-            oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
+            retval = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
         }
         for (final OXException.Truncated truncated : truncateds) {
-            oxx.addProblematic(truncated);
+            retval.addProblematic(truncated);
         }
-        return oxx;
+        return retval;
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "68", exceptionId = 68, msg = "Bad character in field %2$s. Error: %1$s")
-    private static void checkCharacters(final Contact co) throws OXException {
+    private static void checkCharacters(final Contact co) throws ContactException {
         for (int i = 0; i < 650; i++) {
             if ((mapping[i] != null) && (i != Contact.IMAGE1)) {
                 String error = null;

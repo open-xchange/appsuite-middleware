@@ -127,7 +127,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
     )
     public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try{
-            final boolean back = Contacts.performContactWriteCheckByID(folderId, objectId,user.getId(),user.getGroups(),ctx,userConfig);
+            final boolean back = Contacts.performContactWriteCheckByID(folderId, objectId,user.getId(),ctx,userConfig);
             if (!back){
                 throw EXCEPTIONS.create(1, Integer.valueOf(folderId),Integer.valueOf(objectId),Integer.valueOf(user.getId()),Integer.valueOf(ctx.getContextId()));
                 //throw new OXException("Insufficient write rights for this folder! Unable to attach Document.");
@@ -150,7 +150,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
     )
     public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try{
-            final boolean back = Contacts.performContactReadCheckByID(folderId, objectId,user.getId(),user.getGroups(),ctx,userConfig);
+            final boolean back = Contacts.performContactReadCheckByID(folderId, objectId,user.getId(),ctx,userConfig);
             if (!back){
                 throw EXCEPTIONS.create(2, Integer.valueOf(folderId),Integer.valueOf(objectId),Integer.valueOf(user.getId()),Integer.valueOf(ctx.getContextId()));
                 //throw new OXException("Insufficient write rights for this folder! Unable to attach Document.");

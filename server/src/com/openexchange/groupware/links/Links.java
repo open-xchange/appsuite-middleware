@@ -259,7 +259,7 @@ public class Links {
                     return false;
                 }
                 try {
-                    return Contacts.performContactReadCheckByID(oid, user, group, ct, UserConfigurationStorage
+                    return Contacts.performContactReadCheckByID(oid, user, ct, UserConfigurationStorage
                             .getInstance().getUserConfigurationSafe(so.getUserId(), ct));
                 } catch (final Exception e) {
                     // System.out.println("UNABLE TO CHECK CONTACT READRIGHT FOR LINK");

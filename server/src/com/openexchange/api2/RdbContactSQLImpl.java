@@ -1228,7 +1228,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
             fid,
             created_from,
             user,
-            group,
             ctx,
             UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx),
             readcon);

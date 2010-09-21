@@ -89,6 +89,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     NO_CHANGES(NO_CHANGES_MSG, Category.USER_INPUT, 122),
     /** Contact %1$d not found in context %2$d. */
     CONTACT_NOT_FOUND(CONTACT_NOT_FOUND_MSG, Category.CODE_ERROR, 125),
+    /** Unable to save contact image. The image appears to be broken. */
+    IMAGE_BROKEN(IMAGE_BROKEN_MSG, Category.USER_INPUT, 136),
     /** Unable to pick up a connection from the DBPool */
     INIT_CONNECTION_FROM_DBPOOL(INIT_CONNECTION_FROM_DBPOOL_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 151),
     /** The image you tried to attach is not a valid picture. It may be broken or is not a valid file. */

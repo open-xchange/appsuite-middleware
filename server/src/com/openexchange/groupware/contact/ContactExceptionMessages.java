@@ -86,6 +86,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String CONTACT_NOT_FOUND_MSG = "Contact %1$d not found in context %2$d.";
 
+    public static final String IMAGE_BROKEN_MSG = "Unable to save contact image. The image appears to be broken.";
+
     public static final String INIT_CONNECTION_FROM_DBPOOL_MSG = "Unable to pick up a connection from the DBPool";
 
     public static final String NOT_VALID_IMAGE_MSG = "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.";
