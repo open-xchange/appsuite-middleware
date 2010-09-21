@@ -290,7 +290,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 } else {
                     ownPermission = fs.getFolder(parentFullname).getOwnPermission();
                 }
-                if (ownPermission.canCreateSubfolders()) {
+                if (null ==ownPermission || ownPermission.canCreateSubfolders()) {
                     /*
                      * Set parent to current path's parent
                      */
