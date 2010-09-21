@@ -1,50 +1,50 @@
-# translation of server.de_DE.po to deutsch
-# Antje Faber, 2007.
-# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010.
-# translation of server.new.de_DE.po to
-# translation of server.de_DE.po to
+# translation of server.nl_NL.po to deutsch
+# Antje Faber <antje.faber@open-xchange.com>, 2010.
+# Ivar Snaaijer <Ivar@snaaijer.nl>, 2010.
+# Ivar Snaaijer <Ivar@Snaaijer.nl>, 2010.
 msgid ""
 msgstr ""
-"Project-Id-Version: server.de_DE\n"
+"Project-Id-Version: server.nl_NL\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2010-09-08 16:35+0200\n"
-"Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
-"Language-Team: deutsch <de@li.org>\n"
+"POT-Creation-Date: 2008-08-04 14:10+0100\n"
+"PO-Revision-Date: 2010-09-19 14:36+0200\n"
+"Last-Translator: Ivar Snaaijer\n"
+"Language-Team: Dutch <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: KBabel 1.11.4\n"
+"Language: nl\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.0\n"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Calendar"
-msgstr "Kalender"
+msgstr "Agenda"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:63
 msgid "Week"
-msgstr "Woche"
+msgstr "Week"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
 msgid "All-day events"
-msgstr "Ganztägige Ereignisse"
+msgstr "Geheledag-gebeurtenis"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
 msgid "Events"
-msgstr "Ereignisse"
+msgstr "Gebeurtenissen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
 msgid "Location"
-msgstr "Ort"
+msgstr "Locatie"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
 msgid "Participants"
-msgstr "Teilnehmer"
+msgstr "Deelnemers"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:73
 msgid "Comments"
-msgstr "Kommentare"
+msgstr "Opmerkingen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:61
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:61
@@ -58,17 +58,17 @@ msgstr "Login"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:63
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
-msgstr "Passwort"
+msgstr "Wachtwoord"
 
 #. The name for the folder of a facebook account containing user's wall posts.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/NameStrings.java:62
 msgid "Wall posts"
-msgstr "Pinnwand-Meldungen"
+msgstr "Prikbordberichten"
 
 #. The name for the folder of a facebook account containing user's action links.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/NameStrings.java:65
 msgid "Action links"
-msgstr "Aktionslinks"
+msgstr "Actie link"
 
 #. The name for an album posted by a Facebook user/group
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/NameStrings.java:68
@@ -77,35 +77,35 @@ msgstr "Album"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:65
 msgid "Confirmed ham"
-msgstr "Bestätigter Ham"
+msgstr "Bevestigde ham"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:67
 msgid "Confirmed ham folder"
-msgstr "Bestätigter Ham-Ordner"
+msgstr "Bevestigde hammap"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
 msgid "Confirmed spam"
-msgstr "Bestätigter Spam"
+msgstr "Bevestigde spam"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:71
 msgid "Confirmed spam folder"
-msgstr "Bestätigter Spam-Ordner"
+msgstr "Bevestigde spam map"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 msgid "Drafts"
-msgstr "Entwürfe"
+msgstr "Concepten"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:75
 msgid "Drafts folder"
-msgstr "Entwürfe-Ordner"
+msgstr "Concept map"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:77
 msgid "Sent"
-msgstr "Gesendet"
+msgstr "Verzonden"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:79
 msgid "Sent folder"
-msgstr "Ordner Gesendet"
+msgstr "Verzonden map"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 msgid "Spam"
@@ -113,67 +113,67 @@ msgstr "Spam"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:83
 msgid "Spam folder"
-msgstr "Spam-Ordner"
+msgstr "Spam map"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 msgid "Trash"
-msgstr "Mülleimer"
+msgstr "Prullenbak"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:87
 msgid "Trash folder"
-msgstr "Ordner Papierkorb"
+msgstr "Prullenbak map"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:89
 msgid "Mail port"
-msgstr "Mail-Port"
+msgstr "E-mail poort"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:91
 msgid "Mail protocol"
-msgstr "Mail-Protokoll"
+msgstr "E-mail protocol"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:93
 msgid "Secure mail connection"
-msgstr "Sichere Mailverbindung"
+msgstr "Beveiligde server verbinding"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:95
 msgid "Mail server"
-msgstr "Mailserver"
+msgstr "E-mail server"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:97
 msgid "Primary address"
-msgstr "Primäre Adresse"
+msgstr "Primair adres"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:99
 msgid "Personal"
-msgstr "Persönlich"
+msgstr "Persoonlijk"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:101
 msgid "SMTP login"
-msgstr "SMTP-Login"
+msgstr "SMTP aanmeldnaam"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:103
 msgid "SMTP password"
-msgstr "SMTP-Passwort"
+msgstr "SMTP wachtwoord"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:105
 msgid "SMTP port"
-msgstr "SMTP-Port"
+msgstr "SMTP poort"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:107
 msgid "SMTP protocol"
-msgstr "SMTP-Protokoll"
+msgstr "SMTP protocol"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:109
 msgid "Secure SMTP connection"
-msgstr "Sichere SMTP-Verbindung"
+msgstr "Beveiligde SMTP verbinding"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:111
 msgid "SMTP server"
-msgstr "SMTP-Server"
+msgstr "SMTP server"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:113
 msgid "Unified mail enabled"
-msgstr "Unified Mail aktiviert"
+msgstr "Unified mail ingeschakeld"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
@@ -188,11 +188,11 @@ msgstr "Site"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:63
 msgid "Apply a Template (optional)"
-msgstr "Template anwenden (optional)"
+msgstr "Sjabloon toepassen (optioneel)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:65
 msgid "Add cipher code"
-msgstr "Chiffre hinzufügen"
+msgstr "Encryptiecode toevoegen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:61
 msgid ""
@@ -210,116 +210,116 @@ msgid ""
 "data:\n"
 "Data published by %s on %s\n"
 msgstr ""
-"Datenschutzhinweis:\n"
-"Alle Daten und Verweise, die Sie auf dieser Webseite sehen, wurden unter der "
-"Annahme veröffentlicht, dass der Inhaber der Daten zur Weitergabe der Daten "
-"berechtigt war. Open-Xchange und seine verbundenen Unternehmen sind nicht "
-"verantwortlich für die Weitergabe der Daten. Jede unberechtigte Verwendung "
-"oder Weitergabe dieser Daten ist verboten.\n"
-"Wenn Sie beabsichtigen, diese Daten zu speichern, zu verarbeiten oder "
-"weiterzugeben, stellen Sie bitte sicher, dass Sie dazu die entsprechenden "
-"Rechte haben, insbesondere die Zustimmung der betroffenen Personen.\n"
-"Wenn Sie feststellen, dass Ihre personenbezogenen Daten ohne Ihr "
-"Einverständnis oder andere Daten fälschlicherweise hier veröffentlicht "
-"wurden, senden Sie bitte eine Mail mit der URL/Adresse dieser Seite %s an "
-"den Herausgeber der Daten:\n"
-"Daten veröffentlicht von %s am %s\n"
+"Privacy:\n"
+"De gegevens en enige verwijzingen die in deze webpagina zijn opgenomen "
+"worden met u gedeeld onder de aanname dat de eigenaar ervan ze rechtmatig "
+"aan u beschikbaar heeft gemaakt. Noch Open-Xchange, noch enige van zijn "
+"onderdelen of partners kan aansprakelijk worden gesteld voor de publicatie "
+"of herpublicatie ervan.\n"
+"Ieder ongeautoriseerd gebruik of verspreiding van deze gegevens is verboden. "
+"Als u van plan bent deze gegevens op te slaan, te verwerken, of door te "
+"geven, zorg er dan voor dat u het recht heeft om dit te doen.\n"
+"Bent u één van de personen die hier genoemd zijn, of bent u verantwoordelijk "
+"voor een bron die genoemd is op deze pagina en u bent het niet eens met de "
+"publicatie, stuurt u dan een e-mail met de URL (de koppeling) naar deze "
+"webpagina naar %s en de uitgever van de gegevens:\n"
+"Gegevens gepubliceerd door %s op %s\n"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:63
 msgid "OXMF Contacts"
-msgstr "OXMF-Kontakte"
+msgstr "OXMF Contacten"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:65
 msgid "OXMF Infostore"
-msgstr "OXMF-InfoStore"
+msgstr "OXMF Gegevensdepot"
 
 #. Name of the parent folder for the private user folders.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
-msgstr "Persönliche Ordner"
+msgstr "Privémappen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
-msgstr "Öffentliche Ordner"
+msgstr "Openbare mappen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
-msgstr "Freigegebene Ordner"
+msgstr "Gedeelde mappen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
-msgstr "System"
+msgstr "Systeem"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:70
 msgid "Shared address book"
-msgstr "Freigegebenes Adressbuch"
+msgstr "Gedeeld adresboek"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:72
 msgid "Global address book"
-msgstr "Globales Adressbuch"
+msgstr "Globaal adresboek"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:74
 msgid "OX folders"
-msgstr "OX-Ordner"
+msgstr "OX-mappen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:76
 msgid "Projects"
-msgstr "Projekte"
+msgstr "Projecten"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:78
 msgid "Infostore"
-msgstr "InfoStore"
+msgstr "Gegevensdepot"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:80
 msgid "Userstore"
-msgstr "Userstore"
+msgstr "Gebruikersdepot"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:82
 msgid "Public infostore"
-msgstr "Öffentlicher InfoStore"
+msgstr "Publiek gegevensdepot"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:84
 msgid "Other task folders"
-msgstr "Weitere Aufgabenordner"
+msgstr "Andere taakmappen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:86
 msgid "Other calendar folders"
-msgstr "Weitere Kalenderordner"
+msgstr "Andere agendamappen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:88
 msgid "Other contact folders"
-msgstr "Weitere Kontaktordner"
+msgstr "Andere contactenmappen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:90
 msgid "Other infostore folders"
-msgstr "Weitere InfoStore-Ordner"
+msgstr "Andere gegevensdepot-mappen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
 msgid "Tasks"
-msgstr "Aufgaben"
+msgstr "Taken"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
-msgstr "Kontakte"
+msgstr "Contacten"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:98
 msgid "Collected addresses"
-msgstr "Gesammelte Adressen"
+msgstr "Verzamelde adressen"
 
 #. Display name of group with identifier 0. This group always contains all existing users of a context.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All users"
-msgstr "Alle Anwender"
+msgstr "Alle gebruikers"
 
 #. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:71
 msgid "Standard group"
-msgstr "Standardgruppe"
+msgstr "Standaard groep"
 
 #. The internationalized subject for a read acknowledgement
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:69
 msgid "Read Acknowledgement"
-msgstr "Lesebestätigung"
+msgstr "Leesbevestiging"
 
 #. The text body of a received read acknowledgement
 #. #DATE# is replaced with the sent date of referenced email
@@ -334,13 +334,12 @@ msgid ""
 "on the recipients computer. There is no guarantee that the recipient has "
 "read or understood the message contents."
 msgstr ""
-"Dies ist eine Empfangsbestätigung für die am #DATE# gesendete E-Mail an "
-"#RECIPIENT# mit dem Betreff \"#SUBJECT#\".\n"
+"Dit is een ontvangstbevestiging voor de e-mail die u op #DATE# aan "
+"#RECIPIENT# hebt gestuurd met als onderwerp \"#SUBJECT#\".\n"
 "\n"
-"Bitte beachten Sie, dass diese Empfangsbestätigung lediglich das Anzeigen "
-"der Nachricht auf dem Rechner des Empfängers bestätigt. Es gibt keine "
-"Garantie, dass der Empfänger die E-Mail gelesen oder deren Inhalt verstanden "
-"hat."
+"Merk op: deze ontvangstbevestiging is slechts een kennisgeving dat het "
+"bericht is weergegeven op de computer van de ontvanger. Er is geen garantie "
+"dat de ontvanger de inhoud van het bericht heeft gelezen of begrepen."
 
 #. The prefixed text on reply.
 #. #DATE# is replaced with the sent date of referenced email
@@ -348,7 +347,7 @@ msgstr ""
 #. #SENDER# is replaced with personal and/or email address of the sender
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:81
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
-msgstr "#SENDER# hat am #DATE# um #TIME# geschrieben:"
+msgstr "Op #DATE# om #TIME# schreef #SENDER#:"
 
 #. The prefixed text on inline forward.
 #. #FROM# is replaced with personal and/or email address of original message's From header
@@ -366,30 +365,29 @@ msgid ""
 "Date: #DATE# at #TIME#\n"
 "Subject: #SUBJECT#"
 msgstr ""
-"---------- Ursprüngliche Nachricht ----------\n"
-"Von: #FROM#\n"
-"An: #TO##CC_LINE#\n"
-"Datum: #DATE# um #TIME#\n"
-"Betreff: #SUBJECT#"
+"---------- Oorspronkelijk bericht ----------\n"
+"Van: #FROM#\n"
+"Aan: #TO##CC_LINE#\n"
+"Datum: #DATE# om #TIME#\n"
+"Onderwerp: #SUBJECT#"
 
 #. The internationalized default subject.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:94
 msgid "[No Subject]"
-msgstr "[Kein Betreff]"
+msgstr "[Geen onderwerp]"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:98
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
-msgstr ""
-"Die für diese E-Mail verfügbaren Anhänge sind über diese Links verfügbar:"
+msgstr "De bijlagen van deze e-mail zijn beschikbaar via deze links:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:102
 msgid "The links will be deleted by #DATE#"
-msgstr "Die Links werden bis #DATE# gelöscht"
+msgstr "De linkjes worden op #DATE# verwijderd."
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
@@ -418,27 +416,31 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Ein neuer Termin wurde erstellt von [created_by].\n"
-"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
-"[link]\n"
+"Een nieuwe afspraak is aangemaakt door [created_by].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Directe koppeling: [link]\n"
+"\n"
+"Taak\n"
+"====\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op:  [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
-"==========\n"
+"\n"
+"\n"
+"Deelnemers\n"
+"============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
-"==========\n"
+"Bronnen\n"
+"=========\n"
 "[resources]\n"
 "\n"
 "=========================================="
@@ -467,27 +469,32 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Ein neuer Termin wurde erstellt von [created_by].\n"
+"Een nieuwe afspraak is aangemaakt door [created_by].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Taak\n"
+"====\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[location]\n"
-"[start]\n"
-"[end]\n"
+"\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
-"====================="
+"=========================================="
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:130
 msgid ""
@@ -518,32 +525,36 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Eine neue Aufgabe wurde erstellt von [created_by].\n"
-"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
-"[link]\n"
+"Een nieuwe taak is aangemaakt door [created_by].\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von: [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Directe koppeling: [link]\n"
+"\n"
+"Taak\n"
+"====\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
 "[task_status]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
-"========================================== "
+"=========================================="
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:162
 msgid ""
@@ -572,30 +583,34 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Eine neue Aufgabe wurde erstellt von [created_by].\n"
+"Een nieuwe taak is aangemaakt door [created_by].\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Taak\n"
+"====\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op:  [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
 "[task_status]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
-"========================================== "
+"=========================================="
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:202
 msgid ""
@@ -624,26 +639,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Dieser Termin findet nicht statt.\n"
-"Er wurde entweder von [changed_by] gelöscht oder\n"
-"Sie wurden von der Liste der Teilnehmer entfernt.\n"
+"Deze afspraak gaat niet door.\n"
+"U bent verwijderd uit de lijst van deelnemers of de afspraak is verwijderd "
+"door [changed_by].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am:  [creation_datetime]\n"
+"Afspraak\n"
+"===========\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -677,31 +696,35 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Diese Aufgabe wurde entweder von [changed_by] gelöscht\n"
-"oder Sie wurden aus der Liste der Teilnehmer entfernt.\n"
+"U bent verwijderd uit de lijst van deelnemers of de afspraak is verwijderd "
+"door [changed_by].\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am:  [creation_datetime]\n"
+"Taak\n"
+"====\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
 "[task_status]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
-"========================================== "
+"=========================================="
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:270
 msgid ""
@@ -730,26 +753,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Dieser Termin wurde geändert von [changed_by].\n"
-"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
-"[link]\n"
+"Deze afspraak is gewijzigd door [changed_by].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Directe koppeling: [link]\n"
+"\n"
+"Afspraak\n"
+"===========\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -780,24 +807,28 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Dieser Termin wurde geändert von [changed_by].\n"
+"Deze afspraak is gewijzigd door [changed_by].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Afspraak\n"
+"===========\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -832,28 +863,32 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Diese Aufgabe wurde geändert von [changed_by].\n"
-"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
-"[link]\n"
+"Deze taak is gewijzigd door [changed_by].\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Directe koppeling: [link]\n"
+"\n"
+"Taak\n"
+"====\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
 "[task_status]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -886,26 +921,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Diese Aufgabe wurde geändert von [changed_by].\n"
+"Deze taak is gewijzigd door [changed_by].\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Taak\n"
+"====\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
 "[task_status]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -938,26 +977,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by] hat diesen Termin [confirmation_action].\n"
-"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
-"[link]\n"
+"[changed_by] heeft deze afspraak [confirmation_action].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Directe koppeling: [link]\n"
+"\n"
+"Afspraak\n"
+"===========\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op:  [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -988,24 +1031,28 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by] hat diesen Termin [confirmation_action].\n"
+"[changed_by] heeft deze afspraak [confirmation_action].\n"
 "\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Afspraak\n"
+"===========\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op:  [creation_datetime]\n"
 "[title]\n"
 "[location][folder_name]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series][delete_exceptions][change_exceptions]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -1040,28 +1087,32 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by] hat diese Aufgabe [confirmation_action].\n"
-"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
-"[link]\n"
+"[changed_by] heeft deze taak [confirmation_action].\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Directe koppeling: [link]\n"
+"\n"
+"Taak\n"
+"====\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
 "[task_status]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -1094,26 +1145,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by] hat diese Aufgabe [confirmation_action].\n"
+"[changed_by] heeft deze taak [confirmation_action].\n"
 "\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Erstellt am: [creation_datetime]\n"
+"Taak\n"
+"====\n"
+"Aangemaakt door:  [created_by]\n"
+"Aangemaakt op: [creation_datetime]\n"
 "[title]\n"
 "[folder_name]\n"
 "[priority]\n"
 "[task_status]\n"
 "\n"
-"[start]\n"
-"[end]\n"
+"Startdatum:       [start]\n"
+"Einddatum:        [end]\n"
 "[series]\n"
+"\n"
+"Omschrijving:\n"
 "[description]\n"
-"Teilnehmer\n"
+"\n"
+"\n"
+"Deelnemers\n"
 "============\n"
 "[participants]\n"
 "\n"
-"Ressourcen\n"
+"Bronnen\n"
 "=========\n"
 "[resources]\n"
 "\n"
@@ -1124,51 +1179,51 @@ msgstr ""
 #.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:541
 msgid "New Appointment"
-msgstr "Neuer Termin"
+msgstr "Nieuwe afspraak"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:543
 msgid "Appointment changed"
-msgstr "Termin geändert"
+msgstr "Afspraak gewijzigd"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:545
 msgid "Appointment deleted"
-msgstr "Termin gelöscht"
+msgstr "Afspraak verwijderd"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:547
 msgid "Appointment (accepted)"
-msgstr "Termin (bestätigt)"
+msgstr "Afspraak (geaccepteerd)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:549
 msgid "Appointment (declined)"
-msgstr "Termin (abgelehnt)"
+msgstr "Afspraak (afgewezen)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:551
 msgid "Appointment (tentative)"
-msgstr "Termin (vorläufig)"
+msgstr "Afspraak (voorlopig)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:553
 msgid "New task"
-msgstr "Neue Aufgabe"
+msgstr "Nieuwe taak"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:555
 msgid "Task changed"
-msgstr "Aufgabe geändert"
+msgstr "Taak gewijzigd"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:557
 msgid "Task deleted"
-msgstr "Aufgabe gelöscht"
+msgstr "Taak verwijderd"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:559
 msgid "Task (accepted)"
-msgstr "Aufgabe (bestätigt)"
+msgstr "Taak (geaccepteerd)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:561
 msgid "Task (declined)"
-msgstr "Aufgabe (abgelehnt)"
+msgstr "Taak (afgewezen)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:563
 msgid "Task (tentative)"
-msgstr "Aufgabe (vorläufig)"
+msgstr "Taak (voorlopig)"
 
 #. -
 #. * MISC
@@ -1176,52 +1231,52 @@ msgstr "Aufgabe (vorläufig)"
 #. No resources have been scheduled.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:570
 msgid "No resources have been scheduled."
-msgstr "Es wurden keine Ressourcen zugewiesen."
+msgstr "Er zijn geen bronnen ingeroosterd."
 
 #. No series
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:573
 msgid "No series"
-msgstr "Keine Serie"
+msgstr "Geen series"
 
 #. No start date
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:576
 msgid "No start date"
-msgstr "Kein Startdatum"
+msgstr "Geen startdatum"
 
 #. No end date
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:579
 msgid "No end date"
-msgstr "Kein Enddatum"
+msgstr "Geen einddatum"
 
 #. No due date
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:582
 msgid "No due date"
-msgstr "Kein Fälligkeitsdatum"
+msgstr "Geen vervaldatum"
 
 #. No delete exceptions
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:585
 msgid "No delete exceptions"
-msgstr "Keine Löschausnahmen"
+msgstr "Geen uitzonderingen voor verwijderen"
 
 #. No change exceptions
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:588
 msgid "No change exceptions"
-msgstr "Keine Änderungsausnahmen"
+msgstr "Geen uitzonderingen voor wijzigen"
 
 #. Mail to resource %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:591
 msgid "Mail to resource %1$s"
-msgstr "E-Mail an Ressource %1$s"
+msgstr "Mail naar bron %1$s"
 
 #. Resource
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:594
 msgid "Resource"
-msgstr "Ressource"
+msgstr "Bron"
 
 #. Not set
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:597
 msgid "Not set"
-msgstr "Nicht festgelegt"
+msgstr "Niet gezet"
 
 #. -
 #. * Confirmation actions
@@ -1230,17 +1285,17 @@ msgstr "Nicht festgelegt"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:603
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:630
 msgid "accepted"
-msgstr "bestätigt"
+msgstr "geaccepteerd"
 
 #. declined
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:605
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:633
 msgid "declined"
-msgstr "abgelehnt"
+msgstr "afgewezen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:607
 msgid "tentatively accepted"
-msgstr "vorläufig bestätigt"
+msgstr "voorlopig geaccepteerd"
 
 #. -
 #. * TASK PRIORITIES
@@ -1248,17 +1303,17 @@ msgstr "vorläufig bestätigt"
 #. low
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:614
 msgid "Low"
-msgstr "Niedrig"
+msgstr "Laag"
 
 #. normal
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:617
 msgid "Normal"
-msgstr "Normal"
+msgstr "Normaal"
 
 #. high
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:620
 msgid "High"
-msgstr "Hoch"
+msgstr "Hoog"
 
 #. -
 #. * Confirmation statuses
@@ -1266,12 +1321,12 @@ msgstr "Hoch"
 #. waiting
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:627
 msgid "waiting"
-msgstr "Wartestatus"
+msgstr "in afwachting"
 
 #. tentative
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:636
 msgid "tentative"
-msgstr "vorläufig"
+msgstr "voorlopig"
 
 #. external
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:639
@@ -1284,17 +1339,17 @@ msgstr "extern"
 #. Location: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:646
 msgid "Location: %1$s"
-msgstr "Ort: %1$s"
+msgstr "Locatie: %1$s"
 
 #. Description: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:649
 msgid "Description: %1$s"
-msgstr "Beschreibung: %1$s"
+msgstr "Omschrijving: %1$s"
 
 #. Folder: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:652
 msgid "Folder: %1$s"
-msgstr "Ordner: %1$s"
+msgstr "Map: %1$s"
 
 #. Start date: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:655
@@ -1304,17 +1359,17 @@ msgstr "Startdatum: %1$s"
 #. End date: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:658
 msgid "End date: %1$s"
-msgstr "Enddatum: %1$s"
+msgstr "Einddatum: %1$s"
 
 #. Due date: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:661
 msgid "Due date: %1$s"
-msgstr "Fälligkeitsdatum: %1$s"
+msgstr "Vervaldatum: %1$s"
 
 #. Series: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:664
 msgid "Series: %1$s"
-msgstr "Serie: %1$s"
+msgstr "Series: %1$s"
 
 #. Comments:
 #. %1$s: Placeholder for comments
@@ -1323,13 +1378,13 @@ msgid ""
 "Comments:\n"
 "%1$s"
 msgstr ""
-"Kommentare:\n"
+"Opmerkingen:\n"
 "%1$s"
 
 #. Priority: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:671
 msgid "Priority: %1$s"
-msgstr "Priorität: %1$s"
+msgstr "Prioriteit: %1$s"
 
 #. Status: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:674
@@ -1339,12 +1394,12 @@ msgstr "Status: %1$s"
 #. Delete exceptions: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:677
 msgid "Delete exceptions: %1$s"
-msgstr "Löschausnahme: %1$s"
+msgstr "Uitzonderingen voor verwijderen: %1$s"
 
 #. Change exceptions: %1$s
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:680
 msgid "Change exceptions: %1$s"
-msgstr "Änderungsausnahme: %1$s"
+msgstr "Uitzonderingen voor wijzigen: %1$s"
 
 #. Change exception of %1$s on %2$s
 #. %1$s: Placeholder for recurrence title
@@ -1352,7 +1407,7 @@ msgstr "Änderungsausnahme: %1$s"
 #. Example: My Recurring Appointment on 2009-12-06
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:686
 msgid "Change exception of %1$s on %2$s"
-msgstr "Änderungsausnahme von %1$s am %2$s"
+msgstr "Uitzondering voor wijzigen van %1$s op %2$s"
 
 #. -
 #. * Task statuses
@@ -1360,38 +1415,38 @@ msgstr "Änderungsausnahme von %1$s am %2$s"
 #. Not started
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:693
 msgid "Not started"
-msgstr "Nicht begonnen"
+msgstr "Niet gestart"
 
 #. In progress
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "In progress"
-msgstr "In Bearbeitung"
+msgstr "In behandeling"
 
 #. Done
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:699
 msgid "Done"
-msgstr "Erledigt"
+msgstr "Klaar"
 
 #. Waiting
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:702
 msgid "Waiting"
-msgstr "Wartestatus"
+msgstr "In afwachting"
 
 #. Deferred
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:705
 msgid "Deferred"
-msgstr "Verschoben"
+msgstr "Uitgesteld"
 
 #. -
 #. * Added/Removed participant
 #.
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:711
 msgid "Added"
-msgstr "Hinzugefügt"
+msgstr "Toegevoegd"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:713
 msgid "Removed"
-msgstr "Entfernt"
+msgstr "Verwijderd"
 
 #. -
 #. * Numeric recurrence templates
@@ -1399,22 +1454,22 @@ msgstr "Entfernt"
 #. The appendix to indicate the first ordinal; e.g for EN it would be "1st", for DE it would be "1.".
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:720
 msgid "st"
-msgstr "."
+msgstr "e"
 
 #. The appendix to indicate the second ordinal; e.g for EN it would be "2nd", for DE it would be "2.".
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:723
 msgid "nd"
-msgstr "."
+msgstr "e"
 
 #. The appendix to indicate the third ordinal; e.g for EN it would be "3rd", for DE it would be "3.".
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:726
 msgid "rd"
-msgstr "."
+msgstr "e"
 
 #. The appendix to indicate an ordinal greater than 3rd; e.g for EN it would be "4th", for DE it would be "4.".
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:729
 msgid "th"
-msgstr "."
+msgstr "e"
 
 #. -
 #. * Recurrence templates
@@ -1422,72 +1477,72 @@ msgstr "."
 #. and
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:736
 msgid "and"
-msgstr "und"
+msgstr "en"
 
 #. Each day
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:739
 msgid "Each day"
-msgstr "Jeden Tag"
+msgstr "Elke dag"
 
 #. Each %1$s days; e.g. "Each 2 days"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:742
 msgid "Each %1$s days"
-msgstr "Alle %1$s Tage"
+msgstr "Elke %1$s dagen"
 
 #. Each week on %1$s; e.g. "Each week on Monday"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:745
 msgid "Each week on %1$s"
-msgstr "Jede Woche am %1$s"
+msgstr "Elke week op %1$s"
 
 #. Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:748
 msgid "Each %1$s weeks on %2$s"
-msgstr "Alle %1$s Wochen am %2$s"
+msgstr "Elke %1$s weken op %2$s"
 
 #. On %1$s day every month; e.g. "On 1st day every month"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:751
 msgid "On %1$s day every month"
-msgstr "Am %1$s Tag jeden Monats"
+msgstr "Op de %1$se dag van elke maand"
 
 #. On %1$s day every %2$s month; e.g. "On 1st day every 2nd month"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:754
 msgid "On %1$s day every %2$s month"
-msgstr "Am %1$s Tag jeden %2$s Monat"
+msgstr "Op de %1$se dag van elke %2$se maand"
 
 #. On %1$s %2$s each month; e.g. "On first Monday each month"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:757
 msgid "On %1$s %2$s each month"
-msgstr "Am %1$s %2$s jeden Monats"
+msgstr "Op de %1$s %2$s elke maand"
 
 #. On %1$s %2$s each %3$s month; e.g. "On first Monday each 3rd month"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:760
 msgid "On %1$s %2$s each %3$s month"
-msgstr "Am %1$s %2$s jeden %3$s Monats"
+msgstr "Op de %1$s %2$s elke %3$se maand"
 
 #. Each %1$s %2$s; e.g. "Each 10th October"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:763
 msgid "Each %1$s %2$s"
-msgstr "Jeden %1$s %2$s"
+msgstr "Elke %1$se %2$s"
 
 #. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:766
 msgid "On %1$s %2$s in %3$s"
-msgstr "Am %1$s %2$s in %3$s"
+msgstr "Elke %1$s %2$s in %3$s"
 
 #. ", ends after %1$s appointment(s)"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:769
 msgid ", ends after %1$s appointment(s)"
-msgstr ", endet nach %1$s Termin(en)"
+msgstr ", stopt na %1$s afspra(a)ak(en)"
 
 #. ", ends after %1$s task(s)"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:772
 msgid ", ends after %1$s task(s)"
-msgstr ", endet nach %1$s Aufgab(en)"
+msgstr ", stopt na %1$s ta(a)k(en)"
 
 #. ", ends on %1$s"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:775
 msgid ", ends on %1$s"
-msgstr ", endet am %1$s"
+msgstr ", eindigt op %1$s"
 
 #. -
 #. * Months
@@ -1495,62 +1550,62 @@ msgstr ", endet am %1$s"
 #. January
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:782
 msgid "January"
-msgstr "Januar"
+msgstr "januari"
 
 #. February
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:785
 msgid "February"
-msgstr "Februar"
+msgstr "februari"
 
 #. March
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:788
 msgid "March"
-msgstr "März"
+msgstr "maart"
 
 #. April
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:791
 msgid "April"
-msgstr "April"
+msgstr "april"
 
 #. May
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:794
 msgid "May"
-msgstr "Mai"
+msgstr "mei"
 
 #. June
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:797
 msgid "June"
-msgstr "Juni"
+msgstr "juni"
 
 #. July
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:800
 msgid "July"
-msgstr "Juli"
+msgstr "juli"
 
 #. August
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:803
 msgid "August"
-msgstr "August"
+msgstr "augustus"
 
 #. September
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:806
 msgid "September"
-msgstr "September"
+msgstr "september"
 
 #. October
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:809
 msgid "October"
-msgstr "Oktober"
+msgstr "oktober"
 
 #. November
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:812
 msgid "November"
-msgstr "November"
+msgstr "november"
 
 #. December
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:815
 msgid "December"
-msgstr "Dezember"
+msgstr "december"
 
 #. -
 #. * Weekdays
@@ -1558,48 +1613,48 @@ msgstr "Dezember"
 #. Monday
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:822
 msgid "Monday"
-msgstr "Montag"
+msgstr "maandag"
 
 #. Tuesday
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:825
 msgid "Tuesday"
-msgstr "Dienstag"
+msgstr "dinsdag"
 
 #. Wednesday
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:828
 msgid "Wednesday"
-msgstr "Mittwoch"
+msgstr "woensdag"
 
 #. Thursday
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:831
 msgid "Thursday"
-msgstr "Donnerstag"
+msgstr "donderdag"
 
 #. Friday
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:834
 msgid "Friday"
-msgstr "Freitag"
+msgstr "vrijdag"
 
 #. Saturday
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:837
 msgid "Saturday"
-msgstr "Samstag"
+msgstr "zaterdag"
 
 #. Sunday
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:840
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:843
 msgid "Sunday"
-msgstr "Sonntag"
+msgstr "zondag"
 
 #. Weekday
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:846
 msgid "Weekday"
-msgstr "Wochentag"
+msgstr "Weekdag"
 
 #. Weekend day
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:849
 msgid "Weekend day"
-msgstr "Wochenendtag"
+msgstr "Weekend"
 
 #. -
 #. * Monthly1 constants
@@ -1607,27 +1662,27 @@ msgstr "Wochenendtag"
 #. first
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:856
 msgid "first"
-msgstr "ersten"
+msgstr "eerste"
 
 #. second
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:859
 msgid "second"
-msgstr "zweiten"
+msgstr "tweede"
 
 #. third
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:862
 msgid "third"
-msgstr "dritten"
+msgstr "derde"
 
 #. fourth
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:865
 msgid "fourth"
-msgstr "vierten"
+msgstr "vierde"
 
 #. last
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:868
 msgid "last"
-msgstr "letzten"
+msgstr "laatste"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:2
 msgid "Africa/Abidjan"
@@ -1639,11 +1694,11 @@ msgstr "Afrika/Accra"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:4
 msgid "Africa/Addis Ababa"
-msgstr "Afrika/Addis Abeba"
+msgstr "Afrika/Addis Ababa "
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:5
 msgid "Africa/Algiers"
-msgstr "Afrika/Algerien"
+msgstr "Afrika/Algiers"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:6
 msgid "Africa/Asmara"
@@ -1651,7 +1706,7 @@ msgstr "Afrika/Asmara"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:7
 msgid "Africa/Asmera"
-msgstr "Africa/Asmera"
+msgstr "Afrika/Asmera"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:8
 msgid "Africa/Bamako"
@@ -1683,7 +1738,7 @@ msgstr "Afrika/Bujumbura"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:15
 msgid "Africa/Cairo"
-msgstr "Afrika/Kairo"
+msgstr "Afrika/Caïro"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:16
 msgid "Africa/Casablanca"
@@ -1707,7 +1762,7 @@ msgstr "Afrika/Dar es Salaam"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:21
 msgid "Africa/Djibouti"
-msgstr "Afrika/Dschibuti"
+msgstr "Afrika/Djibouti"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:22
 msgid "Africa/Douala"
@@ -1715,7 +1770,7 @@ msgstr "Afrika/Douala"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:23
 msgid "Africa/El Aaiun"
-msgstr "Afrika/El Aaiun"
+msgstr "Afrika/El Aaiún"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:24
 msgid "Africa/Freetown"
@@ -1739,7 +1794,7 @@ msgstr "Afrika/Kampala"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:29
 msgid "Africa/Khartoum"
-msgstr "Afrika/Khartoum"
+msgstr "Afrika/Khartoem"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:30
 msgid "Africa/Kigali"
@@ -1759,7 +1814,7 @@ msgstr "Afrika/Libreville"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:34
 msgid "Africa/Lome"
-msgstr "Afrika/Lome"
+msgstr "Afrika/Lomé"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:35
 msgid "Africa/Luanda"
@@ -1819,15 +1874,15 @@ msgstr "Afrika/Ouagadougou"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:49
 msgid "Africa/Porto-Novo"
-msgstr "Afrika/Porto Novo"
+msgstr "Afrika/Porto-Novo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:50
 msgid "Africa/Sao Tome"
-msgstr "Africa/Sao Tome"
+msgstr "Afrika/Sao Tomé"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:51
 msgid "Africa/Timbuktu"
-msgstr "Afrika/Timbuktu"
+msgstr "Afrika/Timboektoe"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:52
 msgid "Africa/Tripoli"
@@ -1863,55 +1918,55 @@ msgstr "Amerika/Araguaina"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:60
 msgid "America/Argentina/Buenos Aires"
-msgstr "Amerika/Argentinien/Buenos Aires"
+msgstr "Amerika/Argentinië/Buenos Aires"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:61
 msgid "America/Argentina/Catamarca"
-msgstr "Amerika/Argentinien/Catamarca"
+msgstr "Amerika/Argentinië/Catamarca"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:62
 msgid "America/Argentina/ComodRivadavia"
-msgstr "Amerika/Argentinien/ComodRivadavia"
+msgstr "Amerika/Argentinië/Comodoro Rivadavia"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:63
 msgid "America/Argentina/Cordoba"
-msgstr "Amerika/Argentinien/Cordoba"
+msgstr "Amerika/Argentinië/Cordoba"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:64
 msgid "America/Argentina/Jujuy"
-msgstr "Amerika/Argentinien/Jujuy"
+msgstr "Amerika/Argentinië/Jujuy"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:65
 msgid "America/Argentina/La Rioja"
-msgstr "Amerika/Argentinien/La Rioja"
+msgstr "Amerika/Argentinië/La Rioja"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:66
 msgid "America/Argentina/Mendoza"
-msgstr "Amerika/Argentinien/Mendoza"
+msgstr "Amerika/Argentinië/Mendoza"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:67
 msgid "America/Argentina/Rio Gallegos"
-msgstr "Amerika/Argentinien/Rio Gallegos"
+msgstr "Amerika/Argentinië/Río Gallegos"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:68
 msgid "America/Argentina/Salta"
-msgstr "Amerika/Argentinien/Salta"
+msgstr "Amerika/Argentinië/Salta"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:69
 msgid "America/Argentina/San Juan"
-msgstr "Amerika/Argentinien/San Juan"
+msgstr "Amerika/Argentinië/San Juan"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:70
 msgid "America/Argentina/San Luis"
-msgstr "Amerika/Argentinien/San Luis"
+msgstr "Amerika/Argentinië/San Luis"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:71
 msgid "America/Argentina/Tucuman"
-msgstr "Amerika/Argentinien/Tucuman"
+msgstr "Amerika/Argentinië/Tucuman"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:72
 msgid "America/Argentina/Ushuaia"
-msgstr "Amerika/Argentinien/Ushuaia"
+msgstr "Amerika/Argentinië/Ushuaia"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:73
 msgid "America/Aruba"
@@ -1919,7 +1974,7 @@ msgstr "Amerika/Aruba"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:74
 msgid "America/Asuncion"
-msgstr "Amerika/Asuncion"
+msgstr "Amerika/Asunción"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:75
 msgid "America/Atikokan"
@@ -1975,7 +2030,7 @@ msgstr "Amerika/Campo Grande"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:88
 msgid "America/Cancun"
-msgstr "Amerika/Cancun"
+msgstr "Amerika/Cancún"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:89
 msgid "America/Caracas"
@@ -1991,7 +2046,7 @@ msgstr "Amerika/Cayenne"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:92
 msgid "America/Cayman"
-msgstr "Amerika/Cayman"
+msgstr "Amerika/Kaaimaneilanden"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:93
 msgid "America/Chicago"
@@ -2007,7 +2062,7 @@ msgstr "Amerika/Coral Harbour"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:96
 msgid "America/Cordoba"
-msgstr "Amerika/Cordoba"
+msgstr "Amerika/Córdoba"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:97
 msgid "America/Costa Rica"
@@ -2015,11 +2070,11 @@ msgstr "Amerika/Costa Rica"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:98
 msgid "America/Cuiaba"
-msgstr "Amerika/Cuiaba"
+msgstr "Amerika/Cuiabá"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:99
 msgid "America/Curacao"
-msgstr "Amerika/Curacao"
+msgstr "Amerika/Curaçao"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:100
 msgid "America/Danmarkshavn"
@@ -2051,7 +2106,7 @@ msgstr "Amerika/Edmonton"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:107
 msgid "America/Eirunepe"
-msgstr "Amerika/Eirunepe"
+msgstr "Amerika/Eirunepé"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:108
 msgid "America/El Salvador"
@@ -2111,7 +2166,7 @@ msgstr "Amerika/Halifax"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:122
 msgid "America/Havana"
-msgstr "Amerika/Havanna"
+msgstr "Amerika/Havana"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:123
 msgid "America/Hermosillo"
@@ -2163,7 +2218,7 @@ msgstr "Amerika/Iqaluit"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:135
 msgid "America/Jamaica"
-msgstr "Amerika/Jamaika"
+msgstr "Amerika/Jamaica"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:136
 msgid "America/Jujuy"
@@ -2183,7 +2238,7 @@ msgstr "Amerika/Kentucky/Monticello"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:140
 msgid "America/Knox IN"
-msgstr "Amerika/Knox IN"
+msgstr "Amerika/Knox (IN)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:141
 msgid "America/La Paz"
@@ -2239,7 +2294,7 @@ msgstr "Amerika/Merida"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:154
 msgid "America/Mexico City"
-msgstr "Amerika/Mexiko Stadt"
+msgstr "Amerika/Mexico-Stad"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:155
 msgid "America/Miquelon"
@@ -2371,7 +2426,7 @@ msgstr "Amerika/Santo Domingo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:187
 msgid "America/Sao Paulo"
-msgstr "Amerika/Sao Paulo"
+msgstr "Amerika/São Paulo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:188
 msgid "America/Scoresbysund"
@@ -2383,27 +2438,27 @@ msgstr "Amerika/Shiprock"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:190
 msgid "America/St Barthelemy"
-msgstr "Amerika/St Barthelemy"
+msgstr "Amerika/Saint-Barthélemy"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:191
 msgid "America/St Johns"
-msgstr "Amerika/St Johns"
+msgstr "Amerika/St. John's"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:192
 msgid "America/St Kitts"
-msgstr "Amerika/St Kitts"
+msgstr "Amerika/Saint Kitts"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:193
 msgid "America/St Lucia"
-msgstr "Amerika/St Lucia"
+msgstr "Amerika/Saint Lucia"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:194
 msgid "America/St Thomas"
-msgstr "Amerika/St Thomas"
+msgstr "Amerika/Saint Thomas"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:195
 msgid "America/St Vincent"
-msgstr "Amerika/St Vincent"
+msgstr "Amerika/Saint-Vincent"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:196
 msgid "America/Swift Current"
@@ -2459,619 +2514,619 @@ msgstr "Amerika/Yellowknife"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:209
 msgid "Antarctica/Casey"
-msgstr "Antarktik/Casey"
+msgstr "Antarctica/Casey"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:210
 msgid "Antarctica/Davis"
-msgstr "Antarktik/Davis"
+msgstr "Antarctica/Davis"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:211
 msgid "Antarctica/DumontDUrville"
-msgstr "Antarktik/DumontDUrville"
+msgstr "Antarctica/Dumont d'Urville"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:212
 msgid "Antarctica/Mawson"
-msgstr "Antarktik/Mawson"
+msgstr "Antarctica/Mawson"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:213
 msgid "Antarctica/McMurdo"
-msgstr "Antarktik/McMurdo"
+msgstr "Antarctica/McMurdo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:214
 msgid "Antarctica/Palmer"
-msgstr "Antarktik/Palmer"
+msgstr "Antarctica/Palmer"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:215
 msgid "Antarctica/Rothera"
-msgstr "Antarktik/Rothera"
+msgstr "Antarctica/Rothera"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:216
 msgid "Antarctica/South Pole"
-msgstr "Antarktik/Südpol"
+msgstr "Antarctica/Zuidpool"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:217
 msgid "Antarctica/Syowa"
-msgstr "Antarktik/Syowa"
+msgstr "Antarctica/Syowa"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:218
 msgid "Antarctica/Vostok"
-msgstr "Antarktik/Vostok"
+msgstr "Antarctica/Vostok"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:219
 msgid "Arctic/Longyearbyen"
-msgstr "Arctic/Longyearbyen"
+msgstr "Arctis/Longyearbyen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:220
 msgid "Asia/Aden"
-msgstr "Asien/Aden"
+msgstr "Azië/Aden"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:221
 msgid "Asia/Almaty"
-msgstr "Asien/Almaty"
+msgstr "Azië/Almaty"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:222
 msgid "Asia/Amman"
-msgstr "Asien/Amman"
+msgstr "Azië/Amman"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:223
 msgid "Asia/Anadyr"
-msgstr "Asien/Anadyr"
+msgstr "Azië/Anadyr"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:224
 msgid "Asia/Aqtau"
-msgstr "Asien/Aqtau"
+msgstr "Azië/Aqtau"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:225
 msgid "Asia/Aqtobe"
-msgstr "Asien/Aqtobe"
+msgstr "Azië/Aqtobe"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:226
 msgid "Asia/Ashgabat"
-msgstr "Asien/Ashgabat"
+msgstr "Azië/Ashgabat"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:227
 msgid "Asia/Ashkhabad"
-msgstr "Asia/Ashkhabad"
+msgstr "Azië/Asjchabad"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:228
 msgid "Asia/Baghdad"
-msgstr "Asien/Baghdad"
+msgstr "Azië/Bagdad"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:229
 msgid "Asia/Bahrain"
-msgstr "Asien/Bahrain"
+msgstr "Azië/Bahrein"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:230
 msgid "Asia/Baku"
-msgstr "Asien/Baku"
+msgstr "Azië/Baku"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:231
 msgid "Asia/Bangkok"
-msgstr "Asien/Bangkok"
+msgstr "Azië/Bangkok"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:232
 msgid "Asia/Beirut"
-msgstr "Asien/Beirut"
+msgstr "Azië/Beiroet"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:233
 msgid "Asia/Bishkek"
-msgstr "Asien/Bishkek"
+msgstr "Azië/Bishkek"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:234
 msgid "Asia/Brunei"
-msgstr "Asien/Brunei"
+msgstr "Azië/Brunei"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:235
 msgid "Asia/Calcutta"
-msgstr "Asien/Kalkutta"
+msgstr "Azië/Calcutta"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:236
 msgid "Asia/Choibalsan"
-msgstr "Asien/Choibalsan"
+msgstr "Azië/Tsjojbalsan"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:237
 msgid "Asia/Chongqing"
-msgstr "Asien/Chongqing"
+msgstr "Azië/Chongqing"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:238
 msgid "Asia/Chungking"
-msgstr "Asien/Chungking"
+msgstr "Azië/Tsjoengking"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:239
 msgid "Asia/Colombo"
-msgstr "Asien/Colombo"
+msgstr "Azië/Colombo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:240
 msgid "Asia/Dacca"
-msgstr "Asien/Dacca"
+msgstr "Azië/Dacca"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:241
 msgid "Asia/Damascus"
-msgstr "Asien/Damaskus"
+msgstr "Azië/Damascus"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:242
 msgid "Asia/Dhaka"
-msgstr "Asien/Dhaka"
+msgstr "Azië/Dhaka"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:243
 msgid "Asia/Dili"
-msgstr "Asien/Dili"
+msgstr "Azië/Dili"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:244
 msgid "Asia/Dubai"
-msgstr "Asien/Dubai"
+msgstr "Azië/Dubai"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:245
 msgid "Asia/Dushanbe"
-msgstr "Asien/Dushanbe"
+msgstr "Azië/Dushanbe"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:246
 msgid "Asia/Gaza"
-msgstr "Asien/Gaza"
+msgstr "Azië/Gaza"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:247
 msgid "Asia/Harbin"
-msgstr "Asien/Harbin"
+msgstr "Azië/Harbin"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:248
 msgid "Asia/Ho Chi Minh"
-msgstr "Asien/Ho-Chi-Minh-Stadt"
+msgstr "Azië/Ho Chi Minhstad"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:249
 msgid "Asia/Hong Kong"
-msgstr "Asien/Hongkong"
+msgstr "Azië/Hong Kong"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:250
 msgid "Asia/Hovd"
-msgstr "Asien/Hovd"
+msgstr "Azië/Hovd"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:251
 msgid "Asia/Irkutsk"
-msgstr "Asien/Irkutsk"
+msgstr "Azië/Irkoetsk"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:252
 msgid "Asia/Istanbul"
-msgstr "Asien/Istanbul"
+msgstr "Azië/Istanbul"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:253
 msgid "Asia/Jakarta"
-msgstr "Asien/Jakarta"
+msgstr "Azië/Jakarta"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:254
 msgid "Asia/Jayapura"
-msgstr "Asien/Jayapura"
+msgstr "Azië/Jayapura"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:255
 msgid "Asia/Jerusalem"
-msgstr "Asien/Jerusalem"
+msgstr "Azië/Jerusalem"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:256
 msgid "Asia/Kabul"
-msgstr "Asien/Kabul"
+msgstr "Azië/Kabul"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:257
 msgid "Asia/Kamchatka"
-msgstr "Asien/Kamchatka"
+msgstr "Azië/Kamtsjatka"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:258
 msgid "Asia/Karachi"
-msgstr "Asien/Karachi"
+msgstr "Azië/Karachi"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:259
 msgid "Asia/Kashgar"
-msgstr "Asien/Kashgar"
+msgstr "Azië/Kashgar"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:260
 msgid "Asia/Kathmandu"
-msgstr "Asien/Katmandu"
+msgstr "Azië/Katmandu"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:261
 msgid "Asia/Katmandu"
-msgstr "Asien/Katmandu"
+msgstr "Azië/Katmandu"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:262
 msgid "Asia/Kolkata"
-msgstr "Asien/Kolkata"
+msgstr "Azië/Kolkata"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:263
 msgid "Asia/Krasnoyarsk"
-msgstr "Asien/Krasnoyarsk"
+msgstr "Azië/Krasnoyarsk"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:264
 msgid "Asia/Kuala Lumpur"
-msgstr "Asien/Kuala Lumpur"
+msgstr "Azië/Kuala Lumpur"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:265
 msgid "Asia/Kuching"
-msgstr "Asien/Kuching"
+msgstr "Azië/Kuching"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:266
 msgid "Asia/Kuwait"
-msgstr "Asien/Kuwait"
+msgstr "Azië/Koeweit"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:267
 msgid "Asia/Macao"
-msgstr "Asien/Macao"
+msgstr "Azië/Macao"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:268
 msgid "Asia/Macau"
-msgstr "Asien/Macau"
+msgstr "Azië/Macau"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:269
 msgid "Asia/Magadan"
-msgstr "Asien/Magadan"
+msgstr "Azië/Magadan"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:270
 msgid "Asia/Makassar"
-msgstr "Asien/Makassar"
+msgstr "Azië/Makassar"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:271
 msgid "Asia/Manila"
-msgstr "Asien/Manila"
+msgstr "Azië/Manila"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:272
 msgid "Asia/Muscat"
-msgstr "Asien/Muscat"
+msgstr "Azië/Muscat"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:273
 msgid "Asia/Nicosia"
-msgstr "Asien/Nicosia"
+msgstr "Azië/Nicosia"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:274
 msgid "Asia/Novosibirsk"
-msgstr "Asien/Nowosibirsk"
+msgstr "Azië/Novosibirsk"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:275
 msgid "Asia/Omsk"
-msgstr "Asien/Omsk"
+msgstr "Azië/Omsk"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:276
 msgid "Asia/Oral"
-msgstr "Asien/Oral"
+msgstr "Azië/Oral"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:277
 msgid "Asia/Phnom Penh"
-msgstr "Asien/Phnom Penh"
+msgstr "Azië/Phnom-Penh"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:278
 msgid "Asia/Pontianak"
-msgstr "Asien/Pontianak"
+msgstr "Azië/Pontianak"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:279
 msgid "Asia/Pyongyang"
-msgstr "Asien/Pyongyang"
+msgstr "Azië/Pyongyang"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:280
 msgid "Asia/Qatar"
-msgstr "Asien/Katar"
+msgstr "Azië/Qatar"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:281
 msgid "Asia/Qyzylorda"
-msgstr "Asien/Qyzylorda"
+msgstr "Azië/Qyzylorda"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:282
 msgid "Asia/Rangoon"
-msgstr "Asien/Rangoon"
+msgstr "Azië/Rangoon"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:283
 msgid "Asia/Riyadh"
-msgstr "Asien/Riyadh"
+msgstr "Azië/Riyadh"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:284
 msgid "Asia/Riyadh87"
-msgstr "Asien/Riyadh87"
+msgstr "Azië/Riyadh87"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:285
 msgid "Asia/Riyadh88"
-msgstr "Asien/Riyadh88"
+msgstr "Azië/Riyadh88"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:286
 msgid "Asia/Riyadh89"
-msgstr "Asien/Riyadh89"
+msgstr "Azië/Riyadh89"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:287
 msgid "Asia/Saigon"
-msgstr "Asien/Saigon"
+msgstr "Azië/Saigon"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:288
 msgid "Asia/Sakhalin"
-msgstr "Asien/Sakhalin"
+msgstr "Azië/Sakhalin"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:289
 msgid "Asia/Samarkand"
-msgstr "Asien/Samarkand"
+msgstr "Azië/Samarkand"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:290
 msgid "Asia/Seoul"
-msgstr "Asien/Seoul"
+msgstr "Azië/Seoul"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:291
 msgid "Asia/Shanghai"
-msgstr "Asien/Shanghai"
+msgstr "Azië/Shanghai"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:292
 msgid "Asia/Singapore"
-msgstr "Asien/Singapore"
+msgstr "Azië/Singapore"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:293
 msgid "Asia/Taipei"
-msgstr "Asien/Taipei"
+msgstr "Azië/Taipei"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:294
 msgid "Asia/Tashkent"
-msgstr "Asien/Taschkent"
+msgstr "Azië/Tashkent"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:295
 msgid "Asia/Tbilisi"
-msgstr "Asien/Tbilisi"
+msgstr "Azië/Tbilisi"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:296
 msgid "Asia/Tehran"
-msgstr "Asien/Teheran"
+msgstr "Azië/Teheran"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:297
 msgid "Asia/Tel Aviv"
-msgstr "Asien/Tel Aviv"
+msgstr "Azië/Tel Aviv"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:298
 msgid "Asia/Thimbu"
-msgstr "Asien/Thimbu"
+msgstr "Azië/Thimbu"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:299
 msgid "Asia/Thimphu"
-msgstr "Asien/Thimphu"
+msgstr "Azië/Thimphu"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:300
 msgid "Asia/Tokyo"
-msgstr "Asien/Tokio"
+msgstr "Azië/Tokyo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:301
 msgid "Asia/Ujung Pandang"
-msgstr "Asien/Ujung Pandang"
+msgstr "Azië/Makassar"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:302
 msgid "Asia/Ulaanbaatar"
-msgstr "Asien/Ulan-Bator"
+msgstr "Azië/Ulaanbaatar"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:303
 msgid "Asia/Ulan Bator"
-msgstr "Asien/Ulan-Bator"
+msgstr "Azië/Ulan Bator"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:304
 msgid "Asia/Urumqi"
-msgstr "Asien/Urumqi"
+msgstr "Azië/Urumqi"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:305
 msgid "Asia/Vientiane"
-msgstr "Asien/Vientiane"
+msgstr "Azië/Vientiane"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:306
 msgid "Asia/Vladivostok"
-msgstr "Asien/Wladiwostok"
+msgstr "Azië/Vladivostok"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:307
 msgid "Asia/Yakutsk"
-msgstr "Asien/Yakutsk"
+msgstr "Azië/Jakoetsk"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:308
 msgid "Asia/Yekaterinburg"
-msgstr "Asien/Yekaterinburg"
+msgstr "Azië/Yekaterinburg"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:309
 msgid "Asia/Yerevan"
-msgstr "Asien/Yerevan"
+msgstr "Azië/Yerevan"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:310
 msgid "Atlantic/Azores"
-msgstr "Atlantik/Azoren"
+msgstr "Atlantische Oceaan/Azores"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:311
 msgid "Atlantic/Bermuda"
-msgstr "Atlantik/Bermudas"
+msgstr "Atlantische Oceaan/Bermuda"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:312
 msgid "Atlantic/Canary"
-msgstr "Atlantik/Kanaren"
+msgstr "Atlantische Oceaan/Canarische Eilanden"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:313
 msgid "Atlantic/Cape Verde"
-msgstr "Atlantik/Kapverden"
+msgstr "Atlantische Oceaan/Kaapverdië"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:314
 msgid "Atlantic/Faeroe"
-msgstr "Atlantik/Färöer"
+msgstr "Atlantische Oceaan/Faeroe"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:315
 msgid "Atlantic/Faroe"
-msgstr "Atlantik/Färöer"
+msgstr "Atlantische Oceaan/Faroe"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:316
 msgid "Atlantic/Jan Mayen"
-msgstr "Atlantik/Jan Mayen"
+msgstr "Atlantische Oceaan/Jan Mayen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:317
 msgid "Atlantic/Madeira"
-msgstr "Atlantik/Madeira"
+msgstr "Atlantische Oceaan/Madeira"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:318
 msgid "Atlantic/Reykjavik"
-msgstr "Atlantik/Reykjavik"
+msgstr "Atlantische Oceaan/Reykjavik"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:319
 msgid "Atlantic/South Georgia"
-msgstr "Atlantik/South Georgia"
+msgstr "Atlantische Oceaan/Zuid Georgia"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:320
 msgid "Atlantic/St Helena"
-msgstr "Atlantik/St Helena"
+msgstr "Atlantische Oceaan/Sint-Helena"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:321
 msgid "Atlantic/Stanley"
-msgstr "Atlantik/Stanley"
+msgstr "Atlantische Oceaan/Stanley"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:322
 msgid "Australia/ACT"
-msgstr "Australien/ACT"
+msgstr "Australië/ACT"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:323
 msgid "Australia/Adelaide"
-msgstr "Australien/Adelaide"
+msgstr "Australië/Adelaide"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:324
 msgid "Australia/Brisbane"
-msgstr "Australien/Brisbane"
+msgstr "Australië/Brisbane"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:325
 msgid "Australia/Broken Hill"
-msgstr "Australien/Broken Hill"
+msgstr "Australië/Broken Hill"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:326
 msgid "Australia/Canberra"
-msgstr "Australien/Canberra"
+msgstr "Australië/Canberra"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:327
 msgid "Australia/Currie"
-msgstr "Australien/Currie"
+msgstr "Australië/Currie"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:328
 msgid "Australia/Darwin"
-msgstr "Australien/Darwin"
+msgstr "Australië/Darwin"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:329
 msgid "Australia/Eucla"
-msgstr "Australien/Eucla"
+msgstr "Australië/Eucla"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:330
 msgid "Australia/Hobart"
-msgstr "Australien/Hobart"
+msgstr "Australië/Hobart"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:331
 msgid "Australia/LHI"
-msgstr "Australien/LHI"
+msgstr "Australië/LHI"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:332
 msgid "Australia/Lindeman"
-msgstr "Australien/Lindeman"
+msgstr "Australië/Lindeman"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:333
 msgid "Australia/Lord Howe"
-msgstr "Australien/Lord Howe"
+msgstr "Australië/Lord Howe"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:334
 msgid "Australia/Melbourne"
-msgstr "Australien/Melbourne"
+msgstr "Australië/Melbourne"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:335
 msgid "Australia/NSW"
-msgstr "Australien/NSW"
+msgstr "Australië/NSW"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:336
 msgid "Australia/North"
-msgstr "Australien/Nord"
+msgstr "Australië/Noord"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:337
 msgid "Australia/Perth"
-msgstr "Australien/Perth"
+msgstr "Australië/Perth"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:338
 msgid "Australia/Queensland"
-msgstr "Australien/Queensland"
+msgstr "Australië/Queensland"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:339
 msgid "Australia/South"
-msgstr "Australien/Süd"
+msgstr "Australië/Zuid"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:340
 msgid "Australia/Sydney"
-msgstr "Australien/Sydney"
+msgstr "Australië/Sydney"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:341
 msgid "Australia/Tasmania"
-msgstr "Australien/Tasmanien"
+msgstr "Australië/Tasmanië"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:342
 msgid "Australia/Victoria"
-msgstr "Australien/Victoria"
+msgstr "Australië/Victoria"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:343
 msgid "Australia/West"
-msgstr "Australien/West"
+msgstr "Australië/West"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:344
 msgid "Australia/Yancowinna"
-msgstr "Australien/Yancowinna"
+msgstr "Australië/Yancowinna"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:345
 msgid "Brazil/Acre"
-msgstr "Brasilien/Acre"
+msgstr "Brazilië/Acre"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:346
 msgid "Brazil/DeNoronha"
-msgstr "Brasilien/DeNoronha"
+msgstr "Brazilië/De Noronha"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:347
 msgid "Brazil/East"
-msgstr "Brasilien/Ost"
+msgstr "Brazilië/Oost"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:348
 msgid "Brazil/West"
-msgstr "Brasilien/West"
+msgstr "Brazilië/West"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:349
 msgid "Canada/Atlantic"
-msgstr "Kanada/Atlantik"
+msgstr "Canada/Atlantic"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:350
 msgid "Canada/Central"
-msgstr "Kanada/Central"
+msgstr "Canada/Centraal"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:351
 msgid "Canada/East-Saskatchewan"
-msgstr "Kanada/Ost-Saskatchewan"
+msgstr "Canada/Oost-Saskatchewan"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:352
 msgid "Canada/Eastern"
-msgstr "Kanada/Ost"
+msgstr "Canada/Oost"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:353
 msgid "Canada/Mountain"
-msgstr "Kanada/Mountain"
+msgstr "Canada/Mountain"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:354
 msgid "Canada/Newfoundland"
-msgstr "Kanada/Neufundland"
+msgstr "Canada/Newfoundland"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:355
 msgid "Canada/Pacific"
-msgstr "Kanada/Pazifik"
+msgstr "Canada/Pacific"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:356
 msgid "Canada/Saskatchewan"
-msgstr "Kanada/Saskatchewan"
+msgstr "Canada/Saskatchewan"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:357
 msgid "Canada/Yukon"
-msgstr "Kanada/Yukon"
+msgstr "Canada/Yukon"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:358
 msgid "Chile/Continental"
-msgstr "Chile/Kontinent"
+msgstr "Chili/Continentaal"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:359
 msgid "Chile/EasterIsland"
-msgstr "Chile/Osterinsel"
+msgstr "Chili/Paaseiland"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:360
 msgid "Cuba"
-msgstr "Kuba"
+msgstr "Cuba"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:361
 msgid "Egypt"
-msgstr "Ägypten"
+msgstr "Egypte"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:362
 msgid "Eire"
-msgstr "Irland"
+msgstr "Ierland"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:363
 msgid "Europe/Amsterdam"
@@ -3083,7 +3138,7 @@ msgstr "Europa/Andorra"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:365
 msgid "Europe/Athens"
-msgstr "Europa/Athen"
+msgstr "Europa/Athene"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:366
 msgid "Europe/Belfast"
@@ -3091,11 +3146,11 @@ msgstr "Europa/Belfast"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:367
 msgid "Europe/Belgrade"
-msgstr "Europa/Belgrad"
+msgstr "Europa/Belgrado"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:368
 msgid "Europe/Berlin"
-msgstr "Europa/Berlin"
+msgstr "Europa/Berlijn"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:369
 msgid "Europe/Bratislava"
@@ -3103,11 +3158,11 @@ msgstr "Europa/Bratislava"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:370
 msgid "Europe/Brussels"
-msgstr "Europa/Brüssel"
+msgstr "Europa/Brussel"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:371
 msgid "Europe/Bucharest"
-msgstr "Europa/Bukarest"
+msgstr "Europa/Bucharest"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:372
 msgid "Europe/Budapest"
@@ -3155,7 +3210,7 @@ msgstr "Europa/Kaliningrad"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:383
 msgid "Europe/Kiev"
-msgstr "Europa/Kiew"
+msgstr "Europa/Kiev"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:384
 msgid "Europe/Lisbon"
@@ -3195,7 +3250,7 @@ msgstr "Europa/Monaco"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:393
 msgid "Europe/Moscow"
-msgstr "Europa/Moskau"
+msgstr "Europa/Moskou"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:394
 msgid "Europe/Nicosia"
@@ -3207,7 +3262,7 @@ msgstr "Europa/Oslo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:396
 msgid "Europe/Paris"
-msgstr "Europa/Paris"
+msgstr "Europa/Parijs"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:397
 msgid "Europe/Podgorica"
@@ -3215,7 +3270,7 @@ msgstr "Europa/Podgorica"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:398
 msgid "Europe/Prague"
-msgstr "Europa/Prag"
+msgstr "Europa/Praag"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:399
 msgid "Europe/Riga"
@@ -3223,7 +3278,7 @@ msgstr "Europa/Riga"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:400
 msgid "Europe/Rome"
-msgstr "Europa/Rom"
+msgstr "Europa/Rome"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:401
 msgid "Europe/Samara"
@@ -3275,11 +3330,11 @@ msgstr "Europa/Vaduz"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:413
 msgid "Europe/Vatican"
-msgstr "Europa/Vatikan"
+msgstr "Europa/Vaticaanstad"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:414
 msgid "Europe/Vienna"
-msgstr "Europa/Wien"
+msgstr "Europa/Wenen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:415
 msgid "Europe/Vilnius"
@@ -3287,7 +3342,7 @@ msgstr "Europa/Vilnius"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:416
 msgid "Europe/Volgograd"
-msgstr "Europa/Wolgograd"
+msgstr "Europa/Volgograd"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:417
 msgid "Europe/Warsaw"
@@ -3303,7 +3358,7 @@ msgstr "Europa/Zaporozhye"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:420
 msgid "Europe/Zurich"
-msgstr "Europa/Zürich"
+msgstr "Europa/Zurich"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:421
 msgid "Greenwich"
@@ -3311,55 +3366,55 @@ msgstr "Greenwich"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:422
 msgid "Hongkong"
-msgstr "Hongkong"
+msgstr "Hong Kong"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:423
 msgid "Iceland"
-msgstr "Island"
+msgstr "IJsland"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:424
 msgid "Indian/Antananarivo"
-msgstr "Indien/Antananarivo"
+msgstr "Indische Oceaan/Antananarivo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:425
 msgid "Indian/Chagos"
-msgstr "Indien/Chagos"
+msgstr "Indische Oceaan/Chagos"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:426
 msgid "Indian/Christmas"
-msgstr "Indien/Christmas"
+msgstr "Indische Oceaan/Christmaseiland"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:427
 msgid "Indian/Cocos"
-msgstr "Indien/Cocos"
+msgstr "Indische Oceaan/Cocoseilanden"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:428
 msgid "Indian/Comoro"
-msgstr "Indien/Comoro"
+msgstr "Indische Oceaan/Comoro"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:429
 msgid "Indian/Kerguelen"
-msgstr "Indien/Kerguelen"
+msgstr "Indische Oceaan/Kerguelen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:430
 msgid "Indian/Mahe"
-msgstr "Indien/Mahe"
+msgstr "Indische Oceaan/Mahe"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:431
 msgid "Indian/Maldives"
-msgstr "Indien/Malediven"
+msgstr "Indische Oceaan/Maldiven"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:432
 msgid "Indian/Mauritius"
-msgstr "Indien/Mauritius"
+msgstr "Indische Oceaan/Mauritius"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:433
 msgid "Indian/Mayotte"
-msgstr "Indien/Mayotte"
+msgstr "Indische Oceaan/Mayotte"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:434
 msgid "Indian/Reunion"
-msgstr "Indien/Reunion"
+msgstr "Indische Oceaan/Reunion"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:435
 msgid "Iran"
@@ -3367,11 +3422,11 @@ msgstr "Iran"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:436
 msgid "Israel"
-msgstr "Israel"
+msgstr "Israël"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:437
 msgid "Jamaica"
-msgstr "Jamaika"
+msgstr "Jamaica"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:438
 msgid "Japan"
@@ -3383,31 +3438,31 @@ msgstr "Kwajalein"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:440
 msgid "Libya"
-msgstr "Libyen"
+msgstr "Libië"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:441
 msgid "Mexico/BajaNorte"
-msgstr "Mexiko/BajaNorte"
+msgstr "Mexico/BajaNorte"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:442
 msgid "Mexico/BajaSur"
-msgstr "Mexiko/BajaSur"
+msgstr "Mexico/BajaSur"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:443
 msgid "Mexico/General"
-msgstr "Mexico/General"
+msgstr "Mexico/Algemeen"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:444
 msgid "Mideast/Riyadh87"
-msgstr "Mittlerer Osten/Riad87"
+msgstr "Midden Oosten/Riyadh87"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:445
 msgid "Mideast/Riyadh88"
-msgstr "Mittlerer Osten/Riad88"
+msgstr "Midden Oosten/Riyadh88"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:446
 msgid "Mideast/Riyadh89"
-msgstr "Mittlerer Osten/Riad89"
+msgstr "Midden Oosten/Riyadh89"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:447
 msgid "Navajo"
@@ -3415,163 +3470,163 @@ msgstr "Navajo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:448
 msgid "Pacific/Apia"
-msgstr "Pazifik/Apia"
+msgstr "Grote Oceaan/Apia"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:449
 msgid "Pacific/Auckland"
-msgstr "Pazifik/Auckland"
+msgstr "Grote Oceaan/Auckland"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:450
 msgid "Pacific/Chatham"
-msgstr "Pazifik/Chatham"
+msgstr "Grote Oceaan/Chatham"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:451
 msgid "Pacific/Easter"
-msgstr "Pazifik/Easter"
+msgstr "Grote Oceaan/Paaseiland"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:452
 msgid "Pacific/Efate"
-msgstr "Pazifik/Efate"
+msgstr "Grote Oceaan/Efate"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:453
 msgid "Pacific/Enderbury"
-msgstr "Pazifik/Enderbury"
+msgstr "Grote Oceaan/Enderbury"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:454
 msgid "Pacific/Fakaofo"
-msgstr "Pazifik/Fakaofo"
+msgstr "Grote Oceaan/Fakaofo"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:455
 msgid "Pacific/Fiji"
-msgstr "Pazifik/Fidschi"
+msgstr "Grote Oceaan/Fiji"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:456
 msgid "Pacific/Funafuti"
-msgstr "Pazifik/Funafuti"
+msgstr "Grote Oceaan/Funafuti"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:457
 msgid "Pacific/Galapagos"
-msgstr "Pazifik/Galapagos"
+msgstr "Grote Oceaan/Galapagos"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:458
 msgid "Pacific/Gambier"
-msgstr "Pazifik/Gambier"
+msgstr "Grote Oceaan/Gambier"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:459
 msgid "Pacific/Guadalcanal"
-msgstr "Pazifik/Guadalcanal"
+msgstr "Grote Oceaan/Guadalcanal"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:460
 msgid "Pacific/Guam"
-msgstr "Pazifik/Guam"
+msgstr "Grote Oceaan/Guam"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:461
 msgid "Pacific/Honolulu"
-msgstr "Pazifik/Honolulu"
+msgstr "Grote Oceaan/Honolulu"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:462
 msgid "Pacific/Johnston"
-msgstr "Pazifik/Johnston"
+msgstr "Grote Oceaan/Johnston"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:463
 msgid "Pacific/Kiritimati"
-msgstr "Pazifik/Kiritimati"
+msgstr "Grote Oceaan/Kiritimati"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:464
 msgid "Pacific/Kosrae"
-msgstr "Pazifik/Kosrae"
+msgstr "Grote Oceaan/Kosrae"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:465
 msgid "Pacific/Kwajalein"
-msgstr "Pazifik/Kwajalein"
+msgstr "Grote Oceaan/Kwajalein"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:466
 msgid "Pacific/Majuro"
-msgstr "Pazifik/Majuro"
+msgstr "Grote Oceaan/Majuro"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:467
 msgid "Pacific/Marquesas"
-msgstr "Pazifik/Marquesas"
+msgstr "Grote Oceaan/Marquesas"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:468
 msgid "Pacific/Midway"
-msgstr "Pazifik/Midway"
+msgstr "Grote Oceaan/Midway"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:469
 msgid "Pacific/Nauru"
-msgstr "Pazifik/Nauru"
+msgstr "Grote Oceaan/Nauru"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:470
 msgid "Pacific/Niue"
-msgstr "Pazifik/Niue"
+msgstr "Grote Oceaan/Niue"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:471
 msgid "Pacific/Norfolk"
-msgstr "Pazifik/Norfolk"
+msgstr "Grote Oceaan/Norfolk"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:472
 msgid "Pacific/Noumea"
-msgstr "Pazifik/Noumea"
+msgstr "Grote Oceaan/Noumea"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:473
 msgid "Pacific/Pago Pago"
-msgstr "Pazifik/Pago Pago"
+msgstr "Grote Oceaan/Pago Pago"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:474
 msgid "Pacific/Palau"
-msgstr "Pazifik/Palau"
+msgstr "Grote Oceaan/Palau"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:475
 msgid "Pacific/Pitcairn"
-msgstr "Pazifik/Pitcairn"
+msgstr "Grote Oceaan/Pitcairn"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:476
 msgid "Pacific/Ponape"
-msgstr "Pazifik/Ponape"
+msgstr "Grote Oceaan/Ponape"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:477
 msgid "Pacific/Port Moresby"
-msgstr "Pazifik/Port Moresby"
+msgstr "Grote Oceaan/Port Moresby"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:478
 msgid "Pacific/Rarotonga"
-msgstr "Pazifik/Rarotonga"
+msgstr "Grote Oceaan/Rarotonga"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:479
 msgid "Pacific/Saipan"
-msgstr "Pazifik/Saipan"
+msgstr "Grote Oceaan/Saipan"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:480
 msgid "Pacific/Samoa"
-msgstr "Pazifik/Samoa"
+msgstr "Grote Oceaan/Samoa"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:481
 msgid "Pacific/Tahiti"
-msgstr "Pazifik/Tahiti"
+msgstr "Grote Oceaan/Tahiti"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:482
 msgid "Pacific/Tarawa"
-msgstr "Pazifik/Tarawa"
+msgstr "Grote Oceaan/Tarawa"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:483
 msgid "Pacific/Tongatapu"
-msgstr "Pazifik/Tongatapu"
+msgstr "Grote Oceaan/Tongatapu"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:484
 msgid "Pacific/Truk"
-msgstr "Pazifik/Truk"
+msgstr "Grote Oceaan/Truk"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:485
 msgid "Pacific/Wake"
-msgstr "Pazifik/Wake"
+msgstr "Grote Oceaan/Wake"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:486
 msgid "Pacific/Wallis"
-msgstr "Pazifik/Wallis"
+msgstr "Grote Oceaan/Wallis"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:487
 msgid "Pacific/Yap"
-msgstr "Pazifik/Yap"
+msgstr "Grote Oceaan/Yap"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:488
 msgid "Poland"
@@ -3583,63 +3638,63 @@ msgstr "Portugal"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:490
 msgid "Singapore"
-msgstr "Singapur"
+msgstr "Singapore"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:491
 msgid "Turkey"
-msgstr "Türkei"
+msgstr "Turkije"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:492
 msgid "US/Alaska"
-msgstr "US/Alaska"
+msgstr "VS/Alaska"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:493
 msgid "US/Aleutian"
-msgstr "US/Aleutian"
+msgstr "VS/Aleutian"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:494
 msgid "US/Arizona"
-msgstr "US/Arizona"
+msgstr "VS/Arizona"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:495
 msgid "US/Central"
-msgstr "US/Central"
+msgstr "VS/Centraal"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:496
 msgid "US/East-Indiana"
-msgstr "US/Ost-Indiana"
+msgstr "VS/Oost-Indiana"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:497
 msgid "US/Eastern"
-msgstr "US/Osten"
+msgstr "VS/Oost"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:498
 msgid "US/Hawaii"
-msgstr "US/Hawaii"
+msgstr "VS/Hawaii"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:499
 msgid "US/Indiana-Starke"
-msgstr "US/Indiana-Starke"
+msgstr "VS/Indiana-Starke"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:500
 msgid "US/Michigan"
-msgstr "US/Michigan"
+msgstr "VS/Michigan"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:501
 msgid "US/Mountain"
-msgstr "US/Mountain"
+msgstr "VS/Mountain"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:502
 msgid "US/Pacific"
-msgstr "US/Pazifik"
+msgstr "VS/Pacific"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:503
 msgid "US/Pacific-New"
-msgstr "US/Pacific-New"
+msgstr "VS/Pacific-New"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:504
 msgid "US/Samoa"
-msgstr "US/Samoa"
+msgstr "VS/Samoa"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:505
 msgid "UTC"
@@ -3647,4 +3702,6 @@ msgstr "UTC"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/GUIMessages.java:506
 msgid "Zulu"
-msgstr "Zulu"
+msgstr "Zoeloe"
+
+
