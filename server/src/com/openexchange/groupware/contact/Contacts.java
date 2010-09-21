@@ -135,8 +135,6 @@ public final class Contacts {
 
     private static final String PROP_MAX_IMAGE_SIZE = "max_image_size";
 
-    private static final String ERR_UNABLE_TO_CLOSE_CON = "Unable to close Connection";
-
     private static final String ERR_UABLE_TO_ROLLBACK = "Unable to rollback SQL Insert";
 
     private static final String ERR_UNABLE_TO_CLOSE = "Unable to close Statement or ResultSet";
@@ -175,7 +173,7 @@ public final class Contacts {
         }
     }
 
-    private static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, ContactException {
+    private static byte[] scaleContactImage(final byte[] img, final String mime) throws OXConflictException, ContactException {
         if (null == mime) {
             throw ContactExceptionCodes.MIME_TYPE_NOT_DEFINED.create();
         }
@@ -183,28 +181,31 @@ public final class Contacts {
         final int scaledHeight = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_HEIGHT));
         final long max_size = Long.parseLong(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE));
 
+        final String myMime;
         if ((mime.toLowerCase().indexOf("jpg") != -1) || (mime.toLowerCase().indexOf("jpeg") != -1)) {
-            mime = "image/jpg";
+            myMime = "image/jpg";
         } else if ((mime.toLowerCase().indexOf("bmp") != -1)) {
-            mime = "image/bmp";
+            myMime = "image/bmp";
         } else if (mime.toLowerCase().indexOf("png") != -1) {
-            mime = "image/png";
+            myMime = "image/png";
+        } else {
+            myMime = mime;
         }
 
-        final String fileType = mime.substring(mime.indexOf('/') + 1);
+        final String fileType = myMime.substring(myMime.indexOf('/') + 1);
         boolean check = false;
         {
             final Set<String> allowedMime = new HashSet<String>(Arrays.asList(ImageIO.getReaderFormatNames()));
             check = allowedMime.contains(fileType);
         }
-        if (mime.toLowerCase().contains("gif")) {
+        if (myMime.toLowerCase().contains("gif")) {
             check = true;
         }
         if (img.length > max_size) {
             check = false;
         }
         if (!check) {
-            throw new OXConflictException(ContactExceptionCodes.IMAGE_SCALE_PROBLEM.create(mime, I(img.length), L(max_size)));
+            throw new OXConflictException(ContactExceptionCodes.IMAGE_SCALE_PROBLEM.create(myMime, I(img.length), L(max_size)));
         }
         BufferedImage bi = null;
         try {
@@ -225,7 +226,7 @@ public final class Contacts {
         int origType = bi.getType();
 
         if (DEBUG) {
-            final StringBuilder logi = new StringBuilder(128).append("OUR IMAGE -> mime=").append(mime).append(" / type=").append(origType).append(
+            final StringBuilder logi = new StringBuilder(128).append("OUR IMAGE -> mime=").append(myMime).append(" / type=").append(origType).append(
                 " / width=").append(origWidth).append(" / height=").append(origHeigh).append(" / byte[] size=").append(img.length);
             LOG.debug(logi.toString());
         }
@@ -1343,20 +1344,10 @@ public final class Contacts {
     }
 
     public static void writeDistributionListArrayUpdate(final DistributionListEntryObject[] dleos, final DistributionListEntryObject[] old_dleos, final int id, final int cid, final Connection writecon) throws OXException {
-
         DistributionListEntryObject new_one = null;
         DistributionListEntryObject old_one = null;
 
-        int sizey = 0;
-        if ((dleos != null) && (old_dleos != null)) {
-            sizey = dleos.length + old_dleos.length;
-        } else if ((dleos != null) && (old_dleos == null)) {
-            sizey = dleos.length;
-        } else if ((dleos == null) && (old_dleos != null)) {
-            sizey = old_dleos.length;
-        } else {
-            sizey = 1;
-        }
+        final int sizey = (dleos == null ? 0 : dleos.length) + (old_dleos == null ? 0 : old_dleos.length);
         final DistributionListEntryObject[] inserts = new DistributionListEntryObject[sizey];
         final DistributionListEntryObject[] updates = new DistributionListEntryObject[sizey];
         final DistributionListEntryObject[] deletes = new DistributionListEntryObject[sizey];
@@ -1365,46 +1356,48 @@ public final class Contacts {
         int update_count = 0;
         int delete_count = 0;
 
-        for (int i = 0; i < dleos.length; i++) { // this for;next goes to all new entries from the client
-            new_one = dleos[i];
-
-            if (new_one.containsEntryID() && (new_one.getEntryID() > 0)) { // this is a real contact entry in the distributionlist
-                boolean actions = false;
-
-                if (old_dleos != null) {
-                    for (int u = 0; u < old_dleos.length; u++) { // this for;next goes to all old entries from the server
-                        if (old_dleos[u] != null) { // maybe we have some empty entries here from previous checks
-                            old_one = old_dleos[u];
-
-                            if (new_one.searchDlistObject(old_one)) { // this will search the current entry in the old dlist
-                                if (!new_one.compareDlistObject(old_one)) {
-                                    // is this true the dlistentrie has not changed, is it false the dlistentry missmatches the old one
-                                    // ok the dlist has changed and needs to get updated
-                                    updates[insert_count] = new_one;
-                                    update_count++;
-                                    actions = true;
-                                } else {
-                                    actions = true;
-                                    // ignore this entry cuz it has not changed
+        if (null != dleos) {
+            for (int i = 0; i < dleos.length; i++) { // this for;next goes to all new entries from the client
+                new_one = dleos[i];
+        
+                if (new_one.containsEntryID() && (new_one.getEntryID() > 0)) { // this is a real contact entry in the distributionlist
+                    boolean actions = false;
+        
+                    if (old_dleos != null) {
+                        for (int u = 0; u < old_dleos.length; u++) { // this for;next goes to all old entries from the server
+                            if (old_dleos[u] != null) { // maybe we have some empty entries here from previous checks
+                                old_one = old_dleos[u];
+        
+                                if (new_one.searchDlistObject(old_one)) { // this will search the current entry in the old dlist
+                                    if (!new_one.compareDlistObject(old_one)) {
+                                        // is this true the dlistentrie has not changed, is it false the dlistentry missmatches the old one
+                                        // ok the dlist has changed and needs to get updated
+                                        updates[insert_count] = new_one;
+                                        update_count++;
+                                        actions = true;
+                                    } else {
+                                        actions = true;
+                                        // ignore this entry cuz it has not changed
+                                    }
+                                    // ok we have found a entry in the old list and we have done something with him no we must remove him
+                                    // from the old list cuz maybe he needs get deleted
+                                    old_dleos[u] = null;
+                                    break; // when is the entry is found we can leave the old list for the nex new entry
                                 }
-                                // ok we have found a entry in the old list and we have done something with him no we must remove him from
-                                // the old list cuz maybe he needs get deleted
-                                old_dleos[u] = null;
-                                break; // when is the entry is found we can leave the old list for the nex new entry
+                                // this old entry does not match the new one
+                                actions = false;
                             }
-                            // this old entry does not match the new one
-                            actions = false;
                         }
                     }
-                }
-                // we checked the old list and nothing was found. this means we have to insert this entry cuz it is new
-                if (!actions) {
+                    // we checked the old list and nothing was found. this means we have to insert this entry cuz it is new
+                    if (!actions) {
+                        inserts[insert_count] = new_one;
+                        insert_count++;
+                    }
+                } else { // this is an independent entry in a distributionlist and they get a normal insert
                     inserts[insert_count] = new_one;
                     insert_count++;
                 }
-            } else { // this is an independent entry in a distributionlist and they get a normal insert
-                inserts[insert_count] = new_one;
-                insert_count++;
             }
         }
 
@@ -1549,7 +1542,7 @@ public final class Contacts {
         }
     }
 
-    public static LinkEntryObject[] fillLinkArray(final Contact co, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readcon) throws OXException {
+    public static LinkEntryObject[] fillLinkArray(final Contact co, final int user, final Context ctx, final Connection readcon) throws OXException {
 
         Statement stmt = null;
         ResultSet rs = null;
@@ -1638,43 +1631,36 @@ public final class Contacts {
 
     public static void writeContactLinkArrayUpdate(final LinkEntryObject[] leos, final LinkEntryObject[] original, final int id, final int cid, final Connection writecon) throws OXException {
 
-        int sizey = 0;
-        if ((leos != null) && (original != null)) {
-            sizey = leos.length + original.length;
-        } else if ((leos != null) && (original == null)) {
-            sizey = leos.length;
-        } else if ((leos == null) && (original != null)) {
-            sizey = original.length;
-        } else {
-            sizey = 1;
-        }
+        final int sizey = (null == leos ? 0 : leos.length) + (null == original ? 0 : original.length);
         final LinkEntryObject[] inserts = new LinkEntryObject[sizey];
         final LinkEntryObject[] deletes = new LinkEntryObject[sizey];
         int delete_count = 0;
         int insert_count = 0;
 
-        for (int i = 0; i < leos.length; i++) {
-            final LinkEntryObject new_leo = leos[i];
-            boolean action = false;
-
-            if (original != null) {
-                for (int u = 0; u < original.length; u++) {
-                    final LinkEntryObject old_leo = original[u];
-
-                    if (new_leo.compare(old_leo)) {
-                        // found this link in the old ones
-                        original[u] = null;
-                        action = true;
-                        break;
+        if (null != leos) {
+            for (int i = 0; i < leos.length; i++) {
+                final LinkEntryObject new_leo = leos[i];
+                boolean action = false;
+    
+                if (original != null) {
+                    for (int u = 0; u < original.length; u++) {
+                        final LinkEntryObject old_leo = original[u];
+    
+                        if (new_leo.compare(old_leo)) {
+                            // found this link in the old ones
+                            original[u] = null;
+                            action = true;
+                            break;
+                        }
+                        // this one don't equal
+                        action = false;
                     }
-                    // this one don't equal
-                    action = false;
                 }
-            }
-            if (!action) {
-                // nothing found so it is a new one
-                inserts[insert_count] = new_leo;
-                insert_count++;
+                if (!action) {
+                    // nothing found so it is a new one
+                    inserts[insert_count] = new_leo;
+                    insert_count++;
+                }
             }
         }
         if (original != null) {
@@ -7934,7 +7920,7 @@ public final class Contacts {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
-                        co.setLinks(fillLinkArray(co, user, group, ctx, uc, readcon));
+                        co.setLinks(fillLinkArray(co, user, ctx, readcon));
                     }
                 } catch (final Exception e) {
                     LOG.error("Unable to load Links", e);
