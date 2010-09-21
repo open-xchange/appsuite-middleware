@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -382,6 +382,14 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Sep 06 2010 - choeger@open-xchange.com
+ - Bugfix #16812 - Updating on RHEL or SLES fails if admin modified
+ /opt/open-xchange/etc/admindaemon/User.properties
+* Tue Aug 24 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16576: Prefer command line password if environment password and command line password are defined.
+* Tue Aug 10 2010 - choeger@open-xchange.com
+ - Bugfix #16667 - [L3] No Polish translations for default mail folders in User.properties
+   added japanese and polish translations to configfile and added postinst code
 * Fri Jul 30 2010 - marcus.klein@open-xchange.com
  - Bugfix #16608: Created prepared statements batches but only executed the last one. Now the complete batch is executed.
 * Thu Jul 29 2010 - choeger@open-xchange.com
