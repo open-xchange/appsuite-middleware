@@ -52,6 +52,7 @@ package com.openexchange.ajp13;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
@@ -315,7 +316,8 @@ public class AJPv13Response {
         if (null == statusMsg) {
             statusMsg = "";
         }
-        final int dataLength = SEND_HEADERS_LENGTH + getHeaderSizeInBytes(servletResponse.getHeaderEntrySet()) + getCookiesSizeInBytes(formattedCookies) + statusMsg.length();
+        final Set<Entry<String, String[]>> set = servletResponse.getHeaderEntrySet();
+        final int dataLength = SEND_HEADERS_LENGTH + getHeaderSizeInBytes(set) + getCookiesSizeInBytes(formattedCookies) + statusMsg.length();
         if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
             throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
         }
@@ -325,12 +327,11 @@ public class AJPv13Response {
         count = writeString(statusMsg, response, count);
         count = writeInt(servletResponse.getHeadersSize() + getNumOfCookieHeader(formattedCookies), response, count);
         {
-            final int headersSize = servletResponse.getHeadersSize();
-            final Iterator<String> iter = servletResponse.getHeaderNames();
-            for (int i = 0; i < headersSize; i++) {
-                final String headerName = iter.next();
-                final String headerValue = servletResponse.getHeader(headerName);
-                count = writeHeader(headerName, headerValue, response, count);
+            for (final Map.Entry<String, String[]> hdr : set) {
+                final String headerName = hdr.getKey();
+                for (final String val : hdr.getValue()) {
+                    count = writeHeader(headerName, val, response, count);
+                }
             }
         }
         if (formattedCookies.length > 0) {
@@ -489,21 +490,37 @@ public class AJPv13Response {
 
     private static final int getHeaderSizeInBytes(final Set<Map.Entry<String, String[]>> set) {
         int retval = 0;
-        final StringBuilder sb = new StringBuilder(128);
+        // final StringBuilder sb = new StringBuilder(128);
         for (final Map.Entry<String, String[]> hdr : set) {
-            if (HEADER_MAP.containsKey(hdr.getKey())) {
-                /*
-                 * Header can be encoded as an integer
-                 */
-                retval += 2;
-            } else {
-                /*
-                 * Header must be written as string which takes three extra bytes in addition to header name length
-                 */
-                retval += hdr.getKey().length() + 3;
+            final String name = hdr.getKey();
+            for (final String value : hdr.getValue()) {
+                if (HEADER_MAP.containsKey(name)) {
+                    /*
+                     * Header can be encoded as an integer
+                     */
+                    retval += 2;
+                } else {
+                    /*
+                     * Header must be written as string which takes three extra bytes in addition to header name length
+                     */
+                    retval += name.length() + 3;
+                }
+                retval += value.length() + 3;
             }
-            sb.setLength(0);
-            retval += array2string(hdr.getValue(), sb).length() + 3;
+
+//            if (HEADER_MAP.containsKey(hdr.getKey())) {
+//                /*
+//                 * Header can be encoded as an integer
+//                 */
+//                retval += 2;
+//            } else {
+//                /*
+//                 * Header must be written as string which takes three extra bytes in addition to header name length
+//                 */
+//                retval += hdr.getKey().length() + 3;
+//            }
+//            sb.setLength(0);
+//            retval += array2string(hdr.getValue(), sb).length() + 3;
         }
         return retval;
     }

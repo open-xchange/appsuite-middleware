@@ -451,18 +451,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return makeEnumeration(headers.get(name));
     }
 
-    public final String getHeader(final String name) {
-        if (!containsHeader(name)) {
-            return null;
-        }
-        final StringBuilder retval = new StringBuilder(150);
-        final String[] sa = headers.get(name);
-        retval.append(sa[0]);
-        for (int i = 1; i < sa.length; i++) {
-            retval.append(',');
-            retval.append(sa[i]);
-        }
-        return retval.toString();
+    public final String[] getHeader(final String name) {
+        return headers.get(name);
     }
 
     public final void sendRedirect(final String location) {
