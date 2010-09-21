@@ -94,7 +94,11 @@ public class WebdavException extends AbstractOXException {
         /**
          * Empty passwords are not allowed.
          */
-        EMPTY_PASSWORD("Empty passwords are not allowed.", Category.USER_INPUT, 8);
+        EMPTY_PASSWORD("Empty passwords are not allowed.", Category.USER_INPUT, 8),
+        /**
+         * Unsupported authorization mechanism in "Authorization" header: %1$s.
+         */
+        UNSUPPORTED_AUTH_MECH("Unsupported authorization mechanism in \"Authorization\" header: %1$s.", Category.CODE_ERROR, 9);
 
         private final String message;
 
