@@ -96,7 +96,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
 
     public static final String WRITE_PERMS_FOR_UNLOCK_MISSING_MSG = "You need write permissions to unlock a document.";
 
-    public static final String DOCUMENT_NOT_EXISTS_MSG = "The document you requested doesn't exist.";
+    public static final String DOCUMENT_NOT_EXISTS_MSG = "The document you requested does not exist.";
 
     public static final String FILENAME_NOT_UNIQUE_MSG = "Files attached to InfoStore items must have unique names. File name: %s. The other document with this file name is %s.";
 

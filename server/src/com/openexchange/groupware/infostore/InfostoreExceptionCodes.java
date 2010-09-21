@@ -96,7 +96,7 @@ public enum InfostoreExceptionCodes implements OXErrorMessage {
     NEW_ID_FAILED(NEW_ID_FAILED_MSG, Category.CODE_ERROR, 420),
     /** You are not allowed to delete objects in the source folder, so this document cannot be moved. */
     NO_SOURCE_DELETE_PERMISSION(NO_SOURCE_DELETE_PERMISSION_MSG, Category.PERMISSION, 421),
-    /** The document you requested doesn't exist. */
+    /** The document you requested does not exist. */
     DOCUMENT_NOT_EXIST(DOCUMENT_NOT_EXISTS_MSG, Category.USER_INPUT, 438),
     /** Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s. */
     FILENAME_NOT_UNIQUE(FILENAME_NOT_UNIQUE_MSG, Category.USER_INPUT, 441),
