@@ -49,6 +49,7 @@
 
 package com.openexchange.authentication.service;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
@@ -64,7 +65,7 @@ public final class Authentication {
     /**
      * Handles the reference to the authentication service.
      */
-    private static AuthenticationService service;
+    private static final AtomicReference<AuthenticationService> SERVICE_REF = new AtomicReference<AuthenticationService>();
 
     /**
      * Default constructor.
@@ -85,7 +86,7 @@ public final class Authentication {
      */
     public static Authenticated login(final String login, final String pass)
         throws LoginException, ServiceException {
-        final AuthenticationService auth = service;
+        final AuthenticationService auth = SERVICE_REF.get();
         if (null == auth) {
             throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, AuthenticationService.class.getName());
         }
@@ -103,13 +104,21 @@ public final class Authentication {
      * @return the service
      */
     public static AuthenticationService getService() {
-        return service;
+        return SERVICE_REF.get();
     }
 
     /**
      * @param service the service to set
      */
-    public static void setService(final AuthenticationService service) {
-        Authentication.service = service;
+    public static boolean setService(final AuthenticationService service) {
+        return SERVICE_REF.compareAndSet(null, service);
     }
+
+    /**
+     * @param service the service to set
+     */
+    public static boolean dropService(final AuthenticationService service) {
+        return SERVICE_REF.compareAndSet(service, null);
+    }
+
 }
