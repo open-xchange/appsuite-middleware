@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-09-21 10:29+0200\n"
+"PO-Revision-Date: 2010-09-21 13:23+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1756,6 +1756,9 @@ msgstr "Erfoderlicher Wert \"Endet am\" nicht angegeben"
 msgid "Required value \"Title\" was not supplied."
 msgstr "Erfoderlicher Wert \"Titel\" nicht angegeben"
 
+msgid "Resolving user name \"%1$s\" failed."
+msgstr "Benutzername \"%1$s\" konnte nicht aufgelöst werden."
+
 msgid "Response package exceeds max package size value of 8192k: %1$s"
 msgstr "Antwortpaket übersteigt den maximalen Wert für die Paketgröße von 8192k: %1$s"
 
@@ -2361,6 +2364,9 @@ msgstr "Nicht analysierbares Header-Feld %1$s im Weiterleitung-Request-Paket"
 msgid "Unsupported MIME type %1$s"
 msgstr "Nicht unterstützter MIME-Typ %1$s"
 
+msgid "Unsupported authorization mechanism in \"Authorization\" header: %1$s."
+msgstr "Nicht unterstützter Authorisationsmechanismus in Header \"Authorisation\": %1$s."
+
 msgid "Unsupported charset-encoding: %1$s"
 msgstr "Nicht unterstützte Zeichensatz-Kodierung: %1$s"
 
@@ -2641,7 +2647,9 @@ msgstr ""
 msgid ""
 "You do not have permission to access objects in this folder %1$d in context %"
 "2$d with user %3$d"
-msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Zugreifen auf Objekte im Ordner %1$d im Kontext %2$d als Benutzer %3$d"
+msgstr ""
+"Sie haben nicht die entsprechenden Berechtigungen zum Zugriff auf Objekte "
+"im Ordner %1$d im Kontext %2$d als Benutzer %3$d"
 
 msgid ""
 "You do not have permission to delete objects from folder %1$d in context %2"
@@ -3633,7 +3641,7 @@ msgstr ""
 "Anzeigenamen. Kontext %1$d Objekt %2$d"
 
 msgid "Mime type is not defined."
-msgstr "Kein MIME-Typ angegeben"
+msgstr "Kein MIME-Typ angegeben."
 
 msgid ""
 "A contact with private flag cannot be stored in a public folder. Folder: %1"
