@@ -102,7 +102,11 @@ public class WebdavException extends AbstractOXException {
         /**
          * Resolving user name "%1$s" failed.
          */
-        RESOLVING_USER_NAME_FAILED("Resolving user name \"%1$s\" failed.", Category.CODE_ERROR, 10);
+        RESOLVING_USER_NAME_FAILED("Resolving user name \"%1$s\" failed.", Category.CODE_ERROR, 10),
+        /**
+         * Authentication failed for user name: %1$s
+         */
+        AUTH_FAILED("Authentication failed for user name: %1$s", Category.CODE_ERROR, 11);
 
         private final String message;
 
