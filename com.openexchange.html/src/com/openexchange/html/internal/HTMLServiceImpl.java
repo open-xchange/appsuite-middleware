@@ -429,7 +429,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * <code>true</code>.
      * 
      * @param plainText The plain text
-     * @return properly escaped HTML content
+     * @return The properly escaped HTML content
      * @see #htmlFormat(String, boolean)
      */
     public String htmlFormat(final String plainText) {
