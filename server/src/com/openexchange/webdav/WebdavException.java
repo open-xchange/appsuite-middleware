@@ -98,7 +98,11 @@ public class WebdavException extends AbstractOXException {
         /**
          * Unsupported authorization mechanism in "Authorization" header: %1$s.
          */
-        UNSUPPORTED_AUTH_MECH("Unsupported authorization mechanism in \"Authorization\" header: %1$s.", Category.CODE_ERROR, 9);
+        UNSUPPORTED_AUTH_MECH("Unsupported authorization mechanism in \"Authorization\" header: %1$s.", Category.CODE_ERROR, 9),
+        /**
+         * Resolving user name "%1$s" failed.
+         */
+        RESOLVING_USER_NAME_FAILED("Resolving user name \"%1$s\" failed.", Category.CODE_ERROR, 10);
 
         private final String message;
 
