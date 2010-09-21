@@ -48,12 +48,97 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link href="http://www.open-xchange.com/fileadmin/pub_sub/_data/css/pubsub.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="http://www.open-xchange.com/fileadmin/pub_sub/_data/jss/jquery.js"></script>
-    <script type="text/javascript" src="http://www.open-xchange.com/fileadmin/pub_sub/_data/jss/base.js"></script>
+    <link href="https://pubsub.open-xchange.com/_data/css/pubsub.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="https://pubsub.open-xchange.com/_data/jss/jquery.js"></script>
+    <script type="text/javascript" src="https://pubsub.open-xchange.com/_data/jss/base.js"></script> 
     <title>
       Social OX - Sharing Documents and Contacts 
     </title>
+    <style type="text/css">
+@charset "UTF-8";
+/* core modules
+---------------------------------------------------*/
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/reset/_base.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/grid/_base.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/grid/960_16.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/grid/_ie.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/typography/_base.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/form/_base.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/form/_ie.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/elements/_base.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/helper/_base.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/helper/_ie.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/navigation/_base.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/navigation/_ie.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/core/print/_base.css);
+@import url(https://pubsub.open-xchange.com/_data/_twister/css/themes/grayGoose/_base.css);
+
+/* start here
+_________________________________________________________________________________
+_________________________________________________________________________________
+_________________________________________________________________________________
+_________________________________________________________________________________ */
+
+/* base
+---------------------------------------------------*/
+body                                             { background: url(https://pubsub.open-xchange.com/_data/img/bg/body.jpg) #405582 repeat-x;}
+h1                                               { font-size: 18px; color: #415582; }
+h2                                               { font-size: 14px; margin-bottom: 5px; color: #415582; }
+h3                                               { font-size: 13px; margin-bottom: 3px; color: #415582; }
+p                                                { font-size: 13px;}
+a                                                { color: #415582; }
+label                                            { font-size: 13px; width: 200px; height: 24px; margin-right: 10px; clear:left; float: left; font-weight: bold; }
+span                                             { font-size: 13px }
+
+/* lists
+---------------------------------------------------*/
+dt                                               { font-size: 13px; color: #415582; margin-top: 20px}
+
+/* areas
+---------------------------------------------------*/
+#layout                                          { margin: 50px auto 10px auto; }
+
+
+/* navigation
+---------------------------------------------------*/
+#nav a                                           { font-weight: bold; text-decoration: none; }
+#nav a.file                                      { background: url(https://pubsub.open-xchange.com/_data/img/icons/document.gif) no-repeat 10px 3px; border: none; padding-left: 32px; padding-top: 2px;}
+#nav a.user                                      { background: url(https://pubsub.open-xchange.com/_data/img/icons/user.gif) no-repeat 10px 3px; border: none; padding-left: 32px; padding-top: 2px;}
+
+/* sections
+---------------------------------------------------*/
+.info_section                                    { background: white; margin: 10px 0 }
+.info_section a                                  { font-weight: bold }
+.left_section                                    { background: white; width: 290px; margin-right: 10px; }
+.right_section                                   { background: white; }
+.disclaimer_section                              { background: white; margin: 10px 0; -moz-border-radius-bottomleft: 10px; -moz-border-radius-bottomright: 10px; -webkit-border-bottom-left-radius: 10px; -webkit-border-bottom-right-radius: 10px;  }
+.disclaimer_section p                            { font-size: 10px; margin-bottom: 0 }
+
+/* Pubsub
+---------------------------------------------------*/
+.ox_contact span,
+.ox_infoitem span                                { padding: 5px; float: left; }
+.ox_contact span span                            { padding: 0 5px 0 0 }
+.ox_contact span.key,
+.ox_infoitem span.key                            { float: right; padding-right: 20px; opacity: .6; font-weight: bold; }
+
+/* Misc
+---------------------------------------------------*/
+#bill_board                                      { height: 184px; background: url(https://pubsub.open-xchange.com/_data/img/billboard/pub.jpg) }
+.header_visual                                   { background: url(https://pubsub.open-xchange.com/_data/img/bg/header_visual.png) repeat-x; padding-left: 10px; border-bottom: 1px solid gray }
+.group_visual                                    { -moz-border-radius: 10px; -webkit-border-radius: 10px; border: 1px solid #d3d3d3; background: #f4f4f4; padding: 10px; margin: 10px }
+.btn                                             { text-align: center; text-decoration: none; }
+.back_to_top                                     { width: 16px; height: 16px; background: url(https://pubsub.open-xchange.com/_data/img/icons/arrow_up.gif) no-repeat; display: block; margin: 0 0 10px 634px }
+
+/* print
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+--------------------------------------------------------------------------------- */
+@media print {
+    .printN                                        { display: none !important; }
+
+    </style>
   </head>
   <body>
     <div id="layout" class="hasJs">
@@ -71,10 +156,10 @@
               Is sharing contacts and documents with your business partners and your social network a useful feature for you? Then you should definitely check out Open-Xchange's innovative social features and learn how to benefit from them.
             </p>
             <p>            
-              Create your own test account here: <a href="http://ox.io" target="_blank">http://ox.io</a>
+              Create your own test account here: <a href="http://ox.io" target="_blank">http://ox.io</a>. You are convinced? Sign up <a href="http://www.open-xchange.com/en/buy/partner" target="_blank">here</a>
             </p>
             <p>
-              You are convinced? Sign up <a href="http://www.open-xchange.com/en/buy/partner" target="_blank">here</a>
+            	This entry was published with Open-Xchange's <a target="_blank" href="http://www.open-xchange.com/en/products/open-xchange-appliance-editon-en/infostore">Infostore</a> using its <a target="_blank" href="http://www.open-xchange.com/sales_support/social-ox/">Social OX Feature</a> extending your reach!
             </p>
           </div>
         </div>
