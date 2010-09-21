@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -131,6 +131,9 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/mailfilter.properties
 %changelog
+* Tue Aug 31 2010 - dennis.sieben@open-xchange.com
+  - Added possibility to define the password source. It is now possible to
+    switch between the password from the session or a global defined one.
 * Wed Jun 02 2010 - dennis.sieben@open-xchange.com
   - Bugfix #16149: [L3] connection timeout for SieveHandler
     - Made timeout configurable

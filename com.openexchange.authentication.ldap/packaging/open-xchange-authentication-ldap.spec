@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -125,6 +125,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/ldapauth.properties
 
 %changelog
+* Fri Sep 03 2010 - choeger@open-xchange.com
+ - Added new functions adsBind and referral
 * Tue Feb 02 2010 - dennis.sieben@open-xchange.com
  - Bugfix #15309: [L3] open-xchange-authentication-ldap: multiple OUs works
    only for LDAP-Server on localhost

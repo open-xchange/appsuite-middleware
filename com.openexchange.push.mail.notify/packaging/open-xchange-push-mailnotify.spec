@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -79,6 +79,9 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/push_mailnotify.properties
 %changelog
+* Thu Sep 16 2010 - wolfgang.rosenauer@open-xchange.com
+ - Bugfix: allow imapLoginDelimiter to be null
+ - Minor string changes
 * Tue Jun 22 2010 - choeger@open-xchange.com
  - Bugfix #16001 - mail push bundle does not work on installations with cyrus virtdomains switched on
 * Thu Apr 08 2010 - choeger@open-xchange.com

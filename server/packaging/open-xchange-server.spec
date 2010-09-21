@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,106 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Sep 20 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16800: Replacing non-ascii URLs with proper puny-code-encoded URLs
+* Fri Sep 17 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15476: Replacing image URLs with a safe proxied URI in RSS messages
+ - Bugfix #16894: Fixed ClassCastException
+* Wed Sep 15 2010 - steffen.templin@open-xchange.com
+ - Bugfix 16402: Receiving contact images should not cause 404 errors anymore.
+* Tue Sep 14 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16857: No folder deletion on special IMAP error code "NO_ADMINISTER_ACCESS_ON_INITIAL"
+* Tue Sep 14 2010 - tobias.prinz@open-xchange.com
+ - Bugfix 16826: Publish-Templates now go through a whitelisting process to filter out potential harmful code.
+* Mon Sep 13 2010 - tobias.prinz@open-xchange.com
+ - User story #5212: Both resources and groups now allow to be queried for updates, just like other elements. See HTTP API for details. 
+* Mon Sep 13 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16796: Fixed creating a task without start and end date through first generation Outlook OXtender. 
+* Fri Sep 10 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16151: Move appointment from shared to private folder.
+* Fri Sep 10 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #16848: Use correct date format in response headers.
+ - Bugfix #16846: Easy Login transmits "autologin" parameter to redirect method, which in turn forwards it to the UI, that, then will issue
+                  store request.
+* Fri Sep 10 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16809: Changed error message if twitter consumer key/secret pair is invalid.
+                  Changed default consumer key/secret to Open-Xchange application.
+ - Bugfix #16843: Fixed URLs parsing in plain text
+* Fri Sep 10 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16763: Not throwing a session expired exception anymore if loading context or user fails.
+* Thu Sep 09 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16835: post install of crawler bundle is now able to deal with filenames containing a white space character.
+* Thu Sep 09 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15681: Checking POP3 account's default folders on path creation in primary mail account
+* Tue Sep 07 2010 - choeger@open-xchange.com
+ - Bugfix #16815: activation and jcharset packages to use OX versioning
+* Fri Sep 03 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16776: Changed twitter API to use OAuth
+ - Bugfix #16786: Support of field 'image1_content_type' in all request
+ - Bugfix #16723: No appending of Href content for text-only mails
+* Fri Sep 03 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16805: Added dependency from publish microformats component to templating json interface because UI using microformats to publish
+   like to list available templates.
+* Thu Sep 02 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16532: Update task fixes primary key on table publication and table publication_users is tried be created again. Additionally
+   possibly wrong primary key on table subscriptions is fixed, too.
+* Thu Sep 02 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #15903: Removing of Participants.
+* Tue Aug 31 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16762: No blind future use of previously passed connection
+* Mon Aug 30 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16548: Reccurrence type 0 for normal appointments.
+* Thu Aug 26 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16742: Fixed folder display of namespace folders
+* Thu Aug 26 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16455: Implemented a more sophisticated search for a participant when using freebusy interface. Resources are now preferred if a
+   user has the same mail address as alias.
+* Wed Aug 25 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16718: Fixed implementation of HttpServletRequest.getRequestURL()
+* Wed Aug 25 2010 - steffen.templin@open-xchange.com
+ - US4027: Backend provides the possibility to get all publications of a user.
+* Tue Aug 24 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16714: No change notifications for category changes.
+* Mon Aug 23 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16579: New Until for Appointment Series.
+* Sun Aug 22 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16708: Removed 'final' modifier from checkFieldsBeforeConnect() method to allow overriding in concrete MAL implementations
+* Fri Aug 20 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16410: Fixed TLS connection to SMTP server
+* Thu Aug 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16700: Fixed NullPointerException if no I18nService can be found for a specific locale in messaging component.
+* Wed Aug 18 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16620: Contact collect folder can now be enabled again because options are always visible.
+* Tue Aug 17 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16693: Fixed setting "subscr_subflds" field for shared folder
+ - Bugfix #13785: Proper calculation of modified and "deleted" folders for XML/WebDAV interface
+ - Partial fix for #16688: Increased space of PermGen heap section
+* Tue Aug 17 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16615: Warning of exceeded database connection pool is only written once a minute.
+ - Bugfix #16681: Translating form labels for dynamic forms sent by the back end for subscriptions and messaging.
+* Tue Aug 17 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16689: Notifications for appointments which start in the past.
+* Mon Aug 16 2010 - francisco.laguna@open-xchange.com
+ - Add whitelist capability to ip check.
+* Mon Aug 16 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #16613: Ignoring ID element in ATTACH in an ICAL file.
+* Fri Aug 13 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16618: Allowing contact image URL on action=all
+* Thu Aug 12 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16669: Proper quoting of regex replacement
+* Wed Aug 11 2010 - steffen.templin@open-xchange.com 
+ - Bugfix #16643: Wrong series information in notification mails
+* Fri Aug 06 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16515: fileas in contacts will be set correctly after creating a new contact with Outlook.
+* Fri Aug 06 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16655: Fixed sorting of (infostore) folders in classic folder tree
+* Tue Aug 03 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16495: Added config parameter to decide whether to add client's IP address to mail headers on
+                  delivery as custom header "X-Originating-IP"
+* Mon Aug 02 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16614: Fixed NPE in FolderObjectIterator class
+ - Bugfix #16616: Using a blocking queue to avoid possible OutOfMemory error due to creation of too many threads
+ - Bugfix #16531: No translation of IMAP folder names
 * Fri Jul 30 2010 - francisco.laguna@open-xchange.com
  - Bugfix #15138: Made a log message, complaining, that the server can't reach an external subscription service definition, more meaningful.
  - Bugfix #16351: Complain louder about missing property in templating service.
