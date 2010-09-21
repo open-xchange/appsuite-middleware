@@ -103,10 +103,6 @@ public class AJAXConfig extends AbstractConfig {
          */
         LOGIN("login"),
         /**
-         * Imap login of the first user.
-         */
-        IMAP_LOGIN("imap_login"),
-        /**
          * User password.
          */
         PASSWORD("password"),

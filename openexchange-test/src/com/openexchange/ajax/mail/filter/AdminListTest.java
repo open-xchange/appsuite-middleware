@@ -56,7 +56,9 @@ import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.action.Keep;
 import com.openexchange.ajax.mail.filter.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.test.HeaderTest;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.ajax.mailaccount.actions.MailAccountGetRequest;
+import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
+import com.openexchange.mailaccount.MailAccountDescription;
 
 public class AdminListTest extends AbstractMailFilterTest {
 
@@ -92,7 +94,11 @@ public class AdminListTest extends AbstractMailFilterTest {
         final String rid = insertRule(rule, null, userSession);
 
         // Get rules of user as admin
-        final String userImapLogin = AJAXConfig.getProperty(AJAXConfig.Property.IMAP_LOGIN);
+        MailAccountGetRequest getMailAcc = new MailAccountGetRequest(0, false);
+        MailAccountGetResponse response = userClient.execute(getMailAcc);
+        MailAccountDescription description = response.getAsDescription();
+        final String userImapLogin = description.getLogin();
+
         final Rule[] rules = listRulesForUser(adminSession, userImapLogin);
 
         boolean foundRule = false;
