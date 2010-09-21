@@ -91,8 +91,12 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     CONTACT_NOT_FOUND(CONTACT_NOT_FOUND_MSG, Category.CODE_ERROR, 125),
     /** Unable to save contact image. The image appears to be broken. */
     IMAGE_BROKEN(IMAGE_BROKEN_MSG, Category.USER_INPUT, 136),
+    /** Unable to trigger object Events: Context %1$d Folder %2$d */
+    TRIGGERING_EVENT_FAILED(TRIGGERING_EVENT_FAILED_MSG, Category.CODE_ERROR, 146),
     /** Unable to pick up a connection from the DBPool */
     INIT_CONNECTION_FROM_DBPOOL(INIT_CONNECTION_FROM_DBPOOL_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 151),
+    /** Import failed. Some data entered exceed the database field limit. Please shorten following entries: %1$s Character Limit: %2$s Sent %3$s */
+    DATA_TRUNCATION(DATA_TRUNCATION_MSG, Category.USER_INPUT, 154),
     /** The image you tried to attach is not a valid picture. It may be broken or is not a valid file. */
     NOT_VALID_IMAGE(NOT_VALID_IMAGE_MSG, Category.TRY_AGAIN, 158),
     /** Your first name is mandatory. Please enter it. */
@@ -103,6 +107,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     DISPLAY_NAME_MANDATORY(DISPLAY_NAME_IN_USE_MSG, Category.USER_INPUT, 166),
     /** The name you entered is not available. Choose another display name. Context %1$d Object %2$d */
     DISPLAY_NAME_IN_USE(DISPLAY_NAME_IN_USE_MSG, Category.TRY_AGAIN, 167),
+    /** Bad character in field %2$s. Error: %1$s */
+    BAD_CHARACTER(BAD_CHARACTER_MSG, Category.USER_INPUT, 168),
     /** You do not have permission to delete objects from folder %1$d in context %2$d with user %3$d */
     NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG, Category.PERMISSION, 169),
     /** Mime type is not defined. */

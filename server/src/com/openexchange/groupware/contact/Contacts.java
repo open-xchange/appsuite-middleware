@@ -84,11 +84,6 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.database.PrivateFlag;
 import com.openexchange.groupware.container.Contact;
@@ -122,7 +117,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  */
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTS, component = EnumComponent.CONTACT)
 public final class Contacts {
 
     private static final String PROP_SCALE_IMAGE_HEIGHT = "scale_image_height";
@@ -135,16 +129,9 @@ public final class Contacts {
 
     private static final String PROP_MAX_IMAGE_SIZE = "max_image_size";
 
-    private static final String ERR_UABLE_TO_ROLLBACK = "Unable to rollback SQL Insert";
-
-    private static final String ERR_UNABLE_TO_CLOSE = "Unable to close Statement or ResultSet";
-
     public static final int DATA_TRUNCATION = 54;
 
-    @Deprecated
-    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(Contacts.class);
-
-    private static final Log LOG = LogFactory.getLog(Contacts.class);
+    static final Log LOG = LogFactory.getLog(Contacts.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -2115,47 +2102,36 @@ public final class Contacts {
         }
     }
 
-    public static void deleteContactsFromFolder(final int fid, final int user, final int[] group, final Session so, final Connection readcon, final Connection writecon) throws OXException {
+    public static void deleteContactsFromFolder(final int fid, final Session so, final Connection readcon, final Connection writecon) throws ContactException {
         trashContactsFromFolder(fid, so, readcon, writecon, true);
     }
 
-    @OXThrowsMultiple(category = { Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR }, desc = {
-        "42", "44", "45", "46" }, exceptionId = { 42, 44, 45, 46 }, msg = {
-        ContactException.NO_DELETE_PERMISSION_MSG,
-        "Critical Error occurred. This folder contains a contact with no id. Context %1$d Folder %2$d",
-        "Unable to delete contacts from this folder. Context %1$d Folder %2$d", "Unable to trigger object Events: Context %1$d Folder %2$d" })
-    public static void trashContactsFromFolder(final int fid, final Session so, final Connection readcon, final Connection writecon, boolean delit) throws OXException {
+    public static void trashContactsFromFolder(final int fid, final Session so, final Connection readcon, final Connection writecon, boolean delit) throws ContactException {
 
         Statement read = null;
         Statement del = null;
         ResultSet rs = null;
+        boolean deleteIt = delit;
 
         try {
-            // read = readcon.createStatement();
             del = writecon.createStatement();
 
             try {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 final FolderObject contactFolder = new OXFolderAccess(readcon, ct).getFolderObject(fid);
                 if (contactFolder.getModule() != FolderObject.CONTACT) {
-                    throw EXCEPTIONS.createOXConflictException(
-                        42,
-                        Integer.valueOf(fid),
-                        Integer.valueOf(so.getContextId()),
-                        Integer.valueOf(so.getUserId()));
-                    // throw new OXException("YOU TRY TO DELETE FROM A NON
-                    // CONTACT FOLDER! cid="+so.getContextId()+" fid="+fid);
+                    throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(
+                        I(fid),
+                        I(so.getContextId()),
+                        I(so.getUserId())));
                 }
                 if (contactFolder.getType() == FolderObject.PRIVATE) {
-                    delit = true;
+                    deleteIt = true;
                 }
             } catch (final ContextException d) {
                 throw new ContactException(d);
             } catch (final OXException e) {
-                throw e;
-                // throw EXCEPTIONS.create(43, fid, so.getContextId(), user);
-                // throw new OXException("NO PERMISSIONS TO DELETE IN THIS
-                // FOLDER cid="+so.getContextId()+" fid="+fid,e);
+                throw new ContactException(e);
             }
 
             final ContactSql cs = new ContactMySql(so);
@@ -2176,26 +2152,21 @@ public final class Contacts {
             while (rs.next()) {
 
                 oid = rs.getInt(1);
-                if (rs.wasNull()) {
-                    throw EXCEPTIONS.create(44, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
-                    // throw new OXException("VERY BAD ERROR OCCURRED, OBJECT
-                    // WITHOUT ID FOUND cid="+so.getContextId()+" fid="+fid);
-                }
                 dlist = rs.getInt(2);
                 if (!rs.wasNull() && (dlist > 0)) {
-                    trashDistributionList(oid, so.getContextId(), writecon, delit);
+                    trashDistributionList(oid, so.getContextId(), writecon, deleteIt);
                 }
                 link = rs.getInt(3);
                 if (!rs.wasNull() && (link > 0)) {
-                    trashLinks(oid, so.getContextId(), writecon, delit);
+                    trashLinks(oid, so.getContextId(), writecon, deleteIt);
                 }
                 image = rs.getInt(4);
                 if (!rs.wasNull() && (image > 0)) {
-                    trashImage(oid, so.getContextId(), writecon, delit);
+                    trashImage(oid, so.getContextId(), writecon, deleteIt);
                 }
                 created_from = rs.getInt(6);
 
-                cs.iFtrashContactsFromFolder(delit, del, oid, so.getContextId());
+                cs.iFtrashContactsFromFolder(deleteIt, del, oid, so.getContextId());
 
                 final Contact co = new Contact();
                 co.setCreatedBy(created_from);
@@ -2211,36 +2182,19 @@ public final class Contacts {
             del.execute(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
         } catch (final ContextException d) {
             throw new ContactException(d);
-        } catch (final EventException is) {
-            throw EXCEPTIONS.create(46, is, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
-            // throw new OXException("UNABLE TO DELTE FOLDER OBJECTS
-            // cid="+so.getContextId()+" fid="+fid,se);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(45, se, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
-            // throw new OXException("UNABLE TO DELTE FOLDER OBJECTS
-            // cid="+so.getContextId()+" fid="+fid,se);
+        } catch (final EventException e) {
+            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(so.getContextId()), I(fid));
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(read) + getStatement(del));
+        } catch (OXException e) {
+            throw new ContactException(e);
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (read != null) {
-                    read.close();
-                }
-            } catch (final SQLException see) {
-                LOG.warn(ERR_UNABLE_TO_CLOSE, see);
-            }
-            try {
-                if (del != null) {
-                    del.close();
-                }
-            } catch (final SQLException see) {
-                LOG.warn("Unable to close Statement", see);
-            }
+            closeSQLStuff(rs, read);
+            closeSQLStuff(del);
         }
     }
 
-    public static void deleteDistributionList(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
+    public static void deleteDistributionList(final int id, final int cid, final Connection writecon) throws SQLException, ContactException {
         trashDistributionList(id, cid, writecon, true);
     }
 
@@ -2258,7 +2212,7 @@ public final class Contacts {
         }
     }
 
-    public static void deleteLinks(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
+    public static void deleteLinks(final int id, final int cid, final Connection writecon) throws SQLException, ContactException {
         trashLinks(id, cid, writecon, true);
     }
 
@@ -2294,13 +2248,8 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION }, desc = { "47", "52", "57" }, exceptionId = {
-        47, 52, 57 }, msg = {
-        "Unable to delete Contacts from this user. Context %1$d User %2$d",
-        "Unable to delete contacts from user because this is a non-contact folder. Context %1$d Folder %2$d User %3$d",
-        "Unable to trigger object Events: Context %1$d User %2$d" })
-    public static void trashAllUserContacts(final int uid, final Session so, final Connection readcon, final Connection writecon) throws OXException {
-        Statement read = null;
+    public static void trashAllUserContacts(final int uid, final Session so, final Connection readcon, final Connection writecon) throws ContactException {
+        Statement stmt = null;
         Statement del = null;
         ResultSet rs = null;
 
@@ -2308,20 +2257,18 @@ public final class Contacts {
             final Context ct = ContextStorage.getStorageContext(so.getContextId());
             final ContactSql cs = new ContactMySql(ct, uid);
 
-            read = readcon.createStatement();
+            stmt = readcon.createStatement();
             del = writecon.createStatement();
 
             FolderObject contactFolder = null;
 
-            rs = read.executeQuery(cs.iFgetRightsSelectString(uid, so.getContextId()));
+            rs = stmt.executeQuery(cs.iFgetRightsSelectString(uid, so.getContextId()));
 
             int fid = 0;
             int oid = 0;
             int created_from = 0;
             boolean delete = false;
             int pflag = 0;
-
-            // writecon.setAutoCommit(false);
 
             final EventClient ec = new EventClient(so);
             OXFolderAccess oxfs = null;
@@ -2345,9 +2292,7 @@ public final class Contacts {
                         contactFolder = FolderObject.loadFolderObjectFromDB(fid, ct, readcon);
                     }
                     if (contactFolder.getModule() != FolderObject.CONTACT) {
-                        throw EXCEPTIONS.create(52, Integer.valueOf(so.getContextId()), Integer.valueOf(fid), Integer.valueOf(uid));
-                        // throw new OXException("YOU TRY TO DELETE FROM A NON
-                        // CONTACT FOLDER! cid="+so.getContextId()+" uid="+uid);
+                        throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(so.getContextId()), I(uid));
                     }
                     if (contactFolder.getType() == FolderObject.PRIVATE) {
                         delete = true;
@@ -2393,7 +2338,6 @@ public final class Contacts {
                         LOG.error(
                             "Unable to trigger delete event for contact delete: id=" + co.getObjectID() + " cid=" + co.getContextId(),
                             e);
-                        // e.printStackTrace();
                     }
                 }
             }
@@ -2402,43 +2346,16 @@ public final class Contacts {
             } else {
                 cs.iFtrashAllUserContactsDeletedEntries(del, so.getContextId(), uid, ct);
             }
-            // writecon.commit();
         } catch (final ContextException d) {
             throw new ContactException(d);
-            /*
-             * } catch (final EventException ox) { throw EXCEPTIONS.create(57, Integer.valueOf(so.getContextId()), Integer.valueOf(uid)); }
-             * catch (final OXException ox) { throw ox;
-             */
-        } catch (final SQLException se) {
-            /*
-             * try { writecon.rollback(); } catch (SQLException see){ LOG.error("Uable to rollback SQL DELETE", see); }
-             */
-            throw EXCEPTIONS.create(47, se, Integer.valueOf(so.getContextId()), Integer.valueOf(uid));
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (read != null) {
-                    read.close();
-                }
-            } catch (final SQLException sxe) {
-                LOG.error(ERR_UNABLE_TO_CLOSE, sxe);
-            }
-            try {
-                if (del != null) {
-                    del.close();
-                }
-            } catch (final SQLException sxe) {
-                LOG.error(ERR_UNABLE_TO_CLOSE, sxe);
-            }
-            /*
-             * try{ writecon.setAutoCommit(true); } catch (Exception see){ LOG.error("Unable to return Connection", see); }
-             */
+            closeSQLStuff(rs, stmt);
+            closeSQLStuff(del);
         }
     }
 
-    @OXThrows(category = Category.TRUNCATED, desc = "54", exceptionId = DATA_TRUNCATION, msg = "Import failed. Some data entered exceed the database field limit. Please shorten following entries: %1$s Character Limit: %2$s Sent %3$s")
     public static ContactException getTruncation(final Connection con, final DataTruncation se, final String table, final Contact co) {
 
         final String[] fields = DBUtils.parseTruncatedFields(se);
@@ -2481,14 +2398,13 @@ public final class Contacts {
         }
         final ContactException retval;
         if (truncateds.length > 0) {
-            retval = EXCEPTIONS.create(
-                DATA_TRUNCATION,
+            retval = ContactExceptionCodes.DATA_TRUNCATION.create(
                 se,
                 sFields.toString(),
-                Integer.valueOf(truncateds[0].getMaxSize()),
-                Integer.valueOf(truncateds[0].getLength()));
+                I(truncateds[0].getMaxSize()),
+                I(truncateds[0].getLength()));
         } else {
-            retval = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
+            retval = ContactExceptionCodes.DATA_TRUNCATION.create(se, sFields.toString(), I(-1), I(-1));
         }
         for (final OXException.Truncated truncated : truncateds) {
             retval.addProblematic(truncated);
@@ -2496,7 +2412,6 @@ public final class Contacts {
         return retval;
     }
 
-    @OXThrows(category = Category.USER_INPUT, desc = "68", exceptionId = 68, msg = "Bad character in field %2$s. Error: %1$s")
     private static void checkCharacters(final Contact co) throws ContactException {
         for (int i = 0; i < 650; i++) {
             if ((mapping[i] != null) && (i != Contact.IMAGE1)) {
@@ -2507,14 +2422,12 @@ public final class Contacts {
                     LOG.error("Null pointer detected", npe);
                 }
                 if (error != null) {
-                    throw EXCEPTIONS.create(68, error, mapping[i].getReadableTitle());
+                    throw ContactExceptionCodes.BAD_CHARACTER.create(error, mapping[i].getReadableTitle());
                 }
             }
         }
 
     }
-
-    /** *************** MAPPER ***************** */
 
     public static interface Mapper {
 
@@ -2573,24 +2486,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getDisplayName();
             }
 
             public String getReadableTitle() {
                 return "Display name";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setDisplayName(s);
             }
         };
         /** ************** * field02 * * ************ */
@@ -2630,24 +2531,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getSurName();
             }
 
             public String getReadableTitle() {
                 return "Sur name";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setSurName(s);
             }
         };
         /** ************** * field03 * * ************ */
@@ -2687,24 +2576,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getGivenName();
             }
 
             public String getReadableTitle() {
                 return "Given name";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setGivenName(s);
             }
         };
         /** ************** * field04 * * ************ */
@@ -2744,14 +2621,6 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
 
                 return co.getMiddleName();
@@ -2760,10 +2629,6 @@ public final class Contacts {
             public String getReadableTitle() {
 
                 return "Middle name";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setMiddleName(s);
             }
         };
         /** ************** * field05 * * ************ */
@@ -2803,24 +2668,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getSuffix();
             }
 
             public String getReadableTitle() {
                 return "Suffix";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setSuffix(s);
             }
         };
         /** ************** * field06 * * ************ */
@@ -2860,24 +2713,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTitle();
             }
 
             public String getReadableTitle() {
                 return "Title";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTitle(s);
             }
         };
         /** ************** * field07 * * ************ */
@@ -2917,24 +2758,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getStreetHome();
             }
 
             public String getReadableTitle() {
                 return "Street home";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setStreetHome(s);
             }
         };
         /** ************** * field08 * * ************ */
@@ -2974,24 +2803,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getPostalCodeHome();
             }
 
             public String getReadableTitle() {
                 return "Postal code home";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setPostalCodeHome(s);
             }
         };
         /** ************** * field09 * * ************ */
@@ -3031,24 +2848,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCityHome();
             }
 
             public String getReadableTitle() {
                 return "City home";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCityHome(s);
             }
         };
         /** ************** * field10 * * ************ */
@@ -3088,24 +2893,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getStateHome();
             }
 
             public String getReadableTitle() {
                 return "State home";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setStateHome(s);
             }
         };
         /** ************** * field11 * * ************ */
@@ -3145,24 +2938,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCountryHome();
             }
 
             public String getReadableTitle() {
                 return "Country home";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCountryHome(s);
             }
         };
 
@@ -3203,24 +2984,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getMaritalStatus();
             }
 
             public String getReadableTitle() {
                 return "Martial status";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setMaritalStatus(s);
             }
         };
         /** ************** * field13 * * ************ */
@@ -3260,24 +3029,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getNumberOfChildren();
             }
 
             public String getReadableTitle() {
                 return "Number of children";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setNumberOfChildren(s);
             }
         };
         /** ************** * field14 * * ************ */
@@ -3317,24 +3074,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getProfession();
             }
 
             public String getReadableTitle() {
                 return "Profession";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setProfession(s);
             }
         };
         /** ************** * field15 * * ************ */
@@ -3374,24 +3119,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getNickname();
             }
 
             public String getReadableTitle() {
                 return "Nickname";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setNickname(s);
             }
         };
         /** ************** * field16 * * ************ */
@@ -3431,24 +3164,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getSpouseName();
             }
 
             public String getReadableTitle() {
                 return "Spouse name";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setSpouseName(s);
             }
         };
         /** ************** * field17 * * ************ */
@@ -3488,24 +3209,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getNote();
             }
 
             public String getReadableTitle() {
                 return "Note";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setNote(s);
             }
         };
         /** ************** * field18 * * ************ */
@@ -3545,24 +3254,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCompany();
             }
 
             public String getReadableTitle() {
                 return "Company";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCompany(s);
             }
         };
         /** ************** * field19 * * ************ */
@@ -3602,24 +3299,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getDepartment();
             }
 
             public String getReadableTitle() {
                 return "Department";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setDepartment(s);
             }
         };
         /** ************** * field20 * * ************ */
@@ -3659,24 +3344,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getPosition();
             }
 
             public String getReadableTitle() {
                 return "Position";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setPosition(s);
             }
         };
         /** ************** * field21 * * ************ */
@@ -3716,24 +3389,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getEmployeeType();
             }
 
             public String getReadableTitle() {
                 return "Employee type";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setEmployeeType(s);
             }
         };
         /** ************** * field22 * * ************ */
@@ -3773,24 +3434,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getRoomNumber();
             }
 
             public String getReadableTitle() {
                 return "Room number";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setRoomNumber(s);
             }
         };
         /** ************** * field23 * * ************ */
@@ -3830,24 +3479,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getStreetBusiness();
             }
 
             public String getReadableTitle() {
                 return "Street business";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setStreetBusiness(s);
             }
         };
         /** ************** * field24 * * ************ */
@@ -3887,24 +3524,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getPostalCodeBusiness();
             }
 
             public String getReadableTitle() {
                 return "Postal code business";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setPostalCodeBusiness(s);
             }
         };
         /** ************** * field25 * * ************ */
@@ -3944,24 +3569,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCityBusiness();
             }
 
             public String getReadableTitle() {
                 return "City business";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCityBusiness(s);
             }
         };
         /** ************** * field26 * * ************ */
@@ -4001,24 +3614,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getStateBusiness();
             }
 
             public String getReadableTitle() {
                 return "State business";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setStateBusiness(s);
             }
         };
         /** ************** * field27 * * ************ */
@@ -4058,24 +3659,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCountryBusiness();
             }
 
             public String getReadableTitle() {
                 return "Country business";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCountryBusiness(s);
             }
         };
         /** ************** * field28 * * ************ */
@@ -4115,24 +3704,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getNumberOfEmployee();
             }
 
             public String getReadableTitle() {
                 return "Number of employee";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setNumberOfEmployee(s);
             }
         };
         /** ************** * field29 * * ************ */
@@ -4172,24 +3749,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getSalesVolume();
             }
 
             public String getReadableTitle() {
                 return "Sales volume";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setSalesVolume(s);
             }
         };
         /** ************** * field30 * * ************ */
@@ -4229,24 +3794,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTaxID();
             }
 
             public String getReadableTitle() {
                 return "Tax id";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTaxID(s);
             }
         };
         /** ************** * field31 * * ************ */
@@ -4286,24 +3839,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCommercialRegister();
             }
 
             public String getReadableTitle() {
                 return "Commercial register";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCommercialRegister(s);
             }
         };
         /** ************** * field32 * * ************ */
@@ -4343,24 +3884,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getBranches();
             }
 
             public String getReadableTitle() {
                 return "Branches";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setBranches(s);
             }
         };
         /** ************** * field33 * * ************ */
@@ -4400,24 +3929,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getBusinessCategory();
             }
 
             public String getReadableTitle() {
                 return "Business category";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setBusinessCategory(s);
             }
         };
         /** ************** * field34 * * ************ */
@@ -4457,24 +3974,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getInfo();
             }
 
             public String getReadableTitle() {
                 return "Info";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setInfo(s);
             }
         };
         /** ************** * field35 * * ************ */
@@ -4514,24 +4019,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getManagerName();
             }
 
             public String getReadableTitle() {
                 return "Manager's name";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setManagerName(s);
             }
         };
         /** ************** * field36 * * ************ */
@@ -4571,24 +4064,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getAssistantName();
             }
 
             public String getReadableTitle() {
                 return "Assistant's name";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setAssistantName(s);
             }
         };
         /** ************** * field37 * * ************ */
@@ -4628,24 +4109,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getStreetOther();
             }
 
             public String getReadableTitle() {
                 return "Street other";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setStreetOther(s);
             }
         };
         /** ************** * field38 * * ************ */
@@ -4685,24 +4154,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getPostalCodeOther();
             }
 
             public String getReadableTitle() {
                 return "Postal code other";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setPostalCodeOther(s);
             }
         };
         /** ************** * field39 * * ************ */
@@ -4742,24 +4199,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCityOther();
             }
 
             public String getReadableTitle() {
                 return "City other";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCityOther(s);
             }
         };
         /** ************** * field40 * * ************ */
@@ -4799,24 +4244,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getStateOther();
             }
 
             public String getReadableTitle() {
                 return "State other";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setStateOther(s);
             }
         };
         /** ************** * field41 * * ************ */
@@ -4856,24 +4289,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCountryOther();
             }
 
             public String getReadableTitle() {
                 return "Country other";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCountryOther(s);
             }
         };
         /** ************** * field42 * * ************ */
@@ -4913,24 +4334,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneAssistant();
             }
 
             public String getReadableTitle() {
                 return "Telephone assistant";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneAssistant(s);
             }
         };
         /** ************** * field43 * * ************ */
@@ -4970,24 +4379,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneBusiness1();
             }
 
             public String getReadableTitle() {
                 return "Telephone business 1";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneBusiness1(s);
             }
         };
         /** ************** * field44 * * ************ */
@@ -5027,24 +4424,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneBusiness2();
             }
 
             public String getReadableTitle() {
                 return "Telephone business 2";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneBusiness2(s);
             }
         };
         /** ************** * field45 * * ************ */
@@ -5084,24 +4469,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getFaxBusiness();
             }
 
             public String getReadableTitle() {
                 return "FAX business";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setFaxBusiness(s);
             }
         };
         /** ************** * field46 * * ************ */
@@ -5141,24 +4514,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneCallback();
             }
 
             public String getReadableTitle() {
                 return "Telephone callback";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneCallback(s);
             }
         };
         /** ************** * field47 * * ************ */
@@ -5198,24 +4559,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneCar();
             }
 
             public String getReadableTitle() {
                 return "Telephone car";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneCar(s);
             }
         };
         /** ************** * field48 * * ************ */
@@ -5255,24 +4604,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneCompany();
             }
 
             public String getReadableTitle() {
                 return "Telephone company";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneCompany(s);
             }
         };
         /** ************** * field49 * * ************ */
@@ -5312,24 +4649,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneHome1();
             }
 
             public String getReadableTitle() {
                 return "Telephone home 1";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneHome1(s);
             }
         };
         /** ************** * field50 * * ************ */
@@ -5369,24 +4694,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneHome2();
             }
 
             public String getReadableTitle() {
                 return "Telephone home 2";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneHome2(s);
             }
         };
         /** ************** * field51 * * ************ */
@@ -5426,24 +4739,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getFaxHome();
             }
 
             public String getReadableTitle() {
                 return "FAX home";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setFaxHome(s);
             }
         };
         /** ************** * field52 * * ************ */
@@ -5483,24 +4784,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneISDN();
             }
 
             public String getReadableTitle() {
                 return "Telephone ISDN";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneISDN(s);
             }
         };
         /** ************** * field53 * * ************ */
@@ -5540,24 +4829,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCellularTelephone1();
             }
 
             public String getReadableTitle() {
                 return "Cellular telephone 1";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCellularTelephone1(s);
             }
         };
         /** ************** * field54 * * ************ */
@@ -5597,24 +4874,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCellularTelephone2();
             }
 
             public String getReadableTitle() {
                 return "Cellular telephone 2";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCellularTelephone2(s);
             }
         };
         /** ************** * field55 * * ************ */
@@ -5654,24 +4919,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneOther();
             }
 
             public String getReadableTitle() {
                 return "Telephone other";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneOther(s);
             }
         };
         /** ************** * field56 * * ************ */
@@ -5711,24 +4964,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getFaxOther();
             }
 
             public String getReadableTitle() {
                 return "FAX other";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setFaxOther(s);
             }
         };
         /** ************** * field57 * * ************ */
@@ -5768,24 +5009,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephonePager();
             }
 
             public String getReadableTitle() {
                 return "Telephone pager";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephonePager(s);
             }
         };
         /** ************** * field58 * * ************ */
@@ -5825,24 +5054,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephonePrimary();
             }
 
             public String getReadableTitle() {
                 return "Telephone primary";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephonePrimary(s);
             }
         };
         /** ************** * field59 * * ************ */
@@ -5882,24 +5099,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneRadio();
             }
 
             public String getReadableTitle() {
                 return "Telephone radio";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneRadio(s);
             }
         };
         /** ************** * field60 * * ************ */
@@ -5939,24 +5144,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneTelex();
             }
 
             public String getReadableTitle() {
                 return "Telephone telex";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneTelex(s);
             }
         };
         /** ************** * field61 * * ************ */
@@ -5996,24 +5189,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneTTYTTD();
             }
 
             public String getReadableTitle() {
                 return "Telephone TTY/TDD";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneTTYTTD(s);
             }
         };
         /** ************** * field62 * * ************ */
@@ -6053,24 +5234,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getInstantMessenger1();
             }
 
             public String getReadableTitle() {
                 return "Instantmessenger 1";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setInstantMessenger1(s);
             }
         };
 
@@ -6111,24 +5280,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getInstantMessenger2();
             }
 
             public String getReadableTitle() {
                 return "Instantmessenger 2";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setInstantMessenger2(s);
             }
         };
 
@@ -6169,24 +5326,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneIP();
             }
 
             public String getReadableTitle() {
                 return "Telephone IP";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setTelephoneIP(s);
             }
         };
         /** ************** * field65 * * ************ */
@@ -6226,24 +5371,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getEmail1();
             }
 
             public String getReadableTitle() {
                 return "Email 1";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setEmail1(s);
             }
         };
         /** ************** * field66 * * ************ */
@@ -6283,24 +5416,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getEmail2();
             }
 
             public String getReadableTitle() {
                 return "Email 2";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setEmail2(s);
             }
         };
         /** ************** * field67 * * ************ */
@@ -6340,24 +5461,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getEmail3();
             }
 
             public String getReadableTitle() {
                 return "Email 3";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setEmail3(s);
             }
         };
         /** ************** * field68 * * ************ */
@@ -6397,24 +5506,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getURL();
             }
 
             public String getReadableTitle() {
                 return "URL";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setURL(s);
             }
         };
         /** ************** * field69 * * ************ */
@@ -6454,24 +5551,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCategories();
             }
 
             public String getReadableTitle() {
                 return "Categories";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setCategories(s);
             }
         };
         /** ************** * field70 * * ************ */
@@ -6511,24 +5596,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField01();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 1";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField01(s);
             }
         };
         /** ************** * field71 * * ************ */
@@ -6568,24 +5641,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField02();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 2";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField02(s);
             }
         };
         /** ************** * field72 * * ************ */
@@ -6625,24 +5686,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField03();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 3";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField03(s);
             }
         };
         /** ************** * field73 * * ************ */
@@ -6682,24 +5731,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField04();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 4";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField04(s);
             }
         };
         /** ************** * field74 * * ************ */
@@ -6739,24 +5776,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField05();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 5";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField05(s);
             }
         };
         /** ************** * field75 * * ************ */
@@ -6796,24 +5821,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField06();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 6";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField06(s);
             }
         };
         /** ************** * field76 * * ************ */
@@ -6853,24 +5866,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField07();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 7";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField07(s);
             }
         };
         /** ************** * field77 * * ************ */
@@ -6910,24 +5911,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField08();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 8";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField08(s);
             }
         };
         /** ************** * field78 * * ************ */
@@ -6967,24 +5956,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField09();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 9";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField09(s);
             }
         };
         /** ************** * field79 * * ************ */
@@ -7024,24 +6001,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField10();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 10";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField10(s);
             }
         };
         /** ************** * field80 * * ************ */
@@ -7081,24 +6046,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField11();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 11";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField11(s);
             }
         };
         /** ************** * field81 * * ************ */
@@ -7138,24 +6091,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField12();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 12";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField12(s);
             }
         };
         /** ************** * field82 * * ************ */
@@ -7195,24 +6136,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField13();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 13";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField13(s);
             }
         };
         /** ************** * field83 * * ************ */
@@ -7252,24 +6181,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField14();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 14";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField14(s);
             }
         };
         /** ************** * field84 * * ************ */
@@ -7309,24 +6226,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField15();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 15";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField15(s);
             }
         };
         /** ************** * field85 * * ************ */
@@ -7366,24 +6271,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField16();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 16";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField17(s);
             }
         };
         /** ************** * field86 * * ************ */
@@ -7423,24 +6316,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField17();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 17";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField17(s);
             }
         };
         /** ************** * field87 * * ************ */
@@ -7480,24 +6361,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField18();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 18";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField18(s);
             }
         };
         /** ************** * field88 * * ************ */
@@ -7537,24 +6406,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField19();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 19";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField19(s);
             }
         };
         /** ************** * field89 * * ************ */
@@ -7594,24 +6451,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getUserField20();
             }
 
             public String getReadableTitle() {
                 return "Dynamic Field 20";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                co.setUserField20(s);
             }
         };
         /** ************** * intfield01 * * ************ */
@@ -7640,32 +6485,12 @@ public final class Contacts {
                 return (original.getObjectID() == co.getObjectID());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setInt(position, Integer.parseInt((String) ob));
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getObjectID());
             }
 
             public String getReadableTitle() {
                 return "Object id";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setObjectID(0);
-                    return;
-                }
-                try {
-                    co.setObjectID(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setObjectID(0);
-                }
             }
         };
         /** ************** * intfield02 * * ************ */
@@ -7694,32 +6519,12 @@ public final class Contacts {
                 return (original.getNumberOfDistributionLists() == co.getNumberOfDistributionLists());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setInt(position, Integer.parseInt((String) ob));
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getNumberOfDistributionLists());
             }
 
             public String getReadableTitle() {
                 return "Number of distributionlists";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setNumberOfDistributionLists(0);
-                    return;
-                }
-                try {
-                    co.setNumberOfDistributionLists(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setNumberOfDistributionLists(0);
-                }
             }
         };
         /** ************** * intfield03 * * ************ */
@@ -7748,32 +6553,12 @@ public final class Contacts {
                 return (original.getNumberOfLinks() == co.getNumberOfLinks());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setInt(position, Integer.parseInt((String) ob));
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getNumberOfLinks());
             }
 
             public String getReadableTitle() {
                 return "Number of links";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setNumberOfLinks(0);
-                    return;
-                }
-                try {
-                    co.setNumberOfLinks(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setNumberOfLinks(0);
-                }
             }
         };
         /** ************** * intfield02 Part 2 * * ************ */
@@ -7783,7 +6568,7 @@ public final class Contacts {
                 return "intfield02";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
@@ -7798,20 +6583,12 @@ public final class Contacts {
                 return co.containsDistributionLists();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) {
                 // nix
             }
 
             public boolean compare(final Contact co, final Contact original) {
                 return false;
-            }
-
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                // nix
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
             }
 
             public String getValueAsString(final Contact co) {
@@ -7821,10 +6598,6 @@ public final class Contacts {
             public String getReadableTitle() {
                 return null;
             }
-
-            public void setValueAsString(final String s, final Contact co) {
-                // Nothing to do
-            }
         };
         /** ************** * intfield03 Part 2 * * ************ */
         mapping[Contact.LINKS] = new Mapper() {
@@ -7833,7 +6606,7 @@ public final class Contacts {
                 return "intfield03";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
@@ -7848,20 +6621,12 @@ public final class Contacts {
                 return co.containsLinks();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) {
                 // nix
             }
 
             public boolean compare(final Contact co, final Contact original) {
                 return false;
-            }
-
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                // nix
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
             }
 
             public String getValueAsString(final Contact co) {
@@ -7870,10 +6635,6 @@ public final class Contacts {
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                // Nothing to do
             }
         };
         /** ************** * fid * * ************ */
@@ -7902,32 +6663,12 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setInt(position, Integer.parseInt((String) ob));
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getParentFolderID());
             }
 
             public String getReadableTitle() {
                 return "Folder id";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setParentFolderID(0);
-                    return;
-                }
-                try {
-                    co.setParentFolderID(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setParentFolderID(0);
-                }
             }
         };
         /** ************** * cid * * ************ */
@@ -7956,32 +6697,12 @@ public final class Contacts {
                 return (original.getContextId() == co.getContextId());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setInt(position, Integer.parseInt((String) ob));
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getContextId());
             }
 
             public String getReadableTitle() {
                 return "Context id";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setContextId(0);
-                    return;
-                }
-                try {
-                    co.setContextId(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setContextId(0);
-                }
             }
         };
         mapping[Contact.PRIVATE_FLAG] = new PrivateFlag();
@@ -8011,32 +6732,12 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setInt(position, Integer.parseInt((String) ob));
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getCreatedBy());
             }
 
             public String getReadableTitle() {
                 return "Created by";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setCreatedBy(0);
-                    return;
-                }
-                try {
-                    co.setCreatedBy(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setCreatedBy(0);
-                }
             }
         };
         /** ************** * changed_from * * ************ */
@@ -8065,32 +6766,12 @@ public final class Contacts {
                 return (co.getModifiedBy() == original.getModifiedBy());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setInt(position, Integer.parseInt((String) ob));
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getModifiedBy());
             }
 
             public String getReadableTitle() {
                 return "Modified by";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setModifiedBy(0);
-                    return;
-                }
-                try {
-                    co.setModifiedBy(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setModifiedBy(0);
-                }
             }
         };
         /** ************** * creating_date * * ************ */
@@ -8121,34 +6802,12 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                final java.util.Date d = (Date) ob;
-                ps.setLong(position, d.getTime());
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                final long x = rs.getLong(pos);
-                Date d = null;
-                if (!rs.wasNull()) {
-                    d = new Date(x);
-                }
-                return d;
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getCreationDate() == null ? null : co.getCreationDate().toString();
             }
 
             public String getReadableTitle() {
                 return "Creation date";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                Date d = null;
-                if (null != s) {
-                    d = new Date(new Long(s).longValue());
-                }
-                co.setCreationDate(d);
             }
         };
         /** ************** * changing_date * * ************ */
@@ -8179,34 +6838,12 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                final java.util.Date d = (Date) ob;
-                ps.setLong(position, d.getTime());
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                final long x = rs.getLong(pos);
-                Date d = null;
-                if (!rs.wasNull()) {
-                    d = new Date(x);
-                }
-                return d;
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getLastModified() == null ? null : co.getLastModified().toString();
             }
 
             public String getReadableTitle() {
                 return "Changing date";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                Date d = null;
-                if (null != s) {
-                    d = new Date(new Long(s).longValue());
-                }
-                co.setLastModified(d);
             }
         };
         /** ************** * timestampfield01 * * ************ */
@@ -8250,38 +6887,12 @@ public final class Contacts {
                 return (x.getTime() == y.getTime());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                final java.util.Date d = (Date) ob;
-                if (d == null) {
-                    ps.setTimestamp(position, null);
-                } else {
-                    ps.setTimestamp(position, new java.sql.Timestamp(d.getTime()));
-                }
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                final Timestamp x = rs.getTimestamp(pos);
-                java.util.Date d = null;
-                if (!rs.wasNull()) {
-                    d = new java.util.Date(x.getTime());
-                }
-                return d;
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getBirthday() == null ? null : co.getBirthday().toString();
             }
 
             public String getReadableTitle() {
                 return "Birthday";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                Date d = null;
-                if (null != s) {
-                    d = new Date(new Long(s).longValue());
-                }
-                co.setBirthday(d);
             }
         };
         /** ************** * timestampfield02 * * ************ */
@@ -8325,38 +6936,12 @@ public final class Contacts {
                 return (x.getTime() == y.getTime());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                final java.util.Date d = (Date) ob;
-                if (d == null) {
-                    ps.setTimestamp(position, null);
-                } else {
-                    ps.setTimestamp(position, new java.sql.Timestamp(d.getTime()));
-                }
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                final Timestamp x = rs.getTimestamp(pos);
-                java.util.Date d = null;
-                if (!rs.wasNull()) {
-                    d = new java.util.Date(x.getTime());
-                }
-                return d;
-            }
-
             public String getValueAsString(final Contact co) {
                 return co.getAnniversary() == null ? null : co.getAnniversary().toString();
             }
 
             public String getReadableTitle() {
                 return "Anniversay";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                Date d = null;
-                if (null != s) {
-                    d = new Date(new Long(s).longValue());
-                }
-                co.setAnniversary(d);
             }
         };
 
@@ -8367,7 +6952,7 @@ public final class Contacts {
                 return "intfield04";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
@@ -8404,29 +6989,12 @@ public final class Contacts {
                 return true;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                if (((String) ob).equals("0")) {
-                    ps.setInt(position, 0);
-                } else {
-                    ps.setInt(position, 1);
-                }
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                // TODO
-                // co.setImage1();
             }
         };
         /** ************** * intfield04 * * ************ */
@@ -8436,7 +7004,7 @@ public final class Contacts {
                 return "intfield04";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
@@ -8466,27 +7034,12 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                if (((String) ob).equals("0")) {
-                    ps.setInt(position, 0);
-                } else {
-                    ps.setInt(position, 1);
-                }
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
             }
         };
         /** ************** * intfield04 * * ************ */
@@ -8496,7 +7049,7 @@ public final class Contacts {
                 return "intfield04";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
@@ -8526,20 +7079,12 @@ public final class Contacts {
                 return false;
             }
 
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                // Nothing to do
             }
         };
         /** ************** * intfield04 * * ************ */
@@ -8549,7 +7094,7 @@ public final class Contacts {
                 return "intfield04";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 //
             }
 
@@ -8557,20 +7102,12 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) {
                 // false
             }
 
             public boolean compare(final Contact co, final Contact original) {
                 return false;
-            }
-
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                // nix
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
             }
 
             public String getValueAsString(final Contact co) {
@@ -8579,18 +7116,6 @@ public final class Contacts {
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setNumberOfImages(0);
-                    return;
-                }
-                try {
-                    co.setNumberOfImages(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setNumberOfImages(0);
-                }
             }
         };
         /** ************** * userid * * ************ */
@@ -8623,32 +7148,12 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setInternalUserId(0);
-                    return;
-                }
-                try {
-                    co.setInternalUserId(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setInternalUserId(0);
-                }
             }
         };
         /** ************** * intfield05 * * ************ */
@@ -8681,36 +7186,12 @@ public final class Contacts {
                 return (co.getLabel() == original.getLabel());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                if (((String) ob).equals("0") || ((String) ob).equals("null")) {
-                    ps.setInt(position, 0);
-                } else {
-                    ps.setInt(position, Integer.parseInt((String) ob));
-                }
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setLabel(0);
-                    return;
-                }
-                try {
-                    co.setLabel(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setLabel(0);
-                }
             }
         };
         /** ************** * field90 * * ************ */
@@ -8750,24 +7231,12 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setString(position, (String) ob);
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return rs.getString(pos);
-            }
-
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                // Nothing to do
             }
         };
         /** ************** * intfield06 * * ************ */
@@ -8800,36 +7269,12 @@ public final class Contacts {
                 return (co.getDefaultAddress() == original.getDefaultAddress());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                if (((String) ob).equals("0")) {
-                    ps.setInt(position, 0);
-                } else {
-                    ps.setInt(position, Integer.parseInt((String) ob));
-                }
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getDefaultAddress());
             }
 
             public String getReadableTitle() {
                 return "Default address";
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setDefaultAddress(0);
-                    return;
-                }
-                try {
-                    co.setDefaultAddress(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setDefaultAddress(0);
-                }
             }
         };
         /** ************** * intfield07 * * ************ */
@@ -8874,30 +7319,12 @@ public final class Contacts {
                 }
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                if (((String) ob).equals("0")) {
-                    ps.setInt(position, 0);
-                } else {
-                    ps.setInt(position, 1);
-                }
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null != s) {
-                    co.setMarkAsDistributionlist(true);
-                }
             }
         };
         /** ************** * intfield08 * * ************ */
@@ -8930,32 +7357,12 @@ public final class Contacts {
                 return (co.getNumberOfAttachments() == original.getNumberOfAttachments());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                ps.setInt(position, Integer.parseInt((String) ob));
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setNumberOfAttachments(0);
-                    return;
-                }
-                try {
-                    co.setNumberOfAttachments(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setNumberOfAttachments(0);
-                }
             }
         };
         /** ************** * intfield08 * * ************ */
@@ -8988,36 +7395,12 @@ public final class Contacts {
                 return (co.getUseCount() == original.getUseCount());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                if (((String) ob).equals("0")) {
-                    ps.setInt(position, 0);
-                } else {
-                    ps.setInt(position, Integer.parseInt((String) ob));
-                }
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
             public String getReadableTitle() {
                 return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null == s) {
-                    co.setNumberOfAttachments(0);
-                    return;
-                }
-                try {
-                    co.setUseCount(Integer.parseInt(s));
-                } catch (final NumberFormatException e) {
-                    co.setUseCount(0);
-                }
             }
         };
     }

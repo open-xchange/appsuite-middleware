@@ -88,7 +88,11 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String IMAGE_BROKEN_MSG = "Unable to save contact image. The image appears to be broken.";
 
+    public static final String TRIGGERING_EVENT_FAILED_MSG = "Unable to trigger object Events: Context %1$d Folder %2$d";
+
     public static final String INIT_CONNECTION_FROM_DBPOOL_MSG = "Unable to pick up a connection from the DBPool";
+
+    public static final String DATA_TRUNCATION_MSG = "Import failed. Some data entered exceed the database field limit. Please shorten following entries: %1$s Character Limit: %2$s Sent %3$s";
 
     public static final String NOT_VALID_IMAGE_MSG = "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.";
 
@@ -99,6 +103,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
     public static final String DISPLAY_NAME_MANDATORY = "Your display name is mandatory. Please enter it.";
 
     public static final String DISPLAY_NAME_IN_USE_MSG = "The name you entered is not available. Choose another display name. Context %1$d Object %2$d";
+
+    public static final String BAD_CHARACTER_MSG = "Bad character in field %2$s. Error: %1$s";
 
     public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from folder %1$d in context %2$d with user %3$d";
 
