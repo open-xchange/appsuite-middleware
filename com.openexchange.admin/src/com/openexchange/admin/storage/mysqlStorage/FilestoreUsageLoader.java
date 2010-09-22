@@ -153,7 +153,9 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         }
         for (Context context : contexts.values()) {
             if (!context.isUsedQuotaset()) {
-                throw new StorageException("Was not able to find a filestore usage for context " + context.getId());
+                throw new StorageException("Was not able to find a filestore usage for context " + context.getId()
+                    + ". Please consider running update tasks on all existing schemas or at least on schema "
+                    + context.getReadDatabase().getScheme());
             }
         }
         return contexts.values();
