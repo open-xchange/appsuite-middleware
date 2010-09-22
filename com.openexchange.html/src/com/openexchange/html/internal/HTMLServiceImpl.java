@@ -71,6 +71,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.w3c.tidy.Tidy;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.Range;
 import com.openexchange.html.internal.parser.HTMLParser;
@@ -78,6 +79,7 @@ import com.openexchange.html.internal.parser.handler.HTML2TextHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
+import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyException;
 import com.openexchange.proxy.ProxyRegistration;
@@ -394,6 +396,24 @@ public final class HTMLServiceImpl implements HTMLService {
         return handler.getHTML();
     }
 
+    public String filterWhitelist(final String htmlContent, String configName) {
+        if(!configName.endsWith(".properties")) {
+            configName += ".properties";
+        }
+        String definition = getConfiguration().getText(configName);
+        if(definition == null) {
+            // Apparently, the file was not found, so we'll just fall back to the default whitelist
+            return filterWhitelist(htmlContent);
+        }
+        final HTMLFilterHandler handler = new HTMLFilterHandler(this, htmlContent.length(),  definition);
+        HTMLParser.parse(htmlContent, handler);
+        return handler.getHTML();
+    }
+    
+    protected ConfigurationService getConfiguration() {
+        return ServiceRegistry.getInstance().getService(ConfigurationService.class);
+    }
+    
     public String filterExternalImages(final String htmlContent, final boolean[] modified) {
         final HTMLImageFilterHandler handler = new HTMLImageFilterHandler(this, htmlContent.length());
         HTMLParser.parse(htmlContent, handler);

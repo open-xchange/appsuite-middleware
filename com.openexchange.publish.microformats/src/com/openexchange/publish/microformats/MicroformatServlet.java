@@ -221,7 +221,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
             html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
-            html = htmlService.filterWhitelist(html);
+            html = htmlService.filterWhitelist(html, "microformatWhitelist");
             resp.getWriter().write(html);
             
 

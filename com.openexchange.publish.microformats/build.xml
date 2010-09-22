@@ -10,6 +10,7 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
+	<property name="conf.dir" value="conf"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -23,6 +24,8 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+	<property name="conf.install.dir" value="${prefix}/etc/groupware"/>
+	<property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -83,6 +86,10 @@
     <target name="install" depends="installJar,installConfig,installTemplates"/>
 
     <target name="installConfig">
+    	<mkdir dir="${confInstallCopyDir}"/>
+ 	    <copy todir="${confInstallCopyDir}" overwrite="true">
+    	   <fileset dir="${conf.dir}"/>
+    	</copy>
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>

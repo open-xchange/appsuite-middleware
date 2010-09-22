@@ -98,6 +98,19 @@ public interface HTMLService {
     String filterWhitelist(String htmlContent);
 
     /**
+     * Filters specified HTML content according to white-list filter.
+     * <p>
+     * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
+     * 
+     * @param htmlContent The <b>validated</b> HTML content
+     * @param configName The name of the whitelist to use.
+     * @return The filtered HTML content
+     * @see #getConformHTML(String, String)
+     */
+    String filterWhitelist(String htmlContent, String configName);
+
+    
+    /**
      * Filters externally loaded images out of specified HTML content.
      * <p>
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
