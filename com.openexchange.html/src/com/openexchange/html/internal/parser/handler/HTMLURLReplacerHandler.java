@@ -50,8 +50,6 @@
 package com.openexchange.html.internal.parser.handler;
 
 import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL_SOLE;
-import gnu.inet.encoding.IDNAException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -186,21 +184,13 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
     }
 
     private void replaceURL(final String url, final StringBuilder builder) {
-        try {
-            replaceURL0(url, builder);
-        } catch (final Exception e) {
-            LOG.warn("URL replacement failed.", e);
-            builder.append(url);
-        }
-    }
-
-    private void replaceURL0(final String url, final StringBuilder builder) throws UnsupportedEncodingException, IDNAException {
-        String urlStr = url;
-        urlStr = URLDecoder.decode(urlStr, "ISO-8859-1");
         /*
-         * Contains non-ascii in host part?
+         * Contains any non-ascii character in host part?
          */
+        final int resPos = builder.length();
         try {
+            String urlStr = url;
+            urlStr = URLDecoder.decode(urlStr, "ISO-8859-1");
             final URL urlInst = new URL(urlStr);
             final String host = urlInst.getHost();
             if (null != host && !isAscii(host)) {
@@ -215,6 +205,11 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
             /*
              * Not a valid URL
              */
+            builder.setLength(resPos);
+            builder.append(url);
+        } catch (final Exception e) {
+            LOG.warn("URL replacement failed.", e);
+            builder.setLength(resPos);
             builder.append(url);
         }
     }
