@@ -336,7 +336,13 @@ public final class HTML2TextHandler implements HTMLHandler {
                     final String src =
                         attributes.containsKey(ATTR_SRC) ? attributes.get(ATTR_SRC) : (attributes.containsKey(ATTR_SRC2) ? attributes.get(ATTR_SRC2) : null);
                     if (src != null && src.indexOf("cid:") == -1) {
-                        textBuilder.append(" [").append(src).append("] ");
+                        textBuilder.append(" [");
+                        try {
+                            textBuilder.append(checkURL(src));
+                        } catch (final Exception e) {
+                            textBuilder.append(src);
+                        }
+                        textBuilder.append("] ");
                     }
                 }
             }
