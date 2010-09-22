@@ -175,11 +175,9 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
             return attributeValue;
         }
         urlBuilder.setLength(0);
-        int lastMatch = 0;
-        urlBuilder.append(attributeValue.substring(lastMatch, m.start()));
+        urlBuilder.append(attributeValue.substring(0, m.start()));
         replaceURL(m.group(), urlBuilder);
-        lastMatch = m.end();
-        urlBuilder.append(attributeValue.substring(lastMatch));
+        urlBuilder.append(attributeValue.substring(m.end()));
         return urlBuilder.toString();
     }
 
