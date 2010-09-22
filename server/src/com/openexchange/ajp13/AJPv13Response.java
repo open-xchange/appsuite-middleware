@@ -49,6 +49,7 @@
 
 package com.openexchange.ajp13;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,6 +58,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AJPv13Response} - Constructs AJP response packages for <code>END_RESPONSE</code>, <code>SEND_BODY_CHUNK</code>,
@@ -282,12 +284,12 @@ public class AJPv13Response {
         if (total > MAX_PACKAGE_SIZE) {
             throw new AJPv13MaxPackgeSizeException((total));
         }
-        final byte[] response = new byte[total];
-        int count = fillStartBytes(SEND_BODY_CHUNK_PREFIX_CODE, dataLength, response);
-        count = writeInt(len, response, count);
-        count = writeByteArray(responseDataChunk, off, len, response, count);
-        writeByte(0, response, count);
-        return response;
+        final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(MAX_PACKAGE_SIZE);
+        fillStartBytes(SEND_BODY_CHUNK_PREFIX_CODE, dataLength, sink);
+        writeInt(len, sink);
+        writeByteArray(responseDataChunk, off, len, sink);
+        writeByte(0, sink);
+        return sink.toByteArray();
     }
 
     /**
@@ -310,45 +312,58 @@ public class AJPv13Response {
         /*
          * prefix + http_status_code + http_status_msg (empty string) + num_headers (integer)
          */
-        final String[][] formattedCookies = servletResponse.getFormatedCookies();
         String statusMsg = servletResponse.getStatusMsg();
         if (null == statusMsg) {
             statusMsg = "";
         }
-        final int dataLength = SEND_HEADERS_LENGTH + getHeaderSizeInBytes(servletResponse.getHeaderEntrySet()) + getCookiesSizeInBytes(formattedCookies) + statusMsg.length();
-        if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
-            throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
-        }
-        final byte[] response = new byte[dataLength + RESPONSE_PREFIX_LENGTH];
-        int count = fillStartBytes(SEND_HEADERS_PREFIX_CODE, dataLength, response);
-        count = writeInt(servletResponse.getStatus(), response, count);
-        count = writeString(statusMsg, response, count);
-        count = writeInt(servletResponse.getHeadersSize() + getNumOfCookieHeader(formattedCookies), response, count);
+        final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(MAX_PACKAGE_SIZE);
+        final byte[] headers;
         {
+            sink.reset();
             final int headersSize = servletResponse.getHeadersSize();
             final Iterator<String> iter = servletResponse.getHeaderNames();
             for (int i = 0; i < headersSize; i++) {
                 final String headerName = iter.next();
                 final String headerValue = servletResponse.getHeader(headerName);
-                count = writeHeader(headerName, headerValue, response, count);
+                writeHeader(headerName, headerValue, sink);
             }
+            headers = sink.toByteArray();
         }
-        if (formattedCookies.length > 0) {
-            for (int j = 0; j < formattedCookies[0].length; j++) {
-                count = writeHeader(STR_SET_COOKIE, formattedCookies[0][j], response, count);
-            }
-            if (formattedCookies.length > 1) {
-                final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
-                for (int i = 1; i < formattedCookies.length; i++) {
-                    sb.setLength(0);
-                    final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
-                    for (int j = 0; j < formattedCookies[i].length; j++) {
-                        count = writeHeader(hdrName, formattedCookies[i][j], response, count);
+        final byte[] cookies;
+        final int numOfCookieHdrs;
+        {
+            sink.reset();
+            final String[][] formattedCookies = servletResponse.getFormatedCookies();
+            if (formattedCookies.length > 0) {
+                for (int j = 0; j < formattedCookies[0].length; j++) {
+                    writeHeader(STR_SET_COOKIE, formattedCookies[0][j], sink);
+                }
+                if (formattedCookies.length > 1) {
+                    final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
+                    for (int i = 1; i < formattedCookies.length; i++) {
+                        sb.setLength(0);
+                        final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
+                        for (int j = 0; j < formattedCookies[i].length; j++) {
+                            writeHeader(hdrName, formattedCookies[i][j], sink);
+                        }
                     }
                 }
             }
+            cookies = sink.toByteArray();
+            numOfCookieHdrs = getNumOfCookieHeader(formattedCookies);
         }
-        return response;
+        final int dataLength = SEND_HEADERS_LENGTH + headers.length + cookies.length + statusMsg.length();
+        if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
+            throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
+        }
+        sink.reset();
+        fillStartBytes(SEND_HEADERS_PREFIX_CODE, dataLength, sink);
+        writeInt(servletResponse.getStatus(), sink);
+        writeString(statusMsg, sink);
+        writeInt(servletResponse.getHeadersSize() + numOfCookieHdrs, sink);
+        writeByteArray(headers, sink);
+        writeByteArray(cookies, sink);
+        return sink.toByteArray();
     }
 
     /**
@@ -433,17 +448,17 @@ public class AJPv13Response {
         /*
          * No need to check against max package size cause it's a static package size of 6
          */
-        final byte[] response = new byte[END_RESPONSE_LENGTH + RESPONSE_PREFIX_LENGTH];
-        final int count = fillStartBytes(END_RESPONSE_PREFIX_CODE, END_RESPONSE_LENGTH, response);
+        final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(END_RESPONSE_LENGTH + RESPONSE_PREFIX_LENGTH);
+        fillStartBytes(END_RESPONSE_PREFIX_CODE, END_RESPONSE_LENGTH, sink);
         if (closeConnection) {
-            writeBoolean(false, response, count);
+            writeBoolean(false, sink);
         } else if (AJPv13Config.isAJPModJK()) {
-            writeBoolean(true, response, count);
+            writeBoolean(true, sink);
         } else {
             final boolean reuseConnection = AJPv13Server.getNumberOfOpenAJPSockets() <= AJPv13Config.getAJPMaxNumOfSockets();
-            writeBoolean(reuseConnection, response, count);
+            writeBoolean(reuseConnection, sink);
         }
-        return response;
+        return sink.toByteArray();
     }
 
     /**
@@ -466,10 +481,10 @@ public class AJPv13Response {
         /*
          * No need to check against max package size cause it's a static package size of 7
          */
-        final byte[] response = new byte[GET_BODY_CHUNK_LENGTH + RESPONSE_PREFIX_LENGTH];
-        final int count = fillStartBytes(GET_BODY_CHUNK_PREFIX_CODE, GET_BODY_CHUNK_LENGTH, response);
-        writeInt(requestedLength, response, count);
-        return response;
+        final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(GET_BODY_CHUNK_LENGTH + RESPONSE_PREFIX_LENGTH);
+        fillStartBytes(GET_BODY_CHUNK_PREFIX_CODE, GET_BODY_CHUNK_LENGTH, sink);
+        writeInt(requestedLength, sink);
+        return sink.toByteArray();
     }
 
     /**
@@ -558,6 +573,16 @@ public class AJPv13Response {
 //        writeString(value, byteArray);
 //    }
 
+    private static void writeHeader(final String name, final String value, final ByteArrayOutputStream sink) throws AJPv13Exception {
+        if (HEADER_MAP.containsKey(name)) {
+            final int code = (0xA0 << 8) + (HEADER_MAP.get(name)).intValue();
+            writeInt(code, sink);
+        } else {
+            writeString(name, sink);
+        }
+        writeString(value, sink);
+    }
+
     private static int writeHeader(final String name, final String value, final byte[] byteArray, final int count) throws AJPv13Exception {
         int c = count;
         if (HEADER_MAP.containsKey(name)) {
@@ -587,6 +612,13 @@ public class AJPv13Response {
 //        writeByte(prefixCode, byteArray);
 //    }
 
+    private static final void fillStartBytes(final int prefixCode, final int dataLength, final ByteArrayOutputStream sink) throws AJPv13Exception {
+        sink.write(PACKAGE_FROM_CONTAINER_TO_SERVER[0]);
+        sink.write(PACKAGE_FROM_CONTAINER_TO_SERVER[1]);
+        writeInt(dataLength, sink);
+        writeByte(prefixCode, sink);
+    }
+
     /**
      * Writes the first 5 bytes of an AJP response:
      * <ol>
@@ -609,6 +641,10 @@ public class AJPv13Response {
 //        byteArray.write(byteValue);
 //    }
 
+    private static final void writeByte(final int byteValue, final ByteArrayOutputStream sink) {
+        sink.write(byteValue);
+    }
+
     private static final int writeByte(final int byteValue, final byte[] byteArray, final int count) {
         byteArray[count] = (byte) byteValue;
         return count + 1;
@@ -618,9 +654,17 @@ public class AJPv13Response {
 //        byteArray.write(bytes, 0, bytes.length);
 //    }
 
+    private static final void writeByteArray(final byte[] bytes, final ByteArrayOutputStream sink) {
+        sink.write(bytes, 0, bytes.length);
+    }
+
     private static final int writeByteArray(final byte[] bytes, final byte[] byteArray, final int count) {
         System.arraycopy(bytes, 0, byteArray, count, bytes.length);
         return count + bytes.length;
+    }
+
+    private static final void writeByteArray(final byte[] bytes, final int off, final int len, final ByteArrayOutputStream sink) {
+        sink.write(bytes, off, len);
     }
 
     private static final int writeByteArray(final byte[] bytes, final int off, final int len, final byte[] byteArray, final int count) {
@@ -636,6 +680,14 @@ public class AJPv13Response {
 //        byteArray.write((intValue & (255))); // low
 //    }
 
+    private static final void writeInt(final int intValue, final ByteArrayOutputStream sink) throws AJPv13Exception {
+        if (intValue > MAX_INT_VALUE) {
+            throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, true, Integer.valueOf(intValue));
+        }
+        sink.write((intValue >> 8)); // high
+        sink.write((intValue & (255))); // low
+    }
+
     private static final int writeInt(final int intValue, final byte[] byteArray, final int count) throws AJPv13Exception {
         if (intValue > MAX_INT_VALUE) {
             throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, true, Integer.valueOf(intValue));
@@ -648,6 +700,10 @@ public class AJPv13Response {
 //    private static final void writeBoolean(final boolean boolValue, final ByteArrayOutputStream byteArray) {
 //        byteArray.write(boolValue ? 1 : 0);
 //    }
+
+    private static final void writeBoolean(final boolean boolValue, final ByteArrayOutputStream sink) {
+        sink.write((boolValue ? 1 : 0));
+    }
 
     private static final int writeBoolean(final boolean boolValue, final byte[] byteArray, final int count) {
         byteArray[count] = (byte) (boolValue ? 1 : 0);
@@ -670,6 +726,21 @@ public class AJPv13Response {
 //        }
 //        byteArray.write(0);
 //    }
+
+    private static final void writeString(final String strValue, final ByteArrayOutputStream sink) throws AJPv13Exception {
+        final int strLength = strValue.length();
+        writeInt(strLength, sink);
+        /*
+         * Write string content and terminating '0'
+         */
+        if (strLength > 0) {
+            final char[] chars = strValue.toCharArray();
+            for (int i = 0; i < strLength; i++) {
+                sink.write((byte) chars[i]);
+            }
+        }
+        sink.write(0);
+    }
 
     private static final int writeString(final String strValue, final byte[] byteArray, final int count) throws AJPv13Exception {
         final int strLength = strValue.length();
