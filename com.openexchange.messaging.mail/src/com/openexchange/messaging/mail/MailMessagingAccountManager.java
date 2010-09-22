@@ -621,12 +621,10 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
     }
 
     public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws MessagingException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException();
+        return true; // Mail Accounts are handled elsewhere, this is just an adapter class between the mail system and the messaging system
     }
 
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws MessagingException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException();
+        return; // We do this elsewhere
     }
 }
