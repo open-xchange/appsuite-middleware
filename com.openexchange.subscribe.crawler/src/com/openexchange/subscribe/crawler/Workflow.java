@@ -174,8 +174,15 @@ public class Workflow {
                 LOG.info("Current Step : " + currentStep.getClass());
                 currentStep.execute(webClient);
                 previousStep = currentStep;
+                // if step fails try it 2 more times before crying foul
                 if (!currentStep.executedSuccessfully()) {
-                    throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+                    currentStep.execute(webClient);
+                    if (!currentStep.executedSuccessfully()) {
+                        currentStep.execute(webClient);
+                        if (!currentStep.executedSuccessfully()) {
+                            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+                        }
+                    }                    
                 }
                 if (!(currentStep instanceof LogoutStep)) {
                     result = currentStep.getOutput();
