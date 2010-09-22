@@ -231,20 +231,22 @@ public final class HTMLServiceImpl implements HTMLService {
     public String formatHrefLinks(final String content) {
         try {
             final Matcher m = PATTERN_LINK_WITH_GROUP.matcher(content);
-            final MatcherReplacer mr = new MatcherReplacer(m, content);
             final StringBuilder targetBuilder = new StringBuilder(content.length());
             final StringBuilder sb = new StringBuilder(256);
+            int lastMatch = 0;
             while (m.find()) {
+                targetBuilder.append(content.substring(lastMatch, m.start()));
                 final String url = m.group(1);
                 sb.setLength(0);
                 if ((url == null) || (isSrcAttr(content, m.start(1)))) {
-                    mr.appendLiteralReplacement(targetBuilder, checkTarget(m.group(), sb));
+                    targetBuilder.append(checkTarget(m.group(), sb));
                 } else {
                     appendLink(url, sb);
-                    mr.appendLiteralReplacement(targetBuilder, sb.toString());
+                    targetBuilder.append(sb.toString());
                 }
+                lastMatch = m.end();
             }
-            mr.appendTail(targetBuilder);
+            targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
