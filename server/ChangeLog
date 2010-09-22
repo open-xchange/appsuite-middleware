@@ -1,3 +1,7 @@
+* 2010-09-22 - steffen.templin@open-xchange.com
+
+ - Bugfix #16720: Making an existing appointment recurring causes disappearance in Outlook.
+ 
 * 2010-09-22 - thorben.betten@open-xchange.com
 
  - Bugfix #16870: Showing inline images if content-type set to "application/octet-stream"
