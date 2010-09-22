@@ -82,7 +82,7 @@ public class Bug10119Test extends AbstractTaskTest {
         final int folderId = client.getValues().getPrivateTaskFolder();
         final TimeZone timeZone = client.getValues().getTimeZone();
         // If the insert is really,really fast it is on the same time stamp as this server time stamp and the first task is missing in the
-        // updates request because that one checks >= 
+        // updates request because that one checks greater and not greater or equal.
         final Date beforeInsert = new Date(client.getValues().getServerTime().getTime() - 1);
         final MultipleResponse<InsertResponse> mInsert;
         {
