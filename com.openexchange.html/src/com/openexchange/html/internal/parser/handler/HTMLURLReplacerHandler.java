@@ -183,7 +183,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         return urlBuilder.toString();
     }
 
-    private void replaceURL(final String url, final StringBuilder builder) {
+    private static void replaceURL(final String url, final StringBuilder builder) {
         /*
          * Contains any non-ascii character in host part?
          */
