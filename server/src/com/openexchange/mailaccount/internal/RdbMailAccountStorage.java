@@ -1441,9 +1441,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = stmt.executeQuery();
             
             while(rs.next()) {
-                final String password = rs.getString(2);
-                if(password != null) {
-                    MailPasswordUtil.decrypt(password, secret);
+                int id = rs.getInt(1);
+                if(id != MailAccount.DEFAULT_ID) {
+                    final String password = rs.getString(2);
+                    if(password != null) {
+                        MailPasswordUtil.decrypt(password, secret);
+                    }
                 }
             }
             
@@ -1482,15 +1485,18 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             
             while(rs.next()) {
                 final String password = rs.getString(2);
-                try {
-                    // If we can decrypt the password with the newSecret, we don't need to do anything about this account
-                    MailPasswordUtil.decrypt(password, newSecret);
-                } catch (GeneralSecurityException x) {
-                    // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
-                    final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
-                    update.setString(1, transcribed);
-                    update.setInt(3, rs.getInt(1));
-                    update.executeUpdate();
+                int id = rs.getInt(1);
+                if(id != MailAccount.DEFAULT_ID) {
+                    try {
+                        // If we can decrypt the password with the newSecret, we don't need to do anything about this account
+                        MailPasswordUtil.decrypt(password, newSecret);
+                    } catch (GeneralSecurityException x) {
+                        // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
+                        final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                        update.setString(1, transcribed);
+                        update.setInt(3, id);
+                        update.executeUpdate();
+                    }
                 }
             }
             
