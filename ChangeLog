@@ -1,6 +1,10 @@
+* 2010-09-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #16981: When listing context misses some filestore usage entry a hint is returned to update the corresponding schema.
+
 * 2010-09-06 - choeger@open-xchange.com
 
- - Bugfix #16812 - Updating on RHEL or SLES fails if admin modified
+ - Bugfix #16812: Updating on RHEL or SLES fails if admin modified
  /opt/open-xchange/etc/admindaemon/User.properties
 
 * 2010-08-24 - marcus.klein@open-xchange.com
@@ -9,7 +13,7 @@
 
 * 2010-08-10 - choeger@open-xchange.com
 
- - Bugfix #16667 - [L3] No Polish translations for default mail folders in User.properties
+ - Bugfix #16667: [L3] No Polish translations for default mail folders in User.properties
    added japanese and polish translations to configfile and added postinst code
 
 * 2010-07-30 - marcus.klein@open-xchange.com
