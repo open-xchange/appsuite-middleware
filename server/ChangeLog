@@ -1,3 +1,7 @@
+* 2010-09-22 - thorben.betten@open-xchange.com
+
+ - Bugfix #16870: Showing inline images if content-type set to "application/octet-stream"
+
 * 2010-09-20 - thorben.betten@open-xchange.com
 
  - Bugfix #16800: Replacing non-ascii URLs with proper puny-code-encoded URLs

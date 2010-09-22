@@ -64,6 +64,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.session.Session;
 
@@ -145,7 +146,31 @@ public final class InlineImageDataSource implements ImageDataSource {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
             }
             if (!contentType.isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
-                throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: " + contentType.getBaseType());
+                /*
+                 * Either general purpose "application/octet-stream" or check by file name
+                 */
+                final String fileName = mailPart.getFileName();
+                if (null == fileName) {
+                    if (!contentType.isMimeType(MIMETypes.MIME_APPL_OCTET)) {
+                        throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: " + contentType.getBaseType());
+                    }
+                } else {
+                    try {
+                        final String byFileName = MIMEType2ExtMap.getContentType(fileName);
+                        if (ContentType.isMimeType(byFileName, MIMETypes.MIME_IMAGE_ALL)) {
+                            /*
+                             * File name indicates an image/* content type
+                             */
+                            contentType.setBaseType(byFileName);
+                        } else {
+                            if (!contentType.isMimeType(MIMETypes.MIME_APPL_OCTET)) {
+                                throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: " + contentType.getBaseType());
+                            }
+                        }
+                    } catch (final MailException e) {
+                        throw new DataException(e);
+                    }
+                }
             }
             final DataProperties properties = new DataProperties();
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
