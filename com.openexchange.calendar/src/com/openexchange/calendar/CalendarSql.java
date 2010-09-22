@@ -439,11 +439,11 @@ public class CalendarSql implements AppointmentSQLInterface {
                     if (oclp.canCreateObjects()) {
                         recColl.checkForInvalidCharacters(cdao);
                         cdao.setActionFolder(cdao.getParentFolderID());
+                        writecon = DBPool.pickupWriteable(ctx);
+                        writecon.setAutoCommit(false);
                         final ConflictHandler ch = new ConflictHandler(cdao, null, session, true);
                         final CalendarDataObject conflicts[] = ch.getConflicts();
-                        if (conflicts.length == 0) {
-                            writecon = DBPool.pickupWriteable(ctx);
-                            writecon.setAutoCommit(false);
+                        if (conflicts.length == 0) {                            
                             return cimp.insertAppointment(cdao, writecon, session);
                         }
                         return conflicts;
@@ -535,8 +535,10 @@ public class CalendarSql implements AppointmentSQLInterface {
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
         try {
+            writecon = DBPool.pickupWriteable(ctx);
+            
             final CalendarOperation co = new CalendarOperation();
-            final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder);
+            final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon);
             if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
                 // Insert-through-update detected
                 throw new OXCalendarException(OXCalendarException.Code.UPDATE_WITHOUT_OBJECT_ID);
@@ -573,7 +575,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                         }
                     }
                 }
-                writecon = DBPool.pickupWriteable(ctx);
+                
                 try {
                     writecon.setAutoCommit(false);
                     if (cdao.containsParentFolderID()) {
@@ -722,62 +724,20 @@ public class CalendarSql implements AppointmentSQLInterface {
             DBPool.pushWrite(ctx, writecon);
         }
     }
-
+    
     public void deleteAppointmentsInFolder(final int fid) throws OXException, SQLException, OXPermissionException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
-        Connection readcon = null, writecon = null;
-        PreparedStatement prep = null;
-        ResultSet rs = null;
         final Context ctx = Tools.getContext(session);
-        try  {
-            readcon = DBPool.pickup(ctx);
-            try {
-                final OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
-                if (ofa.getFolderType(fid) == FolderObject.PRIVATE) {
-                    prep = cimp.getPrivateFolderObjects(fid, ctx, readcon);
-                    rs = cimp.getResultSet(prep);
-                    writecon = DBPool.pickupWriteable(ctx);
-                    writecon.setAutoCommit(false);
-                    cimp.deleteAppointmentsInFolder(session, ctx, rs, readcon, writecon, FolderObject.PRIVATE, fid);
-                } else if (ofa.getFolderType(fid) == FolderObject.PUBLIC) {
-                    prep = cimp.getPublicFolderObjects(fid, ctx, readcon);
-                    rs = cimp.getResultSet(prep);
-                    writecon = DBPool.pickupWriteable(ctx);
-                    writecon.setAutoCommit(false);
-                    cimp.deleteAppointmentsInFolder(session, ctx, rs, readcon, writecon, FolderObject.PUBLIC, fid);
-                } else {
-                    throw new OXCalendarException(OXCalendarException.Code.FOLDER_DELETE_INVALID_REQUEST);
-                }
-            } catch(final SQLException sqle) {
-                try {
-                    writecon.rollback();
-                } catch(final SQLException rb) {
-                    LOG.error("Rollback failed: " + rb.getMessage(), rb);
-                }
-                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
-            } finally {
-                try {
-                    writecon.setAutoCommit(true);
-                } catch(final SQLException ac) {
-                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ac);
-                }
-            }
-        } catch(final OXCalendarException oxc) {
-            throw oxc;
-        } catch(final OXPermissionException oxpe) {
-            throw oxpe;
-        } catch(final OXException oxe) {
-            throw oxe;
-        } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(29));
+        Connection writecon = null;
+        try {
+            writecon = DBPool.pickupWriteable(ctx);
+            deleteAppointmentsInFolder(fid, writecon);
+        } catch (DBPoolingException e) {
+            LOG.error("Error while getting database connection", e);
+            throw new OXException(e);
         } finally {
-            recColl.closeResultSet(rs);
-            recColl.closePreparedStatement(prep);
-            if (readcon != null) {
-                DBPool.push(ctx, readcon);
-            }
             if (writecon != null) {
                 DBPool.pushWrite(ctx, writecon);
             }

@@ -70,7 +70,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omg.CORBA.CTX_RESTRICT_SCOPE;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -1991,14 +1990,21 @@ public class CalendarMySQL implements CalendarSqlImp {
         return participants;
     }
 
-    public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException {
+    public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder, final Connection con) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException {
         final CalendarOperation co = new CalendarOperation();
         Connection readcon = null;
+        boolean pushCon = false;
         CalendarDataObject edao = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            readcon = DBPool.pickup(ctx);
+            if (con == null) {
+                readcon = DBPool.pickup(ctx);
+                pushCon = true;
+            } else {
+                readcon = con;
+            }
+            
             int action_folder = inFolder;
             if (cdao.containsParentFolderID()) {
                 action_folder = cdao.getParentFolderID();
@@ -2019,7 +2025,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         } finally {
             collection.closeResultSet(rs);
             collection.closePreparedStatement(prep);
-            if (readcon != null) {
+            if (pushCon && readcon != null) {
                 DBPool.push(ctx, readcon);
             }
         }
@@ -2895,7 +2901,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         pi.setInt(7, cid);
                         collection.checkUserParticipantObject(new_userparticipants[a], cdao.getFolderType());
                         pi.addBatch();
-                        if (checkForDeletedParticipants(new_userparticipants[a].getIdentifier(), cdao.getContextID(), cdao.getObjectID(), cdao.getContext())) {
+                        if (checkForDeletedParticipants(new_userparticipants[a].getIdentifier(), cdao.getContextID(), cdao.getObjectID(), cdao.getContext(), writecon)) {
                             deleted.add(new_userparticipants[a]);
                         }
                     }
@@ -3671,15 +3677,24 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @param cid The context ID
      * @param oid The corresponding appointment's ID
      * @param context The context
+     * @param con The database connection.
      * @return <code>true</code> if specified participant is contained in participants' backup table; otherwise <code>false</code>
      * @throws OXException If an OX error occurs
      * @throws SQLException If a SQL error occurs
      */
-    private final boolean checkForDeletedParticipants(final int uid, final int cid, final int oid, final Context context) throws OXException, SQLException {
+    private final boolean checkForDeletedParticipants(final int uid, final int cid, final int oid, final Context context, Connection con) throws OXException, SQLException {
         Connection readcon = null;
+        boolean pushCon = false;
+        
         boolean ret = false;
         try {
-            readcon = DBPool.pickup(context);
+            if (con != null) {
+                readcon = con;
+            } else {
+                readcon = DBPool.pickup(context);
+                pushCon = true;
+            }
+            
             final PreparedStatement pst = readcon.prepareStatement(SQL_CHECK_DEL_PART);
             ResultSet rs = null;
             try {
@@ -3695,7 +3710,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } finally {
-            if (readcon != null) {
+            if (pushCon && readcon != null) {
                 DBPool.push(context, readcon);
             }
         }
@@ -3746,9 +3761,8 @@ public class CalendarMySQL implements CalendarSqlImp {
             pd.setInt(2, cid);
             pd.setInt(3, uid);
             pd.addBatch();
-            deleteReminder(oid, uid, c);
-            // changeReminder(oid, uid, -1, c, false, null, null,
-            // CalendarOperation.DELETE, false);
+            deleteReminder(oid, uid, c, writecon);
+
             pd.executeBatch();
         } finally {
             collection.closePreparedStatement(pd);
@@ -3843,9 +3857,8 @@ public class CalendarMySQL implements CalendarSqlImp {
         ao.setObjectID(oid);
         ao.setParentFolderID(fid);
         collection.triggerEvent(so, CalendarOperation.UPDATE, ao);
-        deleteReminder(oid, uid, c);
-        // changeReminder(oid, uid, fid, c, false, null, null,
-        // CalendarOperation.DELETE, false);
+        deleteReminder(oid, uid, c, writecon);
+
         return lastModified;
     }
 
@@ -3924,8 +3937,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE, false, con);
     }
 
-//    private static final void changeReminder(final CalendarObject obj, final int uid, final int fid, final Context c)
-
     private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange) throws OXMandatoryFieldException, OXConflictException, OXException {
         changeReminder(oid, uid, fid, c, sequence, end_date, reminder_date, action, recurrenceChange, null);
     }
@@ -3933,7 +3944,6 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange, Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
         final ReminderService rsql = new ReminderHandler(c);
         if (action == CalendarOperation.DELETE || action == CalendarOperation.UPDATE && collection.isInThePast(end_date)) {
-        //if (action == CalendarOperation.DELETE) {
             if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
                 try {
                     if (con != null) {
@@ -4190,7 +4200,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
 
                         final Date deleted_exceptions[] = edao.getDeleteException();
-                        final Date changed_exceptions[] = edao.getChangeException();
                         final Date calculated_exception = edao.getRecurrenceDatePosition();
                         edao.removeDeleteExceptions();
                         edao.removeChangeExceptions();
@@ -4213,7 +4222,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         update.setDeleteExceptions(collection.removeException(deleted_exceptions, calculated_exception));
                         update.setModifiedBy(uid);
                         try {
-                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
+                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid, writecon);
                             update.setChangeExceptions(collection.addException(ldao.getChangeException(), calculated_exception));
                             updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
                             // OBJECT
@@ -4242,7 +4251,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         //update.setChangeExceptions(collection.removeException(edao.getChangeException(), edao.getRecurrenceDatePosition()));
                         //update.setDeleteExceptions(new java.util.Date[] { edao.getRecurrenceDatePosition() });
                         try {
-                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
+                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid, writecon);
                             update.setChangeExceptions(collection.removeException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
                             update.setDeleteExceptions(collection.addException(ldao.getDeleteException(), edao.getRecurrenceDatePosition()));
                             updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
@@ -4272,7 +4281,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         //update.setChangeExceptions(new java.util.Date[] { edao.getRecurrenceDatePosition() });
                         try {
-                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
+                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid, writecon);
                             update.setChangeExceptions(collection.addException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
                             updateAppointment(edao, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // EXCEPTION
                             // OBJECT
@@ -4332,7 +4341,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             edao.setRecurrenceDatePosition(edao.getChangeException()[0]);
                         }
                         try {
-                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
+                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid, writecon);
                             update.setChangeExceptions(collection.removeException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
                             update.setDeleteExceptions(collection.addException(ldao.getDeleteException(), edao.getRecurrenceDatePosition()));
                             updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
@@ -4373,7 +4382,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         //update.setChangeExceptions(new java.util.Date[] { edao.getRecurrenceDatePosition() });
                         try {
-                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
+                            final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid, writecon);
                             update.setChangeExceptions(collection.addException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
                             updateAppointment(edao, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // EXCEPTION
                             // OBJECT
@@ -4476,7 +4485,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             throw new OXCalendarException(OXCalendarException.Code.RECURRING_UNEXPECTED_DELETE_STATE, Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(cdao.getRecurrencePosition()));
         }
         try {
-            final CalendarDataObject ldao = loadObjectForUpdate(udao, so, ctx, fid);
+            final CalendarDataObject ldao = loadObjectForUpdate(udao, so, ctx, fid, writecon);
             udao.setDeleteExceptions(collection.addException(ldao.getDeleteException(), de));
             updateAppointment(udao, ldao, writecon, so, ctx, fid, clientLastModified, false, true);
             cdao.setLastModified(udao.getLastModified());
