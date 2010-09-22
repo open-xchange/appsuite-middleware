@@ -93,10 +93,11 @@ public class MultipleAdapter implements MultipleHandler {
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
         for (final Entry<String, Object> entry : jsonObject.entrySet()) {
-            if (RequestConstants.DATA.equals(entry.getKey())) {
+            final String name = entry.getKey();
+            if (RequestConstants.DATA.equals(name)) {
                 request.setData(entry.getValue());
             } else {
-                request.putParameter(entry.getKey(), entry.getValue().toString());
+                request.putParameter(name, entry.getValue().toString());
             }
         }
         result = actionService.perform(request, session);
