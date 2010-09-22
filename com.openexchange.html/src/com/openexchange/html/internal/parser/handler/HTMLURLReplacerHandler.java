@@ -187,10 +187,11 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
          */
         final int restoreLen = builder.length();
         try {
-            String urlStr = url;
-            urlStr = URLDecoder.decode(urlStr, "ISO-8859-1");
-            final URL urlInst = new URL(urlStr);
-            final String host = urlInst.getHost();
+            String urlStr = URLDecoder.decode(url, "ISO-8859-1");
+            /*
+             * Get the host part of URL
+             */
+            final String host = new URL(urlStr).getHost();
             if (null != host && !isAscii(host)) {
                 final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
                 urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
