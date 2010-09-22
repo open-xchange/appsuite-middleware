@@ -117,7 +117,7 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
         
         migrator.migrate(password, secret, session);
         
-        return 1;
+        return Integer.valueOf(1);
     }
 
 }
