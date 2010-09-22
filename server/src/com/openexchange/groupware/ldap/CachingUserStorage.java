@@ -125,7 +125,7 @@ public class CachingUserStorage extends UserStorage {
                 return getDelegate().getUser(userId, ctx);
             }
             public Lock getCacheLock() {
-                return getCacheLock();
+                return CachingUserStorage.this.getCacheLock();
             }
         };
         try {
