@@ -50,6 +50,7 @@
 package com.openexchange.html.internal.parser.handler;
 
 import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
+import static com.openexchange.html.internal.HTMLServiceImpl.checkURL;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -468,7 +469,13 @@ public final class HTML2TextHandler implements HTMLHandler {
                 }
             }
             if (anchorTag && hrefContent != null && !text.equalsIgnoreCase(hrefContent) && !PATTERN_URL.matcher(text).matches()) {
-                textBuilder.append(" [").append(hrefContent).append("] ");
+                textBuilder.append(" [");
+                try {
+                    textBuilder.append(checkURL(hrefContent));
+                } catch (final Exception e) {
+                    textBuilder.append(hrefContent);
+                }
+                textBuilder.append("] ");
             }
         }
     }
