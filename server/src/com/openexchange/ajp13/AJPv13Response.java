@@ -95,7 +95,7 @@ public class AJPv13Response {
     /**
      * Byte sequence indicating a packet from Servlet Container to Web Server.
      */
-    private static final int[] PACKAGE_FROM_CONTAINER_TO_SERVER = { 'A', 'B' };
+    private static final byte[] PACKAGE_FROM_CONTAINER_TO_SERVER = { (byte) 'A', (byte) 'B' };
 
     private static final int SEND_BODY_CHUNK_PREFIX_CODE = 3;
 
@@ -140,8 +140,8 @@ public class AJPv13Response {
          * CPong reply
          */
         CPONG_RESPONSE_BYTES = new byte[5];
-        CPONG_RESPONSE_BYTES[0] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[0];
-        CPONG_RESPONSE_BYTES[1] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[1];
+        CPONG_RESPONSE_BYTES[0] = PACKAGE_FROM_CONTAINER_TO_SERVER[0];
+        CPONG_RESPONSE_BYTES[1] = PACKAGE_FROM_CONTAINER_TO_SERVER[1];
         CPONG_RESPONSE_BYTES[2] = 0;
         CPONG_RESPONSE_BYTES[3] = 1;
         CPONG_RESPONSE_BYTES[4] = CPONG_REPLY_PREFIX_CODE;
@@ -613,8 +613,7 @@ public class AJPv13Response {
 //    }
 
     private static final void fillStartBytes(final int prefixCode, final int dataLength, final ByteArrayOutputStream sink) throws AJPv13Exception {
-        sink.write(PACKAGE_FROM_CONTAINER_TO_SERVER[0]);
-        sink.write(PACKAGE_FROM_CONTAINER_TO_SERVER[1]);
+        sink.write(PACKAGE_FROM_CONTAINER_TO_SERVER, 0, 2);
         writeInt(dataLength, sink);
         writeByte(prefixCode, sink);
     }
@@ -630,8 +629,8 @@ public class AJPv13Response {
      * @throws AJPv13Exception If starting bytes cannot be written
      */
     private static final int fillStartBytes(final int prefixCode, final int dataLength, final byte[] byteArray) throws AJPv13Exception {
-        byteArray[0] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[0];
-        byteArray[1] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[1];
+        byteArray[0] = PACKAGE_FROM_CONTAINER_TO_SERVER[0];
+        byteArray[1] = PACKAGE_FROM_CONTAINER_TO_SERVER[1];
         int c = writeInt(dataLength, byteArray, 2);
         c = writeByte(prefixCode, byteArray, c);
         return c;
