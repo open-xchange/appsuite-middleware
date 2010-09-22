@@ -83,7 +83,7 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
     }
 
     public void close() {
- 
+        // Nothing to do
     }
 
     public Date getTimestamp() {
