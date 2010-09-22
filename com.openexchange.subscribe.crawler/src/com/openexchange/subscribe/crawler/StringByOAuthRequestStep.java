@@ -125,13 +125,13 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
             LOG.info("Successfully requested OAuth token");
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (OAuthException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
 
         // Authorize the request 
@@ -142,7 +142,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
             paramProps.setProperty("application_name", "Open-Xchange Contact Aggregator");
             paramProps.setProperty("oauth_token", requestToken);
             OAuthMessage response = sendRequest(paramProps, oAuthAccessor.consumer.serviceProvider.userAuthorizationURL);
-            LOG.debug("Successfully requested authorization-url: "+response.URL);   
+            LOG.info("Successfully requested authorization-url: "+response.URL);   
             
             // Fill out form / confirm the access otherwise
             LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
@@ -157,15 +157,18 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
             Matcher matcher = pattern.matcher(pageString2);
             if (matcher.find() && matcher.groupCount() == 1){
                 verifier = matcher.group(1);
+                LOG.info("Request authorized, verifier found.");
+            } else {
+                LOG.error("Verifier not found");
             }
             LOG.debug("This is the verifier : " + verifier);
             //openPageInBrowser(pageWithVerifier);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (OAuthException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
 
         
@@ -178,33 +181,35 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
             OAuthMessage response = sendRequest(paramProps, accessUrl);
             accessToken = response.getParameter("oauth_token");
             tokenSecret = response.getParameter("oauth_token_secret");
+            LOG.info("Accessed and conformed using the verifier");
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (OAuthException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         
-        // Execute an API-Request (fully logged in now)
-        
+        // Execute an API-Request (fully logged in now)        
         try {
             Properties paramProps = new Properties();
             paramProps.setProperty("oauth_token", accessToken);
 
             OAuthMessage response = sendRequest(paramProps, apiRequest);
             String result = response.readBodyAsString();
+            LOG.info("Successfully executed an API-Request");
+            executedSuccessfully = true;
             LOG.debug("This is the result of the whole operation : " + result);
             output = result;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (OAuthException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
 
-        executedSuccessfully = true;
+        
     }
 
     /*
