@@ -230,19 +230,29 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             if (subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
                 Map<String, Object> configuration = subscription.getConfiguration();
                 Map<String, Object> update = new HashMap<String, Object>();
+                boolean save = false;
                 for (String passwordField : passwordFields) {
                     String password = (String) configuration.get(passwordField);
                     if (password != null) {
                         try {
-                            String transcriptedPassword = CRYPTO.encrypt(CRYPTO.decrypt(password, oldSecret), newSecret);
-                            update.put(passwordField, transcriptedPassword);
+                            try {
+                                // If we can already decrypt with the new secret, we're done with this entry
+                                CRYPTO.decrypt(password, newSecret);
+                            } catch (CryptoException x) {
+                                // Alright, this one needs migration
+                                String transcriptedPassword = CRYPTO.encrypt(CRYPTO.decrypt(password, oldSecret), newSecret);
+                                update.put(passwordField, transcriptedPassword);
+                                save = true;
+                            }
                         } catch (CryptoException e) {
                             throw new SubscriptionException(e);
                         }
                     }
                 }
-                subscription.setConfiguration(update);
-                STORAGE.updateSubscription(subscription);
+                if(save) {
+                    subscription.setConfiguration(update);
+                    STORAGE.updateSubscription(subscription);
+                }
             }
         }
     }

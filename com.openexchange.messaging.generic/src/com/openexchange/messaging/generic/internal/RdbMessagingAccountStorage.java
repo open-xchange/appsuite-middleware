@@ -555,13 +555,13 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     public boolean checkSecretCanDecryptStrings(final MessagingService parentService, final Session session, final String secret) throws MessagingException {
         final Set<String> secretProperties = parentService.getSecretProperties();
-        if(secretProperties.isEmpty()) {
+        if (secretProperties.isEmpty()) {
             return true;
         }
         final TIntArrayList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
         final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
         final CryptoService cryptoService = getService(CryptoService.class);
-        
+
         final Context ctx = getContext(session);
         final HashMap<String, Object> content = new HashMap<String, Object>();
         try {
@@ -569,10 +569,10 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 final int confId = confIds.get(i);
                 content.clear();
                 genericConfStorageService.fill(ctx, confId, content);
-                
+
                 for (final String field : secretProperties) {
                     final String encrypted = (String) content.get(field);
-                    if(encrypted != null) {
+                    if (encrypted != null) {
                         cryptoService.decrypt(encrypted, secret);
                     }
                 }
@@ -621,13 +621,13 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     public void migrateToNewSecret(final MessagingService parentService, final String oldSecret, final String newSecret, final Session session) throws MessagingException {
         final Set<String> secretProperties = parentService.getSecretProperties();
-        if(secretProperties.isEmpty()) {
+        if (secretProperties.isEmpty()) {
             return;
         }
         final TIntArrayList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
         final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
         final CryptoService cryptoService = getService(CryptoService.class);
-        
+
         final Context ctx = getContext(session);
         final HashMap<String, Object> content = new HashMap<String, Object>();
         try {
@@ -638,9 +638,15 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 final HashMap<String, Object> update = new HashMap<String, Object>();
                 for (final String field : secretProperties) {
                     final String encrypted = (String) content.get(field);
-                    if(encrypted != null) {
-                        final String transcripted = cryptoService.encrypt(cryptoService.decrypt(encrypted, oldSecret), newSecret);
-                        update.put(field, transcripted);
+                    if (encrypted != null) {
+                        try {
+                            // Try using the new secret. Maybe this account doesn't need the migration
+                            cryptoService.decrypt(encrypted, newSecret);
+                        } catch (CryptoException x) {
+                            // Needs migration
+                            final String transcripted = cryptoService.encrypt(cryptoService.decrypt(encrypted, oldSecret), newSecret);
+                            update.put(field, transcripted);
+                        }
                     }
                 }
                 genericConfStorageService.update(ctx, confId, update);

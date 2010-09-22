@@ -1468,7 +1468,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement update = null;
         ResultSet rs = null;
         try {
-            con = Database.get(cid, false);
+            con = Database.get(cid, true);
             con.setAutoCommit(false);
             update = con.prepareStatement(UPDATE_PASSWORD1);
             update.setInt(2, cid);
@@ -1482,10 +1482,16 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             
             while(rs.next()) {
                 final String password = rs.getString(2);
-                final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
-                update.setString(1, transcribed);
-                update.setInt(3, rs.getInt(1));
-                update.executeUpdate();
+                try {
+                    // If we can decrypt the password with the newSecret, we don't need to do anything about this account
+                    MailPasswordUtil.decrypt(password, newSecret);
+                } catch (GeneralSecurityException x) {
+                    // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
+                    final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                    update.setString(1, transcribed);
+                    update.setInt(3, rs.getInt(1));
+                    update.executeUpdate();
+                }
             }
             
             rs.close();
@@ -1527,7 +1533,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 } catch (final SQLException e) {
                     // Don't care
                 }
-                Database.back(cid, false, con);
+                Database.back(cid, true, con);
             }
             DBUtils.closeSQLStuff(rs, select);
             DBUtils.closeSQLStuff(update);
