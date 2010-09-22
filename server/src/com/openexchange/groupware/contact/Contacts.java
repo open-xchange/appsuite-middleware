@@ -664,6 +664,14 @@ public final class Contacts {
 
         } catch (final DBPoolingException e) {
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
+        } catch (OXConcurrentModificationException e) {
+            throw e;
+        } catch (OXPermissionException e) {
+            throw e;
+        } catch (OXConflictException e) {
+            throw e;
+        } catch (OXObjectNotFoundException e) {
+            throw e;
         } catch (OXException e) {
             throw new ContactException(e);
         } finally {
