@@ -106,12 +106,11 @@ public class CachingUserStorage extends UserStorage {
     @Override
     public User getUser(final int uid, final Context context) throws LdapException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        User user = delegate.getUser(uid, context);
         if (cacheService == null) {
-            return user;
+            return delegate.getUser(uid, context);
         }
         try {
-            return createProxy(context, uid, cacheService, user);
+            return createProxy(context, uid, cacheService, null);
         } catch (UserException e) {
             throw new LdapException(e);
         }
@@ -123,14 +122,14 @@ public class CachingUserStorage extends UserStorage {
                 return cacheService.newCacheKey(ctx.getContextId(), userId);
             }
             public User load() throws LdapException {
-                return delegate.getUser(userId, ctx);
+                return getDelegate().getUser(userId, ctx);
             }
             public Lock getCacheLock() {
-                return cacheLock;
+                return getCacheLock();
             }
         };
         try {
-            return new UserReloader(factory, user, REGION_NAME);
+            return null == user ? new UserReloader(factory, REGION_NAME) : new UserReloader(factory, user, REGION_NAME);
         } catch (final AbstractOXException e) {
             if (e instanceof UserException) {
                 throw (UserException) e;
@@ -144,7 +143,7 @@ public class CachingUserStorage extends UserStorage {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         User user = delegate.getUser(ctx, userId, con);
         if (cacheService == null) {
-            return user;
+            return delegate.getUser(ctx, userId, con);
         }
         return createProxy(ctx, userId, cacheService, user);
     }
@@ -174,10 +173,10 @@ public class CachingUserStorage extends UserStorage {
                     return cacheService.newCacheKey(ctx.getContextId(), userId);
                 }
                 public User load() throws LdapException {
-                    return delegate.getUser(userId, ctx);
+                    return getDelegate().getUser(userId, ctx);
                 }
                 public Lock getCacheLock() {
-                    return cacheLock;
+                    return CachingUserStorage.this.getCacheLock();
                 }
             };
             User user = (User) cache.get(factory.getKey());
@@ -198,10 +197,10 @@ public class CachingUserStorage extends UserStorage {
                     return cacheService.newCacheKey(ctx.getContextId(), user.getId());
                 }
                 public User load() throws LdapException {
-                    return delegate.getUser(user.getId(), ctx);
+                    return getDelegate().getUser(user.getId(), ctx);
                 }
                 public Lock getCacheLock() {
-                    return cacheLock;
+                    return CachingUserStorage.this.getCacheLock();
                 }
             };
             try {
@@ -213,9 +212,6 @@ public class CachingUserStorage extends UserStorage {
         return retval.toArray(new User[retval.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateUser(final User user, final Context context) throws LdapException {
         delegate.updateUser(user, context);
@@ -226,9 +222,6 @@ public class CachingUserStorage extends UserStorage {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getUserId(final String uid, final Context context) throws LdapException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
@@ -267,18 +260,12 @@ public class CachingUserStorage extends UserStorage {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int[] listModifiedUser(final Date modifiedSince, final Context context) throws LdapException {
         // Caching doesn't make any sense here.
         return delegate.listModifiedUser(modifiedSince, context);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public User searchUser(final String email, final Context context) throws LdapException {
         // Caching doesn't make any sense here.
@@ -290,9 +277,6 @@ public class CachingUserStorage extends UserStorage {
         return delegate.listAllUser(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
@@ -326,13 +310,9 @@ public class CachingUserStorage extends UserStorage {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void invalidateUser(final Context ctx, final int userId) throws UserException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance()
-            .getService(CacheService.class);
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache(REGION_NAME);
@@ -344,13 +324,13 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    protected void startInternal() throws UserException {
+    protected void startInternal() {
+        // Nothing to initialize.
     }
 
     @Override
     protected void stopInternal() throws UserException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance()
-            .getService(CacheService.class);
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService != null) {
             try {
                 cacheService.freeCache(REGION_NAME);
@@ -358,5 +338,13 @@ public class CachingUserStorage extends UserStorage {
                 throw new UserException(e);
             }
         }
+    }
+
+    UserStorage getDelegate() {
+        return delegate;
+    }
+
+    Lock getCacheLock() {
+        return cacheLock;
     }
 }

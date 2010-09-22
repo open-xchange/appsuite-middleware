@@ -1,3 +1,7 @@
+* 2010-09-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #16962: Fixed the not used cache for users.
+
 * 2010-09-22 - steffen.templin@open-xchange.com
 
  - Bugfix #16720: Making an existing appointment recurring causes disappearance in Outlook.
