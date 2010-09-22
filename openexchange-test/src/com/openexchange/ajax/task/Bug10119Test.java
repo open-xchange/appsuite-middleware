@@ -83,6 +83,7 @@ public class Bug10119Test extends AbstractTaskTest {
         final TimeZone timeZone = client.getValues().getTimeZone();
         final Date beforeInsert = client.getValues().getServerTime();
         final MultipleResponse<InsertResponse> mInsert;
+        final Date task1LastModified, task2LastModified;
         {
             final InsertRequest[] initialInserts = new InsertRequest[2];
             for (int i = 0; i < initialInserts.length; i++) {
@@ -91,14 +92,16 @@ public class Bug10119Test extends AbstractTaskTest {
                 task.setTitle("Initial" + (i + 1));
                 initialInserts[i] = new InsertRequest(task, timeZone);
             }
-            mInsert =  client.execute(MultipleRequest.create(initialInserts));
+            mInsert = client.execute(MultipleRequest.create(initialInserts));
+            task1LastModified = mInsert.getResponse(0).getTimestamp();
+            task2LastModified = mInsert.getResponse(1).getTimestamp();
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
         final TaskUpdatesResponse uResponse;
         {
             final UpdatesRequest uRequest = new UpdatesRequest(folderId, columns, 0, null, beforeInsert);
             uResponse = client.execute(uRequest);
-            assertTrue("Can't find initial inserts. Only found " + uResponse.size() + " changed tasks.", uResponse.size() >= 2);
+            assertTrue("Can't find initial inserts. Only found " + uResponse.size() + " changed tasks. Timestamps: " + beforeInsert.getTime() + ',' + task1LastModified.getTime() + ',' + task2LastModified.getTime(), uResponse.size() >= 2);
         }
         // Delete one
         {
