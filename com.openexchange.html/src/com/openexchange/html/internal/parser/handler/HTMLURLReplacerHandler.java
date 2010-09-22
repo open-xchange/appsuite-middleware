@@ -187,7 +187,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         /*
          * Contains any non-ascii character in host part?
          */
-        final int resPos = builder.length();
+        final int restoreLen = builder.length();
         try {
             String urlStr = url;
             urlStr = URLDecoder.decode(urlStr, "ISO-8859-1");
@@ -205,11 +205,11 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
             /*
              * Not a valid URL
              */
-            builder.setLength(resPos);
+            builder.setLength(restoreLen);
             builder.append(url);
         } catch (final Exception e) {
             LOG.warn("URL replacement failed.", e);
-            builder.setLength(resPos);
+            builder.setLength(restoreLen);
             builder.append(url);
         }
     }
