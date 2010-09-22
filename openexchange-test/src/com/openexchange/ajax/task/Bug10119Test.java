@@ -81,9 +81,10 @@ public class Bug10119Test extends AbstractTaskTest {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateTaskFolder();
         final TimeZone timeZone = client.getValues().getTimeZone();
-        final Date beforeInsert = client.getValues().getServerTime();
+        // If the insert is really,really fast it is on the same time stamp as this server time stamp and the first task is missing in the
+        // updates request because that one checks >= 
+        final Date beforeInsert = new Date(client.getValues().getServerTime().getTime() - 1);
         final MultipleResponse<InsertResponse> mInsert;
-        final Date task1LastModified, task2LastModified;
         {
             final InsertRequest[] initialInserts = new InsertRequest[2];
             for (int i = 0; i < initialInserts.length; i++) {
@@ -93,15 +94,13 @@ public class Bug10119Test extends AbstractTaskTest {
                 initialInserts[i] = new InsertRequest(task, timeZone);
             }
             mInsert = client.execute(MultipleRequest.create(initialInserts));
-            task1LastModified = mInsert.getResponse(0).getTimestamp();
-            task2LastModified = mInsert.getResponse(1).getTimestamp();
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
         final TaskUpdatesResponse uResponse;
         {
-            final UpdatesRequest uRequest = new UpdatesRequest(folderId, columns, 0, null, beforeInsert);
+            final UpdatesRequest uRequest = new UpdatesRequest(folderId, columns, 0, null, new Date(beforeInsert.getTime() - 1));
             uResponse = client.execute(uRequest);
-            assertTrue("Can't find initial inserts. Only found " + uResponse.size() + " changed tasks. Timestamps: " + beforeInsert.getTime() + ',' + task1LastModified.getTime() + ',' + task2LastModified.getTime(), uResponse.size() >= 2);
+            assertTrue("Can't find initial inserts. Only found " + uResponse.size() + " changed tasks.", uResponse.size() >= 2);
         }
         // Delete one
         {
