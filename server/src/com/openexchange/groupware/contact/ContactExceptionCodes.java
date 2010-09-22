@@ -125,6 +125,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     LAST_NAME_MANDATORY(LAST_NAME_MANDATORY_MSG, Category.USER_INPUT, 175),
     /** You are not allowed to modify contact %1$d in context %2$d. */
     NO_CHANGE_PERMISSION(NO_CHANGE_PERMISSION_MSG, Category.PERMISSION, 176),
+    /** Unable to load objects. Context %1$d User %2$d */
+    LOAD_OBJECT_FAILED(LOAD_OBJECT_FAILED_MSG, Category.CODE_ERROR, 252),
     ;
 
     private String message;

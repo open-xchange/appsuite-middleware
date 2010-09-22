@@ -53,7 +53,8 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.TIntArrayList;
+import static com.openexchange.tools.sql.DBUtils.getStatement;
+import gnu.trove.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,7 +62,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -70,34 +70,34 @@ import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.FinalContactConstants;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
-import com.openexchange.groupware.contact.ContactConfig.Property;
-import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
@@ -113,7 +113,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.tx.SimpleDBProvider;
-import com.openexchange.groupware.update.tasks.AggregatingContactTableService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.util.UUIDs;
@@ -133,7 +132,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_API2_DATABASEIMPL_RDBCONTACTSQLIMPL, component = EnumComponent.CONTACT)
-public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface, OverridingContactInterface, FinalContactInterface {
+public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContactInterface, FinalContactInterface {
 
     private static final String ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D = "Unable to load objects. Context %1$d User %2$d";
 
@@ -147,6 +146,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
 
     private final UserConfiguration userConfiguration;
 
+    @Deprecated
     static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(RdbContactSQLImpl.class);
 
     private static final Log LOG = LogFactory.getLog(RdbContactSQLImpl.class);
@@ -169,35 +169,33 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
     }
 
-    public void insertContactObject(final Contact co) throws OXException {
+    public void insertContactObject(final Contact co) throws ContactException, OXConflictException {
         insertContactObject(co, false);
     }
 
-    public void forceInsertContactObject(final Contact co) throws OXException {
+    public void forceInsertContactObject(final Contact co) throws ContactException, OXConflictException {
         insertContactObject(co, true);
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "0", exceptionId = 0, msg = ContactException.EVENT_QUEUE)
-    protected void insertContactObject(final Contact co, final boolean override) throws OXException {
+    protected void insertContactObject(final Contact co, final boolean override) throws ContactException, OXConflictException {
         try {
             Contacts.performContactStorageInsert(co, userId, session, override);
             final EventClient ec = new EventClient(session);
             ec.create(co);
-        } catch (final EventException ise) {
-            throw EXCEPTIONS.create(0, ise);
-        } catch (final ContextException ise) {
-            throw EXCEPTIONS.create(0, ise);
+        } catch (final EventException e) {
+            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(co.getParentFolderID()));
+        } catch (final ContextException e) {
+            throw new ContactException(e);
         } catch (final OXConflictException ce) {
             LOG.debug("Unable to insert contact", ce);
             throw ce;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Problem while inserting contact.", e);
-            throw e;
+            throw new ContactException(e);
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "1", exceptionId = 1, msg = ContactException.EVENT_QUEUE)
-    public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXException, OXConcurrentModificationException, ContactException {
+    public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXConcurrentModificationException, ContactException, OXConflictException, OXObjectNotFoundException, OXPermissionException {
 
         try {
             final Contact storageVersion = Contacts.getContactById(co.getObjectID(), session);
@@ -206,35 +204,46 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
             ec.modify(storageVersion, co, new OXFolderAccess(ctx).getFolderObject(co.getParentFolderID()));
         } catch (final ContactException ise) {
             throw ise;
-        } catch (final EventException ise) {
-            throw EXCEPTIONS.create(1, ise);
-        } catch (final ContextException ise) {
-            throw EXCEPTIONS.create(1, ise);
+        } catch (final EventException e) {
+            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(co.getParentFolderID()));
+        } catch (final ContextException e) {
+            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(co.getParentFolderID()));
         } catch (final OXConcurrentModificationException cme) {
             throw cme;
         } catch (final OXConflictException ce) {
             throw ce;
         } catch (final OXObjectNotFoundException oonfee) {
             throw oonfee;
-        } catch (final OXException e) {
-            throw e;
         } catch (final DBPoolingException e) {
+            throw new ContactException(e);
+        } catch (OXPermissionException e) {
+            throw e;
+        } catch (final OXException e) {
             throw new ContactException(e);
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 61, msg = ContactException.EVENT_QUEUE)
-    public void updateUserContact(Contact contact, java.util.Date lastModified) throws OXException {
+    public void updateUserContact(Contact contact, java.util.Date lastModified) throws ContactException, OXObjectNotFoundException, OXPermissionException, OXConflictException, OXConcurrentModificationException {
         try {
             final Contact storageVersion = Contacts.getContactById(contact.getObjectID(), session);
             Contacts.performUserContactStorageUpdate(contact, lastModified, userId, memberInGroups, ctx, userConfiguration);
             final EventClient ec = new EventClient(session);
             ec.modify(storageVersion, contact, new OXFolderAccess(ctx).getFolderObject(contact.getParentFolderID()));
-        } catch (final EventException ise) {
-            throw EXCEPTIONS.create(61, ise);
-        } catch (final ContextException ise) {
-            throw EXCEPTIONS.create(61, ise);
+        } catch (final EventException e) {
+            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(contact.getParentFolderID()));
+        } catch (final ContextException e) {
+            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(contact.getParentFolderID()));
         } catch (final DBPoolingException e) {
+            throw new ContactException(e);
+        } catch (OXObjectNotFoundException e) {
+            throw e;
+        } catch (OXPermissionException e) {
+            throw e;
+        } catch (OXConflictException e) {
+            throw e;
+        } catch (OXConcurrentModificationException e) {
+            throw e;
+        } catch (OXException e) {
             throw new ContactException(e);
         }
     }
@@ -691,29 +700,30 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         return new PrefetchIterator<Contact>(si);
     }
 
-    @OXThrowsMultiple(category = { Category.TRY_AGAIN, Category.CODE_ERROR, Category.PERMISSION, Category.SOCKET_CONNECTION }, desc = {
-        "26", "27", "28", "29" }, exceptionId = { 26, 27, 28, 29 }, msg = {
-        "The object you requested can not be found. Try again. Context %1$d Folder %2$d User %3$d Object %4$d",
-        ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_READ_PERMISSION_MSG, ContactException.INIT_CONNECTION_FROM_DBPOOL })
-    public Contact getObjectById(final int objectId, final int fid) throws OXException {
+    public Contact getObjectById(final int objectId, final int fid) throws OXObjectNotFoundException, OXConflictException, ContactException {
         if (objectId <= 0) {
-            throw EXCEPTIONS.createOXObjectNotFoundException(26, I(ctx.getContextId()), I(fid), I(userId), I(objectId));
+            throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(objectId), I(ctx.getContextId())));
         }
-        final FolderObject contactFolder = new OXFolderAccess(ctx).getFolderObject(fid);
+        final FolderObject contactFolder;
+        try {
+            contactFolder = new OXFolderAccess(ctx).getFolderObject(fid);
+        } catch (OXException e) {
+            throw new ContactException(e);
+        }
         if (contactFolder.getModule() != FolderObject.CONTACT) {
-            throw EXCEPTIONS.createOXConflictException(27, I(fid), I(ctx.getContextId()), I(userId));
+            throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
         }
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
         } catch (final DBPoolingException e) {
-            throw EXCEPTIONS.create(29, e);
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         }
         final Contact co;
         try {
             co = Contacts.getContactById(objectId, userId, memberInGroups, ctx, userConfiguration, con);
             if (!performSecurityReadCheck(fid, co.getCreatedBy(), userId, memberInGroups, session, con, ctx)) {
-                throw EXCEPTIONS.createOXConflictException(28, I(fid), I(ctx.getContextId()), I(userId));
+                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
             }
             final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(
                 ctx,
@@ -722,8 +732,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
             if (null != creationDate) {
                 co.setLastModifiedOfNewestAttachment(creationDate);
             }
-        } catch (final OXException e) {
-            throw e;
+        } catch (final AttachmentException e) {
+            throw new ContactException(e);
         } finally {
             DBPool.closeReaderSilent(ctx, con);
         }
@@ -1144,7 +1154,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
     }
 
     private int[] checkColumns(final int[] cols) {
-        final TIntArrayList tmp = new TIntArrayList();
+        final TIntHashSet tmp = new TIntHashSet();
         for (final int col : cols) {
             if (Contacts.mapping[col] != null) {
                 tmp.add(col);
@@ -1156,11 +1166,15 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
                 }
             } else if (Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT == col) {
                 tmp.add(col);
+            } else if (Contact.CONTACT_NUMBER_OF_LINKS == col) {
+                tmp.add(Contact.NUMBER_OF_LINKS);
+            } else if (Contact.LAST_MODIFIED_UTC == col) {
+                tmp.add(Contact.LAST_MODIFIED);
             } else {
                 LOG.warn("UNKNOWN FIELD -> " + col);
             }
         }
-        return tmp.toNativeArray();
+        return tmp.toArray();
     }
 
     private int addQueriedContacts(final int[] cols, final List<Contact> retval, final int[][] object_id) throws SQLException, SearchIteratorException, OXException {
@@ -1279,7 +1293,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
                 }
             }
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(51, e, I(ctx.getContextId()), I(userId));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(51, e, I(ctx.getContextId()), I(userId));
         } catch (final OXException e) {
             throw e;
         }
@@ -1351,8 +1365,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
                         nexto = convertResultSet2ContactObject(rs, cols, false, readcon);
                     }
                 }
-            } catch (final SQLException exc) {
-                throw EXCEPTIONS.createSearchIteratorException(52, exc, I(ctx.getContextId()), I(userId));
+            } catch (final SQLException e) {
+                throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
             } catch (final OXException exc) {
                 throw EXCEPTIONS.createSearchIteratorException(53, exc, I(ctx.getContextId()), I(userId));
             }
@@ -1527,7 +1541,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         setUnificationStateForContacts(aggregator, contributor, ContactUnificationState.RED);
     }
 
-    public List<UUID> getAssociatedContacts(Contact contact) throws OXException {
+    public List<UUID> getAssociatedContacts(Contact contact) {
         if(!contact.containsUserField20())
             return new LinkedList<UUID>();
             
@@ -1556,18 +1570,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            if (res != null)
-                try {
-                    res.close();
-                } catch (SQLException e) {
-                    e.printStackTrace(); /* won't happen */
-                }
-            if (stmt != null)
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace(); /* won't happen */
-                }
+            closeSQLStuff(res, stmt);
             if (con != null)
                 DBPool.push(ctx, con);
         }
@@ -1575,7 +1578,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
     }
 
 
-    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException {
+    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) {
         if(! c1.containsUserField20() || ! c2.containsUserField20())
             return ContactUnificationState.UNDEFINED;
         
@@ -1615,7 +1618,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
         return null; // TODO: Throw exception
     }
 
-    public Contact getContactByUUID(UUID uuid) throws OXException {
+    public Contact getContactByUUID(UUID uuid) throws ContactException, OXObjectNotFoundException, OXConflictException {
         Contact contact = null;
         Connection con = null;
         PreparedStatement stmt = null;
@@ -1632,42 +1635,15 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
             int fid = res.getInt("fid");
             int id = res.getInt("intfield01");
             return getObjectById(id, fid);
-            //contact = convertResultsetsToContactsLikeAGrownup(res).get(0);
-            // TODO rights check?
         } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            if (res != null)
-                try {
-                    res.close();
-                } catch (SQLException e) {
-                    e.printStackTrace(); /* won't happen */
-                }
-            if (stmt != null)
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace(); /* won't happen */
-                }
+            closeSQLStuff(res, stmt);
             if (con != null)
                 DBPool.push(ctx, con);
         }
         return contact;
     }
-
-    private String makeIn(Collection<UUID> uuids) {
-        StringBuffer in = new StringBuffer();
-        for (UUID uuid : uuids) {
-            in.append("'");
-            in.append(uuid);
-            in.append("'");
-            in.append(",");
-        }
-        if (in.length() > 0)
-            return in.substring(0, in.length() - 1);
-        return in.toString();
-    }
-
 }

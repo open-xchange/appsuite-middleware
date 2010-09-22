@@ -1,6 +1,7 @@
 * 2010-09-22 - marcus.klein@open-xchange.com
 
  - Bugfix #16962: Fixed the not used cache for users.
+ - Bugfix #16996: Workaround for some outdated contact columns.
 
 * 2010-09-22 - steffen.templin@open-xchange.com
 
