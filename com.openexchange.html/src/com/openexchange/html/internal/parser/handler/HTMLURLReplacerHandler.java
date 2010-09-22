@@ -50,14 +50,14 @@
 package com.openexchange.html.internal.parser.handler;
 
 import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL_SOLE;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.html.HTMLService;
+import com.openexchange.html.internal.HTMLServiceImpl;
 import com.openexchange.html.internal.parser.HTMLHandler;
 
 /**
@@ -176,7 +176,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         }
         urlBuilder.setLength(0);
         urlBuilder.append(attributeValue.substring(0, m.start()));
-        replaceURL(m.group(), urlBuilder);
+        replaceURL(urlDecode(m.group()), urlBuilder);
         urlBuilder.append(attributeValue.substring(m.end()));
         return urlBuilder.toString();
     }
@@ -187,19 +187,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
          */
         final int restoreLen = builder.length();
         try {
-            String urlStr = URLDecoder.decode(url, "ISO-8859-1");
-            /*
-             * Get the host part of URL. Ensure scheme is present before creating a java.net.URL instance
-             */
-            final String host = new URL(urlStr.startsWith("www.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
-            if (null != host && !isAscii(host)) {
-                final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
-                urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
-            }
-            /*
-             * Compose replacement
-             */
-            builder.append(urlStr);
+            builder.append(HTMLServiceImpl.checkURL(url));
         } catch (final MalformedURLException e) {
             /*
              * Not a valid URL
@@ -213,19 +201,12 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         }
     }
 
-    /**
-     * Checks whether the specified string's characters are ASCII 7 bit
-     * 
-     * @param s The string to check
-     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
-     */
-    private static boolean isAscii(final String s) {
-        final char[] chars = s.toCharArray();
-        boolean isAscci = true;
-        for (int i = 0; (i < chars.length) && isAscci; i++) {
-            isAscci &= (chars[i] < 128);
+    private static String urlDecode(final String s) {
+        try {
+            return URLDecoder.decode(s, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
         }
-        return isAscci;
     }
 
     /**

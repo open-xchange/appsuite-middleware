@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal;
 
+import gnu.inet.encoding.IDNAException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -58,6 +59,8 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -284,16 +287,17 @@ public final class HTMLServiceImpl implements HTMLService {
     public String formatURLs(final String content) {
         try {
             final Matcher m = PATTERN_URL.matcher(content);
-            final MatcherReplacer mr = new MatcherReplacer(m, content);
             final StringBuilder targetBuilder = new StringBuilder(content.length());
             final StringBuilder sb = new StringBuilder(256);
+            int lastMatch = 0;
             while (m.find()) {
-                final String url = m.group();
+                targetBuilder.append(content.substring(lastMatch, m.start()));
                 sb.setLength(0);
-                appendLink(url, sb);
-                mr.appendLiteralReplacement(targetBuilder, sb.toString());
+                appendLink(m.group(), sb);
+                targetBuilder.append(sb.toString());
+                lastMatch = m.end();
             }
-            mr.appendTail(targetBuilder);
+            targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -304,38 +308,82 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     private static void appendLink(final String url, final StringBuilder builder) {
-        final int mlen = url.length() - 1;
-        if ((mlen > 0) && (')' == url.charAt(mlen))) { // Ends with a parenthesis
-            /*
-             * Keep starting parenthesis if present
-             */
-            if ('(' == url.charAt(0)) { // Starts with a parenthesis
-                appendAnchor(url.substring(1, mlen), builder);
+        try {
+            final int mlen = url.length() - 1;
+            if ((mlen > 0) && (')' == url.charAt(mlen))) { // Ends with a parenthesis
+                /*
+                 * Keep starting parenthesis if present
+                 */
+                if ('(' == url.charAt(0)) { // Starts with a parenthesis
+                    appendAnchor(url.substring(1, mlen), builder);
+                    builder.append('(');
+                } else {
+                    appendAnchor(url.substring(0, mlen), builder);
+                }
+                /*
+                 * Append closing parenthesis
+                 */
+                builder.append(')');
+            } else if ((mlen >= 0) && ('(' == url.charAt(0))) { // Starts with a parenthesis, but does not end with a parenthesis
+                /*
+                 * Append opening parenthesis
+                 */
                 builder.append('(');
+                appendAnchor(url.substring(1), builder);
             } else {
-                appendAnchor(url.substring(0, mlen), builder);
+                appendAnchor(url, builder);
             }
+        } catch (final Exception e) {
             /*
-             * Append closing parenthesis
+             * Append as-is
              */
-            builder.append(')');
-        } else if ((mlen >= 0) && ('(' == url.charAt(0))) { // Starts with a parenthesis, but does not end with a parenthesis
-            /*
-             * Append opening parenthesis
-             */
-            builder.append('(');
-            appendAnchor(url.substring(1), builder);
-        } else {
-            appendAnchor(url, builder);
+            LOG.warn(e.getMessage(), e);
+            builder.append(url);
         }
     }
 
-    private static void appendAnchor(final String url, final StringBuilder builder) {
+    private static void appendAnchor(final String url, final StringBuilder builder) throws MalformedURLException, IDNAException {
         builder.append("<a href=\"");
         if (url.startsWith("www") || url.startsWith("news")) {
             builder.append("http://");
         }
-        builder.append(url).append("\" target=\"_blank\">").append(url).append("</a>");
+        builder.append(checkURL(url)).append("\" target=\"_blank\">").append(url).append("</a>");
+    }
+
+    /**
+     * Checks if specified URL needs to be converted to its ASCII form.
+     * 
+     * @param url The URL to check
+     * @return The checked URL
+     * @throws MalformedURLException If URL is malformed
+     * @throws IDNAException If conversion fails
+     */
+    public static String checkURL(final String url) throws MalformedURLException, IDNAException {
+        String urlStr = url;
+        /*
+         * Get the host part of URL. Ensure scheme is present before creating a java.net.URL instance
+         */
+        final String host = new URL(urlStr.startsWith("www.") ||urlStr.startsWith("news.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
+        if (null != host && !isAscii(host)) {
+            final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
+            urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
+        }
+        return urlStr;
+    }
+
+    /**
+     * Checks whether the specified string's characters are ASCII 7 bit
+     * 
+     * @param s The string to check
+     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
+     */
+    private static boolean isAscii(final String s) {
+        final char[] chars = s.toCharArray();
+        boolean isAscci = true;
+        for (int i = 0; (i < chars.length) && isAscci; i++) {
+            isAscci &= (chars[i] < 128);
+        }
+        return isAscci;
     }
 
     public String filterWhitelist(final String htmlContent) {
@@ -436,11 +484,11 @@ public final class HTMLServiceImpl implements HTMLService {
         return htmlFormat(plainText, true);
     }
 
-    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
+    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
 
     /**
      * The regular expression to match URLs inside text:<br>
-     * <code>\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]</code>
+     * <code>\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-\p{L}\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\p{L}\p{Sc}0-9+&@#/%=~_()|]</code>
      * <p>
      * Parentheses, if present, are allowed in the URL -- The leading one is <b>not</b> absorbed.
      */
@@ -450,7 +498,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * The regular expression to match URLs inside text:<br>
-     * <code>\(?\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]</code>
+     * <code>\(?\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-\p{L}\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\p{L}\p{Sc}0-9+&@#/%=~_()|]</code>
      * <p>
      * Parentheses, if present, are allowed in the URL -- The leading one is absorbed, too.
      * 
@@ -851,4 +899,19 @@ public final class HTMLServiceImpl implements HTMLService {
         }
     });
 
+    private static String urlEncode(final String s) {
+        try {
+            return URLEncoder.encode(s, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+    
+    private static String urlDecode(final String s) {
+        try {
+            return URLDecoder.decode(s, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
+    }
 }
