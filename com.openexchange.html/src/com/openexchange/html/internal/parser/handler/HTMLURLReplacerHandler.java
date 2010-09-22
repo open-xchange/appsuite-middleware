@@ -189,9 +189,9 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         try {
             String urlStr = URLDecoder.decode(url, "ISO-8859-1");
             /*
-             * Get the host part of URL
+             * Get the host part of URL. Ensure scheme is present before creating a java.net.URL instance
              */
-            final String host = new URL(urlStr).getHost();
+            final String host = new URL(urlStr.startsWith("www.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
             if (null != host && !isAscii(host)) {
                 final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
                 urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
