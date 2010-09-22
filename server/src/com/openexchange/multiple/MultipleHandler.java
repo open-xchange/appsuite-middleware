@@ -68,7 +68,7 @@ public interface MultipleHandler {
      * The constant for the key to get the data element from passed {@link JSONObject JSON object} instance.
      */
     public static final String DATA = "data";
-    
+
     /**
      * The constant for the key to get a subpath after the original module definition
      */
@@ -103,6 +103,8 @@ public interface MultipleHandler {
 
     /**
      * Closes/frees all associated resources.
+     * <p>
+     * Must <b>not</b> throw any (runtime) exception!
      */
     public void close();
 
