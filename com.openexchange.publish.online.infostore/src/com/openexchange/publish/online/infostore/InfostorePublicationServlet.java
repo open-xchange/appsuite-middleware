@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -92,6 +93,8 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class InfostorePublicationServlet extends HttpServlet {
 
+    private static final long serialVersionUID = 8929899129435791832L;
+
     private static final Log LOG = LogFactory.getLog(InfostorePublicationServlet.class);
 
     private static final String SELF_DESTRUCT = "selfDestruct";
@@ -106,127 +109,132 @@ public class InfostorePublicationServlet extends HttpServlet {
     
     private static InfostoreFacade infostore = null;
     
-    public static void setUserService(UserService service) {
+    public static void setUserService(final UserService service) {
         users = service;
     }
     
-    public static void setUserConfigService(UserConfigurationService service) {
+    public static void setUserConfigService(final UserConfigurationService service) {
         userConfigs = service;
     }
     
-    public static void setInfostoreFacade(InfostoreFacade service) {
+    public static void setInfostoreFacade(final InfostoreFacade service) {
         infostore = service;
     }
     
-    public static void setPublicationDataLoaderService(PublicationDataLoaderService service) {
+    public static void setPublicationDataLoaderService(final PublicationDataLoaderService service) {
         loader = service;
     }
     
-    public static void setInfostoreDocumentPublicationService(InfostoreDocumentPublicationService service) {
+    public static void setInfostoreDocumentPublicationService(final InfostoreDocumentPublicationService service) {
         publisher = service;
     }
     
-    public static void setContextService(ContextService service) {
+    public static void setContextService(final ContextService service) {
         contexts  = service;
     }
     
     
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
     
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
     
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
 
-    private void handle(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private static final Pattern SPLIT = Pattern.compile("/");
+
+    private void handle(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         try {
-            String[] path = req.getPathInfo().split("/");
-            Context ctx = getContext(path);
-            String secret = getSecret(path);
-            Publication publication = getPublication(secret, ctx);
+            final String[] path = SPLIT.split(req.getRequestURI(), 0);
+            final Context ctx = getContext(path);
+            final String secret = getSecret(path);
+            final Publication publication = getPublication(secret, ctx);
             if(publication == null) {
                 resp.getWriter().println("Not Found");
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-            DocumentMetadata document = loadDocumentMetadata(publication);
-            InputStream is = loadContent(publication);
+            final DocumentMetadata document = loadDocumentMetadata(publication);
+            final InputStream is = loadContent(publication);
             configureHeaders(document, req, resp);
             write(is, resp);
             if(mustSelfDestruct(publication)) {
                 destroy(publication);
                 if(mustDestroyDocument(publication) && ! hasMorePublications(publication.getContext(), document)) {
-                    ServerSessionAdapter session = new ServerSessionAdapter(new PublicationSession(publication), publication.getContext());
+                    final ServerSessionAdapter session = new ServerSessionAdapter(new PublicationSession(publication), publication.getContext());
                     destroy(session, document);
                 }
             }
             
-        } catch (Exception x) {
+        } catch (final Exception x) {
             resp.getWriter().print(x.toString());
             LOG.error(x.getMessage(), x);
         }
     }
 
-    private void destroy(ServerSession session, DocumentMetadata document) throws OXException {
+    private void destroy(final ServerSession session, final DocumentMetadata document) throws OXException {
         infostore.removeDocument(new int[]{document.getId()}, Long.MAX_VALUE, session);
     }
 
-    private boolean hasMorePublications(Context ctx, DocumentMetadata document) throws PublicationException {
+    private boolean hasMorePublications(final Context ctx, final DocumentMetadata document) throws PublicationException {
         return !publisher.getAllPublications(ctx, String.valueOf(document.getId())).isEmpty();
     }
 
-    private boolean mustDestroyDocument(Publication publication) {
+    private boolean mustDestroyDocument(final Publication publication) {
         return publication.getConfiguration().get(DESTROY_DOCUMENT) == Boolean.TRUE;
     }
 
-    private void destroy(Publication publication) throws PublicationException {
+    private void destroy(final Publication publication) throws PublicationException {
         publisher.delete(publication);
     }
 
-    private boolean mustSelfDestruct(Publication publication) {
+    private boolean mustSelfDestruct(final Publication publication) {
         return publication.getConfiguration().get(SELF_DESTRUCT) == Boolean.TRUE;
     }
     
-    private final boolean isIE(final HttpServletRequest req) {
-        return req.getHeader("User-Agent").contains("MSIE");
+    private static final boolean isIE(final HttpServletRequest req) {
+        final String userAgent = req.getHeader("User-Agent");
+        return null != userAgent && userAgent.contains("MSIE");
     }
 
 
-    private void configureHeaders(DocumentMetadata document, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException {
-        boolean ie = isIE(req);
-        resp.setHeader("Content-Disposition", "attachment; filename=\""
-             + Helper.encodeFilename(document.getFileName(), "UTF-8", ie) + "\"");
-    }
+    private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
+        String fileName = document.getFileName();
+        if(fileName != null) {
+            resp.setHeader("Content-Disposition", "attachment; filename=\""
+                + Helper.encodeFilename(fileName, "UTF-8", isIE(req)) + "\"");
+        }
+   }
 
-    private DocumentMetadata loadDocumentMetadata(Publication publication) throws Exception {
+    private DocumentMetadata loadDocumentMetadata(final Publication publication) throws Exception {
         
-        int id = Integer.valueOf(publication.getEntityId());
-        int version = InfostoreFacade.CURRENT_VERSION;
-        Context ctx = publication.getContext();
-        User user = loadUser(publication);
-        UserConfiguration userConfig = loadUserConfig(publication);
+        final int id = Integer.parseInt(publication.getEntityId());
+        final int version = InfostoreFacade.CURRENT_VERSION;
+        final Context ctx = publication.getContext();
+        final User user = loadUser(publication);
+        final UserConfiguration userConfig = loadUserConfig(publication);
         
-        DocumentMetadata document = infostore.getDocumentMetadata(id, version, ctx, user, userConfig);
+        final DocumentMetadata document = infostore.getDocumentMetadata(id, version, ctx, user, userConfig);
         return document;
     }
 
-    private UserConfiguration loadUserConfig(Publication publication) throws UserConfigurationException {
+    private UserConfiguration loadUserConfig(final Publication publication) throws UserConfigurationException {
         return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
     }
 
-    private User loadUser(Publication publication) throws UserException {
+    private User loadUser(final Publication publication) throws UserException {
         return users.getUser(publication.getUserId(), publication.getContext());
     }
 
-    private void write(InputStream is, HttpServletResponse resp) throws IOException {
+    private void write(final InputStream is, final HttpServletResponse resp) throws IOException {
         BufferedInputStream bis = null;
         OutputStream output = null;
         try {
@@ -244,30 +252,30 @@ public class InfostorePublicationServlet extends HttpServlet {
         }
     }
 
-    private InputStream loadContent(Publication publication) throws PublicationException {
-        Collection<? extends Object> load = loader.load(publication);
+    private InputStream loadContent(final Publication publication) throws PublicationException {
+        final Collection<? extends Object> load = loader.load(publication);
         if(load == null || load.isEmpty()) {
             return new ByteArrayInputStream(new byte[0]);
         }
         return (InputStream) load.iterator().next();
     }
 
-    private Publication getPublication(String secret, Context ctx) throws PublicationException {
+    private Publication getPublication(final String secret, final Context ctx) throws PublicationException {
         return publisher.getPublication(ctx, secret);
     }
 
-    private String getSecret(String[] path) {
+    private String getSecret(final String[] path) {
         return path[path.length-1];
     }
 
-    private Context getContext(String[] path) throws ContextException {
+    private Context getContext(final String[] path) throws ContextException {
         int cid = -1;
         for(int i = 0; i < path.length; i++) {
             if(path[i].equals("documents") && path.length > i+1) {
                 try {
                     cid = Integer.parseInt(path[i+1]);
                     break;
-                } catch (NumberFormatException x) {
+                } catch (final NumberFormatException x) {
                 }
             }
         }

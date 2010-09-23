@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.tools.encoding;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
 
 /**
@@ -63,6 +64,20 @@ public class Helper {
 
     private Helper() {
         super();
+    }
+
+    private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
+
+    private static final Pattern PAT_QUOTE = Pattern.compile("\"");
+
+    /**
+     * Escapes every <code>'"'</code> and <code>'\'</code> character in given string with a heading <code>'\'</code> character.
+     * 
+     * @param value The value to escape
+     * @return The escaped value
+     */
+    public static String escape(final String value) {
+        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(value).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
     }
 
     /**
@@ -81,17 +96,11 @@ public class Helper {
      * @throws UnsupportedEncodingException if the given encoding is not supported by java.
      */
     public static String encodeFilename(final String orig, final String encoding, final boolean internetExplorer) throws UnsupportedEncodingException {
+    	if(orig == null) {
+    		return null;
+    	}
         String encoded = orig;
-        boolean isAscii = true;
-        final char[] namechars = orig.toCharArray();
-        for (int i = orig.length(); isAscii && --i >= 0;) {
-            isAscii &= namechars[i] < 0x7f; // non-ascii characters
-            isAscii &= namechars[i] > 0x21; // space and control characters
-            isAscii &= namechars[i] != '\u002a'; // *
-            isAscii &= namechars[i] != '\u0025'; // %
-            isAscii &= namechars[i] != '\''; // '
-        }
-        if (!isAscii) {
+        if (!isASCII(orig)) {
             if (internetExplorer) {
                 try {
                     final Charset charset = Charset.forName(encoding);
@@ -107,36 +116,63 @@ public class Helper {
     }
 
     /**
-     * At some cases JavaMail is not able to fetch multi-encoded words or broken encodings. Some mailers which are not mime compliant
-     * produces such crap. We'll try to find and decode such Strings here using the JavaMail API.
+     * Encodes a filename according RFC2047 and RFC2231. This is used to encode file names for use in http headers as content-disposition
+     * for downloading a file to the client. Encoding is only done if the original filename contains non ascii characters. Return the header
+     * to the client with the following format:
+     * <ul>
+     * <li>header attribute name: Content-Disposition</li>
+     * <li>header attribute value: filename=&quot;<with this method encoded filename>&quot;</li>
+     * </ul>
+     * This method encodes especially for Internet Explorer.
      * 
-     * @author Stefan Preuss <stefan.preuss@open-xchange.com>
-     * @param data The string which should be encoded
-     * @return The (may) correct encoded String
+     * @param orig filename containing non ascii characters
+     * @param charset Char set to be used.
+     * @return the encoded filename that can be put directly into the filename of the content-disposition header
      */
-    public static String decodeText(final String data) {
-        int start = 0, i;
-        final StringBuffer sb = new StringBuffer();
-        while ((i = data.indexOf("=?", start)) >= 0) {
-            sb.append(data.substring(start, i));
-            final int end = data.indexOf("?=", i);
-            if (end < 0) {
-                break;
-            }
-            final String s = data.substring(i, end + 2);
-            try {
-                sb.append(MimeUtility.decodeWord(s));
-            } catch (final Exception e) {
-                sb.append(s);
-            }
-            start = end + 2;
+    public static String encodeFilenameForIE(String orig, Charset charset) {
+        final String retval;
+        if (isASCII(orig)) {
+            retval = orig;
+        } else {
+            retval = URLCoder.encode(orig, charset);
         }
-        if (start == 0) {
-            return data;
+        return retval;
+    }
+
+    /**
+     * Encodes a filename according RFC2047 and RFC2231. This is used to encode file names for use in http headers as content-disposition
+     * for downloading a file to the client. Encoding is only done if the original filename contains non ascii characters. Return the header
+     * to the client with the following format:
+     * <ul>
+     * <li>header attribute name: Content-Disposition</li>
+     * <li>header attribute value: filename=&quot;<with this method encoded filename>&quot;</li>
+     * </ul>
+     * 
+     * @param orig filename containing non ascii characters
+     * @param charset Char set to be used.
+     * @return the encoded filename that can be put directly into the filename of the content-disposition header
+     * @throws UnsupportedEncodingException if the given encoding is not supported by java.
+     */
+    public static String encodeFilename(String orig, String charset) throws UnsupportedEncodingException {
+        final String retval;
+        if (isASCII(orig)) {
+            retval = orig;
+        } else {
+            retval = MimeUtility.encodeText(orig, charset, "B");
         }
-        if (start < data.length()) {
-            sb.append(data.substring(start));
+        return retval;
+    }
+
+    private static boolean isASCII(String fileName) {
+        boolean retval = true;
+        final char[] namechars = fileName.toCharArray();
+        for (int i = fileName.length(); retval && --i >= 0;) {
+            retval &= namechars[i] < 0x7f; // non-ascii characters
+            retval &= namechars[i] > 0x21; // space and control characters
+            retval &= namechars[i] != '\u002a'; // *
+            retval &= namechars[i] != '\u0025'; // %
+            retval &= namechars[i] != '\''; // '
         }
-        return sb.toString();
+        return retval;
     }
 }
