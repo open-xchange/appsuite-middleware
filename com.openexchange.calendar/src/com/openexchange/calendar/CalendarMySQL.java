@@ -2261,6 +2261,14 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             ucols[uc++] = Appointment.LAST_MODIFIED;
             ucols[uc++] = Appointment.MODIFIED_BY;
+            
+            // If a normal appointment is changed into a recurring appointment, 
+            // recurring position (intfield05) has to be set to 0 instead of staying NULL.
+            // Otherwise it will disappear in outlook because of missing series information.
+            if (edao.getRecurrence() == null && cdao.getRecurrence() != null && !com.openexchange.tools.Arrays.contains(ucols, Appointment.RECURRENCE_POSITION)) {
+                cdao.setRecurrencePosition(0);
+                ucols[uc++] = Appointment.RECURRENCE_POSITION;
+            }
 
             final StringBuilder update = new StringBuilder();
             update.append("UPDATE prg_dates pd SET ");
