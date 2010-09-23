@@ -53,8 +53,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -151,6 +151,20 @@ public final class UserAttributeAccess {
      * @return The value of the <code>boolean</code> attribute
      */
     public boolean getBooleanAttribute(final String name, final User user, final boolean defaultValue) {
+        return Boolean.parseBoolean(getBooleanAttribute(name, user, String.valueOf(defaultValue)));
+    }
+
+    /**
+     * Gets the specified attribute from given user.
+     * <p>
+     * This methods assumes that at most one value is associated with specified attribute name.
+     * 
+     * @param name The name of the attribute
+     * @param user The user
+     * @param defaultValue The default value to return if user has no attribute of specified name
+     * @return The value of the attribute
+     */
+    public String getBooleanAttribute(final String name, final User user, final String defaultValue) {
         final Map<String, Set<String>> attributes = user.getAttributes();
         if (null == attributes) {
             return defaultValue;
@@ -159,7 +173,7 @@ public final class UserAttributeAccess {
         if (null == bset || bset.isEmpty()) {
             return defaultValue;
         }
-        return Boolean.parseBoolean(bset.iterator().next());
+        return bset.iterator().next();
     }
 
     /**
@@ -192,6 +206,19 @@ public final class UserAttributeAccess {
      * @throws LdapException If setting <code>boolean</code> attribute fails
      */
     public void setBooleanAttribute(final String name, final boolean value, final User user, final Context context) throws LdapException {
+        setAttribute(name, String.valueOf(value), user, context);
+    }
+
+    /**
+     * Set specified attribute for given user.
+     * 
+     * @param name The attribute name
+     * @param value The attribute value
+     * @param user The user
+     * @param context The context
+     * @throws LdapException If setting attribute fails
+     */
+    public void setAttribute(final String name, final String value, final User user, final Context context) throws LdapException {
         final Map<String, Set<String>> attributes = user.getAttributes();
         /*
          * Create a modifiable map from existing unmodifiable map
@@ -213,7 +240,7 @@ public final class UserAttributeAccess {
         } else {
             set.clear();
         }
-        set.add(String.valueOf(value));
+        set.add(value);
         /*
          * Save modification
          */
