@@ -159,26 +159,23 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
     private void addStartTag(final String tag, final Map<String, String> a, final boolean simple) {
         attrBuilder.setLength(0);
         for (final Entry<String, String> e : a.entrySet()) {
-            e.setValue(checkURLs(e.getValue()));
-            attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(htmlService.htmlFormat(e.getValue(), false)).append('"');
+            final String val = e.getValue();
+            final Matcher m = PATTERN_URL_SOLE.matcher(val);
+            if (m.matches()) {
+                urlBuilder.setLength(0);
+                urlBuilder.append(val.substring(0, m.start()));
+                replaceURL(urlDecode(m.group()), urlBuilder);
+                urlBuilder.append(val.substring(m.end()));
+                attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(urlBuilder.toString()).append('"');
+            } else {
+                attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(htmlService.htmlFormat(val, false)).append('"');
+            }
         }
         htmlBuilder.append('<').append(tag).append(attrBuilder.toString());
         if (simple) {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
-    }
-
-    private String checkURLs(final String attributeValue) {
-        final Matcher m = PATTERN_URL_SOLE.matcher(attributeValue);
-        if (!m.matches()) {
-            return attributeValue;
-        }
-        urlBuilder.setLength(0);
-        urlBuilder.append(attributeValue.substring(0, m.start()));
-        replaceURL(urlDecode(m.group()), urlBuilder);
-        urlBuilder.append(attributeValue.substring(m.end()));
-        return urlBuilder.toString();
     }
 
     private static void replaceURL(final String url, final StringBuilder builder) {
