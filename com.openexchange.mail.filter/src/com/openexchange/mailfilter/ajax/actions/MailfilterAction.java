@@ -168,7 +168,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
             throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
@@ -221,7 +221,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
             throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
@@ -276,7 +276,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
             throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
@@ -354,7 +354,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
             throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
@@ -418,7 +418,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
             throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
@@ -490,7 +490,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
             handleParsingException(e, credentials);
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
@@ -533,7 +533,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
             throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
@@ -567,7 +567,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
             throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());

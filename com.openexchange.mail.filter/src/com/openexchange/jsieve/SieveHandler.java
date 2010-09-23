@@ -187,6 +187,15 @@ public class SieveHandler {
         sieve_host_port = port; // 2000
 
     }
+    
+    public String getSieveHost() {
+        return sieve_host;
+    }
+
+    
+    public int getSievePort() {
+        return sieve_host_port;
+    }
 
     private void measureStart() {
         this.mStart = System.currentTimeMillis();
