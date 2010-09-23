@@ -52,7 +52,6 @@ package com.openexchange.passwordchange.database.impl;
 import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
@@ -127,7 +126,6 @@ public final class DatabasePasswordChange extends PasswordChangeService {
 
     private void update(final Connection writeCon, final String encodedPassword, final int userId, final int cid) throws SQLException {
         PreparedStatement stmt = null;
-        final ResultSet result = null;
         try {
             stmt = writeCon.prepareStatement(SQL_UPDATE);
             int pos = 1;
@@ -136,7 +134,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 }
