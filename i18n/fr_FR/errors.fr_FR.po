@@ -5,9 +5,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-09-15 18:51+0200\n"
+"PO-Revision-Date: 2010-09-21 21:58+0200\n"
 "Last-Translator: Joëlle Cornavin <jcornavin@laposte.net>\n"
-"Language-Team: French <kde-francophone@kde.org>\n"
+"Language-Team: French <>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -58,13 +58,6 @@ msgstr ""
 
 msgid "A command to mail server failed. Server response: %1$s."
 msgstr "Une commande vers le serveur de courrier a échoué. Réponse du serveur : %1$s."
-
-msgid ""
-"A contact with private flag cannot be stored in a public folder. Folder: %1"
-"$d context %2$d user %3$d"
-msgstr ""
-"Un contact avec des drapeaux privés ne peut être déplacé dans un dossier "
-"public. Dossier : %1$d contexte %2$d utilisateur %3$d"
 
 msgid "A duplicate folder exists in parent folder %1$s in context %2$s"
 msgstr "Un dossier en double existe dans le dossier parent %1$s dans le contexte %2$s"
@@ -188,9 +181,6 @@ msgstr ""
 "Une erreur dans le protocole vers le serveur de courrier %1$s avec le nom de "
 "connexion %2$s (utilisateur=%3$s, contexte=%4$s). Message d'erreur : %5$s"
 
-msgid "An error occurred attaching to the given object."
-msgstr "Une erreur s'est produite en joignant à l'objet donné."
-
 msgid ""
 "An error occurred during the load of deleted objects from a folder. Context %"
 "1$d Folder %2$d User %3$d"
@@ -252,9 +242,6 @@ msgstr ""
 msgid "An error occurred: %1$s"
 msgstr "Une erreur  s'est produite : %1$s"
 
-msgid "An error occurred: Object id is -1"
-msgstr "Une erreur s'est produite : l'identifiant d'objet est -1"
-
 msgid "An event error occurred: %1$s"
 msgstr "Une erreur d'évènement s'est produite : %1$s"
 
@@ -290,9 +277,6 @@ msgstr ""
 "Pièce jointe %1$s non trouvée dans le message %2$s du dossier de courrier %3"
 "$s"
 
-msgid "Attachments must contain a file."
-msgstr "Les pièces jointes doivent contenir un fichier."
-
 msgid "Attribute \"%1$s\" is not set in FolderObject instance %2$s in context %3$s"
 msgstr ""
 "L'attribut « %1$s » n'est pas défini dans l'instance %2$s de FolderObject "
@@ -316,17 +300,6 @@ msgstr ""
 
 msgid "Bad value %1$s in parameter %2$s"
 msgstr "Valeur invalide %1$s pour le paramètre %2$s"
-
-msgid ""
-"Broken CSV file: Lines have different number of cells, line #1 has %d, line #"
-"%d has %d. Is this really a CSV file?"
-msgstr ""
-"Fichier CSV endommagé. Les lignes ont un nombre de champs différents : la "
-"ligne numéro 1 en a %d, la ligne numéro %d en a %d. S'agit-il réellement d'un "
-"fichier CSV ?"
-
-msgid "Broken file uploaded: %s"
-msgstr "Fichier endommagé envoyé : %s"
 
 msgid "Cache %s could not be initialized due to following error: %s"
 msgstr "Le cache %s n'a pas pu être initialisé suite à l'erreur suivante : %s"
@@ -358,12 +331,6 @@ msgstr "Impossible de déterminer la ressource : %1$s"
 msgid "Can not resolve user: %d"
 msgstr "Impossible de déterminer l'utilisateur : %d"
 
-msgid "Can only handle one file, not %s"
-msgstr "Un seul fichier géré, pas %s"
-
-msgid "Can only import into one folder at a time."
-msgstr "Impossible d'importer dans plusieurs dossiers en même temps."
-
 msgid "Can't handle spam because MailService isn't available"
 msgstr "Impossible de gérer les pourriels, car MailService n'est pas disponible"
 
@@ -394,16 +361,6 @@ msgstr "Impossible de créer une tâche privée dans le dossier public ou partag
 
 msgid "Cannot decrease number of attachments below zero."
 msgstr "Impossible de diminuer le nombre de pièces jointes en dessous de zéro."
-
-msgid "Cannot find an exporter for folder %s to format %s"
-msgstr ""
-"Impossible de trouver un mécanisme d'exportation depuis le dossier %s vers "
-"le format %s"
-
-msgid "Cannot find an importer for format %s into folders %s"
-msgstr ""
-"Impossible de trouver un mécanisme d'importation depuis le format %s vers le "
-"dossier %s"
 
 msgid "Cannot find context \"%s\"."
 msgstr "Impossible de trouver le contexte « %s »."
@@ -443,19 +400,11 @@ msgstr "Impossible de trouver l'utilisateur dont l'adresse électronique est %s.
 msgid "Cannot find user with identifier %1$s in context %2$d."
 msgstr "Impossible de trouver l'utilisateur d'identifiant %1$s dans le contexte %2$d."
 
-msgid "Cannot generate ID for new attachment: %s"
-msgstr "Impossible de générer l'identifiant de la nouvelle pièce jointe : %s"
-
 msgid "Cannot get connection to database."
 msgstr "Impossible d'établir une connexion vers la base de données."
 
 msgid "Cannot get database connection."
 msgstr "Impossible d'établir une connexion de base de données."
-
-msgid "Cannot import this kind of data. Use method canImport() first."
-msgstr ""
-"Impossible d'importer ce genre de données. Utilisez d'abord la méthode "
-"canImport()."
 
 msgid "Cannot initialize mail module"
 msgstr "Impossible d'initialiser le module de courrier"
@@ -472,9 +421,6 @@ msgstr "Impossible de charger la classe « %1$s »."
 msgid "Cannot read file \"%1$s\"."
 msgstr "Impossible de lire le fichier « %1$s »."
 
-msgid "Cannot read given InputStream."
-msgstr "Impossible de lire le flux en entrée indiqué."
-
 msgid "Cannot remove lock file."
 msgstr "Impossible de supprimer le fichier verrou."
 
@@ -486,28 +432,6 @@ msgstr "Impossible de déterminer l'administrateur de courrier dans le contexte 
 
 msgid "Cannot send event to event system."
 msgstr "Impossible de passer l'évènement au système d'événements."
-
-msgid "Cannot translate id=%d to a constant from FolderObject."
-msgstr "Impossible de convertir l'identifiant %d en une constante de FolderObject."
-
-msgid "Cannot translate id=%d to a constant from Types."
-msgstr "Impossible de convertir l'identifiant %d en une constante de Types."
-
-msgid ""
-"Changes done to the object this attachment was added to could not be undone. "
-"Your database is probably inconsistent, run the consistency tool."
-msgstr ""
-"Les changements apportés à l'objet auquel cette pièce a été jointe n'ont pas "
-"pu être annulés. Votre base de données est probablement incohérente, lancez "
-"l'outil de mise en cohérence."
-
-msgid ""
-"Changes were made to the object of this attachment and cannot be undone. "
-"Your database is probably inconsistent, run the consistency tool."
-msgstr ""
-"Des changements ont été apportés à l'objet de cette pièce a été jointe et ne "
-"peuvent pas être annulés. Votre base de données est probablement "
-"incohérente, lancez l'outil de mise en cohérence."
 
 msgid "Changing an exception into a series is not supported."
 msgstr "Modifier une exception dans une série n'est pas pris en charge."
@@ -547,9 +471,6 @@ msgstr ""
 "Les réglages de l'utilisateur %1$s n'ont pas pu être trouvés dans le "
 "contexte %2$d"
 
-msgid "Conflicting services registered for context %i and folder %i"
-msgstr "Conflit entre les services enregistrés pour le contexte %i et le dossier %i"
-
 msgid ""
 "Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4"
 "$s): %5$s"
@@ -571,9 +492,6 @@ msgstr ""
 
 msgid "Connection was reset. Please try again."
 msgstr "La connexion a été réinitialisée. Veuillez réessayer."
-
-msgid "Contact %1$d not found in context %2$d."
-msgstr "Contact %1$d non trouvé dans le contexte %2$d."
 
 msgid "Context ID is not a number: %1$s."
 msgstr "L'identifiant de contexte n'est pas un nombre : %1$s."
@@ -608,84 +526,13 @@ msgstr "Impossible de convertir la chaîne %s donnée en date."
 msgid "Could not create a PartModifier instance from name %1$s"
 msgstr "Impossible de créer une instance de PartModifier à partir du nom %1$s"
 
-msgid "Could not create folder id from string %s"
-msgstr "Impossible de créer un identifiant de dossier à partir de la chaîne %s"
-
-msgid "Could not delete attachment."
-msgstr "Impossible de supprimer la pièce jointe."
-
-msgid "Could not delete file from file store. Filestore: %s Context: %s"
-msgstr ""
-"Impossible de supprimer le fichier du dépôt de fichiers. Dépôt de fichiers : "
-"%s Contexte : %s"
-
-msgid "Could not delete files from filestore. Context: %d."
-msgstr "Impossible de supprimer les fichiers du dépôt de fichiers. Contexte : %d."
-
-msgid ""
-"Could not find an attachment with the file_id %s. Either the file is "
-"orphaned or belongs to another module."
-msgstr ""
-"Impossible de trouver une pièce jointe avec l'identifiant de fichier %s. "
-"Soit le fichier est orphelin, soit il appartient à un autre module."
-
 msgid "Could not find participant for this object."
 msgstr "Impossible de trouver un participant pour cet objet."
-
-msgid "Could not find suitable ICalParser. Is an ICalParser exported as a service?"
-msgstr ""
-"Impossible de trouver le ICalParser approprié. Un ICalParser a-t-il été "
-"exporté en tant que service ?"
-
-msgid "Could not find the following fields %s"
-msgstr "Les champs suivants n'ont pas pu être trouvés : %s"
-
-msgid "Could not import into folder %s"
-msgstr "Impossible d'importer dans le dossier %s"
-
-msgid "Could not import into the folder %s."
-msgstr "Impossible d'importer dans le dossier %s."
-
-msgid "Could not load folder %s"
-msgstr "Impossible de charger le dossier %s"
-
-msgid "Could not read InputStream as string"
-msgstr "Impossible de lire le flux en entrée en tant que chaîne"
-
-msgid "Could not recognize format of the following data: %s"
-msgstr "Impossible de reconnaître le format des données suivantes : %s"
-
-msgid "Could not remove attachments from database. Context: %d."
-msgstr ""
-"Impossible de supprimer les pièces jointes de la base de données. Contexte : "
-"%d."
-
-msgid "Could not retrieve file: %s"
-msgstr "Impossible de retrouver le fichier : %s"
-
-msgid "Could not save file to the file store."
-msgstr "Impossible d'enregistrer le fichier dans le dépôt de fichiers."
 
 msgid "Could not set the field %s because this is not an OX contact field"
 msgstr ""
 "Impossible de définir le champ %s parce qu'il ne s'agit pas d'un champ de "
 "contact OX"
-
-msgid "Could not translate a single column title. Is this a valid CSV file?"
-msgstr ""
-"Impossible de convertir un titre de colonne isolé. S'agit-il d'un fichier "
-"CSV valide ?"
-
-msgid "Could not translate a single field of information, did not insert entry %s."
-msgstr ""
-"Impossible de convertir un champ d'information isolé, la ligne %s n'a pas "
-"été ajoutée."
-
-msgid "Could not use UTF-8 encoding."
-msgstr "Impossible d'utiliser l'encodage UTF-8."
-
-msgid "Couldn't convert object: %s"
-msgstr "Impossible de convertir l'objet : %s"
 
 msgid "Couldn't find servlet class \"%s\""
 msgstr "Impossible de trouver la classe de servlet « %s »"
@@ -701,9 +548,6 @@ msgstr "Le comptage des tâches n'a pas renvoyé de résultat."
 
 msgid "Cowardly refusing to convert confidential classified objects."
 msgstr "Refus timoré de convertir des objets classés confidentiels."
-
-msgid "Cowardly refusing to import an entry flagged as confidential."
-msgstr "Refus timoré d'importer un élément marqué comme confidentiel."
 
 msgid ""
 "Critical Error occurred. This folder contains a contact with no id. Context %"
@@ -796,9 +640,6 @@ msgstr "Élément « CLASS » vide."
 msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 msgstr "Un paquetage SEND_BODY_CHUNK vide ne DOIT PAS être envoyé"
 
-msgid "Empty file uploaded."
-msgstr "Fichier vide téléchargé."
-
 msgid "Empty passwords are not allowed."
 msgstr "Les mot de passe vides ne sont pas autorisés."
 
@@ -825,8 +666,8 @@ msgid ""
 "respective user (or owner of the calendar). Please remove additional "
 "participants or remove the \"Private\" mark."
 msgstr ""
-"Erreur : les rendez-vous marqués comme « Privés » ne peuvent être pris que"
-"pour l'utilisateur correspondant (ou pour le propriétaire du calendrier). "
+"Erreur : les rendez-vous marqués comme « Privés » ne peuvent être pris "
+"quepour l'utilisateur correspondant (ou pour le propriétaire du calendrier). "
 "Veuillez supprimer les participants en trop ou supprimer la marque « Privé »."
 
 msgid ""
@@ -879,11 +720,6 @@ msgstr ""
 "dispose ni de l'emplacement se répétant ni de l'emplacement d'une date qui "
 "se répète"
 
-msgid "Failed importing appointment due to hard conflicting resource."
-msgstr ""
-"Impossible d'importer un rendez-vous en raison d'un sérieux conflit de "
-"ressource."
-
 msgid "Fatal error. (DAILY) Missing or wrong Interval value: %d"
 msgstr "Erreur fatale. (CHAQUE JOUR) Valeur Interval manquante ou incorrecte : %d"
 
@@ -912,7 +748,9 @@ msgid "Fatal error. (YEARLY2) Missing or wrong Interval value: %d"
 msgstr "Erreur fatale. (CHAQUE ANNÉE 2) Valeur Interval manquante ou incorrecte : %d"
 
 msgid "Fatal error. (YEARLY2) Missing or wrong day_or_type : %d"
-msgstr "Erreur fatale. (CHAQUE ANNÉE 2) Valeur day_or_type manquante ou incorrecte : %d"
+msgstr ""
+"Erreur fatale. (CHAQUE ANNÉE 2) Valeur day_or_type manquante ou incorrecte : "
+"%d"
 
 msgid "Fatal error. (YEARLY2) Missing or wrong value day : %d"
 msgstr "Erreur fatale. (CHAQUE ANNÉE 2) Valeur Day manquante ou incorrecte : %d"
@@ -1108,9 +946,6 @@ msgstr ""
 msgid "FreeBusyResults calculation problem with oid: %1$d"
 msgstr "Problème de calcul de FreeBusyResults avec l'oid : %1$d"
 
-msgid "Got a -1 ID from IDGenerator"
-msgstr "IDGenerator a renvoyé -1"
-
 msgid ""
 "Got the wrong folder identification. You do not have the appropriate "
 "permissions to modify this object."
@@ -1163,11 +998,6 @@ msgstr "Impossible d'attribuer le nom de connexion IMAP %1$s à un utilisateur"
 msgid "Identifier of the object is missing."
 msgstr "L'identifiant de l'objet manque."
 
-msgid "Illegal state: Found data after presumed last line."
-msgstr ""
-"État illégal : des données ont été trouvées après ce qui est en principe la "
-"dernière ligne."
-
 msgid "Illegal system flag argument %1$s. Flag must be to the power of 2"
 msgstr ""
 "Drapeau système en argument %1$s invalide. Le drapeau doit être une "
@@ -1182,9 +1012,6 @@ msgid ""
 msgstr ""
 "L'image en pièce jointe avec le Content-Id « %1$s » est absente du message %2"
 "$s du dossier de courrier %3$s"
-
-msgid "Image size too large. Image size: %1$d. Max. size: %2$d."
-msgstr "La taille de l'image est trop grande : %1$d. Taille maximale : %2$d."
 
 msgid "Implementing class could not be found"
 msgstr "Impossible de trouver la classe d'implémentation"
@@ -1269,19 +1096,8 @@ msgstr "Valeur « Content-Disposition » invalide : %1$s"
 msgid "Invalid Content-Type value: %1$s"
 msgstr "Valeur « Content-Type » invalide : %1$s"
 
-msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
-msgstr ""
-"Adresse électronique invalide : « %s ». Veuillez corriger l'adresse "
-"électronique."
-
 msgid "Invalid Magic bytes: %1$s."
 msgstr "Octets magiques invalides : %1$s."
-
-msgid "Invalid SQL Query: %s"
-msgstr "Requête SQL invalide : %s"
-
-msgid "Invalid SQL query: %s"
-msgstr "Requête SQL invalide : %s"
 
 msgid "Invalid action %1$s."
 msgstr "Action invalide %1$s."
@@ -1337,13 +1153,6 @@ msgstr "Paramètre invalide « %1$s » : %2$s"
 
 msgid "Invalid parameter name: %1$s"
 msgstr "Nom de paramètre invalide : %1$s"
-
-msgid ""
-"Invalid parameter sent in request. Parameter '%s' was '%s' which does not "
-"look like a number"
-msgstr ""
-"Paramètre invalide envoyé dans la requête. Le paramètre %s était %s, lequel "
-"ne semble pas être un nombre"
 
 msgid "Invalid parameter: %s"
 msgstr "Paramètre invalide : %s"
@@ -1402,8 +1211,8 @@ msgstr ""
 
 msgid "Mail could not be found in folder %1$s for Message-Id: %2$s"
 msgstr ""
-"Le message n'a pas pu être trouvé dans le dossier %1$s pour l'identifiant "
-"de message : %2$s"
+"Le message n'a pas pu être trouvé dans le dossier %1$s pour l'identifiant de "
+"message : %2$s"
 
 msgid "Mail could not be moved to trash folder. Quota exceeded"
 msgstr ""
@@ -1442,7 +1251,9 @@ msgid "Mail folder must not be updated: %1$s."
 msgstr "Le dossier de courrier ne doit pas être mis à jour : %1$s."
 
 msgid "Mail server indicates a bad command. Server response: %1$s"
-msgstr "Le serveur de courrier indique une commande incorrecte. Réponse du serveur : %1$s"
+msgstr ""
+"Le serveur de courrier indique une commande incorrecte. Réponse du serveur : "
+"%1$s"
 
 msgid "Mail server's quota is exceeded"
 msgstr "Le quota du serveur de courrier a été dépassé"
@@ -1454,9 +1265,6 @@ msgstr ""
 
 msgid "Mail(s) %1$s could not be found in folder %2$s"
 msgstr "Le ou les messages %1$s n'ont pas pu être trouvés dans le dossier %2$s"
-
-msgid "Mandatory field last name is not set."
-msgstr "Le champ « nom de famille » obligatoire n'est pas saisi."
 
 msgid "Mandatory field mail address for external participants"
 msgstr ""
@@ -1512,9 +1320,6 @@ msgstr "Une erreur de messagerie s'est produite : %1$s"
 msgid "Method not supported: %1$s"
 msgstr "Méthode non prise en charge : %1$s"
 
-msgid "Mime type is null"
-msgstr "Le type MIME est nul"
-
 msgid "Missing AJAX request handler for module %s"
 msgstr "Gestionnaire de requêtes AJAX manquant dans le module %s"
 
@@ -1528,11 +1333,6 @@ msgstr ""
 
 msgid "Missing Push UDP configuration."
 msgstr "Configuration Push UDP manquante."
-
-msgid "Missing ability to encode or decode UTF-8 on server, cannot read file."
-msgstr ""
-"Faculté d'encoder ou de décoder de l'UTF-8 manquante sur le serveur, "
-"impossible de lire le fichier."
 
 msgid "Missing affiliation id"
 msgstr "Identifiant d'affiliation manquant"
@@ -1617,28 +1417,6 @@ msgstr "Image téléchargée manquante."
 msgid "Module %1$s is unknown in context %2$s"
 msgstr "Le module %1$s est inconnu dans le contexte %2$s"
 
-msgid "Module Calendar not enabled for user, cannot import appointments."
-msgstr ""
-"Le module de calendrier n'est pas activé pour l'utilisateur, impossible "
-"d'importer les rendez-vous."
-
-msgid ""
-"Module Contacts is not enabled for this user, cannot store contacts "
-"contained in VCard."
-msgstr ""
-"Le module de contacts n'est pas activé pour cet utilisateur, impossible "
-"d'enregistrer des contacts contenus dans des VCard."
-
-msgid "Module Contacts not enabled for user, cannot import contacts"
-msgstr ""
-"Le module de contacts n'est pas activé pour l'utilisateur, impossible "
-"d'importer des contacts"
-
-msgid "Module Tasks not enabled for user, cannot import tasks."
-msgstr ""
-"Le module de tâches n'est pas activé pour cet utilisateur, impossible "
-"d'importer des tâches."
-
 msgid "Module is not a number: %1$s."
 msgstr "Le module n'est pas un nombre : %1$s."
 
@@ -1685,12 +1463,6 @@ msgstr "On doit disposer d'au moins un ContactObject pour récupérer la valeur 
 msgid "New password contains invalid characters"
 msgstr "Le nouveau mot de passe contient des caractères invalides"
 
-msgid "No ICal to import found."
-msgstr "Aucun ICal à importer n'a été trouvé."
-
-msgid "No VCard to import found."
-msgstr "Aucune VCard à importer n'a été trouvée."
-
 msgid "No admin user found in context %1$s"
 msgstr "L'utilisateur administrateur dans le contexte %1$s n'a pas été trouvé"
 
@@ -1702,11 +1474,6 @@ msgstr "Le nom d'attribut correspondant au code %1$d n'a pas pu être trouvé"
 
 msgid "No cache found for region name: %1$s"
 msgstr "Cache introuvable pour le nom de la région : %1$s"
-
-msgid "No changes found. No update requiered. Context %1$d Object %2$d"
-msgstr ""
-"Pas de changements trouvés. La mise à jour n'est pas nécessaire. Contexte %1"
-"$d Objet %2$d"
 
 msgid "No connection available to access mailbox"
 msgstr "Pas de connexion disponible pour accéder à la boîte aux lettres"
@@ -1744,20 +1511,6 @@ msgstr ""
 msgid "No delete access on mail folder: %1$s."
 msgstr "Pas d'accès en suppression sur le dossier de courrier %1$s."
 
-msgid ""
-"No field can be found that could be used to name contacts in this file: no "
-"name, no company nor e-mail."
-msgstr ""
-"Aucun champ pouvant être utilisé pour nommer des contacts n'a été trouvé "
-"dans ce fichier : ni nom, ni société ni adresse électronique."
-
-msgid ""
-"No field was set that might give the contact in line %s a display name: no "
-"name, no company nor e-mail."
-msgstr ""
-"Aucun champ pouvant donner un nom d'affichage au contact de la ligne %s n'a "
-"été défini : ni nom, ni société, ni adresse électronique."
-
 msgid "No folder permission."
 msgstr "Pas de droit de dossier."
 
@@ -1777,8 +1530,8 @@ msgstr ""
 msgid "No mail module access permitted"
 msgstr "L'accès au module de courrier n'est pas autorisé"
 
-msgid "No permission for modul: %s."
-msgstr "Pas de droit pour le module : %s."
+msgid "No permission for module: %s."
+msgstr "Pas de droit d'accès pour le module : %s."
 
 msgid "No permission to modify resources in context %1$s"
 msgstr "Pas de droit de modifier des ressources dans le contexte %1$s"
@@ -1871,13 +1624,6 @@ msgstr ""
 "Une ou plusieurs dates faisant exception ne sont pas contenues dans le "
 "rendez-vous répétitif"
 
-msgid ""
-"One or more fields contain too much information. Field: %1$d Character "
-"Limit: %2$d Sent %3$d"
-msgstr ""
-"Au moins un champ contient trop d'informations. Champ : %1$d Limite en "
-"caractères : %2$d Envoyé %3$d"
-
 msgid "Only folder owner may hold admin permission on a private folder"
 msgstr ""
 "Seul le propriétaire du dossier peut détenir les droits d'administration sur "
@@ -1948,13 +1694,6 @@ msgid "Port is not a number: %1$s."
 msgstr "Le port n'est pas un nombre : %1$s."
 
 msgid ""
-"Primary email address in system contact must not be edited: Context %1$d "
-"Object %2$d User %3$d"
-msgstr ""
-"L'adresse de courrier électronique principale dans un contact système ne "
-"doit pas être modifiée. Contexte %1$d Objet %2$d Utilisateur %3$d"
-
-msgid ""
 "Private Appointments can not have attendees. Removing attendees and "
 "accepting appointment anyway."
 msgstr ""
@@ -1981,17 +1720,8 @@ msgstr "Problème en réglant la validation automatique à « vrai »."
 msgid "Problem while communicating with external authorization."
 msgstr "Problème avec une autorisation externe lors d'une communication."
 
-msgid "Problem while converting the vcard to a contact, reason: %s"
-msgstr "Problème en convertissant la vcard en contact, cause : %s"
-
 msgid "Problem while initialising configuration tree."
 msgstr "Problème lors de l'initialisation de l'arborescence de configuration."
-
-msgid "Problem while parsing the vcard, reason: %s"
-msgstr "Problème en analysant la vcard, cause : %s"
-
-msgid "Problem while reading ICal file: %s."
-msgstr "Problème en lisant le fichier ICal : %s."
 
 msgid "Problem with a thread."
 msgstr "Problème avec un fil d'exécution."
@@ -2001,9 +1731,6 @@ msgstr "Problème lors de l'écriture dans le flux."
 
 msgid "Process was interrupted. Please try again."
 msgstr "Le processus a été interrompu. Veuillez réessayer."
-
-msgid "Programming error - folder %s"
-msgstr "Erreur de programmation - dossier %s"
 
 #. %1$s is replaced with the name of the required property that is not found.
 msgid "Property \"%1$s\" is not defined."
@@ -2077,6 +1804,9 @@ msgstr "La valeur « Date de fin » requise n'a pas été indiquée."
 msgid "Required value \"Title\" was not supplied."
 msgstr "La valeur « Titre » requise n'a pas été indiquée."
 
+msgid "Resolving user name \"%1$s\" failed."
+msgstr "La résolution du nom d'utilisateur « %1$s » a échoué."
+
 msgid "Response package exceeds max package size value of 8192k: %1$s"
 msgstr "La taille du paquetage réponse dépasse la valeur maximale de 8192 ko : %1$s"
 
@@ -2091,9 +1821,6 @@ msgstr "Problème SQL : « %s »"
 
 msgid "SQL Problem: \"%s\"."
 msgstr "Problème SQL : « %s »."
-
-msgid "SQL Problem: %1$s"
-msgstr "Problème SQL : %1$s"
 
 msgid "SQL problem while deleting task: %s."
 msgstr "Problème SQL en supprimant la tâche : %s."
@@ -2187,9 +1914,6 @@ msgstr "Le dépôt est déjà fermé : %1$s"
 msgid "String parse exception: No ending 0x00 found"
 msgstr "Exception d'analyse de chaîne de caractères : caractère nul final non trouvé"
 
-msgid "Subsystem down"
-msgstr "Sous-système arrêté"
-
 msgid "System folder %1$s cannot be moved in context %2$s"
 msgstr "Le dossier système %1$s n'a pas pu être déplacé dans le contexte %2$s"
 
@@ -2210,26 +1934,14 @@ msgstr ""
 msgid "Tasks are disable for you (%d)."
 msgstr "Les tâches sont désactivées pour vous (%d)."
 
-msgid "The Action \"%1$s\" is disabled due to the server configuration"
-msgstr "L'action « %1$s » est désactivée en raison de la configuration du serveur"
-
 msgid "The IP address of host \"%1$s\" could not be determined"
 msgstr "L'adresse IP de l'hôte « %1$s » n'a pas pu être déterminée"
 
-msgid ""
-"The Object could not be detached because the update to an underlying object "
-"failed."
-msgstr ""
-"L'objet n'a pas pu être détaché car la mise à jour d'un objet de niveau "
-"inférieur a échoué."
+msgid "The action \"%1$s\" is disabled due to server configuration"
+msgstr "L'action « %1$s » est désactivée en raison de la configuration du serveur"
 
 msgid "The allowed Quota is reached."
 msgstr "Le quota alloué est atteint."
-
-msgid "The attachment you requested no longer exists. Please refresh the view."
-msgstr ""
-"La pièce jointe que vous avez demandée n'existe plus. Veuillez rafraîchir "
-"l'affichage."
 
 msgid ""
 "The attribute %1$s contains too much characters. Current length %3$d is more "
@@ -2237,9 +1949,6 @@ msgid ""
 msgstr ""
 "L'attribut %1$s comporte trop de caractères. La longueur actuelle %3$d est "
 "supérieure à la longueur autorisée de %2$d caractères."
-
-msgid "The contact %1$d is not located in folder %2$s (%3$d)"
-msgstr "Le contact %1$d ne se trouve pas dans le dossier %2$s (%3$d)"
 
 msgid "The contact you requested is not valid."
 msgstr "Le document que vous avez demandé est invalide."
@@ -2256,9 +1965,6 @@ msgstr "Les attributs de l'élément par défaut n'ont pas pu être récupérés
 msgid "The directory already exists."
 msgstr "Le répertoire existe déjà."
 
-msgid "The element %s is not supported."
-msgstr "L'élément %s n'est pas prise en charge."
-
 msgid ""
 "The entered value for costs is not within the allowed range. Please use a "
 "value from -130000.00 to 130000.00."
@@ -2266,30 +1972,14 @@ msgstr ""
 "La valeur des coûts saisie n'est pas dans l'intervalle autorisé. Veuillez "
 "choisir une valeur entre -130000.00 et 130000.00."
 
-msgid "The file you selected does not exist."
-msgstr "Le fichier que vous avez sélectionné n'existe pas."
-
 msgid "The folder %s doesn't exist."
 msgstr "Le dossier %s n'existe pas."
-
-msgid "The following field(s) are too long to be imported: %s"
-msgstr "Le ou les champs suivants sont trop longs pour pouvoir être importés : %s"
-
-msgid "The following field(s) were too long and needed to be truncated: %s"
-msgstr "Le ou les champs suivants étaient trop longs et ont dû être tronqués : %s"
 
 msgid "The given value for mode \"%s\" is not a possible one"
 msgstr "La valeur donnée pour le mode « %s » n'est pas une valeur possible"
 
 msgid "The given value for userSource \"%s\" is not a possible one"
 msgstr "La valeur donnée pour le userSource « %s » n'est pas une valeur possible"
-
-msgid ""
-"The image you tried to attach is not a valid picture. It may be broken or is "
-"not a valid file."
-msgstr ""
-"L'image que vous essayez de joindre n'est pas une image valide. Elle est "
-"soit endommagée soit un fichier invalide."
 
 msgid "The mandatory field %1$s is not defined."
 msgstr "Le champ obligatoire %1$s n'est pas défini."
@@ -2303,20 +1993,6 @@ msgstr ""
 
 msgid "The module of a default folder must not be changed."
 msgstr "Le module d'un dossier par défaut ne doit pas être modifié."
-
-msgid ""
-"The name you entered is not available. Choose another display name. Context %"
-"1$d Object %2$d"
-msgstr ""
-"Le nom donné n'est pas disponible. Veuillez choisir un autre nom "
-"d'affichage. Contexte %1$d Objet %2$d"
-
-msgid ""
-"The object could not be detached because the update to an underlying object "
-"failed."
-msgstr ""
-"L'objet n'a pas pu être détaché, car la mise à jour d'un objet de niveau "
-"inférieur a échoué."
 
 #. The object has been changed in the meantime.
 msgid "The object has been changed in the meantime."
@@ -2404,9 +2080,6 @@ msgstr ""
 "continuer, veuillez vous déconnecter de suite, puis vous reconnecter avec "
 "votre mot de passe le plus récent. (serveur=%1$s | utilisateur=%2$s)"
 
-msgid "This Contact has no FolderID: Entry %1$d Context %2$d"
-msgstr "Ce contact n'a pas d'identifiant de dossier : Élément %1$d Contexte %2$d"
-
 msgid ""
 "This action is not supported in this LDAP addressbook: Folder %1$d Context %2"
 "$d"
@@ -2414,16 +2087,8 @@ msgstr ""
 "Cette action n'est pas prise en charge par ce carnet d'adresses LDAP : "
 "Dossier %1$d Contexte %2$d"
 
-msgid "This contact has no folder id: Entry %1$d Context %2$d"
-msgstr "Ce contact n'a pas d'identifiant de dossier : Élément %1$d Contexte %2$d"
-
 msgid "This does not look like an iCal file. Please check the file."
 msgstr "Cela ne ressemble pas à un fichier iCal. Veuillez vérifier le fichier."
-
-msgid "This gif image is too large. It can not be scaled and will not be accepted"
-msgstr ""
-"Cette image GIF est trop grande, elle ne peut pas être mise à l'échelle et "
-"ne sera pas acceptée"
 
 msgid "This method is not applicable to an IMAP permission"
 msgstr "Cette méthode ne peut pas s'appliquer à un droit IMAP"
@@ -2506,9 +2171,6 @@ msgstr ""
 "Impossible de créer une exception, l'emplacement de répétition ne peut pas "
 "être calculé !"
 
-msgid "Unable to delete Contact: Context %1$d Contact %2$d"
-msgstr "Impossible de supprimer le contact : Contexte %1$d Contact %2$d"
-
 msgid "Unable to delete Contacts from this user. Context %1$d User %2$d"
 msgstr ""
 "Impossible de supprimer les contacts de cet utilisateur. Contexte %1$d "
@@ -2540,14 +2202,6 @@ msgstr ""
 "dossier non consacré aux contacts. Contexte %1$d Dossier %2$d Utilisateur %3"
 "$d"
 
-msgid "Unable to delete dristributionlist by id : Context %1$d Contact %2$d"
-msgstr ""
-"Impossible de supprimer la liste de diffusion selon son identifiant : "
-"Contexte %1$d Contact %2$d"
-
-msgid "Unable to delete linking between contacts : Context %1$d Contact %2$d"
-msgstr "Impossible de supprimer les liens entre contacts : Contexte %1$d Contact %2$d"
-
 msgid "Unable to delete reminder"
 msgstr "Impossible de supprimer le rappel"
 
@@ -2560,12 +2214,6 @@ msgstr ""
 
 msgid "Unable to initialize Event queue"
 msgstr "Impossible d'initialiser la file d'attente des évènements"
-
-msgid "Unable to insert Contact. Context: %d"
-msgstr "Impossible d'ajouter le contact. Contexte : %d"
-
-msgid "Unable to insert contacts! Context: %d"
-msgstr "Impossible d'ajouter les contacts. Contexte : %d"
 
 msgid "Unable to insert reminder"
 msgstr "Impossible d'ajouter le rappel"
@@ -2585,18 +2233,6 @@ msgstr ""
 "Impossible de charger l'ensemble des liens de cet objet. Objet %1$d "
 "Utilisateur %2$d Contexte %3$d"
 
-msgid "Unable to load contact %1$d in context %2$d."
-msgstr "Impossible de charger le contact %1$d dans le contexte %2$d."
-
-msgid "Unable to load contact image: Context %1$d Contact %2$d"
-msgstr "Impossible de charger l'image du contact : Contexte %1$d Contact %2$d"
-
-msgid "Unable to load dristributionlist: Context %1$d Contact %2$d"
-msgstr "Impossible de charger la liste de diffusion : Contexte %1$d Contact %2$d"
-
-msgid "Unable to load linked contacts : Context %1$d Contact %2$d"
-msgstr "Impossible de charger les contacts liés : Contexte %1$d Contact %2$d"
-
 msgid "Unable to load objects. Context %1$d User %2$d"
 msgstr "Impossible de charger les objets. Contexte %1$d Utilisateur %2$d"
 
@@ -2608,13 +2244,6 @@ msgstr "Impossible de charger ce carnet d'adresses LDAP : %1$s"
 
 msgid "Unable to map OCL permission value %1$s to a JSON permission value"
 msgstr "Impossible d'associer la valeur de droit OCL %1$s à une valeur de droit JSON"
-
-msgid ""
-"Unable to move this contact because it is marked as private: Context %1$d "
-"Object %2$d"
-msgstr ""
-"Impossible de déplacer ce contact, car il est marqué comme privé : Contexte %"
-"1$d Objet %2$d"
 
 msgid "Unable to parse value \"%1$s\" within field %2$s as a number."
 msgstr ""
@@ -2637,37 +2266,11 @@ msgstr "Impossible de supprimer le participant %d"
 msgid "Unable to remove participant because this participant is the last one"
 msgstr "Impossible de supprimer le participant, car il s'agit du dernier participant"
 
-msgid "Unable to save Linking between Contacts : Context %1$d Contact %2$d"
-msgstr "Impossible d'enregistrer le lien entre contacts : Contexte %1$d Contact %2$d"
-
 msgid "Unable to save contact Image: Context %1$d Contact %2$d"
 msgstr "Impossible d'enregistrer l'image du contact : Contexte %1$d Contact %2$d"
 
 msgid "Unable to save contact image. The image appears to be broken."
 msgstr "Impossible d'enregistrer l'image du contact. L'image semble être corrompue."
-
-msgid "Unable to save dristributionlist: Context %1$d Contact %2$d"
-msgstr "Impossible d'enregistrer la liste de diffusion : Contexte %1$d Contact %2$d"
-
-msgid "Unable to scale image down."
-msgstr "Impossible de réduire l'image à l'échelle."
-
-msgid ""
-"Unable to scale this contact image.  Either the file type is not supported "
-"or the image is too large. Your mime type is %1$s and your image size is %2"
-"$d. The max. allowed image size is %3$d."
-msgstr ""
-"Impossible de changer l'échelle de l'image du contact. Soit ce n'est pas un "
-"type de fichier pris en charge, soit l'image est trop grande. Le type MIME "
-"est %1$s et la taille d'image est %2$d. La taille d'image maximale autorisée "
-"est %3$d."
-
-msgid ""
-"Unable to synchronize the old contact with the new changes: Context %1$d "
-"Object %2$d"
-msgstr ""
-"Impossible de synchroniser le vieux contact avec les nouvelles "
-"modifications : Contexte %1$d Objet %2$d"
 
 msgid "Unable to trigger object Events: Context %1$d Folder %2$d"
 msgstr ""
@@ -2686,12 +2289,6 @@ msgstr ""
 
 msgid "Unable to update contact image: Context %1$d Contact %2$d"
 msgstr "Impossible de mettre à jour l'image du contact : Contexte %1$d Contact %2$d"
-
-msgid "Unable to update contact. Context %1$d Object %2$d"
-msgstr "Impossible de mettre à jour le contact. Contexte %1$d Objet %2$d"
-
-msgid "Unable to update dristributionlist : Context %1$d Contact %2$d"
-msgstr "Impossible de mettre à jour la liste de diffusion : Contexte %1$d Contact %2$d"
 
 msgid "Unable to update reminder."
 msgstr "Impossible de mettre à jour le rappel."
@@ -2765,9 +2362,6 @@ msgstr "Type d'évènement de suppression inconnu : %1$d"
 msgid "Unknown field: %1$s"
 msgstr "Champ inconnu : %1$s"
 
-msgid "Unknown format: %s"
-msgstr "Format inconnu : %s"
-
 msgid "Unknown module: %1$d"
 msgstr "Module inconnu : %1$d"
 
@@ -2819,6 +2413,9 @@ msgstr ""
 msgid "Unsupported MIME type %1$s"
 msgstr "Type MIME %1$s non pris en charge"
 
+msgid "Unsupported authorization mechanism in \"Authorization\" header: %1$s."
+msgstr "Mécanisme d'autorisation non pris en charge dans l'en-tête « Autorisation » : %1$s."
+
 msgid "Unsupported charset-encoding: %1$s"
 msgstr "Encodage de jeu de caractères non pris en charge : %1$s"
 
@@ -2862,9 +2459,6 @@ msgid "Upload quota (%1$s) exceeded for file %2$s (size=%3$s)"
 msgstr ""
 "Le quota de chargement (%1$s) a été dépassé pour le fichier %2$s de taille %3"
 "$s"
-
-msgid "Uploaded file is of type %s, cannot handle that"
-msgstr "Le fichier chargé est de type %s, impossible de gérer cela"
 
 msgid "User %1$s from context %2$s is not known on IMAP server \"%3$s\"."
 msgstr ""
@@ -2964,14 +2558,8 @@ msgstr "La configuration utilisateur n'a pas pu être supprimée du cache : %1$
 msgid "User contacts can not be deleted."
 msgstr "Les contacts utilisateur ne peuvent pas être supprimés."
 
-msgid "User input error %s"
-msgstr "Erreur de saisie de l'utilisateur %s"
-
 msgid "User is missing for the reminder."
 msgstr "L'utilisateur manque dans le rappel."
-
-msgid "Validation failed: %s"
-msgstr "La validation a échoué : %s"
 
 msgid "Validation of calendar failed."
 msgstr "La validation du calendrier a échoué."
@@ -2987,14 +2575,11 @@ msgstr "Le facteur de répétition manque : %d."
 
 msgid "Versit attachment could not be saved due to an unsupported MIME type: %1$s"
 msgstr ""
-"La pièce jointe Versit n'a pas pu être enregistrée car le type MIME %1"
-"$s n'est pas pris en charge"
+"La pièce jointe Versit n'a pas pu être enregistrée car le type MIME %1$s "
+"n'est pas pris en charge"
 
 msgid "Versit error: %1$s"
 msgstr "Erreur Versit : %1$s"
-
-msgid "Warnings when importing file: %i warnings"
-msgstr "Avertissement lors de l'importation du fichier : %i avertissements"
 
 msgid ""
 "Was not able to calculate next upcoming reminder for series appointment %2$d "
@@ -3077,16 +2662,6 @@ msgstr "Vous n'avez pas le droit de supprimer la tâche."
 msgid "You are not allowed to edit tasks in folder %1$s (%2$d)."
 msgstr "Vous n'avez pas le droit de modifier des tâches dans le dossier %1$s (%2$d)."
 
-msgid ""
-"You are not allowed to mark this contact as private contact: Context %1$d "
-"Object %2$d"
-msgstr ""
-"Vous n'avez pas le droit de marquer ce contact comme privé : Contexte %1$d "
-"Objet %2$d"
-
-msgid "You are not allowed to modify contact %1$d in context %2$d."
-msgstr "Vous n'êtes pas autorisé à modifier le contact %1$d dans le contexte %2$d."
-
 msgid "You are not allowed to read the contents of folder %1$s (%2$d)."
 msgstr "Vous n'avez pas le droit de lire le contenu du dossier %1$s (%2$d)."
 
@@ -3124,10 +2699,10 @@ msgstr ""
 "n'est pas privé"
 
 msgid ""
-"You do not have permission to create objects in this folder %1$d in context %"
+"You do not have permission to access objects in this folder %1$d in context %"
 "2$d with user %3$d"
 msgstr ""
-"Vous n'avez pas le droit de créer des objets dans ce dossier %1$d dans le "
+"Vous n'avez pas les droits nécessaires pour accéder à des objets dans ce dossier %1$d dans le "
 "contexte %2$d avec l'utilisateur %3$d"
 
 msgid ""
@@ -3158,15 +2733,6 @@ msgstr "Vous n'avez pas les droits appropriés pour lire cet objet"
 
 msgid "You do not have the necessary permissions for appointments in folder %1$d."
 msgstr "Vous n'avez pas les droits nécessaires pour les rendez-vous du dossier %1$d."
-
-msgid "Your display name is mandatory. Please enter it."
-msgstr "Votre nom affiché est obligatoire. Veuillez le saisir."
-
-msgid "Your first name is mandatory. Please enter it."
-msgstr "Votre prénom est obligatoire. Veuillez le saisir."
-
-msgid "Your last name is mandatory. Please enter it."
-msgstr "Votre nom est obligatoire. Veuillez le saisir."
 
 msgid "clientLastModified IS NULL. Abort action!"
 msgstr "clientLastModified IS NULL. Action interrompue !"
@@ -3409,7 +2975,9 @@ msgstr "Index d'étiquette de couleur inconnu : %1$s"
 msgid ""
 "A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
 "\"."
-msgstr "Un dossier dupliqué nommé « %1$s » existe déjà en dessous du dossier parent « %2$s »."
+msgstr ""
+"Un dossier dupliqué nommé « %1$s » existe déjà en dessous du dossier parent « %"
+"2$s »."
 
 #. Not connected
 msgid "Not connected"
@@ -3431,6 +2999,26 @@ msgstr ""
 msgid "Message %1$s not found in folder %2$s."
 msgstr "Le message %1$s n'a pas été trouvé dans le dossier %2$s."
 
+#. Duplicate proxy registration: %1$s
+msgid "Duplicate proxy registration: %1$s"
+msgstr "Enregistrement auprès du mandataire en double : %1$s"
+
+#. Malformed URL: %1$s
+msgid "Malformed URL: %1$s"
+msgstr "URL mal formé : %1$s"
+
+#. HTTP request to VoipNow server %1$s failed. Status line: %2$s
+msgid "HTTP request to VoipNow server %1$s failed. Status line: %2$s"
+msgstr "La requête HTTP vers le serveur VoipNow %1$s a échoué. Ligne d'état : %2$s"
+
+#. Malformed URI: %1$s
+msgid "Malformed URI: %1$s"
+msgstr "URI mal formé : %1$s"
+
+#. Invalid session identifier: %1$s
+msgid "Invalid session identifier: %1$s"
+msgstr "Identifiant de session invalide : %1$s"
+
 #. Missing property: %1$s
 msgid "Missing property: %1$s"
 msgstr "Propriété manquante : %1$s"
@@ -3446,11 +3034,15 @@ msgstr "Une erreur d'analyse s'est produite : %1$s."
 
 #. An IOException occurred: %1$s. Was trying to get the service at %2$s.
 msgid "An IOException occurred: %1$s. Was trying to get the service at %2$s."
-msgstr "Une exception d'E/S s'est produite : %1$s, en essayant d'obtenir le service à %2$s."
+msgstr ""
+"Une exception d'E/S s'est produite : %1$s, en essayant d'obtenir le service "
+"à %2$s."
 
 #. A HTTPException occurred: %1$s. Was trying to get the service at %2$s.
 msgid "A HTTPException occurred: %1$s. Was trying to get the service at %2$s."
-msgstr "Une exception HTTP s'est produite : %1$s, en essayant d'obtenir le service à %2$s."
+msgstr ""
+"Une exception HTTP s'est produite : %1$s, en essayant d'obtenir le service à "
+"%2$s."
 
 #. Can only post to external subscription sources.
 msgid "Can only post to external subscription sources."
@@ -3557,8 +3149,9 @@ msgid ""
 "The configured consumer key/consumer secret pair is invalid. Please provide "
 "a valid consumer key/consumer secret through configuration."
 msgstr ""
-"La paire clé utilisateur/clé secrète configurée est invalide. Veuillez fournir une "
-"paire clé utilisateur/clé secrète par le biais de la configuration."
+"La paire clé utilisateur/clé secrète configurée est invalide. Veuillez "
+"fournir une paire clé utilisateur/clé secrète par le biais de la "
+"configuration."
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 msgid "Missing main extension attribute for user %1$s in context %2$s."
@@ -3978,6 +3571,187 @@ msgstr ""
 "Les dossiers de courrier ne sont pas autorisés à l'intérieur d'un dossier "
 "public."
 
+msgid "Invalid SQL Query: %s"
+msgstr "Requête SQL invalide : %s"
+
+msgid "Could not save file to the file store."
+msgstr "Impossible d'enregistrer le fichier dans le dépôt de fichiers."
+
+msgid "Attachments must contain a file."
+msgstr "Les pièces jointes doivent contenir un fichier."
+
+msgid "Cannot generate ID for new attachment: %s"
+msgstr "Impossible de générer l'identifiant de la nouvelle pièce jointe : %s"
+
+msgid "Could not retrieve file: %s"
+msgstr "Impossible de retrouver le fichier : %s"
+
+msgid "The attachment you requested no longer exists. Please refresh the view."
+msgstr ""
+"La pièce jointe que vous avez demandée n'existe plus. Veuillez rafraîchir "
+"l'affichage."
+
+msgid "Could not delete attachment."
+msgstr "Impossible de supprimer la pièce jointe."
+
+msgid ""
+"Could not find an attachment with the file_id %s. Either the file is "
+"orphaned or belongs to another module."
+msgstr ""
+"Impossible de trouver une pièce jointe avec l'identifiant de fichier %s. "
+"Soit le fichier est orphelin, soit il appartient à un autre module."
+
+msgid "Could not delete files from filestore. Context: %d."
+msgstr "Impossible de supprimer les fichiers du dépôt de fichiers. Contexte : %d."
+
+msgid "Validation failed: %s"
+msgstr "La validation a échoué : %s"
+
+msgid "An error occurred executing the search in the database."
+msgstr "Une erreur s'est produite durant l'exécution de la recherche dans la base de données."
+
+msgid "Unable to access the filestore."
+msgstr "Impossible d'accéder au dépôt de données."
+
+msgid "Writing to filestore failed."
+msgstr "L'écriture dans le dépôt de données a échoué."
+
+msgid ""
+"Changes done to the object this attachment was added to could not be undone. "
+"Your database is probably inconsistent, run the consistency tool."
+msgstr ""
+"Les changements apportés à l'objet auquel cette pièce a été jointe n'ont pas "
+"pu être annulés. Votre base de données est probablement incohérente, lancez "
+"l'outil de mise en cohérence."
+
+msgid "An error occurred attaching to the given object."
+msgstr "Une erreur s'est produite en joignant à l'objet donné."
+
+msgid ""
+"The object could not be detached because the update to an underlying object "
+"failed."
+msgstr ""
+"L'objet n'a pas pu être détaché, car la mise à jour d'un objet de niveau "
+"inférieur a échoué."
+
+msgid ""
+"Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does "
+"not look like a number."
+msgstr ""
+"Paramètre invalide envoyé dans la requête. Le paramètre « %1$s » était « %2$s », lequel "
+"ne semble pas être un nombre"
+
+msgid "Conflicting services registered for context %1$i and folder %2$i"
+msgstr "Conflit entre les services enregistrés pour le contexte %1$i et le dossier %2$i"
+
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr ""
+"Adresse électronique invalide : « %s ». Veuillez corriger l'adresse "
+"électronique."
+
+msgid ""
+"Unable to scale this contact image. Either the file type is not supported or "
+"the image is too large. Your mime type is %1$s and your image size is %2$d. "
+"The max. allowed image size is %3$d."
+msgstr ""
+"Impossible de changer l'échelle de l'image de ce contact. Soit le type du fichier n'est pas "
+"pris en charge, soit l'image est trop grande. Votre type MIME est %1$s et la taille de "
+"votre image est %2$d. La taille d'image maximale autorisée est %3$d."
+
+msgid "Got a -1 ID from IDGenerator"
+msgstr "IDGenerator a renvoyé -1"
+
+msgid "Unable to scale image down."
+msgstr "Impossible de réduire l'image à l'échelle."
+
+msgid ""
+"You do not have permission to create objects in this folder %1$d in context %"
+"2$d with user %3$d"
+msgstr ""
+"Vous n'avez pas le droit de créer des objets dans ce dossier %1$d dans le "
+"contexte %2$d avec l'utilisateur %3$d"
+
+msgid ""
+"Unable to synchronize the old contact with the new changes: Context %1$d "
+"Object %2$d"
+msgstr ""
+"Impossible de synchroniser le vieux contact avec les nouvelles "
+"modifications : Contexte %1$d Objet %2$d"
+
+msgid ""
+"You are not allowed to mark this contact as private contact: Context %1$d "
+"Object %2$d"
+msgstr ""
+"Vous n'avez pas le droit de marquer ce contact comme privé : Contexte %1$d "
+"Objet %2$d"
+
+msgid "An error occurred: Object id is -1"
+msgstr "Une erreur s'est produite : l'identifiant d'objet est -1"
+
+msgid "No changes found. No update requiered. Context %1$d Object %2$d"
+msgstr ""
+"Pas de changements trouvés. La mise à jour n'est pas nécessaire. Contexte %1"
+"$d Objet %2$d"
+
+msgid "Contact %1$d not found in context %2$d."
+msgstr "Contact %1$d non trouvé dans le contexte %2$d."
+
+msgid ""
+"The image you tried to attach is not a valid picture. It may be broken or is "
+"not a valid file."
+msgstr ""
+"L'image que vous essayez de joindre n'est pas une image valide. Elle est "
+"soit endommagée soit un fichier invalide."
+
+msgid "Your first name is mandatory. Please enter it."
+msgstr "Votre prénom est obligatoire. Veuillez le saisir."
+
+msgid ""
+"Unable to move this contact because it is marked as private: Context %1$d "
+"Object %2$d"
+msgstr ""
+"Impossible de déplacer ce contact, car il est marqué comme privé : Contexte %"
+"1$d Objet %2$d"
+
+msgid "Your display name is mandatory. Please enter it."
+msgstr "Votre nom affiché est obligatoire. Veuillez le saisir."
+
+msgid ""
+"The name you entered is not available. Choose another display name. Context %"
+"1$d Object %2$d"
+msgstr ""
+"Le nom donné n'est pas disponible. Veuillez choisir un autre nom "
+"d'affichage. Contexte %1$d Objet %2$d"
+
+msgid "Mime type is not defined."
+msgstr "Le type MIME n'est pas défini."
+
+msgid ""
+"A contact with private flag cannot be stored in a public folder. Folder: %1"
+"$d context %2$d user %3$d"
+msgstr ""
+"Un contact avec des drapeaux privés ne peut être déplacé dans un dossier "
+"public. Dossier : %1$d contexte %2$d utilisateur %3$d"
+
+msgid "Image size too large. Image size: %1$d. Max. size: %2$d."
+msgstr "La taille de l'image est trop grande : %1$d. Taille maximale : %2$d."
+
+msgid ""
+"Primary email address in system contact must not be edited: Context %1$d "
+"Object %2$d User %3$d"
+msgstr ""
+"L'adresse de courrier électronique principale dans un contact système ne "
+"doit pas être modifiée. Contexte %1$d Objet %2$d Utilisateur %3$d"
+
+msgid "The contact %1$d is not located in folder %2$s (%3$d)"
+msgstr "Le contact %1$d ne se trouve pas dans le dossier %2$s (%3$d)"
+
+msgid "Your last name is mandatory. Please enter it."
+msgstr "Votre nom est obligatoire. Veuillez le saisir."
+
+msgid "You are not allowed to modify contact %1$d in context %2$d."
+msgstr "Vous n'êtes pas autorisé à modifier le contact %1$d dans le contexte %2$d."
+
 msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
 msgstr ""
 "Dépôt de fichiers %1$d incorrect dans le contexte %2$d alors que l'on a "
@@ -3998,7 +3772,13 @@ msgstr "Impossible de charger les contacts"
 msgid "Could not encode as UTF-8"
 msgstr "Impossible d'encoder en UTF-8"
 
-msgid "The necessary iCal emitter serivce is missing."
+msgid "Can not get connection to database."
+msgstr "Impossible d'établir une connexion vers la base de données."
+
+msgid "Could not load folder %s"
+msgstr "Impossible de charger le dossier %s"
+
+msgid "The necessary iCal emitter service is missing."
 msgstr "Le service émetteur iCal nécessaire est absent."
 
 msgid "Parsing %1$s to a number failed."
@@ -4006,6 +3786,124 @@ msgstr "L'analyse de %1$s en un nombre a échoué."
 
 msgid "Conversion to iCal failed."
 msgstr "La conversion en iCal a échoué."
+
+msgid "Conversion to vCard failed."
+msgstr "La conversion en iCal a échoué."
+
+msgid "Can not import the format %2$s into folder %1$s."
+msgstr "Impossible d'importer le format %2$s dans le dossier %1$s."
+
+msgid "Module calendar not enabled for user, cannot import appointments."
+msgstr ""
+"Le module Calendrier n'est pas activé pour l'utilisateur, impossible "
+"d'importer des rendez-vous."
+
+msgid "Module tasks not enabled for user, cannot import tasks."
+msgstr ""
+"Le module Tâches n'est pas activé pour l'utilisateur, impossible "
+"d'importer des tâches."
+
+msgid "The necessary iCal parser service is missing."
+msgstr "Le service d'analyseur iCal nécessaire est absent."
+
+msgid "Failed importing appointment due to hard conflicting resource."
+msgstr ""
+"Impossible d'importer un rendez-vous en raison d'un sérieux conflit de "
+"ressource."
+
+msgid "Warnings when importing file: %i warnings"
+msgstr "Avertissement lors de l'importation du fichier : %i avertissements"
+
+msgid "Could not recognize format of the following data: %s"
+msgstr "Impossible de reconnaître le format des données suivantes : %s"
+
+msgid "Module contacts not enabled for user, cannot import contacts."
+msgstr ""
+"Le module Contacts n'est pas activé pour l'utilisateur, impossible "
+"d'importer des contacts."
+
+msgid "No VCard to import found."
+msgstr "Aucune VCard à importer n'a été trouvée."
+
+msgid "Problem while parsing the vcard, reason: %s"
+msgstr "Problème en analysant la vcard, cause : %s"
+
+msgid "Problem while converting the vcard to a contact, reason: %s"
+msgstr "Problème en convertissant la vcard en contact, cause : %s"
+
+msgid "Can only import into one folder at a time."
+msgstr "Impossible d'importer dans plusieurs dossiers en même temps."
+
+msgid "Could not find the following fields %s"
+msgstr "Les champs suivants n'ont pas pu être trouvés : %s"
+
+msgid "Could not translate a single column title. Is this a valid CSV file?"
+msgstr ""
+"Impossible de convertir un titre de colonne isolé. S'agit-il d'un fichier "
+"CSV valide ?"
+
+msgid "Could not translate a single field of information, did not insert entry %s."
+msgstr ""
+"Impossible de convertir un champ d'information isolé, la ligne %s n'a pas "
+"été ajoutée."
+
+msgid ""
+"No field can be found that could be used to name contacts in this file: no "
+"name, no company nor e-mail."
+msgstr ""
+"Aucun champ pouvant être utilisé pour nommer des contacts n'a été trouvé "
+"dans ce fichier : ni nom, ni société ni adresse électronique."
+
+msgid ""
+"No field was set that might give the contact in line %s a display name: no "
+"name, no company nor e-mail."
+msgstr ""
+"Aucun champ pouvant donner un nom d'affichage au contact de la ligne %s n'a "
+"été défini : ni nom, ni société, ni adresse électronique."
+
+msgid "Could not read InputStream as string"
+msgstr "Impossible de lire le flux en entrée en tant que chaîne"
+
+msgid ""
+"Broken CSV file: Lines have different number of cells, line #1 has %d, line #"
+"%d has %d. Is this really a CSV file?"
+msgstr ""
+"Fichier CSV endommagé. Les lignes ont un nombre de champs différents : la "
+"ligne numéro 1 en a %d, la ligne numéro %d en a %d. S'agit-il réellement "
+"d'un fichier CSV ?"
+
+msgid "Illegal state: Found data after presumed last line."
+msgstr ""
+"État illégal : des données ont été trouvées après ce qui est en principe la "
+"dernière ligne."
+
+msgid "Cannot find an importer for format %s into folders %s"
+msgstr ""
+"Impossible de trouver un mécanisme d'importation depuis le format %s vers le "
+"dossier %s"
+
+msgid "Cannot find an exporter for folder %s to format %s"
+msgstr ""
+"Impossible de trouver un mécanisme d'exportation depuis le dossier %s vers "
+"le format %s"
+
+msgid "Cannot translate id=%d to a constant from Types."
+msgstr "Impossible de convertir l'identifiant %d en une constante de Types."
+
+msgid "Cannot translate id=%d to a constant from FolderObject."
+msgstr "Impossible de convertir l'identifiant %d en une constante de FolderObject."
+
+msgid "Can only handle one file, not %s"
+msgstr "Un seul fichier géré, pas %s"
+
+msgid "Unknown format: %s"
+msgstr "Format inconnu : %s"
+
+msgid "Empty file uploaded."
+msgstr "Fichier vide téléchargé."
+
+msgid "The file you selected does not exist."
+msgstr "Le fichier que vous avez sélectionné n'existe pas."
 
 msgid "Some fields have values, that are too long"
 msgstr "Certains champs ont des valeurs trop longues"
@@ -4023,7 +3921,9 @@ msgid "The folder %d is not an Infostore folder"
 msgstr "Le dossier %d n'est pas un dossier du dépôt de données"
 
 msgid "You do not have sufficient read permissions to read objects in this folder.."
-msgstr "Vous ne disposez pas des droits de lecture suffisants pour lire des objets dans ce dossier."
+msgstr ""
+"Vous ne disposez pas des droits de lecture suffisants pour lire des objets "
+"dans ce dossier."
 
 msgid "You do not have sufficient permissions to create objects in this folder."
 msgstr "Vous n'avez pas les droits suffisants pour créer des objets dans ce dossier."
