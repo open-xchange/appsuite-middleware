@@ -151,7 +151,7 @@ public final class UserAttributeAccess {
      * @return The value of the <code>boolean</code> attribute
      */
     public boolean getBooleanAttribute(final String name, final User user, final boolean defaultValue) {
-        return Boolean.parseBoolean(getBooleanAttribute(name, user, String.valueOf(defaultValue)));
+        return Boolean.parseBoolean(getAttribute(name, user, String.valueOf(defaultValue)));
     }
 
     /**
@@ -164,7 +164,7 @@ public final class UserAttributeAccess {
      * @param defaultValue The default value to return if user has no attribute of specified name
      * @return The value of the attribute
      */
-    public String getBooleanAttribute(final String name, final User user, final String defaultValue) {
+    public String getAttribute(final String name, final User user, final String defaultValue) {
         final Map<String, Set<String>> attributes = user.getAttributes();
         if (null == attributes) {
             return defaultValue;
