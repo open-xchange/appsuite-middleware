@@ -1457,10 +1457,10 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final GeneralSecurityException e) {
             return false;
         } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
             if(con != null) {
                 Database.back(cid, false, con);
             }
-            DBUtils.closeSQLStuff(rs, stmt);
         }
         return true;
     }
@@ -1512,6 +1512,8 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             select.setInt(1, cid);
             select.setInt(2, user);
             
+            rs = select.executeQuery();
+            
             while(rs.next()) {
                 final String password = rs.getString(2);
                 final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
@@ -1532,6 +1534,8 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         } finally {
+            DBUtils.closeSQLStuff(rs, select);
+            DBUtils.closeSQLStuff(update);
             if(con != null) {
                 try {
                     con.rollback();
@@ -1541,8 +1545,6 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
                 Database.back(cid, true, con);
             }
-            DBUtils.closeSQLStuff(rs, select);
-            DBUtils.closeSQLStuff(update);
         }
     }
 
