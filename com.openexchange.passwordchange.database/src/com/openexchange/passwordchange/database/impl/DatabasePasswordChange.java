@@ -109,6 +109,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
         }
         try {
             update(writeCon, encodedPassword, event.getSession().getUserId(), ctx.getContextId());
+            deleteAttr(writeCon, event.getSession().getUserId(), ctx.getContextId());
             writeCon.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(writeCon);
@@ -137,4 +138,21 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             DBUtils.closeSQLStuff(stmt);
         }
     }
+
+    private static final String SQL_DELETE = "DELETE user_attribute WHERE cid = ? AND id = ? AND name = ?";
+
+    private void deleteAttr(final Connection writeCon, final int userId, final int cid) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_DELETE);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, userId);
+            stmt.setString(pos++, "passcrypt");
+            stmt.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
 }
