@@ -1,17 +1,16 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
 displayName: Facebook
 id: com.openexchange.subscribe.crawler.facebook
-priority: 9
+priority: 10
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
     - !com.openexchange.subscribe.crawler.FacebookAPIStep
       actionOfLoginForm: "https://login.facebook.com/login.php?login_attempt=1"
-      description: Get a users friend information from facebook via facebook-java-api
+      apiKey: d36ebc9e274a89e3bd0c239cea4acb48
+      birthdayPattern: "([0-9]{1,2})\\s([^\\s]*)(\\s)*([0-9]{4})*"
       linkAvailableAfterLogin: "(http://www.facebook.com/notifications.php)"
       nameOfPasswordField: pass
       nameOfUserField: email
-      password: ""
-      url: ""
-      username: ""
+      secret: 903e8006dbad9204bb74c26eb3ca2310
   
