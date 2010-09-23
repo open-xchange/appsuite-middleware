@@ -56,7 +56,6 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
@@ -69,37 +68,22 @@ public final class CurrentTime implements PreferencesItemService {
 
     public static final String NAME = "currentTime";
 
-    /**
-     * Default constructor.
-     */
     public CurrentTime() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { NAME };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            /**
-             * {@inheritDoc}
-             */
+
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
-            /**
-             * {@inheritDoc}
-             */
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 final TimeZone zone = TimeZoneUtils.getTimeZone(user.getTimeZone());
                 long time = System.currentTimeMillis();
                 time  += zone.getOffset(time);
