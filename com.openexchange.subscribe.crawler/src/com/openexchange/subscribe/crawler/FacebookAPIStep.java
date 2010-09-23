@@ -77,11 +77,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
 
     private static final Log LOG = LogFactory.getLog(FacebookAPIStep.class);
 
-    private static String API_KEY = "d36ebc9e274a89e3bd0c239cea4acb48";
-
-    private static String SECRET = "903e8006dbad9204bb74c26eb3ca2310";
-
-    String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin;
+    String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, apiKey, secret, birthdayPattern;
 
     public FacebookAPIStep() {
 
@@ -105,13 +101,13 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
 
         try {
             // Create the client instance
-            final FacebookJaxbRestClient client = new FacebookJaxbRestClient(API_KEY, SECRET);
+            final FacebookJaxbRestClient client = new FacebookJaxbRestClient(apiKey, secret);
 
             // first, we need to get an auth-token to log in with
             final String token = client.auth_createToken();
 
             // Build the authentication URL for the user to fill out
-            final String url = "http://www.facebook.com/login.php?api_key=" + API_KEY + "&v=1.0" + "&auth_token=" + token;
+            final String url = "http://www.facebook.com/login.php?api_key=" + apiKey + "&v=1.0" + "&auth_token=" + token;
             // open browser for user to log in
             final LoginPageByFormActionStep step = new LoginPageByFormActionStep(
                 description,
@@ -160,48 +156,48 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                 if (user.getBirthday() != null) {
                     final Calendar calendar = Calendar.getInstance();
                     final String birthdayString = user.getBirthday().getValue();
-                    final Pattern pattern = Pattern.compile("([a-zA-Z\u00e4\u00f6\u00fc]*)([\\s])([0-9]{1,2})([,]{0,1}[\\s]{0,1})([0-9]{0,4})");
+                    final Pattern pattern = Pattern.compile(birthdayPattern);
                     if (birthdayString != null) {
                         final Matcher matcher = pattern.matcher(birthdayString);
                         if (matcher.matches()) {
                             // only set the contacts birthday if at least day and month are available
-                            if (matcher.groupCount() >= 3) {
+                            if (matcher.groupCount() >= 2) {
                                 int month = 0;
                                 int day = 0;
                                 // set the year to the current year in case it is not available
                                 int year = calendar.get(Calendar.YEAR);
                                 // set the day
-                                day = Integer.valueOf(matcher.group(3));
+                                day = Integer.valueOf(matcher.group(1));
                                 // set the month
-                                if (matcher.group(1).equals("January")) {
+                                if (matcher.group(2).equals("January")) {
                                     month = Calendar.JANUARY;
-                                } else if (matcher.group(1).equals("February")) {
+                                } else if (matcher.group(2).equals("February")) {
                                     month = Calendar.FEBRUARY;
-                                } else if (matcher.group(1).equals("March")) {
+                                } else if (matcher.group(2).equals("March")) {
                                     month = Calendar.MARCH;
-                                } else if (matcher.group(1).equals("April")) {
+                                } else if (matcher.group(2).equals("April")) {
                                     month = Calendar.APRIL;
-                                } else if (matcher.group(1).equals("May")) {
+                                } else if (matcher.group(2).equals("May")) {
                                     month = Calendar.MAY;
-                                } else if (matcher.group(1).equals("June")) {
+                                } else if (matcher.group(2).equals("June")) {
                                     month = Calendar.JUNE;
-                                } else if (matcher.group(1).equals("July")) {
+                                } else if (matcher.group(2).equals("July")) {
                                     month = Calendar.JULY;
-                                } else if (matcher.group(1).equals("August")) {
+                                } else if (matcher.group(2).equals("August")) {
                                     month = Calendar.AUGUST;
-                                } else if (matcher.group(1).equals("September")) {
+                                } else if (matcher.group(2).equals("September")) {
                                     month = Calendar.SEPTEMBER;
-                                } else if (matcher.group(1).equals("October")) {
+                                } else if (matcher.group(2).equals("October")) {
                                     month = Calendar.OCTOBER;
-                                } else if (matcher.group(1).equals("November")) {
+                                } else if (matcher.group(2).equals("November")) {
                                     month = Calendar.NOVEMBER;
-                                } else if (matcher.group(1).equals("December")) {
+                                } else if (matcher.group(2).equals("December")) {
                                     month = Calendar.DECEMBER;
                                 }
 
                                 // set the year
-                                if (matcher.groupCount() == 5 && !matcher.group(5).equals("")) {
-                                    year = Integer.valueOf(matcher.group(5));
+                                if (matcher.groupCount() == 4 && !matcher.group(4).equals("")) {
+                                    year = Integer.valueOf(matcher.group(4));
                                 }
 
                                 calendar.set(year, month, day);
@@ -318,24 +314,35 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
     }
 
     
-    public static String getAPI_KEY() {
-        return API_KEY;
+    public String getApiKey() {
+        return apiKey;
     }
 
     
-    public static void setAPI_KEY(final String api_key) {
-        API_KEY = api_key;
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 
     
-    public static String getSECRET() {
-        return SECRET;
+    public String getSecret() {
+        return secret;
     }
 
     
-    public static void setSECRET(final String secret) {
-        SECRET = secret;
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
+
+    
+    public String getBirthdayPattern() {
+        return birthdayPattern;
+    }
+
+    
+    public void setBirthdayPattern(String birthdayPattern) {
+        this.birthdayPattern = birthdayPattern;
+    }
+
     
     
 

@@ -69,25 +69,24 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
-        crawler.setPriority(9);
+        crawler.setPriority(10);
         
         List<Step> steps = new LinkedList<Step>();
-
-        steps.add(new FacebookAPIStep(
-            "Get a users friend information from facebook via facebook-java-api",
-            "",
-            "",
-            "",
-            "https://login.facebook.com/login.php?login_attempt=1",
-            "email",
-            "pass",
-            "(http://www.facebook.com/notifications.php)"));
+        FacebookAPIStep facebookAPIStep = new FacebookAPIStep();
+        facebookAPIStep.setActionOfLoginForm("https://login.facebook.com/login.php?login_attempt=1");
+        facebookAPIStep.setNameOfUserField("email");
+        facebookAPIStep.setNameOfPasswordField("pass");
+        facebookAPIStep.setLinkAvailableAfterLogin("(http://www.facebook.com/notifications.php)");
+        facebookAPIStep.setApiKey("d36ebc9e274a89e3bd0c239cea4acb48");
+        facebookAPIStep.setSecret("903e8006dbad9204bb74c26eb3ca2310");
+        facebookAPIStep.setBirthdayPattern("([0-9]{1,2})\\s([^\\s]*)(\\s)*([0-9]{4})*");
+        steps.add(facebookAPIStep);
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        // findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        // dumpThis(crawler, crawler.getDisplayName());
+        dumpThis(crawler, crawler.getDisplayName());
     }
 }
