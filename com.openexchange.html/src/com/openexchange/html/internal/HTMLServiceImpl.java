@@ -372,7 +372,25 @@ public final class HTMLServiceImpl implements HTMLService {
             final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
             urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
         }
-        return urlStr;
+        /*
+         * Still contains any non-ascii character?
+         */
+        final char[] chars = urlStr.toCharArray();
+        final int len = chars.length;
+        final StringBuilder tmp = new StringBuilder(len + 16);
+        int lastpos = 0;
+        int i;
+        for (i = 0; i < len; i++) {
+            final char c = chars[i];
+            if (c >= 128) {
+                tmp.append(urlStr.substring(lastpos, i)).append('%').append(Integer.toHexString(c).toUpperCase(Locale.ENGLISH));
+                lastpos = i + 1;
+            }
+        }
+        if (lastpos < len) {
+            tmp.append(urlStr.substring(lastpos));
+        }
+        return tmp.toString();
     }
 
     /**
