@@ -79,6 +79,19 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-409
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/easylogin.properties
+   if ! ox_exists_property com.openexchange.easylogin.autologinPara $pfile; then
+       ox_set_property com.openexchange.easylogin.autologinPara "autologin" $pfile
+   fi
+   if ! ox_exists_property com.openexchange.easylogin.autologin.default $pfile; then
+       ox_set_property com.openexchange.easylogin.autologin.default false $pfile
+   fi
+   if ! ox_exists_property com.openexchange.easylogin.defaultClient $pfile; then
+       ox_set_property com.openexchange.easylogin.defaultClient "com.openexchange.ox.gui.dhtml" $pfile
+   fi
+
    # SoftwareChange_Request-189
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/easylogin.properties
