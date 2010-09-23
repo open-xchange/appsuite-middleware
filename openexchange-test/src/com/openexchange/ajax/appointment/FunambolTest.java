@@ -98,7 +98,9 @@ public final class FunambolTest extends AbstractAJAXSession {
     }
 
     public void testAppointmentCreationTime() throws Throwable {
-        final Date timeBeforeCreation = client.getValues().getServerTime();
+        // Sometimes requests are really, really fast and time of first insert is same as this time. Maybe it is more a problem of XEN and a
+        // frozen clock there.
+        final Date timeBeforeCreation = new Date(client.getValues().getServerTime().getTime() - 1);
 
         final CommonInsertResponse insertResponse = client.execute(new InsertRequest(appointment, timeZone));
         insertResponse.fillObject(appointment);
@@ -108,7 +110,7 @@ public final class FunambolTest extends AbstractAJAXSession {
         final Date lastModified = reload.getLastModified();
 
         // This request is responded even faster than creating an appointment. Therefore this must be the second request.
-        final Date timeAfterCreation = client.getValues().getServerTime();
+        final Date timeAfterCreation = new Date(client.getValues().getServerTime().getTime() + 1);
 
         assertTrue("Appointment creation time is not after time request before creation.", lastModified.after(timeBeforeCreation));
         assertTrue("Appointment creation time is not before time request after creation.", lastModified.before(timeAfterCreation));
