@@ -1,3 +1,7 @@
+* 2010-09-23 - francisco.laguna@open-xchange.com
+
+ - Bugfix #16704: More robust attachment handling in auto-publish for mail attachments
+
 * 2010-09-10 - thorben.betten@open-xchange.com
 
  - Bugfix #15681: Checking POP3 account's default folders on path creation in primary mail account
