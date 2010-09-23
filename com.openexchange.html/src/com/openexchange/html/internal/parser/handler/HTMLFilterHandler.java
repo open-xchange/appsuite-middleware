@@ -180,7 +180,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     /**
-     * Initializes a new {@link HTMLFilterHandler} with default white list given through property {@link Property#Whitelist}.
+     * Initializes a new {@link HTMLFilterHandler} with default white list.
      * 
      * @param capacity The initial capacity
      */
@@ -535,17 +535,19 @@ public final class HTMLFilterHandler implements HTMLHandler {
         final Map<String, Map<String, Set<String>>> tagMap = new HashMap<String, Map<String, Set<String>>>();
         while (m.find()) {
             final String attributes = m.group(2);
+            final String tagName = m.group(1).toLowerCase(Locale.ENGLISH);
             if (null == attributes) {
-                tagMap.put(m.group(1).toLowerCase(Locale.ENGLISH), null);
+                tagMap.put(tagName, null);
             } else {
                 final Matcher attribMatcher = PATTERN_ATTRIBUTE.matcher(attributes);
                 final Map<String, Set<String>> attribMap = new HashMap<String, Set<String>>();
                 while (attribMatcher.find()) {
                     final String values = attribMatcher.group(2);
+                    final String attributeName = attribMatcher.group(1).toLowerCase(Locale.ENGLISH);
                     if (null == values) {
-                        attribMap.put(attribMatcher.group(1).toLowerCase(Locale.ENGLISH), null);
+                        attribMap.put(attributeName, null);
                     } else if (values.length() == 0) {
-                        attribMap.put(attribMatcher.group(1).toLowerCase(Locale.ENGLISH), NUM_ATTRIBS);
+                        attribMap.put(attributeName, NUM_ATTRIBS);
                     } else {
                         final Set<String> valueSet = new HashSet<String>();
                         final String[] valArr =
@@ -553,10 +555,10 @@ public final class HTMLFilterHandler implements HTMLHandler {
                         for (final String value : valArr) {
                             valueSet.add(value.toLowerCase(Locale.ENGLISH));
                         }
-                        attribMap.put(attribMatcher.group(1).toLowerCase(Locale.ENGLISH), valueSet);
+                        attribMap.put(attributeName, valueSet);
                     }
                 }
-                tagMap.put(m.group(1).toLowerCase(Locale.ENGLISH), attribMap);
+                tagMap.put(tagName, attribMap);
             }
         }
         return tagMap;
