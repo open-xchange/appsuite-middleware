@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -131,6 +131,9 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/mailfilter.properties
 %changelog
+* Tue Sep 21 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16747: After removal of the admin mode oxadmin is able to manage 
+ 				  the users sieve scripts again within a normal groupware session.
 * Tue Aug 31 2010 - dennis.sieben@open-xchange.com
   - Added possibility to define the password source. It is now possible to
     switch between the password from the session or a global defined one.

@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,15 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Sep 22 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16870: Showing inline images if content-type set to "application/octet-stream"
+* Wed Sep 22 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16720: Making an existing appointment recurring causes disappearance in Outlook.
+* Wed Sep 22 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16962: Fixed the not used cache for users.
+ - Bugfix #16996: Workaround for some outdated contact columns.
+* Wed Sep 22 2010 - tobias.prinz@open-xchange.com
+ - Bugfix 16975: Whitelisting for publications is now defined in microformatWhitelisting.properties and more tolerant than before, allowing paths to CSS files.
 * Mon Sep 20 2010 - thorben.betten@open-xchange.com
  - Bugfix #16800: Replacing non-ascii URLs with proper puny-code-encoded URLs
 * Fri Sep 17 2010 - thorben.betten@open-xchange.com

@@ -1,3 +1,9 @@
+open-xchange-push-mailnotify (6.18.1.0-2) unstable; urgency=low
+
+  * Build for 6.18.1 Rev2
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Thu, 23 Sep 2010 21:34:14 +0200
+
 open-xchange-push-mailnotify (6.18.1.0-1) unstable; urgency=low
 
   * Build for 6.18.1 Rev1
