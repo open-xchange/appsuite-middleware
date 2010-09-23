@@ -548,7 +548,10 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         /*
          * Create document meta data for current attachment
          */
-        final String name = attachment.getFileName();
+        String name = attachment.getFileName();
+        if(name == null) {
+            name = "attachment"; 
+        }
         final DocumentMetadata documentMetadata = new DocumentMetadataImpl();
         documentMetadata.setId(InfostoreFacade.NEW);
         documentMetadata.setFolderId(folderId);
