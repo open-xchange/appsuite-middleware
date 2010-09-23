@@ -76,7 +76,6 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -142,32 +141,7 @@ public final class LoginPerformer {
             checkClient(request, user, ctx);
             // Create session
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
-            final String sessionId = sessiondService.addSession(new AddSessionParameter() {
-                public String getClientIP() {
-                    return request.getClientIP();
-                }
-                public Context getContext() {
-                    return ctx;
-                }
-                public String getFullLogin() {
-                    return request.getLogin();
-                }
-                public String getUserLoginInfo() {
-                    return username;
-                }
-                public String getPassword() {
-                    return request.getPassword();
-                }
-                public int getUserId() {
-                    return user.getId();
-                }
-                public String getAuthId() {
-                    return request.getAuthId();
-                }
-                public String getHash() {
-                    return request.getHash();
-                }
-            });
+            final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
             retval.setSession(sessiondService.getSession(sessionId));
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
