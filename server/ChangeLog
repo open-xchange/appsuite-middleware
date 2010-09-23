@@ -1,3 +1,7 @@
+* 2010-09-23 - steffen.templin@open-xchange.com
+
+ - Bugfix #16720: Fix for wrong recurrence position when changing a normal appointment into a recurring appointment 
+ 
 * 2010-09-23 - francisco.laguna@open-xchange.com
 
   - Bugfix #16704: More robust attachment handling in auto-publish for mail attachments
