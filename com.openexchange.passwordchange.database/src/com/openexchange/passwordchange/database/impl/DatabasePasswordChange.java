@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
@@ -83,12 +84,13 @@ public final class DatabasePasswordChange extends PasswordChangeService {
     @Override
     protected void update(final PasswordChangeEvent event) throws UserException {
         final String encodedPassword;
+        final Context ctx = event.getContext();
         {
             final UserService userService = getServiceRegistry().getService(UserService.class);
             if (userService == null) {
                 throw new UserException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName()));
             }
-            final User user = userService.getUser(event.getSession().getUserId(), event.getContext());
+            final User user = userService.getUser(event.getSession().getUserId(), ctx);
             /*
              * Get encoded version of new password
              */
@@ -99,24 +101,25 @@ public final class DatabasePasswordChange extends PasswordChangeService {
          */
         final Connection writeCon;
         try {
-            writeCon = Database.get(event.getContext(), true);
+            writeCon = Database.get(ctx, true);
+            writeCon.setAutoCommit(false);
         } catch (final DBPoolingException e) {
             throw new UserException(e);
+        } catch (final SQLException e) {
+            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         }
         try {
-            writeCon.setAutoCommit(false);
-            update(writeCon, encodedPassword, event.getSession().getUserId(), event.getContext().getContextId());
+            update(writeCon, encodedPassword, event.getSession().getUserId(), ctx.getContextId());
             writeCon.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(writeCon);
-            throw new UserException(UserException.Code.SQL_ERROR, e);
+            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+        } catch (final Exception e) {
+            DBUtils.rollback(writeCon);
+            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
-            try {
-                writeCon.setAutoCommit(true);
-            } catch (final SQLException e) {
-                LOG.error("Problem setting autocommit to true.", e);
-            }
-            Database.back(event.getContext(), true, writeCon);
+            DBUtils.autocommit(writeCon);
+            Database.back(ctx, true, writeCon);
         }
     }
 
