@@ -1,3 +1,7 @@
+* 2010-09-23 - francisco.laguna@open-xchange.com
+
+  - Bugfix #16704: More robust attachment handling in auto-publish for mail attachments
+
 * 2010-08-11 - markus.wagner@open-xchange.com
 
  - Bugfix #16087: Keeping mails as unseen now works when passing the save parameter as true on mail get request.

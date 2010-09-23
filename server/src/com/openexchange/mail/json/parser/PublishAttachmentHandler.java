@@ -105,6 +105,8 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
+import java.io.InputStream;
+import java.io.IOException;
 
 /**
  * {@link PublishAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that publishes attachments on exceeded quota (either
@@ -546,7 +548,10 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         /*
          * Create document meta data for current attachment
          */
-        final String name = attachment.getFileName();
+        String name = attachment.getFileName();
+        if(name == null) {
+            name = "attachment"; 
+        }
         final DocumentMetadata documentMetadata = new DocumentMetadataImpl();
         documentMetadata.setId(InfostoreFacade.NEW);
         documentMetadata.setFolderId(folderId);
@@ -567,14 +572,24 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         int count = 1;
         final StringBuilder hlp = new StringBuilder(16);
         while (retry) {
-            infostoreFacade.startTransaction();
+            /*
+             * Get attachment's input stream
+             */
+            final InputStream in = attachment.getInputStream();
             try {
-                infostoreFacade.saveDocument(documentMetadata, attachment.getInputStream(), Long.MAX_VALUE, serverSession);
-                infostoreFacade.commit();
-                retry = false;
-            } catch (final InfostoreException x) {
-                infostoreFacade.rollback();
-                if (441 == x.getDetailNumber()) {
+                /*
+                 * Start InfoStore transaction
+                 */
+                infostoreFacade.startTransaction();
+                try {
+                    infostoreFacade.saveDocument(documentMetadata, in, Long.MAX_VALUE, serverSession);
+                    infostoreFacade.commit();
+                    retry = false;
+                } catch (final InfostoreException x) {
+                    infostoreFacade.rollback();
+                    if (441 != x.getDetailNumber()) {
+                        throw new MailException(x);
+                    }
                     /*
                      * Duplicate document name, thus retry with a new name
                      */
@@ -582,21 +597,27 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     final int pos = name.lastIndexOf('.');
                     final String newName;
                     if (pos >= 0) {
-                        newName =
-                            hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
+                        newName = hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
                     } else {
                         newName = hlp.append(name).append("_(").append(++count).append(')').toString();
                     }
                     documentMetadata.setFileName(newName);
                     documentMetadata.setTitle(newName);
-                } else {
+                } catch (final OXException x) {
+                    infostoreFacade.rollback();
                     throw new MailException(x);
+                } catch (final Exception e) {
+                    infostoreFacade.rollback();
+                    throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+                } finally {
+                    infostoreFacade.finish();
                 }
-            } catch (final OXException x) {
-                infostoreFacade.rollback();
-                throw new MailException(x);
             } finally {
-                infostoreFacade.finish();
+                try {
+                    in.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
         /*

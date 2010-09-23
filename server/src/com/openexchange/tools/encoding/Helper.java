@@ -96,6 +96,9 @@ public class Helper {
      * @throws UnsupportedEncodingException if the given encoding is not supported by java.
      */
     public static String encodeFilename(final String orig, final String encoding, final boolean internetExplorer) throws UnsupportedEncodingException {
+        if(orig == null) {
+            return null;
+        }
         String encoded = orig;
         boolean isAscii = true;
         final char[] namechars = orig.toCharArray();
