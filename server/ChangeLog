@@ -1,3 +1,7 @@
+* 2010-09-22 - tobias.prinz@open-xchange.com
+
+ - Bugfix 16826 follow-up: Whitelisting for publications is now defined in microformatWhitelisting.properties and more tolerant than before.
+
 * 2010-09-22 - marcus.klein@open-xchange.com
 
  - Bugfix #16962: Fixed the not used cache for users.
