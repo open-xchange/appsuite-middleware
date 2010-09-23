@@ -208,7 +208,8 @@ public final class HTMLServiceImpl implements HTMLService {
                      * Add proxy registration
                      */
                     final URL imageUrl = new URL(urlStr);
-                    final URI uri = proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance()));
+                    final URI uri =
+                        proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance()));
                     /*
                      * Compose replacement
                      */
@@ -367,7 +368,9 @@ public final class HTMLServiceImpl implements HTMLService {
         /*
          * Get the host part of URL. Ensure scheme is present before creating a java.net.URL instance
          */
-        final String host = new URL(urlStr.startsWith("www.") ||urlStr.startsWith("news.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
+        final String host =
+            new URL(
+                urlStr.startsWith("www.") || urlStr.startsWith("news.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
         if (null != host && !isAscii(host)) {
             final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
             urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
@@ -377,20 +380,26 @@ public final class HTMLServiceImpl implements HTMLService {
          */
         final char[] chars = urlStr.toCharArray();
         final int len = chars.length;
-        final StringBuilder tmp = new StringBuilder(len + 16);
+        StringBuilder tmp = null;
         int lastpos = 0;
         int i;
         for (i = 0; i < len; i++) {
             final char c = chars[i];
             if (c >= 128) {
+                if (null == tmp) {
+                    tmp = new StringBuilder(len + 16);
+                }
                 tmp.append(urlStr.substring(lastpos, i)).append('%').append(Integer.toHexString(c).toUpperCase(Locale.ENGLISH));
                 lastpos = i + 1;
             }
         }
-        if (lastpos < len) {
-            tmp.append(urlStr.substring(lastpos));
+        /*
+         * Return
+         */
+        if (null == tmp) {
+            return urlStr;
         }
-        return tmp.toString();
+        return (lastpos < len) ? tmp.append(urlStr.substring(lastpos)).toString() : tmp.toString();
     }
 
     /**
@@ -415,23 +424,23 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     public String filterWhitelist(final String htmlContent, String configName) {
-        if(!configName.endsWith(".properties")) {
+        if (!configName.endsWith(".properties")) {
             configName += ".properties";
         }
         String definition = getConfiguration().getText(configName);
-        if(definition == null) {
+        if (definition == null) {
             // Apparently, the file was not found, so we'll just fall back to the default whitelist
             return filterWhitelist(htmlContent);
         }
-        final HTMLFilterHandler handler = new HTMLFilterHandler(this, htmlContent.length(),  definition);
+        final HTMLFilterHandler handler = new HTMLFilterHandler(this, htmlContent.length(), definition);
         HTMLParser.parse(htmlContent, handler);
         return handler.getHTML();
     }
-    
+
     protected ConfigurationService getConfiguration() {
         return ServiceRegistry.getInstance().getService(ConfigurationService.class);
     }
-    
+
     public String filterExternalImages(final String htmlContent, final boolean[] modified) {
         final HTMLImageFilterHandler handler = new HTMLImageFilterHandler(this, htmlContent.length());
         HTMLParser.parse(htmlContent, handler);
@@ -524,7 +533,8 @@ public final class HTMLServiceImpl implements HTMLService {
         return htmlFormat(plainText, true);
     }
 
-    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
+    private static final String REGEX_URL_SOLE =
+        "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
 
     /**
      * The regular expression to match URLs inside text:<br>
@@ -946,7 +956,7 @@ public final class HTMLServiceImpl implements HTMLService {
             return s;
         }
     }
-    
+
     private static String urlDecode(final String s) {
         try {
             return URLDecoder.decode(s, "ISO-8859-1");
