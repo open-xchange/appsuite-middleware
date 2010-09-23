@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 12
+%define		ox_release 13
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -499,6 +499,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Sep 23 2010 - francisco.laguna@open-xchange.com
+  - Bugfix #16704: More robust attachment handling in auto-publish for mail attachments
+* Thu Sep 23 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16720: Fix for wrong recurrence position when changing a normal appointment into a recurring appointment 
 * Wed Aug 11 2010 - markus.wagner@open-xchange.com
  - Bugfix #16087: Keeping mails as unseen now works when passing the save parameter as true on mail get request.
 * Wed Jun 16 2010 - karsten.will@open-xchange.com
