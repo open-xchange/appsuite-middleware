@@ -89,7 +89,7 @@ public class AuthenticationCustomizer implements ServiceTrackerCustomizer {
     public Object addingService(final ServiceReference reference) {
         final AuthenticationService auth = (AuthenticationService) context
             .getService(reference);
-        if (!Authentication.setService(auth)) {
+        if (Authentication.setService(auth)) {
             return auth;
         }
         LOG.error("Several authentication services found. Remove all except one!");
@@ -111,7 +111,7 @@ public class AuthenticationCustomizer implements ServiceTrackerCustomizer {
     public void removedService(final ServiceReference reference,
         final Object service) {
         final AuthenticationService auth = (AuthenticationService) service;
-        if (!Authentication.dropService(auth)) {
+        if (Authentication.dropService(auth)) {
             LOG.error("Removed authentication services was not active!");
         }
         context.ungetService(reference);
