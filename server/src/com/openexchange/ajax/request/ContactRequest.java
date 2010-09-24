@@ -360,8 +360,9 @@ public class ContactRequest {
                 contactWriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
-                if (timestamp.before(contactObj.getLastModified())) {
-                    timestamp = contactObj.getLastModified();
+                final Date clm = contactObj.getLastModified();
+                if (null != clm && timestamp.before(clm)) {
+                    timestamp = clm;
                 }
             }
 
@@ -372,8 +373,9 @@ public class ContactRequest {
 
                     jsonResponseArray.put(contactObj.getObjectID());
 
-                    if (timestamp.before(contactObj.getLastModified())) {
-                        timestamp = contactObj.getLastModified();
+                    final Date clm = contactObj.getLastModified();
+                    if (null != clm && timestamp.before(clm)) {
+                        timestamp = clm;
                     }
                 }
             }
@@ -456,8 +458,9 @@ public class ContactRequest {
                         contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                         jsonResponseArray.put(jsonContactArray);
 
-                        if (timestamp.before(contactObj.getLastModified())) {
-                            timestamp = contactObj.getLastModified();
+                        final Date clm = contactObj.getLastModified();
+                        if (clm != null && timestamp.before(clm)) {
+                            timestamp = clm;
                         }
                     }
                 } else {
@@ -531,8 +534,9 @@ public class ContactRequest {
                 contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
-                if (timestamp.before(contactObj.getLastModified())) {
-                    timestamp = contactObj.getLastModified();
+                final Date clm = contactObj.getLastModified();
+                if (null != clm && timestamp.before(clm)) {
+                    timestamp = clm;
                 }
             }
         } catch (final JSONException e) {
@@ -583,8 +587,9 @@ public class ContactRequest {
                 contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
-                if (timestamp.before(contactObj.getLastModified())) {
-                    timestamp = contactObj.getLastModified();
+                final Date clm = contactObj.getLastModified();
+                if (null != clm && timestamp.before(clm)) {
+                    timestamp = clm;
                 }
             }
 
@@ -736,8 +741,9 @@ public class ContactRequest {
                 contactwriter.writeArray(contactObj, columns, jsonContactArray, session);
                 jsonResponseArray.put(jsonContactArray);
 
-                if (timestamp.before(contactObj.getLastModified())) {
-                    timestamp = contactObj.getLastModified();
+                final Date clm = contactObj.getLastModified();
+                if (null != clm && timestamp.before(clm)) {
+                    timestamp = clm;
                 }
             }
         } finally {
@@ -939,8 +945,9 @@ public class ContactRequest {
         final ContactInterface contactInterfaceTemp = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             FolderObject.SYSTEM_LDAP_FOLDER_ID,
             session);
-        if(! (contactInterfaceTemp instanceof FinalContactInterface))
+        if(! (contactInterfaceTemp instanceof FinalContactInterface)) {
             throw new AjaxException(AjaxException.Code.UnknownAction, FinalContactConstants.ACTION_GET_BY_UUID.getName());
+        }
         return (FinalContactInterface) contactInterfaceTemp;
     }
     
