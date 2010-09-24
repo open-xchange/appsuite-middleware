@@ -1,6 +1,6 @@
 * 2010-09-24 - thorben.betten@open-xchange.com
 
- - Bugfix #16968: Returning zero number of session sif SessiondService is missing
+ - Bugfix #16968: Returning zero number of sessions if SessiondService is missing
 
 * 2010-09-22 - tobias.prinz@open-xchange.com
 
