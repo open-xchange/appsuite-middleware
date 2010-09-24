@@ -103,7 +103,10 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
         if (sessiondService != null) {
             return sessiondService.getNumberOfActiveSessions();
         }
-        return -1;
+        /*
+         * No session can be active if service is missing
+         */
+        return 0;
     }
 
     public int getNumberOfRunningAJPListeners() {
