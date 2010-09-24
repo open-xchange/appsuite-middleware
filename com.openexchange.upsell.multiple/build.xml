@@ -63,7 +63,13 @@
 		<pathelement location="${adminlibdir}/${adminclientjar}" />
 		<pathelement location="${adminlibdir}/${adminclienthostingjar}" />
 	</path>
+	<!-- Needed for later use when install-->
+	<fileset dir="." id="metainf">
+	  <include name="META-INF/**"/>
+	  <exclude name="CVS"/>
+    </fileset>
 
+	
 	<!-- Compile -->
 	<target name="prepare">
 		<mkdir dir="${output..}" />
@@ -116,6 +122,7 @@
 			<fileset dir="${tmp.dir}">
 				<include name="${bundle.name}" />
 			</fileset>
+			<fileset refid="metainf"/>
 		</copy>
 	</target>
 
