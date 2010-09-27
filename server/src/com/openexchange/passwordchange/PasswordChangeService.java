@@ -150,7 +150,7 @@ public abstract class PasswordChangeService {
              */
             final Session session = event.getSession();
             UserStorage.getStorageUser(session.getUserId(), event.getContext());
-            authenticationService.handleLoginInfo(new LoginInfoImpl(session.getLogin(), event.getOldPassword()));
+            authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword()));
         } catch (final LoginException e) {
             /*
              * Verification of old password failed
@@ -250,23 +250,23 @@ public abstract class PasswordChangeService {
      */
 
     /**
-     * {@link LoginInfoImpl} - Simple class that implements {@link LoginInfo}
+     * {@link _LoginInfo} - Simple class that implements {@link LoginInfo}
      * 
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
-    protected static final class LoginInfoImpl implements LoginInfo {
+    protected static final class _LoginInfo implements LoginInfo {
 
         private final String pw;
 
         private final String loginInfo;
 
         /**
-         * Initializes a new {@link LoginInfoImpl}
+         * Initializes a new {@link _LoginInfo}
          * 
          * @param loginInfo The login info
          * @param pw The password
          */
-        public LoginInfoImpl(final String loginInfo, final String pw) {
+        public _LoginInfo(final String loginInfo, final String pw) {
             super();
             this.loginInfo = loginInfo;
             this.pw = pw;
