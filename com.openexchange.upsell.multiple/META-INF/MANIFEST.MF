@@ -53,5 +53,6 @@ Import-Package: com.openexchange.ajax,
  org.osgi.service.http,
  org.osgi.util.tracker
 Bundle-ClassPath: .,
+ com.openexchange.upsell.multiple.jar,
  lib/ox_admin_hosting_rmiclient.jar,
  lib/ox_admin_rmiclient.jar
