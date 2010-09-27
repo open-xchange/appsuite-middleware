@@ -160,6 +160,9 @@ public final class MyServletRequest  {
 	private static String MAP_ATTR_UPSELL_PLAN = "_UPSELL_PLAN_";
 	
 	public MyServletRequest(final Session sessionObj, final Context ctx) throws OXException, ServiceException {		
+		
+		
+		
 		this.sessionObj = sessionObj;
 		this.ctx = ctx;
 		try {
