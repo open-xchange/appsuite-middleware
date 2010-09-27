@@ -365,6 +365,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 next = createFolderObjectFromSelectedEntry();
             } else if (!prefetchEnabled) {
                 closeResources();
+                if (null != permissionLoader) {
+                    permissionLoader.stopWhenEmpty();
+                }
             }
         } catch (final SQLException e) {
             throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
@@ -394,6 +397,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } finally {
                 closeResources();
+                if (null != permissionLoader) {
+                    permissionLoader.stopWhenEmpty();
+                }
             }
         } else {
             prefetchQueue = null;
@@ -858,6 +864,23 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             mainFuture.cancel(true);
             queue.clear();
             permsMap.clear();
+        }
+
+        public void stopWhenEmpty() {
+            final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+            final BlockingQueue<Integer> q = queue;
+            final Future<Object> f = mainFuture;
+            tps.submit(ThreadPools.task(new Callable<Object>() {
+
+                public Object call() throws Exception {
+                    while (!q.isEmpty()) {
+                        // Nope
+                    }
+                    f.cancel(true);
+                    return null;
+                }
+                
+            }), CallerRunsBehavior.<Object> getInstance());
         }
 
         public void submitPermissionsFor(final int folderId) {
