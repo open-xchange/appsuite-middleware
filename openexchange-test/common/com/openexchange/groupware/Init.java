@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
 import org.w3c.tidy.Report;
 import com.openexchange.ajp13.AJPv13Config;
@@ -75,6 +76,7 @@ import com.openexchange.charset.ModifyCharsetExtendedProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
+import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.context.ContextService;
@@ -181,7 +183,7 @@ public final class Init {
 
     private static final List<Initialization> started = new ArrayList<Initialization>();
 
-    private static boolean running;
+    private static final AtomicBoolean running = new AtomicBoolean();
 
     private static final Map<Class<?>, Object> services = new HashMap<Class<?>, Object>();
 
@@ -278,12 +280,16 @@ public final class Init {
     }
 
     public static void startServer() throws Exception {
-        if (running) {
+        if (!running.compareAndSet(false, true)) {
+            /*
+             * Already running
+             */
             return;
         }
-        running = true;
+        /*
+         * Start-up
+         */
         injectProperty();
-
         injectTestServices();
         for (final Initialization init : inits) {
             init.start();
@@ -327,74 +333,86 @@ public final class Init {
     }
 
     public static void startAndInjectConfigBundle() {
+        /*
+         * This one is properly dropped in stopServer() method
+         */
         final ConfigurationService config = new ConfigurationImpl();
         services.put(ConfigurationService.class, config);
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
     }
 
     private static void startAndInjectThreadPoolBundle() {
-        String property = System.getProperty("java.specification.version");
-        if (null == property) {
-            property = System.getProperty("java.runtime.version");
+        if (null == ServerServiceRegistry.getInstance().getService(ThreadPoolService.class)) {
+            String property = System.getProperty("java.specification.version");
             if (null == property) {
-                // JRE not detectable, use fallback
-                QueueProvider.initInstance(false);
+                property = System.getProperty("java.runtime.version");
+                if (null == property) {
+                    // JRE not detectable, use fallback
+                    QueueProvider.initInstance(false);
+                } else {
+                    // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
+                    QueueProvider.initInstance(!property.startsWith("1.5"));
+                }
             } else {
-                // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
-                QueueProvider.initInstance(!property.startsWith("1.5"));
+                // "java.specification.version=1.5" OR "java.specification.version=1.6"
+                QueueProvider.initInstance("1.5".compareTo(property) < 0);
             }
-        } else {
-            // "java.specification.version=1.5" OR "java.specification.version=1.6"
-            QueueProvider.initInstance("1.5".compareTo(property) < 0);
+            final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
+            final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
+            final ThreadPoolServiceImpl threadPool =
+                ThreadPoolServiceImpl.newInstance(
+                    props.getCorePoolSize(),
+                    props.getMaximumPoolSize(),
+                    props.getKeepAliveTime(),
+                    props.getWorkQueue(),
+                    props.getWorkQueueSize(),
+                    props.getRefusedExecutionBehavior());
+            services.put(ThreadPoolService.class, threadPool);
+            ServerServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
+            final TimerService timer = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
+            services.put(TimerService.class, timer);
+            ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
         }
-        final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
-        final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
-        final ThreadPoolServiceImpl threadPool =
-            ThreadPoolServiceImpl.newInstance(
-                props.getCorePoolSize(),
-                props.getMaximumPoolSize(),
-                props.getKeepAliveTime(),
-                props.getWorkQueue(),
-                props.getWorkQueueSize(),
-                props.getRefusedExecutionBehavior());
-        services.put(ThreadPoolService.class, threadPool);
-        ServerServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
-        final TimerService timer = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
-        services.put(TimerService.class, timer);
-        ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
     }
 
     private static void startAndInjectBasicServices() throws AbstractOXException {
-        try {
-            // Add charset providers
-            new CustomCharsetProviderInit().start();
-            final CharsetProvider[] results = ModifyCharsetExtendedProvider.modifyCharsetExtendedProvider();
-            final CollectionCharsetProvider collectionCharsetProvider = (CollectionCharsetProvider) results[1];
-            collectionCharsetProvider.addCharsetProvider(new net.freeutils.charset.CharsetProvider());
-            collectionCharsetProvider.addCharsetProvider(new CustomCharsetProvider());
-        } catch (final NoSuchFieldException e) {
-            throw getWrappingOXException(e);
-        } catch (final IllegalAccessException e) {
-            throw getWrappingOXException(e);
+        /*
+         * Check for one service which is initialized below
+         */
+        if (null == ServerServiceRegistry.getInstance().getService(UserConfigurationService.class)) {
+            try {
+                // Add charset providers
+                new CustomCharsetProviderInit().start();
+                final CharsetProvider[] results = ModifyCharsetExtendedProvider.modifyCharsetExtendedProvider();
+                final CollectionCharsetProvider collectionCharsetProvider = (CollectionCharsetProvider) results[1];
+                collectionCharsetProvider.addCharsetProvider(new net.freeutils.charset.CharsetProvider());
+                collectionCharsetProvider.addCharsetProvider(new CustomCharsetProvider());
+            } catch (final NoSuchFieldException e) {
+                throw getWrappingOXException(e);
+            } catch (final IllegalAccessException e) {
+                throw getWrappingOXException(e);
+            }
+            services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
+            new ContactInterfaceDiscoveryInitialization().start();
+            services.put(ContactInterfaceDiscoveryService.class, ContactInterfaceDiscoveryServiceImpl.getInstance());
+    
+            ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
+            ServerServiceRegistry.getInstance().addService(
+                ContactInterfaceDiscoveryService.class,
+                services.get(ContactInterfaceDiscoveryService.class));
         }
-        services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
-        new ContactInterfaceDiscoveryInitialization().start();
-        services.put(ContactInterfaceDiscoveryService.class, ContactInterfaceDiscoveryServiceImpl.getInstance());
-
-        ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
-        ServerServiceRegistry.getInstance().addService(
-            ContactInterfaceDiscoveryService.class,
-            services.get(ContactInterfaceDiscoveryService.class));
     }
 
     private static void startAndInjectHTMLService() {
-        ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
-        Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
-        Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
-        Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
-        HTMLService service = new HTMLServiceImpl(properties, (Map<Character, String>) maps[0], (Map<String, Character>) maps[1]);
-        services.put(HTMLService.class, service);
-        ServerServiceRegistry.getInstance().addService(HTMLService.class, service);
+        if (null == ServerServiceRegistry.getInstance().getService(HTMLService.class)) {
+            ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
+            Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
+            Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
+            Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
+            HTMLService service = new HTMLServiceImpl(properties, (Map<Character, String>) maps[0], (Map<String, Character>) maps[1]);
+            services.put(HTMLService.class, service);
+            ServerServiceRegistry.getInstance().addService(HTMLService.class, service);
+        }
     }
 
     private static final AbstractOXException getWrappingOXException(final Exception cause) {
@@ -414,25 +432,36 @@ public final class Init {
     }
 
     private static void startAndInjectCalendarServices() {
-        ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
-        ServerServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
-        TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
+        if (null == ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class)) {
+            ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
+            ServerServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
+            TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
+        }
     }
 
     private static void startAndInjectXMLServices() {
-        final SpringParser springParser = new DefaultSpringParser();
-        ServerServiceRegistry.getInstance().addService(SpringParser.class, springParser);
-
-        final JDOMParser jdomParser = new JDOMParserImpl();
-        ServerServiceRegistry.getInstance().addService(JDOMParser.class, jdomParser);
+        if (null == ServerServiceRegistry.getInstance().getService(SpringParser.class)) {
+            final SpringParser springParser = new DefaultSpringParser();
+            ServerServiceRegistry.getInstance().addService(SpringParser.class, springParser);
+        }
+    
+        if (null == ServerServiceRegistry.getInstance().getService(JDOMParser.class)) {
+            final JDOMParser jdomParser = new JDOMParserImpl();
+            ServerServiceRegistry.getInstance().addService(JDOMParser.class, jdomParser);
+        }
     }
 
     private static void startAndInjectImportExportServices() throws ComponentAlreadyRegisteredException {
         final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
-        registry.registerComponent(EnumComponent.IMPORT_EXPORT, "com.openexchange.groupware.importexport", ImportExportExceptionFactory.getInstance());
+        if (null == registry.getExceptionsForComponent(EnumComponent.IMPORT_EXPORT)) {
+            registry.registerComponent(EnumComponent.IMPORT_EXPORT, "com.openexchange.groupware.importexport", ImportExportExceptionFactory.getInstance());
+        }
     }
 
     public static void startAndInjectI18NBundle() throws FileNotFoundException {
+        /*
+         * This one properly dropped by stopServer() method
+         */
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
         final String directory_name = config.getProperty("i18n.language.path");
         final File dir = new File(directory_name);
@@ -450,33 +479,46 @@ public final class Init {
     }
 
     private static void startAndInjectExceptionFramework() {
-        services.put(ComponentRegistry.class, new ComponentRegistryImpl());
+        if (null == services.get(ComponentRegistry.class)) {
+            services.put(ComponentRegistry.class, new ComponentRegistryImpl());
+        }
     }
 
     public static void startAndInjectServerConfiguration() {
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
+        /*
+         * May be invoked multiple times
+         */
         ServerConfig.getInstance().initialize(config);
     }
 
     public static void startAndInjectNotification() {
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
+        /*
+         * May be invoked multiple times
+         */
         ParticipantConfig.getInstance().initialize(config);
     }
 
     public static void startAndInjectDatabaseBundle() throws DBPoolingException, ComponentAlreadyRegisteredException {
-        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
-        registry.registerComponent(EnumComponent.DB_POOLING, "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
-        final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
-        final TimerService timerService = (TimerService) services.get(TimerService.class);
-        CacheService cacheService = (CacheService) services.get(CacheService.class);
-        com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
-        final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
-        services.put(DatabaseService.class, dbService);
-        com.openexchange.database.internal.Initialization.getInstance().setCacheService(cacheService);
-        Database.setDatabaseService(dbService);
+        if (null == services.get(DatabaseService.class)) {
+            final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
+            registry.registerComponent(EnumComponent.DB_POOLING, "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
+            final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
+            final TimerService timerService = (TimerService) services.get(TimerService.class);
+            CacheService cacheService = (CacheService) services.get(CacheService.class);
+            com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
+            final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
+            services.put(DatabaseService.class, dbService);
+            com.openexchange.database.internal.Initialization.getInstance().setCacheService(cacheService);
+            Database.setDatabaseService(dbService);
+        }
     }
 
     public static void startAndInjectFileStorage() {
+        /*
+         * May be invoked multiple times
+         */
         FileStorageFactory fileStorageStarter = new LocalFileStorageFactory();
         FileStorage.setFileStorageStarter(fileStorageStarter); 
         DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
@@ -485,9 +527,11 @@ public final class Init {
 
     public static void startAndInjectDatabaseUpdate() throws ComponentAlreadyRegisteredException {
         final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
-        registry.registerComponent(EnumComponent.UPDATE, "com.openexchange.groupware.update", SchemaExceptionFactory.getInstance());
-        // Not configuring configured update task list.
-        InternalList.getInstance().start();
+        if (null == registry.getExceptionsForComponent(EnumComponent.UPDATE)) {
+            registry.registerComponent(EnumComponent.UPDATE, "com.openexchange.groupware.update", SchemaExceptionFactory.getInstance());
+            // Not configuring configured update task list.
+            InternalList.getInstance().start();
+        }
     }
 
     private static void startAndInjectMonitoringBundle() {
@@ -497,127 +541,160 @@ public final class Init {
     private static void startAndInjectMailBundle() throws Exception {
         // MailInitialization.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
         /*
-         * Init config
+         * Init config. Works only once.
          */
         MailProperties.getInstance().loadProperties();
 
         final ServiceRegistry imapServiceRegistry = IMAPServiceRegistry.getServiceRegistry();
-        imapServiceRegistry.addService(ConfigurationService.class, services.get(ConfigurationService.class));
-        imapServiceRegistry.addService(CacheService.class, services.get(CacheService.class));
-        imapServiceRegistry.addService(UserService.class, services.get(UserService.class));
-        imapServiceRegistry.addService(MailAccountStorageService.class, services.get(MailAccountStorageService.class));
-        imapServiceRegistry.addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
-        imapServiceRegistry.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
-        imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
-
-        /*
-         * Register IMAP bundle
-         */
-        MailProviderRegistry.registerMailProvider("imap_imaps", IMAPProvider.getInstance());
+        if (null == MailProviderRegistry.getMailProvider("imap_imaps")) {
+            imapServiceRegistry.addService(ConfigurationService.class, services.get(ConfigurationService.class));
+            imapServiceRegistry.addService(CacheService.class, services.get(CacheService.class));
+            imapServiceRegistry.addService(UserService.class, services.get(UserService.class));
+            imapServiceRegistry.addService(MailAccountStorageService.class, services.get(MailAccountStorageService.class));
+            imapServiceRegistry.addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
+            imapServiceRegistry.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
+            imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
+    
+            /*
+             * Register IMAP bundle
+             */
+            MailProviderRegistry.registerMailProvider("imap_imaps", IMAPProvider.getInstance());
+        }
     }
 
     private static void startAndInjectContactService() throws ComponentAlreadyRegisteredException {
         final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
-        registry.registerComponent(EnumComponent.CONTACT, "com.openexchange.groupware.contact", ContactExceptionFactory.getInstance());
+        if (null == registry.getExceptionsForComponent(EnumComponent.CONTACT)) {
+            registry.registerComponent(EnumComponent.CONTACT, "com.openexchange.groupware.contact", ContactExceptionFactory.getInstance());
+        }
     }
 
     private static void startAndInjectContactCollector() throws Exception {
         final CCServiceRegistry reg = CCServiceRegistry.getInstance();
-        reg.addService(TimerService.class, services.get(TimerService.class));
-        reg.addService(ContextService.class, services.get(ContextService.class));
-        reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
-        reg.addService(UserService.class, services.get(UserService.class));
-        reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+        if (null == reg.getService(TimerService.class)) {
+            reg.addService(TimerService.class, services.get(TimerService.class));
+            reg.addService(ContextService.class, services.get(ContextService.class));
+            reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
+            reg.addService(UserService.class, services.get(UserService.class));
+            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+        }
     }
 
     private static void startAndInjectMailAccountStorageService() throws Exception {
-        // Initialize mail account storage
-        new MailAccountStorageInit().start();
-        services.put(MailAccountStorageService.class, MailAccountStorageInit.newMailAccountStorageService());
-        services.put(UnifiedINBOXManagement.class, MailAccountStorageInit.newUnifiedINBOXManagement());
+        if (null == ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class)) {
+            // Initialize mail account storage
+            new MailAccountStorageInit().start();
+            MailAccountStorageService storageService = MailAccountStorageInit.newMailAccountStorageService();
+            services.put(MailAccountStorageService.class, storageService);
+            ServerServiceRegistry.getInstance().addService(MailAccountStorageService.class, storageService);
+    
+            UnifiedINBOXManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
+            services.put(UnifiedINBOXManagement.class, unifiedINBOXManagement);
+            ServerServiceRegistry.getInstance().addService(UnifiedINBOXManagement.class, unifiedINBOXManagement);
+        }
     }
 
     private static void startAndInjectSpamHandler() {
-        SpamHandlerRegistry.registerSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName(), DefaultSpamHandler.getInstance());
-        SpamHandlerRegistry.registerSpamHandler(
-            SpamAssassinSpamHandler.getInstance().getSpamHandlerName(),
-            SpamAssassinSpamHandler.getInstance());
+        if (null == SpamHandlerRegistry.getSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName())) {
+            SpamHandlerRegistry.registerSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName(), DefaultSpamHandler.getInstance());
+        }
+        if (null == SpamHandlerRegistry.getSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName())) {
+            SpamHandlerRegistry.registerSpamHandler(
+                SpamAssassinSpamHandler.getInstance().getSpamHandlerName(),
+                SpamAssassinSpamHandler.getInstance());
+        }
     }
 
     private static void startAndInjectResourceService() {
-        final ResourceService resources = ResourceServiceImpl.getInstance();
-        services.put(ResourceService.class, resources);
-        ServerServiceRegistry.getInstance().addService(ResourceService.class, resources);
+        if (null == ServerServiceRegistry.getInstance().getService(ResourceService.class)) {
+            final ResourceService resources = ResourceServiceImpl.getInstance();
+            services.put(ResourceService.class, resources);
+            ServerServiceRegistry.getInstance().addService(ResourceService.class, resources);
+        }
     }
 
     private static void startAndInjectUserService() {
-        final UserService us = new UserServiceImpl();
-        services.put(UserService.class, us);
-        ServerServiceRegistry.getInstance().addService(UserService.class, us);
+        if (null == ServerServiceRegistry.getInstance().getService(UserService.class)) {
+            final UserService us = new UserServiceImpl();
+            services.put(UserService.class, us);
+            ServerServiceRegistry.getInstance().addService(UserService.class, us);
+        }
     }
 
     private static void startAndInjectContextService() {
-        final ContextService cs = new ContextServiceImpl();
-        services.put(ContextService.class, cs);
-        ServerServiceRegistry.getInstance().addService(ContextService.class, cs);
+        if (null == ServerServiceRegistry.getInstance().getService(ContextService.class)) {
+            final ContextService cs = new ContextServiceImpl();
+            services.put(ContextService.class, cs);
+            ServerServiceRegistry.getInstance().addService(ContextService.class, cs);
+        }
     }
 
     private static void startAndInjectSessiondBundle() {
-        SessiondServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
-        SessiondServiceRegistry.getServiceRegistry().addService(TimerService.class, services.get(TimerService.class));
-        ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondServiceImpl());
+        if (null == ServerServiceRegistry.getInstance().getService(SessiondService.class)) {
+            SessiondServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
+            SessiondServiceRegistry.getServiceRegistry().addService(TimerService.class, services.get(TimerService.class));
+            ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondServiceImpl());
+        }
     }
 
     private static void startAndInjectEventBundle() throws Exception {
-        EventQueue.setNewEventDispatcher(new EventDispatcher() {
-
-            public void addListener(final AppointmentEventInterface listener) {
-                // Do nothing.
-            }
-
-            public void addListener(final TaskEventInterface listener) {
-                // Do nothing.
-            }
-        });
-        ServerServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
-        PushServiceRegistry.getServiceRegistry().addService(EventAdmin.class, TestEventAdmin.getInstance());
+        if (null == ServerServiceRegistry.getInstance().getService(EventAdmin.class)) {
+            EventQueue.setNewEventDispatcher(new EventDispatcher() {
+    
+                public void addListener(final AppointmentEventInterface listener) {
+                    // Do nothing.
+                }
+    
+                public void addListener(final TaskEventInterface listener) {
+                    // Do nothing.
+                }
+            });
+            ServerServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
+            PushServiceRegistry.getServiceRegistry().addService(EventAdmin.class, TestEventAdmin.getInstance());
+        }
     }
 
     public static void startAndInjectCache() throws CacheException {
-        JCSCacheServiceInit.initInstance();
-        JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
-        final CacheService cache = JCSCacheService.getInstance();
-        services.put(CacheService.class, cache);
-        ServerServiceRegistry.getInstance().addService(CacheService.class, cache);
+        if (null == ServerServiceRegistry.getInstance().getService(CacheService.class)) {
+            JCSCacheServiceInit.initInstance();
+            JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
+            final CacheService cache = JCSCacheService.getInstance();
+            services.put(CacheService.class, cache);
+            ServerServiceRegistry.getInstance().addService(CacheService.class, cache);
+        }
     }
 
     public static void startAndInjectICalServices() {
-        final ICal4JParser parser = new ICal4JParser();
-        final ICal4JEmitter emitter = new ICal4JEmitter();
-
-        final OXUserResolver userResolver = new OXUserResolver();
-        userResolver.setUserService((UserService) services.get(UserService.class));
-        Participants.userResolver = userResolver;
-        CreatedBy.userResolver = userResolver;
-
-        final OXResourceResolver resourceResolver = new OXResourceResolver();
-        resourceResolver.setResourceService((ResourceService) services.get(ResourceService.class));
-        Participants.resourceResolver = resourceResolver;
-
-        services.put(ICalParser.class, parser);
-        services.put(ICalEmitter.class, emitter);
-
-        ServerServiceRegistry.getInstance().addService(ICalParser.class, parser);
-        ServerServiceRegistry.getInstance().addService(ICalEmitter.class, emitter);
+        if (null == ServerServiceRegistry.getInstance().getService(ICalParser.class)) {
+            final ICal4JParser parser = new ICal4JParser();
+            final ICal4JEmitter emitter = new ICal4JEmitter();
+    
+            final OXUserResolver userResolver = new OXUserResolver();
+            userResolver.setUserService((UserService) services.get(UserService.class));
+            Participants.userResolver = userResolver;
+            CreatedBy.userResolver = userResolver;
+    
+            final OXResourceResolver resourceResolver = new OXResourceResolver();
+            resourceResolver.setResourceService((ResourceService) services.get(ResourceService.class));
+            Participants.resourceResolver = resourceResolver;
+    
+            services.put(ICalParser.class, parser);
+            services.put(ICalEmitter.class, emitter);
+    
+            ServerServiceRegistry.getInstance().addService(ICalParser.class, parser);
+            ServerServiceRegistry.getInstance().addService(ICalEmitter.class, emitter);
+        }
     }
 
     public static void startAndInjectConverterService() {
-        ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new ContactInsertDataHandler());
-        ConversionEngineRegistry.getInstance().putDataSource("com.openexchange.mail.vcard", new VCardMailPartDataSource());
-
-        final ConversionService conversionService = new ConversionServiceImpl();
-        services.put(ConversionService.class, conversionService);
-        ServerServiceRegistry.getInstance().addService(ConversionService.class, conversionService);
+        if (null == ServerServiceRegistry.getInstance().getService(ConversionService.class)) {
+            ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new ContactInsertDataHandler());
+            ConversionEngineRegistry.getInstance().putDataSource("com.openexchange.mail.vcard", new VCardMailPartDataSource());
+    
+            final ConversionService conversionService = new ConversionServiceImpl();
+            services.put(ConversionService.class, conversionService);
+            ServerServiceRegistry.getInstance().addService(ConversionService.class, conversionService);
+        }
     }
 
     public static void stopServer() throws Exception {
@@ -628,6 +705,47 @@ public final class Init {
 //        stopMailBundle();
 //        stopDatabaseBundle();
 //        stopThreadPoolBundle();
+        if (!running.compareAndSet(true, false)) {
+            /*
+             * Already stopped
+             */
+            return;
+        }
+        /*
+         * Shut-down
+         */
+        dropI18NBundle();
+        dropConfigBundle();
+        dropProperty();
+    }
+
+    private static void dropProperty() {
+        final Properties sysProps = System.getProperties();
+        sysProps.remove("openexchange.propdir");
+        sysProps.remove("openexchange.propdir2");
+    }
+
+    private static void dropConfigBundle() {
+        services.remove(ConfigurationService.class);
+        ServerServiceRegistry.getInstance().removeService(ConfigurationService.class);
+        FileWatcher.dropTimer();
+    }
+
+    private static void dropI18NBundle() throws FileNotFoundException {
+        final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
+        final String directory_name = config.getProperty("i18n.language.path");
+        final File dir = new File(directory_name);
+        final I18nServices i18nServices = I18nServices.getInstance();
+        try {
+            for (final ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
+                i18nServices.removeService(new I18nImpl(rc));
+            }
+            for (final Translations tr : new POTranslationsDiscoverer(dir).getTranslations()) {
+                i18nServices.removeService(new TranslationsI18N(tr));
+            }
+        } catch (final NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void stopMailBundle() {
