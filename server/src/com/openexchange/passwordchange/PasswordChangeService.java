@@ -67,6 +67,7 @@ import com.openexchange.passwordchange.mechs.SHACrypt;
 import com.openexchange.passwordchange.mechs.UnixCrypt;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 
@@ -187,8 +188,9 @@ public abstract class PasswordChangeService {
         /*
          * Remove possible session-bound cached default mail access
          */
+        final Session session = event.getSession();
         try {
-            MailAccessCache.getInstance().removeMailAccess(event.getSession(), MailAccount.DEFAULT_ID);
+            MailAccessCache.getInstance().removeMailAccess(session, MailAccount.DEFAULT_ID);
         } catch (final MailException e) {
             LOG.error("Removing cached mail access failed", e);
             throw new UserException(e);
@@ -196,7 +198,7 @@ public abstract class PasswordChangeService {
         /*
          * Invalidate user cache
          */
-        UserStorage.getInstance().invalidateUser(event.getContext(), event.getSession().getUserId());
+        UserStorage.getInstance().invalidateUser(event.getContext(), session.getUserId());
         /*
          * Update password in session
          */
@@ -205,7 +207,7 @@ public abstract class PasswordChangeService {
             throw new UserException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
         }
         try {
-            sessiondService.changeSessionPassword(event.getSession().getSessionID(), event.getNewPassword());
+            sessiondService.changeSessionPassword(session.getSessionID(), event.getNewPassword());
         } catch (final SessiondException e) {
             LOG.error("Updating password in user session failed", e);
             throw new UserException(e);
