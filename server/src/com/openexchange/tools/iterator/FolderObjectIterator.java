@@ -530,6 +530,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     }
 
     private final void closeResources() throws SearchIteratorException {
+        /*
+         * Stop permission loader, but don't set to null
+         */
+        if (null != permissionLoader) {
+            permissionLoader.stopWhenEmpty();
+        }
         SearchIteratorException error = null;
         /*
          * Close ResultSet
@@ -567,12 +573,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         if (closeCon && (readCon != null)) {
             DBPool.push(ctx, readCon);
             readCon = null;
-        }
-        /*
-         * Stop permission loader, but don't set to null
-         */
-        if (null != permissionLoader) {
-            permissionLoader.stopWhenEmpty();
         }
         if (error != null) {
             throw error;
@@ -638,13 +638,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
              * No permissions set, yet
              */
             final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissionsFor(folderId, 2000L);
-            try {
-                fo.setPermissionsAsArray(null == permissions ? FolderObject.getFolderPermissions(folderId, ctx, readCon) : permissions);
-            } catch (final DBPoolingException e) {
-                throw new SearchIteratorException(e);
-            } catch (final SQLException e) {
-                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
-            }
+            fo.setPermissionsAsArray(null == permissions ? getFolderPermissions(folderId) : permissions);
         }
         /*
          * Determine if folder object should be put into cache or not
@@ -664,6 +658,36 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
          * Return prepared folder object
          */
         return fo;
+    }
+
+    private OCLPermission[] getFolderPermissions(final int folderId) throws SearchIteratorException {
+        Connection con = readCon;
+        if (null == con) {
+            try {
+                con = Database.get(ctx, false);
+            } catch (final DBPoolingException e) {
+                throw new SearchIteratorException(e);
+            }
+            try {
+                return FolderObject.getFolderPermissions(folderId, ctx, con);
+            } catch (final SQLException e) {
+                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            } catch (final DBPoolingException e) {
+                throw new SearchIteratorException(e);
+            } finally {
+                Database.back(ctx, false, con);
+            }
+        }
+        /*
+         * readCon was not null
+         */
+        try {
+            return FolderObject.getFolderPermissions(folderId, ctx, con);
+        } catch (final SQLException e) {
+            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+        } catch (final DBPoolingException e) {
+            throw new SearchIteratorException(e);
+        }
     }
 
     public void close() {
@@ -861,9 +885,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         public void close() {
             flag.set(false);
-            if (!mainFuture.isDone()) {
-                mainFuture.cancel(true);
-            }
+            mainFuture.cancel(true);
             queue.clear();
             permsMap.clear();
         }
