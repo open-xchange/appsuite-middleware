@@ -148,8 +148,9 @@ public abstract class PasswordChangeService {
             /*
              * Loading user also verifies its existence
              */
-            UserStorage.getStorageUser(event.getSession().getUserId(), event.getContext());
-            final String login = event.getSession().getLogin();
+            final Session session = event.getSession();
+            UserStorage.getStorageUser(session.getUserId(), event.getContext());
+            final String login = session.getLogin();
             authenticationService.handleLoginInfo(new _LoginInfo(login, event.getOldPassword()));
         } catch (final LoginException e) {
             /*
