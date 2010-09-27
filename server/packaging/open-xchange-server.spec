@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 14
+%define		ox_release 15
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Sep 27 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17046: Fixed closing of FolderObjectIterator
+* Thu Sep 23 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #16704: More robust attachment handling in auto-publish for mail attachments
 * Fri Sep 10 2010 - karsten.will@open-xchange.com
  - Bugfix #16756: Calendar folder now have the information that their content is subscribed.
 * Fri Sep 10 2010 - francisco.laguna@open-xchange.com
