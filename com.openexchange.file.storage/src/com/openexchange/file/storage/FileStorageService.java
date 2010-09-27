@@ -105,6 +105,6 @@ public interface FileStorageService {
      * @return The account access for specified account identifier
      * @throws FileStorageException If account access cannot be returned for given account identifier
      */
-    public FileStorageAccountAccess getAccountAccess(int accountId, Session session) throws FileStorageException;
+    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws FileStorageException;
 
 }
