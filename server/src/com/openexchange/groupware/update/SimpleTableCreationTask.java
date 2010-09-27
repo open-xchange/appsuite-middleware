@@ -77,14 +77,21 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
 
     protected abstract String getTableName();
 
-    public void perform(PerformParameters params) throws AbstractOXException {
-        int contextId = params.getContextId();
+    public void perform(final PerformParameters params) throws AbstractOXException {
+        final int contextId = params.getContextId();
         final Connection con = dbService.getForUpdateTask(contextId);
         try {
             con.setAutoCommit(false);
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
+        try {
             innerPerform(con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final Exception e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -93,7 +100,7 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
         }
     }
 
-    protected void innerPerform(Connection con) throws SQLException {
+    protected void innerPerform(final Connection con) throws SQLException {
         if (Tools.tableExists(con, getTableName())) {
             return;
         }
