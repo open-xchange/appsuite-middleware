@@ -50,8 +50,6 @@ package com.openexchange.upsell.multiple.impl;
  */
 
 import java.io.IOException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -60,7 +58,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
