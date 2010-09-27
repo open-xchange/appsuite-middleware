@@ -181,7 +181,7 @@ public interface FileStorageFolder {
      * 
      * @return <code>true</code> if this folder denotes a default folder; otherwise <code>false</code>
      */
-    // public boolean isDefaultFolder();
+    public boolean isDefaultFolder();
 
     /**
      * Gets the number of files.
