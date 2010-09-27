@@ -5,8 +5,8 @@ Bundle-SymbolicName: com.openexchange.upsell.multiple
 Bundle-Version: 6.18.1.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: 
- com.openexchange.ajax,
+Bundle-Activator: com.openexchange.upsell.multiple.osgi.MyActivator
+Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.writer,
  com.openexchange.api2,
@@ -23,6 +23,9 @@ Import-Package:
  com.openexchange.groupware.notify.hostname,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.mail,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.dataobjects.compose,
+ com.openexchange.mail.transport,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
@@ -31,25 +34,24 @@ Import-Package:
  com.openexchange.tools.oxfolder,
  com.openexchange.tools.servlet,
  com.openexchange.tools.servlet.http,
+ com.openexchange.tools.session,
  com.openexchange.tools.ssl,
  com.openexchange.tools.stream,
+ com.openexchange.user,
  javax.activation,
  javax.mail,
  javax.mail.internet,
  javax.naming,
  javax.servlet,
  javax.servlet.http,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.params,
  org.apache.commons.logging,
  org.apache.commons.logging.impl,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker
-Require-Bundle: com.openexchange.server,
- com.openexchange.common,
- com.openexchange.global
-Bundle-Activator: com.openexchange.upsell.multiple.osgi.MyActivator
 Bundle-ClassPath: .,
  lib/ox_admin_hosting_rmiclient.jar,
  lib/ox_admin_rmiclient.jar
-
