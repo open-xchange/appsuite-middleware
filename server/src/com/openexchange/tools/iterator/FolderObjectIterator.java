@@ -365,9 +365,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 next = createFolderObjectFromSelectedEntry();
             } else if (!prefetchEnabled) {
                 closeResources();
-                if (null != permissionLoader) {
-                    permissionLoader.stopWhenEmpty();
-                }
             }
         } catch (final SQLException e) {
             throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
@@ -397,9 +394,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } finally {
                 closeResources();
-                if (null != permissionLoader) {
-                    permissionLoader.stopWhenEmpty();
-                }
             }
         } else {
             prefetchQueue = null;
@@ -573,6 +567,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         if (closeCon && (readCon != null)) {
             DBPool.push(ctx, readCon);
             readCon = null;
+        }
+        /*
+         * Stop permission loader, but don't set to null
+         */
+        if (null != permissionLoader) {
+            permissionLoader.stopWhenEmpty();
         }
         if (error != null) {
             throw error;
@@ -861,7 +861,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         public void close() {
             flag.set(false);
-            mainFuture.cancel(true);
+            if (!mainFuture.isDone()) {
+                mainFuture.cancel(true);
+            }
             queue.clear();
             permsMap.clear();
         }
@@ -870,12 +872,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
             final BlockingQueue<Integer> q = queue;
             final Future<Object> f = mainFuture;
+            final AtomicBoolean fl = flag;
             tps.submit(ThreadPools.task(new Callable<Object>() {
 
                 public Object call() throws Exception {
                     while (!q.isEmpty()) {
                         // Nope
                     }
+                    fl.set(false);
                     f.cancel(true);
                     return null;
                 }
