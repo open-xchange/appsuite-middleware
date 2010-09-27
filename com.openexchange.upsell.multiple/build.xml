@@ -104,7 +104,7 @@
 		</copy>
 
 		<mkdir dir="${destdir}/${bundle.d}" />
-		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}/${bundle.name}@start${line.separator}" />
+		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}" />
 	</target>
 
 	<target name="installGui">
