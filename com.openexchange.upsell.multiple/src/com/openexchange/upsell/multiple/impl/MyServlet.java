@@ -119,13 +119,6 @@ public final class MyServlet extends DataServlet {
 				return;
 			}
 			final Context ctx = ContextStorage.getInstance().getContext(session);
-			try {
-				final OXContextInterface iface = (OXContextInterface)Naming.lookup("rmi://localhost/"+OXContextInterface.RMI_NAME);
-			} catch (NotBoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
 			final MyServletRequest proRequest = new MyServletRequest(session, ctx);
 			final Object responseObj = proRequest.action(action, jsonObj,req);
 			response.setData(responseObj);
