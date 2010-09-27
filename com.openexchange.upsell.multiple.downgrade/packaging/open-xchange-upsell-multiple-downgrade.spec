@@ -79,6 +79,6 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware/settings
 %dir %{docroot}/ox6/plugins/com.openexchange.upsell.multiple.downgrade
-%config(noreplace) /opt/open-xchange/etc/groupware/settings/upsell.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/settings/upsell-multiple-downgrade.properties
 %{docroot}/ox6/plugins/com.openexchange.upsell.multiple.downgrade/*
 %changelog
