@@ -50,6 +50,8 @@ package com.openexchange.upsell.multiple.impl;
  */
 
 import java.io.IOException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
@@ -116,6 +119,13 @@ public final class MyServlet extends DataServlet {
 				return;
 			}
 			final Context ctx = ContextStorage.getInstance().getContext(session);
+			try {
+				final OXContextInterface iface = (OXContextInterface)Naming.lookup("rmi://localhost/"+OXContextInterface.RMI_NAME);
+			} catch (NotBoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			final MyServletRequest proRequest = new MyServletRequest(session, ctx);
 			final Object responseObj = proRequest.action(action, jsonObj,req);
 			response.setData(responseObj);
