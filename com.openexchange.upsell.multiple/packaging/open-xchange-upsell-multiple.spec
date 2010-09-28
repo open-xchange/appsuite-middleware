@@ -84,5 +84,3 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 %config(noreplace) /opt/open-xchange/etc/groupware/upsell.properties
 %{docroot}/ox6/plugins/com.openexchange.upsell.multiple/*
 %changelog
-* Mon Oct 05 2009 - benjamin.otterbach@open-xchange.com
- - Enhancement: Changed default upsell text.
