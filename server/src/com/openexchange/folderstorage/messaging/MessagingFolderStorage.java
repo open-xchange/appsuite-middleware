@@ -230,9 +230,6 @@ public final class MessagingFolderStorage implements FolderStorage {
 
     private void openMessagingAccess(final MessagingAccountAccess accountAccess) throws MessagingException {
         if (!accountAccess.isConnected()) {
-            /*
-             * Get new mail configuration
-             */
             try {
                 accountAccess.connect();
             } catch (final MessagingException e) {
