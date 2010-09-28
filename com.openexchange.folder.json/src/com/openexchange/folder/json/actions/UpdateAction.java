@@ -139,7 +139,7 @@ public final class UpdateAction extends AbstractFolderAction {
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier
          */
-        return new AJAXRequestResult(folder.getID(), folderService.getFolder(treeId, id, session, null).getLastModifiedUTC());
+        return new AJAXRequestResult(folder.getID(), folderService.getFolder(treeId, folder.getID(), session, null).getLastModifiedUTC());
     }
 
 }
