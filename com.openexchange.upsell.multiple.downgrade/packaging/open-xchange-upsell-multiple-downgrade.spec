@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange upsell downgrade demo bundle
-Requires:       open-xchange-gui open-xchange-upsell-multiple
+Requires:       open-xchange-gui
 #
 
 %description
