@@ -232,31 +232,31 @@ public final class MyServletRequest  {
 			LOG.info("Updated access combination name for context "+this.ctx.getContextId()+" to: "+iface.getAccessCombinationName(bla, authcreds));
 			
 		} catch (MalformedURLException e) {
-			LOG.error("Error upgrading context",e);
+			LOG.error("Error changing context",e);
 			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
 		} catch (RemoteException e) {
-			LOG.error("Error upgrading context",e);
+			LOG.error("Error changing context",e);
 			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
 		} catch (NotBoundException e) {
-			LOG.error("Error upgrading context",e);
+			LOG.error("Error changing context",e);
 			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
 		} catch (StorageException e) {
-			LOG.error("Error upgrading context",e);
+			LOG.error("Error changing context",e);
 			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
 		} catch (InvalidCredentialsException e) {
 			LOG.error("Invalid credentials supplied for OX API",e);
 			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
 		} catch (NoSuchContextException e) {
-			LOG.error("Error upgrading context",e);
+			LOG.error("Error changing context",e);
 			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
 		} catch (InvalidDataException e) {
-			LOG.error("Error upgrading context",e);
+			LOG.error("Error changing context",e);
 			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
 		} catch (JSONException e) {
-			LOG.error("Error upgrading context",e);
+			LOG.error("Error changing context",e);
 			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
 		} catch (ServiceException e) {
-			LOG.error("Error upgrading context. Mandatory configuration option not found",e);
+			LOG.error("Error changing context. Mandatory configuration option not found",e);
 			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
 		}
 		
