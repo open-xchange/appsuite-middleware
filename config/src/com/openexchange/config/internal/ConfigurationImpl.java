@@ -94,6 +94,10 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     }
 
+    /*-
+     * ------------- Member stuff -------------
+     */
+
     private final Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
 
     private final Map<String, String> texts = new ConcurrentHashMap<String, String>();
