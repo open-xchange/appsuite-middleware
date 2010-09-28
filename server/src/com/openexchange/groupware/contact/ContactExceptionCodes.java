@@ -75,6 +75,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     IMAGE_DOWNSCALE_FAILED(IMAGE_DOWNSCALE_FAILED_MSG, Category.CODE_ERROR, 108),
     /** Invalid SQL Query: %s */
     SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 109),
+    /** Invalid SQL Query: %s */
+    AGGREGATING_CONTACTS_NOT_ENABLED(FEATURE_DISABLED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 110),
     /** You do not have permission to create objects in this folder %1$d in context %2$d with user %3$d */
     NO_CREATE_PERMISSION(NO_CREATE_PERMISSION_MSG, Category.PERMISSION, 112),
     /** Unable to synchronize the old contact with the new changes: Context %1$d Object %2$d */

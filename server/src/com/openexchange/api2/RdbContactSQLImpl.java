@@ -78,16 +78,15 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
@@ -95,9 +94,10 @@ import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
+import com.openexchange.groupware.contact.ContactConfig.Property;
+import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
@@ -1463,7 +1463,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return null;
     }
 
-    public void setUnificationStateForContacts(Contact aggregator, Contact contributor, ContactUnificationState state) {
+    public void setUnificationStateForContacts(Contact aggregator, Contact contributor, ContactUnificationState state) throws OXException{
         Connection con = null;
         PreparedStatement stmt = null;
         try {
@@ -1510,6 +1510,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);
         } catch (SQLException e) {
+            handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
         } catch (OXConcurrentModificationException e) {
             LOG.error(e.getMessage(), e);
@@ -1533,15 +1534,15 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return UUIDs.toByteArray(UUID.fromString(c.getUserField20()));
     }
 
-    public void associateTwoContacts(Contact aggregator, Contact contributor) {
+    public void associateTwoContacts(Contact aggregator, Contact contributor) throws OXException {
         setUnificationStateForContacts(aggregator, contributor, ContactUnificationState.GREEN);
     }
 
-    public void separateTwoContacts(Contact aggregator, Contact contributor) {
+    public void separateTwoContacts(Contact aggregator, Contact contributor) throws OXException {
         setUnificationStateForContacts(aggregator, contributor, ContactUnificationState.RED);
     }
 
-    public List<UUID> getAssociatedContacts(Contact contact) {
+    public List<UUID> getAssociatedContacts(Contact contact) throws ContactException{
         if(!contact.containsUserField20())
             return new LinkedList<UUID>();
             
@@ -1568,6 +1569,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);
         } catch (SQLException e) {
+            handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
         } finally {
             closeSQLStuff(res, stmt);
@@ -1578,7 +1580,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     }
 
 
-    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) {
+    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws ContactException{
         if(! c1.containsUserField20() || ! c2.containsUserField20())
             return ContactUnificationState.UNDEFINED;
         
@@ -1604,6 +1606,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);
         } catch (SQLException e) {
+            handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
         } finally {
             if (stmt != null)
@@ -1638,6 +1641,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);
         } catch (SQLException e) {
+            handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
         } finally {
             closeSQLStuff(res, stmt);
@@ -1645,5 +1649,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 DBPool.push(ctx, con);
         }
         return contact;
+    }
+
+
+    private void handleUnsupportedAggregatingContactModule(SQLException e) throws ContactException {
+        if(e.getSQLState().equals("42S02"))
+            throw ContactExceptionCodes.AGGREGATING_CONTACTS_NOT_ENABLED.create();
     }
 }
