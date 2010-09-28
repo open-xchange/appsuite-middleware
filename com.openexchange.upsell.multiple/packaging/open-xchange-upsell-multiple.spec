@@ -45,7 +45,7 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The multiple Open-Xchange upsell multiple bundle
+Summary:        The multiple Open-Xchange upsell layer bundle
 Requires:       open-xchange-gui
 #
 
