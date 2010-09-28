@@ -71,8 +71,8 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // A JSON error occurred: %1$s
     public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 
-    // Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
-    public static final String ACCOUNT_NOT_FOUND_MSG = "Messaging account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.";
+    // File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
+    public static final String ACCOUNT_NOT_FOUND_MSG = "File storage account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.";
 
     // The operation is not supported by service %1$s.
     public static final String OPERATION_NOT_SUPPORTED_MSG = "The operation is not supported by service %1$s.";
@@ -80,8 +80,8 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
     public static final String FOLDER_NOT_FOUND_MSG = "The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of user %4$s in context %5$s.";
 
-    // Invalid message identifier: %1$s
-    public static final String INVALID_MESSAGE_IDENTIFIER_MSG = "Invalid message identifier: %1$s";
+    // Invalid file identifier: %1$s
+    public static final String INVALID_FILE_IDENTIFIER_MSG = "Invalid file identifier: %1$s";
 
     // Invalid header "%1$s": %2$s
     public static final String INVALID_HEADER_MSG = "Invalid header \"%1$s\": %2$s";
@@ -89,17 +89,17 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Unknown action to perform: %1$s.
     public static final String UNKNOWN_ACTION_MSG = "Unknown action to perform: %1$s.";
 
-    // A messaging error occurred: %1$s
-    public static final String MESSAGING_ERROR_MSG = "A messaging error occurred: %1$s";
+    // A file error occurred: %1$s
+    public static final String FILE_ERROR_MSG = "A file error occurred: %1$s";
 
     // Wrongly formatted address: %1$s.
     public static final String ADDRESS_ERROR_MSG = "Wrongly formatted address: %1$s.";
 
-    // Unknown messaging content: %1$s.
-    public static final String UNKNOWN_MESSAGING_CONTENT_MSG = "Unknown messaging content: %1$s.";
+    // Unknown file content: %1$s.
+    public static final String UNKNOWN_FILE_CONTENT_MSG = "Unknown file content: %1$s.";
     
-    // Unknown messaging service: %1$s.
-    public static final String UNKNOWN_MESSAGING_SERVICE_MSG = "Unknown messaging service: %1$s.";
+    // Unknown file storage service: %1$s.
+    public static final String UNKNOWN_FILE_STORAGE_SERVICE_MSG = "Unknown file storage service: %1$s.";
     
     //  Missing parameter: %1$s
     public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
@@ -107,8 +107,8 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Invalid parameter: %1$s with value '%2$s'.
     public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with value '%2$s'.";
 
-    // Messaging part is read-only: %1$s
-    public static final String READ_ONLY_MSG = "Messaging part is read-only.: %1$s";
+    // File part is read-only: %1$s
+    public static final String READ_ONLY_MSG = "File part is read-only.: %1$s";
 
     // Unknown color label index: %1$s
     public static final String UNKNOWN_COLOR_LABEL_MSG = "Unknown color label index: %1$s";
@@ -116,8 +116,8 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // A duplicate folder named "%1$s" already exists below parent folder "%2$s".
     public static final String DUPLICATE_FOLDER_MSG = "A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s\".";
 
-    // No create access on mail folder %1$s.
-    public static final String NO_CREATE_ACCESS_MSG = "No create access on mail folder %1$s.";
+    // No create access on folder %1$s.
+    public static final String NO_CREATE_ACCESS_MSG = "No create access on folder %1$s.";
 
     // Not connected
     public static final String NOT_CONNECTED_MSG = "Not connected";
@@ -125,11 +125,11 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Invalid sorting column. Cannot sort by %1$s.
     public static final String INVALID_SORTING_COLUMN_MSG = "Invalid sorting column. Cannot sort by %1$s.";
 
-    // No attachment found with section identifier %1$s in message %2$s in folder %3$s.
-    public static final String ATTACHMENT_NOT_FOUND_MSG = "No attachment found with section identifier %1$s in message %2$s in folder %3$s.";
+    // No attachment found with section identifier %1$s in file %2$s in folder %3$s.
+    public static final String ATTACHMENT_NOT_FOUND_MSG = "No attachment found with section identifier %1$s in file %2$s in folder %3$s.";
 
-    // Message %1$s not found in folder %2$s.
-    public static final String MESSAGE_NOT_FOUND_MSG = "Message %1$s not found in folder %2$s.";
+    // File %1$s not found in folder %2$s.
+    public static final String FILE_NOT_FOUND_MSG = "File %1$s not found in folder %2$s.";
 
     /**
      * Initializes a new {@link FileStorageExceptionMessages}.

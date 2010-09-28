@@ -78,7 +78,7 @@ public enum FileStorageExceptionCodes implements OXErrorMessage {
      */
     JSON_ERROR(FileStorageExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 14),
     /**
-     * Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
+     * File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
      */
     ACCOUNT_NOT_FOUND(FileStorageExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CODE_ERROR, 4),
     /**
@@ -90,9 +90,9 @@ public enum FileStorageExceptionCodes implements OXErrorMessage {
      */
     FOLDER_NOT_FOUND(FileStorageExceptionMessages.FOLDER_NOT_FOUND_MSG, Category.CODE_ERROR, 7),
     /**
-     * Invalid message identifier: %1$s
+     * Invalid file identifier: %1$s
      */
-    INVALID_MESSAGE_IDENTIFIER(FileStorageExceptionMessages.INVALID_MESSAGE_IDENTIFIER_MSG, Category.CODE_ERROR, 8),
+    INVALID_FILE_IDENTIFIER(FileStorageExceptionMessages.INVALID_FILE_IDENTIFIER_MSG, Category.CODE_ERROR, 8),
     /**
      * Invalid header "%1$s": %2$s
      */
@@ -102,21 +102,21 @@ public enum FileStorageExceptionCodes implements OXErrorMessage {
      */
     UNKNOWN_ACTION(FileStorageExceptionMessages.UNKNOWN_ACTION_MSG, Category.CODE_ERROR, 10),
     /**
-     * A messaging error occurred: %1$s
+     * A file error occurred: %1$s
      */
-    MESSAGING_ERROR(FileStorageExceptionMessages.MESSAGING_ERROR_MSG, Category.CODE_ERROR, 11),
+    FILE_ERROR(FileStorageExceptionMessages.FILE_ERROR_MSG, Category.CODE_ERROR, 11),
     /**
      * Wrongly formatted address: %1$s.
      */
     ADDRESS_ERROR(FileStorageExceptionMessages.ADDRESS_ERROR_MSG, Category.CODE_ERROR, 12),
     /**
-     * Unknown messaging content: %1$s.
+     * Unknown file content: %1$s.
      */
-    UNKNOWN_MESSAGING_CONTENT(FileStorageExceptionMessages.UNKNOWN_MESSAGING_CONTENT_MSG, Category.CODE_ERROR, 14),
+    UNKNOWN_FILE_CONTENT(FileStorageExceptionMessages.UNKNOWN_FILE_CONTENT_MSG, Category.CODE_ERROR, 14),
     /**
-     * Unknown messaging service: %1$s.
+     * Unknown file storage service: %1$s.
      */
-    UNKNOWN_MESSAGING_SERVICE(FileStorageExceptionMessages.UNKNOWN_MESSAGING_SERVICE_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
+    UNKNOWN_FILE_STORAGE_SERVICE(FileStorageExceptionMessages.UNKNOWN_FILE_STORAGE_SERVICE_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
     /**
      * Missing parameter: %1$s.
      */
@@ -126,7 +126,7 @@ public enum FileStorageExceptionCodes implements OXErrorMessage {
      */
     INVALID_PARAMETER(FileStorageExceptionMessages.INVALID_PARAMETER_MSG, Category.USER_INPUT, 17),
     /**
-     * Messaging part is read-only: %1$s
+     * File part is read-only: %1$s
      */
     READ_ONLY(FileStorageExceptionMessages.READ_ONLY_MSG, Category.USER_INPUT, 18),
     /**
@@ -138,7 +138,7 @@ public enum FileStorageExceptionCodes implements OXErrorMessage {
      */
     DUPLICATE_FOLDER(FileStorageExceptionMessages.DUPLICATE_FOLDER_MSG, Category.CODE_ERROR, 20),
     /**
-     * No create access on mail folder %1$s.
+     * No create access on folder %1$s.
      */
     NO_CREATE_ACCESS(FileStorageExceptionMessages.NO_CREATE_ACCESS_MSG, Category.PERMISSION, 21),
     /**
@@ -150,13 +150,13 @@ public enum FileStorageExceptionCodes implements OXErrorMessage {
      */
     INVALID_SORTING_COLUMN(FileStorageExceptionMessages.INVALID_SORTING_COLUMN_MSG, Category.USER_INPUT, 23),
     /**
-     * No attachment found with section identifier %1$s in message %2$s in folder %3$s.
+     * No attachment found with section identifier %1$s in file %2$s in folder %3$s.
      */
     ATTACHMENT_NOT_FOUND(FileStorageExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, Category.CODE_ERROR, 24),
     /**
-     * Message %1$s not found in folder %2$s.
+     * File %1$s not found in folder %2$s.
      */
-    MESSAGE_NOT_FOUND(FileStorageExceptionMessages.MESSAGE_NOT_FOUND_MSG, Category.CODE_ERROR, 25);
+    FILE_NOT_FOUND(FileStorageExceptionMessages.FILE_NOT_FOUND_MSG, Category.CODE_ERROR, 25);
 
     private final Category category;
 
