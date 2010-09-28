@@ -87,7 +87,6 @@ import com.openexchange.folderstorage.type.MessagingType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.messaging.MailMessagingService;
@@ -119,6 +118,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingFolderStorage implements FolderStorage {
+
+    private static final String PARAM = MessagingParameterConstants.PARAM_MESSAGING_ACCESS;
 
     private static volatile boolean mailFolderStorageAvailable;
 
@@ -254,7 +255,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
             (ConcurrentMap<Key, MessagingAccountAccess>) params.getParameter(
                 MessagingFolderType.getInstance(),
-                MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                PARAM);
         if (null != accesses) {
             try {
                 final Collection<MessagingAccountAccess> values = accesses.values();
@@ -262,7 +263,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                     messagingAccess.close();
                 }
             } finally {
-                params.putParameter(MessagingFolderType.getInstance(), MessagingParameterConstants.PARAM_MESSAGING_ACCESS, null);
+                params.putParameter(MessagingFolderType.getInstance(), PARAM, null);
             }
         }
     }
@@ -272,11 +273,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
 
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folder.getParentID());
@@ -328,11 +327,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
 
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folderId);
@@ -357,11 +354,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
 
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folderId);
@@ -396,11 +391,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
             /*
              * Open account access
@@ -436,11 +429,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
 
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folderId);
@@ -473,11 +464,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
 
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folderId);
@@ -517,11 +506,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
 
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folderId);
@@ -724,11 +711,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
 
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(parentId);
@@ -809,7 +794,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
             (ConcurrentMap<Key, MessagingAccountAccess>) params.getParameter(
                 MessagingFolderType.getInstance(),
-                MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                PARAM);
         if (null != accesses) {
             try {
                 final Collection<MessagingAccountAccess> values = accesses.values();
@@ -834,7 +819,7 @@ public final class MessagingFolderStorage implements FolderStorage {
          */
         return parameters.putParameterIfAbsent(
             MessagingFolderType.getInstance(),
-            MessagingParameterConstants.PARAM_MESSAGING_ACCESS,
+            PARAM,
             new ConcurrentHashMap<Key, MessagingAccountAccess>());
     }
 
@@ -854,11 +839,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
 
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folderId);
@@ -900,11 +883,9 @@ public final class MessagingFolderStorage implements FolderStorage {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
                     MessagingFolderType.getInstance(),
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+                    PARAM);
             if (null == accesses) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
             }
 
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folder.getID());
