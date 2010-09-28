@@ -8,7 +8,7 @@ var downpage = new ox.Configuration.Page(downgradepanel, _("Change Access Permis
 var intro = new ox.UI.Text(_("The Downgrade Premium function will downgrade an Open-Xchange Premium Groupware context (tenant) to a simple Open-Xchange PIM context (tenant). Please re-login to the context to use the downgraded version. At any time you can UPGRADE again to the Premium Groupware by simply clicking the upsell triggers (e.g. InfoStore icon in the main module bar) and follow the upsell process."));
 downpage.addWidget(intro);
 
-var button = new ox.UI.Button(_("Downgrade Context"));
+var button = new ox.UI.Button(_("Downgrade"));
 
 button.click = function (){
 
