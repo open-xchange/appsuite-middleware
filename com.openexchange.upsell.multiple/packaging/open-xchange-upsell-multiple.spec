@@ -4,7 +4,7 @@
 Name:           open-xchange-upsell-multiple
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-gui open-xchange-server open-xchange-admin-client open-xchange-admin-plugin-hosting-client
+BuildRequires:  ant ant-nodeps open-xchange-gui open-xchange-server open-xchange-admin-client open-xchange-admin-plugin-hosting-client
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -45,7 +45,7 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The multiple Open-Xchange upsell layer bundle
+Summary:        The multiple Open-Xchange upsell multiple bundle
 Requires:       open-xchange-gui
 #
 
