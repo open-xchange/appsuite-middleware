@@ -105,6 +105,9 @@
 
 		<mkdir dir="${destdir}/${bundle.d}" />
 		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}" />
+		
+		<!-- create symlinks to OX admin client jars -->
+        <symlink link="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib" resource="${prefix}/lib" />
 	</target>
 
 	<target name="installGui">
