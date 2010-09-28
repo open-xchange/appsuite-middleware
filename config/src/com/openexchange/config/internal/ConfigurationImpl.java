@@ -82,12 +82,6 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private static final String EXT = ".properties";
 
-    private final Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
-
-    private final Map<String, String> texts = new ConcurrentHashMap<String, String>();
-    
-    private final File[] dirs;
-
     private static final class PropertyFileFilter implements FileFilter {
 
         public PropertyFileFilter() {
@@ -100,6 +94,12 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     }
 
+    private final Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
+
+    private final Map<String, String> texts = new ConcurrentHashMap<String, String>();
+    
+    private final File[] dirs;
+    
     private final Map<String, String> properties;
 
     private final Map<String, String> propertiesFiles;
