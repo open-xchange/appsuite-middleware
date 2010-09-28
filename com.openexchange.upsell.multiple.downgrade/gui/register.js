@@ -14,7 +14,7 @@ button.click = function (){
 
 // method which is executed after succesfull http call to change context
 function dwnsuc(data) {
-   ox.Configuration.info(_("Your context has been changed."));
+   ox.Configuration.info(_("Your context has been downgraded."));
 }
 
 
