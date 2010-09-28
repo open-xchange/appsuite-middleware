@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public interface FinalContactInterface extends ContactInterface {
 
-    public abstract void setUnificationStateForContacts(Contact aggregator, Contact contributor, ContactUnificationState state);
+    public abstract void setUnificationStateForContacts(Contact aggregator, Contact contributor, ContactUnificationState state) throws OXException;
 
     public abstract void associateTwoContacts(Contact aggregator, Contact contributor) throws OXException;
 
