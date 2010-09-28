@@ -310,6 +310,9 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     private void removeFromCache(final String id, final String treeId, final int userId, final int contextId, final PathPerformer pathPerformer) throws FolderException {
+        if (null == id) {
+            return;
+        }
         try {
             final List<String> ids;
             {
@@ -771,14 +774,9 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Perform update operation via non-cache storage
          */
-        final String parentID = folder.getParentID();
-        final String oldParentId;
-        if (null != parentID) {
-            // Move
-            oldParentId = getFolder(folder.getTreeID(), folder.getID(), storageParameters).getParentID();
-        } else {
-            oldParentId = null;
-        }
+        final String oldFolderId = folder.getID();
+        final boolean isMove = null != folder.getParentID();
+        final String oldParentId = isMove ? getFolder(folder.getTreeID(), oldFolderId, storageParameters).getParentID() : null;
         if (null == session) {
             new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doUpdate(
                 folder,
@@ -793,26 +791,32 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Get folder from appropriate storage
          */
-        final String folderId = folder.getID();
+        final String newFolderId = folder.getID();
         final String treeId = folder.getTreeID();
-        final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
-        if (null == storage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
-        }
         /*
          * Refresh/Invalidate folder
          */
-        removeFromCache(folderId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
-        /*
-         * Old folder if needed
-         */
-        if (null != oldParentId && !FolderStorage.ROOT_ID.equals(oldParentId)) {
-            removeFromCache(oldParentId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
+        final int userId = storageParameters.getUserId();
+        final int contextId = storageParameters.getContextId();
+        if (isMove) {
+            removeSingleFromCache(oldFolderId, treeId, userId, contextId);
+            removeFromCache(oldParentId, treeId, userId, contextId, newPathPerformer(storageParameters));
+        } else {
+            removeFromCache(newFolderId, treeId, userId, contextId, newPathPerformer(storageParameters));
         }
         /*
          * Put updated folder
          */
-        final Folder updatedFolder = loadFolder(treeId, folderId, StorageType.WORKING, storageParameters);
+        final Folder updatedFolder = loadFolder(treeId, newFolderId, StorageType.WORKING, storageParameters);
+        if (isMove) {
+            /*
+             * Invalidate new parent folder
+             */
+            final String newParentId = updatedFolder.getParentID();
+            if (null != newParentId && !newParentId.equals(oldParentId)) {
+                removeSingleFromCache(newParentId, treeId, userId, contextId);
+            }
+        }
         if (updatedFolder.isCacheable()) {
             putFolder(updatedFolder, treeId, storageParameters);
         }
