@@ -49,8 +49,10 @@
 
 package com.openexchange.tools.iterator;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.TIntHashSet;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -368,8 +370,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
         } catch (final SQLException e) {
             throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
-        } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
         if (prefetchEnabled) {
             prefetchQueue = new LinkedList<FolderObject>();
@@ -390,8 +390,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 }
             } catch (final SQLException e) {
                 throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
-            } catch (final DBPoolingException e) {
-                throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } finally {
                 closeResources();
             }
@@ -413,7 +411,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     /**
      * @return a <code>FolderObject</code> from current <code>ResultSet.next()</code> data
      */
-    private final FolderObject createFolderObjectFromSelectedEntry() throws SQLException, DBPoolingException {
+    private final FolderObject createFolderObjectFromSelectedEntry() throws SQLException, SearchIteratorException {
         // fname, fuid, module, type, creator
         final int folderId = rs.getInt(1);
         final FolderObject fo;
@@ -459,7 +457,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
              * Read & set permissions
              */
             if (null == permissionLoader) {
-                fo.setPermissionsAsArray(FolderObject.getFolderPermissions(folderId, ctx, readCon));
+                fo.setPermissionsAsArray(loadFolderPermissions(folderId, ctx.getContextId(), readCon));
             } else {
                 permissionLoader.submitPermissionsFor(folderId);
             }
@@ -623,8 +621,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             return retval;
         } catch (final SQLException e) {
             throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
-        } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
     }
 
@@ -669,11 +665,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 throw new SearchIteratorException(e);
             }
             try {
-                return FolderObject.getFolderPermissions(folderId, ctx, con);
-            } catch (final SQLException e) {
-                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
-            } catch (final DBPoolingException e) {
-                throw new SearchIteratorException(e);
+                return loadFolderPermissions(folderId, ctx.getContextId(), con);
             } finally {
                 Database.back(ctx, false, con);
             }
@@ -681,13 +673,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         /*
          * readCon was not null
          */
-        try {
-            return FolderObject.getFolderPermissions(folderId, ctx, con);
-        } catch (final SQLException e) {
-            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
-        } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(e);
-        }
+        return loadFolderPermissions(folderId, ctx.getContextId(), con);
     }
 
     public void close() {
@@ -790,8 +776,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 }
             }
             return retval;
-        } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(Code.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final SQLException e) {
             throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } finally {
@@ -842,31 +826,59 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
 
+                    private final void waitForIDs(final List<Integer> ids) throws InterruptedException {
+                        /*
+                         * Wait for an ID
+                         */
+                        Integer folderId = queue.take();
+                        /*
+                         * Gather possibly available IDs
+                         */
+                        ids.add(folderId);
+                        while ((folderId = queue.poll()) != null) {
+                            ids.add(folderId);
+                        }
+                    }
+
                     public Object call() throws Exception {
                         try {
+                            final List<Integer> ids = new ArrayList<Integer>();
+                            final List<FutureTask<?>> tasks = new ArrayList<FutureTask<?>>();
                             while (flag.get()) {
-                                final Integer folderId = queue.take();
+                                /*
+                                 * Wait for IDs
+                                 */
+                                ids.clear();
+                                waitForIDs(ids);
                                 /*
                                  * Add future to concurrent map
                                  */
-                                final FutureTask<OCLPermission[]> f = new FutureTask<OCLPermission[]>(new Callable<OCLPermission[]>() {
-        
-                                    public OCLPermission[] call() throws Exception {
-                                        final Connection readCon = Database.get(ctx, false);
-                                        try {
-                                            return FolderObject.getFolderPermissions(folderId.intValue(), ctx, readCon);
-                                        } catch (final SQLException e) {
-                                            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
-                                        } finally {
-                                            Database.back(ctx, false, readCon);
-                                        }
+                                final Connection readCon = Database.get(ctx, false);
+                                try {
+                                    final int cid = ctx.getContextId();
+                                    tasks.clear();
+                                    for (final Integer id : ids) {
+                                        final FutureTask<OCLPermission[]> f = new FutureTask<OCLPermission[]>(new Callable<OCLPermission[]>() {
+                                            
+                                            public OCLPermission[] call() throws Exception {
+                                                return loadFolderPermissions(id.intValue(), cid, readCon);
+                                            }
+                                        });
+                                        permsMap.put(id, f);
+                                        /*
+                                         * Add to list
+                                         */
+                                        tasks.add(f);
                                     }
-                                });
-                                permsMap.put(folderId, f);
-                                /*
-                                 * Execute task with this thread
-                                 */
-                                f.run();
+                                    /*
+                                     * Execute tasks with this thread
+                                     */
+                                    for (final FutureTask<?> f : tasks) {
+                                        f.run();
+                                    }
+                                } finally {
+                                    Database.back(ctx, false, readCon);
+                                }
                             }
                             /*
                              * Return
@@ -933,4 +945,40 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
     } // End of PermissionLoader
+
+    private static final String SQL_LOAD_P =
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
+
+    static final OCLPermission[] loadFolderPermissions(final int folderId, final int cid, final Connection con) throws SearchIteratorException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_LOAD_P);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, folderId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                /*
+                 * Empty result set
+                 */
+                return new OCLPermission[0];
+            }
+            final ArrayList<OCLPermission> ret = new ArrayList<OCLPermission>(8);
+            do {
+                final OCLPermission p = new OCLPermission();
+                p.setEntity(rs.getInt(1)); // Entity
+                p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5)); // fp, orp, owp, and odp
+                p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
+                p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
+                p.setSystem(rs.getInt(8)); // system
+                ret.add(p);
+            } while (rs.next());
+            return ret.toArray(new OCLPermission[ret.size()]);
+        } catch (final SQLException e) {
+            throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
 }
