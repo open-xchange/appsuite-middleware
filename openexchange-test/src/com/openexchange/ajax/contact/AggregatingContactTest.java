@@ -173,11 +173,11 @@ public class AggregatingContactTest extends AbstractAJAXSession{
         GetResponse getResponse = client2.execute(new GetContactByUIDRequest(aggregatorUUID, tz));
         AbstractOXException exception = getResponse.getException();
         assertNotNull("Should not be able to retrieve contact", exception);
-        assertEquals("Should prohibit access", "CON-0228", exception.getErrorCode());
+        assertEquals("Should prohibit access", "CON-0104", exception.getErrorCode());
         
         getResponse = client2.execute(new GetContactByUIDRequest(contributorUUID, tz));
         exception = getResponse.getException();
         assertNotNull("Should not be able to retrieve other contact", getResponse.getException());
-        assertEquals("Should prohibit access", "CON-0228", exception.getErrorCode());
+        assertEquals("Should prohibit access", "CON-0104", exception.getErrorCode());
     }
 }
