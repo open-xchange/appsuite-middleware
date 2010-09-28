@@ -92,6 +92,9 @@ public class AdminListTest extends AbstractMailFilterTest {
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
         final String rid = insertRule(rule, null, userSession);
+        
+        // Get rules of user
+        final Rule[] userRules = listRules(userSession);        
 
         // Get rules of user as admin
         MailAccountGetRequest getMailAcc = new MailAccountGetRequest(0, false);
@@ -99,22 +102,22 @@ public class AdminListTest extends AbstractMailFilterTest {
         MailAccountDescription description = response.getAsDescription();
         final String userImapLogin = description.getLogin();
 
-        final Rule[] rules = listRulesForUser(adminSession, userImapLogin);
+        final Rule[] adminRules = listRulesForUser(adminSession, userImapLogin);
 
-        boolean foundRule = false;
-        for (final Rule r : rules) {
-            if (r.getName().equals(rule.getName())) {
-                foundRule = true;
-                break;
+        
+        for (final Rule ur : userRules) {
+            boolean foundRule = false;
+            inner: for (final Rule ar : adminRules) {                
+                if (ar.getId().equals(ur.getId())) {
+                    foundRule = true;
+                    break inner;
+                }
             }
+            assertTrue("Did not find rule.", foundRule);
         }
 
         deleteRule(rid, null, userSession);
         adminClient.logout();
-
-        if (!foundRule) {
-            fail("Did not find rule.");
-        }
     }
 
 }
