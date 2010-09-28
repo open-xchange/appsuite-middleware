@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.secret.SecretService;
@@ -60,6 +61,7 @@ import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.SecretRecoveryMultipleHandler;
 import com.openexchange.secret.recovery.json.SecretRecoveryServlet;
+import com.openexchange.secret.recovery.json.preferences.Enabled;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.Whiteboard;
 
@@ -68,6 +70,7 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
     
     private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class, HttpService.class};
     private ServiceRegistration registration;
+    private ServiceRegistration enabledReg;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -112,6 +115,8 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
                 }
                 
             }, null);
+            enabledReg = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
+            
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
         }
@@ -123,6 +128,7 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
         final HttpService httpService = getService(HttpService.class);
         httpService.unregister("ajax/recovery/secret");
         registration.unregister();
+        enabledReg.unregister();
     }
 
 
