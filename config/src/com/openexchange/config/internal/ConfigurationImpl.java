@@ -94,13 +94,24 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     }
 
+    private static final String[] getDirectories() {
+        final List<String> tmp = new ArrayList<String>();
+        for (final String property : new String[] { "openexchange.propdir", "openexchange.propdir2" }) {
+            final String sysProp = System.getProperty(property);
+            if (null != sysProp) {
+                tmp.add(sysProp);
+            }
+        }
+        return tmp.toArray(new String[tmp.size()]);
+    }
+
     /*-
      * ------------- Member stuff -------------
      */
 
-    private final Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
+    private final Map<String, Properties> propertiesByFile;
 
-    private final Map<String, String> texts = new ConcurrentHashMap<String, String>();
+    private final Map<String, String> texts;
     
     private final File[] dirs;
     
@@ -115,17 +126,6 @@ public final class ConfigurationImpl implements ConfigurationService {
         this(getDirectories());
     }
 
-    private static final String[] getDirectories() {
-        final List<String> tmp = new ArrayList<String>();
-        for (final String property : new String[] { "openexchange.propdir", "openexchange.propdir2" }) {
-            final String sysProp = System.getProperty(property);
-            if (null != sysProp) {
-                tmp.add(sysProp);
-            }
-        }
-        return tmp.toArray(new String[tmp.size()]);
-    }
-
     /**
      * Initializes a new configuration
      * 
@@ -136,6 +136,8 @@ public final class ConfigurationImpl implements ConfigurationService {
         if (null == directories || directories.length == 0) {
             throw new IllegalArgumentException("Missing configuration directory path.");
         }
+        propertiesByFile = new HashMap<String, Properties>();
+        texts = new ConcurrentHashMap<String, String>();
         properties = new HashMap<String, String>();
         propertiesFiles = new HashMap<String, String>();
         final FileFilter fileFilter = new PropertyFileFilter();
