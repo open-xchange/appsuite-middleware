@@ -45,7 +45,7 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The multiple Open-Xchange upsell layer bundle
+Summary:        The multiple Open-Xchange upsell multiple bundle
 Requires:       open-xchange-gui
 #
 
@@ -77,10 +77,6 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/etc/groupware/settings
 %dir /opt/open-xchange/etc/groupware
-%dir %{docroot}/ox6/plugins/com.openexchange.upsell.multiple
-%config(noreplace) /opt/open-xchange/etc/groupware/settings/upsell.properties
 %config(noreplace) /opt/open-xchange/etc/groupware/upsell.properties
-%{docroot}/ox6/plugins/com.openexchange.upsell.multiple/*
 %changelog

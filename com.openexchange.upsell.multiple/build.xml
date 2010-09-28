@@ -99,10 +99,6 @@
 			<fileset dir="conf/" includes="upsell.properties" />
 		</copy>
 
-		<copy todir="${destdir}/${prefix}/etc/groupware/settings/" overwrite="true">
-			<fileset dir="conf/gui" />
-		</copy>
-
 		<mkdir dir="${destdir}/${bundle.d}" />
 		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}" />
 		
@@ -111,12 +107,6 @@
 	</target>
 
 	<target name="installGui">
-		<mkdir dir="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}" />
-		<copy todir="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}" overwrite="true">
-			<fileset dir="gui">
-				<exclude name="build.xml" />
-			</fileset>
-		</copy>
 	</target>
 
 	<target name="installJar" depends="jar">
