@@ -67,6 +67,7 @@ import com.openexchange.ajax.contact.action.GetAssociationResponse;
 import com.openexchange.ajax.contact.action.GetContactByUIDRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.servlet.AjaxException;
@@ -83,8 +84,10 @@ public class AggregatingContactTestManager extends ContactTestManager {
         super(client);
     }
 
-    public ContactUnificationState getAssociationBetween(Contact contributor, Contact aggregator) throws AjaxException, IOException, SAXException, JSONException {
+    public ContactUnificationState getAssociationBetween(Contact contributor, Contact aggregator) throws IOException, SAXException, JSONException, AbstractOXException {
         GetAssociationResponse response = getClient().execute(new GetAssociationRequest(contributor, aggregator));
+        
+        doJanitorialTasks(response);
         return response.getState();
     }
 
@@ -98,7 +101,7 @@ public class AggregatingContactTestManager extends ContactTestManager {
             temp = getAction(contributor);
             contributor.setUserField20(temp.getUserField20());
             
-            lastResponse = doAssociationResponse;
+            doJanitorialTasks(doAssociationResponse);
         } catch(Exception e){
             doExceptionHandling(e, "DoAssociationRequest");
         }
@@ -109,7 +112,7 @@ public class AggregatingContactTestManager extends ContactTestManager {
             DoSeparationResponse doSeparationResponse = getClient().execute(new DoSeparationRequest(contributor, aggregator));
             aggregator = getAction(aggregator);
             contributor = getAction(contributor);
-            lastResponse = doSeparationResponse;
+            doJanitorialTasks(doSeparationResponse);
             
         } catch(Exception e){
             doExceptionHandling(e, "DoSeparationRequest");
@@ -119,7 +122,7 @@ public class AggregatingContactTestManager extends ContactTestManager {
     public Contact getContactByUID(UUID uid){
         try {
             GetResponse response = getClient().execute(new GetContactByUIDRequest(uid, timeZone));
-            lastResponse = response;
+            doJanitorialTasks(response);
             return response.getContact();
         } catch(Exception e){
             doExceptionHandling(e, "GetContactByUIDRequest");
@@ -130,7 +133,7 @@ public class AggregatingContactTestManager extends ContactTestManager {
     public List<UUID> getAssociatedContactsByUID(UUID uid){
         try {
             GetAssociatedContactsResponse response = getClient().execute(new GetAssociatedContactsRequest(uid, timeZone));
-            lastResponse = response;
+            doJanitorialTasks(response);
             return response.getUUIDs();
         } catch(Exception e){
             doExceptionHandling(e, "GetAssociatedContactsRequest");
@@ -141,7 +144,7 @@ public class AggregatingContactTestManager extends ContactTestManager {
     public List<UUID> getAssociatedContacts(Contact c){
         try {
             GetAssociatedContactsResponse response = getClient().execute(new GetAssociatedContactsRequest(c, timeZone));
-            lastResponse = response;
+            doJanitorialTasks(response);
             return response.getUUIDs();
         } catch(Exception e){
             doExceptionHandling(e, "GetAssociatedContactsRequest");

@@ -387,7 +387,12 @@ public class ContactTestManager implements TestManager {
             if (getFailOnError())
                 fail("Unexpected exception occured during " + action + ": " + e.getMessage());
         }
-
+    }
+    
+    protected void doJanitorialTasks(AbstractAJAXResponse response) throws AbstractOXException{
+        lastResponse = response;
+        if(response.hasError() && failOnError)
+            throw response.getException();
     }
 
     private void remember(Contact contact) {
