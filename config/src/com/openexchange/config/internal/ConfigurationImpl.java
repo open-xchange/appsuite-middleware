@@ -289,7 +289,11 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
 
         final Properties tmp = propertiesByFile.get(key);
-        final Properties retval = new Properties(tmp);
+        final Properties retval = new Properties();
+
+        for (final Entry<Object, Object> entry : tmp.entrySet()) {
+            retval.put(entry.getKey(), entry.getValue());
+        }
 
         if (listener != null) {
             for (final Object k : retval.keySet()) {
