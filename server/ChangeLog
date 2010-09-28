@@ -1,3 +1,8 @@
+* 2010-09-28 - choeger@open-xchange.com
+
+ - Bugfix #17031: open-xchange-folder-json package MUST be installed with
+   6.18.rev2 but is not a dependency
+
 * 2010-09-27 - thorben.betten@open-xchange.com
 
  - Bugfix #17046: Fixed closing of FolderObjectIterator
