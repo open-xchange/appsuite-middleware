@@ -7,7 +7,6 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
-    <property name="lib.dir" value="lib"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -28,12 +27,6 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
 
-    <!-- Third party libs -->
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
-        <exclude name="CVS"/>
-    </fileset>
-
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -41,7 +34,6 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${genericonfjar}"/>
-    	<fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
@@ -59,7 +51,6 @@
     <target name="jar" depends="prepare,compile">
         <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
-        	<fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 

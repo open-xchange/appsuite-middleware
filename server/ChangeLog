@@ -1,3 +1,7 @@
+* 2010-09-28 - marcus.klein@open-xchange.com
+
+ - Bugfix #17049: Fixed wrongly installed bundle files for new file storage bundle.
+
 * 2010-09-28 - choeger@open-xchange.com
 
  - Bugfix #17031: open-xchange-folder-json package MUST be installed with
