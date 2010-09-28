@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="2.1">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname=" Testplan für Upsell OX Plugin" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname=" Testplan für Upsell Multiple OX Plugin" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
@@ -325,7 +325,7 @@
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="send upsell email" enabled="false">
+        <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="send upsell email" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true">
             <collectionProp name="Arguments.arguments">
               <elementProp name="action" elementType="HTTPArgument">
@@ -479,7 +479,7 @@
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="upgrade context" enabled="false">
+        <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="upgrade context" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true">
             <collectionProp name="Arguments.arguments">
               <elementProp name="action" elementType="HTTPArgument">
