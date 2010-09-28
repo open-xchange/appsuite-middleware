@@ -94,6 +94,7 @@ public class AggregatingContactTest extends AbstractAJAXSession{
         
         folderMgr = new FolderTestManager(client);
         contactMgr = new AggregatingContactTestManager(client);
+        contactMgr.setFailOnError(true);
 
         UserValues values = client.getValues();
         folder = folderMgr.generateFolder("aggregatedContactTest"+(new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
