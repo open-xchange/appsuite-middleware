@@ -50,6 +50,7 @@
 package com.openexchange.groupware.container;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -1651,7 +1652,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             stmt = null;
             return permList.toArray(new OCLPermission[permList.size()]);
         } finally {
-            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+            closeSQLStuff(rs, stmt);
+            if (closeCon) {
+                DBPool.closeReaderSilent(ctx, readCon);
+            }
         }
     }
 
