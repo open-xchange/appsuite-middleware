@@ -78,5 +78,9 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware
+%dir /opt/open-xchange/bundles
+%dir /opt/open-xchange/etc/groupware/osgi/bundle.d
+/opt/open-xchange/bundles/*
+/opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/upsell.properties
 %changelog
