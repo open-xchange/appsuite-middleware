@@ -68,5 +68,7 @@ public enum Interface {
 
     OUTLOOK_UPDATER,
 
-    MOBILECONFIG
+    MOBILECONFIG,
+    
+    MAC_UPDATER
 }
