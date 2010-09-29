@@ -74,7 +74,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
     /**
      * The backing map.
      */
-    final ConcurrentMap<String, FileStorageService> map;
+    private final ConcurrentMap<String, FileStorageService> map;
 
     /**
      * The tracker instance.
@@ -118,7 +118,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
     public FileStorageService getFileStorageService(final String id) throws FileStorageException {
         final FileStorageService filestorageService = map.get(id);
         if (null == filestorageService) {
-            throw FileStorageExceptionCodes.UNKNOWN_MESSAGING_SERVICE.create(id);
+            throw FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.create(id);
         }
         return filestorageService;
     }
