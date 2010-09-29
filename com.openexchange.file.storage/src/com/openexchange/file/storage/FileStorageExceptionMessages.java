@@ -131,6 +131,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // File %1$s not found in folder %2$s.
     public static final String FILE_NOT_FOUND_MSG = "File %1$s not found in folder %2$s.";
 
+    // No account manager could be found for service: %1$s.
+    public static final String NO_ACCOUNT_MANAGER_FOR_SERVICE_MSG = "No account manager could be found for service: %1$s.";
+
     /**
      * Initializes a new {@link FileStorageExceptionMessages}.
      */

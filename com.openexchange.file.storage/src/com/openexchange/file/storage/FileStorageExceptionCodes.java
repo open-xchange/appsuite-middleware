@@ -156,7 +156,11 @@ public enum FileStorageExceptionCodes implements OXErrorMessage {
     /**
      * File %1$s not found in folder %2$s.
      */
-    FILE_NOT_FOUND(FileStorageExceptionMessages.FILE_NOT_FOUND_MSG, Category.CODE_ERROR, 25);
+    FILE_NOT_FOUND(FileStorageExceptionMessages.FILE_NOT_FOUND_MSG, Category.CODE_ERROR, 25),
+    /**
+     * No account manager could be found for service: %1$s.
+     */
+    NO_ACCOUNT_MANAGER_FOR_SERVICE(FileStorageExceptionMessages.NO_ACCOUNT_MANAGER_FOR_SERVICE_MSG, Category.CODE_ERROR, 26);
 
     private final Category category;
 
