@@ -578,8 +578,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mf = mailAccess.getFolderStorage().getFolder(fullname);
 
 					assertTrue("Unexpected name: " + mf.getName(), "TemporaryFolderMovedAgain".equals(mf.getName()));
-					assertTrue("Unexpected parent: " + mf.getParentFullname(), parentFullname
-							.equals(MailFolder.DEFAULT_FOLDER_ID));
+					assertTrue("Unexpected parent: " + mf.getParentFullname(), MailFolder.DEFAULT_FOLDER_ID.equals(mf.getParentFullname()));
 				} else {
 				    fullname = null;
 				}
