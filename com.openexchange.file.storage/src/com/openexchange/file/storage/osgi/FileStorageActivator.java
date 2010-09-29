@@ -55,6 +55,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.exception.FileStorageExceptionFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -70,6 +71,8 @@ public final class FileStorageActivator implements BundleActivator {
     private ComponentRegistration componentRegistration;
 
     private OSGIFileStorageServiceRegistry registry;
+
+    private OSGIFileStorageAccountManagerLookupService lookupService;
 
     private List<ServiceRegistration> registrations;
 
@@ -101,10 +104,16 @@ public final class FileStorageActivator implements BundleActivator {
             registry = new OSGIFileStorageServiceRegistry();
             registry.start(context);
             /*
+             * Start provider tracking
+             */
+            lookupService = new OSGIFileStorageAccountManagerLookupService();
+            lookupService.start(context);
+            /*
              * Register services
              */
             registrations = new ArrayList<ServiceRegistration>(4);
             registrations.add(context.registerService(FileStorageServiceRegistry.class.getName(), registry, null));
+            registrations.add(context.registerService(FileStorageAccountManagerLookupService.class.getName(), lookupService, null));
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.file.storage\" failed.", e);
             throw e;
@@ -122,6 +131,13 @@ public final class FileStorageActivator implements BundleActivator {
                     registrations.remove(0).unregister();
                 }
                 registrations = null;
+            }
+            /*
+             * Stop look-up service
+             */
+            if (null != lookupService) {
+                lookupService.stop();
+                lookupService = null;
             }
             /*
              * Stop registry
