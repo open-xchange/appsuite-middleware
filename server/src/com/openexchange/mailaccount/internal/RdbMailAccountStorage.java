@@ -141,12 +141,13 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final String UPDATE_PERSONAL2 = "UPDATE user_transport_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String SELECT_PASSWORD1 = "SELECT id, password FROM user_mail_account WHERE cid = ? AND user = ?";
+
     private static final String SELECT_PASSWORD2 = "SELECT id, password FROM user_transport_account WHERE cid = ? AND user = ?";
-    
+
     private static final String UPDATE_PASSWORD1 = "UPDATE user_mail_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
+
     private static final String UPDATE_PASSWORD2 = "UPDATE user_transport_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
-    
-    
+
     private static void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid) throws MailAccountException {
         Connection con = null;
         try {
@@ -590,26 +591,26 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     /**
      * Contains attributes which denote an account's default folders.
      */
-    private static final EnumSet<Attribute> DEFAULT =
-        EnumSet.of(
-            Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
-            Attribute.CONFIRMED_HAM_LITERAL,
-            Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
-            Attribute.CONFIRMED_SPAM_LITERAL,
-            Attribute.DRAFTS_FULLNAME_LITERAL,
-            Attribute.DRAFTS_LITERAL,
-            Attribute.SENT_FULLNAME_LITERAL,
-            Attribute.SENT_LITERAL,
-            Attribute.SPAM_FULLNAME_LITERAL,
-            Attribute.SPAM_LITERAL,
-            Attribute.TRASH_FULLNAME_LITERAL,
-            Attribute.TRASH_LITERAL);
+    private static final EnumSet<Attribute> DEFAULT = EnumSet.of(
+        Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_HAM_LITERAL,
+        Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_SPAM_LITERAL,
+        Attribute.DRAFTS_FULLNAME_LITERAL,
+        Attribute.DRAFTS_LITERAL,
+        Attribute.SENT_FULLNAME_LITERAL,
+        Attribute.SENT_LITERAL,
+        Attribute.SPAM_FULLNAME_LITERAL,
+        Attribute.SPAM_LITERAL,
+        Attribute.TRASH_FULLNAME_LITERAL,
+        Attribute.TRASH_LITERAL);
 
     /**
      * Contains attributes which are allowed to be edited for primary mail account.
      */
-    private static final EnumSet<Attribute> PRIMARY_EDITABLE =
-        EnumSet.of(Attribute.UNIFIED_INBOX_ENABLED_LITERAL, Attribute.PERSONAL_LITERAL);
+    private static final EnumSet<Attribute> PRIMARY_EDITABLE = EnumSet.of(
+        Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
+        Attribute.PERSONAL_LITERAL);
 
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
         if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
@@ -1355,6 +1356,137 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         return account;
     }
 
+    public boolean checkCanDecryptPasswords(final int user, final int cid, final String secret) throws MailAccountException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = Database.get(cid, false);
+            stmt = con.prepareStatement(SELECT_PASSWORD1);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, user);
+
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                final String password = rs.getString(2);
+                if (password != null) {
+                    MailPasswordUtil.decrypt(password, secret);
+                }
+            }
+
+            rs.close();
+            stmt.close();
+
+            stmt = con.prepareStatement(SELECT_PASSWORD2);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, user);
+
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt(1);
+                if (id != MailAccount.DEFAULT_ID) {
+                    final String password = rs.getString(2);
+                    if (password != null) {
+                        MailPasswordUtil.decrypt(password, secret);
+                    }
+                }
+            }
+
+        } catch (final DBPoolingException e) {
+            throw new MailAccountException(e);
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final GeneralSecurityException e) {
+            return false;
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (con != null) {
+                Database.back(cid, false, con);
+            }
+        }
+        return true;
+    }
+
+    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws MailAccountException {
+        Connection con = null;
+        PreparedStatement select = null;
+        PreparedStatement update = null;
+        ResultSet rs = null;
+        try {
+            con = Database.get(cid, true);
+            con.setAutoCommit(false);
+            update = con.prepareStatement(UPDATE_PASSWORD1);
+            update.setInt(2, cid);
+            update.setInt(4, user);
+
+            select = con.prepareStatement(SELECT_PASSWORD1);
+            select.setInt(1, cid);
+            select.setInt(2, user);
+
+            rs = select.executeQuery();
+
+            while (rs.next()) {
+                final String password = rs.getString(2);
+                int id = rs.getInt(1);
+                if (id != MailAccount.DEFAULT_ID) {
+                    try {
+                        // If we can decrypt the password with the newSecret, we don't need to do anything about this account
+                        MailPasswordUtil.decrypt(password, newSecret);
+                    } catch (GeneralSecurityException x) {
+                        // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
+                        final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                        update.setString(1, transcribed);
+                        update.setInt(3, id);
+                        update.executeUpdate();
+                    }
+                }
+            }
+
+            rs.close();
+            select.close();
+            update.close();
+
+            update = con.prepareStatement(UPDATE_PASSWORD2);
+            update.setInt(2, cid);
+            update.setInt(4, user);
+
+            select = con.prepareStatement(SELECT_PASSWORD2);
+            select.setInt(1, cid);
+            select.setInt(2, user);
+
+            rs = select.executeQuery();
+
+            while (rs.next()) {
+                final String password = rs.getString(2);
+                final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                update.setString(1, transcribed);
+                update.setInt(3, rs.getInt(1));
+                update.executeUpdate();
+            }
+            con.commit();
+        } catch (final DBPoolingException e) {
+            throw new MailAccountException(e);
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } catch (final GeneralSecurityException e) {
+            throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(e, "", "", Integer.valueOf(user), Integer.valueOf(cid));
+        } finally {
+            DBUtils.closeSQLStuff(rs, select);
+            DBUtils.closeSQLStuff(update);
+            if (con != null) {
+                try {
+                    con.rollback();
+                    con.setAutoCommit(true);
+                } catch (final SQLException e) {
+                    // Don't care
+                }
+                Database.back(cid, true, con);
+            }
+        }
+    }
+
     /*-
      * ++++++++++++++++++++++++++++++++++++ UTILITY METHOD(S) ++++++++++++++++++++++++++++++++++++
      */
@@ -1384,13 +1516,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     /**
-     * Binary-sorted invalid characters: No control <code>\t\n\f\r</code> or punctuation <code>!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~</code> except <code>'-'</code> and
-     * <code>'_'</code>.
+     * Binary-sorted invalid characters: No control <code>\t\n\f\r</code> or punctuation <code>!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~</code>
+     * except <code>'-'</code> and <code>'_'</code>.
      */
-    private static final char[] CHARS_INVALID =
-        {
-            '\t', '\n', '\f', '\r', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?',
-            '@', '[', '\\', ']', '^', '`', '{', '|', '}', '~' };
+    private static final char[] CHARS_INVALID = {
+        '\t', '\n', '\f', '\r', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?', '@',
+        '[', '\\', ']', '^', '`', '{', '|', '}', '~' };
 
     /**
      * Checks if specified name contains an invalid character.
@@ -1410,142 +1541,6 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             isWhitespace &= Character.isWhitespace(chars[i]);
         }
         return !isWhitespace && valid;
-    }
-
-    public boolean checkCanDecryptPasswords(final int user, final int cid, final String secret) throws MailAccountException {
-        Connection con = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            con = Database.get(cid, false);
-            stmt = con.prepareStatement(SELECT_PASSWORD1);
-            stmt.setInt(1, cid);
-            stmt.setInt(2, user);
-            
-            rs = stmt.executeQuery();
-            
-            while(rs.next()) {
-                final String password = rs.getString(2);
-                if(password != null) {
-                    MailPasswordUtil.decrypt(password, secret);
-                }
-            }
-            
-            rs.close();
-            stmt.close();
-            
-            stmt = con.prepareStatement(SELECT_PASSWORD2);
-            stmt.setInt(1, cid);
-            stmt.setInt(2, user);
-            
-            rs = stmt.executeQuery();
-            
-            while(rs.next()) {
-                int id = rs.getInt(1);
-                if(id != MailAccount.DEFAULT_ID) {
-                    final String password = rs.getString(2);
-                    if(password != null) {
-                        MailPasswordUtil.decrypt(password, secret);
-                    }
-                }
-            }
-            
-        } catch (final DBPoolingException e) {
-            throw new MailAccountException(e);
-        } catch (final SQLException e) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
-        } catch (final GeneralSecurityException e) {
-            return false;
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            if(con != null) {
-                Database.back(cid, false, con);
-            }
-        }
-        return true;
-    }
-
-    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws MailAccountException {
-        Connection con = null;
-        PreparedStatement select = null;
-        PreparedStatement update = null;
-        ResultSet rs = null;
-        try {
-            con = Database.get(cid, true);
-            con.setAutoCommit(false);
-            update = con.prepareStatement(UPDATE_PASSWORD1);
-            update.setInt(2, cid);
-            update.setInt(4, user);
-            
-            select = con.prepareStatement(SELECT_PASSWORD1);
-            select.setInt(1, cid);
-            select.setInt(2, user);
-            
-            rs = select.executeQuery();
-            
-            while(rs.next()) {
-                final String password = rs.getString(2);
-                int id = rs.getInt(1);
-                if(id != MailAccount.DEFAULT_ID) {
-                    try {
-                        // If we can decrypt the password with the newSecret, we don't need to do anything about this account
-                        MailPasswordUtil.decrypt(password, newSecret);
-                    } catch (GeneralSecurityException x) {
-                        // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
-                        final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
-                        update.setString(1, transcribed);
-                        update.setInt(3, id);
-                        update.executeUpdate();
-                    }
-                }
-            }
-            
-            rs.close();
-            select.close();
-            update.close();
-
-            update = con.prepareStatement(UPDATE_PASSWORD2);
-            update.setInt(2, cid);
-            update.setInt(4, user);
-
-            select = con.prepareStatement(SELECT_PASSWORD2);
-            select.setInt(1, cid);
-            select.setInt(2, user);
-            
-            rs = select.executeQuery();
-            
-            while(rs.next()) {
-                final String password = rs.getString(2);
-                final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
-                update.setString(1, transcribed);
-                update.setInt(3, rs.getInt(1));
-                update.executeUpdate();
-            }   
-            con.commit();
-        } catch (final DBPoolingException e) {
-            throw new MailAccountException(e);
-        } catch (final SQLException e) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
-        } catch (final GeneralSecurityException e) {
-            throw MailAccountExceptionMessages.PASSWORD_ENCRYPTION_FAILED.create(
-                e,
-                "",
-                "",
-                Integer.valueOf(user),
-                Integer.valueOf(cid));
-        } finally {
-            DBUtils.closeSQLStuff(rs, select);
-            DBUtils.closeSQLStuff(update);
-            if(con != null) {
-                try {
-                    con.rollback();
-                    con.setAutoCommit(true);
-                } catch (final SQLException e) {
-                    // Don't care
-                }
-                Database.back(cid, true, con);
-            }
-        }
     }
 
 }
