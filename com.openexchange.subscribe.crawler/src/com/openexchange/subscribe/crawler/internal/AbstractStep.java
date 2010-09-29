@@ -135,16 +135,23 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         try {
           output = new BufferedWriter(new FileWriter(file));
           output.write( page.getWebResponse().getContentAsString() );
-          Runtime.getRuntime().exec("open -a Safari ./crawlerTestPage.html");
+          // Check on which Operating System this runs
+          if (System.getProperty("os.name").contains("Mac")){
+              Runtime.getRuntime().exec("open -a Safari ./crawlerTestPage.html");
+          } else if (System.getProperty("os.name").contains("Windows")){
+              Runtime.getRuntime().exec("cmd.exe /C start ./crawlerTestPage.html");
+          } else {
+              // Linux hopefully
+              Runtime.getRuntime().exec("firefox ./crawlerTestPage.html &");
+          }
+          //windows: iexplore http://www.example.com
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         finally {
           try {
             output.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } 
         }
