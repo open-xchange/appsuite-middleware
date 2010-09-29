@@ -120,4 +120,8 @@ public class I18nServices {
     public String translate(String localeId, String toTranslate) {
         return translate(LocaleTools.getLocale(localeId), toTranslate);
     }
+
+    public void clear() {
+        services.clear();
+    }
 }
