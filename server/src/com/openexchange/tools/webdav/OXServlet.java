@@ -350,7 +350,7 @@ public abstract class OXServlet extends WebDavServlet {
         builder.append("opaque=\"").append(opaque).append('"').append(", ");
         builder.append("stale=\"false\"").append(", ");
         builder.append("algorithm=\"MD5\"");
-        resp.addHeader("WWW-Authenticate", builder.toString());
+//        resp.addHeader("WWW-Authenticate", builder.toString());
     }
 
     private LoginRequest parseLogin(final HttpServletRequest req) throws WebdavException, IOException {
