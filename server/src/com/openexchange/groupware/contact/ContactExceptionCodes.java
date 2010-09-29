@@ -83,7 +83,7 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     LOAD_OLD_CONTACT_FAILED(LOAD_OLD_CONTACT_FAILED_MSG, Category.CODE_ERROR, 116),
     /** You are not allowed to mark this contact as private contact: Context %1$d Object %2$d */
     MARK_PRIVATE_NOT_ALLOWED(MARK_PRIVATE_NOT_ALLOWED_MSG, Category.PERMISSION, 118),
-    /**Edit Conflict. Your change cannot be completed because somebody else" + " has made a conflicting change to the same item. Please refresh or " + "synchronize and try again. */
+    /** Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again. */
     OBJECT_HAS_CHANGED(OBJECT_HAS_CHANGED_MSG, Category.CONCURRENT_MODIFICATION, 119),
     /** An error occurred: Object id is -1 */
     NEGATIVE_OBJECT_ID(NEGATIVE_OBJECT_ID_MSG, Category.CODE_ERROR, 121),
@@ -129,6 +129,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     NO_CHANGE_PERMISSION(NO_CHANGE_PERMISSION_MSG, Category.PERMISSION, 176),
     /** Unable to load objects. Context %1$d User %2$d */
     LOAD_OBJECT_FAILED(LOAD_OBJECT_FAILED_MSG, Category.CODE_ERROR, 252),
+    /** User contacts can not be deleted. */
+    NO_USER_CONTACT_DELETE(NO_USER_CONTACT_DELETE_MSG, Category.PERMISSION, 260),
     ;
 
     private String message;
