@@ -719,33 +719,21 @@ public final class Init {
         dropProperty();
     }
 
-    private static void dropProperty() {
+    public static void dropProperty() {
         final Properties sysProps = System.getProperties();
         sysProps.remove("openexchange.propdir");
         sysProps.remove("openexchange.propdir2");
     }
 
-    private static void dropConfigBundle() {
+    public static void dropConfigBundle() {
         services.remove(ConfigurationService.class);
         ServerServiceRegistry.getInstance().removeService(ConfigurationService.class);
         FileWatcher.dropTimer();
     }
 
-    private static void dropI18NBundle() throws FileNotFoundException {
-        final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
-        final String directory_name = config.getProperty("i18n.language.path");
-        final File dir = new File(directory_name);
+    public static void dropI18NBundle() {
         final I18nServices i18nServices = I18nServices.getInstance();
-        try {
-            for (final ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
-                i18nServices.removeService(new I18nImpl(rc));
-            }
-            for (final Translations tr : new POTranslationsDiscoverer(dir).getTranslations()) {
-                i18nServices.removeService(new TranslationsI18N(tr));
-            }
-        } catch (final NullPointerException e) {
-            e.printStackTrace();
-        }
+        i18nServices.clear();
     }
 
     public static void stopMailBundle() {

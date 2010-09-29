@@ -81,7 +81,9 @@ public class TranslatedSingleTest extends TestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        Init.stopServer();
+        Init.dropI18NBundle();
+        Init.dropConfigBundle();
+        Init.dropProperty();
         super.tearDown();
     }
 
