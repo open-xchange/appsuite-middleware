@@ -78,19 +78,13 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.Attachments;
-import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
-import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.ContactUnificationState;
@@ -131,10 +125,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_API2_DATABASEIMPL_RDBCONTACTSQLIMPL, component = EnumComponent.CONTACT)
 public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContactInterface, FinalContactInterface {
-
-    private static final String ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D = "Unable to load objects. Context %1$d User %2$d";
 
     private final int userId;
 
@@ -145,9 +136,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     private final Session session;
 
     private final UserConfiguration userConfiguration;
-
-    @Deprecated
-    static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(RdbContactSQLImpl.class);
 
     private static final Log LOG = LogFactory.getLog(RdbContactSQLImpl.class);
 
@@ -661,7 +649,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final Contact co;
         try {
             co = Contacts.getContactById(objectId, userId, memberInGroups, ctx, userConfiguration, con);
-            if (!performSecurityReadCheck(fid, co.getCreatedBy(), userId, memberInGroups, session, con, ctx)) {
+            if (!performSecurityReadCheck(fid, co.getCreatedBy(), userId, session, con, ctx)) {
                 throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
             }
             final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(
@@ -702,7 +690,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
             }
 
-            if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
+            if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, session, readCon, ctx)) {
                 throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
             }
         } catch (final DBPoolingException e) {
@@ -731,7 +719,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
         }
 
-        if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
+        if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, session, readCon, ctx)) {
             throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
         }
         return co;
@@ -969,11 +957,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    @OXThrowsMultiple(category = { Category.SOCKET_CONNECTION, Category.CODE_ERROR, Category.CODE_ERROR, Category.TRY_AGAIN }, desc = {
-        "47", "48", "49", "59" }, exceptionId = { 47, 48, 49, 59 }, msg = {
-        ContactException.INIT_CONNECTION_FROM_DBPOOL, ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D,
-        ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D, "The contact you requested is not valid." })
-    public SearchIterator<Contact> getObjectsById(final int[][] object_id, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getObjectsById(final int[][] object_id, final int[] cols) throws ContactException, OXException {
         final int[] myCols = checkColumns(cols);
         try {
             final List<Contact> retval = new ArrayList<Contact>(object_id.length);
@@ -982,14 +966,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             int offset = 0;
             final int blockSize = 10;
             while (remain > blockSize) {
-                /*
-                 * Copy block
-                 */
+                // Copy block
                 final int[][] block_object_id = new int[blockSize][];
                 System.arraycopy(object_id, offset, block_object_id, 0, block_object_id.length);
-                /*
-                 * Add contacts
-                 */
+                // Add contacts
                 addQueriedContacts(myCols, retval, block_object_id);
                 remain -= blockSize;
                 offset += blockSize;
@@ -997,23 +977,19 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             if (remain > 0) {
                 final int[][] block_object_id = new int[remain][];
                 System.arraycopy(object_id, offset, block_object_id, 0, block_object_id.length);
-                /*
-                 * Add contacts
-                 */
+                // Add contacts
                 addQueriedContacts(myCols, retval, block_object_id);
             }
             final int size = retval.size();
             if (object_id.length == 1 && size < object_id.length) {
-                /*
-                 * Throw error if single contact is requested
-                 */
-                throw EXCEPTIONS.createOXObjectNotFoundException(59);
+                // Throw error if single contact is requested
+                throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(0), I(ctx.getContextId())));
             }
             return new SearchIteratorDelegator<Contact>(retval.iterator(), size);
         } catch (final SearchIteratorException e) {
-            throw EXCEPTIONS.create(48, e, I(ctx.getContextId()), I(userId));
+            throw new ContactException(e);
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(49, e, I(ctx.getContextId()), I(userId));
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, "");
         }
     }
 
@@ -1101,7 +1077,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public static boolean performSecurityReadCheck(final int fid, final int created_from, final int user, final int[] group, final Session so, final Connection readcon, final Context ctx) {
+    public static boolean performSecurityReadCheck(final int fid, final int created_from, final int user, final Session so, final Connection readcon, final Context ctx) {
         return Contacts.performContactReadCheck(
             fid,
             created_from,
@@ -1111,12 +1087,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             readcon);
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "50", "51" }, exceptionId = { 50, 51 }, msg = {
-        ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D, ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D })
-    protected Contact convertResultSet2ContactObject(final ResultSet rs, final int cols[], final boolean check, final Connection con) throws OXException {
+    protected Contact convertResultSet2ContactObject(final ResultSet rs, final int cols[], final boolean check, final Connection con) throws ContactException, OXConflictException {
         final Contact co = new Contact();
-
+        Statement stmt = null;
         try {
+            stmt = rs.getStatement();
             co.setParentFolderID(rs.getInt(1));
             co.setContextId(rs.getInt(2));
             co.setCreatedBy(rs.getInt(3));
@@ -1132,9 +1107,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             co.setLastModified(mi);
 
             co.setObjectID(rs.getInt(7));
-            /*
-             * Start at row count 8 to pass prefixed fields
-             */
+            // Start at row count 8 to pass prefixed fields
             int cnt = 8;
             for (int a = 0; a < cols.length; a++) {
                 final Mapper m = Contacts.mapping[cols[a]];
@@ -1144,8 +1117,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 }
             }
 
-            if (check && !performSecurityReadCheck(co.getParentFolderID(), co.getCreatedBy(), userId, memberInGroups, session, con, ctx)) {
-                throw EXCEPTIONS.createOXConflictException(50, I(ctx.getContextId()), I(userId));
+            if (check && !performSecurityReadCheck(co.getParentFolderID(), co.getCreatedBy(), userId, session, con, ctx)) {
+                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(co.getParentFolderID()), I(ctx.getContextId()), I(userId)));
             }
             if (Arrays.contains(cols, Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
                 final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(
@@ -1157,9 +1130,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 }
             }
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(51, e, I(ctx.getContextId()), I(userId));
-        } catch (final OXException e) {
-            throw e;
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } catch (AttachmentException e) {
+            throw new ContactException(e);
         }
 
         return co;
@@ -1191,8 +1164,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return results;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "52", "53" }, exceptionId = { 52, 53 }, msg = {
-        ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D, ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D })
     private class ContactObjectIterator implements SearchIterator<Contact> {
 
         private Contact nexto;
@@ -1231,28 +1202,15 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 }
             } catch (final SQLException e) {
                 throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
-            } catch (final OXException exc) {
-                throw EXCEPTIONS.createSearchIteratorException(53, exc, I(ctx.getContextId()), I(userId));
+            } catch (final ContactException e) {
+                throw new SearchIteratorException(e);
+            } catch (OXConflictException e) {
+                throw new SearchIteratorException(e);
             }
         }
 
-        @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "54", "55" }, exceptionId = { 54, 55 }, msg = {
-            "Unable to close Statement Handling. Context %1$d User %2$d", "Unable to close Statement Handling. Context %1$d User %2$d" })
-        public void close() throws SearchIteratorException {
-            try {
-                rs.close();
-            } catch (final SQLException e) {
-                throw EXCEPTIONS.createSearchIteratorException(54, e, I(ctx.getContextId()), I(userId));
-                // throw new
-                // SearchIteratorException("UNABLE TO CLOSE SEARCHITERATOR RESULTSET! (cid="+sessionobject.getContext().getContextId()+')',e);
-            }
-            try {
-                stmt.close();
-            } catch (final SQLException e) {
-                throw EXCEPTIONS.createSearchIteratorException(55, e, I(ctx.getContextId()), I(userId));
-                // throw new
-                // SearchIteratorException("UNABLE TO CLOSE SEARCHITERATOR STATEMENT! (cid="+sessionobject.getContext().getContextId()+')',e);
-            }
+        public void close() {
+            closeSQLStuff(rs, stmt);
             if (readcon != null) {
                 DBPool.closeReaderSilent(ctx, readcon);
             }
@@ -1265,9 +1223,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             return nexto != null;
         }
 
-        @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "56", "57" }, exceptionId = { 56, 57 }, msg = {
-            "Unable to get next Object. Context %1$d User %2$d", "Unable to get next Object. Context %1$d User %2$d" })
-        public Contact next() throws OXException {
+        public Contact next() throws SearchIteratorException {
             try {
                 if (rs.next()) {
                     try {
@@ -1276,11 +1232,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                         } else {
                             pre = convertResultSet2ContactObject(rs, cols, false, readcon);
                         }
-                    } catch (final OXException e) {
-                        throw EXCEPTIONS.create(56, I(ctx.getContextId()), I(userId));
-                        // throw new
-                        // OXException("ERROR DURING RIGHTS CHECK IN SEARCHITERATOR NEXT (cid="+sessionobject.getContext().getContextId()+')',
-                        // e);
+                    } catch (final ContactException e) {
+                        throw new SearchIteratorException(e);
+                    } catch (OXConflictException e) {
+                        throw new SearchIteratorException(e);
                     }
                 } else {
                     pre = null;
@@ -1290,11 +1245,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 }
 
                 return nexto;
-            } catch (final SQLException exc) {
-                throw EXCEPTIONS.create(57, exc, I(ctx.getContextId()), I(userId));
-            } catch (final OXException exc) {
-                throw exc;
-                // throw new SearchIteratorException("ERROR OCCURRED ON NEXT (cid="+sessionobject.getContext().getContextId()+')',exc);
+            } catch (final SQLException e) {
+                throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
             }
         }
 
