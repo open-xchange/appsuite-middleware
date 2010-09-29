@@ -50,7 +50,8 @@
 package com.openexchange.file.storage;
 
 /**
- * {@link FileStorageAccountManagerProvider}
+ * {@link FileStorageAccountManagerProvider} - Provides the {@link FileStorageAccountManager account manager} appropriate for a certain
+ * {@link FileStorageService file storage service}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
