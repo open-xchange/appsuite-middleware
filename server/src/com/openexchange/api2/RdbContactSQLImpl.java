@@ -692,30 +692,21 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             if (userid > 0) {
                 co = Contacts.getUserById(userid, userId, memberInGroups, ctx, userConfiguration, readCon);
             } else {
-                throw EXCEPTIONS.createOXObjectNotFoundException(26, I(ctx.getContextId()), I(fid), I(userId), I(userid));
-                // throw new OXObjectNotFoundException("NO CONTACT FOUND! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
+                throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(userId), I(ctx.getContextId())));
             }
 
             final int folderId = co.getParentFolderID();
 
             final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(27, I(fid), I(ctx.getContextId()), I(userId));
-                // throw new
-                // OXException("getObjectById() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
+                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
             }
 
             if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
-                throw EXCEPTIONS.createOXConflictException(28, I(folderId), I(ctx.getContextId()), I(userId));
-                // throw new OXConflictException("NOT ALLOWED TO SEE OBJECTS");
+                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
             }
         } catch (final DBPoolingException e) {
-            throw EXCEPTIONS.create(29, e);
-        } catch (final OXException e) {
-            throw e;
-            // throw new
-            // OXException("UNABLE TO LOAD CONTACT BY ID - CHECK RIGHTS (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+objectId+')',
-            // e);
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } finally {
             if (readCon != null) {
                 DBPool.closeReaderSilent(ctx, readCon);
@@ -727,69 +718,45 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     public Contact getUserById(final int userid, final boolean performReadCheck, final Connection readCon) throws OXException {
         Contact co = null;
         final int fid = FolderObject.SYSTEM_LDAP_FOLDER_ID;
-        try {
-            if (userid > 0) {
-                co = Contacts.getUserById(userid, userId, memberInGroups, ctx, userConfiguration, readCon);
-            } else {
-                throw EXCEPTIONS.createOXObjectNotFoundException(26, I(ctx.getContextId()), I(fid), I(userId), I(userid));
-                // throw new OXObjectNotFoundException("NO CONTACT FOUND! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
-            }
+        if (userid > 0) {
+            co = Contacts.getUserById(userid, userId, memberInGroups, ctx, userConfiguration, readCon);
+        } else {
+            throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(userId), I(ctx.getContextId())));
+        }
 
-            final int folderId = co.getParentFolderID();
+        final int folderId = co.getParentFolderID();
 
-            final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
-            if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(27, I(fid), I(ctx.getContextId()), I(userId));
-                // throw new
-                // OXException("getObjectById() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
-            }
+        final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
+        if (contactFolder.getModule() != FolderObject.CONTACT) {
+            throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
+        }
 
-            if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
-                throw EXCEPTIONS.createOXConflictException(28, I(folderId), I(ctx.getContextId()), I(userId));
-                // throw new OXConflictException("NOT ALLOWED TO SEE OBJECTS");
-            }
-        } catch (final OXException e) {
-            throw e;
-            // throw new
-            // OXException("UNABLE TO LOAD CONTACT BY ID - CHECK RIGHTS (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+objectId+')',
-            // e);
+        if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
+            throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
         }
         return co;
     }
 
-    @OXThrowsMultiple(category = {
-        Category.SOCKET_CONNECTION, Category.CODE_ERROR, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR }, desc = {
-        "30", "31", "32", "33", "34", "35" }, exceptionId = { 30, 31, 32, 33, 34, 35 }, msg = {
-        ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG,
-        ContactException.NO_READ_PERMISSION_MSG,
-        "An error occurred during the load of modified objects from a folder. Context %1$d Folder %2$d User %3$d",
-        "An error occurred during the load of modified objects from a folder. Context %1$d Folder %2$d User %3$d" })
-    public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
+    public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws ContactException, OXConflictException {
         boolean error = false;
         Connection readCon = null;
         try {
             readCon = DBPool.pickup(ctx);
         } catch (final Exception e) {
-            throw EXCEPTIONS.create(30, e);
-            // throw new OXException("UNABLE TO GET READ CONNECTION", e);
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         }
         final OXFolderAccess folderAccess = new OXFolderAccess(readCon, ctx);
         try {
             final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(31, I(folderId), I(ctx.getContextId()), I(userId));
-                // throw new
-                // OXException("getModifiedContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
+                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId)));
             }
         } catch (final OXException e) {
             if (readCon != null) {
                 DBPool.closeReaderSilent(ctx, readCon);
             }
-            throw e;
-            // throw new
-            // OXException("getModifiedContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
+            throw new ContactException(e);
         }
-
         SearchIterator<Contact> si = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -798,17 +765,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
             final EffectivePermission oclPerm = folderAccess.getFolderPermission(folderId, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw EXCEPTIONS.createOXConflictException(32, I(folderId), I(ctx.getContextId()), I(userId));
-                // throw new
-                // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
+                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
             }
             if (!oclPerm.canReadAllObjects()) {
                 if (oclPerm.canReadOwnObjects()) {
                     cs.setReadOnlyOwnFolder(userId);
                 } else {
-                    throw EXCEPTIONS.createOXConflictException(33, I(folderId), I(ctx.getContextId()), I(userId));
-                    // throw new
-                    // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
+                    throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
                 }
             }
 
@@ -817,8 +780,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             } else {
                 cs.setFolder(folderId);
             }
-
-            // stmt = readCon.createStatement();
 
             cs.getAllChangedSince(since.getTime());
             cs.setSelect(cs.iFgetColsString(cols).toString());
@@ -829,27 +790,19 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             si = new ContactObjectIterator(rs, stmt, cols, false, readCon);
         } catch (final SearchIteratorException e) {
             error = true;
-            throw EXCEPTIONS.create(34, I(ctx.getContextId()), I(folderId), I(userId));
+            throw new ContactException(e);
         } catch (final SQLException e) {
             error = true;
-            throw EXCEPTIONS.create(35, I(ctx.getContextId()), I(folderId), I(userId));
-        } catch (final OXException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } catch (OXConflictException e) {
             error = true;
             throw e;
-            // throw new OXException( "Exception during getContactsInFolder() for User " + userId+ " in folder " + folderId+
-            // "(cid="+sessionobject.getContext().getContextId()+')', e);
+        } catch (final OXException e) {
+            error = true;
+            throw new ContactException(e);
         } finally {
             if (error) {
-                try {
-                    if (rs != null) {
-                        rs.close();
-                    }
-                    if (stmt != null) {
-                        stmt.close();
-                    }
-                } catch (final SQLException sxe) {
-                    LOG.error("Unable to close Statement or ResultSet", sxe);
-                }
+                closeSQLStuff(rs, stmt);
                 try {
                     if (readCon != null) {
                         DBPool.closeReaderSilent(ctx, readCon);
