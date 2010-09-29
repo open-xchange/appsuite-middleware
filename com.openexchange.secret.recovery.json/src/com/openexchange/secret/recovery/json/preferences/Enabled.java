@@ -71,7 +71,7 @@ public class Enabled implements PreferencesItemService {
     }
 
     public String[] getPath() {
-        return new String[] { "modules", "secretRecovery", "module" };
+        return new String[] { "modules", "com.openexchange.secret.recovery", "module" };
     }
 
     public IValueHandler getSharedValue() {
