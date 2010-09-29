@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open-Xchange Meta packages
 
-%define oxcommon open-xchange, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-management, open-xchange-monitoring, open-xchange-pop3, open-xchange-push-udp, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-threadpool, open-xchange-charset, open-xchange-control, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin, open-xchange-report-client, open-xchange-secret
+%define oxcommon open-xchange, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-control, open-xchange-calendar-printing, open-xchange-gui-wizard-plugin, open-xchange-report-client
 
 # ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-server
