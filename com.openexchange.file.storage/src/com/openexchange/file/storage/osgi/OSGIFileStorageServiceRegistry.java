@@ -74,7 +74,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
     /**
      * The backing map.
      */
-    private final ConcurrentMap<String, FileStorageService> map;
+    final ConcurrentMap<String, FileStorageService> map;
 
     /**
      * The tracker instance.
