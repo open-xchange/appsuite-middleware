@@ -815,12 +815,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return new PrefetchIterator<Contact>(si);
     }
 
-    @OXThrowsMultiple(category = { Category.SOCKET_CONNECTION, Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "36", "37", "38" }, exceptionId = {
-        36, 37, 38 }, msg = {
-        ContactException.INIT_CONNECTION_FROM_DBPOOL,
-        "An error occurred during the load of deleted objects from a folder. Context %1$d Folder %2$d User %3$d",
-        "An error occurred during the load of deleted objects from a folder. Context %1$d Folder %2$d User %3$d" })
-    public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
+    public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws ContactException {
         boolean error = false;
         SearchIterator<Contact> si = null;
         Connection readcon = null;
@@ -832,8 +827,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             final ContactSql cs = new ContactMySql(session, ctx);
             cs.setFolder(folderId);
 
-            // stmt = readcon.createStatement();
-
             cs.getAllChangedSince(since.getTime());
             cs.setSelect(cs.iFgetColsStringFromDeleteTable(cols).toString());
             cs.setOrder(" ORDER BY co.field02 ");
@@ -844,27 +837,16 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
         } catch (final SearchIteratorException e) {
             error = true;
-            throw EXCEPTIONS.create(37, e, I(ctx.getContextId()), I(folderId), I(userId));
+            throw new ContactException(e);
         } catch (final DBPoolingException e) {
             error = true;
-            throw EXCEPTIONS.create(36, e);
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final SQLException e) {
             error = true;
-            throw EXCEPTIONS.create(38, e, I(ctx.getContextId()), I(folderId), I(userId));
-            // throw new OXException("Exception during getDeletedContactsInFolder() for User " + userId+ " in folder " + folderId+
-            // "(cid="+sessionobject.getContext().getContextId()+')', e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             if (error) {
-                try {
-                    if (rs != null) {
-                        rs.close();
-                    }
-                    if (stmt != null) {
-                        stmt.close();
-                    }
-                } catch (final SQLException sxe) {
-                    LOG.error("Unable to close Statement or ResultSet", sxe);
-                }
+                closeSQLStuff(rs, stmt);
                 try {
                     if (readcon != null) {
                         DBPool.closeReaderSilent(ctx, readcon);
