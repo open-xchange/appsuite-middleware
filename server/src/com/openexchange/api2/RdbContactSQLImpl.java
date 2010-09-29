@@ -78,15 +78,16 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
@@ -94,10 +95,9 @@ import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
-import com.openexchange.groupware.contact.ContactConfig.Property;
-import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
@@ -248,49 +248,28 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    @OXThrowsMultiple(category = {
-        Category.PERMISSION, Category.SOCKET_CONNECTION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR }, desc = {
-        "2", "3", "4", "5", "6" }, exceptionId = { 2, 3, 4, 5, 6 }, msg = {
-        ContactException.NON_CONTACT_FOLDER_MSG, ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.NO_PERMISSION_MSG,
-        ContactException.NO_PERMISSION_MSG, "Unable fetch the number of elements in this Folder. Context %1$d Folder %2$d User %3$d" })
-    public int getNumberOfContacts(final int folderId) throws OXException {
-        Connection readCon = null;
+    public int getNumberOfContacts(final int folderId) throws ContactException, OXConflictException {
+        final Connection readCon;
         try {
             readCon = DBPool.pickup(ctx);
-
+        } catch (DBPoolingException e) {
+            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
+        }
+        try {
             final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(2, I(folderId), I(ctx.getContextId()), I(userId));
-                // throw new
-                // OXException("getNumberOfContacts() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
+                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId)));
             }
-
-        } catch (final OXException e) {
-            if (readCon != null) {
-                DBPool.closeReaderSilent(ctx, readCon);
-            }
-            throw e;
-            // throw new
-            // OXException("getNumberOfContacts() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
-        } catch (final DBPoolingException e) {
-            throw EXCEPTIONS.create(3, e);
-        }
-
-        try {
             final ContactSql contactSQL = new ContactMySql(session, ctx);
             final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw EXCEPTIONS.createOXConflictException(4, I(folderId), I(ctx.getContextId()), I(userId));
-                // throw new
-                // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
+                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
             }
             if (!oclPerm.canReadAllObjects()) {
                 if (oclPerm.canReadOwnObjects()) {
                     contactSQL.setReadOnlyOwnFolder(userId);
                 } else {
-                    throw EXCEPTIONS.createOXConflictException(5, I(folderId), I(ctx.getContextId()), I(userId));
-                    // throw new
-                    // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
+                    throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
                 }
             }
             contactSQL.setSelect(contactSQL.iFgetNumberOfContactsString());
@@ -306,19 +285,17 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                     retval = rs.getInt(1);
                 }
             } catch (final SQLException e) {
-                throw EXCEPTIONS.create(6, e, I(ctx.getContextId()), I(folderId), I(userId));
-                // throw new OXException("Exception during getNumberOfContacts() for User "+ userId + " in folder " + folderId + " cid= "
-                // +sessionobject.getContext().getContextId()+' ' + "\n:"+ e.getMessage());
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
             } finally {
                 closeSQLStuff(rs, stmt);
             }
             return retval;
-        } catch (final OXException e) {
+        } catch (OXConflictException e) {
             throw e;
+        } catch (OXException e) {
+            throw new ContactException(e);
         } finally {
-            if (readCon != null) {
-                DBPool.closeReaderSilent(ctx, readCon);
-            }
+            DBPool.closeReaderSilent(ctx, readCon);
         }
     }
 
