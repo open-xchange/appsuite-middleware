@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.FinalContactInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
@@ -64,6 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
 
@@ -79,6 +82,8 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     private static final int SQL_INTERFACE = 1;
 
     private static final int SUBSCRIPTION = 2;
+    
+    private static final Log LOG = LogFactory.getLog(ContactFolderMultipleUpdaterStrategy.class);
 
     // All columns need to be loaded here as we keep the original, not the update and no data may be lost
     private static final int[] COMPARISON_COLUMNS = Contact.CONTENT_COLUMNS;
@@ -92,20 +97,23 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         if (candidate.getUserField20() != null && !candidate.getUserField20().equals("")){
             
             UUID uuid = UUID.fromString(candidate.getUserField20());
-            
-            Contact contactfromUUID = contactStore.getContactByUUID(uuid);
-            
-            if (contactfromUUID != null){
-                contactsAreAbleToBeAssociated = true;
-                ContactUnificationState state = contactStore.getAssociationBetween(original, candidate);
-                // if the two contacts are associated RED already a big negative score needs to be given
-                if (state.equals(ContactUnificationState.RED)){
-                    score = -1000;
+                                    
+            try{
+                Contact contactfromUUID = contactStore.getContactByUUID(uuid);
+                if (contactfromUUID != null){
+                    contactsAreAbleToBeAssociated = true;
+                    ContactUnificationState state = contactStore.getAssociationBetween(original, candidate);
+                    // if the two contacts are associated RED already a big negative score needs to be given
+                    if (state.equals(ContactUnificationState.RED)){
+                        score = -1000;
+                    }
+                    // if the contacts are associated GREEN already a big positive score needs to be given
+                    if (state.equals(ContactUnificationState.GREEN)){
+                        score = 1000;
+                    }
                 }
-                // if the contacts are associated GREEN already a big positive score needs to be given
-                if (state.equals(ContactUnificationState.GREEN)){
-                    score = 1000;
-                }
+            } catch (ContactException e) {                
+                LOG.error(e);                            
             }
         }        
         if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
@@ -132,23 +140,27 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         }
         
         if( score < threshhold && original.equalsContentwise(candidate)) { //the score check is only to speed the process up
-            score = threshhold + 1;
+            score += threshhold + 1;
         }
         //before returning the score the contacts need to be associated GREEN here if the score is high enough, they are not associated already, and they are both on the system
-        if (score >= threshhold && contactsAreAbleToBeAssociated){
-            List<UUID> idsOfAlreadyAssociatedContacts = contactStore.getAssociatedContacts(original);
-            //List<Contact> associatedContacts = 
-            boolean alreadyAssociated = false;
-            for (UUID uuid : idsOfAlreadyAssociatedContacts){
-                Contact contact = contactStore.getContactByUUID(uuid);
-                if (contact.equals(candidate)){
-                    alreadyAssociated = true;
+        try {
+            if (score >= threshhold && contactsAreAbleToBeAssociated){
+                List<UUID> idsOfAlreadyAssociatedContacts = contactStore.getAssociatedContacts(original);
+                //List<Contact> associatedContacts = 
+                boolean alreadyAssociated = false;
+                for (UUID uuid : idsOfAlreadyAssociatedContacts){
+                    Contact contact = contactStore.getContactByUUID(uuid);
+                    if (contact.equals(candidate)){
+                        alreadyAssociated = true;
+                    }
+                }
+                if (!alreadyAssociated){
+                    contactStore.associateTwoContacts(original, candidate);                
                 }
             }
-            if (!alreadyAssociated){
-                contactStore.associateTwoContacts(original, candidate);                
-            }
-        }
+        } catch (ContactException e) {
+            LOG.error(e);
+        } 
         return score;
     }
 
