@@ -5,7 +5,7 @@
 Name:           open-xchange-server
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-secret >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >=@OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-secret >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Bundle
-Requires:       open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-management >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-secret >= @OXVERSION@  open-xchange-management >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -83,8 +83,13 @@ Requires:  java-sun
 Group:          Applications/Productivity
 Summary:	Open-Xchange server scripts and configuration
 Prereq:		/usr/sbin/useradd
-Requires:	open-xchange-authentication >= @OXVERSION@ open-xchange-charset >= @OXVERSION@ open-xchange-conversion-engine >= @OXVERSION@ open-xchange-conversion-servlet >= @OXVERSION@ open-xchange-contactcollector >= @OXVERSION@ open-xchange-i18n >= @OXVERSION@ open-xchange-mailstore >= @OXVERSION@ open-xchange-jcharset open-xchange-push-udp >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-sessiond >= @OXVERSION@ open-xchange-smtp >= @OXVERSION@ open-xchange-spamhandler >= @OXVERSION@ open-xchange-user-json >= @OXVERSION@ open-xchange-settings-extensions >= @OXVERSION@ open-xchange-theme-default >= @OXVERSION@ open-xchange-folder-json >= @OXVERSION@, mysql >= 5.0.0
-
+Requires:	open-xchange-authentication >= @OXVERSION@ open-xchange-charset >= @OXVERSION@ open-xchange-conversion-engine >= @OXVERSION@ open-xchange-conversion-servlet >= @OXVERSION@ open-xchange-contactcollector >= @OXVERSION@ open-xchange-i18n >= @OXVERSION@ open-xchange-mailstore >= @OXVERSION@ open-xchange-jcharset >= @OXVERSION@ open-xchange-push-udp >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-sessiond >= @OXVERSION@ open-xchange-smtp >= @OXVERSION@ open-xchange-spamhandler >= @OXVERSION@ open-xchange-user-json >= @OXVERSION@ open-xchange-settings-extensions >= @OXVERSION@ open-xchange-theme-default >= @OXVERSION@ open-xchange-folder-json >= @OXVERSION@ open-xchange-proxy-servlet >= @OXVERSION@ open-xchange-secret-recovery-json >= @OXVERSION@
+%if 0%{?suse_version}
+Requires: mysql-client >= 5.0.0
+%endif
+%if 0%{?rhel_version}
+Requires: mysql >= 5.0.0
+%endif
 
 %description -n open-xchange
 Open-Xchange server scripts and configuration
