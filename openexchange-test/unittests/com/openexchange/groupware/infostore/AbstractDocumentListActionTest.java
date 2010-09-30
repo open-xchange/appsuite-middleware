@@ -55,17 +55,10 @@ import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.database.impl.AbstractDocumentListAction;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.tx.UndoableAction;
-import junit.framework.TestCase;
-
-import com.openexchange.groupware.EnumComponent;
-
 
 /**
  * {@link AbstractDocumentListActionTest}
@@ -80,6 +73,7 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
 
     private final List<DocumentMetadata> clean = new LinkedList<DocumentMetadata>();
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         createDocument();
@@ -124,23 +118,25 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
         notExistingId = IDGenerator.getId(getCtx(), Types.INFOSTORE);
     }
 
+    @Override
     public void tearDown() throws Exception {
         super.tearDown();
     }
 
-    private static final class TestDocumentListAction extends AbstractDocumentListAction {
+    static final class TestDocumentListAction extends AbstractDocumentListAction {
 
         public void perform() throws AbstractOXException {
             assureExistence();
         }
 
+        @Override
         protected Object[] getAdditionals(DocumentMetadata doc) {
             return null;
         }
 
         @Override
-        protected void undoAction() throws AbstractOXException {
-
+        protected void undoAction() {
+            // Nothing to do.
         }
     }
 
