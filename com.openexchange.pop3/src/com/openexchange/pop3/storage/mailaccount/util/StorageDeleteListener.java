@@ -56,7 +56,6 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageProperties;
@@ -93,7 +92,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
                 final Collection<Session> sessions = sessiondService.getSessions(user, cid);
                 if (!sessions.isEmpty()) {
                     final Session session = sessions.iterator().next();
-                    final POP3Access pop3Access = (POP3Access) POP3Provider.getInstance().createNewMailAccess(session, id);
+                    final POP3Access pop3Access = POP3Access.newInstance(session, id);
                     final POP3Storage pop3Storage = pop3Access.getPOP3Storage();
                     pop3Storage.drop();
                 }

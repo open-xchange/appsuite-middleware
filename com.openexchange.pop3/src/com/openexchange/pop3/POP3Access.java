@@ -183,7 +183,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * @param session The session providing needed user data
      * @throws MailException If initialization fails
      */
-    protected static POP3Access newInstance(final Session session) throws MailException {
+    public static POP3Access newInstance(final Session session) throws MailException {
         final POP3Access pop3Access = new POP3Access(session);
         applyPOP3Storage(pop3Access);
         return pop3Access;
@@ -196,7 +196,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * @param accountId The account ID
      * @throws MailException If initialization fails
      */
-    protected static POP3Access newInstance(final Session session, final int accountId) throws MailException {
+    public static POP3Access newInstance(final Session session, final int accountId) throws MailException {
         final POP3Access pop3Access = new POP3Access(session, accountId);
         applyPOP3Storage(pop3Access);
         return pop3Access;
