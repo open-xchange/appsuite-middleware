@@ -50,8 +50,6 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -61,12 +59,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.collections.Injector;
 
 public interface InfostoreSecurity {
-    @OXThrows(
-			category = AbstractOXException.Category.USER_INPUT,
-            desc = "The infoitem does not exist, so the permissions cannot be loaded.",
-            exceptionId = 0,
-            msg = "The requested item does not exist."
-    )
+
     EffectiveInfostorePermission getInfostorePermission(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
     EffectiveInfostorePermission getInfostorePermission(DocumentMetadata document, Context ctx, User user, UserConfiguration userConfig) throws OXException;
@@ -76,11 +69,5 @@ public interface InfostoreSecurity {
 
     <L> L injectInfostorePermissions(int[] ids, Context ctx, User user, UserConfiguration userConfig, L list, Injector<L, EffectiveInfostorePermission> injector) throws OXException;
 
-    @OXThrows(
-			category = AbstractOXException.Category.CODE_ERROR,
-            desc = "The client tries to put an infoitem into a non infoitem folder.",
-            exceptionId = 2,
-            msg = "The folder %d is not an Infostore folder"
-    )
     void checkFolderId(long folderId, Context ctx) throws OXException;
 }

@@ -65,7 +65,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -87,12 +86,6 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    @OXThrowsMultiple(
-        category = { AbstractOXException.Category.CODE_ERROR,AbstractOXException.Category.SETUP_ERROR },
-        desc = { "" },
-        exceptionId = { 1,2 },
-        msg = { "An SQL error occurred while performing task ClearLeftoverAttachmentsUpdateTask: %1$s.", "Can't resolve filestore." }
-    )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         try {
             filestorages.set(new HashMap<Integer, FileStorage>());

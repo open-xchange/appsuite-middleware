@@ -60,8 +60,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.sql.DBUtils;
@@ -163,7 +161,6 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider {
         txState.set(null);
     }
 
-    @OXThrows(category=Category.INTERNAL_ERROR, desc="This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool!", exceptionId=1, msg="This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool!")
     public void rollback() throws TransactionException {
         final List<Undoable> failed = new ArrayList<Undoable>();
         final List<Undoable> undos = new ArrayList<Undoable>(txState.get().undoables);
