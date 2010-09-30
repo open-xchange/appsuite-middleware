@@ -3944,7 +3944,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange, Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
         final ReminderService rsql = new ReminderHandler(c);
         if (action == CalendarOperation.DELETE || action == CalendarOperation.UPDATE && collection.isInThePast(end_date)) {
-            if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
+            if (rsql.existsReminder(oid, uid, Types.APPOINTMENT, con)) {
                 try {
                     if (con != null) {
                         rsql.deleteReminder(oid, uid, Types.APPOINTMENT, con);
@@ -3968,7 +3968,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 ro.setRecurrenceAppointment(sequence);
                 ro.setDate(reminder_date);
                 ro.setFolder(fid);
-                if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
+                if (rsql.existsReminder(oid, uid, Types.APPOINTMENT, con)) {
                     if (sequence && !recurrenceChange) {
                         /*
                          * A recurring appointment's reminder update whose
@@ -3979,7 +3979,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                          * date is greater than or equal to specified reminder,
                          * leave unchanged.
                          */
-                        if (rsql.loadReminder(oid, uid, Types.APPOINTMENT).getDate().getTime() < reminder_date
+                        if (rsql.loadReminder(oid, uid, Types.APPOINTMENT, con).getDate().getTime() < reminder_date
                                 .getTime()) {
                             if (con != null) {
                                 rsql.updateReminder(ro, con);

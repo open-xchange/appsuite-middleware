@@ -401,10 +401,15 @@ public class ReminderHandler implements ReminderService {
             closeSQLStuff(stmt);
         }
     }
-
-    public boolean existsReminder(final int targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
+    
+    public boolean existsReminder(final int targetId, final int userId, final int module, final Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
         try {
-            loadReminder(targetId, userId, module);
+            if (con == null) {
+                loadReminder(targetId, userId, module);
+            } else {
+                loadReminder(targetId, userId, module, con);
+            }
+            
             return true;
         } catch (final ReminderException exc) {
             if (Code.NOT_FOUND.getDetailNumber() == exc.getDetailNumber()) {
@@ -414,10 +419,13 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    public boolean existsReminder(final int targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
+        return existsReminder(targetId, userId, module, null);
+    }
+
     public ReminderObject loadReminder( final int targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
         return loadReminder(String.valueOf(targetId), userId, module);
     }
-
     public ReminderObject loadReminder( final String targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
         final Connection readCon;
         try {
@@ -433,7 +441,11 @@ public class ReminderHandler implements ReminderService {
     }
 
     public ReminderObject loadReminder( final int targetId, final int userId, final int module, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException {
-        return loadReminder(String.valueOf(targetId), userId, module, readCon);
+        if (readCon == null) {
+            return loadReminder(String.valueOf(targetId), userId, module);
+        } else {
+            return loadReminder(String.valueOf(targetId), userId, module, readCon);
+        }        
     }
 
     public ReminderObject loadReminder(final String targetId, final int userId, final int module, final Connection con) throws OXException {

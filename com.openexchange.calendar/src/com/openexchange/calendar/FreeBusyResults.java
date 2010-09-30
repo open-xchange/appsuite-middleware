@@ -409,7 +409,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     
     private final void preFillPermissionArray(final int groups[], final UserConfiguration uc) throws OXException {
         try {
-            cfo = recColl.getAllVisibleAndReadableFolderObject(uid, groups, c, uc);
+            cfo = recColl.getAllVisibleAndReadableFolderObject(uid, groups, c, uc, con);
         } catch (final OXException ex) {
             throw new OXException(ex);
         } catch (final DBPoolingException ex) {

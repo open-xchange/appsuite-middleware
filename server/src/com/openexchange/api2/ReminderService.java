@@ -94,11 +94,15 @@ public interface ReminderService {
     public void deleteReminder(int targetId, int userId, int module, Connection writeCon) throws OXException;
 
     public boolean existsReminder(int targetId, int userId, int module) throws OXException;
+    
+    public boolean existsReminder(int targetId, int userId, int module, Connection con) throws OXException;
 
     public ReminderObject loadReminder(int targetId, int userId, int module) throws OXException;
 
     public ReminderObject loadReminder(int objectId) throws OXMandatoryFieldException, OXConflictException, OXException;
-
+    
+    public ReminderObject loadReminder(final int targetId, final int userId, final int module, final Connection con) throws OXException;
+    
     /**
      * This method loads the reminder for several target objects.
      * @param targetIds unique identifier of several target objects.

@@ -2473,6 +2473,10 @@ public final class CalendarCollection implements CalendarCollectionService {
     public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
         return _getVisibleAndReadableFolderObject(uid, groups, c, uc, null, true);
     }
+    
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection con) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+        return _getVisibleAndReadableFolderObject(uid, groups, c, uc, con, true);
+    }
 
     private CalendarFolderObject _getVisibleAndReadableFolderObject(final int uid, final int groups[],
             final Context c, final UserConfiguration uc, final Connection readcon, final boolean fillShared) throws SQLException,
