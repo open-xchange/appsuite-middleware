@@ -131,6 +131,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     LOAD_OBJECT_FAILED(LOAD_OBJECT_FAILED_MSG, Category.CODE_ERROR, 252),
     /** User contacts can not be deleted. */
     NO_USER_CONTACT_DELETE(NO_USER_CONTACT_DELETE_MSG, Category.PERMISSION, 260),
+    /** Number of documents attached to this contact is below zero. You can not remove any more attachments. */
+    TOO_FEW_ATTACHMENTS(TOO_FEW_ATTACHMENTS_MSG, Category.USER_INPUT, 400),
     ;
 
     private String message;

@@ -128,6 +128,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String NO_USER_CONTACT_DELETE_MSG = "User contacts can not be deleted.";
 
+    public static final String TOO_FEW_ATTACHMENTS_MSG = "Number of documents attached to this contact is below zero. You can not remove any more attachments.";
+
     private ContactExceptionMessages() {
         super();
     }
