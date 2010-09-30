@@ -130,6 +130,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String TOO_FEW_ATTACHMENTS_MSG = "Number of documents attached to this contact is below zero. You can not remove any more attachments.";
 
+    public static final String TOO_FEW_ATTRIBUTES_MSG = "Need at least a ContactObject and a value to set %s";
+
     private ContactExceptionMessages() {
         super();
     }

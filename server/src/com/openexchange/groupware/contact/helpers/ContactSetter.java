@@ -49,14 +49,11 @@
 
 package com.openexchange.groupware.contact.helpers;
 
+import static com.openexchange.java.Autoboxing.b;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactException;
-import com.openexchange.groupware.contact.ContactExceptionFactory;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
@@ -64,25 +61,14 @@ import com.openexchange.groupware.container.LinkEntryObject;
 /**
  * This switcher enables us to set the values of a contact object. As convention, the first argument of a method represents a ContactObject,
  * the second one the value to be set. Note: This class was generated mostly - don't even try to keep this up to date by hand...
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
-
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_HELPERS_CONTACTSETTER, component = EnumComponent.CONTACT)
-@OXThrowsMultiple(
-    category = { Category.CODE_ERROR, Category.CODE_ERROR }, 
-    desc = { "","" }, 
-    exceptionId = { 0 , 1 }, 
-    msg = { 
-        "Need at least a ContactObject and a value to set %s",
-        "Could not set the field %s because this is not an OX contact field"})
 public class ContactSetter implements ContactSwitcher {
-
-    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSetter.class);
 
     public Object displayname(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "DisplayName");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DisplayName");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -96,7 +82,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object surname(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "SurName");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SurName");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -108,7 +94,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object givenname(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "GivenName");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("GivenName");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -120,7 +106,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object middlename(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "MiddleName");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MiddleName");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -132,7 +118,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object suffix(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Suffix");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Suffix");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -144,7 +130,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object title(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Title");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Title");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -156,7 +142,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object streethome(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "StreetHome");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetHome");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -168,7 +154,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object postalcodehome(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "PostalCodeHome");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeHome");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -180,7 +166,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object cityhome(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CityHome");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityHome");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -192,7 +178,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object statehome(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "StateHome");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateHome");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -204,7 +190,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object countryhome(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CountryHome");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryHome");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -216,7 +202,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object maritalstatus(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "MaritalStatus");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MaritalStatus");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -228,7 +214,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object numberofchildren(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "NumberOfChildren");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfChildren");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -240,7 +226,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object profession(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Profession");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Profession");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -252,7 +238,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object nickname(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Nickname");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Nickname");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -264,7 +250,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object spousename(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "SpouseName");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SpouseName");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -276,7 +262,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object note(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Note");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Note");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -288,7 +274,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object company(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Company");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Company");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -300,7 +286,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object department(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Department");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Department");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -312,7 +298,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object position(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Position");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Position");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -324,7 +310,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object employeetype(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "EmployeeType");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("EmployeeType");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -336,7 +322,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object roomnumber(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "RoomNumber");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("RoomNumber");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -348,7 +334,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object streetbusiness(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "StreetBusiness");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetBusiness");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -360,7 +346,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object postalcodebusiness(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "PostalCodeBusiness");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeBusiness");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -372,7 +358,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object citybusiness(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CityBusiness");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityBusiness");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -384,7 +370,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object statebusiness(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "StateBusiness");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateBusiness");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -396,7 +382,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object countrybusiness(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CountryBusiness");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryBusiness");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -408,7 +394,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object numberofemployee(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "NumberOfEmployee");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfEmployee");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -420,7 +406,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object salesvolume(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "SalesVolume");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SalesVolume");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -432,7 +418,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object taxid(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TaxID");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TaxID");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -444,7 +430,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object commercialregister(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CommercialRegister");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CommercialRegister");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -456,7 +442,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object branches(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Branches");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Branches");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -468,7 +454,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object businesscategory(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "BusinessCategory");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("BusinessCategory");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -480,7 +466,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object info(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Info");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Info");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -492,7 +478,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object managername(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "ManagerName");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ManagerName");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -504,7 +490,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object assistantname(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "AssistantName");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("AssistantName");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -516,7 +502,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object streetother(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "StreetOther");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetOther");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -528,7 +514,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object postalcodeother(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "PostalCodeOther");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeOther");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -540,7 +526,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object cityother(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CityOther");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityOther");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -552,7 +538,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object stateother(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "StateOther");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateOther");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -564,7 +550,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object countryother(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CountryOther");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryOther");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -576,7 +562,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephoneassistant(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneAssistant");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneAssistant");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -588,7 +574,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonebusiness1(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneBusiness1");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneBusiness1");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -600,7 +586,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonebusiness2(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneBusiness2");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneBusiness2");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -612,7 +598,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object faxbusiness(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "FaxBusiness");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxBusiness");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -624,7 +610,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonecallback(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneCallback");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCallback");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -636,7 +622,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonecar(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneCar");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCar");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -648,7 +634,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonecompany(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneCompany");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCompany");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -660,7 +646,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonehome1(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneHome1");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneHome1");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -672,7 +658,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonehome2(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneHome2");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneHome2");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -684,7 +670,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object faxhome(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "FaxHome");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxHome");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -696,7 +682,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephoneisdn(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneISDN");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneISDN");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -708,7 +694,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object cellulartelephone1(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CellularTelephone1");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CellularTelephone1");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -720,7 +706,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object cellulartelephone2(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CellularTelephone2");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CellularTelephone2");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -732,7 +718,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephoneother(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneOther");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneOther");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -744,7 +730,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object faxother(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "FaxOther");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxOther");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -756,7 +742,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonepager(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephonePager");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephonePager");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -768,7 +754,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephoneprimary(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephonePrimary");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephonePrimary");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -780,7 +766,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephoneradio(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneRadio");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneRadio");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -792,7 +778,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonetelex(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneTelex");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneTelex");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -804,7 +790,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephonettyttd(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneTTYTTD");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneTTYTTD");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -816,7 +802,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object instantmessenger1(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "InstantMessenger1");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InstantMessenger1");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -828,7 +814,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object instantmessenger2(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "InstantMessenger2");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InstantMessenger2");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -840,7 +826,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object telephoneip(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "TelephoneIP");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneIP");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -852,7 +838,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object email1(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Email1");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email1");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -864,7 +850,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object email2(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Email2");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email2");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -876,7 +862,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object email3(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Email3");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email3");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -888,7 +874,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object url(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "URL");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("URL");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -900,7 +886,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object categories(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Categories");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Categories");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -912,7 +898,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield01(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField01");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField01");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -924,7 +910,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield02(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField02");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField02");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -936,7 +922,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield03(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField03");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField03");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -948,7 +934,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield04(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField04");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField04");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -960,7 +946,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield05(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField05");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField05");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -972,7 +958,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield06(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField06");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField06");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -984,7 +970,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield07(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField07");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField07");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -996,7 +982,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield08(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField08");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField08");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1008,7 +994,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield09(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField09");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField09");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1020,7 +1006,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield10(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField10");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField10");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1032,7 +1018,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield11(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField11");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField11");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1044,7 +1030,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield12(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField12");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField12");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1056,7 +1042,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield13(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField13");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField13");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1068,7 +1054,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield14(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField14");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField14");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1080,7 +1066,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield15(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField15");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField15");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1092,7 +1078,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield16(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField16");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField16");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1104,7 +1090,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield17(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField17");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField17");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1116,7 +1102,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield18(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField18");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField18");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1128,7 +1114,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield19(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField19");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField19");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1140,7 +1126,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object userfield20(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "UserField20");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField20");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1152,7 +1138,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object objectid(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "ObjectID");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ObjectID");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1164,7 +1150,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object numberofdistributionlists(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "NumberOfDistributionLists");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfDistributionLists");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1176,7 +1162,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object numberoflinks(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "NumberOfLinks");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfLinks");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1188,7 +1174,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object distributionlist(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "DistributionList");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DistributionList");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1200,7 +1186,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object links(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Links");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Links");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1212,7 +1198,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object parentfolderid(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "ParentFolderID");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ParentFolderID");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1224,7 +1210,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object contextid(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "ContextId");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ContextId");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1236,19 +1222,19 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object privateflag(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "PrivateFlag");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PrivateFlag");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
             return conObj;
-        final boolean value = (Boolean) objects[1];
+        final boolean value = b((Boolean) objects[1]);
         conObj.setPrivateFlag(value);
         return conObj;
     }
 
     public Object createdby(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CreatedBy");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreatedBy");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1260,7 +1246,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object modifiedby(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "ModifiedBy");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ModifiedBy");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1272,7 +1258,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object creationdate(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "CreationDate");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreationDate");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1284,7 +1270,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object lastmodified(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "LastModified");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("LastModified");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1296,7 +1282,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object birthday(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Birthday");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Birthday");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1308,7 +1294,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object anniversary(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Anniversary");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Anniversary");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1320,7 +1306,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object imagelastmodified(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "ImageLastModified");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ImageLastModified");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1332,7 +1318,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object internaluserid(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "InternalUserId");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InternalUserId");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1344,7 +1330,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object label(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "Label");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Label");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1356,7 +1342,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object fileas(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "FileAs");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FileAs");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1368,7 +1354,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object defaultaddress(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "DefaultAddress");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DefaultAddress");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1380,7 +1366,7 @@ public class ContactSetter implements ContactSwitcher {
 
     public Object numberofattachments(final Object... objects) throws ContactException {
         if (objects.length < 2) {
-            throw EXCEPTIONS.create(0, "NumberOfAttachments");
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfAttachments");
         }
         final Contact conObj = (Contact) objects[0];
         if(objects[1] == null)
@@ -1390,43 +1376,43 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
-    
-    
-    
+
+
+
     private int toInt(Object candidate) {
         if (candidate instanceof Integer) {
-            return (Integer) candidate;
+            return i((Integer) candidate);
         }
-        return Integer.valueOf(candidate.toString());
+        return Integer.parseInt(candidate.toString());
     }
-    
+
     private boolean isMatching(String needle, ContactField haystack){
         return(
-            needle.matches(haystack.getAjaxName()) 
-         || needle.matches(haystack.getDBName()) 
-         || needle.matches(haystack.getFieldName()) 
+            needle.matches(haystack.getAjaxName())
+         || needle.matches(haystack.getDBName())
+         || needle.matches(haystack.getFieldName())
          || needle.matches(String.valueOf(haystack.getNumber()))
         );
     }
 
-    private boolean markasdistributionlist(Contact contact, Object value2) throws ContactException {
+    private boolean markasdistributionlist(Contact contact, Object value2) {
         Boolean value;
         try {
             value = (Boolean) value2;
         } catch (ClassCastException c) {
-            value = Boolean.parseBoolean((String) value2);
+            value = Boolean.valueOf((String) value2);
         }
-        contact.setMarkAsDistributionlist( value );
+        contact.setMarkAsDistributionlist(b(value));
         return true;
     }
-    
-    public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws ContactException {
+
+    public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) {
         if(fieldname == null || fieldname.equals(""))
             return false;
-        
+
         if(isMatching(fieldname, ContactField.MARK_AS_DISTRIBUTIONLIST))
             return markasdistributionlist(contact, value);
-        
+
         return false;
     }
 

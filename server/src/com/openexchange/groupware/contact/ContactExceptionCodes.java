@@ -133,6 +133,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     NO_USER_CONTACT_DELETE(NO_USER_CONTACT_DELETE_MSG, Category.PERMISSION, 260),
     /** Number of documents attached to this contact is below zero. You can not remove any more attachments. */
     TOO_FEW_ATTACHMENTS(TOO_FEW_ATTACHMENTS_MSG, Category.USER_INPUT, 400),
+    /** Need at least a ContactObject and a value to set %s */
+    TOO_FEW_ATTRIBUTES(TOO_FEW_ATTRIBUTES_MSG, Category.CODE_ERROR, 500),
     ;
 
     private String message;
