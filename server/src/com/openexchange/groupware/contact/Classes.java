@@ -51,5 +51,4 @@ package com.openexchange.groupware.contact;
 
 public class Classes {
     public static final int COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTEXCEPTIONFACTORY = 0;
-    public static final int COM_OPENEXCHANGE_GROUPWARE_CONTACT_SEARCH = 10;
 }
