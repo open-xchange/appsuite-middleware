@@ -132,6 +132,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String TOO_FEW_ATTRIBUTES_MSG = "Need at least a ContactObject and a value to set %s";
 
+    public static final String DATE_CONVERSION_FAILED_MSG = "Could not convert given string %1$s to a date.";
+
     private ContactExceptionMessages() {
         super();
     }

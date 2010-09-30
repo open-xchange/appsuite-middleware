@@ -55,13 +55,8 @@ import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactException;
-import com.openexchange.groupware.contact.ContactExceptionFactory;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 
 /**
  * This switcher is able to convert a given String into a date using
@@ -69,23 +64,9 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
-@OXExceptionSource(
-    classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_HELPERS_CONTACTSETTERFORSIMPLEDATEGFORMAT,
-    component=EnumComponent.CONTACT
-)
-@OXThrowsMultiple(
-    category={Category.CODE_ERROR},
-    desc={""},
-    exceptionId={0},
-    msg={
-        "Could not convert given string %s to a date."
-    }
-)
 public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherWithDelegate {
 
     private static final Log LOG = LogFactory.getLog(ContactSwitcherForSimpleDateFormat.class);
-
-    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForSimpleDateFormat.class);
 
     private final List<DateFormat> dateFormats = new LinkedList<DateFormat>();
 
@@ -97,10 +78,10 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
                     objects[1] = dateFormat.parse((String) objects[1]);
                     return objects;
                 } catch (final ParseException e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug(e.getMessage());
                 }
             }
-            throw EXCEPTIONS.create(0, (String) objects[1]);
+            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create((String) objects[1]);
         }
         return objects;
     }
@@ -115,7 +96,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.creationdate(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1], "CreationDate", e);
+            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "CreationDate");
         }
     }
 
@@ -124,7 +105,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.anniversary(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1], "Anniversary", e);
+            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "Anniversary");
         }
     }
 
@@ -133,7 +114,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.birthday(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1], "Birthday", e);
+            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "Birthday");
         }
     }
 
@@ -142,7 +123,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.imagelastmodified(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1], "ImageLastModified", e);
+            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "ImageLastModified");
         }
     }
 
@@ -151,7 +132,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.lastmodified(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1] ,  "LastModified", e);
+            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "LastModified");
         }
     }
 }

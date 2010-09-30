@@ -135,6 +135,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     TOO_FEW_ATTACHMENTS(TOO_FEW_ATTACHMENTS_MSG, Category.USER_INPUT, 400),
     /** Need at least a ContactObject and a value to set %s */
     TOO_FEW_ATTRIBUTES(TOO_FEW_ATTRIBUTES_MSG, Category.CODE_ERROR, 500),
+    /** Could not convert given string %1$s to a date. */
+    DATE_CONVERSION_FAILED(DATE_CONVERSION_FAILED_MSG, Category.CODE_ERROR, 600),
     ;
 
     private String message;
