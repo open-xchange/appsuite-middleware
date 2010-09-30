@@ -53,6 +53,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -74,8 +75,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.Collections.SmartIntArray;
+import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -93,6 +94,57 @@ public final class OXFolderSQL {
      */
     private OXFolderSQL() {
         super();
+    }
+
+    private static final String SQL_SELECT_WITH_NON_EXISTING_PARENT = "SELECT ot1.parent FROM oxfolder_tree AS ot1 where ot1.cid = ? AND ot1.parent <> "+FolderObject.SYSTEM_ROOT_FOLDER_ID+" AND NOT EXISTS (SELECT * FROM oxfolder_tree AS ot2 where ot2.cid = ? AND ot1.parent = ot2.fuid)";
+
+    /**
+     * Gets the non-existing parents in specified context.
+     * 
+     * @param ctx The context
+     * @return The non-existing parents in specified context
+     * @throws OXFolderException If operation fails
+     */
+    public static int[] getNonExistingParents(final Context ctx) throws OXFolderException {
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(e);
+        }
+        try {
+            return getNonExistingParents(ctx, con);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    /**
+     * Gets the non-existing parents in specified context.
+     * 
+     * @param ctx The context
+     * @param con The connection to user; <b>must not be <code>null</code></b>
+     * @return The non-existing parents in specified context
+     * @throws OXFolderException If operation fails
+     */
+    public static int[] getNonExistingParents(final Context ctx, final Connection con) throws OXFolderException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT_WITH_NON_EXISTING_PARENT);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(1, ctx.getContextId());
+            rs = stmt.executeQuery();
+            final TIntHashSet set = new TIntHashSet(16);
+            while (rs.next()) {
+                set.add(rs.getInt(1));
+            }
+            return set.toArray();
+        } catch (SQLException e) {
+            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
     }
 
     private static final String SQL_SELECT_ADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
@@ -1072,7 +1124,7 @@ public final class OXFolderSQL {
      * determines whether working or backup tables are affected by delete operation. <code>createBackup</code> specifies if backup entries
      * are going to be created and is only allowed if <code>deleteWorking</code> is set to <code>true</code>.
      */
-    private static void delOXFolder(final int folderId, final int userId, final long lastModified, final boolean deleteWorking, final boolean createBackup, final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
+    static void delOXFolder(final int folderId, final int userId, final long lastModified, final boolean deleteWorking, final boolean createBackup, final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
         Connection writeCon = writeConArg;
         boolean closeWriteCon = false;
         if (writeCon == null) {
