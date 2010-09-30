@@ -179,7 +179,23 @@ public final class CacheFolderStorage implements FolderStorage {
 
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
         for (final FolderStorage folderStorage : registry.getFolderStoragesForTreeID(treeId)) {
-            folderStorage.checkConsistency(treeId, storageParameters);
+            final boolean started = folderStorage.startTransaction(storageParameters, false);
+            try {
+                folderStorage.checkConsistency(treeId, storageParameters);
+                if (started) {
+                    folderStorage.commitTransaction(storageParameters);
+                }
+            } catch (final FolderException e) {
+                if (started) {
+                    folderStorage.rollback(storageParameters);
+                }
+                throw e;
+            } catch (final Exception e) {
+                if (started) {
+                    folderStorage.rollback(storageParameters);
+                }
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         }
     }
 
@@ -315,12 +331,15 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         try {
             final List<String> ids;
-            {
+            try {
                 final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
                 ids = new ArrayList<String>(path.length);
                 for (final UserizedFolder userizedFolder : path) {
                     ids.add(userizedFolder.getID());
                 }
+            } catch (final Exception e) {
+                removeSingleFromCache(id, treeId, userId, contextId);
+                return;
             }
             if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 for (final String folderId : ids) {
