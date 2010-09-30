@@ -134,6 +134,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String DATE_CONVERSION_FAILED_MSG = "Could not convert given string %1$s to a date.";
 
+    public static final String CONV_OBJ_2_DATE_FAILED_MSG = "Could not convert given object %s to a date when setting %s.";
+
     private ContactExceptionMessages() {
         super();
     }

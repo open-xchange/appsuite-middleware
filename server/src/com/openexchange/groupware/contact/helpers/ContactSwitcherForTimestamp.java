@@ -50,13 +50,8 @@
 package com.openexchange.groupware.contact.helpers;
 
 import java.util.Date;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactException;
-import com.openexchange.groupware.contact.ContactExceptionFactory;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 
 /**
  * This switcher is able to convert a given String into a date by
@@ -65,19 +60,7 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
-@OXExceptionSource(
-    classId = Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_HELPERS_CONTACTSETTERFORSIMPLEDATEGFORMAT,
-    component = EnumComponent.CONTACT
-)
-@OXThrowsMultiple(
-    category = { Category.CODE_ERROR },
-    desc = { "" },
-    exceptionId = { 0 },
-    msg = { "Could not convert given object %s to a date when setting %s." }
-)
 public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDelegate {
-
-    protected static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForTimestamp.class);
 
     protected Object[] makeDate(final Object... objects) throws NumberFormatException {
         if (objects[1] instanceof String) {
@@ -98,7 +81,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
                 return delegate.creationdate(objects);
             }
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1], "CreationDate", e);
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "CreationDate");
         }
     }
 
@@ -111,7 +94,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
                 return delegate.anniversary(objects);
             }
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1], "Anniversary", e);
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "Anniversary");
         }
     }
 
@@ -124,7 +107,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
                 return delegate.birthday(objects);
             }
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1], "Birthday", e);
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "Birthday");
         }
     }
 
@@ -137,7 +120,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
                 return delegate.imagelastmodified(objects);
             }
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1], "ImageLastModified", e);
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "ImageLastModified");
         }
     }
 
@@ -150,7 +133,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
                 return delegate.lastmodified(objects);
             }
         } catch (final ClassCastException e) {
-            throw EXCEPTIONS.create(0, objects[1], "LastModified", e);
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "LastModified");
         }
     }
 }

@@ -96,7 +96,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.creationdate(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "CreationDate");
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "CreationDate");
         }
     }
 
@@ -105,7 +105,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.anniversary(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "Anniversary");
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "Anniversary");
         }
     }
 
@@ -114,7 +114,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.birthday(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "Birthday");
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "Birthday");
         }
     }
 
@@ -123,7 +123,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.imagelastmodified(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "ImageLastModified");
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "ImageLastModified");
         }
     }
 
@@ -132,7 +132,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             return delegate.lastmodified(makeDate(objects));
         } catch (final ClassCastException e) {
-            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create(e, "LastModified");
+            throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "LastModified");
         }
     }
 }
