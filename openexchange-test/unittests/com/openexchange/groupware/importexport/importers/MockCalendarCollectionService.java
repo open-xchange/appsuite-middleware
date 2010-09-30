@@ -919,5 +919,9 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
         // TODO Auto-generated method stub
         
     }
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc, Connection con) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
     
 }
