@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -83,6 +83,9 @@ ant -Ddestdir=%{buildroot} install
 %doc ChangeLog
 
 %changelog
+* Thu Sep 30 2010 - choeger@open-xchange.com
+ - Bugfix ID#16874 'open-xchange-admin' and 'open-xchange-groupware' scripts do
+   not recognize when services are already running
 * Thu Jul 30 2009 - choeger@open-xchange.com
  - Bugfix ID#14207 [L3] wrong exit code from init script if you stop an
    already stopped service

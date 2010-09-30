@@ -1,3 +1,9 @@
+open-xchange-publish (6.18.1.0-3) unstable; urgency=low
+
+  * first build for 6.18.1-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 30 Sep 2010 14:23:16 +0200
+
 open-xchange-publish (6.18.1.0-2) unstable; urgency=low
 
   * Build for 6.18.1 Rev2

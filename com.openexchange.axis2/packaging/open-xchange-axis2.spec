@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -85,6 +85,8 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install doc
 %config(noreplace) /opt/open-xchange/etc/groupware/axis2.properties
 %doc docs
 %changelog
+* Tue Sep 28 2010 - choeger@open-xchange.com
+ - Bugfix #17048: Provisioning via SOAP broken
 * Mon Jul 27 2009 - marcus.klein@open-xchange.com
  - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
 * Thu Nov 13 2008 - dennis.sieben@open-xchange.com

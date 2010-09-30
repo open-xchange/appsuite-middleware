@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 2
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -82,3 +82,5 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 %config(noreplace) /opt/open-xchange/etc/groupware/settings/upsell-multiple-gui.properties
 %{docroot}/ox6/plugins/com.openexchange.upsell.multiple.gui/*
 %changelog
+* Mon Sep 27 2010 - mkraft@open-xchange.com
+ - Initial

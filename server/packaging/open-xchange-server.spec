@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -582,6 +582,17 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Sep 29 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17063: Removed WWW-Authenticate header proclaiming the backend supports digest authentication.
+* Tue Sep 28 2010 - choeger@open-xchange.com
+ - Bugfix #17031: open-xchange-folder-json package MUST be installed with
+   6.18.rev2 but is not a dependency
+* Tue Sep 28 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17049: Fixed wrongly installed bundle files for new file storage bundle.
+* Mon Sep 27 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17046: Fixed closing of FolderObjectIterator
+* Fri Sep 24 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16968: Returning zero number of sessions if SessiondService is missing
 * Wed Sep 22 2010 - thorben.betten@open-xchange.com
  - Bugfix #16870: Showing inline images if content-type set to "application/octet-stream"
 * Wed Sep 22 2010 - steffen.templin@open-xchange.com

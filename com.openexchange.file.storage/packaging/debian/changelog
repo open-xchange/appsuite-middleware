@@ -1,3 +1,9 @@
+open-xchange-file-storage (6.18.1.0-1) unstable; urgency=low
+
+  * first build for 6.18.1-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 30 Sep 2010 14:23:13 +0200
+
 open-xchange-file-storage (6.18.1.0-0) unstable; urgency=low
 
   * Initial release.
