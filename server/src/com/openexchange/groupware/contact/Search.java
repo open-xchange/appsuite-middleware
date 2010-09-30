@@ -53,10 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.sql.SearchStrings;
 
@@ -66,13 +62,7 @@ import com.openexchange.tools.sql.SearchStrings;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OXExceptionSource(
-    classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACT_SEARCH,
-    component=EnumComponent.CONTACT
-)
 public class Search {
-
-    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(Search.class);
 
     private Search() {
         super();
@@ -106,15 +96,9 @@ public class Search {
         checkPatternLength(minimumSearchCharacters, pattern);
     }
 
-    @OXThrows(
-        category = Category.USER_INPUT,
-        desc = "The administrator configured a minimum length for a search pattern and the users pattern is shorter than this minimum.",
-        exceptionId = 1,
-        msg = "In order to accomplish the search, %1$d or more characters are required."
-    )
     private static void checkPatternLength(int minimumSearchCharacters, String pattern) throws ContactException {
         if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
-            throw EXCEPTIONS.create(1, I(minimumSearchCharacters));
+            throw ContactExceptionCodes.TOO_FEW_SEARCH_CHARS.create(I(minimumSearchCharacters));
         }
     }
 }

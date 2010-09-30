@@ -141,7 +141,8 @@ public enum ContactExceptionCodes implements OXErrorMessage {
     CONV_OBJ_2_DATE_FAILED(CONV_OBJ_2_DATE_FAILED_MSG, Category.CODE_ERROR, 700),
     /** Need at least a ContactObject to get the value of %s */
     CONTACT_OBJECT_MISSING(CONTACT_OBJECT_MISSING_MSG, Category.CODE_ERROR, 800),
-    ;
+    /** In order to accomplish the search, %1$d or more characters are required. */
+    TOO_FEW_SEARCH_CHARS(TOO_FEW_SEARCH_CHARS_MSG, Category.USER_INPUT, 1000);
 
     private String message;
     private Category category;

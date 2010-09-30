@@ -138,6 +138,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String CONTACT_OBJECT_MISSING_MSG = "Need at least a ContactObject to get the value of %s";
 
+    public static final String TOO_FEW_SEARCH_CHARS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
+
     private ContactExceptionMessages() {
         super();
     }
