@@ -127,6 +127,8 @@ ox_is_running() {
 
     if [ -e /var/run/${name}.pid ]; then
 	read PID < /var/run/${name}.pid
+	# take care nothing influences line length if ps output
+	COLUMNS=1000
 	if ps $PID | grep "$pattern" > /dev/null; then
 	   return 0
 	else

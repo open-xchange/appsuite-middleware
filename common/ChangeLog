@@ -1,3 +1,8 @@
+* 2010-09-30 - choeger@open-xchange.com
+
+ - Bugfix ID#16874 'open-xchange-admin' and 'open-xchange-groupware' scripts do
+   not recognize when services are already running
+
 * 2009-07-30 - choeger@open-xchange.com
 
  - Bugfix ID#14207 [L3] wrong exit code from init script if you stop an
