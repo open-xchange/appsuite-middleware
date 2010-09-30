@@ -90,6 +90,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.tasks.Tasks;
@@ -1609,6 +1610,8 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     sus.setContactCollectionFolder(ctx.getContextId(), user.getId(), null);
                 }
             } catch (final SettingException e) {
+                throw new OXFolderException(e);
+            } catch (LinkException e) {
                 throw new OXFolderException(e);
             }
             /*

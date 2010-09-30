@@ -47,8 +47,37 @@
  *
  */
 
-package com.openexchange.groupware.contact;
+package com.openexchange.groupware.links.internal;
 
-public class Classes {
-    public static final int COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTEXCEPTIONFACTORY = 0;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.groupware.links.LinkException;
+import com.openexchange.groupware.links.LinkExceptionCodes;
+
+/**
+ * {@link LinkExceptionFactory}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class LinkExceptionFactory extends Exceptions<LinkException> {
+
+    private static final LinkExceptionFactory SINGLETON = new LinkExceptionFactory();
+
+    private LinkExceptionFactory() {
+        super();
+    }
+
+    public static final LinkExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    @Override
+    protected void knownExceptions() {
+        declareAll(LinkExceptionCodes.values());
+    }
+
+    @Override
+    protected LinkException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new LinkException(message, cause, args);
+    }
 }

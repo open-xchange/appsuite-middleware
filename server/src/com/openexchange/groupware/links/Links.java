@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.links;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,15 +67,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contact.ContactException;
-import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
@@ -87,20 +83,16 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Links} - Provides static access to link module
- * 
+ *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic
  *         Pahne</a>
  */
-@OXExceptionSource(classId = 1, component = EnumComponent.LINKING)
 public class Links {
 
-    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(Links.class);
-
-    private static final Log LOG = LogFactory.getLog(Links.class);
+    static final Log LOG = LogFactory.getLog(Links.class);
 
     private static interface ModuleAccess {
 
@@ -276,8 +268,7 @@ public class Links {
                 return true;
             }
 
-            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so)
-                    throws ContextException {
+            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) {
                 throw new UnsupportedOperationException("isReadableByID() not supported for contact module");
             }
         });
@@ -314,34 +305,23 @@ public class Links {
         });
     }
 
-    /**
-     * Prevent instantiation
-     */
     private Links() {
         super();
     }
 
-    @OXThrowsMultiple(category = { Category.PERMISSION, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR,
-            Category.CODE_ERROR }, desc = { "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4 }, msg = {
-            "Unable to create a link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
-            "Unable to create a link between these two objects. This link already exists. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
-            ContactException.INIT_CONNECTION_FROM_DBPOOL,
-            "An error occurred. Unable to save this linking between those two objects. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
-            "An error occurred. Unable to save this linking between those two objects. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d" })
     public static void performLinkStorage(final LinkObject l, final int user, final int[] group, final Session so,
-            final Connection writecon) throws OXException, ContextException {
+            final Connection writecon) throws LinkException, ContextException {
 
         final Context ct = ContextStorage.getStorageContext(so.getContextId());
 
-        if (!modules.get(Integer.valueOf(l.getFirstType())).isReadable(l.getFirstId(), l.getFirstFolder(), user, group,
-                so)
-                || !modules.get(Integer.valueOf(l.getSecondType())).isReadable(l.getSecondId(), l.getSecondFolder(),
-                        user, group, so)) {
-            throw EXCEPTIONS
-                    .create(0, Integer.valueOf(l.getFirstId()), Integer.valueOf(l.getFirstFolder()), Integer.valueOf(l
-                            .getSecondId()), Integer.valueOf(l.getSecondFolder()), Integer.valueOf(so.getContextId()));
-            // throw new
-            // OXException("THIS LINK IS NOT VISIBLE TO THE USER. MISSING READRIGHTS FOR ONE OR BOTH OBJECTS");
+        if (!modules.get(I(l.getFirstType())).isReadable(l.getFirstId(), l.getFirstFolder(), user, group, so) ||
+            !modules.get(I(l.getSecondType())).isReadable(l.getSecondId(), l.getSecondFolder(), user, group, so)) {
+            throw LinkExceptionCodes.NO_LINK_ACCESS_PERMISSION.create(
+                I(l.getFirstId()),
+                I(l.getFirstFolder()),
+                I(l.getSecondId()),
+                I(l.getSecondFolder()),
+                I(so.getContextId()));
         }
 
         Statement stmt = null;
@@ -354,31 +334,19 @@ public class Links {
             rs = stmt.executeQuery(lms.iFperformLinkStorage(l, so.getContextId()));
 
             if (rs.next()) {
-                throw EXCEPTIONS.create(1, Integer.valueOf(l.getFirstId()), Integer.valueOf(l.getFirstFolder()),
-                        Integer.valueOf(l.getSecondId()), Integer.valueOf(l.getSecondFolder()), Integer.valueOf(so
-                                .getContextId()));
-                // throw new OXException("This Link allready exists");
+                throw LinkExceptionCodes.ALREADY_LINKED.create(
+                    I(l.getFirstId()),
+                    I(l.getFirstFolder()),
+                    I(l.getSecondId()),
+                    I(l.getSecondFolder()),
+                    I(so.getContextId()));
             }
-        } catch (final DBPoolingException se) {
-            throw EXCEPTIONS.create(2, se);
-        } catch (final SQLException se) {
-            throw EXCEPTIONS
-                    .create(3, Integer.valueOf(l.getFirstId()), Integer.valueOf(l.getFirstFolder()), Integer.valueOf(l
-                            .getSecondId()), Integer.valueOf(l.getSecondFolder()), Integer.valueOf(so.getContextId()));
-        } catch (final OXException se) {
-            throw se;
-            // throw new OXException("UNABLE TO SAVE LINK",se);
+        } catch (final DBPoolingException e) {
+            throw new LinkException(e);
+        } catch (final SQLException e) {
+            throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException sqle) {
-                LOG.error("Unable to close Statement or ResultSet", sqle);
-            }
+            closeSQLStuff(rs, stmt);
             if (readCon != null) {
                 DBPool.closeReaderSilent(ct, readCon);
             }
@@ -395,84 +363,14 @@ public class Links {
             ps.setInt(6, l.getSecondFolder());
             ps.setInt(7, l.getContectId());
             ps.execute();
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(4, se, Integer.valueOf(l.getFirstId()), Integer.valueOf(l.getFirstFolder()),
-                    Integer.valueOf(l.getSecondId()), Integer.valueOf(l.getSecondFolder()), Integer.valueOf(so
-                            .getContextId()));
-            // throw new OXException("UNABLE TO SAVE LINK",se);
+        } catch (final SQLException e) {
+            throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (final SQLException se) {
-                LOG.error("Unable to close Statement", se);
-            }
+            closeSQLStuff(ps);
         }
     }
 
-    @OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR }, desc = { "", "", "" }, exceptionId = {
-            5, 6, 7 }, msg = {
-            "Unable to create a link between these two objects. Insufficient rights. 1. Object %1$d 2. Object %2$d Context %3$d",
-            "Unable to create a link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
-            "An error occurred. Unable to load some links for this objects. 1. Object %1$d 2. Object %2$d Context %3$d" })
-    public static LinkObject getLinkFromObject(final int first_id, final int first_type, final int second_id,
-            final int second_type, final int user, final int[] group, final Session so, final Connection readcon)
-            throws OXException, ContextException {
-
-        if (!modules.get(Integer.valueOf(first_type)).hasModuleRights(so)
-                || !modules.get(Integer.valueOf(second_type)).hasModuleRights(so)) {
-            throw EXCEPTIONS.create(5, Integer.valueOf(first_id), Integer.valueOf(second_id), Integer.valueOf(so
-                    .getContextId()));
-            // throw new
-            // OXException("ONE OF THE REQUESTED MODULES IS NOT VISIBLE TO THE USER, MAYBE BOTH.");
-        }
-
-        LinkObject lo = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        final LinksSql lms = new LinksMySql();
-        try {
-            stmt = readcon.createStatement();
-            rs = stmt.executeQuery(lms.iFgetLinkFromObject(first_id, first_type, second_id, second_type, so
-                    .getContextId()));
-
-            if (rs.next()) {
-                lo = new LinkObject(rs.getInt(1), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6),
-                        rs.getInt(7));
-                if (!modules.get(Integer.valueOf(lo.getFirstType())).isReadable(lo.getFirstId(), lo.getFirstFolder(),
-                        user, group, so)
-                        || !modules.get(Integer.valueOf(lo.getSecondType())).isReadable(lo.getSecondId(),
-                                lo.getSecondFolder(), user, group, so)) {
-                    throw EXCEPTIONS.create(6, Integer.valueOf(lo.getFirstId()), Integer.valueOf(lo.getFirstFolder()),
-                            Integer.valueOf(lo.getSecondId()), Integer.valueOf(lo.getSecondFolder()), Integer
-                                    .valueOf(so.getContextId()));
-                    // throw new
-                    // OXException("THIS LINK IS NOT VISIBLE TO THE USER. MISSING READRIGHTS FOR ONE OR BOTH OBJECTS");
-                }
-            }
-        } catch (final SQLException sql) {
-            throw EXCEPTIONS.create(7, sql, Integer.valueOf(first_id), Integer.valueOf(second_id), Integer.valueOf(so
-                    .getContextId()));
-            // throw new OXException("UNABLE TO LOAD LINKOBJECT ",sql);
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException sqle) {
-                LOG.error("Unable to close Statement or ResultSet", sqle);
-            }
-        }
-        return lo;
-    }
-
-    @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 9, msg = "Unable to load all links for the object. Object %1$d Folder %2$d User %3$d Context %4$d")
-    public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folderId, final int user,
-            final int[] group, final Session so, final Connection readcon) throws OXException, ContextException {
+    public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folderId, final int user, final int[] group, final Session so, final Connection readcon) throws LinkException, ContextException {
         final List<LinkObject> tmp = new ArrayList<LinkObject>();
         Statement stmt = null;
         ResultSet rs = null;
@@ -490,23 +388,18 @@ public class Links {
                     tmp.add(lo);
                 }
             }
-        } catch (final SQLException sql) {
-            throw EXCEPTIONS.create(9, sql, Integer.valueOf(id), Integer.valueOf(folderId), Integer.valueOf(user),
-                    Integer.valueOf(so.getContextId()));
+        } catch (final SQLException e) {
+            throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            closeSQLStuff(rs, stmt);
         }
         return tmp.toArray(new LinkObject[tmp.size()]);
     }
 
-    @OXThrowsMultiple(category = { Category.PERMISSION, Category.CODE_ERROR }, desc = { "", "" }, exceptionId = { 10,
-            11 }, msg = {
-            "Unable to create a link between these two objects. Insufficient rights. Object %1$d Folder %2$d Context %3$d",
-            "An error occurred. Unable to delete some links from this objects. Object %1$d Folder %2$d Context %3$d" })
     public static int[][] deleteLinkFromObject(final int id, final int type, final int folder, final int[][] data,
             final int user, final int[] group, final Session so, final Connection readcon, final Connection writecon)
-            throws OXException, ContextException {
-        Statement smt = null;
+            throws ContextException, LinkException {
+        Statement stmt = null;
         Statement del = null;
         ResultSet rs = null;
         final LinksSql lms = new LinksMySql();
@@ -518,7 +411,6 @@ public class Links {
         }
 
         if (!modules.get(Integer.valueOf(type)).isReadable(id, folder, user, group, so)) {
-            // System.out.println("Unable to delete Link");
             for (final int[] tmp : data) {
                 resp.add(tmp);
             }
@@ -526,8 +418,8 @@ public class Links {
 
         try {
             del = writecon.createStatement();
-            smt = readcon.createStatement();
-            rs = smt.executeQuery(lms.iFgetAllLinksFromObject(id, type, folder, so.getContextId()));
+            stmt = readcon.createStatement();
+            rs = stmt.executeQuery(lms.iFgetAllLinksFromObject(id, type, folder, so.getContextId()));
             int cnt = 0;
             while (rs.next()) {
                 int loadid = rs.getInt(1);
@@ -545,16 +437,19 @@ public class Links {
                 for (int i = 0; i < data.length; i++) {
                     if ((data[i][0] == loadid) && (data[i][1] == loadtype) && (data[i][2] == loadfolder)) {
                         try {
-                            if (!modules.get(Integer.valueOf(loadtype)).isReadable(loadid, loadfolder, user, group, so)) {
-                                throw EXCEPTIONS.create(10, Integer.valueOf(loadid), Integer.valueOf(loadfolder),
-                                        Integer.valueOf(so.getContextId()));
-                                // throw new OXException("NO RIGHT");
+                            if (!modules.get(I(loadtype)).isReadable(loadid, loadfolder, user, group, so)) {
+                                throw LinkExceptionCodes.NO_LINK_ACCESS_PERMISSION.create(
+                                    I(loadid),
+                                    I(loadfolder),
+                                    I(id),
+                                    I(folder),
+                                    I(so.getContextId()));
                             }
                             lms.iFDeleteLinkFromObject(del, second, id, type, folder, loadid, loadfolder, loadtype, so
                                     .getContextId());
                             cnt++;
-                        } catch (final OXException ox) {
-                            LOG.error("Unable to delete Link!", ox);
+                        } catch (final LinkException e) {
+                            LOG.error("Unable to delete Link!", e);
                             resp.add(new int[] { loadid, loadtype, loadfolder });
                         }
                     }
@@ -565,36 +460,17 @@ public class Links {
                     resp.add(tmp);
                 }
             }
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(11, se, Integer.valueOf(id), Integer.valueOf(folder), Integer.valueOf(so
-                    .getContextId()));
-            // throw new OXException("UNABLE TO DELETE LINKS",se);
+        } catch (final SQLException e) {
+            throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt) + ',' + getStatement(del));
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (smt != null) {
-                    smt.close();
-                }
-            } catch (final SQLException sqle) {
-                LOG.error("Unable to close Statement or ResultSet", sqle);
-            }
-            try {
-                if (del != null) {
-                    del.close();
-                }
-            } catch (final SQLException sqle) {
-                LOG.error("Unable to close Statement", sqle);
-            }
+            closeSQLStuff(rs, stmt);
+            closeSQLStuff(del);
         }
 
         return resp.toArray(new int[resp.size()][]);
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 12, msg = "Unable to delete all links from this objects. Object %1$d Context %2$d")
-    public static void deleteAllObjectLinks(final int id, final int type, final int cid, final Connection writecon)
-            throws OXException {
+    public static void deleteAllObjectLinks(final int id, final int type, final int cid, final Connection writecon) throws LinkException {
         // TODO RIGHTS CHECK on onject id and fid!
         /*
          * this right check is realy not requiered because this method only
@@ -602,27 +478,19 @@ public class Links {
          * point, all rights are already checked
          */
         final LinksSql lms = new LinksMySql();
-        PreparedStatement ps = null;
+        PreparedStatement stmt = null;
         try {
-            ps = writecon.prepareStatement(lms.iFdeleteAllObjectLinks());
-            ps.setInt(1, id);
-            ps.setInt(2, type);
-            ps.setInt(3, id);
-            ps.setInt(4, type);
-            ps.setInt(5, cid);
-            ps.execute();
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(12, se, Integer.valueOf(id), Integer.valueOf(cid));
-            // throw new OXException("UNABLE TO DELETE LINKS FROM OBJECT "+id,
-            // se);
+            stmt = writecon.prepareStatement(lms.iFdeleteAllObjectLinks());
+            stmt.setInt(1, id);
+            stmt.setInt(2, type);
+            stmt.setInt(3, id);
+            stmt.setInt(4, type);
+            stmt.setInt(5, cid);
+            stmt.execute();
+        } catch (final SQLException e) {
+            throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (final SQLException sqle) {
-                LOG.error("Unable to close Statement", sqle);
-            }
+            closeSQLStuff(stmt);
         }
     }
 
@@ -634,34 +502,24 @@ public class Links {
      * @param writecon A connection with write capability
      * @throws OXException If deleting all folder links fails
      */
-    @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 13, msg = "Unable to delete all links from folder. Folder %1$d Context %2$d")
-    public static void deleteAllFolderLinks(final int folderId, final int cid, final Connection writecon)
-            throws OXException {
+    public static void deleteAllFolderLinks(final int folderId, final int cid, final Connection writecon) throws LinkException {
         final LinksSql lms = new LinksMySql();
-        PreparedStatement ps = null;
+        PreparedStatement stmt = null;
         try {
-            ps = writecon.prepareStatement(lms.iFdeleteAllFolderLinks());
+            stmt = writecon.prepareStatement(lms.iFdeleteAllFolderLinks());
             int pos = 1;
-            ps.setInt(pos++, folderId);
-            ps.setInt(pos++, folderId);
-            ps.setInt(pos++, cid);
-            ps.execute();
-        } catch (final SQLException se) {
-            throw EXCEPTIONS.create(12, se, Integer.valueOf(folderId), Integer.valueOf(cid));
+            stmt.setInt(pos++, folderId);
+            stmt.setInt(pos++, folderId);
+            stmt.setInt(pos++, cid);
+            stmt.execute();
+        } catch (final SQLException e) {
+            throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (final SQLException e) {
-                    LOG.error("Unable to close Statement", e);
-                }
-            }
+            closeSQLStuff(stmt);
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 14, msg = "Unable to load all links for the object. Object %1$d User %2$d Context %3$d")
-    public static LinkObject[] getAllLinksByObjectID(final int id, final int type, final int user, final int[] group,
-            final Session so, final Connection readcon) throws OXException, ContextException {
+    public static LinkObject[] getAllLinksByObjectID(final int id, final int type, final int user, final int[] group, final Session so, final Connection readcon) throws LinkException, ContextException {
         final List<LinkObject> tmp = new ArrayList<LinkObject>();
         Statement stmt = null;
         ResultSet rs = null;
@@ -690,11 +548,10 @@ public class Links {
                     tmp.add(lo);
                 }
             }
-        } catch (final SQLException sql) {
-            throw EXCEPTIONS.create(14, sql, Integer.valueOf(id), Integer.valueOf(user), Integer.valueOf(so
-                    .getContextId()));
+        } catch (final SQLException e) {
+            throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            closeSQLStuff(rs, stmt);
         }
         return tmp.toArray(new LinkObject[tmp.size()]);
     }

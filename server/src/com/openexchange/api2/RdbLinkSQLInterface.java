@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.api2;
 
 import java.sql.Connection;
@@ -60,6 +58,7 @@ import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
@@ -70,102 +69,98 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public class RdbLinkSQLInterface implements LinkSQLInterface {
-	
-	private static final Log LOG = LogFactory.getLog(RdbLinkSQLInterface.class);
-	
-	public LinkObject[] getLinksOfObject(final int objectId, final int type, final int folder, final int user, final int[] group, final Session sessionobject) throws OXException {
-		LinkObject[] lo = null;
-		Connection readcon = null;
-		Context ctx = null;
-		try{
-			ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
-			readcon = DBPool.pickup(ctx);
-			lo = Links.getAllLinksFromObject(objectId,type,folder,user,group,sessionobject,readcon);
-		} catch (final ContextException ct){
-			throw new ContactException(ct);
-		}catch (final DBPoolingException e){
-			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
-		}catch (final OXException e){
-			throw e;
-			//throw new OXException("AN ERROR OCCURRED DURING getLinksOfObject", e);
-		} finally {
-			if (readcon != null) {
-				DBPool.closeReaderSilent(ctx, readcon);
-			}
-		}
-		return lo;
-	}
 
-	public LinkObject[] getLinksByObjectID(final int objectId, final int type, final int user, final int[] group, final Session sessionobject) throws OXException {
-		LinkObject[] lo = null;
-		Connection readcon = null;
-		Context ctx = null;
-		try{
-			ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
-			readcon = DBPool.pickup(ctx);
-			lo = Links.getAllLinksByObjectID(objectId,type,user,group,sessionobject,readcon);
-		} catch (final ContextException ct){
-			throw new ContactException(ct);
-		}catch (final DBPoolingException e){
-			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
-		}catch (final OXException e){
-			throw e;
-			//throw new OXException("AN ERROR OCCURRED DURING getLinksOfObject", e);
-		} finally {
-			if (readcon != null) {
-				DBPool.closeReaderSilent(ctx, readcon);
-			}
-		}
-		return lo;
-	}
+    private static final Log LOG = LogFactory.getLog(RdbLinkSQLInterface.class);
 
-	public void saveLink(final LinkObject l, final int user, final int[] group, final Session so) throws OXException {
-		Connection writecon = null;
-		Context ctx = null;
-		try{
-			ctx = ContextStorage.getStorageContext(so.getContextId());
-			writecon = DBPool.pickupWriteable(ctx);
-			Links.performLinkStorage(l, user, group, so, writecon);
-		}catch (final ContextException ct){
-			throw new ContactException(ct);
-		}catch (final DBPoolingException e){
-			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
-		}catch (final OXException e){
-			throw e;
-			//throw new OXException("AN ERROR OCCURRED DURING saveLink", e);
-		} finally {
-			if (writecon != null) {
-				DBPool.closeWriterSilent(ctx, writecon);
-			}
-		}
-	}
+    public LinkObject[] getLinksOfObject(final int objectId, final int type, final int folder, final int user, final int[] group, final Session sessionobject) throws OXException {
+        LinkObject[] lo = null;
+        Connection readcon = null;
+        Context ctx = null;
+        try{
+            ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
+            readcon = DBPool.pickup(ctx);
+            lo = Links.getAllLinksFromObject(objectId,type,folder,user,group,sessionobject,readcon);
+        } catch (final ContextException ct){
+            throw new ContactException(ct);
+        } catch (final DBPoolingException e){
+            LOG.error("AN ERROR OCCURRED DURING saveLink", e);
+        } catch (LinkException e) {
+            throw new ContactException(e);
+        } finally {
+            if (readcon != null) {
+                DBPool.closeReaderSilent(ctx, readcon);
+            }
+        }
+        return lo;
+    }
 
-	public int[][] deleteLinks(final int id, final int type, final int folder, final int[][] data, final int user, final int[] group, final Session sessionobject) throws OXException {
+    public LinkObject[] getLinksByObjectID(final int objectId, final int type, final int user, final int[] group, final Session sessionobject) throws OXException {
+        LinkObject[] lo = null;
+        Connection readcon = null;
+        Context ctx = null;
+        try{
+            ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
+            readcon = DBPool.pickup(ctx);
+            lo = Links.getAllLinksByObjectID(objectId,type,user,group,sessionobject,readcon);
+        } catch (final ContextException ct){
+            throw new ContactException(ct);
+        } catch (final DBPoolingException e){
+            LOG.error("AN ERROR OCCURRED DURING saveLink", e);
+        } catch (LinkException e) {
+            throw new ContactException(e);
+        } finally {
+            if (readcon != null) {
+                DBPool.closeReaderSilent(ctx, readcon);
+            }
+        }
+        return lo;
+    }
 
-		int[][] resp = null;
-		Connection writecon = null;
-		Connection readcon = null;
-		Context ctx = null;
-		try{
-			ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
-			readcon = DBPool.pickup(ctx);
-			writecon = DBPool.pickupWriteable(ctx);
-			resp = Links.deleteLinkFromObject(id,type,folder,data,user,group,sessionobject,readcon,writecon);
-		}catch (final ContextException ct){
-			throw new ContactException(ct);
-		}catch (final DBPoolingException e){
-			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
-		}catch (final OXException e){
-			throw e;
-			//throw new OXException("AN ERROR OCCURRED DURING deleteLinks", e);
-		} finally {
-			if (readcon != null) {
-				DBPool.closeReaderSilent(ctx, readcon);
-			}
-			if (writecon != null) {
-				DBPool.closeWriterSilent(ctx, writecon);
-			}
-		}
-		return resp;
-	}
+    public void saveLink(final LinkObject l, final int user, final int[] group, final Session so) throws OXException {
+        Connection writecon = null;
+        Context ctx = null;
+        try{
+            ctx = ContextStorage.getStorageContext(so.getContextId());
+            writecon = DBPool.pickupWriteable(ctx);
+            Links.performLinkStorage(l, user, group, so, writecon);
+        } catch (final ContextException ct){
+            throw new ContactException(ct);
+        } catch (final DBPoolingException e){
+            LOG.error("AN ERROR OCCURRED DURING saveLink", e);
+        } catch (LinkException e) {
+            throw new ContactException(e);
+        } finally {
+            if (writecon != null) {
+                DBPool.closeWriterSilent(ctx, writecon);
+            }
+        }
+    }
+
+    public int[][] deleteLinks(final int id, final int type, final int folder, final int[][] data, final int user, final int[] group, final Session sessionobject) throws OXException {
+
+        int[][] resp = null;
+        Connection writecon = null;
+        Connection readcon = null;
+        Context ctx = null;
+        try{
+            ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
+            readcon = DBPool.pickup(ctx);
+            writecon = DBPool.pickupWriteable(ctx);
+            resp = Links.deleteLinkFromObject(id,type,folder,data,user,group,sessionobject,readcon,writecon);
+        } catch (final ContextException ct){
+            throw new ContactException(ct);
+        } catch (final DBPoolingException e){
+            LOG.error("AN ERROR OCCURRED DURING saveLink", e);
+        } catch (LinkException e) {
+            throw new ContactException(e);
+        } finally {
+            if (readcon != null) {
+                DBPool.closeReaderSilent(ctx, readcon);
+            }
+            if (writecon != null) {
+                DBPool.closeWriterSilent(ctx, writecon);
+            }
+        }
+        return resp;
+    }
 }

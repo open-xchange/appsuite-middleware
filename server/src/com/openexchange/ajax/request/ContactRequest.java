@@ -85,6 +85,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
+import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
@@ -96,6 +97,7 @@ import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tx.TransactionException;
@@ -816,6 +818,8 @@ public class ContactRequest {
             links = Links.getAllLinksFromObject(origObjectId, Types.CONTACT, origFolderId, user.getId(), user.getGroups(), session, readCon);
         } catch (final ContextException e) {
             throw new OXException(e);
+        } catch (LinkException e) {
+            throw new ContactException(e);
         } finally {
             Database.back(ctx, false, readCon);
             readCon = null;
@@ -861,6 +865,8 @@ public class ContactRequest {
             }
         } catch (final ContextException e) {
             throw new OXException(e);
+        } catch (LinkException e) {
+            throw new ContactException(e);
         } finally {
             Database.back(ctx, true, writeCon);
         }

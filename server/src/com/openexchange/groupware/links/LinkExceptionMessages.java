@@ -47,46 +47,22 @@
  *
  */
 
-package com.openexchange.server.osgi;
-
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+package com.openexchange.groupware.links;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link LinkExceptionMessages}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class LinkExceptionMessages {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.tx.osgi.TransactionActivator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.filestore.osgi.FilestoreActivator(),
-        new com.openexchange.context.osgi.ContextActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
-        new com.openexchange.groupware.contact.osgi.ContactActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
-        new com.openexchange.groupware.links.osgi.LinkActivator(),
-        new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
-        new com.openexchange.consistency.osgi.ConsistencyActivator()
-    };
+    public static final String NO_LINK_ACCESS_PERMISSION_MSG = "Unable to access link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d";
 
-    public Activator() {
+    public static final String ALREADY_LINKED_MSG = "Unable to create a link between these two objects. This link already exists. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d";
+
+    public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
+
+    private LinkExceptionMessages() {
         super();
-    }
-
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
     }
 }

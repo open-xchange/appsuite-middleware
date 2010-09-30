@@ -58,33 +58,10 @@ public class ContactException extends OXException {
 
     private static final long serialVersionUID = -202902687980139008L;
 
-    public static final String NON_CONTACT_FOLDER_MSG = ContactExceptionMessages.NON_CONTACT_FOLDER_MSG;
-
-    public static final String NO_PERMISSION_MSG = ContactExceptionMessages.NO_ACCESS_PERMISSION_MSG;
-
-    public static final String NO_READ_PERMISSION_MSG = "You do not have permission to read objects in folder %1$d in context %2$d with user %3$d";
-
-    public static final String OBJECT_HAS_CHANGED_MSG = ContactExceptionMessages.OBJECT_HAS_CHANGED_MSG;
-
-    public static final String NO_DELETE_PERMISSION_MSG = ContactExceptionMessages.NO_DELETE_PERMISSION_MSG;
-
-    public static final String EVENT_QUEUE = "Unable to initialize Event queue";
-
-    public static final String INIT_CONNECTION_FROM_DBPOOL = ContactExceptionMessages.INIT_CONNECTION_FROM_DBPOOL_MSG;
-
-    public static final String PFLAG_IN_PUBLIC_FOLDER = ContactExceptionMessages.PFLAG_IN_PUBLIC_FOLDER_MSG;
-
-    public static final String NOT_IN_FOLDER = ContactExceptionMessages.NOT_IN_FOLDER_MSG;
-
     /**
      * Invalid email address: %1$s
      */
     public static final String INVALID_ADDRESS = "Invalid email address: %1$s";
-
-    /**
-     * Unexpected error: %1$s
-     */
-    public static final String UNEXPECTED_ERROR = "Unexpected error: %1$s";
 
     /**
      * Initializes a new {@link ContactException}.
