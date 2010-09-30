@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.MulticastSocket;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.push.PushException;
 
@@ -21,16 +20,21 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
 
     private static final int MAX_UDP_PACKET_SIZE = 4+64+1;
     
-    private static DatagramSocket datagramSocket;
+    private static DatagramSocket datagramSocket = null;
     
     private final String imapLoginDelimiter;
     
-    public MailNotifyPushUdpSocketListener(final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter) throws UnknownHostException, SocketException, ConfigurationException {
+    public MailNotifyPushUdpSocketListener(final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws ConfigurationException, IOException {
         InetAddress senderAddress = InetAddress.getByName(udpListenHost);
 
         this.imapLoginDelimiter = imapLoginDelimiter;
         if (senderAddress != null) {
-            datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
+            if (multicast) {
+                datagramSocket = new MulticastSocket(udpListenPort);
+                ((MulticastSocket)datagramSocket).joinGroup(senderAddress);
+            } else {
+                datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
+            }
         } else {
             throw new ConfigurationException(ConfigurationException.Code.INVALID_CONFIGURATION, "Can't get internet addres to given hostname " + udpListenHost);
         }

@@ -1,3 +1,7 @@
+* 2010-09-23 - wolfgang.rosenauer@open-xchange.com
+
+ - Support multicast networking
+
 * 2010-09-16 - wolfgang.rosenauer@open-xchange.com
 
  - Bugfix: allow imapLoginDelimiter to be null

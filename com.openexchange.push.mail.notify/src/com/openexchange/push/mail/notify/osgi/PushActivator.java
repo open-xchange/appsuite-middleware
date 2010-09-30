@@ -49,8 +49,7 @@
 
 package com.openexchange.push.mail.notify.osgi;
 
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -84,6 +83,8 @@ public final class PushActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PushActivator.class);
     
+    private static final String PROP_UDP_LISTEN_MULTICAST = "com.openexchange.push.mail.notify.udp_listen_multicast";
+    
     private static final String PROP_UDP_LISTEN_HOST = "com.openexchange.push.mail.notify.udp_listen_host";
 
     private static final String PROP_UDP_LISTEN_PORT = "com.openexchange.push.mail.notify.udp_listen_port";
@@ -91,6 +92,8 @@ public final class PushActivator extends DeferredActivator {
     private static final String PROP_IMAP_LOGIN_DELIMITER = "com.openexchange.push.mail.notify.imap_login_delimiter";
 
     private List<ServiceRegistration> serviceRegistrations;
+
+    private boolean multicast;
 
     private String udpListenHost;
 
@@ -199,7 +202,15 @@ public final class PushActivator extends DeferredActivator {
          * Read configuration
          */
         final ConfigurationService configurationService = getService(ConfigurationService.class);
-        String tmp = configurationService.getProperty(PROP_UDP_LISTEN_HOST);
+        String tmp = configurationService.getProperty(PROP_UDP_LISTEN_MULTICAST);
+        multicast = false;
+        if (null != tmp) {
+            if (tmp.trim().equals("true")) {
+                sb.append("\t" + PROP_UDP_LISTEN_MULTICAST + ": true" + CRLF);
+                multicast = true;
+            }
+        }
+        tmp = configurationService.getProperty(PROP_UDP_LISTEN_HOST);
         if (null != tmp) {
             udpListenHost = tmp.trim();
             sb.append("\t" + PROP_UDP_LISTEN_HOST + ": " + udpListenHost + CRLF);
@@ -228,9 +239,9 @@ public final class PushActivator extends DeferredActivator {
         LOG.info(sb);
     }
 
-    private void startUdpListener() throws UnknownHostException, SocketException, ConfigurationException {
+    private void startUdpListener() throws ConfigurationException, IOException {
         final ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
-        udpThread = threadPoolService.submit(ThreadPools.task(new MailNotifyPushUdpSocketListener(udpListenHost, udpListenPort, imapLoginDelimiter)));
+        udpThread = threadPoolService.submit(ThreadPools.task(new MailNotifyPushUdpSocketListener(udpListenHost, udpListenPort, imapLoginDelimiter, multicast)));
     }
 
     private void stopUdpListener() {
