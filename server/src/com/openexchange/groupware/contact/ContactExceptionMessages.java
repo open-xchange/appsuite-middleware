@@ -136,6 +136,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String CONV_OBJ_2_DATE_FAILED_MSG = "Could not convert given object %s to a date when setting %s.";
 
+    public static final String CONTACT_OBJECT_MISSING_MSG = "Need at least a ContactObject to get the value of %s";
+
     private ContactExceptionMessages() {
         super();
     }
