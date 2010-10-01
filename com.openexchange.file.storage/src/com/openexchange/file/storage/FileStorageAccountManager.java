@@ -69,7 +69,7 @@ public interface FileStorageAccountManager {
      * @return The identifier of the newly created account
      * @throws FileStorageException If insertion fails
      */
-    public int addAccount(FileStorageAccount account, Session session) throws FileStorageException;
+    public String addAccount(FileStorageAccount account, Session session) throws FileStorageException;
 
     /**
      * Updates an existing account.
