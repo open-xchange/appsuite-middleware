@@ -52,8 +52,8 @@ package com.openexchange.ajax;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -174,11 +174,12 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
     }
 
     /**
-     * Override this to handle an action differently from the usual JSON handling. This is primarily useful for handling up / downloads
+     * Override this to handle an action differently from the usual JSON handling. This is primarily useful for handling up- / downloads.
+     * 
      * @param action The action parameter given
      * @param req The HTTP request object
      * @param resp The HTTP response object
-     * @return
+     * @return <code>true</code> if operation completed successfully and therefore usual JSON handling must be omitted; otherwise <code>false</code> to fall-back to usual JSON handling
      */
     protected boolean handleIndividually(String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         return false;
