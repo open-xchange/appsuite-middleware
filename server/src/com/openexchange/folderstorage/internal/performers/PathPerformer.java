@@ -237,8 +237,61 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
         }
         if (LOG.isDebugEnabled()) {
             final long duration = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder().append("List.doList() with single storage took ").append(duration).append(
+            LOG.debug(new StringBuilder().append("Path.doPath() took ").append(duration).append(
                 "msec for parent folder: ").append(folderId).toString());
+        }
+        return ret;
+    }
+
+    /**
+     * Performs the <code>PATH</code> request.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
+     *            subscribed ones
+     * @return The user-sensitive folders describing the path to root folder
+     * @throws FolderException If a folder error occurs
+     */
+    public String[] doForcePath(final String treeId, final String folderId, final boolean all) throws FolderException {
+        if (FolderStorage.ROOT_ID.equals(folderId)) {
+            return new String[0];
+        }
+        final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+        }
+        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
+        folderStorage.startTransaction(storageParameters, false);
+        final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+        openedStorages.add(folderStorage);
+        final String[] ret;
+        try {
+            Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
+
+            final List<String> path = new ArrayList<String>(8);
+            path.add(folderId);
+            while (!FolderStorage.ROOT_ID.equals(folder.getParentID())) {
+                final FolderStorage fs = getOpenedStorage(folder.getParentID(), treeId, storageParameters, openedStorages);
+                folder = fs.getFolder(treeId, folder.getParentID(), storageParameters);
+                path.add(folder.getID());
+            }
+
+            ret = path.toArray(new String[path.size()]);
+
+            for (final FolderStorage fs : openedStorages) {
+                fs.commitTransaction(storageParameters);
+            }
+        } catch (final FolderException e) {
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         return ret;
     }

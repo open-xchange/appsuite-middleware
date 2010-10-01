@@ -1,3 +1,7 @@
+* 2010-10-01 - thorben.betten@open-xchange.com
+
+ - Bugfix #17027: Consistent folder structure in database
+
 * 2010-09-30 - thorben.betten@open-xchange.com
 
  - Bugfix #17107: Direct instantiation of POP3Access instance

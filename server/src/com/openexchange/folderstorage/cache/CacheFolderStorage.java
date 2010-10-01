@@ -330,7 +330,7 @@ public final class CacheFolderStorage implements FolderStorage {
             return;
         }
         try {
-            final List<String> ids;
+            List<String> ids = Collections.singletonList(id);
             try {
                 final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
                 ids = new ArrayList<String>(path.length);
@@ -338,8 +338,18 @@ public final class CacheFolderStorage implements FolderStorage {
                     ids.add(userizedFolder.getID());
                 }
             } catch (final Exception e) {
-                removeSingleFromCache(id, treeId, userId, contextId);
-                return;
+                final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(CacheFolderStorage.class);
+                if (log.isDebugEnabled()) {
+                    log.debug(e.getMessage(), e);
+                }
+                try {
+                    ids = new ArrayList<String>(Arrays.asList(pathPerformer.doForcePath(treeId, id, true)));
+                } catch (final Exception e1) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(e1.getMessage(), e1);
+                    }
+                    ids = Collections.singletonList(id);
+                }
             }
             if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 for (final String folderId : ids) {
