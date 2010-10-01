@@ -75,9 +75,8 @@ public final class FolderConsistenceLoginHandler implements LoginHandlerService 
     public void handleLogin(final LoginResult login) throws LoginException {
         try {
             final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-            if (null != folderService) {
-                folderService.checkConsistency("1", login.getSession());
-            }
+            folderService.checkConsistency("1", login.getSession());
+            folderService.checkConsistency("0", login.getSession());
         } catch (final ServiceException e) {
             throw new LoginException(e);
         } catch (final FolderException e) {
