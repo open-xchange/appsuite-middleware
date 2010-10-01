@@ -271,14 +271,20 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
         // Modify parent
         if (isShared) {
-            // Remain tree if parent is viewable, too.
-            final FolderStorage parentStorage = getOpenedStorage(treeId, folder.getParentID(), storageParameters, openedStorages);
-            final Folder parent = parentStorage.getFolder(treeId, folder.getParentID(), storageParameters);
-            final Permission permission = CalculatePermission.calculate(parent, session, getAllowedContentTypes());
-            if (!permission.isVisible()) {
-                userizedFolder.setParentID(FolderObject.SHARED_PREFIX + FolderObject.SYSTEM_SHARED_FOLDER_ID);
-            }
+            userizedFolder.setParentID(FolderObject.SHARED_PREFIX + userizedFolder.getCreatedBy());
             userizedFolder.setDefault(false);
+            
+            // Remain tree if parent is viewable, too.
+            //final FolderStorage parentStorage = getOpenedStorage(treeId, folder.getParentID(), storageParameters, openedStorages);
+            //final Folder parent = parentStorage.getFolder(treeId, folder.getParentID(), storageParameters);
+            //final Permission permission = CalculatePermission.calculate(parent, session, getAllowedContentTypes());
+            //if (!permission.isVisible()) {
+            //   userizedFolder.setParentID(FolderObject.SHARED_PREFIX + userizedFolder.getCreatedBy());
+            //}
+            //userizedFolder.setDefault(false);
+        }
+        if (userizedFolder.getID().startsWith(FolderObject.SHARED_PREFIX)) {
+            userizedFolder.setParentID(FolderStorage.SHARED_ID);
         }
         /*
          * Time zone offset and last-modified in UTC
