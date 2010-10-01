@@ -75,6 +75,8 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
     protected I input;
     
     protected boolean debuggingEnabled;
+    
+    protected boolean switchUserAgent;
 
     protected AbstractStep() {
         super();
@@ -119,6 +121,15 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         
     }
     
+    public boolean isSwitchUserAgent() {
+        return switchUserAgent;
+    }
+
+    
+    public void setSwitchUserAgent(boolean switchUserAgent) {
+        this.switchUserAgent = switchUserAgent;
+    }
+
     // Convenience Methods for Development / Debugging
     public boolean isDebuggingEnabled() {
         return debuggingEnabled;

@@ -83,17 +83,30 @@ public class StringByFrameNumberAndRegexStep extends AbstractStep<String, HtmlPa
     @Override
     public void execute(final WebClient webClient) throws SubscriptionException {
         int index = 1;
+        if (debuggingEnabled){
+            LOG.info("Number of Frames : " + input.getFrames().size());
+        }
 
         for (FrameWindow frame : input.getFrames()) {
+            if (debuggingEnabled){
+                LOG.info("Frame name : " + frame.getName() + ", number : " + index);
+                HtmlPage page = (HtmlPage) frame.getEnclosedPage();
+                LOG.info("Frame content : " + page.getWebResponse().getContentAsString());
+            }
+            
             if (index == frameNumber) {
                 HtmlPage page = (HtmlPage) frame.getEnclosedPage();
                 String pageString = page.getWebResponse().getContentAsString();
                 LOG.debug("Frame selected : " + frame.getName() + "\n" + pageString);
+                if (debuggingEnabled){
+                    LOG.info("Frame selected : " + frame.getName() + "\n" + pageString);
+                    openPageInBrowser(page);
+                }
                 Pattern pattern = Pattern.compile(regex);
                 Matcher matcher = pattern.matcher(pageString);
                 if (matcher.find()) {
                     output = matcher.group(1);
-                    LOG.debug("String found is  : " + output);
+                    LOG.debug("String found is  : " + output);                    
                     executedSuccessfully = true;
                 }
             }

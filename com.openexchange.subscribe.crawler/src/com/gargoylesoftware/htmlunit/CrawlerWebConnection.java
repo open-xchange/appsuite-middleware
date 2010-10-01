@@ -105,6 +105,9 @@ public class CrawlerWebConnection extends HttpWebConnection {
     private String virtualHost_;
     private static Log LOG = LogFactory.getLog(CrawlerWebConnection.class);
     private boolean quirkyCookieQuotes;
+    private boolean switchUserAgent;
+    private final String mobileUserAgent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16";
+    private final String normalUserAgent = BrowserVersion.FIREFOX_3.getUserAgent();
 
     /**
      * Initializes a new {@link CrawlerWebConnection}.
@@ -289,7 +292,15 @@ public class CrawlerWebConnection extends HttpWebConnection {
             }
         }
 
-        httpMethod.setRequestHeader("User-Agent", webClient_.getBrowserVersion().getUserAgent());
+        if (switchUserAgent) {
+            if (webClient_.getBrowserVersion().getUserAgent().equals(mobileUserAgent)){
+                httpMethod.setRequestHeader("User-Agent", normalUserAgent);
+            } else {
+                httpMethod.setRequestHeader("User-Agent", mobileUserAgent);
+            }
+        } else {
+            httpMethod.setRequestHeader("User-Agent", webClient_.getBrowserVersion().getUserAgent());            
+        }    
 
         writeRequestHeadersToHttpMethod(httpMethod, webRequestSettings.getAdditionalHeaders());
         httpMethod.setFollowRedirects(false);
@@ -574,5 +585,9 @@ public class CrawlerWebConnection extends HttpWebConnection {
         this.quirkyCookieQuotes = quirkyCookieQuotes;
     }
 
+    public void switchUserAgent(){
+        if (this.switchUserAgent) {this.switchUserAgent = false;}
+        else {this.switchUserAgent = true;}
+    }
     
 }

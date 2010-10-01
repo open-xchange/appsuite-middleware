@@ -154,7 +154,7 @@ public class Workflow {
         // System.out.println(CookiePolicy.getCookieSpec("crawler-special"));
 
         webClient.setWebConnection(crawlerConnection);
-        // Javascript is disable by default for security reasons but may be activated for single crawlers
+        // Javascript is disabled by default for security reasons but may be activated for single crawlers
         webClient.setJavaScriptEnabled(enableJavascript);
         webClient.setTimeout(60000);
         webClient.setAjaxController(new NicelyResynchronizingAjaxController());
@@ -172,7 +172,14 @@ public class Workflow {
                 }
                 currentStep.setWorkflow(this);
                 LOG.info("Current Step : " + currentStep.getClass());
+                if (currentStep.isSwitchUserAgent()){
+                    crawlerConnection.switchUserAgent();
+                }
                 currentStep.execute(webClient);
+                //switch back the user agent
+                if (currentStep.isSwitchUserAgent()){
+                    crawlerConnection.switchUserAgent();
+                }
                 previousStep = currentStep;
                 // if step fails try it 2 more times before crying foul
                 if (!currentStep.executedSuccessfully()) {

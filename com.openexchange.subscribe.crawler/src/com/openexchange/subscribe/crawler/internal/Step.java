@@ -85,4 +85,8 @@ public interface Step<O, I>{
     
     public TypeVariable<?>[] runEmpty();
 
+    public boolean isSwitchUserAgent();
+
+    public void setSwitchUserAgent(boolean switchUserAgent);
+
 }

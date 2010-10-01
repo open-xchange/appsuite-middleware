@@ -75,7 +75,8 @@ public class GenericSubscribeServiceForMSNTest extends GenericSubscribeServiceTe
         crawler.setId("com.openexchange.subscribe.crawler.msn.de");
         crawler.setCrawlerApiVersion(618);
         crawler.setMobileUserAgentEnabled(true);
-        crawler.setPriority(1);
+        crawler.setJavascriptEnabled(true);
+        crawler.setPriority(2);
         
         List<Step> steps = new LinkedList<Step>();        
         
@@ -92,12 +93,15 @@ public class GenericSubscribeServiceForMSNTest extends GenericSubscribeServiceTe
             "",
             "PasswordSubmit"));
         steps.add(new PageByLinkRegexStep("Click on 'All services'", ".*allservices.*"));
-        steps.add(new PageByUrlStep("Open Contacts", "http://profile.live.com/contacts"));
+        PageByUrlStep pageByUrlStep = new PageByUrlStep();
+        pageByUrlStep.setDescription("Open Contacts");
+        pageByUrlStep.setUrl("http://profile.live.com/contacts");
+        steps.add(pageByUrlStep);
         steps.add(new AnchorsByLinkRegexStep(
             "Get all contact links. this is just one long list, no subpages here",
             "",
-            ".*ContactId.*",
-            ".*ContactId=(.*)",
+            ".*contactId.*",
+            ".*contactId=(.*)",
             true));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(id=\"ic2_name\"\\s*title=\")" + "([^\"]*)" + "(\")", "display_name"));
