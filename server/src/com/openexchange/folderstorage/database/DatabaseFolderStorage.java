@@ -161,14 +161,19 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final long now = System.currentTimeMillis();
             do {
                 for (final int folderId : nonExistingParents) {
-                    if (FolderObject.SHARED == folderAccess.getFolderType(folderId, userId)) {
-                        shared.add(folderId);
-                    } else {
-                        manager.deleteValidatedFolder(folderId, now, -1, true);
+                    if (folderId >= FolderObject.MIN_FOLDER_ID) {
+                        if (FolderObject.SHARED == folderAccess.getFolderType(folderId, userId)) {
+                            shared.add(folderId);
+                        } else {
+                            manager.deleteValidatedFolder(folderId, now, -1, true);
+                        }
                     }
                 }
                 final TIntHashSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(session.getContext(), con));
                 tmp.removeAll(shared.toArray());
+                for (int i = 0; i < FolderObject.MIN_FOLDER_ID; i++) {
+                    tmp.remove(i);
+                }
                 nonExistingParents = tmp.toArray();
             } while (null != nonExistingParents && nonExistingParents.length > 0);
         } catch (final OXException e) {
