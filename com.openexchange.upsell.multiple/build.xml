@@ -96,7 +96,7 @@
 	<target name="installConfig">
 
 		<copy todir="${destdir}/${prefix}/etc/groupware/" overwrite="true">
-			<fileset dir="conf/" includes="upsell.properties" />
+			<fileset dir="conf/" includes="upsell.properties,upsell_mail_subject_ox_enduser.tmpl_de_DE,upsell_mail_subject_ox_enduser.tmpl,upsell_mail_body_ox_enduser.tmpl_de_DE,upsell_mail_body_ox_enduser.tmpl" />
 		</copy>
 
 		<mkdir dir="${destdir}/${bundle.d}" />
