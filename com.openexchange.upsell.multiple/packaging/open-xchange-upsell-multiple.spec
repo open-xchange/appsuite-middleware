@@ -83,6 +83,10 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/upsell.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/upsell_mail_body_ox_enduser.tmpl
+%config(noreplace) /opt/open-xchange/etc/groupware/upsell_mail_body_ox_enduser.tmpl_de_DE
+%config(noreplace) /opt/open-xchange/etc/groupware/upsell_mail_subject_ox_enduser.tmpl
+%config(noreplace) /opt/open-xchange/etc/groupware/upsell_mail_subject_ox_enduser.tmpl_de_DE
 %changelog
 * Wed Sep 22 2010 - manuel@open-xchange.com
 Initial

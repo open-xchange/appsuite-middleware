@@ -20,11 +20,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -103,8 +99,8 @@ import com.openexchange.upsell.multiple.osgi.MyServiceRegistry;
 
 
 /**
- * This request handler currently know these actions:
  * 
+ * Servlet to trigger upsell actions like email or URL redirect.
  * 
  */
 public final class MyServletRequest  {
@@ -114,19 +110,10 @@ public final class MyServletRequest  {
 	private final Context ctx;
 	private ConfigurationService configservice;
 	
-	private static final HttpClient HTTPCLIENT;
-
-    static {
-            MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
-            HttpConnectionManagerParams params = manager.getParams();
-            params.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, 23);
-            HTTPCLIENT = new HttpClient(manager);
-    }
-
-	
 	
 	private static final Log LOG = LogFactory.getLog(MyServletRequest.class);
 	
+	// HTTP API methods/parameters
 	public static final String ACTION_GET_CONFIGURED_METHOD = "get_method"; // action to retrieve configured upsell method
 	public static final String ACTION_GET_STATIC_REDIRECT_URL_METHOD = "get_static_redirect_url"; // 
 	public static final String ACTION_GET_EXTERNAL_REDIRECT_URL_METHOD = "get_external_redirect_url"; // 
@@ -138,9 +125,16 @@ public final class MyServletRequest  {
 	private static final String PROPERTY_METHOD_EXTERNAL_SHOP_API_URL = "com.openexchange.upsell.multiple.method.external.shop_api_url";
 	private static final String PROPERTY_METHOD_STATIC_SHOP_REDIR_URL = "com.openexchange.upsell.multiple.method.static.shop_redir_url";
 	private static final String PROPERTY_METHOD = "com.openexchange.upsell.multiple.method"; // one of: external, static, email
+	
+	// email options
 	private static final String PROPERTY_METHOD_EMAIL_ADDRESS = "com.openexchange.upsell.multiple.method.email.address";
 	private static final String PROPERTY_METHOD_EMAIL_SUBJECT = "com.openexchange.upsell.multiple.method.email.subject";
 	private static final String PROPERTY_METHOD_EMAIL_TEMPLATE = "com.openexchange.upsell.multiple.method.email.template";
+	private static final String PROPERTY_METHOD_EMAIL_OXUSER_TEMPLATE = "com.openexchange.upsell.multiple.method.email.oxuser.template";
+	private static final String PROPERTY_METHOD_EMAIL_OXUSER_SUBJECT_TEMPLATE = "com.openexchange.upsell.multiple.method.email.oxuser.template_subject";
+	private static final String PROPERTY_METHOD_EMAIL_OXUSER_ENABLED = "com.openexchange.upsell.multiple.method.email.oxuser.enabled";
+	
+	// RMI API options
 	private static final String PROPERTY_RMI_HOST = "com.openexchange.upsell.multiple.rmi.host";
 	private static final String PROPERTY_RMI_MASTERADMIN = "com.openexchange.upsell.multiple.rmi.masteradmin";
 	private static final String PROPERTY_RMI_MASTERADMIN_PWD = "com.openexchange.upsell.multiple.rmi.masteradmin.pass";
@@ -288,28 +282,52 @@ public final class MyServletRequest  {
 		
 		try {
 			
-			String from = this.user.getMail();
-			
-			String to = getFromConfig(PROPERTY_METHOD_EMAIL_ADDRESS);
-			
+			String email_addy_ox_user = this.user.getMail();
+			String email_addy_provider = getFromConfig(PROPERTY_METHOD_EMAIL_ADDRESS);
 			String subject = getFromConfig(PROPERTY_METHOD_EMAIL_SUBJECT);
 			
+				
 			// load mail body template if exists
-			String mailbody_file = getFromConfig(PROPERTY_METHOD_EMAIL_TEMPLATE);		
-			String mailbody = subject; // fallback
-			
-			File templateFile = new File(mailbody_file);
-            if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()) {
-            	mailbody = getFileContents(templateFile);
-                LOG.debug("Found and now using the upsell mail template at " + mailbody_file);
-            } else {
-                LOG.error("Could not find an upsell mail template at " + mailbody_file + ", using "+PROPERTY_METHOD_EMAIL_SUBJECT+" as mail body.");
-            }
+			String mailbody_provider = getTemplateContent(getFromConfig(PROPERTY_METHOD_EMAIL_TEMPLATE),false);
+			if(mailbody_provider==null){
+				mailbody_provider = subject;
+			}
 			
 			subject = parseText(subject, jsonObject, false); // replace stuff for easier processing at customer
-			mailbody = parseText(mailbody, jsonObject, false); // replace stuff in mail template
+			mailbody_provider = parseText(mailbody_provider, jsonObject, false); // replace stuff in mail template
 			
-			sendUpsellEmail(to, from, mailbody, subject);
+			// send mail to provider email addy
+			sendUpsellEmail(email_addy_provider, email_addy_ox_user, mailbody_provider, subject);
+			
+			
+			// prepare/send email to enduser if configured
+			if(getFromConfig(PROPERTY_METHOD_EMAIL_OXUSER_ENABLED)!=null && 
+			   getFromConfig(PROPERTY_METHOD_EMAIL_OXUSER_ENABLED).equalsIgnoreCase("true")){
+								
+				// first try to load i18n version, if not found, try to load generic one
+				String oxuser_subject = getTemplateContent(getFromConfig(PROPERTY_METHOD_EMAIL_OXUSER_SUBJECT_TEMPLATE),true);
+				
+				
+				if(oxuser_subject==null){
+					oxuser_subject = subject; // fallback to general subject
+				}else{
+					oxuser_subject = parseText(oxuser_subject, jsonObject, false); // parse infos into the templates
+				}
+				
+				
+				String oxuser_body = getTemplateContent(getFromConfig(PROPERTY_METHOD_EMAIL_OXUSER_TEMPLATE),true);
+				
+				if(oxuser_body==null){
+					oxuser_body = mailbody_provider; // fallback to general mailbody
+				}else{
+					oxuser_body = parseText(oxuser_body, jsonObject, false); // parse infos into the templates
+				}
+				
+				sendUpsellEmail(email_addy_ox_user, email_addy_ox_user, oxuser_body, oxuser_subject);
+				if(LOG.isDebugEnabled()){
+					LOG.debug("Sent upsell request email to enduser with email address:"+email_addy_ox_user);
+				}
+			}
 			
 		} catch (ServiceException e) {
 			LOG.error("Error reading mandatory configuration parameters for sending upsell email",e);
@@ -326,6 +344,42 @@ public final class MyServletRequest  {
 		}
 		
 		return null;
+	}
+	
+	
+	private String getTemplateContent(String fulltemplatepath,boolean i18n){
+		
+		
+		if (!i18n) {
+			File templateFile = new File(fulltemplatepath);
+			if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()) {
+				LOG.debug("Found and now using the upsell mail template at "+ fulltemplatepath);
+				return getFileContents(templateFile);
+			} else {
+				LOG.error("Could not find an upsell mail template at "
+						+ fulltemplatepath + ", using "
+						+ PROPERTY_METHOD_EMAIL_SUBJECT + " as mail body.");
+				return null;
+			}
+		} else {
+			// load with langcode extension
+			File templateFile_i18n = new File(fulltemplatepath + "_"+ this.user.getPreferredLanguage());
+			File templateFile = new File(fulltemplatepath);
+			// first try to load i18n file, then the fallback file
+			if (templateFile_i18n.exists() && templateFile_i18n.canRead()
+					&& templateFile_i18n.isFile()) {
+				LOG.debug("Found and now using the i18n upsell mail template at "+ templateFile_i18n.getPath());
+				return getFileContents(templateFile_i18n);
+			} else if (templateFile.exists() && templateFile.canRead()
+					&& templateFile.isFile()) {
+				LOG.debug("Found and now using the upsell mail template at "+ templateFile.getPath());
+				return getFileContents(templateFile);
+			} else {
+				LOG.error("Could not find an i18n upsell mail template with base path "+ fulltemplatepath);
+				return null;
+			}
+		}
+		
 	}
 
 	
@@ -488,6 +542,14 @@ public final class MyServletRequest  {
 		return this.configservice.getProperty(key); 
 	}
 	
+//	private static final HttpClient HTTPCLIENT;
+	//
+//	    static {
+//	            MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
+//	            HttpConnectionManagerParams params = manager.getParams();
+//	            params.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, 23);
+//	            HTTPCLIENT = new HttpClient(manager);
+//	    }
 	
 
 }
