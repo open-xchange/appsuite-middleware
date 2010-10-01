@@ -2,10 +2,12 @@
 crawlerApiVersion: 618
 displayName: msn.de
 id: com.openexchange.subscribe.crawler.msn.de
+javascriptEnabled: true
 mobileUserAgentEnabled: true
-priority: 1
+priority: 2
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
+  enableJavascript: true
   mobileUserAgent: true
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
@@ -29,8 +31,8 @@ workflowString: |
       url: "http://profile.live.com/contacts"
     - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
       description: "Get all contact links. this is just one long list, no subpages here"
-      identifyingCriteria: ".*ContactId=(.*)"
-      linkRegex: ".*ContactId.*"
+      identifyingCriteria: ".*contactId=(.*)"
+      linkRegex: ".*contactId.*"
       mayHaveEmptyOutput: true
       subpageLinkRegex: ""
     - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
