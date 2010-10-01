@@ -179,7 +179,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
         for (final FolderStorage folderStorage : registry.getFolderStoragesForTreeID(treeId)) {
-            final boolean started = folderStorage.startTransaction(storageParameters, false);
+            final boolean started = folderStorage.startTransaction(storageParameters, true);
             try {
                 folderStorage.checkConsistency(treeId, storageParameters);
                 if (started) {

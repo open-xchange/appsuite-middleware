@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.database;
 
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
+import gnu.trove.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -135,7 +136,46 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
-        // Nothing to do
+        try {
+            final Connection con = getConnection(storageParameters);
+            final ServerSession session;
+            {
+                final Session s = storageParameters.getSession();
+                if (null == s) {
+                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+                }
+                if (s instanceof ServerSession) {
+                    session = ((ServerSession) s);
+                } else {
+                    session = new ServerSessionAdapter(s);
+                }
+            }
+            /*
+             * Determine folder with non-existing parents
+             */
+            int[] nonExistingParents = OXFolderSQL.getNonExistingParents(session.getContext(), con);
+            final TIntHashSet shared = new TIntHashSet();
+            final OXFolderManager manager = OXFolderManager.getInstance(session, con, con);
+            final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
+            final int userId = session.getUserId();
+            final long now = System.currentTimeMillis();
+            do {
+                for (final int folderId : nonExistingParents) {
+                    if (FolderObject.SHARED == folderAccess.getFolderType(folderId, userId)) {
+                        shared.add(folderId);
+                    } else {
+                        manager.deleteValidatedFolder(folderId, now, -1, true);
+                    }
+                }
+                final TIntHashSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(session.getContext(), con));
+                tmp.removeAll(shared.toArray());
+                nonExistingParents = tmp.toArray();
+            } while (null != nonExistingParents && nonExistingParents.length > 0);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (ContextException e) {
+            throw new FolderException(e);
+        }
     }
 
     public ContentType[] getSupportedContentTypes() {

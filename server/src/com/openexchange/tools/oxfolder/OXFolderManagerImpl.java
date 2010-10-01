@@ -1483,7 +1483,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                             (TIntObjectHashMap<TIntObjectHashMap<?>>) hashMap;
                         deleteValidatedFolders(tmp, lastModified, type);
                     }
-                    deleteValidatedFolder(folderId, lastModified, type);
+                    deleteValidatedFolder(folderId, lastModified, type, false);
                     /*
                      * Allow further executions
                      */
@@ -1512,62 +1512,62 @@ final class OXFolderManagerImpl extends OXFolderManager {
      * @param type The folder type
      * @throws OXException If deletion fails
      */
-    void deleteValidatedFolder(final int folderID, final long lastModified, final int type) throws OXException {
-        /*
-         * Iterate possibly listening folder delete listeners
-         */
-        for (final Iterator<FolderDeleteListenerService> iter = FolderDeleteListenerRegistry.getInstance().getDeleteListenerServices(); iter.hasNext();) {
-            final FolderDeleteListenerService next = iter.next();
+    @Override
+    public void deleteValidatedFolder(final int folderID, final long lastModified, final int type, final boolean hardDelete) throws OXException {
+        if (hardDelete) {
+            /*
+             * Delete contained items
+             */
+            deleteContainedItems(folderID);
+            /*
+             * Call SQL delete
+             */
             try {
-                next.onFolderDelete(folderID, ctx);
-            } catch (final FolderException e) {
-                LOG.error(new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
-                    "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()), e);
-                throw new OXFolderException(e);
+                OXFolderSQL.delOXFolder(folderID, session.getUserId(), lastModified, true, false, ctx, writeCon);
+            } catch (final DBPoolingException e) {
+                throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            } catch (final SQLException e) {
+                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
             }
-        }
-        /*
-         * Delete folder
-         */
-        final int module = getOXFolderAccess().getFolderModule(folderID);
-        switch (module) {
-        case FolderObject.CALENDAR:
-            deleteContainedAppointments(folderID);
-            break;
-        case FolderObject.TASK:
-            deleteContainedTasks(folderID);
-            break;
-        case FolderObject.CONTACT:
-            deleteContainedContacts(folderID);
-            break;
-        case FolderObject.UNBOUND:
-            break;
-        case FolderObject.INFOSTORE:
-            deleteContainedDocuments(folderID);
-            break;
-        case FolderObject.PROJECT:
-            // TODO: Delete all projects in project folder
-            break;
-        default:
-            throw new OXFolderException(FolderCode.UNKNOWN_MODULE, Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
-        }
-        final OCLPermission[] perms = getOXFolderAccess().getFolderObject(folderID).getPermissionsAsArray();
-        final int parent = getOXFolderAccess().getParentFolderID(folderID);
-        /*
-         * Call SQL delete
-         */
-        try {
-            OXFolderSQL.delWorkingOXFolder(folderID, session.getUserId(), lastModified, ctx, writeCon);
-        } catch (final DBPoolingException e) {
-            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
-        } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
-        }
-        /*
-         * Process system permissions
-         */
-        if (FolderObject.PUBLIC == type) {
-            new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnDelete(parent, folderID, perms, lastModified);
+        } else {
+            /*
+             * Iterate possibly listening folder delete listeners
+             */
+            for (final Iterator<FolderDeleteListenerService> iter = FolderDeleteListenerRegistry.getInstance().getDeleteListenerServices(); iter.hasNext();) {
+                final FolderDeleteListenerService next = iter.next();
+                try {
+                    next.onFolderDelete(folderID, ctx);
+                } catch (final FolderException e) {
+                    LOG.error(new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
+                        "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()), e);
+                    throw new OXFolderException(e);
+                }
+            }
+            /*
+             * Delete contained items
+             */
+            deleteContainedItems(folderID);
+            /*
+             * Remember values
+             */
+            final OCLPermission[] perms = getOXFolderAccess().getFolderObject(folderID).getPermissionsAsArray();
+            final int parent = getOXFolderAccess().getParentFolderID(folderID);
+            /*
+             * Call SQL delete
+             */
+            try {
+                OXFolderSQL.delWorkingOXFolder(folderID, session.getUserId(), lastModified, ctx, writeCon);
+            } catch (final DBPoolingException e) {
+                throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            } catch (final SQLException e) {
+                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+            }
+            /*
+             * Process system permissions
+             */
+            if (FolderObject.PUBLIC == type) {
+                new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnDelete(parent, folderID, perms, lastModified);
+            }
         }
         /*
          * Remove from cache
@@ -1617,19 +1617,46 @@ final class OXFolderManagerImpl extends OXFolderManager {
             /*
              * Propagate
              */
-            final FolderObject fo =
-                FolderObject.loadFolderObjectFromDB(folderID, ctx, wc, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
-            try {
-                new EventClient(session).delete(fo);
-            } catch (final EventException e) {
-                LOG.warn("Delete event could not be enqueued", e);
-            } catch (final ContextException e) {
-                LOG.warn("Delete event could not be enqueued", e);
+            if (!hardDelete) {
+                final FolderObject fo =
+                    FolderObject.loadFolderObjectFromDB(folderID, ctx, wc, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+                try {
+                    new EventClient(session).delete(fo);
+                } catch (final EventException e) {
+                    LOG.warn("Delete event could not be enqueued", e);
+                } catch (final ContextException e) {
+                    LOG.warn("Delete event could not be enqueued", e);
+                }
             }
         } finally {
             if (closeWriter) {
                 DBPool.closeWriterSilent(ctx, wc);
             }
+        }
+    }
+
+    private void deleteContainedItems(final int folderID) throws OXException {
+        final int module = getOXFolderAccess().getFolderModule(folderID);
+        switch (module) {
+        case FolderObject.CALENDAR:
+            deleteContainedAppointments(folderID);
+            break;
+        case FolderObject.TASK:
+            deleteContainedTasks(folderID);
+            break;
+        case FolderObject.CONTACT:
+            deleteContainedContacts(folderID);
+            break;
+        case FolderObject.UNBOUND:
+            break;
+        case FolderObject.INFOSTORE:
+            deleteContainedDocuments(folderID);
+            break;
+        case FolderObject.PROJECT:
+            // TODO: Delete all projects in project folder
+            break;
+        default:
+            throw new OXFolderException(FolderCode.UNKNOWN_MODULE, Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
         }
     }
 

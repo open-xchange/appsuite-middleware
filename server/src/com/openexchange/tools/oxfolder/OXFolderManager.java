@@ -179,6 +179,16 @@ public abstract class OXFolderManager {
     public abstract FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
 
     /**
+     * Deletes the validated folder.
+     * 
+     * @param folderID The folder ID
+     * @param lastModified The last-modified time stamp
+     * @param type The folder type
+     * @throws OXException If deletion fails
+     */
+    public abstract void deleteValidatedFolder(final int folderID, final long lastModified, final int type, final boolean hardDelete) throws OXException;
+
+    /**
      * Clears a folder's content so that all items located in given folder are going to be deleted. <b>NOTE:</b> the returned instance of
      * <tt>FolderObject</tt> is the parameter object itself. Thus it does not matter if you further work on this routine's return value or
      * with parameter value.

@@ -96,7 +96,7 @@ public final class OXFolderSQL {
         super();
     }
 
-    private static final String SQL_SELECT_WITH_NON_EXISTING_PARENT = "SELECT ot1.parent FROM oxfolder_tree AS ot1 where ot1.cid = ? AND ot1.parent <> "+FolderObject.SYSTEM_ROOT_FOLDER_ID+" AND NOT EXISTS (SELECT * FROM oxfolder_tree AS ot2 where ot2.cid = ? AND ot1.parent = ot2.fuid)";
+    private static final String SQL_SELECT_WITH_NON_EXISTING_PARENT = "SELECT ot1.fuid FROM oxfolder_tree AS ot1 where ot1.cid = ? AND ot1.parent <> "+FolderObject.SYSTEM_ROOT_FOLDER_ID+" AND NOT EXISTS (SELECT * FROM oxfolder_tree AS ot2 where ot2.cid = ? AND ot1.parent = ot2.fuid)";
 
     /**
      * Gets the non-existing parents in specified context.
@@ -133,7 +133,7 @@ public final class OXFolderSQL {
         try {
             stmt = con.prepareStatement(SQL_SELECT_WITH_NON_EXISTING_PARENT);
             stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, ctx.getContextId());
             rs = stmt.executeQuery();
             final TIntHashSet set = new TIntHashSet(16);
             while (rs.next()) {
