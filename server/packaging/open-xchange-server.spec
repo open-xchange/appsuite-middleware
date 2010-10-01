@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 15
+%define		ox_release 16
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Oct 01 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16796: Fixed creating a task without start and end date through first generation Outlook OXtender. 
 * Mon Sep 27 2010 - thorben.betten@open-xchange.com
  - Bugfix #17046: Fixed closing of FolderObjectIterator
 * Thu Sep 23 2010 - francisco.laguna@open-xchange.com
