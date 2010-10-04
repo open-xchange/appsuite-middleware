@@ -59,16 +59,16 @@ import com.openexchange.server.ServiceException;
 
 
 /**
- * {@link FolderConsistenceLoginHandler}
+ * {@link FolderConsistencyLoginHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderConsistenceLoginHandler implements LoginHandlerService {
+public final class FolderConsistencyLoginHandler implements LoginHandlerService {
 
     /**
-     * Initializes a new {@link FolderConsistenceLoginHandler}.
+     * Initializes a new {@link FolderConsistencyLoginHandler}.
      */
-    public FolderConsistenceLoginHandler() {
+    public FolderConsistencyLoginHandler() {
         super();
     }
 

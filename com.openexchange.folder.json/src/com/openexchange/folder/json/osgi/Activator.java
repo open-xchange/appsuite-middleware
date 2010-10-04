@@ -141,7 +141,7 @@ public class Activator extends DeferredActivator {
                 MultipleHandlerFactoryService.class.getName(),
                 new FolderMultipleHandlerFactory(),
                 null));
-            serviceRegistrations.add(context.registerService(LoginHandlerService.class.getName(), new FolderConsistenceLoginHandler(), null));
+            serviceRegistrations.add(context.registerService(LoginHandlerService.class.getName(), new FolderConsistencyLoginHandler(), null));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
