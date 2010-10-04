@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange File Storage Generic Bundle
+Bundle-SymbolicName: com.openexchange.file.storage.generic
+Bundle-Version: 6.18.2.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.cache,
+ com.openexchange.caching,
+ com.openexchange.context,
+ com.openexchange.crypto,
+ com.openexchange.database,
+ com.openexchange.datatypes.genericonf,
+ com.openexchange.datatypes.genericonf.storage,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.delete,
+ com.openexchange.groupware.update,
+ com.openexchange.file.storage,
+ com.openexchange.file.storage.registry,
+ com.openexchange.secret,
+ com.openexchange.secret.osgi.tools,
+ com.openexchange.secret.recovery,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ com.openexchange.tools.sql,
+ gnu.trove,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.file.storage.generic.osgi.FileStorageGenericActivator
+Export-Package: com.openexchange.file.storage.generic

@@ -1,0 +1,36 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange File Storage JSON Bundle
+Bundle-SymbolicName: com.openexchange.file.storage.json
+Bundle-Version: 6.18.2.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.caching,
+ com.openexchange.datatypes.genericonf,
+ com.openexchange.datatypes.genericonf.json,
+ com.openexchange.file.storage,
+ com.openexchange.file.storage.generic,
+ com.openexchange.file.storage.registry,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.settings,
+ com.openexchange.groupware.userconfiguration,
+ com.openexchange.i18n,
+ com.openexchange.multiple,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.encoding,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.osgi.util.tracker
