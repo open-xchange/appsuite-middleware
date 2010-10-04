@@ -73,5 +73,8 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.secret.recovery,com.openexchange.secret.recovery"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.secret.recovery.json,com.openexchange.secret.recovery.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.secret.recovery.mail,com.openexchange.secret.recovery.mail"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.file.storage.generic,com.openexchange.file.storage.generic"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.file.storage.json,com.openexchange.file.storage.json"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.file.storage.config,com.openexchange.file.storage.config"/>
 </provider>
 </psf>
