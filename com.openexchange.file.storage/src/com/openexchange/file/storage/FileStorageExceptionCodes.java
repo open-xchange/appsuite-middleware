@@ -160,7 +160,11 @@ public enum FileStorageExceptionCodes implements OXErrorMessage {
     /**
      * No account manager could be found for service: %1$s.
      */
-    NO_ACCOUNT_MANAGER_FOR_SERVICE(FileStorageExceptionMessages.NO_ACCOUNT_MANAGER_FOR_SERVICE_MSG, Category.CODE_ERROR, 26);
+    NO_ACCOUNT_MANAGER_FOR_SERVICE(FileStorageExceptionMessages.NO_ACCOUNT_MANAGER_FOR_SERVICE_MSG, Category.CODE_ERROR, 26),
+    /**
+     * Invalid URL "%1$s". Error: %2$s.
+     */
+    INVALID_URL(FileStorageExceptionMessages.INVALID_URL_MSG, Category.USER_INPUT, 27);
 
     private final Category category;
 

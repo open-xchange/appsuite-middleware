@@ -134,6 +134,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // No account manager could be found for service: %1$s.
     public static final String NO_ACCOUNT_MANAGER_FOR_SERVICE_MSG = "No account manager could be found for service: %1$s.";
 
+    // Invalid URL "%1$s". Error: %2$s.
+    public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Error: %2$s.";
+
     /**
      * Initializes a new {@link FileStorageExceptionMessages}.
      */
