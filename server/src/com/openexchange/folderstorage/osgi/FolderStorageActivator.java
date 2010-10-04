@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.osgi.CacheFolderStorageActivator;
 import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivator;
+import com.openexchange.folderstorage.filestorage.osgi.FileStorageFolderStorageActivator;
 import com.openexchange.folderstorage.internal.ContentTypeRegistry;
 import com.openexchange.folderstorage.internal.FolderServiceImpl;
 import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
@@ -124,6 +125,7 @@ public final class FolderStorageActivator implements BundleActivator {
             activators.add(new DatabaseFolderStorageActivator()); // Database impl
             activators.add(new MailFolderStorageActivator()); // Mail impl
             activators.add(new MessagingFolderStorageActivator()); // Messaging impl
+            activators.add(new FileStorageFolderStorageActivator()); // File storage impl
             activators.add(new CacheFolderStorageActivator()); // Cache impl
             activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
             // activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
@@ -149,7 +151,7 @@ public final class FolderStorageActivator implements BundleActivator {
             if (LOG.isInfoEnabled()) {
                 final StringBuilder sb = new StringBuilder(32);
                 sb.append("Bundle \"");
-                sb.append(FolderStorageActivator.class.getName());
+                sb.append("com.openexchange.folderstorage");
                 sb.append("\" successfully started!");
                 LOG.info(sb.toString());
             }
@@ -206,7 +208,7 @@ public final class FolderStorageActivator implements BundleActivator {
             if (LOG.isInfoEnabled()) {
                 final StringBuilder sb = new StringBuilder(32);
                 sb.append("Bundle \"");
-                sb.append(FolderStorageActivator.class.getName());
+                sb.append("com.openexchange.folderstorage");
                 sb.append("\" successfully stopped!");
                 LOG.info(sb.toString());
             }
