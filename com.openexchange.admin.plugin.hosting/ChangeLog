@@ -1,3 +1,10 @@
+* 2010-10-04 - choeger@open-xchange.com
+
+ - Bugfix #12012: showruntimestats missed the $JAVA_XTRAOPTS causes failure on
+   virtuozoo containers
+   JAVA_OXCMD_OPTS must be used for commandline options
+   fixed all commandline tools to only use JAVA_OXCMD_OPTS
+
 * 2010-09-16 - marcus.klein@open-xchange.com
 
  - Bugfix #16865: Default for the initial amount of connection to a new database is zero.
