@@ -682,7 +682,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         /*
-         * Primary account's root folder does not exist in tis folder tree
+         * Primary account's root folder does not exist in this folder tree
          */
         if (PREPARED_FULLNAME_DEFAULT.equals(folderId)) {
             throw FolderExceptionErrorMessage.NOT_FOUND.create(folderId, treeId);
