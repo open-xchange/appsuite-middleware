@@ -71,136 +71,136 @@ import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
 public class Appointment extends DataServlet {
-	
-	private static final long serialVersionUID = 8550664916596120436L;
-	
-	private static final transient Log LOG = LogFactory.getLog(Appointment.class);
-	
-	@Override
-	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		final Response response = new Response();
-		try {
-			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final ServerSession session = getSessionObject(httpServletRequest);
-			JSONObject jsonObj;
-			try {
-				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-	            writeResponse(response, httpServletResponse);
-	            return;
-			}
-			final AppointmentRequest appointmentRequest = new AppointmentRequest(session);
-			final JSONValue responseObj = appointmentRequest.action(action, jsonObj);
-			response.setTimestamp(appointmentRequest.getTimestamp());
-			response.setData(responseObj);
-		} catch (final OXMandatoryFieldException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXConflictException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXException e) {
-			if (e.getCategory() == Category.USER_INPUT) {
-				LOG.debug(e.getMessage(), e);
-			} else {
-				LOG.error(e.getMessage(), e);
-			}
-			
-			response.setException(e);
-		} catch (final SearchIteratorException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final AjaxException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                .JSON_WRITE_ERROR, e);
-			LOG.error(oje.getMessage(), oje);
-			response.setException(oje);
-		} catch (final OXJSONException e) {
+
+    private static final long serialVersionUID = 8550664916596120436L;
+
+    private static final transient Log LOG = LogFactory.getLog(Appointment.class);
+
+    @Override
+    protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        final Response response = new Response();
+        try {
+            final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            final ServerSession session = getSessionObject(httpServletRequest);
+            JSONObject jsonObj;
+            try {
+                jsonObj = convertParameter2JSONObject(httpServletRequest);
+            } catch (final JSONException e) {
+                LOG.error(e.getMessage(), e);
+                response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+                writeResponse(response, httpServletResponse);
+                return;
+            }
+            final AppointmentRequest appointmentRequest = new AppointmentRequest(session);
+            final JSONValue responseObj = appointmentRequest.action(action, jsonObj);
+            response.setTimestamp(appointmentRequest.getTimestamp());
+            response.setData(responseObj);
+        } catch (final OXMandatoryFieldException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        }
-		
-		writeResponse(response, httpServletResponse);
-	}
-	
-	@Override
-	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		final Response response = new Response();
-		try {
-			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final ServerSession session = getSessionObject(httpServletRequest);
-			
-			final String data = getBody(httpServletRequest).trim();
-			if (data.length() > 0) {
-				final AppointmentRequest appointmentRequest;
-				final JSONObject jsonObj;
+        } catch (final OXConflictException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final OXException e) {
+            if (e.getCategory() == Category.USER_INPUT) {
+                LOG.debug(e.getMessage(), e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
 
-				try {
-					jsonObj = convertParameter2JSONObject(httpServletRequest);					
-				} catch (final JSONException e) {
-					LOG.error(e.getMessage(), e);
-		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-		            writeResponse(response, httpServletResponse);
-		            return;
-				}
-                appointmentRequest = new AppointmentRequest(session);
-				if (data.charAt(0) == '[') {
-					final JSONArray jsonDataArray = new JSONArray(data);
-					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
-					final JSONValue responseObj = appointmentRequest.action(action, jsonObj);
-					response.setTimestamp(appointmentRequest.getTimestamp());
-					response.setData(responseObj);
-				} else if (data.charAt(0) == '{') {
-					final JSONObject jsonDataObject = new JSONObject(data);
-					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObject);
-					final Object responseObj = appointmentRequest.action(action, jsonObj);
-					response.setTimestamp(appointmentRequest.getTimestamp());
-					response.setData(responseObj);
-				} else {
-					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
-				}
-			} else {
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
-			}
-		} catch (final OXMandatoryFieldException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXConflictException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final JSONException e) {
+            response.setException(e);
+        } catch (final SearchIteratorException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final AjaxException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
-			LOG.error(oje.getMessage(), oje);
-			response.setException(oje);
-		} catch (final OXException e) {
-			if (e.getCategory() == Category.USER_INPUT) {
-				LOG.debug(e.getMessage(), e);
-			} else {
-				LOG.error(e.getMessage(), e);
-			}
-			response.setException(e);
-		} catch (final SearchIteratorException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final AjaxException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
+            LOG.error(oje.getMessage(), oje);
+            response.setException(oje);
         } catch (final OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
-		
-		writeResponse(response, httpServletResponse);
-	}
-	
-	@Override
-	protected boolean hasModulePermission(final ServerSession session) {
+
+        writeResponse(response, httpServletResponse);
+    }
+
+    @Override
+    protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        final Response response = new Response();
+        try {
+            final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            final ServerSession session = getSessionObject(httpServletRequest);
+
+            final String data = getBody(httpServletRequest).trim();
+            if (data.length() > 0) {
+                final AppointmentRequest appointmentRequest;
+                final JSONObject jsonObj;
+
+                try {
+                    jsonObj = convertParameter2JSONObject(httpServletRequest);
+                } catch (final JSONException e) {
+                    LOG.error(e.getMessage(), e);
+                    response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+                    writeResponse(response, httpServletResponse);
+                    return;
+                }
+                appointmentRequest = new AppointmentRequest(session);
+                if (data.charAt(0) == '[') {
+                    final JSONArray jsonDataArray = new JSONArray(data);
+                    jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
+                    final JSONValue responseObj = appointmentRequest.action(action, jsonObj);
+                    response.setTimestamp(appointmentRequest.getTimestamp());
+                    response.setData(responseObj);
+                } else if (data.charAt(0) == '{') {
+                    final JSONObject jsonDataObject = new JSONObject(data);
+                    jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObject);
+                    final Object responseObj = appointmentRequest.action(action, jsonObj);
+                    response.setTimestamp(appointmentRequest.getTimestamp());
+                    response.setData(responseObj);
+                } else {
+                    httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
+                }
+            } else {
+                httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
+            }
+        } catch (final OXMandatoryFieldException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final OXConflictException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final JSONException e) {
+            final OXJSONException oje = new OXJSONException(OXJSONException.Code
+                .JSON_WRITE_ERROR, e);
+            LOG.error(oje.getMessage(), oje);
+            response.setException(oje);
+        } catch (final OXException e) {
+            if (e.getCategory() == Category.USER_INPUT) {
+                LOG.debug(e.getMessage(), e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
+            response.setException(e);
+        } catch (final SearchIteratorException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final AjaxException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final OXJSONException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        }
+
+        writeResponse(response, httpServletResponse);
+    }
+
+    @Override
+    protected boolean hasModulePermission(final ServerSession session) {
         return session.getUserConfiguration().hasCalendar();
-	}
+    }
 }
