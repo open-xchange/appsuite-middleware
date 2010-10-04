@@ -384,6 +384,7 @@ public class LocalFileStorage implements FileStorage {
      * @throws FileStorageException if an error occurs.
      */
     public InputStream getFile(final String identifier) throws FileStorageException {
+        
         return load(identifier);
     }
 
@@ -711,10 +712,14 @@ public class LocalFileStorage implements FileStorage {
      * @throws FileStorageException
      */
     protected InputStream load(final String name) throws FileStorageException {
+        File dataFile = new File(storage, name);
+        if (!dataFile.exists()) {
+            throw new FileStorageException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
+        }
         try {
             return new FileInputStream(new File(storage, name));
         } catch (final FileNotFoundException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
+            throw new FileStorageException(Code.IOERROR, e, e.getMessage());
         }
     }
 
