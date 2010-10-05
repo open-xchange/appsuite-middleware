@@ -50,6 +50,7 @@
 package com.openexchange.file.storage;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -104,6 +105,10 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
     protected boolean b_subfolders;
 
     protected boolean exists;
+
+    protected Date creationDate;
+
+    protected Date lastModifiedDate;
 
     /**
      * Initializes a new {@link DefaultFileStorageFolder}.
@@ -468,6 +473,32 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
      */
     public void setExists(final boolean exists) {
         this.exists = exists;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public Date getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    /**
+     * Sets the creation date
+     * 
+     * @param creationDate The creation date to set
+     */
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    /**
+     * Sets the last modified date.
+     * 
+     * @param lastModifiedDate The last modified date to set
+     */
+    public void setLastModifiedDate(Date lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
     }
 
 }
