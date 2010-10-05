@@ -63,7 +63,7 @@ public interface FileStorageAccountAccess extends FileStorageResource {
      * 
      * @return The account identifier
      */
-    public int getAccountId();
+    public String getAccountId();
 
     /**
      * Gets the file access for associated account.
