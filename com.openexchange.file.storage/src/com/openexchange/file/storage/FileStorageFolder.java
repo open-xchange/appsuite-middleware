@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -154,6 +155,20 @@ public interface FileStorageFolder {
      * @return Whether the denoted file storage folder is subscribed or not
      */
     public boolean isSubscribed();
+
+    /**
+     * Gets the creation date.
+     * 
+     * @return The creation date
+     */
+    public Date getCreationDate();
+
+    /**
+     * Gets the last modified date.
+     * 
+     * @return The last modified date
+     */
+    public Date getLastModifiedDate();
 
     /**
      * Checks if this folder is able to hold folders.
