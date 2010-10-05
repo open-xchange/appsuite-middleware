@@ -163,7 +163,7 @@ public final class UpdatesAction extends AbstractFolderAction {
                     Constants.ADDITIONAL_FOLDER_FIELD_LIST);
             final int len = jsonArray2.length();
             for (int i = 0; i < len; i++) {
-                resultArray.put(jsonArray2.getJSONArray(i));
+                resultArray.put(jsonArray2.getJSONArray(i).get(0));
             }
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
