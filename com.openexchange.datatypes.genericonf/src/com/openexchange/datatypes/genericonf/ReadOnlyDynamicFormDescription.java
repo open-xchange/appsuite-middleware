@@ -137,5 +137,4 @@ public final class ReadOnlyDynamicFormDescription extends DynamicFormDescription
     public String toString() {
         return delegatee.toString();
     }
-
 }
