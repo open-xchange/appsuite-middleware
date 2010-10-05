@@ -1,186 +1,209 @@
-// ########################################## Upsell #####################################################
-/*
-possible event trigger
+upsell = {
+  config: {
+    path: "plugins/com.openexchange.upsell.multiple.gui/",
+    features: {
+      infostore: {
+        name: ["modules/infostore"],
+        title: "Enhance your system with &#8222;InfoStore&#8220;",
+        template: "infostore.html",
+        buttons: {
+          trial: {
+            content: "Sign-Up for trial",
+            action: "upsell._get_purchase_method()",
+          },
+        },
+      },
+      calender: {
+        name: ["modules/calender"],
+        title: "Hinweis zum Teamkalender - Mail Professional",
+        template: "calendar.html",
+        buttons: {
+          trial: {
+            content: "Sign-Up for trial",
+            action: "upsell._get_purchase_method()",
+          },
+        },
+      },
+      mobility: {
+        name: ["modules/usm/eas", "modules/mobility"],
+        title: "Enhance your system with &#8222;Business Mobility&#8220;",
+        product_name: "Mail Push oder Mail Professional",
+        template: "mobility.html",
+        buttons: {
+          trial: {
+            content: "Sign-Up for trial",
+            action: "upsell._get_purchase_method()",
+          },
+        },
+      },
+      outlook: {
+        name: ["modules/outlook"],
+        title: "Hinweis zu Mail Professional",
+        template: "outlook.html",
+      },
+      order_confirm: {
+        name: ["order_confirm"],
+        title: "Danke fuer Ihre Bestellung",
+        template: "order_confirm.html",
+      }
+    },
+  },
+  
+  init: function (feature, win) {
+    // Bind Lightbox
+    jQuery('body').delegate('a.light_box', 'mouseover', function(){
+      jQuery('a.light_box.image').fancybox(
+        {
+          'titleShow':false
+        }
+      );
+      jQuery('a.light_box.swf').fancybox(
+        { 
+          'padding'			: 0,
+				  'autoScale'			: false,
+  				'transitionIn'		: 'none',
+	  			'transitionOut'		: 'none'
+        }
+      );
+      return false;
+    });
+    
+    // Reset delegated actions
+    jQuery('a.light_box').undelegate('mouseout');
+    
+    // Add feature to config
+    upsell.config.feature = feature;
+    
+    // Find out which feature is selected and configures content
+    upsell._get_feature();
+    
+    // Show upsell
+    upsell._show_upsell();
+    
 
-modules/calendar/freebusy
-modules/calendar/team
-modules/calendar/mini_calender
-modules/calendar/new/add_participants
-modules/calendar/new/remove_participants
-modules/calendar/new/add_attachment
-modules/calendar/new/delete_attachment
-modules/contacts/new/add_attachment
-modules/contacts/new/delete_attachment
-modules/mail/save_to_infostore
-modules/infostore/send_as_attachment
-modules/infostore/send_as_link
-modules/infostore/mail/save_to_infostore
-modules/tasks/new/add_participants
-modules/tasks/new/remove_participants
-modules/tasks/new/add_attachment
-modules/tasks/new/delete_attachment
-configuration/mail/accounts/new
-modules/folders/users
+  },
+  
+  _get_feature: function(){
+    jQuery.each(upsell.config.features, function(i, val){
+      if(jQuery.inArray(upsell.config.feature, val.name) >= 0){
+        upsell.config.title = val.title;
+        upsell.config.template = upsell.config.path + 'templates/_' + val.template.replace(/.html.*/, "") + "/_" + val.template;
+        upsell.config.js = upsell.config.path + 'templates/_' + val.template.replace(/.html.*/, "") + "/_" + val.template.replace(/.html.*/, "") + ".js";
+      }
+    });
+  },
+  
+  _show_upsell: function(){
+    jQuery.ajax({
+      url: upsell.config.template,
+      dataType: "text", 
+      success: function(data) {
+        upsell._build_window(data);
+      }
+    });
 
-modules/infostore
-modules/calender
-modules/contacts
-modules/mail
-modules/portal
-modules/tasks
-modules/configuration
-
-modules/outlook (set in this plugin)
-modules/mobility (set in this plugin)
-
-*/
-
-var upsellPluginPath = "plugins/com.openexchange.upsell.multiple.gui/";
-var upsellTemplate = upsellPluginPath+"upsell_txt.html";
-
-// was hat er angeklickt? 
-var feature_cl = "";
-
-function loadUpsellFile(page, win, feature) {
-	
-var xmlhttp = JSON.prototype.getXmlHttp();
-function callback() {
-	if (xmlhttp.readyState != 4) return;
-	xmlhttp.onreadystatechange = emptyFunction; // fixes IE memory leak
-	
-	var s = xmlhttp.responseText;
-				
-	var myDiv = newnode("div",{ verticalAlign: "middle", textAlign: "left", padding: "1px" }, 0, [], win.document);
-	var winTitle = "Hinweis zu Mail Professional";
+  },
+  
+  _build_window: function(data){
+    var data =
+      '<div id="upsell_window">' +
+        '<div id="headerSection">' +
+           '<h2>' +
+             upsell.config.title +
+           '</h2>' +
+          '<a href="#" class="simplemodal-close"></a>' +
+         '</div>' +
+         '<div id="contentSection">' +
+           '<div class="contentSection">' +
+               data +
+           '</div>' +
+         '</div>' +
+         '<div id="footerSection">' +
+           upsell._build_button();
+         '</div>' +
+       '</div>';
        
-	var produktName = "Mail Professional";
-   
-	if (feature.match(/infostore/g)){
-		winTitle = "Hinweis zum Infostore - Mail Professional";
-	} else if (feature.match(/calender/g)){
-		winTitle = "Hinweis zum Teamkalender - Mail Professional";
-	} else if (feature === "modules/mobility"){	
-		winTitle = "Hinweis zu Mobile E-Mail - Mail Push / Mail Professional";
-		produktName = " Mail Push oder Mail Professional";
-	} else if (feature === "modules/outlook"){
-		winTitle = "Hinweis zu Mail Professional";		
-	}
-	feature_cl = feature;
-	myDiv.innerHTML = s.replace(/_PRODUKT_/g, produktName);
-			
-	function openVersatelUrl(){
-		generateId();
-	}
-	win.newConfirm(winTitle,null,258,openVersatelUrl,null,null,null,null,null,null,null,null,myDiv);
-
-}
-xmlhttp.onreadystatechange = callback;
-xmlhttp.open("GET",page, true);
-xmlhttp.send("");
-}
-
-//Upsell layer
-register("Feature_Not_Available", showUpsellLayer);
-
-function generateId(){
-	ox.JSON.get("/ajax/upsell/multiple?session="+parent.session+"&action=get_method", openUrl);
-}
-
-function openUrl(reply){
-
-
-	if(reply.data.upsell_method==="email"){
-		// trigger email via servlet and show popup/resultpage
-		ox.JSON.get("/ajax/upsell/multiple?session="+parent.session+"&action=send_upsell_email&feature_clicked="+feature_cl, openMailSuccess);
-	}
-
-	if(reply.data.upsell_method==="static"){
-        	// trigger redirect and follow URL from response 
-		getredirect();
-	}
+    jQuery.modal(data);
+    jQuery.getScript(upsell.config.js);
+  },
+  
+  _build_button: function(data){
+    var button = "";
+    jQuery.each(upsell.config.features, function(i, val){
+      if(jQuery.inArray(upsell.config.feature, val.name) >= 0 && val.buttons){
+        jQuery.each(val.buttons, function(ib, valb){
+          if(valb.content != "undefined"){
+            button += '<a href="#" id="' + ib + '" class="btn"';
+            button += 'onClick="' + valb.action + '"';
+            button += '><span>';
+            button += valb.content;
+            button += '</span></a>';
+          }
+        });
+      }
+    });
+    return button;
+  },
+  
+  _get_purchase_method: function(){
+    jQuery.getJSON(
+      "/ajax/upsell/multiple?session="+parent.session+"&action=get_method",
+      function(data){
+        upsell._procces_purchase(data.data.upsell_method);
+      }
+    );
+  },
+  
+  _procces_purchase: function(data){
+    switch (data) {
+      case "email":
+        jQuery.getJSON(
+          "/ajax/upsell/multiple?session="+parent.session+"&action=send_upsell_email&feature_clicked="+upsell.config.feature,
+          function(data){
+            upsell._do_purchase_mail(data);
+          }
+        );
+        break;
+      case "static":
+        upsell._get_purchase_redirect();
+        break;
+      default:
+        alert("No Valid Purchasing method");
+        break;
+    }
+  },
+  
+  _do_purchase_redirect: function(data){
+	  jQuery.getJSON(
+      "/ajax/upsell/multiple?session="+parent.session+"&action=get_static_redirect_url&feature_clicked="+upsell.config.feature,
+      function(data){
+        window.open(data.data.upsell_static_redirect_url, '_blank');
+      }
+    );
+  },
+  
+  _do_purchase_mail: function(data){
+	  jQuery.getJSON(
+      "/ajax/upsell/multiple?session="+parent.session+"&action=change_context_permissions&upsell_plan=groupware_premium",
+      function(data){
+        alert("Your provider processed your order successfully. After you press 'OK', an automatic Re-Login will be initiated, and the new feature is going to be available immediately");
+        location.reload();
+      }
+    );
+  },
+  
 };
 
-function openMailSuccess(reply){
-	ox.JSON.get("/ajax/upsell/multiple?session="+parent.session+"&action=change_context_permissions&upsell_plan=groupware_premium", emptyfunction);
-	alert("Bestellung erfolgreich an Ihren Dienstleister weitergeleitet");
-}
 
-function emptyfunction(reply){
+// Initialize upsell and load dependencies
+jQuery.getScript("plugins/com.openexchange.upsell.multiple.gui/jss/fancybox.js");
+jQuery.getScript("plugins/com.openexchange.upsell.multiple.gui/jss/modal.js");
 
-}
-
-function getredirect(){
-	ox.JSON.get("/ajax/upsell/multiple?session="+parent.session+"&action=get_static_redirect_url&feature_clicked="+feature_cl, openRedirUrl);
-}
-
-function openRedirUrl(reply){
-	window.open(reply.data.upsell_static_redirect_url, '_blank');
-}
-
-
-
-
-function showUpsellLayer(feature, win) {
-
-win = win || corewindow;
-loadUpsellFile(upsellTemplate, win, feature);
-	
-};
-
-/**
-* upsell function in the portal pannel: syncronization for outlook and mobility
-*/
-if ((!(config.modules.infostore.module))&&(config.modules.portal.module)) {
-var syncupsell = MenuNodes.createSmallButtonContext("syncronisation", "NEU! Synchronisierung");
-MenuNodes.createSmallButton(syncupsell,"buttonol", "Windows Outlook", getFullImgSrc("img/mail/email_priolow.gif"), "", function(){
-	showUpsellLayer("modules/outlook");
+jQuery("<link>").appendTo("head").attr({
+  rel:  "stylesheet",
+  type: "text/css",
+  href: "plugins/com.openexchange.upsell.multiple.gui/css/upsell.css"
 });
 
-MenuNodes.createSmallButton(syncupsell,"buttonsy", "Iphone/Windows Mobile", getFullImgSrc("img/mail/email_priolow.gif"), "", function(){
-	showUpsellLayer("modules/mobility");
-});
-
-/* The pannel object gets the id 42 and gets displayed in the fixed area
- * possible areas are FIXED and DYNAMIC the id controls the order in the areas
- */
-addMenuNode(syncupsell.node, MenuNodes.FIXED, 42);
-
-//Following makes the new pannel options dynamic active/inactive
-changeDisplay("portal", "syncronisation");
-//show the upsell area in the pannel on the first login
-showNode("syncronisation");
-};
-
-
-/**
-*disable the tabs in detail views
-*/
-if (!(config.modules.infostore.module)) {
-//calendar
-$("panelAppointmentDetail3").onclick=function() {
-	corewindow.triggerEvent('Feature_Not_Available',
-	'modules/calendar/detail/attachment_tab', window); 
-	return false; 
-}; 
-$("panelAppointmentDetail2").onclick=function() {
-        corewindow.triggerEvent('Feature_Not_Available',
-        'modules/calendar/detail/participants_tab', window);
-  		return false;
-}; 
-//contatcs
-$("taskpanel2").onclick=function() {
-        corewindow.triggerEvent('Feature_Not_Available',
-        'modules/contacts/detail/participants_tab', window);
-        return false;
-}; 
-$("taskpanel4").onclick=function() {
-        corewindow.triggerEvent('Feature_Not_Available',
-        'modules/contacts/detail/participants_tab', window);
-        return false;
-}; 
-}
-
-
-
-
-
+// Register
+register("Feature_Not_Available", upsell.init);
