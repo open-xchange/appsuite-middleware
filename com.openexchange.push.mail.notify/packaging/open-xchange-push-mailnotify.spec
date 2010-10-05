@@ -70,6 +70,24 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %clean
 %{__rm} -rf %{buildroot}
 
+
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-449
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/push_mailnotify.properties
+   if ! ox_exists_property com.openexchange.push.mail.notify.udp_listen_multicast $pfile; then
+      ox_set_property com.openexchange.push.mail.notify.udp_listen_multicast false $pfile
+   fi
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
