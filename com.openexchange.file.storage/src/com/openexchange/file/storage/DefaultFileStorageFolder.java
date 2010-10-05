@@ -61,49 +61,49 @@ import java.util.Set;
  */
 public class DefaultFileStorageFolder implements FileStorageFolder {
 
-    private Set<String> capabilities;
+    protected Set<String> capabilities;
 
-    private String id;
+    protected String id;
 
-    private int fileCount;
+    protected int fileCount;
 
-    private String name;
+    protected String name;
 
-    private FileStoragePermission ownPermission;
+    protected FileStoragePermission ownPermission;
 
-    private String parentId;
+    protected String parentId;
 
-    private List<FileStoragePermission> permissions;
+    protected List<FileStoragePermission> permissions;
 
-    private boolean subfolders;
+    protected boolean subfolders;
 
-    private boolean subscribedSubfolders;
+    protected boolean subscribedSubfolders;
 
-    private boolean defaultFolder;
+    protected boolean defaultFolder;
 
-    private boolean holdsFolders;
+    protected boolean holdsFolders;
 
-    private boolean holdsFiles;
+    protected boolean holdsFiles;
 
-    private boolean rootFolder;
+    protected boolean rootFolder;
 
-    private boolean b_rootFolder;
+    protected boolean b_rootFolder;
 
-    private boolean subscribed;
+    protected boolean subscribed;
 
-    private boolean b_subscribed;
+    protected boolean b_subscribed;
 
-    private boolean b_holdsFolders;
+    protected boolean b_holdsFolders;
 
-    private boolean b_holdsFiles;
+    protected boolean b_holdsFiles;
 
-    private boolean b_defaultFolder;
+    protected boolean b_defaultFolder;
 
-    private boolean b_subscribedSubfolders;
+    protected boolean b_subscribedSubfolders;
 
-    private boolean b_subfolders;
+    protected boolean b_subfolders;
 
-    private boolean exists;
+    protected boolean exists;
 
     /**
      * Initializes a new {@link DefaultFileStorageFolder}.
