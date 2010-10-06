@@ -58,7 +58,6 @@ import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.update.ForeignKeyOld;
-import com.openexchange.tx.TransactionException;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
@@ -93,7 +92,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
 
     }
 
-    public void tearDown() throws SQLException, DBPoolingException, FileStorageException, FilestoreException, TransactionException {
+    public void tearDown() throws SQLException, DBPoolingException, FileStorageException, FilestoreException, DBPoolingException {
         exec("DELETE FROM infostore_document WHERE infostore_id = ?", 100000);
         exec("DELETE FROM del_infostore_document WHERE infostore_id = ?", 100001);
 

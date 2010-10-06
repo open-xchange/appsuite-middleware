@@ -1,3 +1,4 @@
+
 package com.openexchange.groupware.update;
 
 import java.sql.Connection;
@@ -6,9 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.SortedSet;
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.databaseold.Database;
@@ -24,37 +23,43 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tx.TransactionException;
 
 public abstract class UpdateTest extends TestCase {
+
     protected Schema schema = null;
+
     protected int existing_ctx_id = 0;
+
     protected int user_id = -1;
+
     protected Context ctx;
+
     protected User user;
+
     protected SessionObject session;
+
     private DBProvider provider;
 
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         Init.startServer();
 
         existing_ctx_id = ContextStorage.getInstance().getContextId("defaultcontext");
         ctx = ContextStorage.getInstance().getContext(existing_ctx_id);
 
         schema = SchemaStore.getInstance().getSchema(ctx);
-     
+
         user_id = ctx.getMailadmin();
         user = UserStorage.getInstance().getUser(user_id, ctx);
         session = SessionObjectWrapper.createSessionObject(user_id, ctx.getContextId(), String.valueOf(System.currentTimeMillis()));
     }
 
     @Override
-	public void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         Init.stopServer();
     }
 
-    protected final void exec(final String sql, final Object...args) throws DBPoolingException, SQLException {
+    protected final void exec(final String sql, final Object... args) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
 
@@ -62,21 +67,21 @@ public abstract class UpdateTest extends TestCase {
             con = Database.get(existing_ctx_id, true);
             stmt = con.prepareStatement(sql);
             int count = 1;
-            for(final Object o : args) {
-                stmt.setObject(count++,o);
+            for (final Object o : args) {
+                stmt.setObject(count++, o);
             }
 
             stmt.execute();
         } finally {
 
-            if(null != stmt) {
+            if (null != stmt) {
                 stmt.close();
             }
             Database.back(existing_ctx_id, true, con);
         }
     }
-    
-    protected final void execSafe(final String sql, final Object...args) {
+
+    protected final void execSafe(final String sql, final Object... args) {
         try {
             exec(sql, args);
         } catch (DBPoolingException x) {
@@ -85,9 +90,8 @@ public abstract class UpdateTest extends TestCase {
             x.printStackTrace();
         }
     }
-    
 
-    protected final void assertNoResults(final String sql, final Object...args) throws DBPoolingException, SQLException {
+    protected final void assertNoResults(final String sql, final Object... args) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -95,24 +99,24 @@ public abstract class UpdateTest extends TestCase {
             con = Database.get(existing_ctx_id, true);
             stmt = con.prepareStatement(sql);
             int count = 1;
-            for(final Object o : args) {
-                stmt.setObject(count++,o);
+            for (final Object o : args) {
+                stmt.setObject(count++, o);
             }
 
             rs = stmt.executeQuery();
-            assertFalse("'"+stmt.toString()+"' shouldn't select anything", rs.next());
+            assertFalse("'" + stmt.toString() + "' shouldn't select anything", rs.next());
         } finally {
-            if(null != rs) {
+            if (null != rs) {
                 rs.close();
             }
-            if(null != stmt) {
+            if (null != stmt) {
                 stmt.close();
             }
             Database.back(existing_ctx_id, true, con);
         }
     }
-    
-    protected final void assertResult(final String sql, final Object...args) throws DBPoolingException, SQLException {
+
+    protected final void assertResult(final String sql, final Object... args) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -120,17 +124,17 @@ public abstract class UpdateTest extends TestCase {
             con = Database.get(existing_ctx_id, true);
             stmt = con.prepareStatement(sql);
             int count = 1;
-            for(final Object o : args) {
-                stmt.setObject(count++,o);
+            for (final Object o : args) {
+                stmt.setObject(count++, o);
             }
 
             rs = stmt.executeQuery();
-            assertTrue("'"+stmt.toString()+"' should select something", rs.next());
+            assertTrue("'" + stmt.toString() + "' should select something", rs.next());
         } finally {
-            if(null != rs) {
+            if (null != rs) {
                 rs.close();
             }
-            if(null != stmt) {
+            if (null != stmt) {
                 stmt.close();
             }
             Database.back(existing_ctx_id, true, con);
@@ -139,18 +143,17 @@ public abstract class UpdateTest extends TestCase {
 
     protected final void assertNotInFilestorage(List<String> paths) throws FileStorageException, FilestoreException {
 
-        FileStorage fs  = QuotaFileStorage.getInstance(
-                        FilestoreStorage.createURI(ctx), ctx);
+        FileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
         SortedSet<String> existingPaths = fs.getFileList();
         for (String path : paths) {
             assertFalse(existingPaths.contains(path));
         }
     }
 
-    protected DBProvider getProvider(){
-        if(provider != null) {
-			return provider;
-		}
+    protected DBProvider getProvider() {
+        if (provider != null) {
+            return provider;
+        }
         return provider = createProvider();
     }
 
@@ -159,24 +162,18 @@ public abstract class UpdateTest extends TestCase {
     }
 
     private class UpdateTaskDBProvider implements DBProvider {
-        public Connection getReadConnection(final Context ctx) throws TransactionException {
-            try {
-                return Database.get(ctx, false);
-            } catch (final DBPoolingException e) {
-                throw new TransactionException(e);
-            }
+
+        public Connection getReadConnection(final Context ctx) throws DBPoolingException {
+            return Database.get(ctx, false);
         }
 
         public void releaseReadConnection(final Context ctx, final Connection con) {
             Database.back(ctx, false, con);
         }
 
-        public Connection getWriteConnection(final Context ctx) throws TransactionException {
-            try {
-                return Database.get(ctx, true);
-            } catch (final DBPoolingException e) {
-                throw new TransactionException(e);
-            }
+        public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
+            return Database.get(ctx, true);
+
         }
 
         public void releaseWriteConnection(final Context ctx, final Connection con) {
