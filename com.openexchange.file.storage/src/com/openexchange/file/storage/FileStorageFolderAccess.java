@@ -56,7 +56,7 @@ package com.openexchange.file.storage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public interface FileStorageFolderAccess {
+public interface FileStorageFolderAccess extends FileStorageConstants {
 
     /**
      * Checks if a folder exists whose identifier matches given <code>identifier</code>

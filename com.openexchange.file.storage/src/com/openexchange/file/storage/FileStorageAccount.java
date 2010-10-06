@@ -59,7 +59,7 @@ import java.util.Map;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public interface FileStorageAccount extends Serializable {
+public interface FileStorageAccount extends Serializable, FileStorageConstants {
 
     /**
      * Gets this account's configuration.

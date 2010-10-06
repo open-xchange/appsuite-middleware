@@ -56,7 +56,7 @@ package com.openexchange.file.storage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public interface FileStorageResource {
+public interface FileStorageResource extends FileStorageConstants {
 
     /**
      * Opens this resource. May be invoked on an already opened resource.

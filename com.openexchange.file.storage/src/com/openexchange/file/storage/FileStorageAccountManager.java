@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public interface FileStorageAccountManager {
+public interface FileStorageAccountManager extends FileStorageConstants {
 
     /**
      * Adds a new account.

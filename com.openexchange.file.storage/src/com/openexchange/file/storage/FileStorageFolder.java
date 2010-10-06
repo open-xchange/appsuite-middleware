@@ -59,7 +59,7 @@ import java.util.Set;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public interface FileStorageFolder {
+public interface FileStorageFolder extends FileStorageConstants {
 
     /**
      * The constant for fullname of an account's root folder.

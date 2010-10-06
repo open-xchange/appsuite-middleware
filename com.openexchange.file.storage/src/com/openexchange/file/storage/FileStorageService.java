@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public interface FileStorageService {
+public interface FileStorageService extends FileStorageConstants {
 
     /**
      * Gets the identifier of this file storage service.
