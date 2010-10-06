@@ -7,13 +7,13 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.infostore.webdav.PropertyStore;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.webdav.protocol.WebdavProperty;
 

@@ -9,8 +9,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.CreateAttachmentAction;
 import com.openexchange.groupware.attach.impl.DeleteAttachmentAction;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tx.TransactionException;
+import com.openexchange.tx.UndoableAction;
 
 public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
 

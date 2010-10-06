@@ -10,6 +10,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.filestore.FilestoreStorage;
@@ -18,13 +19,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tx.TransactionException;
 
 public abstract class UpdateTest extends TestCase {
     protected Schema schema = null;

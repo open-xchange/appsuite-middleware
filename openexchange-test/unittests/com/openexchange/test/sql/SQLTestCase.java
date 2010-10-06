@@ -57,9 +57,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.tx.TransactionException;
 import junit.framework.TestCase;
 
 /**

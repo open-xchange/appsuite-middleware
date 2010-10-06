@@ -7,9 +7,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import com.openexchange.groupware.tx.AbstractActionTest;
-import com.openexchange.groupware.tx.UndoableAction;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.internal.LocalFileStorageFactory;
+import com.openexchange.tx.UndoableAction;
 
 public class SaveFileActionTest extends AbstractActionTest {
 

@@ -1,5 +1,6 @@
 package com.openexchange.groupware.tx;
 
+import com.openexchange.tx.UndoableAction;
 import junit.framework.TestCase;
 
 public abstract class AbstractActionTest extends TestCase {

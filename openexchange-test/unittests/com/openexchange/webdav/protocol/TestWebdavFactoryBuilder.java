@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.protocol;
 
+import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
@@ -57,7 +58,6 @@ import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
-import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;

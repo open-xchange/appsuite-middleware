@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.FolderLock;
@@ -13,7 +14,6 @@ import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManager;
-import com.openexchange.groupware.tx.DBPoolProvider;
 
 public class FolderLockManagerTest extends FolderTestCase{
 	private FolderLockManager lockManager;

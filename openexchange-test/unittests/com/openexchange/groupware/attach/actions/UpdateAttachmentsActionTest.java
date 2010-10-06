@@ -6,7 +6,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.impl.CreateAttachmentAction;
 import com.openexchange.groupware.attach.impl.UpdateAttachmentAction;
-import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tx.UndoableAction;
 
 public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
 	

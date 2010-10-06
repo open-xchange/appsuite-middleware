@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.FireAttachedEventAction;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tx.UndoableAction;
 
 public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTest {
 

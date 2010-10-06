@@ -50,7 +50,7 @@ package com.openexchange.groupware.infostore;
 
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.InsertDocumentIntoDelTableAction;
-import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tx.UndoableAction;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

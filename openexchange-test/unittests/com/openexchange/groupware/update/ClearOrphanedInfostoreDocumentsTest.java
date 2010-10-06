@@ -52,13 +52,13 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.update.tasks.ClearOrphanedInfostoreDocuments;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.update.ForeignKeyOld;
+import com.openexchange.tx.TransactionException;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;

@@ -54,6 +54,8 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,9 +67,6 @@ import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.test.TestInit;
@@ -76,6 +75,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.tx.TransactionException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

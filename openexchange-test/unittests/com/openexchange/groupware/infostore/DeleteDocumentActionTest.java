@@ -2,7 +2,7 @@ package com.openexchange.groupware.infostore;
 
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.DeleteDocumentAction;
-import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tx.UndoableAction;
 
 public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 

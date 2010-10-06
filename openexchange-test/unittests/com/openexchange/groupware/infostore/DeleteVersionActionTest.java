@@ -4,7 +4,7 @@ import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
 import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tx.UndoableAction;
 
 import java.util.List;
 import java.util.ArrayList;

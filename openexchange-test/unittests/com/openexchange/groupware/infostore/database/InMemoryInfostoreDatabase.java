@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
@@ -67,11 +68,10 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.Undoable;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.Undoable;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

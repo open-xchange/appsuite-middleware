@@ -2,6 +2,8 @@ package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
 import junit.framework.TestCase;
+import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -10,8 +12,6 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;

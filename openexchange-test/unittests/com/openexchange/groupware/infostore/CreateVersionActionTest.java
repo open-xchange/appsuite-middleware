@@ -4,8 +4,8 @@ import java.sql.SQLException;
 
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tx.TransactionException;
+import com.openexchange.tx.UndoableAction;
 
 public class CreateVersionActionTest extends AbstractInfostoreActionTest {
 

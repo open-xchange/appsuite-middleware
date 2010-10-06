@@ -3,7 +3,7 @@ package com.openexchange.groupware.infostore;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tx.UndoableAction;
 
 public class UpdateDocumentActionTest extends AbstractInfostoreActionTest {
 

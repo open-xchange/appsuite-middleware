@@ -49,10 +49,10 @@
 package com.openexchange.groupware.attach;
 
 import junit.framework.TestCase;
+import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
