@@ -49,16 +49,15 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
-
 /**
  * {@link SmartDriveAccess} - The access to SmartDrive server.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveAccess {
+public interface SmartDriveAccess extends SmartDriveConstants {
 
     SmartDriveStatefulAccess getStatefulAccess();
-    
+
     SmartDriveStatelesslAccess getStatelessAccess();
-    
+
 }

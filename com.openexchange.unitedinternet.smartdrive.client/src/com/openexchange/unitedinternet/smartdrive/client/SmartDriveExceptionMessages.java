@@ -71,6 +71,15 @@ public final class SmartDriveExceptionMessages implements LocalizableStrings {
     // Response is not of type: %1$s
     public static final String NOT_OF_TYPE_MSG = "Response is not of type: %1$s";
 
+    // A HTTP error occurred: %1$s
+    public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";
+
+    // General error: %1$s
+    public static final String GENERAL_ERROR_MSG = "General error: %1$s";
+
+    // Not found: %1$s
+    public static final String NOT_FOUND_MSG = "Not found: %1$s";
+
     /**
      * Initializes a new {@link SmartDriveExceptionMessages}.
      */

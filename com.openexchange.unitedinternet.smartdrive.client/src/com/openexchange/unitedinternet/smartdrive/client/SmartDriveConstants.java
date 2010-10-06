@@ -47,73 +47,43 @@
  *
  */
 
-package com.openexchange.unitedinternet.smartdrive.client.internal;
-
-import com.openexchange.unitedinternet.smartdrive.client.ResponseStatus;
+package com.openexchange.unitedinternet.smartdrive.client;
 
 /**
- * {@link ResponseStatusImpl}
+ * {@link SmartDriveConstants}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ResponseStatusImpl implements ResponseStatus {
-
-    private String statusCode;
-
-    private int httpStatusCode;
-
-    private String errorMessage;
+public interface SmartDriveConstants {
 
     /**
-     * Initializes a new {@link ResponseStatusImpl}.
+     * The client name (user as <code>User-Agent</code> header for stateful SmartDrive methods).
      */
-    public ResponseStatusImpl() {
-        super();
-    }
-
-    public String getStatusCode() {
-        return statusCode;
-    }
-
-    public int getHttpStatusCode() {
-        return httpStatusCode;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
+    public static final String CLIENT_NAME = "Open-Xchange SmartDrive Client";
 
     /**
-     * Sets the status code
-     * 
-     * @param statusCode The status code to set
-     * @return This response status with new value applied
+     * The name for JSESSIONID cookie.
      */
-    public ResponseStatusImpl setStatusCode(final String statusCode) {
-        this.statusCode = statusCode;
-        return this;
-    }
+    public static final String COOKIE_JSESSIONID = "JSESSIONID";
 
     /**
-     * Sets the HTTP status code
-     * 
-     * @param httpStatusCode The HTTP status code to set
-     * @return This response status with new value applied
+     * The name for Authentication cookie.
      */
-    public ResponseStatusImpl setHttpStatusCode(final int httpStatusCode) {
-        this.httpStatusCode = httpStatusCode;
-        return this;
-    }
+    public static final String COOKIE_AUTHENTICATION = "Authentication";
 
     /**
-     * Sets the error message
-     * 
-     * @param errorMessage The error message to set
-     * @return This response status with new value applied
+     * The status code for <code>200 (OK)</code>.
      */
-    public ResponseStatusImpl setErrorMessage(final String errorMessage) {
-        this.errorMessage = errorMessage;
-        return this;
-    }
+    public static final int SC_OK = 200;
+
+    /**
+     * The status code for <code>400 (general error)</code>.
+     */
+    public static final int SC_GENERAL_ERROR = 400;
+
+    /**
+     * The status code for <code>404 (not found)</code>.
+     */
+    public static final int SC_NOT_FOUND = 404;
 
 }

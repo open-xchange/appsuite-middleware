@@ -55,6 +55,6 @@ package com.openexchange.unitedinternet.smartdrive.client;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveStatelesslAccess {
+public interface SmartDriveStatelesslAccess extends SmartDriveConstants {
 
 }

@@ -76,7 +76,19 @@ public enum SmartDriveExceptionCodes implements OXErrorMessage {
     /**
      * Response is not of type: %1$s
      */
-    NOT_OF_TYPE(SmartDriveExceptionMessages.NOT_OF_TYPE_MSG, Category.CODE_ERROR, 4);
+    NOT_OF_TYPE(SmartDriveExceptionMessages.NOT_OF_TYPE_MSG, Category.CODE_ERROR, 4),
+    /**
+     * A HTTP error occurred: %1$s
+     */
+    HTTP_ERROR(SmartDriveExceptionMessages.HTTP_ERROR_MSG, Category.CODE_ERROR, 5),
+    /**
+     * General error: %1$s
+     */
+    GENERAL_ERROR(SmartDriveExceptionMessages.GENERAL_ERROR_MSG, Category.CODE_ERROR, 6),
+    /**
+     * Not found: %1$s
+     */
+    NOT_FOUND(SmartDriveExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 7);
     
 
     private final Category category;
