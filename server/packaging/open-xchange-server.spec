@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -582,6 +582,12 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Oct 05 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17027: Correctly sending deleted folder identifier in folder updates response.
+* Fri Oct 01 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17027: Consistent folder structure in database
+* Thu Sep 30 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17107: Direct instantiation of POP3Access instance
 * Wed Sep 29 2010 - marcus.klein@open-xchange.com
  - Bugfix #17063: Removed WWW-Authenticate header proclaiming the backend supports digest authentication.
 * Tue Sep 28 2010 - choeger@open-xchange.com

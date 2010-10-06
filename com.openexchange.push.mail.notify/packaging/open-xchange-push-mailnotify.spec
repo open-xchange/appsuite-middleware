@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -97,6 +97,8 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/push_mailnotify.properties
 %changelog
+* Thu Sep 23 2010 - wolfgang.rosenauer@open-xchange.com
+ - Support multicast networking
 * Thu Sep 16 2010 - wolfgang.rosenauer@open-xchange.com
  - Bugfix: allow imapLoginDelimiter to be null
  - Minor string changes

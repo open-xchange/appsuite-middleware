@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Open-Xchange Meta Packages" default="default" basedir=".">
-    <property name="version" value="6.18.1.0"/>
+    <property name="version" value="6.18.2.0"/>
 
     <target name="install"/>
 
