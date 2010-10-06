@@ -171,6 +171,7 @@ public class UserModuleAccess implements Serializable {
         this.USM = true;
         this.GlobalAddressBookDisabled = false;
         this.PublicFolderEditable = true;
+        this.OLOX20 = true;
     }
 
     /**
@@ -206,6 +207,7 @@ public class UserModuleAccess implements Serializable {
         this.USM = false;
         this.GlobalAddressBookDisabled = true;
         this.PublicFolderEditable = false;
+        this.OLOX20 = false;
     }
 
     public boolean getEditGroup() {
