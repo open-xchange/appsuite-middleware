@@ -69,7 +69,6 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
-import com.openexchange.admin.plugins.SQLQueryExtension;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -103,6 +102,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.tools.pipesnfilters.Filter;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
 
@@ -526,14 +526,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw invalidDataException;
         }
         new BasicAuthenticator(context).doAuthentication(auth);
-        
+
         log.debug("" + search_pattern);
 
         try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-            SQLQueryExtension temp = null;
-            SQLQueryExtension retval = null;
+            Filter<Context, Context> loader = null;
+            Filter<Integer, Integer> filter = null;
+            ArrayList<Filter<Context, Context>> loaderFilter = new ArrayList<Filter<Context,Context>>();
+            ArrayList<Filter<Integer, Integer>> contextFilter = new ArrayList<Filter<Integer,Integer>>();
             final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
             for (final Bundle bundle : bundles) {
                 final String bundlename = bundle.getSymbolicName();
@@ -549,13 +551,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                                     log.debug("Calling list for plugin: " + bundlename);
                                 }
                                 try {
-                                    temp = oxctx.list(search_pattern, auth);
-                                    if (null != temp) {
-                                        if (null != retval) {
-                                            retval = new SQLQueryExtension(retval.getTablename() + "," + temp.getTablename(), retval.getQuerypart() + temp.getQuerypart());
-                                        } else {
-                                            retval = temp;
-                                        }
+                                    filter = oxctx.filter(auth);
+                                    if (null != filter) {
+                                        contextFilter.add(filter);
+                                    }
+                                    loader = oxctx.list(search_pattern, auth);
+                                    if (null != loader) {
+                                        loaderFilter.add(loader);
                                     }
                                 } catch (final PluginException e) {
                                     log.error("Error while calling method list of plugin " + bundlename,e);
@@ -567,16 +569,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
-            final Context[] ctxs;
-            if( null == retval ) {
-                ctxs = oxcox.listContext(search_pattern);
-            } else {
-                ctxs = oxcox.listContext(search_pattern, retval.getTablename(), retval.getQuerypart());
-            }
-            final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ctxs), auth, oxcox);
-            if (null != callGetDataPlugins)
-                return callGetDataPlugins.toArray(new Context[callGetDataPlugins.size()]);
-            return ctxs;
+            return oxcox.listContext(search_pattern, contextFilter, loaderFilter);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;

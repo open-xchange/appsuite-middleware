@@ -125,6 +125,10 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
+import com.openexchange.tools.pipesnfilters.DataSource;
+import com.openexchange.tools.pipesnfilters.Filter;
+import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
+import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
 /**
  * This class provides the implementation for the storage into a MySQL database
@@ -725,17 +729,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return null;
     }
 
-    /**
-     *
-     * @see com.openexchange.admin.storage.OXContextSQLStorage#listContext(java.lang.String)
-     */
     @Override
-    public Context[] listContext(final String search_pattern) throws StorageException {
-        return listContext(search_pattern, null, null);
-    }
-
-    @Override
-    public Context[] listContext(final String pattern, final String additionaltable, final String sqlconjunction) throws StorageException {
+    public Context[] listContext(final String pattern, List<Filter<Integer, Integer>> filters, List<Filter<Context, Context>> loaders) throws StorageException {
         final String sqlPattern = pattern.replace('*', '%');
         ThreadPoolService threadPoolS;
         try {
@@ -745,18 +740,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
        ContextSearcher[] searchers = null;
-        if( additionaltable != null && sqlconjunction != null ) {
-            searchers = new ContextSearcher[]{
-                new ContextSearcher(cache, "SELECT DISTINCT context.cid FROM context JOIN " + additionaltable + " ON " + additionaltable + ".cid=context.cid WHERE context.name LIKE ? " + sqlconjunction, sqlPattern),
-                new ContextSearcher(cache, "SELECT DISTINCT context.cid FROM context JOIN " + additionaltable + " ON " + additionaltable + ".cid=context.cid WHERE context.cid LIKE ? " + sqlconjunction, sqlPattern),
-                new ContextSearcher(cache, "SELECT DISTINCT login2context.cid FROM login2context JOIN " + additionaltable + " ON login2context.cid=" + additionaltable + ".cid WHERE login2context.login_info LIKE ? " + sqlconjunction, sqlPattern)
-                };
-        } else {
-            searchers = new ContextSearcher[]{
-                new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern),
-                new ContextSearcher(cache, "SELECT cid FROM context WHERE cid LIKE ?", sqlPattern),
-                new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern) };
-        }
+       searchers = new ContextSearcher[]{
+           new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern),
+           new ContextSearcher(cache, "SELECT cid FROM context WHERE cid LIKE ?", sqlPattern),
+           new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern) };
         CompletionFuture<Collection<Integer>> completion = threadPoolS.invoke(searchers);
         Set<Integer> cids = new HashSet<Integer>();
         try {
@@ -772,7 +759,35 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (ExecutionException e) {
              throw ThreadPools.launderThrowable(e, StorageException.class);
         }
-        return contextCommon.loadContexts(cids, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
+
+        Set<Integer> filteredCids = null;
+        if( null != filters && filters.size() > 0) {
+            PipesAndFiltersService pnfService;
+            try {
+                pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
+            } catch (ServiceException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+            DataSource<Integer> output = pnfService.create(cids);
+            for(final Object f : filters.toArray()) {
+                output = output.addFilter((Filter<Integer, Integer>) f);
+            }
+            filteredCids = new HashSet<Integer>();
+            try {
+                while (output.hasData()) {
+                    output.getData(filteredCids);
+                }
+            } catch (PipesAndFiltersException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof StorageException) {
+                    throw (StorageException) cause;
+                }
+                throw new StorageException(cause.getMessage(), cause);
+            }
+        }
+
+        return contextCommon.loadContexts(filteredCids != null ? filteredCids : cids,
+            Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")), loaders);
     }
 
     @Override

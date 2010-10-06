@@ -51,10 +51,9 @@ package com.openexchange.admin.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -63,10 +62,10 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
+import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
  * This interface provides an abstraction to the storage of the context
@@ -198,19 +197,12 @@ public abstract class OXContextStorageInterface {
 
     /**
      * @param search_pattern
+     * @param filters
+     * @param loaders
      * @return
      * @throws StorageException
      */
-    public abstract Context[] listContext(final String search_pattern) throws StorageException;
-
-    /**
-     * @param search_pattern
-     * @param additionaltable
-     * @param sqlconjunction
-     * @return
-     * @throws StorageException
-     */
-    public abstract Context[] listContext(final String search_pattern, final String additionaltable, final String sqlconjunction) throws StorageException;
+    public abstract Context[] listContext(final String search_pattern, List<Filter<Integer, Integer>> filters, List<Filter<Context, Context>> loaders) throws StorageException;
 
     /**
      * @param ctx

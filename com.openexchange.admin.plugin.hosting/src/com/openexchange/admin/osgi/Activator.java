@@ -63,6 +63,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
 public class Activator implements BundleActivator {
 
@@ -77,6 +78,7 @@ public class Activator implements BundleActivator {
         trackers.push(new ServiceTracker(context, ContextService.class.getName(), new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class)));
         trackers.push(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
         trackers.push(new ServiceTracker(context, ManagementService.class.getName(), new ManagementCustomizer(context)));
+        trackers.push(new ServiceTracker(context, PipesAndFiltersService.class.getName(), new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class)));
         for (ServiceTracker tracker : trackers) {
             tracker.open();
         }
