@@ -61,7 +61,9 @@ import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.FileStoragePermission;
 
 /**
  * {@link WebDAVFileStorageFolder}
@@ -75,7 +77,7 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
     /**
      * Initializes a new {@link WebDAVFileStorageFolder}.
      */
-    public WebDAVFileStorageFolder(final String uri, final String rootUri) {
+    public WebDAVFileStorageFolder(final String uri, final String rootUri, final int userId) {
         super();
         id = uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
         if (id.equalsIgnoreCase(rootUri)) {
@@ -94,6 +96,9 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
         exists = true;
         subscribed = true;
         b_subscribed = true;
+        final DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
+        permission.setEntity(userId);
+        permissions = Collections.<FileStoragePermission> singletonList(permission);
     }
 
     /**

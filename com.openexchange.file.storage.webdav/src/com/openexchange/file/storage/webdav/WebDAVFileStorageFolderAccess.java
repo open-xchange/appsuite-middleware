@@ -167,7 +167,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
              * Check
              */
             final URI uri = new URI(folderId, true);
-            final WebDAVFileStorageFolder ret = new WebDAVFileStorageFolder(folderId, rootUri);
+            final WebDAVFileStorageFolder ret = new WebDAVFileStorageFolder(folderId, rootUri, session.getUserId());
             final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
             try {
                 client.executeMethod(propFindMethod);
