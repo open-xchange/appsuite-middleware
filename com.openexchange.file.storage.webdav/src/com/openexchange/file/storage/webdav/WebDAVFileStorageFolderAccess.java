@@ -64,6 +64,7 @@ import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.DavMethod;
 import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.apache.jackrabbit.webdav.client.methods.MkColMethod;
+import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
 import org.apache.jackrabbit.webdav.client.methods.OptionsMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavProperty;
@@ -147,6 +148,8 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             } finally {
                 propFindMethod.releaseConnection();
             }
+        } catch (final FileStorageException e) {
+            throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -261,6 +264,8 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
              * Return
              */
             return ret;
+        } catch (final FileStorageException e) {
+            throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -362,6 +367,8 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
              * Return
              */
             return ret;
+        } catch (final FileStorageException e) {
+            throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -398,24 +405,120 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final DavException e) {
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    public String updateFolder(final String identifier, final FileStorageFolder toUpdate) throws FileStorageException {
-        // TODO PropPatch
-        return null;
+    public String updateFolder(final String folderId, final FileStorageFolder toUpdate) throws FileStorageException {
+        try {
+            if (rootUri.equalsIgnoreCase(folderId)) {
+                throw WebDAVFileStorageExceptionCodes.UPDATE_DENIED.create(folderId);
+            }
+            /*
+             * WebDAV does neither support permissions nor subscriptions
+             */
+            return folderId;
+        } catch (final FileStorageException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public String moveFolder(final String folderId, final String newParentId) throws FileStorageException {
-        // TODO Move
-        return null;
+        try {
+            if (rootUri.equalsIgnoreCase(folderId)) {
+                throw WebDAVFileStorageExceptionCodes.UPDATE_DENIED.create(folderId);
+            }
+            /*
+             * New URI
+             */
+            final String newUri;
+            {
+                URI uri = new URI(folderId, true);
+                String path = uri.getPath();
+                if (path.endsWith("/")) {
+                    path = path.substring(0, path.length() - 1);
+                }
+                int pos = path.lastIndexOf('/');
+                final String name = pos >= 0 ? path.substring(pos) : path;
+
+                uri = new URI(newParentId, true);
+                path = uri.getPath();
+                if (path.endsWith("/")) {
+                    path = path.substring(0, path.length() - 1);
+                }
+                uri.setPath(new StringBuilder(path).append('/').append(name).toString());
+                newUri = uri.toString();
+            }
+            /*
+             * Perform MOVE
+             */
+            final MoveMethod method = new MoveMethod(folderId, newUri, true);
+            try {
+                client.executeMethod(method);
+                method.checkSuccess();
+                return newUri;
+            } finally {
+                method.releaseConnection();
+            }
+        } catch (final FileStorageException e) {
+            throw e;
+        } catch (final HttpException e) {
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final DavException e) {
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public String renameFolder(final String folderId, final String newName) throws FileStorageException {
-        // TODO PropPatch auf displayname oder Move
-        return null;
+        try {
+            if (rootUri.equalsIgnoreCase(folderId)) {
+                throw WebDAVFileStorageExceptionCodes.UPDATE_DENIED.create(folderId);
+            }
+            /*
+             * New URI
+             */
+            final String newUri;
+            {
+                final URI uri = new URI(folderId, true);
+                String path = uri.getPath();
+                if (path.endsWith("/")) {
+                    path = path.substring(0, path.length() - 1);
+                }
+                final int pos = path.lastIndexOf('/');
+                uri.setPath(pos > 0 ? new StringBuilder(path.substring(0, pos)).append('/').append(newName).toString() : newName);
+                newUri = uri.toString();
+            }
+            /*
+             * Perform MOVE
+             */
+            final MoveMethod method = new MoveMethod(folderId, newUri, true);
+            try {
+                client.executeMethod(method);
+                method.checkSuccess();
+                return newUri;
+            } finally {
+                method.releaseConnection();
+            }
+        } catch (final FileStorageException e) {
+            throw e;
+        } catch (final HttpException e) {
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final DavException e) {
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public String deleteFolder(final String folderId) throws FileStorageException {
@@ -438,6 +541,8 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             } finally {
                 method.releaseConnection();
             }
+        } catch (final FileStorageException e) {
+            throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -547,25 +652,16 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             }
             if (!files.isEmpty()) {
                 for (final String fileURI : files) {
+                    /*
+                     * Perform DELETE
+                     */
+                    final DavMethod method = new DeleteMethod(fileURI);
                     try {
-                        /*
-                         * Perform DELETE
-                         */
-                        final DavMethod method = new DeleteMethod(fileURI);
-                        try {
-                            client.executeMethod(method);
-                            method.checkSuccess();
-                        } finally {
-                            method.releaseConnection();
-                        }
-                    } catch (final HttpException e) {
-                        throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
-                    } catch (final IOException e) {
-                        throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                    } catch (final Exception e) {
-                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        client.executeMethod(method);
+                        method.checkSuccess();
+                    } finally {
+                        method.releaseConnection();
                     }
-                    
                 }
             }
             if (deleteRoot) {
@@ -588,6 +684,8 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                     throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
+        } catch (final FileStorageException e) {
+            throw e;
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -600,67 +698,31 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
     }
 
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
+
+        FileStorageFolder f = getFolder(folderId);
+        do {
+            list.add(f);
+            f = getFolder(f.getParentId());
+        } while (!rootUri.equals(f.getParentId()));
+
+        return list.toArray(new FileStorageFolder[list.size()]);
     }
 
     public Quota getStorageQuota(final String folderId) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        return Quota.getUnlimitedQuota(Quota.Type.STORAGE);
     }
 
     public Quota getFileQuota(final String folderId) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        return Quota.getUnlimitedQuota(Quota.Type.FILE);
     }
 
     public Quota[] getQuotas(final String folder, final Type[] types) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    private DavPropertySet getPropertySetFor(final String folderId) throws FileStorageException {
-        try {
-            final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
-            try {
-                client.executeMethod(propFindMethod);
-                /*
-                 * Check if request was successfully executed
-                 */
-                propFindMethod.checkSuccess();
-                /*
-                 * Get multistatus response
-                 */
-                final MultiStatus multiStatus = propFindMethod.getResponseBodyAsMultiStatus();
-                final MultiStatusResponse multiStatusResponse = multiStatus.getResponses()[0];
-                /*
-                 * Get for 200 (OK) status
-                 */
-                final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
-                if (null == propertySet || propertySet.isEmpty()) {
-                    throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
-                        folderId,
-                        account.getId(),
-                        WebDAVConstants.ID,
-                        session.getUserId(),
-                        session.getContextId());
-                }
-                /*
-                 * Check for collection
-                 */
-                return propertySet;
-            } finally {
-                propFindMethod.releaseConnection();
-            }
-        } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        final Quota[] ret = new Quota[types.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = Quota.getUnlimitedQuota(types[i]);
         }
+        return ret;
     }
 
 }

@@ -88,7 +88,11 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
     /**
      * Directory "%1$s" must not be deleted.
      */
-    DELETE_DENIED(WebDAVFileStorageExceptionMessages.DELETE_DENIED_MSG, Category.CODE_ERROR, 7);
+    DELETE_DENIED(WebDAVFileStorageExceptionMessages.DELETE_DENIED_MSG, Category.CODE_ERROR, 7),
+    /**
+     * Directory "%1$s" must not be updated.
+     */
+    UPDATE_DENIED(WebDAVFileStorageExceptionMessages.UPDATE_DENIED_MSG, Category.CODE_ERROR, 8);
     
 
     private final Category category;

@@ -80,6 +80,9 @@ public final class WebDAVFileStorageExceptionMessages implements LocalizableStri
     // Directory "%1$s" must not be deleted.
     public static final String DELETE_DENIED_MSG = "Directory \"%1$s\" must not be deleted.";
 
+    // Directory "%1$s" must not be updated.
+    public static final String UPDATE_DENIED_MSG = "Directory \"%1$s\" must not be updated.";
+
     /**
      * Initializes a new {@link WebDAVFileStorageExceptionMessages}.
      */
