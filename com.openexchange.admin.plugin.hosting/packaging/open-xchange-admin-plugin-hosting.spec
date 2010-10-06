@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,11 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Oct 04 2010 - choeger@open-xchange.com
+ - Bugfix #12012: showruntimestats missed the $JAVA_XTRAOPTS causes failure on
+   virtuozoo containers
+   JAVA_OXCMD_OPTS must be used for commandline options
+   fixed all commandline tools to only use JAVA_OXCMD_OPTS
 * Thu Sep 16 2010 - marcus.klein@open-xchange.com
  - Bugfix #16865: Default for the initial amount of connection to a new database is zero.
 * Wed Aug 25 2010 - marcus.klein@open-xchange.com
