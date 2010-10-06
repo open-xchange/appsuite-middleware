@@ -56,6 +56,7 @@ import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
@@ -63,9 +64,11 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageException;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageService;
 import com.openexchange.file.storage.webdav.exception.WebDAVFileStorageExceptionFactory;
+import com.openexchange.file.storage.webdav.session.WebDAVEventHandler;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link WebDAVFileStorageActivator}
@@ -89,7 +92,7 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class };
     }
 
     @Override
@@ -157,7 +160,7 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
              */
             final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            // registrations.add(context.registerService(EventHandler.class.getName(), new FacebookEventHandler(), serviceProperties));
+            registrations.add(context.registerService(EventHandler.class.getName(), new WebDAVEventHandler(), serviceProperties));
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class).error(e.getMessage(), e);
             throw e;

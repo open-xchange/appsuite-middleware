@@ -112,8 +112,8 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
         } else {
             final String[] sa = SPLIT.split(allow, 0);
             final Set<String> allowedCmds = new HashSet<String>(sa.length);
-            for (int i = 0; i < sa.length; i++) {
-                allowedCmds.add(sa[i].toUpperCase(Locale.ENGLISH));
+            for (final String element : sa) {
+                allowedCmds.add(element.toUpperCase(Locale.ENGLISH));
             }
             capabilities = allowedCmds;
         }

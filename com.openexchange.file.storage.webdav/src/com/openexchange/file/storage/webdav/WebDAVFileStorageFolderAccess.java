@@ -443,7 +443,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 if (path.endsWith("/")) {
                     path = path.substring(0, path.length() - 1);
                 }
-                int pos = path.lastIndexOf('/');
+                final int pos = path.lastIndexOf('/');
                 final String name = pos >= 0 ? path.substring(pos) : path;
 
                 uri = new URI(newParentId, true);

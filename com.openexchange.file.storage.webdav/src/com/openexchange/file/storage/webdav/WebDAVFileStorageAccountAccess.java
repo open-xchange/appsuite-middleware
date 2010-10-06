@@ -53,10 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.Credentials;
@@ -82,7 +78,7 @@ import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.file.storage.webdav.session.WebDAVHttpClientRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -93,9 +89,9 @@ import com.openexchange.session.Session;
 public final class WebDAVFileStorageAccountAccess implements FileStorageAccountAccess {
 
     /**
-     * The HTTP time out.
+     * The default HTTP time out.
      */
-    private static final int TIMEOUT = 3000;
+    private static final int TIMEOUT = 60000;
 
     /**
      * The maximum number of connections to be used for a host configuration.
@@ -116,7 +112,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      * Member stuff
      */
 
-    private final AtomicReference<Future<HttpClient>> httpClientRef;
+    private final AtomicReference<HttpClient> httpClientRef;
 
     private final FileStorageAccount account;
 
@@ -131,7 +127,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      */
     public WebDAVFileStorageAccountAccess(final FileStorageAccount account, final Session session) {
         super();
-        httpClientRef = new AtomicReference<Future<HttpClient>>();
+        httpClientRef = new AtomicReference<HttpClient>();
         this.account = account;
         this.session = session;
     }
@@ -140,19 +136,17 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         if (null != httpClientRef.get()) {
             return;
         }
-        final Map<String, Object> configuration = account.getConfiguration();
-        final String url = (String) configuration.get(WebDAVConstants.WEBDAV_URL);
+        final String url = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
         if (null == url) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(WebDAVConstants.WEBDAV_URL);
         }
-        Future<HttpClient> f = httpClientRef.get();
-        if (null == f) {
-            final FutureTask<HttpClient> ft = new FutureTask<HttpClient>(new CreateHttpClientCallable(url, configuration));
-            if (httpClientRef.compareAndSet(null, ft)) {
-                ft.run();
-                f = ft;
+        HttpClient client = httpClientRef.get();
+        if (null == client) {
+            final HttpClient daClient = clientFor(url, account, session);
+            if (httpClientRef.compareAndSet(null, daClient)) {
+                client = daClient;
             } else {
-                f = httpClientRef.get();
+                client = httpClientRef.get();
             }
         }
     }
@@ -162,23 +156,20 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
     }
 
     public void close() {
-        final Future<HttpClient> f = httpClientRef.get();
-        if (null != f && httpClientRef.compareAndSet(f, null)) {
-            try {
-                ((MultiThreadedHttpConnectionManager) getFrom(f).getHttpConnectionManager()).shutdown();
-            } catch (final FileStorageException e) {
-                org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageAccountAccess.class).error(e.getMessage(), e);
-            }
-        }
+        /*
+         * Close is performed when last session gone by FacebookEventHandler
+         */
+        httpClientRef.set(null);
     }
 
     public boolean ping() throws FileStorageException {
-        final Map<String, Object> configuration = account.getConfiguration();
-        final String url = (String) configuration.get(WebDAVConstants.WEBDAV_URL);
+        final String url = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
         if (null == url) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(WebDAVConstants.WEBDAV_URL);
         }
-        new CreateHttpClientCallable(url, configuration).call();
+        final HttpClient client = createNewHttpClient(url, account.getConfiguration());
+        checkHttpClient(url, client);
+        ((MultiThreadedHttpConnectionManager) client.getHttpConnectionManager()).shutdown();
         return true;
     }
 
@@ -191,8 +182,8 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
     }
 
     public FileStorageFolderAccess getFolderAccess() throws FileStorageException {
-        final Future<HttpClient> f = httpClientRef.get();
-        if (null == f) {
+        final HttpClient client = httpClientRef.get();
+        if (null == client) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
         FileStorageFolderAccess tmp = folderAccess;
@@ -200,7 +191,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
             synchronized (this) {
                 tmp = folderAccess;
                 if (null == tmp) {
-                    folderAccess = tmp = new WebDAVFileStorageFolderAccess(getFrom(f), account, session);
+                    folderAccess = tmp = new WebDAVFileStorageFolderAccess(client, account, session);
                 }
             }
         }
@@ -218,34 +209,27 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      * ------------------------------------------------------------------------------------------------------------------------------------
      */
 
-    private static final class CreateHttpClientCallable implements Callable<HttpClient> {
-
-        private final Map<String, Object> configuration;
-
-        private final String url;
-
-        public CreateHttpClientCallable(final String url, final Map<String, Object> configuration) {
-            this.configuration = configuration;
-            this.url = url;
-        }
-
-        public HttpClient call() throws FileStorageException {
-            try {
-                final HttpClient client = createNewHttpClient(url, configuration);
-                /*
-                 * Check
-                 */
-                checkHttpClient(url, client);
-                /*
-                 * ... and return
-                 */
-                return client;
-            } catch (final FileStorageException e) {
-                throw e;
-            } catch (final Exception e) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+    /**
+     * Gets the HttpClient for given WebDAV account.
+     * 
+     * @param account The facebook messaging account providing credentials and settings
+     * @param session The user session
+     * @return The HttpClient; either newly created or fetched from underlying registry
+     * @throws FileStorageException If a HttpClient could not be created
+     */
+    private static HttpClient clientFor(final String url, final FileStorageAccount account, final Session session) throws FileStorageException {
+        final WebDAVHttpClientRegistry registry = WebDAVHttpClientRegistry.getInstance();
+        final String accountId = account.getId();
+        HttpClient client = registry.getClient(session.getContextId(), session.getUserId(), accountId);
+        if (null == client) {
+            final HttpClient newInstance = createNewHttpClient(url, account.getConfiguration());
+            checkHttpClient(url, newInstance);
+            client = registry.addClient(session.getContextId(), session.getUserId(), accountId, newInstance);
+            if (null == client) {
+                client = newInstance;
             }
         }
+        return client;
     }
 
     /**
@@ -254,7 +238,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      * @return The newly created {@link HttpClient}
      * @throws FileStorageException If creation fails
      */
-    static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration) throws FileStorageException {
+    private static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration) throws FileStorageException {
         // http://www.jarvana.com/jarvana/view/org/apache/jackrabbit/jackrabbit-webdav/2.0-beta3/jackrabbit-webdav-2.0-beta3-javadoc.jar!/org/apache/jackrabbit/webdav/client/methods/package-summary.html
         /*
          * The URL to WebDAV server
@@ -305,8 +289,21 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
          * Create the HttpClient object and eventually pass the Credentials:
          */
         final HttpClient newClient = new HttpClient(connectionManager);
-        newClient.getParams().setSoTimeout(TIMEOUT);
-        newClient.getParams().setIntParameter("http.connection.timeout", TIMEOUT);
+        int timeout = TIMEOUT;
+        {
+            final String sTimeout = (String) configuration.get(WebDAVConstants.WEBDAV_TIMEOUT);
+            if (null != sTimeout) {
+                try {
+                    timeout = Integer.parseInt(sTimeout);
+                } catch (final NumberFormatException e) {
+                    org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageAccountAccess.class).warn(
+                        "Configuration property \"" + WebDAVConstants.WEBDAV_TIMEOUT + "\" is not a number: " + sTimeout);
+                    timeout = TIMEOUT;
+                }
+            }
+        }
+        newClient.getParams().setSoTimeout(timeout);
+        newClient.getParams().setIntParameter("http.connection.timeout", timeout);
         newClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
         newClient.setHostConfiguration(hostConfiguration);
         /*
@@ -332,7 +329,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      * @param client The HttpClient to check
      * @throws FileStorageException If check fails
      */
-    static void checkHttpClient(final String url, final HttpClient client) throws FileStorageException {
+    private static void checkHttpClient(final String url, final HttpClient client) throws FileStorageException {
         try {
             /*
              * Check
@@ -358,23 +355,6 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static HttpClient getFrom(final Future<HttpClient> f) throws FileStorageException {
-        try {
-            return f.get();
-        } catch (final InterruptedException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof FileStorageException) {
-                throw (FileStorageException) cause;
-            }
-            if (cause instanceof AbstractOXException) {
-                throw new FileStorageException((AbstractOXException) cause);
-            }
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
         }
     }
 

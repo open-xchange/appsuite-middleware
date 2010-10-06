@@ -79,6 +79,11 @@ public final class WebDAVConstants implements FileStorageConstants {
     public static final String WEBDAV_URL = "url";
 
     /**
+     * The configuration property name for timeout for WebDAV server.
+     */
+    public static final String WEBDAV_TIMEOUT = "timeout";
+
+    /**
      * Initializes a new {@link WebDAVConstants}.
      */
     private WebDAVConstants() {
