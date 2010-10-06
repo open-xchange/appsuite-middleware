@@ -58,6 +58,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -315,6 +316,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         final String password = (String) configuration.get(WebDAVConstants.WEBDAV_PASSWORD);
         if (null != login && null != password) {
             final Credentials creds = new UsernamePasswordCredentials(login, password);
+            newClient.getParams().setAuthenticationPreemptive(true);
             newClient.getState().setCredentials(AuthScope.ANY, creds);
         }
         /*
@@ -350,6 +352,9 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
+            if (HttpServletResponse.SC_UNAUTHORIZED == e.getErrorCode()) {
+                throw WebDAVFileStorageExceptionCodes.INVALID_CREDS.create(e, url);
+            }
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

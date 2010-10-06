@@ -142,7 +142,10 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
         }
     }
 
-    private static final SimpleDateFormat WEBDAV_DATE = new SimpleDateFormat();
+    /**
+     * WebDAV creation date/time formatter; e.g <code>2006-12-04T16:07:24Z</code>
+     */
+    private static final SimpleDateFormat WEBDAV_DATE = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     private static Date parseDateProperty(final String name, final DavPropertySet propertySet) throws WebDAVFileStorageException {
         try {

@@ -83,6 +83,9 @@ public final class WebDAVFileStorageExceptionMessages implements LocalizableStri
     // Directory "%1$s" must not be updated.
     public static final String UPDATE_DENIED_MSG = "Directory \"%1$s\" must not be updated.";
 
+    // Invalid or missing credentials to access WebDAV server "%1$s".
+    public static final String INVALID_CREDS_MSG = "Invalid or missing credentials to access WebDAV server \"%1$s\".";
+
     /**
      * Initializes a new {@link WebDAVFileStorageExceptionMessages}.
      */

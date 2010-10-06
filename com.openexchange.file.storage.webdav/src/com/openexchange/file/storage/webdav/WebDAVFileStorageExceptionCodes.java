@@ -92,7 +92,11 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
     /**
      * Directory "%1$s" must not be updated.
      */
-    UPDATE_DENIED(WebDAVFileStorageExceptionMessages.UPDATE_DENIED_MSG, Category.CODE_ERROR, 8);
+    UPDATE_DENIED(WebDAVFileStorageExceptionMessages.UPDATE_DENIED_MSG, Category.CODE_ERROR, 8),
+    /**
+     * Invalid or missing credentials to access WebDAV server "%1$s".
+     */
+    INVALID_CREDS(WebDAVFileStorageExceptionMessages.INVALID_CREDS_MSG, Category.CODE_ERROR, 9);
     
 
     private final Category category;
