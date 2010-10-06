@@ -139,7 +139,7 @@ public final class ConfigFileStorageAccountParser {
         for (final String id : ids) {
             try {
                 final ConfigFileStorageAccount account = parseAccount(id, properties);
-                final String serviceId = account.getFileStorageService().getId();
+                final String serviceId = account.getServiceId();
                 Map<String, ConfigFileStorageAccount> map = m.get(serviceId);
                 if (null == map) {
                     map = new ConcurrentHashMap<String, ConfigFileStorageAccount>(2);
