@@ -50,6 +50,7 @@
 package com.openexchange.file.storage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -210,7 +211,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     public List<FileStoragePermission> getPermissions() {
         if (null == permissions) {
-            return null;
+            return Collections.emptyList();
         }
         return new ArrayList<FileStoragePermission>(permissions);
     }
