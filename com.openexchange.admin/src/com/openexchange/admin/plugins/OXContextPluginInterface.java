@@ -54,6 +54,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
  * @author choeger
@@ -156,17 +157,24 @@ public interface OXContextPluginInterface {
     public List<OXCommonExtension> getData(final List<Context> ctx, final Credentials auth) throws PluginException;
 
     /**
-     * This method only returns how the core list query must be extended, the final data for a context is fetched by
-     * the {@link #getData(Context, Credentials)} method which must eventually enhance the data in the context object.
-     * This method must return null if no changes must be made to the core sql query.
-     * 
+     * Return a {@link Filter} to load plugin specific data or null in case no specific data available
+     *  
      * @param search_pattern
      * @param auth
      * @return
      * @throws PluginException
      */
-    public SQLQueryExtension list(final String search_pattern, final Credentials auth) throws PluginException;
+    public Filter<Context, Context> list(final String search_pattern, final Credentials auth) throws PluginException;
 
+    /**
+     * Return a {@link Filter} to optionally filter out contexts
+     *  
+     * @param auth
+     * @return
+     * @throws PluginException
+     */
+    public Filter<Integer, Integer> filter(final Credentials auth) throws PluginException;
+    
     /**
      * Define the operations which should be done before the real context
      * changeModuleAccess process.
