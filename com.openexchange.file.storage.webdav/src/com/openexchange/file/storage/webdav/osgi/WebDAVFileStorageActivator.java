@@ -58,11 +58,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageException;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageService;
 import com.openexchange.file.storage.webdav.exception.WebDAVFileStorageExceptionFactory;
-import com.openexchange.html.HTMLService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -89,7 +89,7 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HTMLService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class };
     }
 
     @Override

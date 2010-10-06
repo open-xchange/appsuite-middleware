@@ -38,3 +38,4 @@ Bundle-ClassPath: lib/jackrabbit-webdav-2.1.0.jar,
  lib/slf4j-api-1.5.8.jar,
  lib/slf4j-log4j12-1.5.8.jar,
  .
+Bundle-Activator: com.openexchange.file.storage.webdav.osgi.WebDAVFileStorageActivator
