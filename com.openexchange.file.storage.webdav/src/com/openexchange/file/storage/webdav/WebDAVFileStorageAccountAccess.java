@@ -239,6 +239,8 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
                  * ... and return
                  */
                 return client;
+            } catch (final FileStorageException e) {
+                throw e;
             } catch (final Exception e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
@@ -349,7 +351,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
