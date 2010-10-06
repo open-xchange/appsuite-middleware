@@ -67,7 +67,7 @@
     <property name="conversionjar" value="com.openexchange.conversion.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
-	<property name="secretjar" value="com.openexchange.secret.jar"/>
+    <property name="secretjar" value="com.openexchange.secret.jar"/>
     <property name="managementjar" value="com.openexchange.management.jar"/>
     <property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="commonjar" value="common.jar"/>
@@ -77,10 +77,10 @@
     <property name="pushjar" value="com.openexchange.push.jar"/>
     <property name="messagingjar" value="com.openexchange.messaging.jar"/>
     <property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
-	<property name="secretjar" value="com.openexchange.secret.jar"/>
+    <property name="secretjar" value="com.openexchange.secret.jar"/>
     <property name="htmljar" value="com.openexchange.html.jar"/>
-	<property name="filestoragejar" value="com.openexchange.file.storage.jar"/>
-	<property name="txjar" value="com.openexchange.tx.jar"/>
+    <property name="filestoragejar" value="com.openexchange.file.storage.jar"/>
+    <property name="txjar" value="com.openexchange.tx.jar"/>
 
     <property name="activationjar" value="activation-1.1.1.jar"/>
     <property name="chardetjar" value="chardet-1.0.jar"/>
@@ -128,9 +128,10 @@
         <pathelement location="${bundlesdir}/${pushjar}"/>
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
-    	<pathelement location="${bundlesdir}/${secretjar}"/>
+        <pathelement location="${bundlesdir}/${secretjar}"/>
         <pathelement location="${bundlesdir}/${htmljar}"/>
-    	<pathelement location="${bundlesdir}/${filestoragejar}"/>
+        <pathelement location="${bundlesdir}/${filestoragejar}"/>
+        <pathelement location="${bundlesdir}/${txjar}"/>
 
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}"/>
