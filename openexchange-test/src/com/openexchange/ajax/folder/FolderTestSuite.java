@@ -114,6 +114,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(Bug16163Test.class);
         tests.addTestSuite(Bug16243Test.class);
         tests.addTestSuite(Bug16303Test.class);
+        tests.addTestSuite(Bug17027Test.class);
 
         return tests;
     }
