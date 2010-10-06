@@ -138,8 +138,21 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         final ConfigFileStorageAccount ret = (ConfigFileStorageAccount) account.clone();
         ret.setFileStorageService(service);
         final Map<String, Object> configuration = ret.getConfiguration();
-        configuration.put(CONF_PROPERTY_LOGIN, session.getLogin());
-        configuration.put(CONF_PROPERTY_PASSWORD, session.getPassword());
+        /*
+         * Set login/password if absent
+         */
+        {
+            String tmp = (String) configuration.get(CONF_PROPERTY_LOGIN);
+            if (null == tmp) {
+                configuration.put(CONF_PROPERTY_LOGIN, session.getLogin());
+            }
+        }
+        {
+            String tmp = (String) configuration.get(CONF_PROPERTY_PASSWORD);
+            if (null == tmp) {
+                configuration.put(CONF_PROPERTY_PASSWORD, session.getPassword());
+            }
+        }
         return ret;
     }
 
