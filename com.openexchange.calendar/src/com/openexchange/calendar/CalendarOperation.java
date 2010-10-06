@@ -585,6 +585,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 final long mod = edao.getStartDate().getTime() % Constants.MILLI_DAY;
                 if (mod != 0) {
                     cdao.setStartDate(new Date(edao.getStartDate().getTime() - mod));
+                } else {
+                    cdao.setStartDate(edao.getStartDate());
                 }
                 if ((cdao.getStartDate().getTime() == edao.getEndDate().getTime())
                         || (edao.getEndDate().getTime() - cdao.getStartDate().getTime() < Constants.MILLI_DAY)) {
