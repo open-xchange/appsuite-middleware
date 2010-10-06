@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.java.Autoboxing.i;
 import java.util.Set;
+import com.openexchange.java.Autoboxing;
 
 /**
  * DataObject
@@ -115,7 +117,12 @@ public abstract class FolderChildObject extends DataObject {
     public void set(int field, Object value) {
         switch (field) {
         case FOLDER_ID:
-            setParentFolderID((Integer) value);
+            if (value instanceof Integer) {
+                setParentFolderID(i((Integer) value));
+            }
+            if (value instanceof String) {
+                setParentFolderID(Integer.parseInt((String) value));
+            }
             break;
         default:
             super.set(field, value);
