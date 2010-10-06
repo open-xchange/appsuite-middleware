@@ -23,6 +23,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.test.DelayedInputStream;
 import com.openexchange.tools.RandomString;
+import com.openexchange.tx.TransactionException;
 
 public class QuotaFileStorageTest extends TestCase {
 	private FileStorage fs;
@@ -310,12 +311,12 @@ public class QuotaFileStorageTest extends TestCase {
 	
 	private static final class DummyDatabaseService implements DatabaseService {
 
-        public Connection getReadConnection(final Context ctx) throws DBPoolingException {
+        public Connection getReadConnection(final Context ctx) throws TransactionException {
             // TODO Auto-generated method stub
             return null;
         }
 
-        public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
+        public Connection getWriteConnection(final Context ctx) throws TransactionException {
             // TODO Auto-generated method stub
             return null;
         }
