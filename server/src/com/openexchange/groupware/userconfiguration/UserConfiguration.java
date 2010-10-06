@@ -722,7 +722,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
             }
             array.append(FolderObject.SYSTEM_MODULE);
             array.append(FolderObject.UNBOUND);
+            // TODO: Switcher for messaging module
             array.append(FolderObject.MESSAGING);
+            // TODO: Switcher for file storage module
             array.append(FolderObject.FILE);
             accessibleModules = array.toArray();
             Arrays.sort(accessibleModules);
