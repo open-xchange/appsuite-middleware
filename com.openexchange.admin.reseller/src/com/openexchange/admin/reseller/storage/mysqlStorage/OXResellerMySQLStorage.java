@@ -935,6 +935,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             userconf.setEditGroup(access.getEditGroup());
             userconf.setEditResource(access.getEditResource());
             userconf.setEditPassword(access.getEditPassword());
+            userconf.setCollectEmailAddresses(access.isCollectEmailAddresses());
+            userconf.setMultipleMailAccounts(access.isMultipleMailAccounts());
+            userconf.setSubscription(access.isSubscription());
+            userconf.setPublication(access.isPublication());
+            userconf.setActiveSync(access.isActiveSync());
+            userconf.setUSM(access.isUSM());
+            userconf.setOLOX20(access.isOLOX20());
 
             int ret = RdbUserConfigurationStorage.adminCountUsersByPermission(ctx.getId(), userconf, null);
             if( ret < 0 ) {
