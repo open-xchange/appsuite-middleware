@@ -117,13 +117,11 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     private final AtomicReference<Future<HttpClient>> httpClientRef;
 
-    private volatile HttpClient httpClient;
-
     private final FileStorageAccount account;
 
     private final Session session;
 
-    private FileStorageFolderAccess folderAccess;
+    private volatile FileStorageFolderAccess folderAccess;
 
     // private FileStorageFileAccess fileAccess;
 
@@ -138,6 +136,9 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
     }
 
     public void connect() throws FileStorageException {
+        if (null != httpClientRef.get()) {
+            return;
+        }
         final Map<String, Object> configuration = account.getConfiguration();
         final String url = (String) configuration.get(WebDAVConstants.WEBDAV_URL);
         if (null == url) {
@@ -153,11 +154,10 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
                 f = httpClientRef.get();
             }
         }
-        httpClient = getFrom(f);
     }
 
     public boolean isConnected() {
-        return (null != httpClient);
+        return (null != httpClientRef.get());
     }
 
     public void close() {
@@ -190,13 +190,25 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
     }
 
     public FileStorageFolderAccess getFolderAccess() throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        final Future<HttpClient> f = httpClientRef.get();
+        if (null == f) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
+        FileStorageFolderAccess tmp = folderAccess;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = folderAccess;
+                if (null == tmp) {
+                    folderAccess = tmp = new WebDAVFileStorageFolderAccess(getFrom(f), account, session);
+                }
+            }
+        }
+        return tmp;
     }
 
     public FileStorageFolder getRootFolder() throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        connect();
+        return getFolderAccess().getRootFolder();
     }
 
     /*-
