@@ -57,9 +57,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
-import com.openexchange.tx.TransactionException;
 import junit.framework.TestCase;
 
 /**
@@ -115,7 +115,7 @@ public abstract class SQLTestCase extends TestCase {
         return properties.getProperty("url");
     }
 
-    public void assertResult(String sql) throws TransactionException, SQLException {
+    public void assertResult(String sql) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -138,7 +138,7 @@ public abstract class SQLTestCase extends TestCase {
         }
     }
     
-    public void assertNoResult(String sql) throws TransactionException, SQLException {
+    public void assertNoResult(String sql) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -161,7 +161,7 @@ public abstract class SQLTestCase extends TestCase {
         }
     }
     
-    public void exec(String sql) throws SQLException, TransactionException {
+    public void exec(String sql) throws SQLException, DBPoolingException {
         Connection con = null;
         PreparedStatement stmt = null;
         
