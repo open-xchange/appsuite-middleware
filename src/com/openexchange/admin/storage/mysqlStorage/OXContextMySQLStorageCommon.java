@@ -77,6 +77,7 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.pipesnfilters.DataSource;
+import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
@@ -204,15 +205,20 @@ public class OXContextMySQLStorageCommon {
         }
     }
 
-    public Context[] loadContexts(Collection<Integer> cids, long averageSize) throws StorageException {
+    public Context[] loadContexts(Collection<Integer> cids, long averageSize, List<Filter<Context, Context>> filters) throws StorageException {
         PipesAndFiltersService pnfService;
         try {
             pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
         } catch (ServiceException e) {
             throw new StorageException(e.getMessage(), e);
         }
-        DataSource<Context> output = pnfService.create(cids).addFilter(new ContextLoader(cache)).addFilter(new LoginInfoLoader(cache))
-            .addFilter(new FilestoreUsageLoader(cache, averageSize));
+        DataSource<Context> output = pnfService.create(cids).addFilter(new ContextLoader(cache));
+        if( null != filters && filters.size() > 0) {
+            for(final Object f : filters.toArray()) {
+                output = output.addFilter((Filter<Context, Context>) f);
+            }
+        }
+        output = output.addFilter(new LoginInfoLoader(cache)).addFilter(new FilestoreUsageLoader(cache, averageSize));
         SortedMap<Integer, Context> retval = new TreeMap<Integer, Context>();
         try {
             while (output.hasData()) {
