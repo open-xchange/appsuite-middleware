@@ -53,13 +53,13 @@ import java.util.List;
 import com.openexchange.admin.autocontextid.storage.interfaces.OXAutoCIDStorageInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
-import com.openexchange.admin.plugins.SQLQueryExtension;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
  * @author choeger
@@ -201,7 +201,14 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#list(java.lang.String,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public SQLQueryExtension list(final String search_pattern, final Credentials auth) throws PluginException {
+    public Filter<Context, Context> list(final String search_pattern, final Credentials auth) throws PluginException {
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.plugins.OXContextPluginInterface#filter(com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    public Filter<Integer, Integer> filter(final Credentials auth) throws PluginException {
         return null;
     }
 
