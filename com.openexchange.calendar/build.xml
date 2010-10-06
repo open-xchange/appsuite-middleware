@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.calendar" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -19,6 +20,7 @@
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
+    <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
     <property name="cachingBundle" value="com.openexchange.caching"/>
 
@@ -30,6 +32,7 @@
     <property name="serverjar" value="com.openexchange.server.jar" />
     <property name="sqljar" value="com.openexchange.sql.jar" />
     <property name="commonjar" value="common.jar"/>
+    <property name="txjar" value="com.openexchange.tx.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -40,6 +43,7 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${sqljar}"/>
+        <pathelement location="${bundlesdir}/${txjar}"/>
     </path>
 
     <!-- Compile -->
