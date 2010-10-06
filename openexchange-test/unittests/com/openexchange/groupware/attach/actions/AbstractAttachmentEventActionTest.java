@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
@@ -67,7 +68,7 @@ public abstract class AbstractAttachmentEventActionTest extends AbstractAttachme
             this.delegate = delegate;
         }
 
-        public Connection getReadConnection(final Context ctx) throws TransactionException {
+        public Connection getReadConnection(final Context ctx) throws DBPoolingException {
             Connection con = delegate.getReadConnection(ctx);
             read.add(con);
             log.append("Get ReadConnection: " + con.hashCode() + "\n");
@@ -75,7 +76,7 @@ public abstract class AbstractAttachmentEventActionTest extends AbstractAttachme
             return con;
         }
 
-        public Connection getWriteConnection(final Context ctx) throws TransactionException {
+        public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
             Connection con = delegate.getWriteConnection(ctx);
             write.add(con);
             log.append("Get WriteConnection: " + con.hashCode() + "\n");
