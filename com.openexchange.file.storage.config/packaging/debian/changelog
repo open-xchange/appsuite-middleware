@@ -1,0 +1,5 @@
+open-xchange-file-storage-config (6.18.2.0-0) unstable; urgency=low
+
+  * Initial release.
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 06 Oct 2010 15:38:15 +0200
