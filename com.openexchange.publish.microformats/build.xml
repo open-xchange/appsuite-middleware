@@ -41,6 +41,7 @@
     <property name="templatingjar" value="com.openexchange.templating.jar"/>
 	<property name="configreadjar" value="com.openexchange.configread.jar"/>
     <property name="htmljar" value="com.openexchange.html.jar"/>
+    <property name="txjar" value="com.openexchange.tx.jar"/>
 
     <!-- Bundle dependencies -->
     <property name="templatingBundle" value="com.openexchange.templating"/>
@@ -60,6 +61,7 @@
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
     	<pathelement location="${bundlesdir}/${configreadjar}"/>
         <pathelement location="${bundlesdir}/${htmljar}"/>
+        <pathelement location="${bundlesdir}/${txjar}"/>
     </path>
 
     <!-- Compile -->
