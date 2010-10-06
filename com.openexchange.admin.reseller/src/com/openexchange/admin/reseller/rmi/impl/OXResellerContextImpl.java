@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
-import com.openexchange.admin.plugins.SQLQueryExtension;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.OXResellerTools.ClosureInterface;
@@ -65,6 +64,8 @@ import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
+import com.openexchange.admin.reseller.storage.mysqlStorage.ResellerContextFilter;
+import com.openexchange.admin.reseller.storage.mysqlStorage.ResellerExtensionLoader;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -75,6 +76,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
  * @author choeger
@@ -366,19 +368,23 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#list(java.lang.String,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public SQLQueryExtension list(final String search_pattern, final Credentials auth) throws PluginException {
+    public Filter<Context, Context> list(final String search_pattern, final Credentials auth) throws PluginException {
+        return new ResellerExtensionLoader(cache);
+    }
+
+    public Filter<Integer, Integer> filter(final Credentials auth) throws PluginException {
         try {
-            if( ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
-                return null;
-            } else {
-                final ResellerAdmin adm = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(auth.getLogin(), auth.getPassword()) })[0];
-                return new SQLQueryExtension("context2subadmin", "AND context2subadmin.sid=" + adm.getId());
+            if( ! ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
+                ResellerAdmin adm = null;
+                adm = (this.oxresell.getData(new ResellerAdmin[]{ new ResellerAdmin(auth.getLogin()) } ))[0];
+                return new ResellerContextFilter(cache, adm);
             }
-        } catch (final StorageException e) {
+            return null;
+        } catch (StorageException e) {
             throw new PluginException(e);
         }
     }
-
+    
     private void applyRestrictionsPerContext(final Context ctx) throws PluginException {
         // Handle the extension...
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
@@ -444,4 +450,5 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
     public Boolean checkMandatoryMembersContextCreate(Context ctx) throws PluginException {
         return new Boolean(true);
     }
+
 }
