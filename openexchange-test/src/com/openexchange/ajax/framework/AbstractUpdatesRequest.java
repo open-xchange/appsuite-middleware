@@ -102,7 +102,9 @@ public abstract class AbstractUpdatesRequest<T extends AbstractColumnsResponse> 
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES));
-        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        if (-1 != folderId) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        }
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, getColumns()));
         if (null != order) {
             params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
