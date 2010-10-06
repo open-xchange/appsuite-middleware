@@ -49,12 +49,14 @@
 
 package com.openexchange.file.storage.webdav;
 
+import com.openexchange.file.storage.FileStorageConstants;
+
 /**
  * {@link WebDAVConstants} - Provides useful constants for twitter.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WebDAVConstants {
+public final class WebDAVConstants implements FileStorageConstants {
 
     /**
      * The identifier for WebDAV file storage service.
@@ -64,12 +66,12 @@ public final class WebDAVConstants {
     /**
      * The configuration property name for login.
      */
-    public static final String WEBDAV_LOGIN = "login";
+    public static final String WEBDAV_LOGIN = CONF_PROPERTY_LOGIN;
 
     /**
      * The configuration property name for password.
      */
-    public static final String WEBDAV_PASSWORD = "password";
+    public static final String WEBDAV_PASSWORD = CONF_PROPERTY_PASSWORD;
 
     /**
      * The configuration property name for URL to WebDAV server.
