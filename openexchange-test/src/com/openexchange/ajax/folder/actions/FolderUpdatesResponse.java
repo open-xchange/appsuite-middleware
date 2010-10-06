@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
@@ -63,6 +64,7 @@ import com.openexchange.groupware.container.FolderObject;
 public class FolderUpdatesResponse extends CommonUpdatesResponse {
 
     private List<FolderObject> folders = new ArrayList<FolderObject>();
+    private List<Integer> deleted = new ArrayList<Integer>();
 
     public FolderUpdatesResponse(Response response) {
         super(response);
@@ -78,5 +80,13 @@ public class FolderUpdatesResponse extends CommonUpdatesResponse {
 
     public List<FolderObject> getFolders() {
         return this.folders;
+    }
+
+    public void addDeleted(Integer folderId) {
+        deleted.add(folderId);
+    }
+
+    public List<Integer> getDeleted() {
+        return Collections.unmodifiableList(deleted);
     }
 }

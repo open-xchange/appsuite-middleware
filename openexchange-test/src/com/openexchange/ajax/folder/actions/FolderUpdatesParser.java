@@ -37,7 +37,11 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
             final Object arrayOrId = rows.get(i);
             final FolderObject folder = new FolderObject();
 
-            if (!JSONArray.class.isInstance(arrayOrId)) {
+            if (arrayOrId instanceof String) {
+                folderUpdateResponse.addDeleted(Integer.valueOf((String) arrayOrId));
+                continue;
+            }
+            if (!(arrayOrId instanceof JSONArray)) {
                 continue;
             }
             final JSONArray row = (JSONArray) arrayOrId;
@@ -75,20 +79,10 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
     public boolean getsIgnored(final int column) {
         return column == DataObject.LAST_MODIFIED_UTC || column == FolderObject.OWN_RIGHTS // generated based on user
             || column == FolderObject.SUMMARY // Thorben said that one's mail-specific
-            || column == FolderObject.STANDARD_FOLDER || column == FolderObject.TOTAL || column == FolderObject.NEW || column == FolderObject.UNREAD || column == FolderObject.DELETED || column == FolderObject.CAPABILITIES || column == FolderObject.SUBSCRIBED || column == FolderObject.SUBSCR_SUBFLDS || column > 1000;// ibg
-                                                                                                                                                                                                                                                                                                                             // numbers
-                                                                                                                                                                                                                                                                                                                             // are
-                                                                                                                                                                                                                                                                                                                             // used
-                                                                                                                                                                                                                                                                                                                             // by
-                                                                                                                                                                                                                                                                                                                             // addons
-                                                                                                                                                                                                                                                                                                                             // that
-                                                                                                                                                                                                                                                                                                                             // might
-                                                                                                                                                                                                                                                                                                                             // not
-                                                                                                                                                                                                                                                                                                                             // be
-                                                                                                                                                                                                                                                                                                                             // installed
-                                                                                                                                                                                                                                                                                                                             // for
-                                                                                                                                                                                                                                                                                                                             // core
-                                                                                                                                                                                                                                                                                                                             // tests.
+            || column == FolderObject.STANDARD_FOLDER || column == FolderObject.TOTAL || column == FolderObject.NEW
+            || column == FolderObject.UNREAD || column == FolderObject.DELETED || column == FolderObject.CAPABILITIES
+            || column == FolderObject.SUBSCRIBED || column == FolderObject.SUBSCR_SUBFLDS
+            || column > 1000;// big numbers are used by addons that might not be installed for core tests.
     }
 
     @Override
