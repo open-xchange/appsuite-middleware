@@ -61,12 +61,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.tx.DBService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBService;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.tx.TransactionException;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
 public class PropertyStoreImpl extends DBService implements PropertyStore {
@@ -120,7 +121,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             return retVal;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, builder.toString());
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt,rs);
@@ -164,7 +165,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             return props;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, builder.toString());
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt,rs);
@@ -187,7 +188,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             }
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);
@@ -225,7 +226,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             return props;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt,rs);
@@ -263,7 +264,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             return retVal;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt,rs);
@@ -287,7 +288,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);
@@ -311,7 +312,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             removeProperties(entity, properties, ctx, writeCon);
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);

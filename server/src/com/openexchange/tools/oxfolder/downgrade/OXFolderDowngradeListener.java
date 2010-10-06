@@ -60,6 +60,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
@@ -72,9 +74,6 @@ import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.tasks.Tasks;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.tx.StaticDBPoolProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -83,6 +82,7 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.downgrade.sql.OXFolderDowngradeSQL;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tx.TransactionException;
 
 /**
  * {@link OXFolderDowngradeListener} - Performs deletion of unused folder data remaining from a former downgrade.

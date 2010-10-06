@@ -57,6 +57,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentException;
@@ -64,12 +66,11 @@ import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.AbstractUndoable;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.tx.UndoableAction;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
+import com.openexchange.tx.AbstractUndoable;
+import com.openexchange.tx.TransactionException;
+import com.openexchange.tx.UndoableAction;
 
 public abstract class AttachmentEventAction extends AbstractUndoable implements
         UndoableAction {
@@ -267,7 +268,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
             if (writeCon == null) {
                 try {
                     writeCon = provider.getWriteConnection(ctx);
-                } catch (TransactionException e) {
+                } catch (DBPoolingException e) {
                     throw new AttachmentException(e);
                 }
             }

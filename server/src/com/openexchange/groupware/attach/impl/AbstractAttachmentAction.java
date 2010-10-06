@@ -52,11 +52,11 @@ package com.openexchange.groupware.attach.impl;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+import com.openexchange.database.tx.AbstractDBAction;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.GetSwitch;
-import com.openexchange.groupware.tx.AbstractDBAction;
-import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tx.UndoableAction;
 
 public abstract class AbstractAttachmentAction extends AbstractDBAction
 		implements UndoableAction {

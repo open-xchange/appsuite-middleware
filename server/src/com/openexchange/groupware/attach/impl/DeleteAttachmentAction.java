@@ -51,10 +51,11 @@ package com.openexchange.groupware.attach.impl;
 
 import java.sql.SQLException;
 import java.util.Date;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.tx.TransactionException;
 
 public class DeleteAttachmentAction extends AttachmentListQueryAction {
 
@@ -73,7 +74,7 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
             doUpdates(getQueryCatalog().getInsert(), getAttachments(), false);
         } catch (final UpdateException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         }
     }
@@ -109,7 +110,7 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
             doUpdates(updates);
         } catch (final UpdateException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         }
     }

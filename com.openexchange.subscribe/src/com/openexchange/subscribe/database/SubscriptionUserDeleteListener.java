@@ -50,12 +50,12 @@
 package com.openexchange.subscribe.database;
 
 import java.sql.Connection;
+import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.tx.DBTransactionPolicy;
-import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;

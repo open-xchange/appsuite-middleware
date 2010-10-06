@@ -58,11 +58,11 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tx.TransactionException;
 
 public class PropertyCleaner implements FolderEventInterface, InfostoreEventInterface {
 	

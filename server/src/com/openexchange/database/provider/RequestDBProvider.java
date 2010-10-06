@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.database.provider;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -58,6 +58,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajp13.stable.AJPv13ListenerThread;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
 
 public class RequestDBProvider implements DBProvider {
@@ -117,14 +118,14 @@ public class RequestDBProvider implements DBProvider {
     
     // Service
     
-    public void startTransaction() throws TransactionException {
+    public void startTransaction() throws DBPoolingException {
         final DBTransaction tx = createTransaction();
         tx.transactional = transactional;
         tx.commit = commits;
         txIds.set(tx);
     }
     
-    public void commit() throws TransactionException{
+    public void commit() throws DBPoolingException{
         checkThreadDeath();
         commit(getActiveTransaction());
     }
@@ -136,12 +137,12 @@ public class RequestDBProvider implements DBProvider {
             if(ajpv13Thread.isDead()) {
                 try {
                     rollback();
-                } catch (final TransactionException x) {
+                } catch (final DBPoolingException x) {
                     LOG.debug("",x);
                 }
                 try {
                     finish();
-                } catch (final TransactionException x) {
+                } catch (final DBPoolingException x) {
                     LOG.debug("",x);
                 }
                 
@@ -151,7 +152,7 @@ public class RequestDBProvider implements DBProvider {
         }
     }
 
-    public void rollback() throws TransactionException{
+    public void rollback() throws DBPoolingException{
         rollback(getActiveTransaction());
     }
     
@@ -167,7 +168,7 @@ public class RequestDBProvider implements DBProvider {
         return tx;
     }
 
-    protected void commit(final DBTransaction tx) throws TransactionException {
+    protected void commit(final DBTransaction tx) throws DBPoolingException {
         try {
             if (tx.writeConnection != null && !tx.writeConnection.getAutoCommit()) {
                 if(tx.commit) {
@@ -175,11 +176,11 @@ public class RequestDBProvider implements DBProvider {
                 }
             }
         } catch (final SQLException e) {
-            throw TransactionExceptionCodes.CANNOT_COMMIT.create(e);
+            throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e);
         }
     }
 
-    protected void rollback(final DBTransaction tx) throws TransactionException {
+    protected void rollback(final DBTransaction tx) throws DBPoolingException {
         if(tx == null) {
             return;
         }
@@ -191,11 +192,11 @@ public class RequestDBProvider implements DBProvider {
                 tx.writeConnection.rollback();
             }
         } catch (final SQLException e) {
-            throw TransactionExceptionCodes.CANNOT_ROLLBACK.create(e);
+            throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e);
         }
     }
     
-    public Connection getReadConnection(final Context ctx) throws TransactionException{
+    public Connection getReadConnection(final Context ctx) throws DBPoolingException{
         checkThreadDeath();
         final DBTransaction tx = getActiveTransaction();
         int rc = readCount.get();
@@ -229,7 +230,7 @@ public class RequestDBProvider implements DBProvider {
         return readCon;
     }
     
-    public Connection getWriteConnection(final Context ctx) throws TransactionException{
+    public Connection getWriteConnection(final Context ctx) throws DBPoolingException{
         checkThreadDeath();
         final DBTransaction tx = getActiveTransaction();
         if(tx == null) {
@@ -295,7 +296,7 @@ public class RequestDBProvider implements DBProvider {
         }
     }
     
-    public void finish() throws TransactionException {
+    public void finish() throws DBPoolingException {
         final DBTransaction tx = getActiveTransaction();
         if(tx == null) {
             return;
@@ -314,7 +315,7 @@ public class RequestDBProvider implements DBProvider {
                 tx.readConnection = null;
             }
         } catch (final SQLException e) {
-            throw TransactionExceptionCodes.CANNOT_FINISH.create(e);
+            throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e);
         }
         txIds.set(null);
         final DBProvider prov = getProvider();

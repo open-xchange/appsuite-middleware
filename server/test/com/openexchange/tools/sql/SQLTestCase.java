@@ -64,9 +64,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.tx.TransactionException;
 import junit.framework.TestCase;
 
 /**
@@ -122,7 +123,7 @@ public abstract class SQLTestCase extends TestCase {
         return properties.getProperty("url");
     }
 
-    public void assertResult(String sql) throws TransactionException, SQLException {
+    public void assertResult(String sql) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -145,7 +146,7 @@ public abstract class SQLTestCase extends TestCase {
         }
     }
 
-    public void assertNoResult(String sql) throws TransactionException, SQLException {
+    public void assertNoResult(String sql) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -168,15 +169,15 @@ public abstract class SQLTestCase extends TestCase {
         }
     }
 
-    public void exec(String sql, Object...substitutes) throws TransactionException, SQLException {
+    public void exec(String sql, Object...substitutes) throws DBPoolingException, SQLException {
         exec(sql, Arrays.asList(substitutes));
     }
     
-    public void exec(String sql) throws TransactionException, SQLException {
+    public void exec(String sql) throws DBPoolingException, SQLException {
         exec(sql, new ArrayList<Object>(0));
     }
     
-    public void exec(String sql, List<Object> substitues) throws SQLException, TransactionException {
+    public void exec(String sql, List<Object> substitues) throws SQLException, DBPoolingException {
         Connection con = null;
         PreparedStatement stmt = null;
 
@@ -198,7 +199,7 @@ public abstract class SQLTestCase extends TestCase {
         }
     }
     
-    public List<Map<String, Object>> query(String sql) throws TransactionException, SQLException {
+    public List<Map<String, Object>> query(String sql) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -234,18 +235,18 @@ public abstract class SQLTestCase extends TestCase {
         return results;
     }
     
-    protected void copyTableStructure(String origName, String newName) throws TransactionException, SQLException {
+    protected void copyTableStructure(String origName, String newName) throws DBPoolingException, SQLException {
         Map<String, Object> createTableRow = query("SHOW CREATE TABLE "+origName).get(0);
         String createStatement = (String) createTableRow.get("Create Table");
         createStatement = createStatement.replaceAll(origName, newName);
         exec(createStatement);
     }
     
-    protected void dropTable(String tableName) throws TransactionException, SQLException {
+    protected void dropTable(String tableName) throws DBPoolingException, SQLException {
         exec("DROP TABLE IF EXISTS "+tableName);
     }
     
-    protected void insert(String tableName, Object...attrs) throws TransactionException, SQLException {
+    protected void insert(String tableName, Object...attrs) throws DBPoolingException, SQLException {
         StringBuilder builder = new StringBuilder("INSERT INTO ").append(tableName).append(" (");
         StringBuilder questionMarks = new StringBuilder();
         
@@ -270,7 +271,7 @@ public abstract class SQLTestCase extends TestCase {
         exec(builder.toString(), values);
     }
     
-    protected void assertEntry(String tableName, Object...attrs) throws TransactionException, SQLException {
+    protected void assertEntry(String tableName, Object...attrs) throws DBPoolingException, SQLException {
         StringBuilder builder = new StringBuilder("SELECT 1 FROM ").append(tableName).append(" WHERE ");
         String key = null;
         for(Object object : attrs) {

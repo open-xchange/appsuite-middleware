@@ -57,13 +57,13 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionAware;
 
-public interface InfostoreFacade extends Service{
+public interface InfostoreFacade extends TransactionAware{
 	/**
 	 * Special Version used if you want to retrieve the latest version of an infostore document
 	 */

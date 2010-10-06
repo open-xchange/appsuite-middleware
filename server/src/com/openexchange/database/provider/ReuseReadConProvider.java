@@ -47,53 +47,54 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.database.provider;
 
-import gnu.trove.TLongObjectHashMap;
+import java.sql.Connection;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.contexts.Context;
 
-public abstract class AbstractService implements Service {
+public class ReuseReadConProvider implements DBProvider {
 
-    private final TLongObjectHashMap<Object> txIds = new TLongObjectHashMap<Object>();
-    private final TLongObjectHashMap<StackTraceElement[]> startedTx = new TLongObjectHashMap<StackTraceElement[]>();
+	private final DBProvider provider;
+	private Connection readCon;
+	private int refCount;
 
-    protected abstract Object createTransaction()throws TransactionException;
-    protected abstract void commit(Object transaction) throws TransactionException;
-    protected abstract void rollback(Object transaction)throws TransactionException;
+	public ReuseReadConProvider(final DBProvider provider) {
+		this.provider = provider;
+	}
 
-    private static final boolean rememberStacks = false;
+	public Connection getReadConnection(final Context ctx)
+			throws DBPoolingException {
+		if(readCon != null) {
+			refCount++;
+			return readCon;
+		}
+		readCon = provider.getReadConnection(ctx);
+		refCount++;
+		return readCon;
+	}
 
-    public void startTransaction() throws TransactionException {
-        final long id = Thread.currentThread().getId();
+	public Connection getWriteConnection(final Context ctx)
+			throws DBPoolingException {
+		throw new UnsupportedOperationException();
+	}
 
-        if(txIds.containsKey(id)){
-            throw new TransactionException("There is already a transaction active at this moment", startedTx.get(id));
-        }
+	public void releaseReadConnection(final Context ctx, final Connection con) {
+		if(con == null) {
+			return;
+		}
+		if(!readCon.equals(con)) {
+			throw new IllegalArgumentException("I don't know this connection");
+		}
+		refCount--;
+		if(refCount == 0) {
+			provider.releaseReadConnection(ctx, con);
+			readCon = null;
+		}
+	}
 
-        final Object txId = createTransaction();
-
-        txIds.put(id,txId);
-        if(rememberStacks) {
-            startedTx.put(id,Thread.currentThread().getStackTrace());
-        }
-    }
-
-    public void commit() throws TransactionException{
-        commit(getActiveTransaction());
-    }
-
-    public void rollback() throws TransactionException{
-        rollback(getActiveTransaction());
-    }
-
-    protected Object getActiveTransaction(){
-        return txIds.get(Thread.currentThread().getId());
-    }
-
-    public void finish() throws TransactionException{
-        txIds.remove(Thread.currentThread().getId());
-        if(rememberStacks) {
-            startedTx.remove(Thread.currentThread().getId());
-        }
-    }
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
+		throw new UnsupportedOperationException();
+	}
 
 }

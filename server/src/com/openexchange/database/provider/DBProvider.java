@@ -47,30 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.database.provider;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.exceptions.Exceptions;
+import java.sql.Connection;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tx.TransactionException;
 
-public class TXExceptionFactory extends Exceptions<TransactionException> {
+public interface DBProvider {
 
-    private static final TXExceptionFactory SINGLETON = new TXExceptionFactory();
+    static final DBProvider DUMMY = new DBProvider() {
+        public Connection getReadConnection(Context ctx) {
+            throw new UnsupportedOperationException();
+        }
+        public Connection getWriteConnection(Context ctx) {
+            throw new UnsupportedOperationException();
+        }
+        public void releaseReadConnection(Context ctx, Connection con) {
+            throw new UnsupportedOperationException();
+        }
+        public void releaseWriteConnection(Context ctx, Connection con) {
+            throw new UnsupportedOperationException();
+        }
+    };
 
-    private TXExceptionFactory() {
-        super();
-    }
+    Connection getReadConnection(Context ctx) throws DBPoolingException;
 
-    public static final TXExceptionFactory getInstance() {
-        return SINGLETON;
-    }
+    void releaseReadConnection(Context ctx, Connection con);
 
-    @Override
-    protected void knownExceptions() {
-        declareAll(TransactionExceptionCodes.values());
-    }
+    Connection getWriteConnection(Context ctx) throws DBPoolingException;
 
-    @Override
-    protected TransactionException createException(ErrorMessage message, Throwable cause, Object... args) {
-        return new TransactionException(message, cause, args);
-    }
+    void releaseWriteConnection(Context ctx, Connection con);
 }

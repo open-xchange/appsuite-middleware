@@ -53,11 +53,11 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tx.TransactionAware;
 
-public interface SearchEngine extends Service{
+public interface SearchEngine extends TransactionAware{
 	
 	public static final int DESC = -1;
 	public static final int ASC = 1;

@@ -53,12 +53,12 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.sql.SQLTestCase;
 
 /**
@@ -88,7 +88,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         super.tearDown();
     }
 
-    public void testSaveDynamicConfiguration() throws GenericConfigStorageException, TransactionException, SQLException {
+    public void testSaveDynamicConfiguration() throws GenericConfigStorageException, DBPoolingException, SQLException {
         Map<String, Object> content = new HashMap<String, Object>();
         content.put("login", "loginname");
         content.put("otherValue", "other");
@@ -107,7 +107,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
-    public void testLoadDynamicConfiguration() throws TransactionException, SQLException, GenericConfigStorageException {
+    public void testLoadDynamicConfiguration() throws DBPoolingException, SQLException, GenericConfigStorageException {
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'booleanField', 1)");
@@ -129,7 +129,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
-    public void testUpdateDynamicConfiguration() throws TransactionException, SQLException, GenericConfigStorageException {
+    public void testUpdateDynamicConfiguration() throws DBPoolingException, SQLException, GenericConfigStorageException {
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
@@ -167,7 +167,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
-    public void testDeleteDynamicConfiguration() throws TransactionException, SQLException, GenericConfigStorageException {
+    public void testDeleteDynamicConfiguration() throws DBPoolingException, SQLException, GenericConfigStorageException {
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
@@ -195,7 +195,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
     
-    public void testSearchDynamicConfiguration() throws TransactionException, SQLException, GenericConfigStorageException {
+    public void testSearchDynamicConfiguration() throws DBPoolingException, SQLException, GenericConfigStorageException {
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");

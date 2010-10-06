@@ -55,13 +55,14 @@ import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.schema.Tables.subscriptions;
 import java.sql.SQLException;
 import java.util.List;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.tx.TransactionException;
 
 
 /**
@@ -174,7 +175,7 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
         assertEquals(subscription2, loadedSubscription);
     }
     
-    public void testDeleteAllSubscriptionsOfAUser() throws SubscriptionException, TransactionException, SQLException{
+    public void testDeleteAllSubscriptionsOfAUser() throws SubscriptionException, DBPoolingException, SQLException{
         storage.rememberSubscription(subscription);
         storage.deleteAllSubscriptionsForUser(userId, ctx);
         SELECT select = 
@@ -184,7 +185,7 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
     
-    public void testDeleteAllSubscriptionsOfAContext() throws SubscriptionException, TransactionException, SQLException{
+    public void testDeleteAllSubscriptionsOfAContext() throws SubscriptionException, DBPoolingException, SQLException{
         storage.rememberSubscription(subscription);
         storage.deleteAllSubscriptionsInContext(ctx.getContextId(), ctx);
         SELECT select = 

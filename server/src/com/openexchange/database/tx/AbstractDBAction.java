@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.database.tx;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -56,8 +56,12 @@ import java.sql.SQLException;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tx.AbstractUndoable;
+import com.openexchange.tx.UndoableAction;
 
 public abstract class AbstractDBAction extends AbstractUndoable implements
 		UndoableAction {
@@ -68,7 +72,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 	private Context context = null;
 
 	
-	protected int doUpdates(final UpdateBlock...updates) throws UpdateException, TransactionException {
+	protected int doUpdates(final UpdateBlock...updates) throws UpdateException, DBPoolingException {
 		Connection writeCon = null;
 		UpdateBlock current = null;
 		int counter = 0;
@@ -92,7 +96,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		return counter;
 	}
 
-    protected int doUpdates(final List<UpdateBlock> updates) throws TransactionException, UpdateException {
+    protected int doUpdates(final List<UpdateBlock> updates) throws DBPoolingException, UpdateException {
         return doUpdates(updates.toArray(new UpdateBlock[updates.size()]));
     }
 

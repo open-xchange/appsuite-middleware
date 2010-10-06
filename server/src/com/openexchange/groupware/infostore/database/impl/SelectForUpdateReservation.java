@@ -56,15 +56,16 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.StaticDBPoolProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tx.TransactionException;
 
 /**
  * {@link SelectForUpdateReservation}
@@ -119,7 +120,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
         provider.releaseWriteConnection(ctx, con);
     }
 
-    private void openConnection() throws TransactionException {
+    private void openConnection() throws DBPoolingException {
         con = provider.getWriteConnection(ctx);
     }
 
@@ -142,7 +143,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
         } catch (SQLException x) {
             rollback();
             throw x;
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             finishTransaction();
@@ -252,7 +253,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
         }
     }
 
-    private void startTransaction() throws TransactionException, SQLException {
+    private void startTransaction() throws DBPoolingException, SQLException {
         openConnection();
         con.setAutoCommit(false);
     }

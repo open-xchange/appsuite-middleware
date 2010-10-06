@@ -51,8 +51,8 @@ package com.openexchange.groupware.infostore.database;
 
 import java.sql.SQLException;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tx.DBProvider;
 
 /**
  * {@link InfostoreFilenameReserver}

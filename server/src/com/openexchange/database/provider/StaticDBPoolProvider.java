@@ -47,35 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.database.provider;
 
 import java.sql.Connection;
 import com.openexchange.groupware.contexts.Context;
 
-public class AlwaysWriteConnectionProvider implements DBProvider {
+public class StaticDBPoolProvider implements DBProvider{
 
-	private final DBProvider delegate;
-
-	public AlwaysWriteConnectionProvider(final DBProvider delegate) {
-		this.delegate = delegate;
-	}
+	private final Connection writeCon;
 	
-	public Connection getReadConnection(final Context ctx)
-			throws TransactionException {
-		return delegate.getWriteConnection(ctx);
+	
+
+	public StaticDBPoolProvider(final Connection writeCon) {
+		super();
+		this.writeCon = writeCon;
 	}
 
-	public Connection getWriteConnection(final Context ctx)
-			throws TransactionException {
-		return delegate.getWriteConnection(ctx);
+	public Connection getReadConnection(final Context ctx) {
+		return writeCon;
 	}
 
 	public void releaseReadConnection(final Context ctx, final Connection con) {
-		delegate.releaseWriteConnection(ctx, con);
+	}
+
+	public Connection getWriteConnection(final Context ctx) {
+		return writeCon;
 	}
 
 	public void releaseWriteConnection(final Context ctx, final Connection con) {
-		delegate.releaseWriteConnection(ctx, con);
+		
 	}
 
 }

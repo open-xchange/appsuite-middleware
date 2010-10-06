@@ -51,15 +51,16 @@ package com.openexchange.groupware.attach.impl;
 
 import java.sql.SQLException;
 import java.util.List;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.tx.TransactionException;
 
 public abstract class AttachmentListQueryAction extends AbstractAttachmentAction {
 
 	private List<AttachmentMetadata> attachments;
 	
 	
-	protected void doUpdates(final String query, final List<AttachmentMetadata> attachments, final boolean addId) throws TransactionException, UpdateException {
+	protected void doUpdates(final String query, final List<AttachmentMetadata> attachments, final boolean addId) throws DBPoolingException, UpdateException {
 		final UpdateBlock[] updates = new UpdateBlock[attachments.size()];
 		int i = 0;
 		for(final AttachmentMetadata m : attachments) {

@@ -51,10 +51,10 @@ package com.openexchange.groupware.attach.impl;
 
 import java.sql.Connection;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.tx.SimpleDBProvider;
 
 public class AttachmentContextDelete extends ContextDelete {
 

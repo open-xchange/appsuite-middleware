@@ -58,13 +58,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManagerImpl;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implements
@@ -116,7 +116,7 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
             return locks;
         } catch (final SQLException x) {
             throw new OXException();
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new OXException(e);
         } finally {
             close(stmt, rs);

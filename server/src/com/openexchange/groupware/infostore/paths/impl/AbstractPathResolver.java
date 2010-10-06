@@ -50,11 +50,11 @@
 package com.openexchange.groupware.infostore.paths.impl;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.database.tx.DBService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.PathResolver;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.webdav.protocol.WebdavPath;
 

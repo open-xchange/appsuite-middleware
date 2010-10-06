@@ -32,6 +32,8 @@
 	<property name="serverjar" value="com.openexchange.server.jar"/>
 	<property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
+	<property name="txjar" value="com.openexchange.tx.jar"/>
+		
 
     <fileset dir="." id="metainf">
         <include name="META-INF/**"/>
@@ -52,6 +54,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${configjar}"/>
     	<pathelement location="${bundlesdir}/${serverjar}"/>
+    	<pathelement location="${bundlesdir}/${txjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 

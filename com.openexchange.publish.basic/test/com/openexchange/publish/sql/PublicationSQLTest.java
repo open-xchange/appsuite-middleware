@@ -55,13 +55,14 @@ import static com.openexchange.sql.schema.Tables.publications;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.tx.TransactionException;
 
 
 /**
@@ -215,14 +216,14 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         }
     }
     
-    public void testDeleteAllPublicationsOfOneUser() throws PublicationException, TransactionException, SQLException{
+    public void testDeleteAllPublicationsOfOneUser() throws PublicationException, DBPoolingException, SQLException{
         storage.rememberPublication(pub1);
         storage.deletePublicationsOfUser(userId, ctx);
         SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE( new EQUALS("user_id", I(userId)).AND( new EQUALS("cid", I(ctx.getContextId()) ) )  );
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
     
-    public void testDeleteAllPublicationsOfAContext() throws PublicationException, TransactionException, SQLException{
+    public void testDeleteAllPublicationsOfAContext() throws PublicationException, DBPoolingException, SQLException{
         storage.rememberPublication(pub1);
         storage.deletePublicationsInContext(ctx.getContextId(), ctx);
         SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE( new EQUALS("cid", I(ctx.getContextId()) ) ) ;

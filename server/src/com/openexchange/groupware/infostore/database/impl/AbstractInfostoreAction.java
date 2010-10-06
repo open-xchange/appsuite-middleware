@@ -52,9 +52,9 @@ package com.openexchange.groupware.infostore.database.impl;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+import com.openexchange.database.tx.AbstractDBAction;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.tx.AbstractDBAction;
 
 public abstract class AbstractInfostoreAction extends AbstractDBAction {
 

@@ -50,9 +50,9 @@
 package com.openexchange.tools.file;
 
 import java.io.InputStream;
-import com.openexchange.groupware.tx.AbstractUndoable;
-import com.openexchange.groupware.tx.UndoableAction;
 import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tx.AbstractUndoable;
+import com.openexchange.tx.UndoableAction;
 
 public class SaveFileAction extends AbstractUndoable implements UndoableAction {
 

@@ -50,13 +50,13 @@
 package com.openexchange.publish.database;
 
 import java.sql.Connection;
+import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.tx.DBTransactionPolicy;
-import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;

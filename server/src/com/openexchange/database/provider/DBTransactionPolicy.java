@@ -47,10 +47,58 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.database.provider;
 
-import com.openexchange.groupware.AbstractOXException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-public interface UndoableAction extends Undoable {
-	public void perform() throws AbstractOXException;
+
+/**
+ * A {@link DBTransactionPolicy} governs how transaction handling is done. Note: This swallows and logs exceptions.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public interface DBTransactionPolicy {
+
+    /**
+     * Do not partake in transaction handling, presumably to let something higher up in the call chain handle transactions.
+     */
+    public static final DBTransactionPolicy NO_TRANSACTIONS = new DBTransactionPolicy() {
+
+        public void commit(Connection con) {
+            // Don't do a thing
+        }
+
+        public void rollback(Connection con) {
+            // Don't do a thing
+        }
+
+        public void setAutoCommit(Connection con, boolean autoCommit) {
+            // Don't do a thing
+        }
+        
+    };
+    
+    /**
+     * Partake in transaction handling normally. Just delegates to the corresponding methods on the connection.
+     */
+    public static final DBTransactionPolicy NORMAL_TRANSACTIONS = new DBTransactionPolicy() {
+
+        public void commit(Connection con) throws SQLException {
+            con.commit();
+        }
+
+        public void rollback(Connection con) throws SQLException {
+            con.rollback();
+        }
+
+        public void setAutoCommit(Connection con, boolean autoCommit) throws SQLException {
+            con.setAutoCommit(autoCommit);
+        }
+        
+    };
+    
+    public void setAutoCommit(Connection con, boolean autoCommit) throws SQLException;
+    public void commit(Connection con) throws SQLException;
+    public void rollback(Connection con) throws SQLException;
 }

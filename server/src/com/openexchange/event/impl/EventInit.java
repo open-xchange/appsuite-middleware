@@ -52,6 +52,7 @@ package com.openexchange.event.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentCleaner;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
@@ -61,7 +62,6 @@ import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
-import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.server.Initialization;
 
 /**

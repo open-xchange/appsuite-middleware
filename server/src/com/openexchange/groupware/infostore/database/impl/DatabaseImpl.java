@@ -66,6 +66,9 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.tx.DBService;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
@@ -88,9 +91,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBService;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -101,6 +101,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.Code;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionException;
 
 public class DatabaseImpl extends DBService {
 
@@ -219,7 +220,7 @@ public class DatabaseImpl extends DBService {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
 
@@ -282,7 +283,7 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, result);
@@ -317,7 +318,7 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             LOG.error("SQLException", e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, rs);
@@ -346,7 +347,7 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             LOG.error("SQLException", e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, rs);
@@ -392,7 +393,7 @@ public class DatabaseImpl extends DBService {
             throw new InfostoreException(e);
         } catch (final FilestoreException e) {
             throw new InfostoreException(e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, result);
@@ -427,7 +428,7 @@ public class DatabaseImpl extends DBService {
         final Connection writecon;
         try {
             writecon = getWriteConnection(ctx);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
 
@@ -491,17 +492,17 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             try {
                 rollbackDBTransaction();
-            } catch (TransactionException e1) {
+            } catch (DBPoolingException e1) {
                 throw new InfostoreException(e1);
             }
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, result);
             try {
                 finishDBTransaction();
-            } catch (TransactionException e) {
+            } catch (DBPoolingException e) {
                 throw new InfostoreException(e);
             }
             releaseWriteConnection(ctx, writecon);
@@ -523,7 +524,7 @@ public class DatabaseImpl extends DBService {
         final Connection writecon;
         try {
             writecon = getWriteConnection(ctx);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
 
@@ -564,17 +565,17 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             try {
                 rollbackDBTransaction();
-            } catch (TransactionException e1) {
+            } catch (DBPoolingException e1) {
                 throw new InfostoreException(e1);
             }
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, result);
             try {
                 finishDBTransaction();
-            } catch (TransactionException e) {
+            } catch (DBPoolingException e) {
                 throw new InfostoreException(e);
             }
             releaseWriteConnection(ctx, writecon);
@@ -650,7 +651,7 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             try {
                 rollbackDBTransaction();
-            } catch (TransactionException e1) {
+            } catch (DBPoolingException e1) {
                 throw new InfostoreException(e1);
             }
             LOG.error(e.getMessage(), e);
@@ -658,18 +659,18 @@ public class DatabaseImpl extends DBService {
         } catch (final OXException e) {
             try {
                 rollbackDBTransaction();
-            } catch (TransactionException e1) {
+            } catch (DBPoolingException e1) {
                 throw new InfostoreException(e1);
             }
             LOG.error(e.getMessage(), e);
             throw e;
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);
             try {
                 finishDBTransaction();
-            } catch (TransactionException e) {
+            } catch (DBPoolingException e) {
                 throw new InfostoreException(e);
             }
             releaseWriteConnection(ctx, writeCon);
@@ -721,7 +722,7 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
     }
@@ -731,7 +732,7 @@ public class DatabaseImpl extends DBService {
         Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
         final StringBuilder SQL = new StringBuilder(
@@ -760,7 +761,7 @@ public class DatabaseImpl extends DBService {
         Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
         final StringBuilder SQL = new StringBuilder(
@@ -823,7 +824,7 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
     }
@@ -862,7 +863,7 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
     }
@@ -943,7 +944,7 @@ public class DatabaseImpl extends DBService {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmtNew));
         } catch (final SearchIteratorException e) {
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             if (FETCH.equals(Fetch.PREFETCH)) {
@@ -978,7 +979,7 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, result);
@@ -993,7 +994,7 @@ public class DatabaseImpl extends DBService {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
         try {
@@ -1022,7 +1023,7 @@ public class DatabaseImpl extends DBService {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
         PreparedStatement stmt = null;
@@ -1058,7 +1059,7 @@ public class DatabaseImpl extends DBService {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         }
         PreparedStatement stmt = null;
@@ -1112,7 +1113,7 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, query.toString());
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             if (stmt != null) {
@@ -1317,7 +1318,7 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, (query != null) ? query.toString() : "");
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             if (stmt != null) {
@@ -1792,7 +1793,7 @@ public class DatabaseImpl extends DBService {
             return -1;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, rs);

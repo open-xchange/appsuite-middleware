@@ -58,11 +58,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
+import com.openexchange.tx.TransactionAware;
 
-public interface AttachmentBase extends Service {
+public interface AttachmentBase extends TransactionAware {
 
     public static final int NEW = 0;
 

@@ -54,16 +54,17 @@ import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.schema.Tables.subscriptions;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.ldap.MockUser;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.subscribe.sql.AbstractSubscriptionSQLStorageTest;
+import com.openexchange.tx.TransactionException;
 
 /**
  * {@link SubscriptionUserDeleteListenerTest}
@@ -72,7 +73,7 @@ import com.openexchange.subscribe.sql.AbstractSubscriptionSQLStorageTest;
  */
 public class SubscriptionUserDeleteListenerTest extends AbstractSubscriptionSQLStorageTest {
 
-    public void testShouldDeleteSubscriptionOnDeletionOfUser() throws SubscriptionException, TransactionException, DeleteFailedException, SQLException {
+    public void testShouldDeleteSubscriptionOnDeletionOfUser() throws SubscriptionException, DBPoolingException, DeleteFailedException, SQLException {
         Connection writeConnection = getDBProvider().getWriteConnection(ctx);
 
         SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener() {

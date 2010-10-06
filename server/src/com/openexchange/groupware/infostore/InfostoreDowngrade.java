@@ -49,17 +49,17 @@
 package com.openexchange.groupware.infostore;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.StaticDBPoolProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tx.TransactionException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

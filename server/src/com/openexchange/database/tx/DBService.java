@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.database.tx;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,12 +59,21 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBProviderUser;
+import com.openexchange.database.provider.RequestDBProvider;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tx.TransactionAware;
+import com.openexchange.tx.TransactionException;
+import com.openexchange.tx.TransactionExceptionCodes;
+import com.openexchange.tx.Undoable;
+import com.openexchange.tx.UndoableAction;
 
-public abstract class DBService implements Service, DBProviderUser, DBProvider {
+public abstract class DBService implements TransactionAware, DBProviderUser, DBProvider {
 
     private static final Log LOG = LogFactory.getLog(DBService.class);
     private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(DBService.class);
@@ -97,14 +106,14 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider {
         setProvider(provider);
     }
 
-    public Connection getReadConnection(final Context ctx) throws TransactionException {
+    public Connection getReadConnection(final Context ctx) throws DBPoolingException {
         if(txState.get() != null && txState.get().preferWriteCon) {
             return getWriteConnection(ctx);
         }
         return provider.getReadConnection(ctx);
     }
 
-    public Connection getWriteConnection(final Context ctx) throws TransactionException {
+    public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
         final Connection writeCon = provider.getWriteConnection(ctx);
         if(txState.get() != null && txState.get().preferWriteCon) {
             txState.get().writeCons.add(writeCon);
@@ -131,24 +140,24 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider {
         provider.releaseWriteConnection(ctx, con);
     }
 
-    public void commitDBTransaction() throws TransactionException {
+    public void commitDBTransaction() throws DBPoolingException {
         provider.commit();
     }
 
-    public void commitDBTransaction(final Undoable undo) throws TransactionException {
+    public void commitDBTransaction(final Undoable undo) throws DBPoolingException {
         provider.commit();
         addUndoable(undo);
     }
 
-    public void rollbackDBTransaction() throws TransactionException {
+    public void rollbackDBTransaction() throws DBPoolingException {
         provider.rollback();
     }
 
-    public void startDBTransaction() throws TransactionException {
+    public void startDBTransaction() throws DBPoolingException {
         provider.startTransaction();
     }
 
-    public void finishDBTransaction() throws TransactionException {
+    public void finishDBTransaction() throws DBPoolingException {
         provider.finish();
     }
 
@@ -157,7 +166,11 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider {
     }
 
     public void finish() throws TransactionException {
-        provider.finish();
+        try {
+            provider.finish();
+        } catch (DBPoolingException e) {
+            throw new TransactionException(e);
+        }
         txState.set(null);
     }
 
@@ -226,7 +239,7 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider {
             if(dbTransaction) {
                 try {
                     rollbackDBTransaction();
-                } catch (final TransactionException x) {
+                } catch (final DBPoolingException x) {
                     LL.log(x);
                 }
             }
@@ -235,7 +248,7 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider {
             if(dbTransaction) {
                 try {
                     finishDBTransaction();
-                } catch (final TransactionException x) {
+                } catch (final DBPoolingException x) {
                     LL.log(x);
                 }
             }

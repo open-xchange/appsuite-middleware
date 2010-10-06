@@ -37,6 +37,7 @@
     <property name="secretjar" value="com.openexchange.secret.jar"/>
 	<property name="secretrecovjar" value="com.openexchange.secret.recovery.jar"/>
 	<property name="calendarjar" value="com.openexchange.calendar.jar"/>
+	<property name="txjar" value="com.openexchange.tx.jar"/>
     <property name="commonjar" value="common.jar"/>
 	<property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
 
@@ -57,6 +58,7 @@
     	<pathelement location="${bundlesdir}/${secretjar}"/>
     	<pathelement location="${bundlesdir}/${secretrecovjar}"/>
     	<pathelement location="${bundlesdir}/${calendarjar}"/>
+    	<pathelement location="${bundlesdir}/${txjar}"/>
     </path>
 
     <!-- Compile -->

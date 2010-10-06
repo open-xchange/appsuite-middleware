@@ -50,6 +50,8 @@
 package com.openexchange.groupware.attach;
 
 import gnu.trove.TIntObjectHashMap;
+import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.OverridableAttachmentAuthorization;
@@ -58,8 +60,6 @@ import com.openexchange.groupware.calendar.CalendarAttachments;
 import com.openexchange.groupware.contact.ContactsAttachment;
 import com.openexchange.groupware.tasks.TaskAttachmentListener;
 import com.openexchange.groupware.tasks.TaskAuthorization;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.tools.service.ServicePriorityConflictException;
 import com.openexchange.tools.service.SpecificServiceChooser;
 

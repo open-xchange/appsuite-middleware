@@ -51,9 +51,9 @@ package com.openexchange.groupware.infostore;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tx.Service;
+import com.openexchange.tx.TransactionAware;
 
-public interface InfoDatabase extends Service {
+public interface InfoDatabase extends TransactionAware {
 
 	void delete(int[] ids, Context ctx) throws OXException ;
 

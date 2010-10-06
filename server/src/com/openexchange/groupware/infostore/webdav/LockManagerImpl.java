@@ -61,14 +61,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.tx.DBService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBService;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.tx.TransactionException;
 
 public abstract class LockManagerImpl<T extends Lock> extends DBService implements LockManager{
 
@@ -169,7 +170,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             return id;
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);
@@ -203,7 +204,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt.executeUpdate();
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);
@@ -221,7 +222,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt.executeUpdate();
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);
@@ -269,7 +270,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             return locks;
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);
@@ -294,7 +295,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);
@@ -314,7 +315,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt.executeUpdate();
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);
@@ -333,7 +334,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt.executeUpdate();
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt, null);

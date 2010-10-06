@@ -69,6 +69,9 @@ import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.tx.DBService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
@@ -90,9 +93,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBService;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
@@ -105,6 +105,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tx.TransactionException;
 
 public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
@@ -219,7 +220,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final TransactionException e) {
+        } catch (final DBPoolingException e) {
             throw new AttachmentException(e);
         } finally {
             close(stmt, rs);
@@ -431,13 +432,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         } catch (final SQLException e) {
             LOG.error("SQL Exception: ", e);
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         }
 
     }
 
-    private void removeDatabaseEntries(final Context context) throws TransactionException, SQLException {
+    private void removeDatabaseEntries(final Context context) throws DBPoolingException, SQLException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
         try {
@@ -527,7 +528,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 attachment.setId(getId(ctx, writeCon));
             } catch (final SQLException e) {
                 throw AttachmentExceptionCodes.GENERATIING_ID_FAILED.create(e);
-            } catch (TransactionException e) {
+            } catch (DBPoolingException e) {
                 throw new AttachmentException(e);
             } finally {
                 releaseWriteConnection(ctx, writeCon);
@@ -583,11 +584,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         } catch (final SQLException e) {
             try {
                 rollbackDBTransaction();
-            } catch (final TransactionException x2) {
+            } catch (final DBPoolingException x2) {
                 LL.log(x2);
             }
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         } finally {
             close(stmt, rs);
@@ -629,7 +630,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             return rs.getString(1);
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         } finally {
             close(stmt, rs);
@@ -722,7 +723,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         } finally {
             close(stmt, rs);
@@ -744,7 +745,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             retval[1] = stmt.executeUpdate();
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         } finally {
             close(stmt, null);
@@ -772,7 +773,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         } finally {
             close(stmt, rs);
@@ -797,7 +798,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             retval = stmt.executeUpdate();
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         } finally {
             close(stmt, null);
@@ -877,7 +878,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         } finally {
             close(stmt, rs);
@@ -1142,7 +1143,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             } catch (SQLException e) {
                 LOG.error(e);
                 this.exception = e;
-            } catch (TransactionException e) {
+            } catch (DBPoolingException e) {
                 LOG.error(e);
                 this.exception = e;
             }
@@ -1157,7 +1158,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (final TransactionException e) {
+        } catch (final DBPoolingException e) {
             throw new AttachmentException(e);
         }
         PreparedStatement stmt = null;

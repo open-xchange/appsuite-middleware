@@ -63,15 +63,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBTransactionPolicy;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
@@ -82,6 +82,7 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;
+import com.openexchange.tx.TransactionException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -508,7 +509,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             throw SQLException.create(e);
         } catch (SQLException e) {
             throw SQLException.create(e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new SubscriptionException(e);
         } finally {
             try {
@@ -539,7 +540,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             storageService.delete(writeConnection, ctx);
             txPolicy.commit(writeConnection);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new SubscriptionException(e);
         } catch (SQLException e) {
             throw SQLException.create(e);

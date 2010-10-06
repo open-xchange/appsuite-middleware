@@ -47,53 +47,50 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.database.provider;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import java.sql.Connection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.impl.DBPool;
 
-public class ReuseReadConProvider implements DBProvider {
+public class DBPoolProvider implements DBProvider {
 
-	private final DBProvider provider;
-	private Connection readCon;
-	private int refCount;
+    private static final Log LOG = LogFactory.getLog(DBPoolProvider.class);
 
-	public ReuseReadConProvider(final DBProvider provider) {
-		this.provider = provider;
-	}
+    public Connection getReadConnection(final Context ctx) throws DBPoolingException {
+        try {
+            final Connection readCon = DBPool.pickup(ctx);
+            return readCon;
+        } catch (final DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+            throw new DBPoolingException(e);
+        }
+    }
 
-	public Connection getReadConnection(final Context ctx)
-			throws TransactionException {
-		if(readCon != null) {
-			refCount++;
-			return readCon;
-		}
-		readCon = provider.getReadConnection(ctx);
-		refCount++;
-		return readCon;
-	}
+    public void releaseReadConnection(final Context ctx, final Connection con) {
+        if (con != null) {
+            DBPool.closeReaderSilent(ctx,con); //FIXME
+        }
+    }
 
-	public Connection getWriteConnection(final Context ctx)
-			throws TransactionException {
-		throw new UnsupportedOperationException();
-	}
+    public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
+        try {
+            final Connection writeCon = DBPool.pickupWriteable(ctx);
+            return writeCon;
+        } catch (final DBPoolingException e) {
+            throw new DBPoolingException(e);
+        }
+    }
 
-	public void releaseReadConnection(final Context ctx, final Connection con) {
-		if(con == null) {
-			return;
-		}
-		if(!readCon.equals(con)) {
-			throw new IllegalArgumentException("I don't know this connection");
-		}
-		refCount--;
-		if(refCount == 0) {
-			provider.releaseReadConnection(ctx, con);
-			readCon = null;
-		}
-	}
-
-	public void releaseWriteConnection(final Context ctx, final Connection con) {
-		throw new UnsupportedOperationException();
-	}
-
+    public void releaseWriteConnection(final Context ctx, final Connection con) {
+        if (con == null) {
+            return;
+        }
+        autocommit(con);
+        DBPool.closeWriterSilent(ctx,con);
+    }
 }

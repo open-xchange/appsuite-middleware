@@ -51,11 +51,11 @@ package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class InfostoreDelete implements DeleteListener {

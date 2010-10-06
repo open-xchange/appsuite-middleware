@@ -64,15 +64,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBTransactionPolicy;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationStorage;
@@ -85,6 +85,7 @@ import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.sql.tools.SQLTools;
+import com.openexchange.tx.TransactionException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -401,7 +402,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             throw e;
         } catch (SQLException e) {
             throw SQLException.create(e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new PublicationException(e);
         } finally {
             tryToClose(context, writeConnection);
@@ -415,7 +416,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             deleteWhereContextID(contextId, ctx, writeConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new PublicationException(e);
         } catch (GenericConfigStorageException e) {
             throw new PublicationException(e);

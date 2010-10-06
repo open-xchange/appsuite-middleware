@@ -70,6 +70,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.folder.FolderDeleteListenerService;
@@ -94,9 +96,6 @@ import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.tasks.Tasks;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.tx.StaticDBPoolProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.preferences.ServerUserSetting;
@@ -112,6 +111,7 @@ import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnInsert;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnRemove;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tx.TransactionException;
 
 /**
  * {@link OXFolderManagerImpl} - The {@link OXFolderManager} implementation

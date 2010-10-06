@@ -68,6 +68,10 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.ReuseReadConProvider;
+import com.openexchange.database.tx.DBService;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
@@ -117,10 +121,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBService;
-import com.openexchange.groupware.tx.ReuseReadConProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -136,6 +136,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionException;
 
 /**
  * DatabaseImpl
@@ -397,7 +398,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 I(document.getId()),
                 I(ctx.getContextId()),
                 QUERIES.getNumberOfVersionsQueryForOneDocument());
-        } catch (final TransactionException e) {
+        } catch (final DBPoolingException e) {
             throw new InfostoreException(e);
         }
     }
@@ -508,13 +509,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     commitDBTransaction();
                 } catch (final SQLException e) {
                     throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
-                } catch (TransactionException e) {
+                } catch (DBPoolingException e) {
                     throw new InfostoreException(e);
                 } finally {
                     releaseWriteConnection(sessionObj.getContext(), writeCon);
                     try {
                         finishDBTransaction();
-                    } catch (TransactionException e) {
+                    } catch (DBPoolingException e) {
                         throw new InfostoreException(e);
                     }
                 }
@@ -629,7 +630,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
-    protected <T> T performQuery(final Context ctx, final String query, final ResultProcessor<T> rsp, final Object... args) throws SQLException, TransactionException {
+    protected <T> T performQuery(final Context ctx, final String query, final ResultProcessor<T> rsp, final Object... args) throws SQLException, DBPoolingException {
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;

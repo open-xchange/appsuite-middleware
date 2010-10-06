@@ -47,32 +47,8 @@
  *
  */
 
-package com.openexchange.groupware.tx.osgi;
+package com.openexchange.database.provider;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.tx.TXExceptionFactory;
-
-/**
- * {@link TransactionActivator}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- */
-public class TransactionActivator implements BundleActivator {
-
-    private ComponentRegistration registration;
-
-    public TransactionActivator() {
-        super();
-    }
-
-    public void start(BundleContext context) throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.TRANSACTION, "com.openexchange.groupware.tx", TXExceptionFactory.getInstance());
-    }
-
-    public void stop(BundleContext context) throws Exception {
-        registration.unregister();
-    }
+public interface DBProviderUser {
+	public void setProvider(DBProvider provider);
 }

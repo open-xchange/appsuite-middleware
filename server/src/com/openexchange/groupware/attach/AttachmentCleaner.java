@@ -51,6 +51,7 @@ package com.openexchange.groupware.attach;
 
 import gnu.trove.TIntArrayList;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
@@ -62,14 +63,13 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tx.TransactionException;
 
 public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface,
         ContactEventInterface {

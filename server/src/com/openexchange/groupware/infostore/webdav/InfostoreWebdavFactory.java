@@ -64,6 +64,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -77,10 +80,6 @@ import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBProviderUser;
-import com.openexchange.groupware.tx.Service;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.sessiond.impl.SessionHolder;
@@ -88,6 +87,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tx.TransactionAware;
+import com.openexchange.tx.TransactionException;
 import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
@@ -196,7 +197,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         }
     }
 
-    private final Set<Service> services = new HashSet<Service>();
+    private final Set<TransactionAware> services = new HashSet<TransactionAware>();
 
     private final ThreadLocal<State> state = new ThreadLocal<State>();
     private PathResolver resolver;
@@ -294,7 +295,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         return resolveResource(new WebdavPath(url));
     }
 
-    private Set<Service> services(){
+    private Set<TransactionAware> services(){
         return this.services;
     }
 
@@ -323,7 +324,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
                 if(lockNullId>0) {
                     return new InfostoreLockNullResource((AbstractResource) def, this,lockNullId);
                 }
-            } catch (TransactionException e) {
+            } catch (DBPoolingException e) {
                 throw new OXException(e);
             } finally {
                 if(readCon != null) {
@@ -430,12 +431,12 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
     }
 
     public void setSecurity(final InfostoreSecurity security){
-        if(this.security instanceof Service) {
-            removeService((Service) this.security);
+        if(this.security instanceof TransactionAware) {
+            removeService((TransactionAware) this.security);
         }
         this.security = security;
-        if(this.security instanceof Service) {
-            addService((Service) this.security);
+        if(this.security instanceof TransactionAware) {
+            addService((TransactionAware) this.security);
         }
        }
 
@@ -522,7 +523,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         return retVal;
     }
 
-    private void addService(final Service service) {
+    private void addService(final TransactionAware service) {
         services.add(service);
         if (service instanceof DBProviderUser) {
             final DBProviderUser defService = (DBProviderUser) service;
@@ -530,7 +531,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         }
     }
 
-    private void removeService(final Service service) {
+    private void removeService(final TransactionAware service) {
         if(null == service) {
             return;
         }
@@ -539,7 +540,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 
     public void beginRequest() {
         state.set(new State());
-        for(final Service service : services()) {
+        for(final TransactionAware service : services()) {
             try {
                 service.startTransaction();
             } catch (final TransactionException e) {
@@ -550,7 +551,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 
     public void endRequest(final int status) {
         state.set(null);
-        for (final Service service : services()) {
+        for (final TransactionAware service : services()) {
             try {
                 service.finish();
             } catch (final TransactionException e) {
@@ -565,7 +566,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 
     public void setProvider(final DBProvider provider) {
         this.provider = provider;
-        for(final Service service : services()) {
+        for(final TransactionAware service : services()) {
             if (service instanceof DBProviderUser) {
                 final DBProviderUser defService = (DBProviderUser) service;
                 defService.setProvider(getProvider());
@@ -577,7 +578,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         final State s = state.get();
         s.invalidate(url,id,type);
 
-        for(final Service service : services) {
+        for(final TransactionAware service : services) {
             if (service instanceof URLCache) {
                 final URLCache urlCache = (URLCache) service;
                 urlCache.invalidate(url,id,type);

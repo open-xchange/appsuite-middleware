@@ -50,12 +50,12 @@
 package com.openexchange.groupware.filestore;
 
 import java.sql.Connection;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;

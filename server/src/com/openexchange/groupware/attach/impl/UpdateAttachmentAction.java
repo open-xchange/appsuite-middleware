@@ -50,11 +50,12 @@
 package com.openexchange.groupware.attach.impl;
 
 import java.util.List;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.tx.TransactionException;
 
 public class UpdateAttachmentAction extends AttachmentListQueryAction {
 
@@ -69,7 +70,7 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
             doUpdates(getQueryCatalog().getUpdate(), oldAttachments, true);
         } catch (final UpdateException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         }
     }
@@ -82,7 +83,7 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
             doUpdates(getQueryCatalog().getUpdate(), getAttachments(), true);
         } catch (final UpdateException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new AttachmentException(e);
         }
     }

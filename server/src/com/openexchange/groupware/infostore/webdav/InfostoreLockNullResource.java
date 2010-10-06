@@ -62,13 +62,14 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tx.TransactionException;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -222,7 +223,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		} catch (final SQLException x) {
 		    rollback(writeCon);
             throw new WebdavProtocolException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		} catch (final TransactionException e) {
+		} catch (final DBPoolingException e) {
 		    rollback(writeCon);
 			throw new WebdavProtocolException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
@@ -376,7 +377,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		return OPTIONS;
 	}
 	
-	private void dumpToDB() throws SQLException, TransactionException {
+	private void dumpToDB() throws SQLException, DBPoolingException {
 		if(exists) {
 			return;
 		}
@@ -397,7 +398,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		} catch (final SQLException x) {
 		    rollback(writeCon);
 			throw x;
-		} catch (final TransactionException e) {
+		} catch (final DBPoolingException e) {
 		    rollback(writeCon);
 			throw e;
 		} finally {

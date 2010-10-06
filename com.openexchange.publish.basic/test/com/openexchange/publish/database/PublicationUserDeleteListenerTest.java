@@ -54,16 +54,17 @@ import static com.openexchange.sql.schema.Tables.publications;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.ldap.MockUser;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.sql.AbstractPublicationSQLStorageTest;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.tx.TransactionException;
 
 /**
  * {@link PublicationUserDeleteListenerTest}
@@ -102,7 +103,7 @@ public class PublicationUserDeleteListenerTest extends AbstractPublicationSQLSto
         super.tearDown();
     }
 
-    public void testShouldPerformDeletionAttempt() throws DeleteFailedException, SQLException, PublicationException, TransactionException {
+    public void testShouldPerformDeletionAttempt() throws DeleteFailedException, SQLException, PublicationException, DBPoolingException {
         DeleteEvent event = new DeleteEvent(user, user.getId(), DeleteEvent.TYPE_USER, ctx);
         storage.rememberPublication(pub1);
         listener.deletePerformed(event, readCon , writeCon );

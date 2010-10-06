@@ -47,15 +47,15 @@
  *
  */
 
-package com.openexchange.groupware.tx.osgi;
+package com.openexchange.database.osgiservice;
 
 import java.sql.Connection;
 import java.util.Collection;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.server.osgiservice.WhiteboardFactoryService;
 import com.openexchange.tools.global.OXCloseable;
 
@@ -86,7 +86,7 @@ public class WhiteboardDBProvider implements DBProvider{
         this.context = context;
     }
 
-    public Connection getReadConnection(Context ctx) throws TransactionException {
+    public Connection getReadConnection(Context ctx) throws DBPoolingException {
         DBProvider provider = null;
         ServiceReference reference = null;
         try {
@@ -98,7 +98,7 @@ public class WhiteboardDBProvider implements DBProvider{
         }
     }
 
-    public Connection getWriteConnection(Context ctx) throws TransactionException {
+    public Connection getWriteConnection(Context ctx) throws DBPoolingException {
         DBProvider provider = null;
         ServiceReference reference = null;
         try {

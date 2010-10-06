@@ -55,18 +55,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tx.TransactionException;
 
 public abstract class AbstractDocumentListAction extends AbstractInfostoreAction {
 
     private List<DocumentMetadata> documents;
 
-    public int doUpdates(final String query, final Metadata[] fields, final List<DocumentMetadata> docs) throws UpdateException, TransactionException {
+    public int doUpdates(final String query, final Metadata[] fields, final List<DocumentMetadata> docs) throws UpdateException, DBPoolingException {
         final UpdateBlock[] updates = new UpdateBlock[docs.size()];
         int i = 0;
 

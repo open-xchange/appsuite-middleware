@@ -64,6 +64,8 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -74,9 +76,8 @@ import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.webdav.URLCache;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tx.TransactionException;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class PathResolverImpl extends AbstractPathResolver implements URLCache {
@@ -278,7 +279,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             return new ResolvedImpl(current,parentId, false);
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, stmt.toString());
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new InfostoreException(e);
         } finally {
             close(stmt,rs);
@@ -366,7 +367,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                 try {
                     readCon = provider.getReadConnection(ctx);
                     return FolderCacheManager.getInstance().loadFolderObject(folderid, ctx, readCon);
-                } catch (TransactionException e) {
+                } catch (DBPoolingException e) {
                     throw new InfostoreException(e);
                 } finally {
                     provider.releaseReadConnection(ctx, readCon);

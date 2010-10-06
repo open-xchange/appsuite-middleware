@@ -58,16 +58,17 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tx.TransactionException;
 
 public class CheckSizeSwitch {
 
@@ -141,7 +142,7 @@ public class CheckSizeSwitch {
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             return 0;
-        } catch (final TransactionException e) {
+        } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(),  e);
             return 0;
         } finally {

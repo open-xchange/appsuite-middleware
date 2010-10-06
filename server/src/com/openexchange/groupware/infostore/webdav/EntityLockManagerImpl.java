@@ -52,9 +52,9 @@ package com.openexchange.groupware.infostore.webdav;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.api2.OXException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements

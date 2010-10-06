@@ -60,14 +60,14 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 
 /**
  * {@link MySQLGenericConfigurationStorage}
@@ -134,7 +134,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             LOG.error(x.getMessage(), x);
             GenericConfigStorageErrorMessage.SQLException.throwException(x, x.getMessage());
             return null;
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new GenericConfigStorageException(e);
         } finally {
             tx.close();
@@ -161,7 +161,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             }
             loadValues(readCon, ctx, id, content, "genconf_attributes_strings");
             loadValues(readCon, ctx, id, content, "genconf_attributes_bools");
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new GenericConfigStorageException(e);
         } finally {
             if(connectionHandling) {
@@ -318,7 +318,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 list.add(I(rs.getInt(1)));
             }
             
-        } catch (TransactionException e) {
+        } catch (DBPoolingException e) {
             throw new GenericConfigStorageException(e);
         } catch (SQLException e) {
             GenericConfigStorageErrorMessage.SQLException.throwException(e, stmt.toString());

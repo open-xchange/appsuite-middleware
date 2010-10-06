@@ -47,33 +47,40 @@
  *
  */
 
-package com.openexchange.groupware.tx;
+package com.openexchange.database.provider;
 
 import java.sql.Connection;
 import com.openexchange.groupware.contexts.Context;
 
-public interface DBProvider {
+/**
+ * The most simple database connection provider.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class SimpleDBProvider implements DBProvider {
 
-    static final DBProvider DUMMY = new DBProvider() {
-        public Connection getReadConnection(Context ctx) {
-            throw new UnsupportedOperationException();
-        }
-        public Connection getWriteConnection(Context ctx) {
-            throw new UnsupportedOperationException();
-        }
-        public void releaseReadConnection(Context ctx, Connection con) {
-            throw new UnsupportedOperationException();
-        }
-        public void releaseWriteConnection(Context ctx, Connection con) {
-            throw new UnsupportedOperationException();
-        }
-    };
+    private final Connection readCon;
 
-    Connection getReadConnection(Context ctx) throws TransactionException;
+    private final Connection writeCon;
 
-    void releaseReadConnection(Context ctx, Connection con);
+    public SimpleDBProvider(Connection readCon, Connection writeCon) {
+        super();
+        this.readCon = readCon;
+        this.writeCon = writeCon;
+    }
 
-    Connection getWriteConnection(Context ctx) throws TransactionException;
+    public Connection getReadConnection(Context ctx) {
+        return readCon;
+    }
 
-    void releaseWriteConnection(Context ctx, Connection con);
+    public Connection getWriteConnection(Context ctx) {
+        return writeCon;
+    }
+
+    public void releaseReadConnection(Context ctx, Connection con) {
+        // Nothing to release.
+    }
+
+    public void releaseWriteConnection(Context ctx, Connection con) {
+        // Nothing to release.
+    }
 }

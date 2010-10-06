@@ -53,10 +53,10 @@ import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tx.TransactionAware;
 
-public interface LockManager extends Service{
+public interface LockManager extends TransactionAware{
 	public static enum Scope {EXCLUSIVE, SHARED}
 	public static enum Type {WRITE}
 	

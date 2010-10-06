@@ -53,10 +53,10 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tx.Service;
+import com.openexchange.tx.TransactionAware;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
-public interface PropertyStore extends Service{
+public interface PropertyStore extends TransactionAware{
 	public void saveProperties(int entity, List<WebdavProperty> properties, Context ctx) throws OXException;
 	public Map<Integer, List<WebdavProperty>> loadProperties(List<Integer> entities, List<WebdavProperty> properties, Context ctx) throws OXException;
 	public List<WebdavProperty> loadProperties(int entity, List<WebdavProperty> properties, Context ctx) throws OXException;
