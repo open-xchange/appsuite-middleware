@@ -50,6 +50,7 @@ package com.openexchange.admin.rmi;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
@@ -101,6 +102,29 @@ public class UserTest extends AbstractTest {
     public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(UserTest.class);
 	}
+    
+    @Test
+    public void testDefaultModuleAccess() throws Exception {
+        // check whether all new options have been cleared in disableAll()
+        final UserModuleAccess ret = new UserModuleAccess();
+        ret.disableAll();
+        ret.setWebmail(true);
+        ret.setContacts(true);
+        
+        final Class clazz = ret.getClass();
+        for(final Method m : clazz.getMethods() ) {
+            final String name = m.getName();
+            if( !name.equals("getClass") && (name.startsWith("is") || name.startsWith("get")) ) {
+                System.out.println(name);
+                boolean res = (Boolean)m.invoke(ret, null);
+                if( name.endsWith("Webmail") || name.endsWith("Contacts") || name.endsWith("GlobalAddressBookDisabled")) {
+                    assertTrue(name + " must return true", res);
+                } else {
+                    assertFalse(name + " must return false", res);
+                }
+            }
+        }
+    }
     
     @Test
     public void testCreate() throws Exception {        
