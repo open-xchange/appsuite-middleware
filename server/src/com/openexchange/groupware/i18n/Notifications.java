@@ -120,11 +120,75 @@ public class Notifications implements LocalizableStrings {
         "\n" + 
         "========================================== ";
     
+    public static final String APPOINTMENT_CREATE_MAIL_ON_BEHALF = 
+        "A new appointment was created by [created_by] on behalf of [behalf_of].\n" +
+        "You can check this appointment in your calendar:\n" +
+        "[link]\n" + 
+        "\n" + 
+        "Appointment\n" + 
+        "===========\n" + 
+        "Created by: [created_by]\n" + 
+        "Created at: [creation_datetime]\n" + 
+        "[title]\n" + 
+        "[location]" + 
+        "[folder_name]\n" + 
+        "\n" + 
+        "[start]\n" + 
+        "[end]\n" + 
+        "[series]" + 
+        "[delete_exceptions]" + 
+        "[change_exceptions]" + 
+        "\n" + 
+        "[description]" + 
+        "\n" + 
+        "Participants\n" + 
+        "============\n" + 
+        "[participants]" + 
+        "\n" + 
+        "\n" + 
+        "Resources\n" +
+        "=========\n" +
+        "[resources]" +
+        "\n" + 
+        "\n" + 
+        "========================================== ";
+
+    public static final String APPOINTMENT_CREATE_MAIL_ON_BEHALF_EXT = 
+        "A new appointment was created by [created_by] on behalf of [behalf_of].\n" +
+        "\n" + 
+        "Appointment\n" + 
+        "===========\n" + 
+        "Created by: [created_by]\n" + 
+        "Created at: [creation_datetime]\n" + 
+        "[title]\n" + 
+        "[location]" + 
+        "\n" + 
+        "[start]\n" + 
+        "[end]\n" + 
+        "[series]" + 
+        "[delete_exceptions]" + 
+        "[change_exceptions]" + 
+        "\n" + 
+        "[description]" + 
+        "\n" + 
+        "Participants\n" + 
+        "============\n" + 
+        "[participants]" + 
+        "\n" + 
+        "\n" + 
+        "Resources\n" +
+        "=========\n" +
+        "[resources]" +
+        "\n" + 
+        "\n" + 
+        "========================================== ";
     /**
      * Notification Template for user which has no access to this appointment.
      * We use the same as for external participants, because this has no link to the appointment.
      */
     public static final String APPOINTMENT_CREATE_MAIL_NO_ACCESS = APPOINTMENT_CREATE_MAIL_EXT;
+    
+    public static final String APPOINTMENT_CREATE_MAIL_ON_BEHALF_NO_ACCESS = APPOINTMENT_CREATE_MAIL_ON_BEHALF_EXT;
     
     public static final String TASK_CREATE_MAIL = 
         "A new task was created by [created_by].\n" +

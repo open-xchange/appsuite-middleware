@@ -65,6 +65,10 @@ public enum TemplateToken {
      */
     CREATED_BY("created_by"),
     /**
+     * Folder owner
+     */
+    BEHALF_OF("behalf_of"),
+    /**
      * Display name of the changing user
      */
     CHANGED_BY("changed_by"),
