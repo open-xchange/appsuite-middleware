@@ -109,7 +109,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         }
         final List<FileStorageAccount> ret = new ArrayList<FileStorageAccount>(accounts.size());
         for (final ConfigFileStorageAccount account : accounts.values()) {
-            ret.add(cloneAndApplyService(account));
+            ret.add(cloneAndApplyService(account, session));
         }
         return ret;
     }
@@ -131,12 +131,15 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
         }
-        return cloneAndApplyService(account);
+        return cloneAndApplyService(account, session);
     }
 
-    private ConfigFileStorageAccount cloneAndApplyService(final ConfigFileStorageAccount account) {
+    private ConfigFileStorageAccount cloneAndApplyService(final ConfigFileStorageAccount account, final Session session) {
         final ConfigFileStorageAccount ret = (ConfigFileStorageAccount) account.clone();
         ret.setFileStorageService(service);
+        final Map<String, Object> configuration = ret.getConfiguration();
+        configuration.put("login", session.getLogin());
+        configuration.put("password", session.getPassword());
         return ret;
     }
 
