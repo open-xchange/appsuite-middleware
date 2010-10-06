@@ -136,8 +136,7 @@ public final class Create {
      * @param admin user identifier of the admin.
      * @return a ready to insert folder.
      */
-    public static FolderObject createPrivateFolder(final String name,
-        final int type, final int admin) {
+    public static FolderObject createPrivateFolder(final String name, final int type, final int admin) {
         final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
         folder.setModule(type);
