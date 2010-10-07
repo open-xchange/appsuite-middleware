@@ -52,7 +52,6 @@ package com.openexchange.unitedinternet.smartdrive.client.internal;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Date;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -60,6 +59,7 @@ import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -133,8 +133,6 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
             } finally {
                 getMethod.releaseConnection();
             }
-        } catch (final SmartDriveException e) {
-            throw e;
         } catch (final HttpException e) {
             throw SmartDriveExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -178,8 +176,6 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
             } finally {
                 getMethod.releaseConnection();
             }
-        } catch (final SmartDriveException e) {
-            throw e;
         } catch (final HttpException e) {
             throw SmartDriveExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -197,13 +193,13 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
 
     private static SmartDriveResponse handleForErrorResponse(final HttpMethodBase method, final long duration) {
         final int status = method.getStatusCode();
-        if (SC_NOT_FOUND != status) {
+        if (SC_NOT_FOUND == status) {
             final SmartDriveResponseImpl response = new SmartDriveResponseImpl();
             response.setDuration(duration);
             response.setStatus(new ResponseStatusImpl().setHttpStatusCode(status).setStatusCode(String.valueOf(status)).setErrorMessage(method.getStatusText()));
             return response;
         }
-        if (SC_GENERAL_ERROR != status) {
+        if (SC_GENERAL_ERROR == status) {
             final SmartDriveResponseImpl response = new SmartDriveResponseImpl();
             response.setDuration(duration);
             response.setStatus(new ResponseStatusImpl().setHttpStatusCode(status).setStatusCode(String.valueOf(status)).setErrorMessage(method.getStatusText()));
@@ -262,6 +258,7 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
 
     private void ensureStatefulCookies() {
         final String sessionId = getSessionId();
+        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
         final HttpState httpState = client.getState();
         /*
          * Set stateful cookies if absent
@@ -280,39 +277,17 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
          * JSESSIONID
          */
         if (addJSessionId) {
-            final Cookie jsessionidCookie = new Cookie();
-            jsessionidCookie.setName(COOKIE_JSESSIONID);
-            jsessionidCookie.setValue(sessionId);
-            /*
-             * Default path
-             */
-            jsessionidCookie.setPath("/");
-            /*
-             * The cookie is not stored persistently and will be deleted when the Web browser exits
-             */
-            jsessionidCookie.setExpiryDate(new Date(0));
-            httpState.addCookie(jsessionidCookie);
+            httpState.addCookie(new Cookie(null, COOKIE_JSESSIONID, sessionId, "/", null, false));
         }
         /*
          * Authentication
          */
         if (addAuthentication) {
-            final Cookie authenticationCookie = new Cookie();
-            authenticationCookie.setName(COOKIE_AUTHENTICATION);
-            authenticationCookie.setValue(sessionId);
-            /*
-             * Default path
-             */
-            authenticationCookie.setPath("/");
-            /*
-             * The cookie is not stored persistently and will be deleted when the Web browser exits
-             */
-            authenticationCookie.setExpiryDate(new Date(0));
-            httpState.addCookie(authenticationCookie);
+            httpState.addCookie(new Cookie(null, COOKIE_AUTHENTICATION, sessionId, "/", null, false));
         }
     }
 
-    private void setStatefulHeaders(final HttpMethodBase method) {
+    private static void setStatefulHeaders(final HttpMethodBase method) {
         method.setRequestHeader("User-Agent", CLIENT_NAME);
     }
 

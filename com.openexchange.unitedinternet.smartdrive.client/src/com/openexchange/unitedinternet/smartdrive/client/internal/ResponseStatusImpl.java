@@ -84,7 +84,7 @@ public final class ResponseStatusImpl implements ResponseStatus {
     }
 
     /**
-     * Sets the status code
+     * Sets the status code.
      * 
      * @param statusCode The status code to set
      * @return This response status with new value applied
@@ -95,7 +95,7 @@ public final class ResponseStatusImpl implements ResponseStatus {
     }
 
     /**
-     * Sets the HTTP status code
+     * Sets the HTTP status code.
      * 
      * @param httpStatusCode The HTTP status code to set
      * @return This response status with new value applied
@@ -106,7 +106,7 @@ public final class ResponseStatusImpl implements ResponseStatus {
     }
 
     /**
-     * Sets the error message
+     * Sets the error message.
      * 
      * @param errorMessage The error message to set
      * @return This response status with new value applied
