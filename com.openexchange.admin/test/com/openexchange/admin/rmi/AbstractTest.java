@@ -104,6 +104,14 @@ public abstract class AbstractTest {
         return address;
     }
 
+    public static Credentials DummyMasterCredentials() {
+        String mpw = "secret";
+        if(System.getProperty("rmi_test_masterpw")!=null){
+            mpw = System.getProperty("rmi_test_masterpw");
+        }        
+        return new Credentials("oxadminmaster",mpw);
+    }
+
     /*private int addContext(final Context ctx, final String host, final Credentials cred) throws Exception {
         return 1;
     }*/
