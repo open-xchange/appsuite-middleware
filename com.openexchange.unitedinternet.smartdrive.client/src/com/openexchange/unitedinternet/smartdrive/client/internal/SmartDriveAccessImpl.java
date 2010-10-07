@@ -104,6 +104,8 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
 
     private final String userName;
 
+    private final String url;
+
     private final HttpClient client;
 
     private SmartDriveStatefulAccess statefulAccess;
@@ -120,20 +122,21 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
      */
     public SmartDriveAccessImpl(final String userName, final String url, final Map<String, Object> configuration) throws SmartDriveException {
         super();
+        this.url = url;
         this.userName = userName;
         client = createNewHttpClient(url, configuration);
     }
 
     public SmartDriveStatefulAccess getStatefulAccess() {
         if (null == statefulAccess) {
-            statefulAccess = new SmartDriveStatefulAccessImpl(userName, client);
+            statefulAccess = new SmartDriveStatefulAccessImpl(userName, url, client);
         }
         return statefulAccess;
     }
 
     public SmartDriveStatelessAccess getStatelessAccess() {
         if (null == statelessAccess) {
-            statelessAccess = new SmartDriveStatelessAccessImpl(client);
+            statelessAccess = new SmartDriveStatelessAccessImpl(userName, client, this);
         }
         return statelessAccess;
     }

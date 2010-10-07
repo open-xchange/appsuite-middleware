@@ -47,24 +47,29 @@
  *
  */
 
-package com.openexchange.unitedinternet.smartdrive.client;
+package com.openexchange.unitedinternet.smartdrive.client.internal;
 
-import java.io.InputStream;
+import java.util.Map;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveAccess;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveFactoryService;
 
 /**
- * {@link SmartDriveStatelessAccess}
+ * {@link SmartDriveFactoryServiceImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveStatelessAccess extends SmartDriveConstants {
+public final class SmartDriveFactoryServiceImpl implements SmartDriveFactoryService {
 
     /**
-     * Gets the binary content of the denoted file.
-     * 
-     * @param filePath The path to file
-     * @return The binary content of the denoted file
-     * @throws SmartDriveException If binary content cannot be returned
+     * Initializes a new {@link SmartDriveFactoryServiceImpl}.
      */
-    InputStream downloadFile(String filePath) throws SmartDriveException;
+    public SmartDriveFactoryServiceImpl() {
+        super();
+    }
+
+    public SmartDriveAccess createSmartDriveAccess(String userName, String url, Map<String, Object> configuration) throws SmartDriveException {
+        return new SmartDriveAccessImpl(userName, url, configuration);
+    }
 
 }

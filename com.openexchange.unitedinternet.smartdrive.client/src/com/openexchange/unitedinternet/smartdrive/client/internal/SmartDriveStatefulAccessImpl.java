@@ -92,15 +92,18 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
     private final String requestPrefix;
 
     private final HttpClient client;
+    
+    private final String smartDriveServerUrl;
 
     private String sessionId;
 
     /**
      * Initializes a new {@link SmartDriveStatefulAccessImpl}.
      */
-    public SmartDriveStatefulAccessImpl(final String userName, final HttpClient client) {
+    public SmartDriveStatefulAccessImpl(final String userName, final String smartDriveServerUrl, final HttpClient client) {
         super();
         this.client = client;
+        this.smartDriveServerUrl = smartDriveServerUrl;
         requestPrefix = new StringBuilder(16).append("/op/").append(userName).append('/').toString();
         ensureStatefulCookies();
     }
@@ -115,6 +118,56 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
         return sessionId;
     }
 
+    public String obtainDownloadToken() throws SmartDriveException {
+        try {
+            final String uriStr = getURI("list");
+            final GetMethod method = new GetMethod(uriStr);
+            setStatefulHeaders(method);
+            try {
+                client.executeMethod(method);
+                final int status = method.getStatusCode();
+                if (SC_NOT_FOUND == status) {
+                    throw SmartDriveExceptionCodes.NOT_FOUND.create(smartDriveServerUrl);
+                }
+                if (SC_GENERAL_ERROR == status) {
+                    throw SmartDriveExceptionCodes.GENERAL_ERROR.create(method.getStatusText());
+                }
+                if (SC_OK != status) {
+                    throw SmartDriveExceptionCodes.UNEXPECTED_STATUS.create(Integer.valueOf(status), method.getStatusText());
+                }
+                /*
+                 * Parse response
+                 */
+                final SmartDriveResource firstResource;
+                final String body = suckMethodResponse(method);
+                if (startsWith('{', body, true)) {
+                    /*
+                     * Expect the body to be a JSON object
+                     */
+                    firstResource = SmartDriveCoercion.parseResourceResponse(new JSONObject(body));
+                } else {
+                    /*
+                     * Expect the body to be a JSON array
+                     */
+                    firstResource = SmartDriveCoercion.parseResourcesResponse(new JSONArray(body)).get(0);
+                }
+                final String downloadToken = firstResource.getDownloadToken();
+                client.getParams().setParameter(HTTP_CLIENT_PARAM_DOWNLOAD_TOKEN, downloadToken);
+                return downloadToken;
+            } finally {
+                method.releaseConnection();
+            }
+        } catch (final HttpException e) {
+            throw SmartDriveExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw SmartDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw SmartDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw SmartDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+    
     public SmartDriveResponse<List<SmartDriveResource>> list(final String pathOfDirectory) throws SmartDriveException {
         try {
             final String uriStr = getURI("list", pathOfDirectory);

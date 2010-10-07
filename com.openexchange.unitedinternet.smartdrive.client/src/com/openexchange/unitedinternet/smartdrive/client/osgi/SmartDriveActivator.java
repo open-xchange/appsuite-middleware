@@ -56,7 +56,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveFactoryService;
 import com.openexchange.unitedinternet.smartdrive.client.exception.SmartDriveExceptionFactory;
+import com.openexchange.unitedinternet.smartdrive.client.internal.SmartDriveFactoryServiceImpl;
 
 /**
  * {@link SmartDriveActivator}
@@ -96,6 +98,7 @@ public final class SmartDriveActivator implements BundleActivator {
              * Register services
              */
             registrations = new ArrayList<ServiceRegistration>(4);
+            registrations.add(context.registerService(SmartDriveFactoryService.class.getName(), new SmartDriveFactoryServiceImpl(), null));
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.unitedinternet.smartdrive.client\" failed.", e);
             throw e;

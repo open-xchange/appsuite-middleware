@@ -58,6 +58,8 @@ public interface SmartDriveConstants {
 
     public static final String HTTP_CLIENT_PARAM_SESSION_ID = "com.openexchange.unitedinternet.smartdrive.client.sessionid";
 
+    public static final String HTTP_CLIENT_PARAM_DOWNLOAD_TOKEN = "com.openexchange.unitedinternet.smartdrive.client.downloadToken";
+
     /*-
      * ---------------------------------- Configuration constants ----------------------------------
      */

@@ -47,24 +47,96 @@
  *
  */
 
-package com.openexchange.unitedinternet.smartdrive.client;
+package com.openexchange.unitedinternet.smartdrive.client.internal;
 
+import java.io.IOException;
 import java.io.InputStream;
+import org.apache.commons.httpclient.HttpMethodBase;
 
 /**
- * {@link SmartDriveStatelessAccess}
+ * {@link SmartDriveInputStream}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveStatelessAccess extends SmartDriveConstants {
+public final class SmartDriveInputStream extends InputStream {
+
+    private final HttpMethodBase method;
+
+    private final InputStream in;
 
     /**
-     * Gets the binary content of the denoted file.
+     * Initializes a new {@link SmartDriveInputStream}.
      * 
-     * @param filePath The path to file
-     * @return The binary content of the denoted file
-     * @throws SmartDriveException If binary content cannot be returned
+     * @throws IOException If initialization fails
      */
-    InputStream downloadFile(String filePath) throws SmartDriveException;
+    public SmartDriveInputStream(final HttpMethodBase method) throws IOException {
+        super();
+        this.method = method;
+        in = method.getResponseBodyAsStream();
+    }
+
+    @Override
+    public int read() throws IOException {
+        return in.read();
+    }
+
+    @Override
+    public int hashCode() {
+        return in.hashCode();
+    }
+
+    @Override
+    public int read(final byte[] b) throws IOException {
+        return in.read(b);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return in.equals(obj);
+    }
+
+    @Override
+    public int read(final byte[] b, final int off, final int len) throws IOException {
+        return in.read(b, off, len);
+    }
+
+    @Override
+    public long skip(final long n) throws IOException {
+        return in.skip(n);
+    }
+
+    @Override
+    public String toString() {
+        return in.toString();
+    }
+
+    @Override
+    public int available() throws IOException {
+        return in.available();
+    }
+
+    @Override
+    public void close() throws IOException {
+        try {
+            in.close();
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    @Override
+    public void mark(final int readlimit) {
+        in.mark(readlimit);
+    }
+
+    @Override
+    public void reset() throws IOException {
+        in.reset();
+    }
+
+    @Override
+    public boolean markSupported() {
+        return in.markSupported();
+    }
 
 }

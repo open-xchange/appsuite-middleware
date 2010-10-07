@@ -49,22 +49,29 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
-import java.io.InputStream;
+import java.util.Map;
 
 /**
- * {@link SmartDriveStatelessAccess}
+ * {@link SmartDriveFactoryService} - The factory service for SmartDrive access.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveStatelessAccess extends SmartDriveConstants {
+public interface SmartDriveFactoryService {
 
     /**
-     * Gets the binary content of the denoted file.
+     * Creates a new SmartDrive access for given SmartDrive user name.
      * 
-     * @param filePath The path to file
-     * @return The binary content of the denoted file
-     * @throws SmartDriveException If binary content cannot be returned
+     * @param userName The SmartDrive user name
+     * @param url The URL to SmartDrive server; ; e.g. <code>"http://www.smart-drive-server.com"</code>
+     * @param configuration The SmartDrive access configuration:<br>
+     *            <ul>
+     *            <li>{@link SmartDriveConstants#CONFIG_TIMEOUT} - The HTTP time out value, default is <code>"60000"</code></li>
+     *            <li>{@link SmartDriveConstants#CONFIG_LOGIN} - The optional login for HTTP authentication</li>
+     *            <li>{@link SmartDriveConstants#CONFIG_PASSWORD} - The optional password for HTTP authentication</code></li>
+     *            </ul>
+     * @return A new SmartDrive access for given SmartDrive user name
+     * @throws SmartDriveException If SmartDrive access cannot be created for specified user name
      */
-    InputStream downloadFile(String filePath) throws SmartDriveException;
+    SmartDriveAccess createSmartDriveAccess(String userName, String url, Map<String, Object> configuration) throws SmartDriveException;
 
 }

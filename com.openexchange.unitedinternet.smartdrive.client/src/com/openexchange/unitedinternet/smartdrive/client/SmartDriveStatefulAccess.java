@@ -60,6 +60,14 @@ import java.util.List;
 public interface SmartDriveStatefulAccess extends SmartDriveConstants {
 
     /**
+     * Obtains the download token.
+     * 
+     * @return The download token
+     * @throws SmartDriveException If operation fails
+     */
+    String obtainDownloadToken() throws SmartDriveException;
+
+    /**
      * Lists the content of specified directory.
      * 
      * @param pathOfDirectory The path of the directory
