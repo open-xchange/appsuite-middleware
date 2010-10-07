@@ -81,7 +81,7 @@ public class SmartDriveQuery {
      * 
      * @param queryType The query type to set
      */
-    public void setQueryType(QueryType queryType) {
+    public void setQueryType(final QueryType queryType) {
         this.queryType = queryType;
     }
 
@@ -99,7 +99,7 @@ public class SmartDriveQuery {
      * 
      * @param queryText The query text to set
      */
-    public void setQueryText(String queryText) {
+    public void setQueryText(final String queryText) {
         this.queryText = queryText;
     }
 

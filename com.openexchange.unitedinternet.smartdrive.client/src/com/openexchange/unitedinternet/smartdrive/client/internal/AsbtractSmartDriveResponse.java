@@ -83,7 +83,7 @@ public abstract class AsbtractSmartDriveResponse<R> implements SmartDriveRespons
      * 
      * @param status The status to set
      */
-    public void setStatus(ResponseStatus status) {
+    public void setStatus(final ResponseStatus status) {
         this.status = status;
     }
 
@@ -92,7 +92,7 @@ public abstract class AsbtractSmartDriveResponse<R> implements SmartDriveRespons
      * 
      * @param duration The duration to set
      */
-    public void setDuration(long duration) {
+    public void setDuration(final long duration) {
         this.duration = duration;
     }
 

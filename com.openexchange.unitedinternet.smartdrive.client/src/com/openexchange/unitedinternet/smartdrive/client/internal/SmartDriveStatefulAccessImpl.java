@@ -108,9 +108,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
     private String getSessionId() {
         if (null == sessionId) {
             /*
-             * TODO: Obtain proper session identifier
+             * Obtain proper session identifier
              */
-            sessionId = null;
+            sessionId = (String) client.getParams().getParameter(HTTP_CLIENT_PARAM_SESSION_ID);
         }
         return sessionId;
     }
@@ -594,7 +594,7 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
         }
     }
 
-    public SmartDriveResponse<List<SmartDriveResource>> propget(String resourcePath, int[] thumbNailFormatIds) throws SmartDriveException {
+    public SmartDriveResponse<List<SmartDriveResource>> propget(final String resourcePath, final int[] thumbNailFormatIds) throws SmartDriveException {
         try {
             final String uriStr = getURI("propget", resourcePath);
             final GetMethod method = new GetMethod(uriStr);
@@ -659,7 +659,7 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
         }
     }
 
-    public SmartDriveResponse<List<SmartDriveResource>> extendedPropget(String resourcePath, int[] thumbNailFormatIds) throws SmartDriveException {
+    public SmartDriveResponse<List<SmartDriveResource>> extendedPropget(final String resourcePath, final int[] thumbNailFormatIds) throws SmartDriveException {
         try {
             final String uriStr = getURI("extendedPropget", resourcePath);
             final GetMethod method = new GetMethod(uriStr);
@@ -724,7 +724,7 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
         }
     }
 
-    public SmartDriveResponse<List<SmartDriveResource>> search(String pathOfDirectory, SmartDriveQuery query, int[] thumbNailFormatIds) throws SmartDriveException {
+    public SmartDriveResponse<List<SmartDriveResource>> search(final String pathOfDirectory, final SmartDriveQuery query, final int[] thumbNailFormatIds) throws SmartDriveException {
         try {
             final String uriStr = getURI("search", pathOfDirectory);
             final PostMethod method = new PostMethod(uriStr);
@@ -795,7 +795,7 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
         }
     }
 
-    public SmartDriveResponse<List<SmartDriveResource>> extendedSearch(String pathOfDirectory, SmartDriveQuery query, int[] thumbNailFormatIds) throws SmartDriveException {
+    public SmartDriveResponse<List<SmartDriveResource>> extendedSearch(final String pathOfDirectory, final SmartDriveQuery query, final int[] thumbNailFormatIds) throws SmartDriveException {
         try {
             final String uriStr = getURI("extendedSearch", pathOfDirectory);
             final PostMethod method = new PostMethod(uriStr);

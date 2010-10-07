@@ -58,6 +58,6 @@ public interface SmartDriveAccess extends SmartDriveConstants {
 
     SmartDriveStatefulAccess getStatefulAccess();
 
-    SmartDriveStatelesslAccess getStatelessAccess();
+    SmartDriveStatelessAccess getStatelessAccess();
 
 }

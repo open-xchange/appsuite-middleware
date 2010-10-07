@@ -113,6 +113,10 @@ public enum SmartDriveExceptionCodes implements OXErrorMessage {
      * Name contains illegal characters or parent is read-only: %1$s.
      */
     ILLEGAL_CHARS_OR_READ_ONLY(SmartDriveExceptionMessages.ILLEGAL_CHARS_OR_READ_ONLY_MSG, Category.CODE_ERROR, 13),
+    /**
+     * Invalid URL: %1$s
+     */
+    INVALID_URL(SmartDriveExceptionMessages.INVALID_URL_MSG, Category.CODE_ERROR, 14),
     
     
     ;

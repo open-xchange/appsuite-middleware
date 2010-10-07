@@ -50,22 +50,22 @@
 package com.openexchange.unitedinternet.smartdrive.client.internal;
 
 import org.apache.commons.httpclient.HttpClient;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatelesslAccess;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatelessAccess;
 
 
 /**
- * {@link SmartDriveStatelesslAccessImpl}
+ * {@link SmartDriveStatelessAccessImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmartDriveStatelesslAccessImpl implements SmartDriveStatelesslAccess {
+public final class SmartDriveStatelessAccessImpl implements SmartDriveStatelessAccess {
 
     private final HttpClient client;
 
     /**
-     * Initializes a new {@link SmartDriveStatelesslAccessImpl}.
+     * Initializes a new {@link SmartDriveStatelessAccessImpl}.
      */
-    public SmartDriveStatelesslAccessImpl(final HttpClient client) {
+    public SmartDriveStatelessAccessImpl(final HttpClient client) {
         super();
         this.client = client;
     }

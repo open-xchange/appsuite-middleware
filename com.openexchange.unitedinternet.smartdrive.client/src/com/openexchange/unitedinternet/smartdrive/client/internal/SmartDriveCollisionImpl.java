@@ -97,7 +97,7 @@ public class SmartDriveCollisionImpl implements SmartDriveCollision {
      * 
      * @param name The name to set
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -106,7 +106,7 @@ public class SmartDriveCollisionImpl implements SmartDriveCollision {
      * 
      * @param response The response to set
      */
-    public void setResponse(int response) {
+    public void setResponse(final int response) {
         this.response = response;
     }
 
@@ -115,7 +115,7 @@ public class SmartDriveCollisionImpl implements SmartDriveCollision {
      * 
      * @param status The status to set
      */
-    public void setStatus(String status) {
+    public void setStatus(final String status) {
         this.status = status;
     }
 
@@ -124,7 +124,7 @@ public class SmartDriveCollisionImpl implements SmartDriveCollision {
      * 
      * @param description The description to set
      */
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -133,7 +133,7 @@ public class SmartDriveCollisionImpl implements SmartDriveCollision {
      * 
      * @param directory The directory flag to set
      */
-    public void setDirectory(boolean directory) {
+    public void setDirectory(final boolean directory) {
         this.directory = directory;
     }
 

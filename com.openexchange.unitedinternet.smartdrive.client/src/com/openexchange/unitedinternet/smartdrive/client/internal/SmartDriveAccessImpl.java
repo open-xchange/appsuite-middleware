@@ -69,7 +69,7 @@ import com.openexchange.unitedinternet.smartdrive.client.SmartDriveConstants;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveExceptionCodes;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatefulAccess;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatelesslAccess;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatelessAccess;
 
 /**
  * {@link SmartDriveAccessImpl}
@@ -108,7 +108,7 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
 
     private SmartDriveStatefulAccess statefulAccess;
 
-    private SmartDriveStatelesslAccess statelesslAccess;
+    private SmartDriveStatelessAccess statelessAccess;
 
     /**
      * Initializes a new {@link SmartDriveAccessImpl}.
@@ -131,11 +131,11 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
         return statefulAccess;
     }
 
-    public SmartDriveStatelesslAccess getStatelessAccess() {
-        if (null == statelesslAccess) {
-            statelesslAccess = new SmartDriveStatelesslAccessImpl(client);
+    public SmartDriveStatelessAccess getStatelessAccess() {
+        if (null == statelessAccess) {
+            statelessAccess = new SmartDriveStatelessAccessImpl(client);
         }
-        return statelesslAccess;
+        return statelessAccess;
     }
 
     /**

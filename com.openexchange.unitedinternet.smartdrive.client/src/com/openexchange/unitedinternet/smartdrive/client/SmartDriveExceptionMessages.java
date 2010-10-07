@@ -98,6 +98,9 @@ public final class SmartDriveExceptionMessages implements LocalizableStrings {
     // Name contains illegal characters or parent is read-only: %1$s.
     public static final String ILLEGAL_CHARS_OR_READ_ONLY_MSG = "Name contains illegal characters or parent is read-only: %1$s.";
 
+    // Invalid URL: %1$s
+    public static final String INVALID_URL_MSG = "Invalid URL: %1$s";
+
     /**
      * Initializes a new {@link SmartDriveExceptionMessages}.
      */

@@ -86,7 +86,7 @@ public final class DefaultSmartDriveResponse extends AsbtractSmartDriveResponse<
     public Map<String, Object> getResponseAsMap() throws SmartDriveException {
         try {
             return (Map<String, Object>) responseObject;
-        } catch (ClassCastException e) {
+        } catch (final ClassCastException e) {
             throw SmartDriveExceptionCodes.NOT_OF_TYPE.create(e, Map.class.getName());
         }
     }
@@ -101,7 +101,7 @@ public final class DefaultSmartDriveResponse extends AsbtractSmartDriveResponse<
     public Collection<Object> getResponseAsList() throws SmartDriveException {
         try {
             return (Collection<Object>) responseObject;
-        } catch (ClassCastException e) {
+        } catch (final ClassCastException e) {
             throw SmartDriveExceptionCodes.NOT_OF_TYPE.create(e, Collection.class.getName());
         }
     }
@@ -115,7 +115,7 @@ public final class DefaultSmartDriveResponse extends AsbtractSmartDriveResponse<
     public void setJSONResponseObject(final JSONValue responseObject) throws SmartDriveException {
         try {
             this.responseObject = null == responseObject ? null : JSONCoercion.coerceToNative(responseObject);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw SmartDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

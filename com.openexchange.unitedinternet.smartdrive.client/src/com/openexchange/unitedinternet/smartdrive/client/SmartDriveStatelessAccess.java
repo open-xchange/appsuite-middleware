@@ -51,10 +51,10 @@ package com.openexchange.unitedinternet.smartdrive.client;
 
 
 /**
- * {@link SmartDriveStatelesslAccess}
+ * {@link SmartDriveStatelessAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveStatelesslAccess extends SmartDriveConstants {
+public interface SmartDriveStatelessAccess extends SmartDriveConstants {
 
 }

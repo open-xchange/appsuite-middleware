@@ -76,7 +76,7 @@ public final class SmartDriveUserResponse extends AsbtractSmartDriveResponse<Sma
      * 
      * @param userInfo The user information
      */
-    public void setUserInfo(SmartDriveUserInfo userInfo) {
+    public void setUserInfo(final SmartDriveUserInfo userInfo) {
         this.userInfo = userInfo;
     }
 
