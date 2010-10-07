@@ -22,18 +22,20 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
-	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+    <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
-	<property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
+    <property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
+    <property name="txjar" value="com.openexchange.tx.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
-    	<pathelement location="${bundlesdir}/${osgiservicesjar}"/>
+        <pathelement location="${bundlesdir}/${osgiservicesjar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-    	<pathelement location="${bundlesdir}/${genericonfjar}"/>
+        <pathelement location="${bundlesdir}/${genericonfjar}"/>
+        <pathelement location="${bundlesdir}/${txjar}"/>
     </path>
 
     <!-- Compile -->
