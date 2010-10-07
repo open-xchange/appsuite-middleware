@@ -157,7 +157,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     public void close() {
         /*
-         * Close is performed when last session gone by FacebookEventHandler
+         * Close is performed when last session gone by WebDAVHttpClientRegistry
          */
         httpClientRef.set(null);
     }
