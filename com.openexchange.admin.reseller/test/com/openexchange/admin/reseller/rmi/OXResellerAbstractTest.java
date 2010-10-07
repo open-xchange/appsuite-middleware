@@ -81,10 +81,6 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
     protected static final String TESTRESTRICTIONUSER = "testwithrestriction";
     protected static final String TESTRESTCHANGERICTIONUSER = "testchangewithrestriction";
     
-    protected static Credentials DummyMasterCredentials(){
-        return new Credentials("oxadminmaster","secret");
-    }
-
     protected static Credentials ResellerFooCredentials() {
         return new Credentials("foo", "secret");
     }

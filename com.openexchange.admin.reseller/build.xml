@@ -4,7 +4,16 @@
 	<property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
 
-    <!-- Constants -->
+	<property name="rmi_test_host" value="localhost"/>
+	<property name="rmi_test_dbhost" value="localhost"/>
+	<property name="rmi_test_dbpw" value="secret"/>
+	<property name="rmi_test_masterpw" value="secret"/>
+	<property name="rmi_test_storepath" value="/tmp/"/>
+    <property name="rmi_lib_dir" location="/opt/open-xchange/lib"/>
+    <property name="core_tests_dir" location="../open-xchange-admin"/>
+	<property name="test.xml.dir" value="test-results"/>
+
+	<!-- Constants -->
     <property file="META-INF/MANIFEST.MF"/>
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
@@ -84,7 +93,14 @@
         <exclude name="CVS"/>
     </fileset>
 
-    <!--                    TARGETS                      -->
+	<path id="rmi.classpath">
+		<fileset dir="${rmi_lib_dir}" includes="ox_admin*"/>
+		<pathelement location="${core_tests_dir}/test-classes"/>
+		<fileset dir="${core_tests_dir}/lib" includes="${junit}"/>
+		<fileset dir="lib" includes="mysql-connector-java-5.1.6-bin.jar"/>
+	</path>
+
+	<!--                    TARGETS                      -->
 
 	<target name="replacer">
         <copy todir="." overwrite="true">
@@ -237,5 +253,31 @@
     	<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
-	
+
+	<target name="compileTests" depends="clean">
+        <mkdir dir="test-classes"/>
+        <javac failonerror="true" srcdir="test/com/openexchange/admin/rmi" debug="true" destdir="test-classes">
+            <classpath>
+                <path refid="rmi.classpath"/>
+            </classpath>
+        </javac>
+    </target>
+
+	<target name="runTests">
+        <delete dir="${test.xml.dir}"/>
+		<mkdir dir="${test.xml.dir}"/>
+        <junit errorProperty="test.failed" failureProperty="test.failed" showoutput="yes" printsummary="yes">
+            <classpath>
+                <path refid="rmi.classpath"/>
+            	<pathelement path="test-classes"/>
+            </classpath>
+			<test name="com.openexchange.admin.reseller.rmi.OXResellerInterfaceTest" todir="${test.xml.dir}"/>
+			<test name="com.openexchange.admin.reseller.rmi.OXResellerUserTest" todir="${test.xml.dir}"/>
+		    <test name="com.openexchange.admin.reseller.rmi.OXResellerContextTest" todir="${test.xml.dir}"/>
+            <formatter type="xml"/>
+            <sysproperty key="rmi_test_host" value="${rmi_test_host}"/>
+            <sysproperty key="rmi_test_masterpw" value="${rmi_test_masterpw}"/>
+        </junit>
+    </target>
+
 </project>
