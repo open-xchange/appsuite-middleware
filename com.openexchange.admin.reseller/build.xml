@@ -58,7 +58,7 @@
 
 	<!-- non-osgi jars -->
 	<property name="commons-io"         value="commons-io-1.4.jar"/>
-	<property name="junit"              value="junit-4.1.jar"/>
+	<property name="junit"              value="junit-4.6.jar"/>
 	<property name="mysql-connector"    value="mysql-connector-java-3.1.13-bin.jar"/>
 	<property name="jdom"               value="jdom-1.1.jar"/>
 	<property name="adminRMI"           value="ox_admin_rmiclient.jar"/>
@@ -97,7 +97,7 @@
 		<fileset dir="${rmi_lib_dir}" includes="ox_admin*"/>
 		<pathelement location="${core_tests_dir}/test-classes"/>
 		<fileset dir="${core_tests_dir}/lib" includes="${junit}"/>
-		<fileset dir="lib" includes="mysql-connector-java-5.1.6-bin.jar"/>
+		<!-- <fileset dir="lib" includes="mysql-connector-java-5.1.6-bin.jar"/> -->
 	</path>
 
 	<!--                    TARGETS                      -->
@@ -256,7 +256,7 @@
 
 	<target name="compileTests" depends="clean">
         <mkdir dir="test-classes"/>
-        <javac failonerror="true" srcdir="test/com/openexchange/admin/rmi" debug="true" destdir="test-classes">
+        <javac failonerror="true" srcdir="test/com/openexchange/admin/reseller/rmi" debug="true" destdir="test-classes">
             <classpath>
                 <path refid="rmi.classpath"/>
             </classpath>
