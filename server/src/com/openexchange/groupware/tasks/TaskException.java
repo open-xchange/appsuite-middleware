@@ -146,41 +146,6 @@ public class TaskException extends AbstractOXException {
      * Error codes for task exceptions.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
-    /**
-     * {@link Code}
-     *
-     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
-     */
-    /**
-     * {@link Code}
-     *
-     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
-     */
-    /**
-     * {@link Code}
-     *
-     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
-     */
-    /**
-     * {@link Code}
-     *
-     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
-     */
-    /**
-     * {@link Code}
-     *
-     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
-     */
-    /**
-     * {@link Code}
-     *
-     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
-     */
-    /**
-     * {@link Code}
-     *
-     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
-     */
     public enum Code {
         /**
          * Error while inserting task: %s.
