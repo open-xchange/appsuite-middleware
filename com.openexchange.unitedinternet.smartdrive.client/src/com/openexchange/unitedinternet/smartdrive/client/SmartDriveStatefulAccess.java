@@ -185,6 +185,14 @@ public interface SmartDriveStatefulAccess extends SmartDriveConstants {
      * @return Possible collisions
      * @throws SmartDriveException If delete fails
      */
-    public SmartDriveResponse<List<SmartDriveCollision>> delete(final String pathOfDirectory, final List<String> relativePaths) throws SmartDriveException;
+    SmartDriveResponse<List<SmartDriveCollision>> delete(String pathOfDirectory, List<String> relativePaths) throws SmartDriveException;
+
+    /**
+     * Gets the user information for logged-in user.
+     * 
+     * @return The user information for logged-in user
+     * @throws SmartDriveException If operation fails
+     */
+    SmartDriveResponse<SmartDriveUserInfo> userInfo() throws SmartDriveException;
 
 }

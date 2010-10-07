@@ -66,6 +66,7 @@ import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveExceptionCodes;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResource;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveThumbNail;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveUserInfo;
 
 /**
  * {@link SmartDriveCoercion} - Coerces JSON values to corresponding SmartDrive objects.
@@ -257,6 +258,93 @@ public final class SmartDriveCoercion implements SmartDriveConstants {
                 collisionImpl.setDirectory(jsonCollision.getBoolean(JSON_IS_COLLECTION));
             }
             return collisionImpl;
+        } catch (final JSONException e) {
+            throw SmartDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw SmartDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Parses specified JSON object to a SmartDrive user information.
+     * 
+     * @param jsonResource The JSON user information
+     * @return The parsed SmartDrive user information.
+     * @throws SmartDriveException If parsing fails
+     */
+    public static SmartDriveUserInfo parseUserInfoResponse(final JSONObject jsonUserInfo) throws SmartDriveException {
+        try {
+            final SmartDriveUserInfoImpl ret = new SmartDriveUserInfoImpl();
+            if (jsonUserInfo.hasAndNotNull(JSON_MAX_FILE_COUNT)) {
+                ret.setMaxFileCount(jsonUserInfo.getInt(JSON_MAX_FILE_COUNT));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_MAX_FILE_NAME_LENGTH)) {
+                ret.setMaxFileNameLength(jsonUserInfo.getInt(JSON_MAX_FILE_NAME_LENGTH));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_MAX_FILE_SIZE)) {
+                ret.setMaxFileSize(jsonUserInfo.getInt(JSON_MAX_FILE_SIZE));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_MAX_FILES_PER_DIRECTORY)) {
+                ret.setMaxFilesPerDirectory(jsonUserInfo.getInt(JSON_MAX_FILES_PER_DIRECTORY));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_STORAGE_FILE_COUNT)) {
+                ret.setStorageFileCount(jsonUserInfo.getInt(JSON_STORAGE_FILE_COUNT));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_STORAGE_FOTOALBUM)) {
+                ret.setStorageFotoalbum(jsonUserInfo.getInt(JSON_STORAGE_FOTOALBUM));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_STORAGE_FREEMAIL)) {
+                ret.setStorageFreemail(jsonUserInfo.getInt(JSON_STORAGE_FREEMAIL));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_STORAGE_QUOTA)) {
+                ret.setStorageQuota(jsonUserInfo.getInt(JSON_STORAGE_QUOTA));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_STORAGE_SMART_DRIVE)) {
+                ret.setStorageSmartDrive(jsonUserInfo.getInt(JSON_STORAGE_SMART_DRIVE));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_TRAFFIC_GUEST_QUOTA)) {
+                ret.setTrafficGuestQuota(jsonUserInfo.getInt(JSON_TRAFFIC_GUEST_QUOTA));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_TRAFFIC_GUEST_USED)) {
+                ret.setTrafficGuestUsed(jsonUserInfo.getInt(JSON_TRAFFIC_GUEST_USED));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_TRAFFIC_OWNER_QUOTA)) {
+                ret.setTrafficOwnerQuota(jsonUserInfo.getInt(JSON_TRAFFIC_OWNER_QUOTA));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_TRAFFIC_OWNER_USED)) {
+                ret.setTrafficOwnerUsed(jsonUserInfo.getInt(JSON_TRAFFIC_OWNER_USED));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_TRAFFIC_UPLOAD)) {
+                ret.setTrafficUpload(jsonUserInfo.getInt(JSON_TRAFFIC_UPLOAD));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_TRAFFIC_UPLOAD_QUOTA)) {
+                ret.setTrafficUploadQuota(jsonUserInfo.getInt(JSON_TRAFFIC_UPLOAD_QUOTA));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_ROOT)) {
+                ret.setRootDir(jsonUserInfo.getString(JSON_ROOT));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_PICTURE)) {
+                ret.setPictureDir(jsonUserInfo.getString(JSON_PICTURE));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_MOUNT)) {
+                ret.setMountDir(jsonUserInfo.getString(JSON_MOUNT));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_DOC)) {
+                ret.setDocDir(jsonUserInfo.getString(JSON_DOC));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_VIDEO)) {
+                ret.setVideoDir(jsonUserInfo.getString(JSON_VIDEO));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_MUSIC)) {
+                ret.setMusicDir(jsonUserInfo.getString(JSON_MUSIC));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_TRASH)) {
+                ret.setTrashDir(jsonUserInfo.getString(JSON_TRASH));
+            }
+            if (jsonUserInfo.hasAndNotNull(JSON_ATTACHMENT)) {
+                ret.setAttachmentDir(jsonUserInfo.getString(JSON_ATTACHMENT));
+            }
+            return ret;
         } catch (final JSONException e) {
             throw SmartDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

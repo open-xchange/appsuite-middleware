@@ -55,6 +55,8 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -78,6 +80,7 @@ import com.openexchange.unitedinternet.smartdrive.client.SmartDriveQuery;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResource;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResponse;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatefulAccess;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveUserInfo;
 
 /**
  * {@link SmartDriveStatefulAccessImpl}
@@ -848,6 +851,133 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 } else {
                     response.setList(null);
                 }
+                return response;
+            } finally {
+                method.releaseConnection();
+            }
+        } catch (final HttpException e) {
+            throw SmartDriveExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw SmartDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw SmartDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw SmartDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    public SmartDriveResponse<SmartDriveUserInfo> userInfo() throws SmartDriveException {
+        try {
+            final String uriStr = getURI("user/userInfo");
+            final GetMethod method = new GetMethod(uriStr);
+            setStatefulHeaders(method);
+            try {
+                /*
+                 * Execute
+                 */
+                final long start = System.currentTimeMillis();
+                client.executeMethod(method);
+                final long duration = System.currentTimeMillis() - start;
+                final int status = method.getStatusCode();
+                if (SC_GENERAL_ERROR == status) {
+                    throw SmartDriveExceptionCodes.GENERAL_ERROR.create(method.getStatusText());
+                }
+                if (SC_OK != status) {
+                    throw SmartDriveExceptionCodes.UNEXPECTED_STATUS.create(Integer.valueOf(status), method.getStatusText());
+                }
+                /*
+                 * 200 (OK): Expect response to be JSON array
+                 */
+                final SmartDriveUserResponse response = new SmartDriveUserResponse();
+                response.setDuration(duration);
+                response.setStatus(new ResponseStatusImpl().setHttpStatusCode(status).setStatusCode(String.valueOf(status)));
+                /*
+                 * Parse body
+                 */
+                final String body = suckMethodResponse(method);
+                if (startsWith('{', body, true)) {
+                    /*
+                     * Expect the body to be a JSON object
+                     */
+                    response.setUserInfo(SmartDriveCoercion.parseUserInfoResponse(new JSONObject(body)));
+                } else {
+                    response.setUserInfo(null);
+                }
+                return response;
+            } finally {
+                method.releaseConnection();
+            }
+        } catch (final HttpException e) {
+            throw SmartDriveExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw SmartDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw SmartDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw SmartDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    public SmartDriveResponse<Object> uploadByUrl(final String targetDirPath, final String targetFileName, final String uploadUrl, final boolean overwrite, final Map<String, String> properties) throws SmartDriveException {
+        try {
+            /*
+             * TODO: Understand this request from spec
+             */
+            final String uriStr = getURI("uploadByUrl", targetDirPath, targetFileName);
+            final PostMethod method = new PostMethod(uriStr);
+            setStatefulHeaders(method);
+            try {
+                /*
+                 * Add request body
+                 */
+                {
+                    final JSONObject jsonRequestBody = new JSONObject();
+
+                    jsonRequestBody.put(JSON_URL, uploadUrl);
+                    jsonRequestBody.put(JSON_OVER_WRITE, overwrite);
+
+                    if (null != properties && !properties.isEmpty()) {
+                        for (final Entry<String, String> entry : properties.entrySet()) {
+                            jsonRequestBody.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+
+                    method.setRequestEntity(new ByteArrayRequestEntity(jsonRequestBody.toString().getBytes("US-ASCII"), MIME_JSON));
+                }
+                /*
+                 * Execute
+                 */
+                final long start = System.currentTimeMillis();
+                client.executeMethod(method);
+                final long duration = System.currentTimeMillis() - start;
+                final int status = method.getStatusCode();
+                if (SC_GENERAL_ERROR == status) {
+                    throw SmartDriveExceptionCodes.GENERAL_ERROR.create(method.getStatusText());
+                }
+                if (SC_PRECONDITION_FAILED == status) {
+                    throw SmartDriveExceptionCodes.PRECONDITION_FAILED.create(targetDirPath + "/" + targetFileName);
+                }
+                if (SC_CONFLICT == status) {
+                    final String body = suckMethodResponse(method);
+                    if (startsWith('{', body, true)) {
+                        /*
+                         * Expect the body to be a JSON object
+                         */
+                        final JSONObject errorDesc = new JSONObject(body);
+                        throw SmartDriveExceptionCodes.UNEXPECTED_STATUS.create(Integer.valueOf(errorDesc.getInt("errorCode")), errorDesc.getString("errorMessage"));
+                    }
+                    throw SmartDriveExceptionCodes.CONFLICT.create(targetDirPath + "/" + targetFileName);
+                }
+                if (SC_OK != status) {
+                    throw SmartDriveExceptionCodes.UNEXPECTED_STATUS.create(Integer.valueOf(status), method.getStatusText());
+                }
+                /*
+                 * 200 (OK): Expect response to be JSON array
+                 */
+                final DefaultSmartDriveResponse response = new DefaultSmartDriveResponse();
+                response.setDuration(duration);
+                response.setStatus(new ResponseStatusImpl().setHttpStatusCode(status).setStatusCode(String.valueOf(status)));
+                response.setJSONResponseObject(null);
                 return response;
             } finally {
                 method.releaseConnection();

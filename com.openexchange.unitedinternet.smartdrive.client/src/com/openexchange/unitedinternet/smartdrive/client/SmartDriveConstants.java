@@ -188,8 +188,61 @@ public interface SmartDriveConstants {
     public static final String JSON_DESCRIPTION = "description";
 
     public static final String JSON_IS_COLLECTION = "isCollection";
+
+    // Query fields
     
     public static final String JSON_QUERY_TYPE = "queryType";
     
     public static final String JSON_QUERY_TEXT = "queryText";
+
+    // User fields
+    
+    public static final String JSON_MAX_FILE_NAME_LENGTH = "MaxFileNameLength";
+    
+    public static final String JSON_STORAGE_FREEMAIL = "StorageFreemail";
+    
+    public static final String JSON_TRAFFIC_OWNER_USED = "TrafficOwnerUsed";
+    
+    public static final String JSON_TRAFFIC_UPLOAD = "TrafficUpload";
+    
+    public static final String JSON_TRAFFIC_UPLOAD_QUOTA = "TrafficUploadQuota";
+    
+    public static final String JSON_TRAFFIC_GUEST_QUOTA = "TrafficGuestQuoate";
+    
+    public static final String JSON_TRAFFIC_GUEST_USED = "TrafficGuestUsed";
+    
+    public static final String JSON_MAX_FILE_SIZE = "MaxFileSize";
+    
+    public static final String JSON_STORAGE_SMART_DRIVE = "StorageSmartDrive";
+    
+    public static final String JSON_MAX_FILE_COUNT = "MaxFileCount";
+    
+    public static final String JSON_STORAGE_FILE_COUNT = "StorageFileCount";
+    
+    public static final String JSON_STORAGE_QUOTA = "StorageQuota";
+    
+    public static final String JSON_STORAGE_FOTOALBUM = "StorageFotoalbum";
+    
+    public static final String JSON_TRAFFIC_OWNER_QUOTA = "TrafficOwnerQuota";
+    
+    public static final String JSON_MAX_FILES_PER_DIRECTORY = "MacFilesPerdirectory";
+    
+    public static final String JSON_ROOT = "ROOT";
+    
+    public static final String JSON_PICTURE = "PICTURE";
+    
+    public static final String JSON_MOUNT = "MOUNT";
+    
+    public static final String JSON_DOC = "DOC";
+    
+    public static final String JSON_VIDEO = "VIDEO";
+    
+    public static final String JSON_MUSIC = "MUSIC";
+    
+    public static final String JSON_TRASH = "TRASH";
+    
+    public static final String JSON_ATTACHMENT = "ATTACHMENT";
+    
+    //public static final String JSON_ = "";
+
 }
