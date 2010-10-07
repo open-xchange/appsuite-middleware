@@ -1,3 +1,7 @@
+* 2010-10-07 - karsten.will@open-xchange.com
+
+ - Bugfix #16734: Xing subscribtion stops
+
 * 2010-10-07 - francisco.laguna@open-xchange.com
 
  - Bugfix #17197: Bugfix #17196: Avoid NPE in shutdown of com.openexchange.secret.recovery.json bundle.
