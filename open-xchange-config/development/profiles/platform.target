@@ -12,7 +12,7 @@
 <includeBundles>
 <plugin id="org.apache.commons.logging.source"/>
 <plugin id="org.apache.commons.logging"/>
-<plugin id="javax.servlet.source"/>
+<plugin id="javax.servlet.source" version="2.4.0.v200806031604"/>
 <plugin id="org.eclipse.equinox.event.source"/>
 <plugin id="org.apache.commons.cli"/>
 <plugin id="org.apache.commons.lang"/>
@@ -22,6 +22,10 @@
 <plugin id="org.eclipse.osgi.services"/>
 <plugin id="javax.servlet"/>
 <plugin id="org.eclipse.osgi.services.source"/>
-<plugin id="org.apache.log4j" version="1.2.13.v200903072027"/>
+<plugin id="org.apache.log4j"/>
 </includeBundles>
+<environment>
+<os>linux</os>
+</environment>
+<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 </target>
