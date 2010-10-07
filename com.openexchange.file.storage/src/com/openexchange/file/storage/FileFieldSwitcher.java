@@ -49,47 +49,34 @@
 
 package com.openexchange.file.storage;
 
+
 /**
- * {@link FileStorageAccountAccess} - Provides access to a file storage account.
- * 
+ * A {@link FileFieldSwitcher} allows to generically do work for a certain field
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public interface FileStorageAccountAccess extends FileStorageResource {
-
-    /**
-     * Gets the account identifier of this access.
-     * 
-     * @return The account identifier
-     */
-    public String getAccountId();
-
-    /**
-     * Gets the file access for associated account.
-     * 
-     * @return The file access
-     * @throws FileStorageException If file access cannot be returned
-     */
-    public FileStorageFileAccess getFileAccess() throws FileStorageException;
-
-    /**
-     * Gets the folder access for associated account.
-     * 
-     * @return The folder access
-     * @throws FileStorageException If folder access cannot be returned
-     */
-    public FileStorageFolderAccess getFolderAccess() throws FileStorageException;
-
-    /**
-     * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
-     * the root folder.
-     * <p>
-     * The same result is yielded through calling <code>getFolderAccess().getRootFolder()</code> on a connected
-     * {@link FileStorageFolderAccess}.
-     * 
-     * @throws FileStorageException If returning the root folder fails
-     */
-    public FileStorageFolder getRootFolder() throws FileStorageException;
-
+public interface FileFieldSwitcher {
+    public Object lastModified(Object...args);
+    public Object created(Object...args);
+    public Object modifiedBy(Object...args);
+    public Object folderId(Object...args);
+    public Object title(Object...args);
+    public Object version(Object...args);
+    public Object content(Object...args);
+    public Object id(Object...args);
+    public Object fileSize(Object...args);
+    public Object description(Object...args);
+    public Object url(Object...args);
+    public Object createdBy(Object...args);
+    public Object filename(Object...args);
+    public Object fileMimetype(Object...args);
+    public Object sequenceNumber(Object...args);
+    public Object categories(Object...args);
+    public Object lockedUntil(Object...args);
+    public Object fileMd5sum(Object...args);
+    public Object versionComment(Object...args);
+    public Object currentVersion(Object...args);
+    public Object colorLabel(Object...args);
+    public Object lastModifiedUtc(Object...args);
+    public Object numberOfVersions(Object...args);
 }

@@ -49,47 +49,79 @@
 
 package com.openexchange.file.storage;
 
+import java.util.Date;
+
+
 /**
- * {@link FileStorageAccountAccess} - Provides access to a file storage account.
- * 
+ * {@link GenericMethodSupport}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public interface FileStorageAccountAccess extends FileStorageResource {
+public class GenericMethodSupport {
+    protected <T> T get(int i, Class<T> klass, Object...args) {
+        if(i >= args.length) {
+            return null;
+        }
+        return (T) args[i];
+    }
+    
+    protected File md(int i, Object...args) {
+        return get(i, File.class, args);
+    }
+    
+    protected File md(Object...args) {
+        return md(0, args);
+    }
+    
+    protected String string(int i, Object...args) {
+        if(args[i] == null || args.length >= i) {
+            return null;
+        }
+        return args[i].toString();
+    }
+    
+    protected int integer(int i, Object...args) {
+        if(args[i] == null || args.length >= i) {
+            return -1;
+        }
+        Object o = args[i];
+        if(o instanceof Number) {
+            return ((Number)o).intValue();
+        } else if (o instanceof String) {
+            return Integer.parseInt((String)o);
+        } else {
+            return integer(0, o.toString());
+        }
+    }
+    
+    protected Date date(int i, Object...args) {
+        if(args[i] == null || args.length >= i) {
+            return null;
+        }
+        Object o = args[i];
+        
+        if(o instanceof Date) {
+            return (Date) o;
+        }
+        
+        return new Date(coerceToLong(o));
+    }
+    
+    protected long longValue(int i, Object...args) {
+        if(args[i] == null || args.length >= i) {
+            return -1;
+        }
+        return coerceToLong(args[i]);
+    }
 
-    /**
-     * Gets the account identifier of this access.
-     * 
-     * @return The account identifier
-     */
-    public String getAccountId();
-
-    /**
-     * Gets the file access for associated account.
-     * 
-     * @return The file access
-     * @throws FileStorageException If file access cannot be returned
-     */
-    public FileStorageFileAccess getFileAccess() throws FileStorageException;
-
-    /**
-     * Gets the folder access for associated account.
-     * 
-     * @return The folder access
-     * @throws FileStorageException If folder access cannot be returned
-     */
-    public FileStorageFolderAccess getFolderAccess() throws FileStorageException;
-
-    /**
-     * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
-     * the root folder.
-     * <p>
-     * The same result is yielded through calling <code>getFolderAccess().getRootFolder()</code> on a connected
-     * {@link FileStorageFolderAccess}.
-     * 
-     * @throws FileStorageException If returning the root folder fails
-     */
-    public FileStorageFolder getRootFolder() throws FileStorageException;
-
+    private long coerceToLong(Object o) {
+        if(o instanceof Number) {
+            return ((Number)o).longValue();
+        } else if (o instanceof String) {
+            return Long.parseLong((String)o);
+        } else {
+            return coerceToLong(o.toString());
+        }
+    }
+  
 }

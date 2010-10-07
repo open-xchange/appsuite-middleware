@@ -10,9 +10,11 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.exceptions.osgi,
  com.openexchange.groupware,
  com.openexchange.session,
+ com.openexchange.tx,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.file.storage.osgi.FileStorageActivator
 Export-Package: com.openexchange.file.storage,
+ com.openexchange.file.storage.meta,
  com.openexchange.file.storage.registry

@@ -49,47 +49,64 @@
 
 package com.openexchange.file.storage;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.file.storage.meta.FileComparator;
+import com.openexchange.file.storage.meta.FileFieldHandling;
+
+
 /**
- * {@link FileStorageAccountAccess} - Provides access to a file storage account.
- * 
+ * {@link AbstractFile}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public interface FileStorageAccountAccess extends FileStorageResource {
+public abstract class AbstractFile implements File {
 
-    /**
-     * Gets the account identifier of this access.
-     * 
-     * @return The account identifier
-     */
-    public String getAccountId();
+    
+    public File dup() {
+        return FileFieldHandling.dup(this);
+    }
+    
+    public void copyInto(File other) {
+        FileFieldHandling.copy(this, other);
+    }
+    
+    public void copyFrom(File other) {
+        FileFieldHandling.copy(other, this);
+    }
+    
+    public Set<File.Field> differences(final File other) {
+        return Field.inject(new AbstractFileFieldHandler() {
 
-    /**
-     * Gets the file access for associated account.
-     * 
-     * @return The file access
-     * @throws FileStorageException If file access cannot be returned
-     */
-    public FileStorageFileAccess getFileAccess() throws FileStorageException;
+            public Object handle(Field field, Object... args) {
+                Set set = get(0,Set.class,args);
+                int comparison = new FileComparator(field).compare(AbstractFile.this, other);
+                if(comparison != 0) {
+                    set.add(field);
+                }
+                return set;
+            }
+            
+        }, new HashSet<File.Field>());
+    }
+    
+    public boolean equals(File other, Field criterium, Field...criteria) {
+        List<Field> fields = new ArrayList<Field>(1 + criteria.length);
+        
+        for (Field field : fields) {
+            if(0 != new FileComparator(field).compare(this, other)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    @Override
+    public String toString() {
+        return FileFieldHandling.toString(this);
+    }
 
-    /**
-     * Gets the folder access for associated account.
-     * 
-     * @return The folder access
-     * @throws FileStorageException If folder access cannot be returned
-     */
-    public FileStorageFolderAccess getFolderAccess() throws FileStorageException;
-
-    /**
-     * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
-     * the root folder.
-     * <p>
-     * The same result is yielded through calling <code>getFolderAccess().getRootFolder()</code> on a connected
-     * {@link FileStorageFolderAccess}.
-     * 
-     * @throws FileStorageException If returning the root folder fails
-     */
-    public FileStorageFolder getRootFolder() throws FileStorageException;
 
 }

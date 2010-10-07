@@ -47,49 +47,68 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.meta;
+
+import java.util.Comparator;
+import com.openexchange.file.storage.File;
+
 
 /**
- * {@link FileStorageAccountAccess} - Provides access to a file storage account.
- * 
+ * {@link FileComparator}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public interface FileStorageAccountAccess extends FileStorageResource {
+public class FileComparator implements Comparator<File>{
 
-    /**
-     * Gets the account identifier of this access.
-     * 
-     * @return The account identifier
-     */
-    public String getAccountId();
-
-    /**
-     * Gets the file access for associated account.
-     * 
-     * @return The file access
-     * @throws FileStorageException If file access cannot be returned
-     */
-    public FileStorageFileAccess getFileAccess() throws FileStorageException;
-
-    /**
-     * Gets the folder access for associated account.
-     * 
-     * @return The folder access
-     * @throws FileStorageException If folder access cannot be returned
-     */
-    public FileStorageFolderAccess getFolderAccess() throws FileStorageException;
-
-    /**
-     * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
-     * the root folder.
-     * <p>
-     * The same result is yielded through calling <code>getFolderAccess().getRootFolder()</code> on a connected
-     * {@link FileStorageFolderAccess}.
-     * 
-     * @throws FileStorageException If returning the root folder fails
-     */
-    public FileStorageFolder getRootFolder() throws FileStorageException;
+    private static final FileFieldGet GET = new FileFieldGet();
+    
+    private Comparator delegate = null;
+    private File.Field by = null;
+    
+    public FileComparator(File.Field by) {
+        this.by = by;
+    }
+    
+    public FileComparator(File.Field by, Comparator comparator) {
+        this.by = by;
+        this.delegate = comparator;
+    }
+    
+    public int compare(File o1, File o2) {
+        if(o1 == o2) {
+            return 0;
+        }
+        
+        if(o1 == null) {
+            return -1;
+        }
+        
+        if(o2 == null) {
+            return 1;
+        }
+        
+        Object v1 = by.doSwitch(GET, o1);
+        Object v2 = by.doSwitch(GET, o2);
+        
+        if(v1 == v2) {
+            return 0;
+        }
+        
+        if(v1 == null) {
+            return -1;
+        }
+        
+        if(v2 == null) {
+            return 1;
+        }
+        
+        if(delegate != null) {
+            return delegate.compare(v1, v2);
+        } else if (v1 instanceof Comparable) {
+            return ((Comparable)v1).compareTo(v2);
+        }
+        
+        return 0;
+    }
 
 }
