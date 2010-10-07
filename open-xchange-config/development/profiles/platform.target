@@ -12,7 +12,7 @@
 <includeBundles>
 <plugin id="org.apache.commons.logging.source"/>
 <plugin id="org.apache.commons.logging"/>
-<plugin id="javax.servlet.source" version="2.4.0.v201005080502"/>
+<plugin id="javax.servlet.source" version="2.4.0.v200806031604"/>
 <plugin id="org.eclipse.equinox.event.source"/>
 <plugin id="org.apache.commons.cli"/>
 <plugin id="org.apache.commons.lang"/>
