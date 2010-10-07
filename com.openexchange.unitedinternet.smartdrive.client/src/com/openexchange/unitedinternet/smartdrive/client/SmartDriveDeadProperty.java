@@ -49,25 +49,59 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
+
 /**
- * {@link SmartDriveDeadProperty}
+ * {@link SmartDriveDeadProperty} - A SmartDrive dead property.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveDeadProperty {
+public final class SmartDriveDeadProperty {
+
+    private String propertyName;
+
+    private String value;
+
+    /**
+     * Initializes a new {@link SmartDriveDeadProperty}.
+     */
+    public SmartDriveDeadProperty() {
+        super();
+    }
 
     /**
      * Gets the property name.
      * 
      * @return The property name
      */
-    String getPropertyName();
+    public String getPropertyName() {
+        return propertyName;
+    }
 
     /**
      * Gets the value.
      * 
      * @return The value
      */
-    String getValue();
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * Sets the property name
+     * 
+     * @param propertyName The property name to set
+     */
+    public void setPropertyName(final String propertyName) {
+        this.propertyName = propertyName;
+    }
+
+    /**
+     * Sets the value
+     * 
+     * @param value The value to set
+     */
+    public void setValue(final String value) {
+        this.value = value;
+    }
 
 }

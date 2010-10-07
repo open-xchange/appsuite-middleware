@@ -88,8 +88,34 @@ public enum SmartDriveExceptionCodes implements OXErrorMessage {
     /**
      * Not found: %1$s
      */
-    NOT_FOUND(SmartDriveExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 7);
+    NOT_FOUND(SmartDriveExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 7),
+    /**
+     * The source and destination URIs are equal: %1$s.
+     */
+    EQUAL_NAME(SmartDriveExceptionMessages.EQUAL_NAME_MSG, Category.CODE_ERROR, 8),
+    /**
+     * Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.
+     */
+    CONFLICT(SmartDriveExceptionMessages.CONFLICT_MSG, Category.CODE_ERROR, 9),
+    /**
+     * Such a resource already exists: %1$s.
+     */
+    PRECONDITION_FAILED(SmartDriveExceptionMessages.PRECONDITION_FAILED_MSG, Category.CODE_ERROR, 10),
+    /**
+     * Resource limit exceeded.
+     */
+    INSUFFICIENT_STORAGE(SmartDriveExceptionMessages.INSUFFICIENT_STORAGE_MSG, Category.CODE_ERROR, 11),
+    /**
+     * Unexpected status %1$s (%2$s)
+     */
+    UNEXPECTED_STATUS(SmartDriveExceptionMessages.UNEXPECTED_STATUS_MSG, Category.CODE_ERROR, 12),
+    /**
+     * Name contains illegal characters or parent is read-only: %1$s.
+     */
+    ILLEGAL_CHARS_OR_READ_ONLY(SmartDriveExceptionMessages.ILLEGAL_CHARS_OR_READ_ONLY_MSG, Category.CODE_ERROR, 13),
     
+    
+    ;
 
     private final Category category;
 

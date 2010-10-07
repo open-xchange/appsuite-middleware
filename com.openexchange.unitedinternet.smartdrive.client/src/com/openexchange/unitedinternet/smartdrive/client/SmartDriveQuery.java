@@ -49,33 +49,58 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
-
 /**
- * {@link SmartDriveResponse} - A SmartDrive response.
+ * {@link SmartDriveQuery} - The SmartDrive query.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveResponse<R> {
+public class SmartDriveQuery {
+
+    private QueryType queryType;
+
+    private String queryText;
 
     /**
-     * Gets the response status.
-     * 
-     * @return The response status
+     * Initializes a new {@link SmartDriveQuery}.
      */
-    ResponseStatus getStatus();
+    public SmartDriveQuery() {
+        super();
+    }
 
     /**
-     * Gets the duration in milliseconds.
+     * Gets the query type
      * 
-     * @return The duration in milliseconds
+     * @return The query type
      */
-    long getDuration();
+    public QueryType getQueryType() {
+        return queryType;
+    }
 
     /**
-     * Gets the response.
+     * Sets the query type
      * 
-     * @return The response
+     * @param queryType The query type to set
      */
-    R getResponse();
+    public void setQueryType(QueryType queryType) {
+        this.queryType = queryType;
+    }
+
+    /**
+     * Gets the query text
+     * 
+     * @return The query text
+     */
+    public String getQueryText() {
+        return queryText;
+    }
+
+    /**
+     * Sets the query text
+     * 
+     * @param queryText The query text to set
+     */
+    public void setQueryText(String queryText) {
+        this.queryText = queryText;
+    }
 
 }

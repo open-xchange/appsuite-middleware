@@ -49,33 +49,40 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
-
 /**
- * {@link SmartDriveResponse} - A SmartDrive response.
+ * {@link QueryType} - An enumeration for query types.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveResponse<R> {
+public enum QueryType {
 
     /**
-     * Gets the response status.
-     * 
-     * @return The response status
+     * The query type for names.
      */
-    ResponseStatus getStatus();
+    NAMES("names"),
+    /**
+     * The query type for content.
+     */
+    CONTENT("content");
+
+    private final String name;
+
+    private QueryType(final String name) {
+        this.name = name;
+    }
 
     /**
-     * Gets the duration in milliseconds.
+     * Gets the query type name.
      * 
-     * @return The duration in milliseconds
+     * @return The name
      */
-    long getDuration();
+    public String getName() {
+        return name;
+    }
 
-    /**
-     * Gets the response.
-     * 
-     * @return The response
-     */
-    R getResponse();
+    @Override
+    public String toString() {
+        return name;
+    }
 
 }

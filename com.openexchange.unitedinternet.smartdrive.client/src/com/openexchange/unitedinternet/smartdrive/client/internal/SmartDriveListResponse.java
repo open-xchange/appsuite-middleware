@@ -47,35 +47,33 @@
  *
  */
 
-package com.openexchange.unitedinternet.smartdrive.client;
+package com.openexchange.unitedinternet.smartdrive.client.internal;
 
+import java.util.List;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResource;
 
 /**
- * {@link SmartDriveResponse} - A SmartDrive response.
+ * {@link SmartDriveListResponse} - The SmartDrive response for list/extendedList request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveResponse<R> {
+public final class SmartDriveListResponse extends AsbtractSmartDriveResponse<List<SmartDriveResource>> {
+
+    private List<SmartDriveResource> list;
 
     /**
-     * Gets the response status.
-     * 
-     * @return The response status
+     * Initializes a new {@link SmartDriveListResponse}.
      */
-    ResponseStatus getStatus();
+    public SmartDriveListResponse() {
+        super();
+    }
 
-    /**
-     * Gets the duration in milliseconds.
-     * 
-     * @return The duration in milliseconds
-     */
-    long getDuration();
+    public List<SmartDriveResource> getResponse() {
+        return list;
+    }
 
-    /**
-     * Gets the response.
-     * 
-     * @return The response
-     */
-    R getResponse();
+    public void setList(final List<SmartDriveResource> list) {
+        this.list = list;
+    }
 
 }

@@ -61,6 +61,25 @@ public interface SmartDriveConstants {
      */
     public static final String CLIENT_NAME = "Open-Xchange SmartDrive Client";
 
+    /*-
+     * ---------------------------------- MIME types ----------------------------------
+     */
+
+    /**
+     * The MIME type for a SmartDrive directory.
+     */
+    public static final String MIME_APPLICATION_DIRECTORY = "application/directory";
+
+    /**
+     * The MIME type for JSON data.<br>
+     * TODO: What content type for JSON data? application/json or text/javascript?
+     */
+    public static final String MIME_JSON = "text/javascript";
+
+    /*-
+     * ---------------------------------- Cookie names ----------------------------------
+     */
+
     /**
      * The name for JSESSIONID cookie.
      */
@@ -71,10 +90,29 @@ public interface SmartDriveConstants {
      */
     public static final String COOKIE_AUTHENTICATION = "Authentication";
 
+    /*-
+     * ---------------------------------- Response codes ----------------------------------
+     */
+
     /**
      * The status code for <code>200 (OK)</code>.
      */
     public static final int SC_OK = 200;
+
+    /**
+     * The status code for <code>201 (created)</code>.
+     */
+    public static final int SC_CREATED = 201;
+
+    /**
+     * The status code for <code>204 (no content)</code>.
+     */
+    public static final int SC_NO_CONTENT = 204;
+
+    /**
+     * The status code for <code>207 (multi status)</code>.
+     */
+    public static final int SC_MULTI_STATUS = 207;
 
     /**
      * The status code for <code>400 (general error)</code>.
@@ -82,8 +120,76 @@ public interface SmartDriveConstants {
     public static final int SC_GENERAL_ERROR = 400;
 
     /**
+     * The status code for <code>403 (forbidden)</code>.
+     */
+    public static final int SC_FORBIDDEN = 403;
+
+    /**
      * The status code for <code>404 (not found)</code>.
      */
     public static final int SC_NOT_FOUND = 404;
 
+    /**
+     * The status code for <code>405 (method not allowed)</code>.
+     */
+    public static final int SC_METHOD_NOT_ALLOWED = 405;
+
+    /**
+     * The status code for <code>409 (conflict)</code>.
+     */
+    public static final int SC_CONFLICT = 409;
+
+    /**
+     * The status code for <code>412 (precondition failed)</code>.
+     */
+    public static final int SC_PRECONDITION_FAILED = 412;
+
+    /**
+     * The status code for <code>507 (insufficient storage)</code>.
+     */
+    public static final int SC_INSUFFICIENT_STORAGE = 507;
+
+    /*-
+     * ---------------------------------- JSON fields ----------------------------------
+     */
+
+    public static final String JSON_FILE_SIZE = "fileSize";
+
+    public static final String JSON_NAME = "name";
+
+    public static final String JSON_CREATION_DATE = "creationDate";
+
+    public static final String JSON_LAST_MODIFIED = "lastModified";
+
+    public static final String JSON_DOWNLOAD_TOKEN = "downloadToken";
+
+    public static final String JSON_THUMB_NAILS = "thumbNails";
+
+    public static final String JSON_MIME_TYPE = "mimeType";
+
+    public static final String JSON_URL = "url";
+
+    public static final String JSON_UPLOAD_TOKEN = "uploadToken";
+
+    public static final String JSON_DEAD_PROPERTIES = "deadProperties";
+
+    public static final String JSON_NEW_NAME = "newName";
+
+    public static final String JSON_SRC_PATH = "srcPath";
+
+    public static final String JSON_NAMES = "names";
+
+    public static final String JSON_OVER_WRITE = "overWrite";
+
+    public static final String JSON_RESPONSE = "response";
+
+    public static final String JSON_STATUS = "status";
+
+    public static final String JSON_DESCRIPTION = "description";
+
+    public static final String JSON_IS_COLLECTION = "isCollection";
+    
+    public static final String JSON_QUERY_TYPE = "queryType";
+    
+    public static final String JSON_QUERY_TEXT = "queryText";
 }

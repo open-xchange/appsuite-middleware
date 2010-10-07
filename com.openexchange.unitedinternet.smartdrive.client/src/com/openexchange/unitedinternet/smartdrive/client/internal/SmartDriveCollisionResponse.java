@@ -49,90 +49,31 @@
 
 package com.openexchange.unitedinternet.smartdrive.client.internal;
 
-import java.util.Collection;
-import java.util.Map;
-import org.json.JSONException;
-import com.openexchange.unitedinternet.smartdrive.client.ResponseStatus;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveExceptionCodes;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResponse;
+import java.util.List;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveCollision;
 
 /**
- * {@link SmartDriveResponseImpl}
+ * {@link SmartDriveCollisionResponse} - The SmartDrive response for collisions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmartDriveResponseImpl implements SmartDriveResponse {
+public final class SmartDriveCollisionResponse extends AsbtractSmartDriveResponse<List<SmartDriveCollision>> {
 
-    private ResponseStatus status;
-
-    private long duration;
-
-    private Object responseObject;
+    private List<SmartDriveCollision> list;
 
     /**
-     * Initializes a new {@link SmartDriveResponseImpl}.
+     * Initializes a new {@link SmartDriveCollisionResponse}.
      */
-    public SmartDriveResponseImpl() {
+    public SmartDriveCollisionResponse() {
         super();
     }
 
-    public ResponseStatus getStatus() {
-        return status;
+    public List<SmartDriveCollision> getResponse() {
+        return list;
     }
 
-    public long getDuration() {
-        return duration;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getResponseAsMap() throws SmartDriveException {
-        try {
-            return (Map<String, Object>) responseObject;
-        } catch (ClassCastException e) {
-            throw SmartDriveExceptionCodes.NOT_OF_TYPE.create(e, Map.class.getName());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public Collection<Object> getResponseAsList() throws SmartDriveException {
-        try {
-            return (Collection<Object>) responseObject;
-        } catch (ClassCastException e) {
-            throw SmartDriveExceptionCodes.NOT_OF_TYPE.create(e, Collection.class.getName());
-        }
-    }
-
-    /**
-     * Sets the status
-     * 
-     * @param status The status to set
-     */
-    public void setStatus(ResponseStatus status) {
-        this.status = status;
-    }
-
-    /**
-     * Sets the duration
-     * 
-     * @param duration The duration to set
-     */
-    public void setDuration(long duration) {
-        this.duration = duration;
-    }
-
-    /**
-     * Sets the JSON response object which is coerced to Java object.
-     * 
-     * @param responseObject The response object to set
-     * @throws SmartDriveException If coercion fails
-     */
-    public void setResponseObject(final Object responseObject) throws SmartDriveException {
-        try {
-            this.responseObject = null == responseObject ? null : JSONCoercion.coerceToNative(responseObject);
-        } catch (JSONException e) {
-            throw SmartDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
+    public void setList(final List<SmartDriveCollision> list) {
+        this.list = list;
     }
 
 }

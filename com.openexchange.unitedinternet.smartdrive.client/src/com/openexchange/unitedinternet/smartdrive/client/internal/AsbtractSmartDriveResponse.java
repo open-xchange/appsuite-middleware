@@ -47,35 +47,53 @@
  *
  */
 
-package com.openexchange.unitedinternet.smartdrive.client;
+package com.openexchange.unitedinternet.smartdrive.client.internal;
 
+import com.openexchange.unitedinternet.smartdrive.client.ResponseStatus;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResponse;
 
 /**
- * {@link SmartDriveResponse} - A SmartDrive response.
+ * {@link AsbtractSmartDriveResponse} - The abstract SmartDrive response.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveResponse<R> {
+public abstract class AsbtractSmartDriveResponse<R> implements SmartDriveResponse<R> {
+
+    protected ResponseStatus status;
+
+    protected long duration;
 
     /**
-     * Gets the response status.
-     * 
-     * @return The response status
+     * Initializes a new {@link AsbtractSmartDriveResponse}.
      */
-    ResponseStatus getStatus();
+    protected AsbtractSmartDriveResponse() {
+        super();
+    }
+
+    public ResponseStatus getStatus() {
+        return status;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
 
     /**
-     * Gets the duration in milliseconds.
+     * Sets the status
      * 
-     * @return The duration in milliseconds
+     * @param status The status to set
      */
-    long getDuration();
+    public void setStatus(ResponseStatus status) {
+        this.status = status;
+    }
 
     /**
-     * Gets the response.
+     * Sets the duration
      * 
-     * @return The response
+     * @param duration The duration to set
      */
-    R getResponse();
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
 
 }

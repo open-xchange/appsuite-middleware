@@ -47,35 +47,94 @@
  *
  */
 
-package com.openexchange.unitedinternet.smartdrive.client;
+package com.openexchange.unitedinternet.smartdrive.client.internal;
 
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveCollision;
 
 /**
- * {@link SmartDriveResponse} - A SmartDrive response.
+ * {@link SmartDriveCollisionImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveResponse<R> {
+public class SmartDriveCollisionImpl implements SmartDriveCollision {
+
+    private String name;
+
+    private int response;
+
+    private String status;
+
+    private String description;
+
+    private boolean directory;
+
+    public SmartDriveCollisionImpl() {
+        super();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getResponse() {
+        return response;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public boolean isDirectory() {
+        return directory;
+    }
 
     /**
-     * Gets the response status.
+     * Sets the name
      * 
-     * @return The response status
+     * @param name The name to set
      */
-    ResponseStatus getStatus();
+    public void setName(String name) {
+        this.name = name;
+    }
 
     /**
-     * Gets the duration in milliseconds.
+     * Sets the response
      * 
-     * @return The duration in milliseconds
+     * @param response The response to set
      */
-    long getDuration();
+    public void setResponse(int response) {
+        this.response = response;
+    }
 
     /**
-     * Gets the response.
+     * Sets the status
      * 
-     * @return The response
+     * @param status The status to set
      */
-    R getResponse();
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    /**
+     * Sets the description
+     * 
+     * @param description The description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * Sets the directory flag.
+     * 
+     * @param directory The directory flag to set
+     */
+    public void setDirectory(boolean directory) {
+        this.directory = directory;
+    }
 
 }

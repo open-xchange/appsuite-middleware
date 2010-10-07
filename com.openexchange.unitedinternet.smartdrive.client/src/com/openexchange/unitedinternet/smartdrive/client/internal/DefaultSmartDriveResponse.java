@@ -49,50 +49,75 @@
 
 package com.openexchange.unitedinternet.smartdrive.client.internal;
 
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveDeadProperty;
+import java.util.Collection;
+import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONValue;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveExceptionCodes;
 
 /**
- * {@link SmartDriveDeadPropertyImpl}
+ * {@link DefaultSmartDriveResponse} - The fallback SmartDrive response.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmartDriveDeadPropertyImpl implements SmartDriveDeadProperty {
+public final class DefaultSmartDriveResponse extends AsbtractSmartDriveResponse<Object> {
 
-    private String propertyName;
-
-    private String value;
+    private Object responseObject;
 
     /**
-     * Initializes a new {@link SmartDriveDeadPropertyImpl}.
+     * Initializes a new {@link DefaultSmartDriveResponse}.
      */
-    public SmartDriveDeadPropertyImpl() {
+    public DefaultSmartDriveResponse() {
         super();
     }
 
-    public String getPropertyName() {
-        return propertyName;
-    }
-
-    public String getValue() {
-        return value;
+    public Object getResponse() {
+        return responseObject;
     }
 
     /**
-     * Sets the property name
+     * Gets the response as a {@link Map}; response is a JSON object.
      * 
-     * @param propertyName The property name to set
+     * @return The response as a {@link Map}
+     * @throws SmartDriveException If response cannot be returned as a map
      */
-    public void setPropertyName(final String propertyName) {
-        this.propertyName = propertyName;
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getResponseAsMap() throws SmartDriveException {
+        try {
+            return (Map<String, Object>) responseObject;
+        } catch (ClassCastException e) {
+            throw SmartDriveExceptionCodes.NOT_OF_TYPE.create(e, Map.class.getName());
+        }
     }
 
     /**
-     * Sets the value
+     * Gets the response as a {@link List}; response is a JSON array.
      * 
-     * @param value The value to set
+     * @return The response as a {@link List}
+     * @throws SmartDriveException If response cannot be returned as a collection
      */
-    public void setValue(final String value) {
-        this.value = value;
+    @SuppressWarnings("unchecked")
+    public Collection<Object> getResponseAsList() throws SmartDriveException {
+        try {
+            return (Collection<Object>) responseObject;
+        } catch (ClassCastException e) {
+            throw SmartDriveExceptionCodes.NOT_OF_TYPE.create(e, Collection.class.getName());
+        }
+    }
+
+    /**
+     * Sets the JSON response object which is coerced to Java object.
+     * 
+     * @param responseObject The response object to set
+     * @throws SmartDriveException If coercion fails
+     */
+    public void setJSONResponseObject(final JSONValue responseObject) throws SmartDriveException {
+        try {
+            this.responseObject = null == responseObject ? null : JSONCoercion.coerceToNative(responseObject);
+        } catch (JSONException e) {
+            throw SmartDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

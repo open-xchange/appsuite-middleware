@@ -49,33 +49,46 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
-
 /**
- * {@link SmartDriveResponse} - A SmartDrive response.
+ * {@link SmartDriveCollision} - A SmartDrive collision caused by copy/move operation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveResponse<R> {
+public interface SmartDriveCollision {
 
     /**
-     * Gets the response status.
+     * Gets the name of the conflicting resource.
      * 
-     * @return The response status
+     * @return The name
      */
-    ResponseStatus getStatus();
+    String getName();
 
     /**
-     * Gets the duration in milliseconds.
+     * Gets the HTTP status code taken from DAV-MultiStatus response.
      * 
-     * @return The duration in milliseconds
+     * @return The response code
      */
-    long getDuration();
+    int getResponse();
 
     /**
-     * Gets the response.
+     * Gets the HTTP status text taken from DAV-MultiStatus response.
      * 
-     * @return The response
+     * @return The status
      */
-    R getResponse();
+    String getStatus();
+
+    /**
+     * Gets the description taken from DAV response.
+     * 
+     * @return The description
+     */
+    String getDescription();
+
+    /**
+     * Whether the denoted resource is a directory or a file.
+     * 
+     * @return <code>true</code> if the denoted resource is a directory; otherwise <code>false</code> for a file
+     */
+    boolean isDirectory();
 
 }

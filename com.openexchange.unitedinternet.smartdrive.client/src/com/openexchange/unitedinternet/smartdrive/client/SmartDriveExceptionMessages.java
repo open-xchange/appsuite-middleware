@@ -80,6 +80,24 @@ public final class SmartDriveExceptionMessages implements LocalizableStrings {
     // Not found: %1$s
     public static final String NOT_FOUND_MSG = "Not found: %1$s";
 
+    // The source and destination URIs are equal: %1$s.
+    public static final String EQUAL_NAME_MSG = "The source and destination URIs are equal: %1$s.";
+
+    // Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.
+    public static final String CONFLICT_MSG = "Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.";
+
+    // Such a resource already exists: %1$s.
+    public static final String PRECONDITION_FAILED_MSG = "Such a resource already exists: %1$s.";
+
+    // Resource limit exceeded.
+    public static final String INSUFFICIENT_STORAGE_MSG = "Resource limit exceeded.";
+
+    // Unexpected status %1$s (%2$s)
+    public static final String UNEXPECTED_STATUS_MSG = "Unexpected status %1$s (%2$s)";
+
+    // Name contains illegal characters or parent is read-only: %1$s.
+    public static final String ILLEGAL_CHARS_OR_READ_ONLY_MSG = "Name contains illegal characters or parent is read-only: %1$s.";
+
     /**
      * Initializes a new {@link SmartDriveExceptionMessages}.
      */

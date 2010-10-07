@@ -49,6 +49,8 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
+import java.util.List;
+
 /**
  * {@link SmartDriveStatefulAccess} - Methods require an active session. Requests to those paths will be answered with a HTTP 401
  * Unauthorized if no session identifier or an invalid one is provided.
@@ -57,8 +59,132 @@ package com.openexchange.unitedinternet.smartdrive.client;
  */
 public interface SmartDriveStatefulAccess extends SmartDriveConstants {
 
-    SmartDriveResponse list(String pathOfDirectory) throws SmartDriveException;
+    /**
+     * Lists the content of specified directory.
+     * 
+     * @param pathOfDirectory The path of the directory
+     * @return The content of specified directory
+     * @throws SmartDriveException If list fails
+     */
+    SmartDriveResponse<List<SmartDriveResource>> list(String pathOfDirectory) throws SmartDriveException;
 
-    SmartDriveResponse extendedList(String pathOfDirectory) throws SmartDriveException;
-    
+    /**
+     * Lists the content of specified directory.
+     * 
+     * @param pathOfDirectory The path of the directory
+     * @return The <b>extended</b> content of specified directory
+     * @throws SmartDriveException If list fails
+     */
+    SmartDriveResponse<List<SmartDriveResource>> extendedList(String pathOfDirectory) throws SmartDriveException;
+
+    /**
+     * Search recursively from specified directory.
+     * 
+     * @param pathOfDirectory The path to directory from which the recursive search is going to be started
+     * @param query The SmartDrive query to perform
+     * @param thumbNailFormatIds The allowed identifiers for thumb nails; default is <code>[ 1 ]</code>
+     * @return The queried SmartDrive resources
+     * @throws SmartDriveException If search fails
+     */
+    SmartDriveResponse<List<SmartDriveResource>> search(String pathOfDirectory, SmartDriveQuery query, int[] thumbNailFormatIds) throws SmartDriveException;
+
+    /**
+     * Search recursively from specified directory.
+     * 
+     * @param pathOfDirectory The path to directory from which the recursive search is going to be started
+     * @param query The SmartDrive query to perform
+     * @param thumbNailFormatIds The allowed identifiers for thumb nails; default is <code>[ 1 ]</code>
+     * @return The queried <b>extended</b> SmartDrive resources
+     * @throws SmartDriveException If search fails
+     */
+    SmartDriveResponse<List<SmartDriveResource>> extendedSearch(String pathOfDirectory, SmartDriveQuery query, int[] thumbNailFormatIds) throws SmartDriveException;
+
+    /**
+     * Retrieves general and custom properties of the resources contained in specified directory.
+     * <p>
+     * This method is necessary since resource <code>"/"</code> is not reachable via list/extendedList method.
+     * 
+     * @param resourcePath The path to resource
+     * @param thumbNailFormatIds The allowed identifiers for thumb nails; default is <code>[ 1 ]</code>
+     * @return The properties of the resources contained in specified directory
+     * @throws SmartDriveException If retrieval fails
+     */
+    SmartDriveResponse<List<SmartDriveResource>> propget(String resourcePath, int[] thumbNailFormatIds) throws SmartDriveException;
+
+    /**
+     * Retrieves general and custom properties of the resources contained in specified directory.
+     * <p>
+     * This method is necessary since resource <code>"/"</code> is not reachable via list/extendedList method.
+     * 
+     * @param resourcePath The path to resource
+     * @param thumbNailFormatIds The allowed identifiers for thumb nails; default is <code>[ 1 ]</code>
+     * @return The <b>extended</b> properties of the resources contained in specified directory
+     * @throws SmartDriveException If retrieval fails
+     */
+    SmartDriveResponse<List<SmartDriveResource>> extendedPropget(String resourcePath, int[] thumbNailFormatIds) throws SmartDriveException;
+
+    /**
+     * Manipulates the properties (meta data) of a resource.
+     * 
+     * @param srcPath The path of the resource
+     * @param newName The new name; set to <code>null</code> to ignore rename
+     * @param deadProperties The dead properties to store
+     * @return A <code>null</code> response
+     * @throws SmartDriveException If operation fails
+     */
+    SmartDriveResponse<Object> proppatch(String srcPath, String newName, List<SmartDriveDeadProperty> deadProperties) throws SmartDriveException;
+
+    /**
+     * Creates a directory.
+     * 
+     * @param pathOfDirectory The path of the directory to create
+     * @return A <code>null</code> response
+     * @throws SmartDriveException If creation fails
+     */
+    SmartDriveResponse<Object> mkcol(String pathOfDirectory) throws SmartDriveException;
+
+    /**
+     * Renames denoted resource.
+     * 
+     * @param srcPath The path of the resource to rename
+     * @param newName The new name
+     * @return A <code>null</code> response
+     * @throws SmartDriveException If rename fails
+     */
+    SmartDriveResponse<Object> rename(String srcPath, String newName) throws SmartDriveException;
+
+    /**
+     * Copies specified files.
+     * 
+     * @param srcPath The source directory path
+     * @param destPath The destination directory path
+     * @param fileNames The file names
+     * @param overwrite <code>true</code> to overwrite; otherwise <code>false</code>
+     * @return Possible collisions
+     * @throws SmartDriveException If operation fails
+     */
+    SmartDriveResponse<List<SmartDriveCollision>> copy(String srcPath, String destPath, String[] fileNames, boolean overwrite) throws SmartDriveException;
+
+    /**
+     * Moves specified files.
+     * 
+     * @param srcPath The source directory path
+     * @param destPath The destination directory path
+     * @param fileNames The file names
+     * @param overwrite <code>true</code> to overwrite; otherwise <code>false</code>
+     * @return Possible collisions
+     * @throws SmartDriveException If operation fails
+     */
+    SmartDriveResponse<List<SmartDriveCollision>> move(String srcPath, String destPath, String[] fileNames, boolean overwrite) throws SmartDriveException;
+
+    /**
+     * Deletes specified resources located below given directory.
+     * 
+     * @param pathOfDirectory The optional directory path; if <code>null</code> paths are considered to be absolute paths
+     * @param relativePaths The relative paths of the resources to delete; <code>"/"</code> deletes whole directory
+     * @return Possible collisions
+     * @throws SmartDriveException If delete fails
+     */
+    public SmartDriveResponse<List<SmartDriveCollision>> delete(final String pathOfDirectory, final List<String> relativePaths) throws SmartDriveException;
+
 }
