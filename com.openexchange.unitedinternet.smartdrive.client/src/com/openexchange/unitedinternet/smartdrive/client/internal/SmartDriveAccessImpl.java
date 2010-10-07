@@ -1,0 +1,230 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.unitedinternet.smartdrive.client.internal;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HostConfiguration;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpConnectionManager;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveAccess;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveConstants;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveExceptionCodes;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatefulAccess;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatelesslAccess;
+
+/**
+ * {@link SmartDriveAccessImpl}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class SmartDriveAccessImpl implements SmartDriveAccess {
+
+    /**
+     * The default HTTP time out.
+     */
+    private static final int TIMEOUT = 60000;
+
+    /**
+     * The maximum number of connections to be used for a host configuration.
+     */
+    private static final int MAX_HOST_CONNECTIONS = 20;
+
+    /**
+     * The HTTPS identifier constant.
+     */
+    private static final String HTTPS = "https";
+
+    /**
+     * The HTTP protocol constant.
+     */
+    private static final Protocol PROTOCOL_HTTP = Protocol.getProtocol("http");
+
+    /*
+     * Member stuff
+     */
+
+    private final String userName;
+
+    private final HttpClient client;
+
+    private SmartDriveStatefulAccess statefulAccess;
+
+    private SmartDriveStatelesslAccess statelesslAccess;
+
+    /**
+     * Initializes a new {@link SmartDriveAccessImpl}.
+     * 
+     * @param userName The name of the SmartDrive user
+     * @param url The URL to SmartDrive server; e.g. <code>"http://www.smart-drive-server.com"</code>
+     * @param configuration The HTTP client configuration; e.g. {@link SmartDriveConstants#CONFIG_TIMEOUT}
+     * @throws SmartDriveException If initialization fails
+     */
+    public SmartDriveAccessImpl(final String userName, final String url, final Map<String, Object> configuration) throws SmartDriveException {
+        super();
+        this.userName = userName;
+        client = createNewHttpClient(url, configuration);
+    }
+
+    public SmartDriveStatefulAccess getStatefulAccess() {
+        if (null == statefulAccess) {
+            statefulAccess = new SmartDriveStatefulAccessImpl(userName, client);
+        }
+        return statefulAccess;
+    }
+
+    public SmartDriveStatelesslAccess getStatelessAccess() {
+        if (null == statelesslAccess) {
+            statelesslAccess = new SmartDriveStatelesslAccessImpl(client);
+        }
+        return statelesslAccess;
+    }
+
+    /**
+     * Creates a new {@link HttpClient}.
+     * 
+     * @return The newly created {@link HttpClient}
+     * @throws FileStorageException If creation fails
+     */
+    private static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration) throws SmartDriveException {
+        /*
+         * The URL to SmartDrive server
+         */
+        final URL url;
+        try {
+            url = new URL(urlStr);
+        } catch (final MalformedURLException e) {
+            throw SmartDriveExceptionCodes.INVALID_URL.create(e, urlStr, e.getMessage());
+        }
+        /*
+         * Create host configuration or URI
+         */
+        final HostConfiguration hostConfiguration;
+        {
+            final String host = url.getHost();
+            if (HTTPS.equalsIgnoreCase(url.getProtocol())) {
+                int port = url.getPort();
+                if (port == -1) {
+                    port = 443;
+                }
+                /*
+                 * Own HTTPS host configuration and relative URI
+                 */
+                final Protocol httpsProtocol = new Protocol(HTTPS, ((ProtocolSocketFactory) new TrustAllAdapter()), port);
+                hostConfiguration = new HostConfiguration();
+                hostConfiguration.setHost(host, port, httpsProtocol);
+            } else {
+                int port = url.getPort();
+                if (port == -1) {
+                    port = 80;
+                }
+                /*
+                 * HTTP host configuration and relative URI
+                 */
+                hostConfiguration = new HostConfiguration();
+                hostConfiguration.setHost(host, port, PROTOCOL_HTTP);
+            }
+        }
+        /*
+         * Define a HttpConnectionManager, which is also responsible for possible multi-threading support
+         */
+        final HttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        final HttpConnectionManagerParams params = new HttpConnectionManagerParams();
+        params.setMaxConnectionsPerHost(hostConfiguration, MAX_HOST_CONNECTIONS);
+        connectionManager.setParams(params);
+        /*
+         * Create the HttpClient object and eventually pass the Credentials:
+         */
+        final HttpClient newClient = new HttpClient(connectionManager);
+        int timeout = TIMEOUT;
+        {
+            final String sTimeout = (String) configuration.get(CONFIG_TIMEOUT);
+            if (null != sTimeout) {
+                try {
+                    timeout = Integer.parseInt(sTimeout);
+                } catch (final NumberFormatException e) {
+                    org.apache.commons.logging.LogFactory.getLog(SmartDriveAccessImpl.class).warn(
+                        "Configuration property \"" + CONFIG_TIMEOUT + "\" is not a number: " + sTimeout);
+                    timeout = TIMEOUT;
+                }
+            }
+        }
+        newClient.getParams().setSoTimeout(timeout);
+        newClient.getParams().setIntParameter("http.connection.timeout", timeout);
+        newClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+        newClient.setHostConfiguration(hostConfiguration);
+        /*
+         * Apply credentials
+         */
+        final String login = (String) configuration.get(CONFIG_LOGIN);
+        final String password = (String) configuration.get(CONFIG_PASSWORD);
+        if (null != login && null != password) {
+            final Credentials creds = new UsernamePasswordCredentials(login, password);
+            newClient.getParams().setAuthenticationPreemptive(true);
+            newClient.getState().setCredentials(AuthScope.ANY, creds);
+        }
+        /*
+         * Return
+         */
+        return newClient;
+    }
+
+}
