@@ -1,3 +1,9 @@
+open-xchange-upsell-generic (6.18.1.0-4) unstable; urgency=low
+
+  * first build for 6.18.1-rev4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  7 Oct 2010 18:04:35 +0200
+
 open-xchange-upsell-generic (6.18.1.0-3) unstable; urgency=low
 
   * first build for 6.18.1-rev3
