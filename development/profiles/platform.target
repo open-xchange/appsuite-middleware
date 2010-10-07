@@ -3,12 +3,15 @@
 
 <target name="OX Platform">
 <locations>
+<location includeAllPlatforms="false" includeMode="slicer" type="InstallableUnit">
+<unit id="org.eclipse.orbit.build.feature.set1.feature.group" version="1.0.0.v20100831-0720-DaFCAFBwISlNOCPBAtLG1Qe0Pj7F"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20100831105311/updateSite"/>
+</location>
 <location path="${eclipse_home}" type="Directory"/>
 </locations>
 <includeBundles>
 <plugin id="org.apache.commons.logging.source"/>
 <plugin id="org.apache.commons.logging"/>
-<plugin id="org.eclipse.osgi.util.source"/>
 <plugin id="javax.servlet.source"/>
 <plugin id="org.eclipse.equinox.event.source"/>
 <plugin id="org.apache.commons.cli"/>
@@ -16,9 +19,9 @@
 <plugin id="org.eclipse.osgi"/>
 <plugin id="org.eclipse.osgi.source"/>
 <plugin id="org.eclipse.equinox.event"/>
-<plugin id="org.eclipse.osgi.util"/>
 <plugin id="org.eclipse.osgi.services"/>
 <plugin id="javax.servlet"/>
 <plugin id="org.eclipse.osgi.services.source"/>
+<plugin id="org.apache.log4j" version="1.2.13.v200903072027"/>
 </includeBundles>
 </target>
