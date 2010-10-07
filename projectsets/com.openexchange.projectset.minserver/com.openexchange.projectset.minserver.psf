@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.team.cvs.core.cvsnature">
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.conversion,com.openexchange.conversion,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.dataretention,com.openexchange.dataretention,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.xml,com.openexchange.xml,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/common,com.openexchange.common,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/config,com.openexchange.configread,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/global,com.openexchange.global,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/management,com.openexchange.management,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/monitoring,com.openexchange.monitoring,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/server,com.openexchange.server,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/cache,com.openexchange.caching,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/javax.activation,javax.activation,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.calendar,com.openexchange.calendar,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.datatypes.genericonf,com.openexchange.datatypes.genericonf,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.publish,com.openexchange.publish,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.test,com.openexchange.test,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.sql,com.openexchange.sql,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.threadpool,com.openexchange.threadpool,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.push,com.openexchange.push,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.messaging,com.openexchange.messaging,bf_6_18_0"/>
-<project reference="1.0,:pserver:anonymous@www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.secret,com.openexchange.secret,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.conversion,com.openexchange.conversion,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.dataretention,com.openexchange.dataretention,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.xml,com.openexchange.xml,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/common,com.openexchange.common,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/config,com.openexchange.configread,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/global,com.openexchange.global,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/management,com.openexchange.management,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/monitoring,com.openexchange.monitoring,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/server,com.openexchange.server,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/cache,com.openexchange.caching,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/javax.activation,javax.activation,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.calendar,com.openexchange.calendar,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.datatypes.genericonf,com.openexchange.datatypes.genericonf,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.publish,com.openexchange.publish,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.test,com.openexchange.test,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.sql,com.openexchange.sql,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.threadpool,com.openexchange.threadpool,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.push,com.openexchange.push,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.messaging,com.openexchange.messaging,bf_6_18_0"/>
+<project reference="1.0,:pserver:www.open-xchange.com:/cvsroot,open-xchange/com.openexchange.secret,com.openexchange.secret,bf_6_18_0"/>
 </provider>
 </psf>
