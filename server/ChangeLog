@@ -1,3 +1,7 @@
+* 2010-10-07 - karsten.will@open-xchange.com
+
+ - Bugfix #17197: Crawler updates missing
+
 * 2010-10-05 - marcus.klein@open-xchange.com
 
  - Bugfix #17027: Correctly sending deleted folder identifier in folder updates response.

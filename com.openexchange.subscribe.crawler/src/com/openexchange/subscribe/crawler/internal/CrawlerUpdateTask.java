@@ -130,9 +130,9 @@ public class CrawlerUpdateTask implements Runnable {
                 }
 
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                LOG.error(e);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error(e);
             }
         }
     }
@@ -174,6 +174,8 @@ public class CrawlerUpdateTask implements Runnable {
                             activator.removeCrawlerFromFilesystem(config, possibleNewCrawlerDescription.getId());
                             Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
                             activator.restartSingleCrawler(possibleNewCrawlerDescription.getId(), config);
+                        } else {
+                            LOG.info("The priority is lower than that of the existing file so nothing will be done");
                         }
                         // it is a description for a completely new crawler
                     } else {
@@ -183,7 +185,9 @@ public class CrawlerUpdateTask implements Runnable {
                             LOG.info("It is a completely new crawler and will be saved");
                             Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
                             activator.restartSingleCrawler(possibleNewCrawlerDescription.getId(), config);
-                        }    
+                        } else {
+                            LOG.info("Configuration forbids to install any crawlers that are not updates to existing services. Nothing will be done.");
+                        }
                     }
                 } else {
                     LOG.info("The API-Version does not fit");
