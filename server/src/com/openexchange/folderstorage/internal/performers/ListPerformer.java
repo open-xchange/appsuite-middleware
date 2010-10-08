@@ -222,7 +222,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 ret = getSubfoldersFromStorages(treeId, parentId, all);
             } else {
                 /*
-                 * The subfolders can be completely fetched from parent's folder storage
+                 * The subfolders can be completely fetched from already opened parent's folder storage
                  */
                 final UserizedFolder[] subfolders = new UserizedFolder[subfolderIds.length];
                 final CompletionService<Object> completionService =
@@ -230,57 +230,55 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 for (int i = 0; i < subfolderIds.length; i++) {
                     completionService.submit(new AbstractIndexCallable<Object>(i) {
 
-                        public Object call() throws Exception {
+                        public Object call() throws FolderException {
                             final StorageParameters newParameters = newStorageParameters();
-                            final boolean started = folderStorage.startTransaction(newParameters, false);
-                            final Folder subfolder;
+                            final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                            final String id = subfolderIds[index];
                             try {
-                                subfolder = folderStorage.getFolder(treeId, subfolderIds[index], newParameters);
-                                if (started) {
-                                    folderStorage.commitTransaction(newParameters);
+                                final Folder subfolder;
+                                try {
+                                    subfolder = folderStorage.getFolder(treeId, id, newParameters);
+                                } catch (final FolderException e) {
+                                    logger.warn(
+                                        new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(
+                                            treeId).append("\" could not be fetched from storage \"").append(
+                                            folderStorage.getClass().getSimpleName()).append("\"").toString(),
+                                        e);
+                                    addWarning(e);
+                                    return null;
                                 }
-                            } catch (final Exception e) {
-                                if (started) {
-                                    folderStorage.rollback(newParameters);
-                                }
-                                throw e;
-                            }
-                            /*
-                             * Check for access rights and subscribed status dependent on parameter "all"
-                             */
-                            if ((all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders()))) {
-                                final Permission subfolderPermission;
-                                if (null == getSession()) {
-                                    subfolderPermission =
-                                        CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                                } else {
-                                    subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                                }
-                                if (subfolderPermission.isVisible()) {
-                                    final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
-                                    try {
-                                        final UserizedFolder userizedFolder =
-                                            getUserizedFolder(
-                                                subfolder,
-                                                subfolderPermission,
-                                                treeId,
-                                                all,
-                                                true,
-                                                newParameters,
-                                                openedStorages);
-                                        subfolders[index] = userizedFolder;
-                                        for (final FolderStorage openedStorage : openedStorages) {
-                                            openedStorage.commitTransaction(newParameters);
-                                        }
-                                    } catch (final Exception e) {
-                                        for (final FolderStorage openedStorage : openedStorages) {
-                                            openedStorage.rollback(newParameters);
-                                        }
-                                        throw e;
+                                /*
+                                 * Check for access rights and subscribed status dependent on parameter "all"
+                                 */
+                                if ((all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders()))) {
+                                    final Permission userPermission;
+                                    if (null == getSession()) {
+                                        userPermission =
+                                            CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
+                                    } else {
+                                        userPermission =
+                                            CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
+                                    }
+                                    if (userPermission.isVisible()) {
+                                        subfolders[index] =
+                                            getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
                                     }
                                 }
+                                for (final FolderStorage openedStorage : openedStorages) {
+                                    openedStorage.commitTransaction(newParameters);
+                                }
+                                return null;
+                            } catch (final FolderException e) {
+                                for (final FolderStorage openedStorage : openedStorages) {
+                                    openedStorage.rollback(newParameters);
+                                }
+                                throw e;
+                            } catch (final Exception e) {
+                                for (final FolderStorage openedStorage : openedStorages) {
+                                    openedStorage.rollback(newParameters);
+                                }
+                                throw FolderException.newUnexpectedException(e);
                             }
-                            return null;
                         }
                     });
                 }
@@ -422,9 +420,10 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                         try {
                             subfolder = tmp.getFolder(treeId, id, newParameters);
                         } catch (final FolderException e) {
-                            logger.warn(new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(
-                                treeId).append("\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append(
-                                "\"").toString(), e);
+                            logger.warn(
+                                new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
+                                    "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
+                                e);
                             addWarning(e);
                             return null;
                         }

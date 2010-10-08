@@ -364,6 +364,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
         }
+        TCM.clear();
         final boolean started = folderStorage.startTransaction(storageParameters, true);
         try {
             folderStorage.clearFolder(realTreeId, folderId, storageParameters);
@@ -395,7 +396,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * No primary mail account root folder in this tree
          */
-        if (MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID).equals(folderId)) {
+        if (PREPARED_FULLNAME_DEFAULT.equals(folderId)) {
             return false;
         }
         /*
@@ -415,6 +416,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        TCM.clear();
         /*
          * Create only if folder could not be stored in real storage
          */
@@ -469,6 +471,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        TCM.clear();
         /*
          * Delete from tables if present
          */
@@ -635,6 +638,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
         }
+        TCM.clear();
         final boolean started = folderStorage.startTransaction(storageParameters, true);
         try {
             final Folder realFolder = folderStorage.getFolder(realTreeId, folderId, StorageType.WORKING, storageParameters);
@@ -682,9 +686,9 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         /*
-         * Primary account's root folder does not exist in tis folder tree
+         * Primary account's root folder does not exist in this folder tree
          */
-        if (MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID).equals(folderId)) {
+        if (PREPARED_FULLNAME_DEFAULT.equals(folderId)) {
             throw FolderExceptionErrorMessage.NOT_FOUND.create(folderId, treeId);
         }
         /*
@@ -1668,6 +1672,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        TCM.clear();
         /*
          * Update only if folder is contained
          */
@@ -1779,7 +1784,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             /*
              * Get real folder storage for primary mail folder
              */
-            final String fullname = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+            final String fullname = PREPARED_FULLNAME_DEFAULT;
             final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, fullname);
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, fullname);

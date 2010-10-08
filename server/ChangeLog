@@ -1,6 +1,7 @@
 * 2010-10-08 - thorben.betten@open-xchange.com
 
  - Bugfix #17162: Changed error codes' detail numbers
+ - Bugfix #17199: Proper cache invalidation after folder move operation
 
 * 2010-10-05 - marcus.klein@open-xchange.com
 
