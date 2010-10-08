@@ -186,8 +186,8 @@ public class RdbContextStorage extends ContextStorage {
     @Override
     public ContextExtended loadContext(int contextId) throws ContextException {
         ContextImpl context = loadContextData(contextId);
-        context.setMailadmin(getAdmin(context));
         context.setLoginInfo(getLoginInfos(context));
+        context.setMailadmin(getAdmin(context));
         return context;
     }
 
