@@ -110,9 +110,9 @@ public class ReportingMBean implements DynamicMBean {
 
     private TabularType totalType;
 
-    private String[] moduleAccessCombinationNames = { "module access combination", "users" };
+    private String[] moduleAccessCombinationNames = { "module access combination", "users", "inactive" };
 
-    private String[] detailNames = { "identifier", "users", "age", "created", "mappings", "module access combinations" };
+    private String[] detailNames = { "identifier", "admin permission", "users", "age", "created", "mappings", "module access combinations" };
 
     private CompositeType detailRow;
 
@@ -180,6 +180,7 @@ public class ReportingMBean implements DynamicMBean {
             List<Integer> allContextIds = contextService.getAllContextIds();
             for (Integer contextId : allContextIds) {
                 Context context = contextService.getContext(contextId.intValue());
+                int contextAdmin = context.getMailadmin();
                 UserConfiguration[] configs = getUserConfigurations(userService, configService, context);
                 Date created = getContextCreated(context);
                 StringBuilder sb = new StringBuilder();
@@ -191,9 +192,9 @@ public class ReportingMBean implements DynamicMBean {
                     sb.setLength(sb.length() - 1);
                 }
                 TabularDataSupport moduleAccessCombinations = new TabularDataSupport(moduleAccessCombinationsType);
-                consolidateAccessCombinations(configs, moduleAccessCombinations);
+                consolidateAccessCombinations(configs, userService, moduleAccessCombinations);
                 CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] {
-                    contextId, I(configs.length), calcAge(created), created, sb.toString(), moduleAccessCombinations });
+                    contextId, getAdminPermission(contextAdmin, configs), I(configs.length), calcAge(created), created, sb.toString(), moduleAccessCombinations });
                 detail.put(value);
             }
         } catch (ContextException e) {
@@ -210,22 +211,36 @@ public class ReportingMBean implements DynamicMBean {
         return detail;
     }
 
-    private void consolidateAccessCombinations(UserConfiguration[] configs, TabularDataSupport moduleAccessCombinations) throws OpenDataException {
-        Map<Integer, Integer> combinations = new HashMap<Integer, Integer>();
+    private void consolidateAccessCombinations(UserConfiguration[] configs, UserService userService, TabularDataSupport moduleAccessCombinations) throws OpenDataException, UserException {
+        Map<Integer, Integer[]> combinations = new HashMap<Integer, Integer[]>();
         for (UserConfiguration config : configs) {
+            User user = userService.getUser(config.getUserId(), config.getContext());
             Integer accessCombination = I(config.getPermissionBits());
-            Integer users = combinations.get(accessCombination);
+            Integer[] users = combinations.get(accessCombination);
             if (null == users) {
-                users = I(1);
+                users = new Integer[]{I(1), user.isMailEnabled() ? I(0) : I(1)};
             } else {
-                users = I(users.intValue() + 1);
+                users[0] = I(users[0].intValue() + 1);
+                if (!user.isMailEnabled()) {
+                    users[1] = I(users[1].intValue() + 1);
+                }
             }
             combinations.put(accessCombination, users);
         }
-        for (Map.Entry<Integer, Integer> entry : combinations.entrySet()) {
+        for (Map.Entry<Integer, Integer[]> entry : combinations.entrySet()) {
             moduleAccessCombinations.put(new CompositeDataSupport(moduleAccessPermission, moduleAccessCombinationNames, new Object[] {
-                entry.getKey(), entry.getValue() }));
+                entry.getKey(), entry.getValue()[0], entry.getValue()[1] }));
         }
+    }
+    
+    private Integer getAdminPermission(int contextAdmin, UserConfiguration[] configs) {
+        for (UserConfiguration config : configs) {
+            if (config.getUserId() == contextAdmin) {
+                return I(config.getPermissionBits());
+            }
+        }
+        LOG.error("Can not find context admin");
+        return I(-1);
     }
 
     private UserConfiguration[] getUserConfigurations(UserService userService, UserConfigurationService configurationService, Context ctx) throws UserException, UserConfigurationException {
@@ -309,13 +324,13 @@ public class ReportingMBean implements DynamicMBean {
             totalRow = new CompositeType("Total row", "A total row", totalNames, totalDescriptions, totalTypes);
             totalType = new TabularType("Total", "Total view", totalRow, totalNames);
 
-            String[] moduleAccessCombinationDescriptions = { "Integer value of the module access combination", "number of users configured with this module access combination" };
-            OpenType[] moduleAccessCombinationTypes = { SimpleType.INTEGER, SimpleType.INTEGER };
+            String[] moduleAccessCombinationDescriptions = { "Integer value of the module access combination", "number of users configured with this module access combination", "inactive subset of useres configured with this module access combination" };
+            OpenType[] moduleAccessCombinationTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
             moduleAccessPermission = new CompositeType("Module access permission", "A module access combination and the number of users having it", moduleAccessCombinationNames, moduleAccessCombinationDescriptions, moduleAccessCombinationTypes);
             moduleAccessCombinationsType = new TabularType("Module access permission combinations", "The different access combinations used in this context", moduleAccessPermission, new String[] { "module access combination" });
 
-            String[] detailDescriptions = { "Context identifier", "Number of users", "Context age in days", "Date and time of context creation", "Login mappings", "Module access permission combinations" };
-            OpenType[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, SimpleType.STRING, moduleAccessCombinationsType };
+            String[] detailDescriptions = { "Context identifier", "Context admin permission", "Number of users", "Context age in days", "Date and time of context creation", "Login mappings", "Module access permission combinations" };
+            OpenType[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, SimpleType.STRING, moduleAccessCombinationsType };
             detailRow = new CompositeType("Detail row", "A detail row", detailNames, detailDescriptions, detailTypes);
             detailType = new TabularType("Detail", "Detail view", detailRow, new String[] { "identifier" });
 
