@@ -105,11 +105,11 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             parent = FileStorageFolderIdentifier.getFQN(serviceId, accountId, fsFolder.getParentId());
         }
         {
-            final List<FileStoragePermission> messagingPermissions = fsFolder.getPermissions();
-            final int size = messagingPermissions.size();
+            final List<FileStoragePermission> fsPermissions = fsFolder.getPermissions();
+            final int size = fsPermissions.size();
             permissions = new Permission[size];
             for (int i = 0; i < size; i++) {
-                permissions[i] = new FileStoragePermissionImpl(messagingPermissions.get(i));
+                permissions[i] = new FileStoragePermissionImpl(fsPermissions.get(i));
             }
         }
         type = SystemType.getInstance();
