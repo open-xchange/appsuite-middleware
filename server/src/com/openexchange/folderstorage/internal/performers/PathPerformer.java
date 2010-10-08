@@ -205,10 +205,11 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
                     Integer.valueOf(getContextId()));
             }
             final List<UserizedFolder> path = new ArrayList<UserizedFolder>(8);
-            path.add(getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages));
-            while (!FolderStorage.ROOT_ID.equals(folder.getParentID())) {
-                final FolderStorage fs = getOpenedStorage(folder.getParentID(), treeId, storageParameters, openedStorages);
-                folder = fs.getFolder(treeId, folder.getParentID(), storageParameters);
+            UserizedFolder userizedFolder = getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages);
+            path.add(userizedFolder);
+            while (!FolderStorage.ROOT_ID.equals(userizedFolder.getParentID())) {
+                final FolderStorage fs = getOpenedStorage(userizedFolder.getParentID(), treeId, storageParameters, openedStorages);
+                folder = fs.getFolder(treeId, userizedFolder.getParentID(), storageParameters);
                 ownPermission = permissionProvider.getOwnPermission(folder);
                 if (!ownPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
@@ -216,7 +217,8 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
                         getUser().getDisplayName(),
                         Integer.valueOf(getContextId()));
                 }
-                path.add(getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages));
+                userizedFolder = getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages);
+                path.add(userizedFolder);
             }
 
             ret = path.toArray(new UserizedFolder[path.size()]);
