@@ -5,6 +5,7 @@
 
  - Bugfix #17162: Changed error codes' detail numbers
  - Bugfix #17199: Proper cache invalidation after folder move operation
+ - Bugfix #17198: Proper respect to property "com.openexchange.mail.ignoreSubscription"
 
 * 2010-10-05 - marcus.klein@open-xchange.com
 
