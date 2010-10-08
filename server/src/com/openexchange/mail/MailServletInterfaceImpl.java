@@ -582,9 +582,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
-        postEvent(accountId, fullname, true);
+        postEvent(accountId, fullname, true, true);
         if (!hd) {
-            postEvent(accountId, trashFullname, true);
+            postEvent(accountId, trashFullname, true, true);
         }
         return true;
     }
