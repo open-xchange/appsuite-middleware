@@ -69,6 +69,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
+import com.openexchange.groupware.contact.OverridingContactInterface;
 
 
 /**
@@ -229,14 +230,14 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     }
 
     public void save(Contact newElement, Object session) throws AbstractOXException {
-        RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
+    	OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
         
         // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
         newElement.setUserField20(UUID.randomUUID().toString());
 
-        contacts.insertContactObject(newElement);
+        contacts.forceInsertContactObject(newElement);
     }
 
     private Object getFromSession(int key, Object session) {
