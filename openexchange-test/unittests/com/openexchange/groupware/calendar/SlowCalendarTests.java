@@ -129,8 +129,11 @@ public class SlowCalendarTests extends AbstractCalendarTest {
 
             iter = sqlInterface.getObjectsById(new int[][] { { cdao.getObjectID(), cdao.getParentFolderID() } }, COLS);
             assertContains(iter, cdao);
-
-            iter = sqlInterface.searchAppointments("*", cdao.getParentFolderID(), Appointment.OBJECT_ID, null, COLS);
+            AppointmentSearchObject searchObj = new AppointmentSearchObject();
+            searchObj.setPattern("*");
+            searchObj.addFolder(cdao.getParentFolderID());
+            
+            iter = sqlInterface.searchAppointments(searchObj, Appointment.OBJECT_ID, null, COLS);
             assertContains(iter, cdao);
 
             sqlInterface.hasAppointmentsBetween(SUPER_START, new Date(SUPER_START.getTime() + 3600000l * 24 * 30));

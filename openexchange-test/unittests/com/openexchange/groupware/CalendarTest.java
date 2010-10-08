@@ -88,6 +88,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -545,7 +546,12 @@ public class CalendarTest extends TestCase {
             //ofa.createFolder(fo, so, true, readcon, writecon, false);
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             public_folder_id = fo.getObjectID();
-            SearchIterator si = csql.searchAppointments("test", folder_id, 0, "ASC", cols);
+            
+            
+            AppointmentSearchObject searchObj = new AppointmentSearchObject(); 
+            searchObj.setPattern("test");
+            searchObj.addFolder(folder_id);
+            SearchIterator si = csql.searchAppointments(searchObj, 0, "ASC", cols);
             boolean gotresults = si.hasNext();
             assertTrue("Got real results by searching \"test\"", gotresults);
             while (si.hasNext()) {
@@ -568,8 +574,12 @@ public class CalendarTest extends TestCase {
             final int object_id = cdao.getObjectID();        
 
             assertEquals("Test correct folder id", public_folder_id, test_folder_id);
-
-            si = csql.searchAppointments("*", public_folder_id, 0, "ASC", cols);
+           
+            searchObj = new AppointmentSearchObject();
+            searchObj.setPattern("*");
+            searchObj.addFolder(public_folder_id);
+           
+            si = csql.searchAppointments(searchObj, 0, "ASC", cols);
             gotresults = si.hasNext();
             assertTrue("Got real results by searching \"*\"", gotresults);
             while (si.hasNext()) {
@@ -578,7 +588,8 @@ public class CalendarTest extends TestCase {
             }              
             si.close();
             
-            si = csql.searchAppointments("*.*", public_folder_id, 0, "ASC", cols);
+            searchObj.setPattern("*.*");
+            si = csql.searchAppointments(searchObj, 0, "ASC", cols);
             gotresults = si.hasNext();
             assertTrue("Got some results by searching \"*e*\"", !gotresults);
             si.close();
