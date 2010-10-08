@@ -56,7 +56,7 @@ import java.util.Map;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmartDriveFactoryService {
+public interface SmartDriveFactoryService extends SmartDriveConstants {
 
     /**
      * Creates a new SmartDrive access for given SmartDrive user name.
@@ -66,8 +66,10 @@ public interface SmartDriveFactoryService {
      * @param configuration The SmartDrive access configuration:<br>
      *            <ul>
      *            <li>{@link SmartDriveConstants#CONFIG_TIMEOUT} - The HTTP time out value, default is <code>"60000"</code></li>
-     *            <li>{@link SmartDriveConstants#CONFIG_LOGIN} - The optional login for HTTP authentication</li>
-     *            <li>{@link SmartDriveConstants#CONFIG_PASSWORD} - The optional password for HTTP authentication</code></li>
+     *            <li>{@link SmartDriveConstants#CONFIG_LOGIN} - The optional login for HTTP authentication, default is <code>null</code>
+     *            (no HTTP authentication)</li>
+     *            <li>{@link SmartDriveConstants#CONFIG_PASSWORD} - The optional password for HTTP authentication, default is
+     *            <code>null</code> (no HTTP authentication)</li>
      *            </ul>
      * @return A new SmartDrive access for given SmartDrive user name
      * @throws SmartDriveException If a SmartDrive access cannot be created for specified user name
