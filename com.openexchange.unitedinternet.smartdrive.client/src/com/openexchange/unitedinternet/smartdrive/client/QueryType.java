@@ -50,7 +50,7 @@
 package com.openexchange.unitedinternet.smartdrive.client;
 
 /**
- * {@link QueryType} - An enumeration for query types.
+ * {@link QueryType} - An enumeration for SmartDrive query types.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
