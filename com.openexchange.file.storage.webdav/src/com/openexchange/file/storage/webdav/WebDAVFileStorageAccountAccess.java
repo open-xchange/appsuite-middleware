@@ -76,6 +76,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.webdav.session.WebDAVHttpClientRegistry;
@@ -120,7 +121,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     private volatile FileStorageFolderAccess folderAccess;
 
-    // private FileStorageFileAccess fileAccess;
+    private FileStorageFileAccess fileAccess;
 
     /**
      * Initializes a new {@link WebDAVFileStorageAccountAccess}.
@@ -192,6 +193,23 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
                 tmp = folderAccess;
                 if (null == tmp) {
                     folderAccess = tmp = new WebDAVFileStorageFolderAccess(client, account, session);
+                }
+            }
+        }
+        return tmp;
+    }
+
+    public FileStorageFileAccess getFileAccess() throws FileStorageException {
+        final HttpClient client = httpClientRef.get();
+        if (null == client) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
+        FileStorageFileAccess tmp = fileAccess;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = fileAccess;
+                if (null == tmp) {
+                    fileAccess = tmp = new WebDAVFileStorageFileAccess(client, account, session);
                 }
             }
         }
