@@ -49,10 +49,13 @@
 
 package com.openexchange.file.storage;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import com.openexchange.file.storage.meta.FileComparator;
+import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tx.TransactionAware;
 
 /**
@@ -148,15 +151,200 @@ public interface FileStorageFileAccess extends TransactionAware {
     /**
      * Find out whether the file with a given ID exists or not.
      * 
-     * @param folder The folder identifier
      * @param id The ID to check for
      * @param version The version to check for
      * @return true when the file exists and is readable, false otherwise.
      */
-    public boolean exists(String folder, String id, int version);
+    public boolean exists(String folderId, String id, int version);
     
+    /**
+     * Load the metadata about a file
+     * @param id The id of the file
+     * @param version The version number of the file. May pass in CURRENT_VERSION to load the current version
+     * @return The File Metadata
+     * @throws FileStorageException
+     */
+    public File getFileMetadata(String folderId, String id, int version) throws FileStorageException;
     
-    // TODO: Define more methods
+    /**
+     * Save the file metadata.
+     * @param document The metadata to save
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @throws FileStorageException
+     */
+    public void saveFileMetadata(File document, long sequenceNumber) throws FileStorageException ; // No modifiedColumns means all columns
+
+    /**
+     * Save the file metadata.
+     * @param document The metadata to save
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @throws FileStorageException
+     */
+    public void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws FileStorageException ;
     
+    /**
+     * Load the documents content
+     * @param id The id of the document
+     * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
+     * @return
+     * @throws FileStorageException
+     */
+    public InputStream getDocument(String folderId, String id, int version) throws FileStorageException;
+
+    /**
+     * Save the file metadata and binary content
+     * @param document The metadata to save
+     * @param data The binary content
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @throws FileStorageException
+     */
+    public void saveDocument(File document, InputStream data, long sequenceNumber) throws FileStorageException ;
+
+    /**
+     * Save the file metadata.
+     * @param document The metadata to save
+     * @param data The binary content
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @throws FileStorageException
+     */
+    public void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws FileStorageException ;
+    
+    /**
+     * Remove all documents in the given folder.
+     * @param folderId The folder to clear
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @throws FileStorageException
+     */
+    public void removeDocument(String folderId, long sequenceNumber) throws FileStorageException;
+
+    /**
+     * Removes the documents with the given IDs from the folder. Documents ids that could not be removed due to an edit-delete conflict are returned.
+     * @param ids The ids to remove 
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @return
+     * @throws FileStorageException
+     */
+    public String[] removeDocument(String[][] ids, long sequenceNumber) throws FileStorageException;
+ 
+    /**
+     * Remove a certain version of a file
+     * @param id The file id whose version is to be removed
+     * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
+     * @return
+     * @throws FileStorageException
+     */
+    public String[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException;
+
+    /**
+     * Unlocks a given file.
+     * @param id The file to unlock
+     * @throws FileStorageException
+     */
+    public void unlock(String folderId, String id) throws FileStorageException;
+    
+    /**
+     * Locks a given file for the given duration (in milliseconds)
+     * @param id The file to lock
+     * @param diff The duration in milliseconds
+     * @throws FileStorageException
+     */
+    public void lock(String folderId, String id, long diff) throws FileStorageException;
+
+    /**
+     * Updates a files sequence number
+     * @param id The file whose sequence number should be updated
+     * @throws FileStorageException
+     */
+    public void touch(String folderId, String id) throws FileStorageException;
+
+    /**
+     * List a folders content
+     * @param folderId The folder whose contents to list
+     * @return
+     * @throws FileStorageException
+     */
+    public TimedResult<File> getDocuments(String folderId) throws FileStorageException;
+
+    /**
+     * List a folders content loading only the columns given
+     * @param folderId The folder whose contents to list
+     * @param columns The fields to load
+     * @return
+     * @throws FileStorageException
+     */
+    public TimedResult<File> getDocuments(String folderId, List<File.Field> columns) throws FileStorageException;
+
+    /**
+     * List a folders content loading only the columns given and sorting by a certain field either ascendingly or descendingly
+     * @param folderId The folder whose contents to list
+     * @param columns The columns to load
+     * @param sort The field to sort by
+     * @param order The sorting direction
+     * @return
+     * @throws FileStorageException
+     */
+    public TimedResult<File> getDocuments(String folderId, List<File.Field> columns, File.Field sort, SortDirection order) throws FileStorageException;
+    
+    /**
+     * List all versions of a document
+     * @param id The documents id
+     * @return
+     * @throws FileStorageException
+     */
+    public TimedResult<File> getVersions(String folderId, String id) throws FileStorageException;
+
+    /**
+     * List all versions of a document loading the given columns
+     * @param id The documents id
+     * @param columns The columns to load
+     * @return
+     * @throws FileStorageException
+     */
+    public TimedResult<File> getVersions(String folderId, String id, List<File.Field> columns) throws FileStorageException;
+
+    /**
+     * List all versions of a document loading the given columns sorted according to the given field in a given order
+     * @param id The documents id
+     * @param columns The columns to load
+     * @return
+     * @throws FileStorageException
+     */
+    public TimedResult<File> getVersions(String folderId, String id, List<File.Field> columns, File.Field sort, SortDirection order) throws FileStorageException;
+
+    /**
+     * Load the document metadata with the given ids
+     * @param ids The documents ids 
+     * @param columns The fields to load
+     * @return
+     * @throws FileStorageException
+     */
+    public TimedResult<File> getDocuments(String[][] ids, List<File.Field> columns) throws FileStorageException;
+    
+    /**
+     * Get changes in a given folder since a certain sequence number
+     * @param folderId The folder to examine
+     * @param updateSince The sequence number to check against
+     * @param columns The columns to load
+     * @param ignoreDeleted Whether to check for file deletion as well.
+     * @return
+     * @throws FileStorageException
+     */
+    public Delta<File> getDelta(String folderId, long updateSince, List<File.Field> columns, boolean ignoreDeleted) throws FileStorageException;
+
+    /**
+     * Get changes in a given folder since a certain sequence number
+     * @param folderId The folder to examine
+     * @param updateSince The sequence number to check against
+     * @param columns The columns to load
+     * @param sort The field to sort by
+     * @param order The sorting direction
+     * @param ignoreDeleted
+     * @return
+     * @throws FileStorageException
+     */
+    public Delta<File> getDelta(String folderId, long updateSince, List<File.Field> columns, File.Field sort, SortDirection order, boolean ignoreDeleted) throws FileStorageException;
+
     
 }

@@ -51,14 +51,14 @@ package com.openexchange.tx;
 
 import gnu.trove.TLongObjectHashMap;
 
-public abstract class AbstractService implements TransactionAware {
+public abstract class AbstractService<T> implements TransactionAware {
 
-    private final TLongObjectHashMap<Object> txIds = new TLongObjectHashMap<Object>();
+    private final TLongObjectHashMap<T> txIds = new TLongObjectHashMap<T>();
     private final TLongObjectHashMap<StackTraceElement[]> startedTx = new TLongObjectHashMap<StackTraceElement[]>();
 
-    protected abstract Object createTransaction()throws TransactionException;
-    protected abstract void commit(Object transaction) throws TransactionException;
-    protected abstract void rollback(Object transaction)throws TransactionException;
+    protected abstract T createTransaction()throws TransactionException;
+    protected abstract void commit(T transaction) throws TransactionException;
+    protected abstract void rollback(T transaction)throws TransactionException;
 
     private static final boolean rememberStacks = false;
 
@@ -69,7 +69,7 @@ public abstract class AbstractService implements TransactionAware {
             throw new TransactionException("There is already a transaction active at this moment", startedTx.get(id));
         }
 
-        final Object txId = createTransaction();
+        final T txId = createTransaction();
 
         txIds.put(id,txId);
         if(rememberStacks) {
@@ -85,7 +85,7 @@ public abstract class AbstractService implements TransactionAware {
         rollback(getActiveTransaction());
     }
 
-    protected Object getActiveTransaction(){
+    protected T getActiveTransaction(){
         return txIds.get(Thread.currentThread().getId());
     }
 
