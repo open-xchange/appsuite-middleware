@@ -147,6 +147,11 @@ public interface SmartDriveConstants {
     public static final int SC_GENERAL_ERROR = 400;
 
     /**
+     * The status code for <code>401 (Unauthorized)</code>.
+     */
+    public static final int SC_UNAUTHORIZED = 401;
+
+    /**
      * The status code for <code>403 (forbidden)</code>.
      */
     public static final int SC_FORBIDDEN = 403;
