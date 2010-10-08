@@ -113,8 +113,6 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
 
     private final HttpClient client;
 
-    private volatile boolean authenticated;
-
     private volatile SmartDriveStatefulAccess statefulAccess;
 
     private volatile SmartDriveStatelessAccess statelessAccess;
@@ -142,16 +140,9 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
     }
 
     private void authenticate() throws SmartDriveException {
-        if (!authenticated) {
-            synchronized (this) {
-                if (!authenticated) {
-                    String sessionId = null;
-                    
-                    client.getParams().setParameter(HTTP_CLIENT_PARAM_SESSION_ID, sessionId);
-                    authenticated = true;
-                }
-            }
-        }
+        String sessionId = null;
+
+        client.getParams().setParameter(HTTP_CLIENT_PARAM_SESSION_ID, sessionId);
     }
 
     public SmartDriveStatefulAccess getStatefulAccess() throws SmartDriveException {
@@ -168,7 +159,7 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
         return tmp;
     }
 
-    public SmartDriveStatelessAccess getStatelessAccess() {
+    public SmartDriveStatelessAccess getStatelessAccess() throws SmartDriveException {
         SmartDriveStatelessAccess tmp = statelessAccess;
         if (null == tmp) {
             synchronized (this) {
