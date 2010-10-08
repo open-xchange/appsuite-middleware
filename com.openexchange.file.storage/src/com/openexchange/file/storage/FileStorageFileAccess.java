@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -149,11 +148,12 @@ public interface FileStorageFileAccess extends TransactionAware {
     /**
      * Find out whether the file with a given ID exists or not.
      * 
+     * @param folder The folder identifier
      * @param id The ID to check for
      * @param version The version to check for
      * @return true when the file exists and is readable, false otherwise.
      */
-    public boolean exists(String id, int version);
+    public boolean exists(String folder, String id, int version);
     
     
     // TODO: Define more methods

@@ -72,7 +72,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         rootUri = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
     }
 
-    public boolean exists(final String id, final int version) {
+    public boolean exists(final String folderId, final String id, final int version) {
         
         
         // TODO Auto-generated method stub
