@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -140,11 +141,11 @@ public final class MailFolderImpl extends AbstractFolder {
      * 
      * @param mailFolder The underlying mail folder
      * @param accountId The account identifier
-     * @param capabilities The capabilities
+     * @param mailConfig The mail configuration
      * @param fullnameProvider The (optional) fullname provider
      * @throws FolderException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
         super();
         final String fullname = mailFolder.getFullname();
         this.id = MailFolderUtility.prepareFullname(accountId, fullname);
@@ -158,9 +159,10 @@ public final class MailFolderImpl extends AbstractFolder {
             this.permissions[i] = new MailPermissionImpl(mailPermissions[i]);
         }
         type = SystemType.getInstance();
-        this.subscribed = mailFolder.isSubscribed(); // || mailFolder.hasSubscribedSubfolders();
-        this.subscribedSubfolders = mailFolder.hasSubscribedSubfolders();
-        this.capabilities = capabilities;
+        final boolean ignoreSubscription = mailConfig.getMailProperties().isIgnoreSubscription();
+        subscribed = ignoreSubscription ? true : mailFolder.isSubscribed(); // || mailFolder.hasSubscribedSubfolders();
+        subscribedSubfolders = ignoreSubscription ? mailFolder.hasSubfolders() : mailFolder.hasSubscribedSubfolders();
+        this.capabilities = mailConfig.getCapabilities().getCapabilities();
         {
             final String value =
                 mailFolder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(mailFolder.getMessageCount()).append('/').append(

@@ -489,8 +489,8 @@ public final class MailFolderStorage implements FolderStorage {
                 retval =
                     new MailFolderImpl(
                         rootFolder,
-                        mailAccess.getAccountId(),
-                        mailAccess.getMailConfig().getCapabilities().getCapabilities(),
+                        accountId,
+                        mailAccess.getMailConfig(),
                         null);
                 /*
                  * Set proper name for non-primary account
@@ -523,8 +523,8 @@ public final class MailFolderStorage implements FolderStorage {
                 retval =
                     new MailFolderImpl(
                         mailFolder,
-                        mailAccess.getAccountId(),
-                        mailAccess.getMailConfig().getCapabilities().getCapabilities(),
+                        accountId,
+                        mailAccess.getMailConfig(),
                         new MailAccessFullnameProvider(mailAccess));
                 hasSubfolders = mailFolder.hasSubfolders();
             }
