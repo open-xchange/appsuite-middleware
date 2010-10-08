@@ -54,6 +54,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.GetSwitch;
@@ -67,14 +68,14 @@ public class AttachmentWriter extends TimedWriter<AttachmentMetadata> {
         super(writer);
     }
 
-    public void writeAttachments(final SearchIterator iterator, final AttachmentField[] columns, final TimeZone tz) throws JSONException, SearchIteratorException, OXException {
+    public void writeAttachments(final SearchIterator iterator, final AttachmentField[] columns, final TimeZone tz) throws JSONException, AbstractOXException {
         jsonWriter.array();
         fillArray(iterator,columns,tz);
         jsonWriter.endArray();
     }
 
     @Override
-    protected void fillArray(final SearchIterator iterator, final Object[] columns, final TimeZone tz) throws SearchIteratorException, OXException, JSONException {
+    protected void fillArray(final SearchIterator iterator, final Object[] columns, final TimeZone tz) throws AbstractOXException, JSONException {
         while(iterator.hasNext()) {
             jsonWriter.array();
             final AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();

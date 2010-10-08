@@ -59,6 +59,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -251,6 +252,8 @@ public class TasksSQLImpl implements TasksSQLInterface {
             update.makeNextRecurrence(session);
         } catch (final TaskException e) {
             throw Tools.convert(e);
+        } catch (AbstractOXException e) {
+            throw new OXException(e);
         }
     }
 

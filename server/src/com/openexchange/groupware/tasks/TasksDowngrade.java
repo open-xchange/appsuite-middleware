@@ -55,6 +55,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
@@ -105,32 +106,23 @@ public class TasksDowngrade extends DowngradeListener {
             // - All tasks in public folders that can be only edited by this user.
             try {
                 removeTasks(session, ctx, userConfig.getUserId(), con);
-            } catch (final TaskException e) {
+            } catch (final AbstractOXException e) {
                 throw new DowngradeFailedException(e);
-            } catch (final OXException e) {
-                throw new DowngradeFailedException(e);
-            } catch (final SearchIteratorException e) {
-                throw new DowngradeFailedException(e);
-            }
+            } 
         } else if (!userConfig.canDelegateTasks()) {
             // Remove all delegations of tasks that the user created.
             try {
                 removeDelegations(session, ctx, userConfig.getUserId(), userConfig, con);
-            } catch (final TaskException e) {
+            } catch (final AbstractOXException e) {
                 throw new DowngradeFailedException(e);
-            } catch (final SearchIteratorException e) {
-                throw new DowngradeFailedException(e);
-            } catch (final OXException e) {
-                throw new DowngradeFailedException(e);
-            }
+            } 
         }
     }
 
     private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
 
     private void removeTasks(final Session session, final Context ctx,
-        final int userId, final Connection con) throws TaskException,
-        OXException, SearchIteratorException {
+        final int userId, final Connection con) throws AbstractOXException {
         final User user = Tools.getUser(ctx, userId);
         // Find private task folder.
         SearchIterator<FolderObject> iter = OXFolderIteratorSQL
@@ -236,8 +228,7 @@ public class TasksDowngrade extends DowngradeListener {
 
     private void removeDelegations(final Session session, final Context ctx,
         final int userId, final UserConfiguration userConfig,
-        final Connection con) throws TaskException, SearchIteratorException,
-        OXException {
+        final Connection con) throws AbstractOXException {
         final User user = Tools.getUser(ctx, userId);
         // Find all private folder.
         SearchIterator<FolderObject> iter = OXFolderIteratorSQL

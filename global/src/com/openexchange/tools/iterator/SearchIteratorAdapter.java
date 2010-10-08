@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -208,15 +207,18 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         class SIIterator implements Iterator<T> {
 
             public boolean hasNext() {
-                return iterator.hasNext();
+                try {
+                    return iterator.hasNext();
+                } catch (AbstractOXException e) {
+                    LOG.error(e.getMessage(), e);
+                    return false;
+                }
             }
 
             public T next() {
                 try {
                     return iterator.next();
-                } catch (final SearchIteratorException e) {
-                    LOG.error(e.getMessage(), e);
-                } catch (final OXException e) {
+                } catch (final AbstractOXException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 return null;
@@ -244,7 +246,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
      * @throws SearchIteratorException If list cannot be created
      * @throws OXException If list cannot be created
      */
-    public static <T> List<T> toList(final SearchIterator<T> iterator) throws SearchIteratorException, OXException {
+    public static <T> List<T> toList(final SearchIterator<T> iterator) throws AbstractOXException {
         final List<T> list = new ArrayList<T>();
         while (iterator.hasNext()) {
             list.add(iterator.next());

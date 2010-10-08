@@ -67,6 +67,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -490,7 +491,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         return retVal;
     }
 
-    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, SearchIteratorException, WebdavProtocolException {
+    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws AbstractOXException, IllegalAccessException, SearchIteratorException, WebdavProtocolException {
         if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
             return new ArrayList<OXWebdavResource>();
         }

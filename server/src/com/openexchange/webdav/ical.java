@@ -76,6 +76,7 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -247,17 +248,13 @@ public final class ical extends PermissionServlet {
                     }
                 }
                 patchers.forEachValue(PATCH_PROCEDURE);
-            } catch (final SearchIteratorException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final ConversionError e) {
+            } catch (final AbstractOXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 if (null != iter) {
                     try {
                         iter.close();
-                    } catch (final SearchIteratorException e) {
+                    } catch (final AbstractOXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
@@ -280,17 +277,13 @@ public final class ical extends PermissionServlet {
                     // item.setUID(clientId);
                     // }
                 }
-            } catch (final SearchIteratorException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final ConversionError e) {
+            } catch (final AbstractOXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 if (null != itTask) {
                     try {
                         itTask.close();
-                    } catch (final SearchIteratorException e) {
+                    } catch (final AbstractOXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }

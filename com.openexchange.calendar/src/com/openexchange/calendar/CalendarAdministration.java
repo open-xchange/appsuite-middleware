@@ -68,6 +68,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -272,7 +273,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             }
         } catch (final OXException e) {
             throw new DowngradeFailedException(e);
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             throw new DowngradeFailedException(e);
         } catch (final SQLException e) {
             LOG.error(e);

@@ -587,7 +587,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    public void actionGetAllMails(final ServerSession session, final JSONWriter writer, final JSONObject requestObj, final MailServletInterface mi) throws SearchIteratorException, JSONException {
+    public void actionGetAllMails(final ServerSession session, final JSONWriter writer, final JSONObject requestObj, final MailServletInterface mi) throws AbstractOXException, JSONException {
         ResponseWriter.write(actionGetAllMails(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi), writer);
     }
 
@@ -607,7 +607,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             final Response response = new Response();
             response.setException(e);
@@ -624,7 +624,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private static final String STR_DESC = "desc";
 
-    private final Response actionGetAllMails(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException, SearchIteratorException {
+    private final Response actionGetAllMails(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException, AbstractOXException {
         /*
          * Some variables
          */
@@ -1559,7 +1559,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return sb.toString();
     }
 
-    public void actionGetNew(final ServerSession session, final JSONWriter writer, final JSONObject requestObj, final MailServletInterface mi) throws SearchIteratorException, JSONException {
+    public void actionGetNew(final ServerSession session, final JSONWriter writer, final JSONObject requestObj, final MailServletInterface mi) throws AbstractOXException, JSONException {
         ResponseWriter.write(actionGetNew(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi), writer);
     }
 
@@ -1579,7 +1579,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             final Response response = new Response();
             response.setException(e);
@@ -1592,7 +1592,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    private final Response actionGetNew(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException, SearchIteratorException {
+    private final Response actionGetNew(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException, AbstractOXException {
         /*
          * Some variables
          */
@@ -2556,7 +2556,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    public void actionPutMailSearch(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException, SearchIteratorException {
+    public void actionPutMailSearch(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException, AbstractOXException {
         ResponseWriter.write(actionPutMailSearch(session, jsonObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
             jsonObj,
             EnumComponent.MAIL), mi), writer);
@@ -2579,7 +2579,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             final Response response = new Response();
             response.setException(e);
@@ -2592,7 +2592,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    private final Response actionPutMailSearch(final ServerSession session, final String body, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException, SearchIteratorException {
+    private final Response actionPutMailSearch(final ServerSession session, final String body, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException, AbstractOXException {
         /*
          * Some variables
          */

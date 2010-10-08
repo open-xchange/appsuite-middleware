@@ -84,6 +84,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -173,7 +174,7 @@ public class AppointmentRequest {
         return timestamp;
     }
 
-    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXConflictException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+    public JSONValue action(final String action, final JSONObject jsonObject) throws  JSONException, AbstractOXException{
         if (!session.getUserConfiguration().hasCalendar()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "calendar");
         }
@@ -305,7 +306,7 @@ public class AppointmentRequest {
         return jsonResponseObj;
     }
 
-    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -509,7 +510,7 @@ public class AppointmentRequest {
         return new JSONArray();
     }
 
-    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         timestamp = new Date(0);
 
         Date lastModified = null;
@@ -686,7 +687,7 @@ public class AppointmentRequest {
         }
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws SearchIteratorException, OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException,AbstractOXException {
         timestamp = new Date(0);
 
         SearchIterator<Appointment> it = null;
@@ -953,7 +954,7 @@ public class AppointmentRequest {
         return jsonResponseArray;
     }
 
-    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXConflictException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         timestamp = new Date(0);
@@ -1022,7 +1023,7 @@ public class AppointmentRequest {
     }
     
 
-    public JSONArray actionNewAppointmentsSearch(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXConflictException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionNewAppointmentsSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         
@@ -1140,7 +1141,7 @@ public class AppointmentRequest {
         }
     }
 
-    public JSONArray actionFreeBusy(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXMandatoryFieldException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionFreeBusy(final JSONObject jsonObj) throws JSONException,AbstractOXException {
         final int userId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int type = DataParser.checkInt(jsonObj, "type");
         final TimeZone timeZone;

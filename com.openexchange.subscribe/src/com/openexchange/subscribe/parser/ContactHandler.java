@@ -79,7 +79,7 @@ public class ContactHandler {
      * @throws ContextException
      * @throws OXException
      */
-    protected void storeContacts(Session session, int folderId, Collection<Contact> updatedContacts) throws ContextException, OXException{
+    protected void storeContacts(Session session, int folderId, Collection<Contact> updatedContacts) throws AbstractOXException{
        
         
         RdbContactSQLImpl storage = new RdbContactSQLImpl(session);

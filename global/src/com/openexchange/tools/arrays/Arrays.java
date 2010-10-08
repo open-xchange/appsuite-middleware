@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools;
+package com.openexchange.tools.arrays;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.Array;

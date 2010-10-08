@@ -62,6 +62,7 @@ import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
 import com.openexchange.ajax.writer.AttachmentWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentField;
@@ -339,14 +340,14 @@ public class AttachmentRequest extends CommonRequest {
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final SearchIteratorException e1) {
+                } catch (final AbstractOXException e1) {
                     LOG.error(e1.getMessage(), e1);
                 }
             }
             if (iter2 != null) {
                 try {
                     iter2.close();
-                } catch (final SearchIteratorException e) {
+                } catch (final AbstractOXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -388,7 +389,7 @@ public class AttachmentRequest extends CommonRequest {
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final SearchIteratorException e) {
+                } catch (final AbstractOXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -464,7 +465,7 @@ public class AttachmentRequest extends CommonRequest {
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final SearchIteratorException e) {
+                } catch (final AbstractOXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }

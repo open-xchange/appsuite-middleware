@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.helpers.DefaultContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -74,7 +75,7 @@ public class ContactSearchMultiplexer {
         this.discoveryService = discoveryService;
     }
 
-    public SearchIterator<Contact> extendedSearch(ServerSession session, ContactSearchObject search, int orderBy, String orderDir, int[] cols) throws OXException {
+    public SearchIterator<Contact> extendedSearch(ServerSession session, ContactSearchObject search, int orderBy, String orderDir, int[] cols) throws AbstractOXException {
         
         int[] folders = search.getFolders();
         int contextId = session.getContextId();

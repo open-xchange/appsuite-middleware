@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -76,7 +77,7 @@ public abstract class TimedWriter<T> {
 		jsonWriter.endObject();
 	}
 	
-	public void writeDelta(final SearchIterator<T> iterator, final SearchIterator<T> deleted, final Object[] cols, final boolean ignoreDeleted, final TimeZone tz) throws JSONException, SearchIteratorException, OXException {
+	public void writeDelta(final SearchIterator<T> iterator, final SearchIterator<T> deleted, final Object[] cols, final boolean ignoreDeleted, final TimeZone tz) throws JSONException, AbstractOXException {
 		jsonWriter.array();
 		fillArray(iterator,cols, tz);
 		while(deleted.hasNext() && !ignoreDeleted) {
@@ -88,5 +89,5 @@ public abstract class TimedWriter<T> {
 
 	protected abstract int getId(Object object);
 
-	protected abstract void fillArray(SearchIterator<T> iterator, Object[] cols, TimeZone tz) throws SearchIteratorException, JSONException, OXException;
+	protected abstract void fillArray(SearchIterator<T> iterator, Object[] cols, TimeZone tz) throws JSONException, AbstractOXException;
 }

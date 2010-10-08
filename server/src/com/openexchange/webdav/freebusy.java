@@ -64,6 +64,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.context.ContextService;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -254,12 +255,10 @@ public class freebusy extends HttpServlet {
             } finally {
                 it.close();
             }
-        } catch (final SearchIteratorException e) {
+        }catch (final ServiceException e) {
+                LOG.error("Calendar service not found.", e);
+        } catch (final AbstractOXException e) {
             LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
-        } catch (final OXException e) {
-            LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
-        } catch (final ServiceException e) {
-            LOG.error("Calendar service not found.", e);
         }
         printWriter.println("END:VFREEBUSY");
         printWriter.println("END:VCALENDAR");

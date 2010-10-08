@@ -364,7 +364,7 @@ public class InfostoreRequest extends CommonRequest {
         return ids;
     }
 
-    protected void doSortedSearch(final SimpleRequest req) throws JSONException, SearchIteratorException {
+    protected void doSortedSearch(final SimpleRequest req) throws JSONException, AbstractOXException {
         Metadata[] cols = null;
 
         try {
@@ -484,7 +484,7 @@ public class InfostoreRequest extends CommonRequest {
 
     // Actions
 
-    protected void list(final int[] ids, final Metadata[] cols, final String timeZoneId) throws SearchIteratorException {
+    protected void list(final int[] ids, final Metadata[] cols, final String timeZoneId) throws AbstractOXException {
         final InfostoreFacade infostore = getInfostore();
         TimedResult<DocumentMetadata> result = null;
         SearchIterator<DocumentMetadata> iter = null;
@@ -580,7 +580,7 @@ public class InfostoreRequest extends CommonRequest {
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final SearchIteratorException e) {
+                } catch (final AbstractOXException e) {
                     LOG.error("", e);
                 }
             }
@@ -593,7 +593,7 @@ public class InfostoreRequest extends CommonRequest {
     }
 
     protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final String timeZoneId, final int leftHandLimit, final int rightHandLimit)
-            throws SearchIteratorException {
+            throws AbstractOXException {
         /**
          * System.out.println("ALL: "+System.currentTimeMillis());
          * System.out.println("---------all-------------");
@@ -632,7 +632,7 @@ public class InfostoreRequest extends CommonRequest {
     }
 
     protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir, final String timeZoneId)
-            throws SearchIteratorException {
+            throws AbstractOXException {
         final InfostoreFacade infostore = getInfostore();
         TimedResult<DocumentMetadata> result = null;
         SearchIterator<DocumentMetadata> iter = null;
@@ -684,7 +684,7 @@ public class InfostoreRequest extends CommonRequest {
                 iter.addWarning(warning);
             }
 
-            public void close() throws SearchIteratorException {
+            public void close() throws AbstractOXException {
                 iter.close();
             }
 
@@ -692,7 +692,7 @@ public class InfostoreRequest extends CommonRequest {
                 return iter.getWarnings();
             }
 
-            public boolean hasNext() {
+            public boolean hasNext() throws AbstractOXException{
                 try {
                     scrollToNext();
                 } catch (final SearchIteratorException e) {
@@ -711,7 +711,7 @@ public class InfostoreRequest extends CommonRequest {
                 return iter.hasWarnings();
             }
 
-            public DocumentMetadata next() throws SearchIteratorException, OXException {
+            public DocumentMetadata next() throws AbstractOXException {
                 if(se != null) {
                     throw se;
                 }
@@ -726,7 +726,7 @@ public class InfostoreRequest extends CommonRequest {
                 return nextResult;
             }
 
-            private void scrollToNext() throws SearchIteratorException, OXException {
+            private void scrollToNext() throws AbstractOXException {
                 while(iter.hasNext()) {
                     next = iter.next();
                     if(next.getVersion() != 0) {
@@ -745,7 +745,7 @@ public class InfostoreRequest extends CommonRequest {
     }
 
     protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir,
-            final long timestamp, final boolean ignoreDelete, final String timeZoneId) throws SearchIteratorException {
+            final long timestamp, final boolean ignoreDelete, final String timeZoneId) throws AbstractOXException {
         final InfostoreFacade infostore = getInfostore(folderId);
         Delta<DocumentMetadata> delta = null;
 

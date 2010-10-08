@@ -49,11 +49,12 @@
 
 package com.openexchange.groupware.results;
 
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
 
 public interface TimedResult<T> {
 
     SearchIterator<T> results();
 
-    long sequenceNumber();
+    long sequenceNumber() throws AbstractOXException;
 }

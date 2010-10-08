@@ -107,7 +107,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
     public static int MAX_PRE_FETCH = 20;
     private int pre_fetch;
 
-    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws SearchIteratorException, OXException {
+    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws AbstractOXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	list = new ArrayList<CalendarDataObject>(16);
         this.non_cached_iterator = non_cached_iterator;
@@ -121,7 +121,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         }
     }
 
-    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws SearchIteratorException, OXException {
+    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws AbstractOXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	if (non_cached_iterator.hasWarnings()) {
     		warnings.addAll(Arrays.asList(non_cached_iterator.getWarnings()));
@@ -139,7 +139,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         }
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws AbstractOXException {
         if (!cache) {
             return non_cached_iterator.hasNext();
         }
@@ -153,7 +153,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         return false;
     }
 
-    public CalendarDataObject next() throws SearchIteratorException, OXException {
+    public CalendarDataObject next() throws AbstractOXException {
         if (!oxonfe) {
             if (!cache) {
                 if (oids != null) {
@@ -177,7 +177,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         return null;
     }
 
-    public final void close() throws SearchIteratorException {
+    public final void close() throws AbstractOXException {
         if (closed) {
             return;
         }
@@ -187,10 +187,6 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 
     public int size() {
         return non_cached_iterator.size();
-    }
-
-    public boolean hasSize() {
-        return non_cached_iterator.hasSize();
     }
 
     public void addWarning(final AbstractOXException warning) {
@@ -205,7 +201,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 		return !warnings.isEmpty();
 	}
 
-    private final void fillCachedResultSet() throws SearchIteratorException, OXException {
+    private final void fillCachedResultSet() throws AbstractOXException {
         try {
             while (non_cached_iterator.hasNext()) {
                 list.add(non_cached_iterator.next());
@@ -215,7 +211,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         }
     }
 
-    private final CalendarDataObject getPreFilledResult() throws SearchIteratorException, OXException {
+    private final CalendarDataObject getPreFilledResult() throws AbstractOXException {
         Connection readcon = null;
         CalendarDataObject cdao;
         try {

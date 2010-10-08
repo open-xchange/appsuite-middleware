@@ -50,6 +50,7 @@
 package com.openexchange.calendar;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -62,16 +63,16 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public class AnonymizingIterator extends CachedCalendarIterator {
 
-    public AnonymizingIterator(SearchIterator<CalendarDataObject> non_cached_iterator, Context c, int uid) throws SearchIteratorException, OXException {
+    public AnonymizingIterator(SearchIterator<CalendarDataObject> non_cached_iterator, Context c, int uid) throws AbstractOXException {
         super(non_cached_iterator, c, uid);
     }
 
-    public AnonymizingIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws SearchIteratorException, OXException{
+    public AnonymizingIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws AbstractOXException {
         super(non_cached_iterator, c, uid, oids);
     }
 
     @Override
-    public CalendarDataObject next() throws SearchIteratorException, OXException {
+    public CalendarDataObject next() throws AbstractOXException {
         CalendarDataObject app = super.next();
         if (null == app) {
             return null;

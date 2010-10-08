@@ -66,7 +66,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.iterator.FolderObjectIterator;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 public class DelUserFolderDiscoverer extends DBService {

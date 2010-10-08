@@ -56,6 +56,7 @@ import com.openexchange.ajax.Infostore;
 import com.openexchange.api2.OXException;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -185,7 +186,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
             final long timeToLive = TransportProperties.getInstance().getPublishedDocumentTimeToLive();
             final SmartIntArray sia = new SmartIntArray(128);
             final int userId = serverSession.getUserId();
-            if (searchIterator.hasSize()) {
+            if (searchIterator.size() != -1) {
                 final int size = searchIterator.size();
                 for (int i = 0; i < size; i++) {
                     final DocumentMetadata documentMetadata = searchIterator.next();
@@ -208,14 +209,12 @@ public final class TransportLoginHandler implements LoginHandlerService {
                 }
             }
             return sia.toArray();
-        } catch (final SearchIteratorException e) {
-            throw new LoginException(e);
-        } catch (final OXException e) {
+        } catch (final AbstractOXException e) {
             throw new LoginException(e);
         } finally {
             try {
                 searchIterator.close();
-            } catch (final SearchIteratorException e) {
+            } catch (final AbstractOXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

@@ -316,7 +316,7 @@ public class ContactRequest {
         return new JSONObject();
     }
 
-    public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
@@ -406,7 +406,7 @@ public class ContactRequest {
         return new JSONArray();
     }
 
-    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         timestamp = new Date(0);
 
         Date lastModified = null;
@@ -548,7 +548,7 @@ public class ContactRequest {
         return jsonResponseArray;
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
@@ -665,7 +665,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);

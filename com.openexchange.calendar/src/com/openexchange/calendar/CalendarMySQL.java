@@ -2432,7 +2432,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             // If a normal appointment is changed into a recurring appointment, 
             // recurring position (intfield05) has to be set to 0 instead of staying NULL.
             // Otherwise it will disappear in outlook because of missing series information.
-            if (edao.getRecurrence() == null && cdao.getRecurrence() != null && !com.openexchange.tools.Arrays.contains(ucols, Appointment.RECURRENCE_POSITION)) {
+            if (edao.getRecurrence() == null && cdao.getRecurrence() != null && !com.openexchange.tools.arrays.Arrays.contains(ucols, Appointment.RECURRENCE_POSITION)) {
                 cdao.setRecurrencePosition(0);
                 ucols[uc++] = Appointment.RECURRENCE_POSITION;
             }
@@ -2502,12 +2502,12 @@ public class CalendarMySQL implements CalendarSqlImp {
                 while (it.hasNext()) {
                     toUpdate.add((ReminderObject) it.next());
                 }
-            } catch (final SearchIteratorException e) {
+            } catch (final AbstractOXException e) {
                 LOG.error("Reminder update failed", e);
             } finally {
                 try {
                     it.close();
-                } catch (final SearchIteratorException e) {
+                } catch (final AbstractOXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }

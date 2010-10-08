@@ -65,7 +65,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSession;
-import com.openexchange.tools.Arrays;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**

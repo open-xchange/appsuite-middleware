@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.iterator;
+package com.openexchange.groupware.tools.iterator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +59,8 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * This iterator prefetches the delegating iterator results if the server configuration contains <code>true</code> for the prefetch
@@ -77,8 +79,9 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
      * Default constructor.
      * 
      * @param delegate Delegating iterator.
+     * @throws AbstractOXException 
      */
-    public PrefetchIterator(final SearchIterator<T> delegate) {
+    public PrefetchIterator(final SearchIterator<T> delegate) throws AbstractOXException {
         final boolean prefetch = ServerConfig.getBoolean(Property.PrefetchEnabled);
         if (prefetch) {
             impl = new Prefetch<T>(delegate);
@@ -90,28 +93,21 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
-    public void close() throws SearchIteratorException {
+    public void close() throws AbstractOXException {
         impl.close();
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean hasNext() {
+    public boolean hasNext() throws AbstractOXException{
         return impl.hasNext();
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean hasSize() {
-        return impl.hasSize();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public T next() throws SearchIteratorException, OXException {
+    public T next() throws AbstractOXException {
         return impl.next();
     }
 
@@ -160,9 +156,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
         private final List<AbstractOXException> warnings;
 
-        private OXException oxExc;
-
-        private SearchIteratorException sie;
+        private AbstractOXException oxExc;
 
         private SearchIteratorException closeexc;
 
@@ -170,8 +164,9 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
          * Default constructor.
          * 
          * @param delegate Iterator for the object.
+         * @throws AbstractOXException 
          */
-        Prefetch(final SearchIterator<T> delegate) {
+        Prefetch(final SearchIterator<T> delegate) throws AbstractOXException {
             super();
             warnings = new ArrayList<AbstractOXException>(2);
             this.delegate = delegate;
@@ -183,21 +178,15 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
         /**
          * Reads all data from the delegate.
+         * @throws AbstractOXException 
          */
-        private void fetch() {
-            if (delegate.hasSize()) {
-                data = new LinkedList<T>();
-            } else {
-                data = new LinkedList<T>();
-            }
+        private void fetch() throws AbstractOXException {
+            data = new LinkedList<T>();
             while (delegate.hasNext()) {
                 try {
                     data.add(delegate.next());
-                } catch (final OXException e) {
+                } catch (final AbstractOXException e) {
                     oxExc = e;
-                    break;
-                } catch (final SearchIteratorException e) {
-                    sie = e;
                     break;
                 }
             }
@@ -222,7 +211,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
          * {@inheritDoc}
          */
         public boolean hasNext() {
-            return !data.isEmpty() || (null != oxExc) || (null != sie);
+            return !data.isEmpty() || (null != oxExc);
         }
 
         /**
@@ -235,13 +224,10 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public T next() throws SearchIteratorException, OXException {
+        public T next() throws AbstractOXException {
             if (data.isEmpty()) {
                 if (null != oxExc) {
                     throw oxExc;
-                }
-                if (null != sie) {
-                    throw sie;
                 }
                 throw new SearchIteratorException(SearchIteratorException.Code.NO_SUCH_ELEMENT, EnumComponent.APPOINTMENT);
             }
@@ -302,28 +288,21 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public void close() throws SearchIteratorException {
+        public void close() throws AbstractOXException {
             delegate.close();
         }
 
         /**
          * {@inheritDoc}
          */
-        public boolean hasNext() {
+        public boolean hasNext() throws AbstractOXException {
             return delegate.hasNext();
         }
 
         /**
          * {@inheritDoc}
          */
-        public boolean hasSize() {
-            return delegate.hasSize();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public T next() throws SearchIteratorException, OXException {
+        public T next() throws AbstractOXException {
             return delegate.next();
         }
 

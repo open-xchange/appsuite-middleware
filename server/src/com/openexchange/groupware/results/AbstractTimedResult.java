@@ -59,48 +59,49 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 public abstract class AbstractTimedResult<T> implements TimedResult<T> {
 
-	private final LastModifiedExtractorIterator results;
-	private long sequenceNumber;
+    private final LastModifiedExtractorIterator results;
 
-	public AbstractTimedResult(final SearchIterator<T> results) {
-		this.results = new LastModifiedExtractorIterator(results);
-	}
-	
-	public SearchIterator<T> results() {
-		return results;
-	}
+    private long sequenceNumber;
 
-	public long sequenceNumber() {
-	    if(results.hasNext()) {
-	       results.fastForward();
-	    }
-		return sequenceNumber;
-	}
-	
-	protected abstract long extractTimestamp(T object);
-	
-	private class LastModifiedExtractorIterator implements SearchIterator<T> {
+    public AbstractTimedResult(final SearchIterator<T> results) {
+        this.results = new LastModifiedExtractorIterator(results);
+    }
+
+    public SearchIterator<T> results() {
+        return results;
+    }
+
+    public long sequenceNumber() throws AbstractOXException {
+        if (results.hasNext()) {
+            results.fastForward();
+        }
+        return sequenceNumber;
+    }
+
+    protected abstract long extractTimestamp(T object);
+
+    private class LastModifiedExtractorIterator implements SearchIterator<T> {
 
         private SearchIterator<T> results;
+
         private SearchIteratorException searchIteratorException;
+
         private OXException oxexception;
+
         private boolean fastForwardDone;
-        private boolean hasSize;
+
         private int size;
 
         public LastModifiedExtractorIterator(SearchIterator<T> results) {
             this.results = results;
-            this.hasSize = results.hasSize();
-            if(hasSize) {
-                this.size = results.size();
-            }
+            this.size = results.size();
         }
 
         public void addWarning(AbstractOXException warning) {
             results.addWarning(warning);
         }
 
-        public void close() throws SearchIteratorException {
+        public void close() throws AbstractOXException {
             results.close();
         }
 
@@ -108,14 +109,10 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             return results.getWarnings();
         }
 
-        public boolean hasNext() {
+        public boolean hasNext() throws AbstractOXException {
             return results.hasNext();
         }
 
-        public boolean hasSize() {
-            return hasSize;
-        }
-        
         public int size() {
             return size;
         }
@@ -124,18 +121,18 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             return results.hasWarnings();
         }
 
-        public T next() throws SearchIteratorException, OXException {
-            
-            if(this.searchIteratorException != null) {
+        public T next() throws AbstractOXException {
+
+            if (this.searchIteratorException != null) {
                 throw this.searchIteratorException;
             }
-            
-            if(this.oxexception != null) {
+
+            if (this.oxexception != null) {
                 throw this.oxexception;
             }
-            
+
             T nextObject = results.next();
-            if(fastForwardDone) {
+            if (fastForwardDone) {
                 return nextObject;
             }
             long timestamp = extractTimestamp(nextObject);
@@ -145,12 +142,11 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             return nextObject;
         }
 
-        
-        public void fastForward() {
+        public void fastForward() throws AbstractOXException {
             List<T> moreValues = new ArrayList<T>();
-            while(hasNext()) {
+            while (hasNext()) {
                 try {
-                    moreValues.add( next() );
+                    moreValues.add(next());
                 } catch (SearchIteratorException e) {
                     this.searchIteratorException = e;
                 } catch (OXException e) {
@@ -159,14 +155,14 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             }
             AbstractOXException[] warnings = results.getWarnings();
             results = new SearchIteratorAdapter<T>(moreValues.iterator());
-            if(warnings != null) {
+            if (warnings != null) {
                 for (AbstractOXException warning : warnings) {
                     results.addWarning(warning);
                 }
             }
             this.fastForwardDone = true;
         }
-           
-	}
+
+    }
 
 }

@@ -143,7 +143,7 @@ public final class ReminderRequest {
      * @throws AjaxException If an AJAX error occurs
      * @throws OXJSONException If a JSON error occurs
      */
-    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+    public JSONValue action(final String action, final JSONObject jsonObject) throws JSONException, AbstractOXException{
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
             return actionDelete(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
@@ -190,7 +190,7 @@ public final class ReminderRequest {
         return jsonArray;
     }
 
-    private JSONArray actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
+    private JSONArray actionUpdates(final JSONObject jsonObject) throws JSONException, AbstractOXException {
         timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
         final TimeZone timeZone;
         {

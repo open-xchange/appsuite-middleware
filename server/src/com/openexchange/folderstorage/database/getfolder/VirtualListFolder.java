@@ -55,12 +55,13 @@ import com.openexchange.api2.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.tools.iterator.FolderObjectIterator;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -117,10 +118,12 @@ public final class VirtualListFolder {
         }
         try {
             return searchIterator.hasNext();
+        } catch (AbstractOXException e) {
+            throw new FolderException(e);
         } finally {
             try {
                 searchIterator.close();
-            } catch (final SearchIteratorException e) {
+            } catch (final AbstractOXException e) {
                 LOG.error("Failed closing search iterator.", e);
             }
         }

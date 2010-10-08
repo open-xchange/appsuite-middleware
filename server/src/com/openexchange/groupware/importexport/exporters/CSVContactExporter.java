@@ -63,6 +63,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -213,17 +214,21 @@ public class CSVContactExporter implements Exporter {
         final StringBuilder ret = new StringBuilder();
         ret.append(convertToLine(com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols)));
 
-        while (conIter.hasNext()) {
-            Contact current;
-            try {
-                current = conIter.next();
-                ret.append(convertToLine(convertToList(current, cols)));
-            } catch (final SearchIteratorException e) {
-                LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
-            } catch (final OXException e) {
-                LOG.error("Could not retrieve contact from folder " + folder + ", OXException was: ", e);
-            }
+        try {
+            while (conIter.hasNext()) {
+                Contact current;
+                try {
+                    current = conIter.next();
+                    ret.append(convertToLine(convertToList(current, cols)));
+                } catch (final SearchIteratorException e) {
+                    LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
+                } catch (final OXException e) {
+                    LOG.error("Could not retrieve contact from folder " + folder + ", OXException was: ", e);
+                }
 
+            }
+        } catch (AbstractOXException e) {
+            LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
         }
         final byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
         return new SizedInputStream(new ByteArrayInputStream(bytes), bytes.length, Format.CSV);

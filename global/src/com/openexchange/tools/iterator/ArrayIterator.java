@@ -52,7 +52,7 @@ package com.openexchange.tools.iterator;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.Arrays;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link ArrayIterator} - A {@link SearchIterator} implementation backed by an array.
@@ -91,10 +91,6 @@ public class ArrayIterator<T> implements SearchIterator<T> {
 
     public int size() {
         return array.length;
-    }
-
-    public boolean hasSize() {
-        return true;
     }
 
     public void addWarning(final AbstractOXException warning) {

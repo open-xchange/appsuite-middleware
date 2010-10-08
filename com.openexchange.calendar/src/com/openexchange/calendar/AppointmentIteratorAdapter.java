@@ -75,7 +75,7 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
         delegate.addWarning(warning);
     }
 
-    public void close() throws SearchIteratorException {
+    public void close() throws AbstractOXException {
         delegate.close();
     }
 
@@ -83,19 +83,15 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
         return delegate.getWarnings();
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws AbstractOXException{
         return delegate.hasNext();
-    }
-
-    public boolean hasSize() {
-        return delegate.hasSize();
     }
 
     public boolean hasWarnings() {
         return delegate.hasWarnings();
     }
 
-    public Appointment next() throws SearchIteratorException, OXException {
+    public Appointment next() throws AbstractOXException {
         return delegate.next();
     }
 

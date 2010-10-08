@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.iterator;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -66,7 +65,7 @@ public interface SearchIterator<T> {
      * 
      * @return <code>true</code> if the iterator has more elements; otherwise <code>false</code>
      */
-    boolean hasNext();
+    boolean hasNext() throws AbstractOXException;
 
     /**
      * Returns the next element in the iteration. Calling this method repeatedly until the {@link #hasNext()} method returns
@@ -76,14 +75,14 @@ public interface SearchIterator<T> {
      * @exception SearchIteratorException If next element cannot be returned
      * @throws OXException If next element cannot be returned
      */
-    T next() throws SearchIteratorException, OXException;
+    T next() throws AbstractOXException;
 
     /**
      * Closes the search iterator
      * 
      * @throws SearchIteratorException If closing the search iterator fails
      */
-    void close() throws SearchIteratorException;
+    void close() throws AbstractOXException;
 
     /**
      * This iterator's size
@@ -91,13 +90,6 @@ public interface SearchIterator<T> {
      * @return The size
      */
     int size();
-
-    /**
-     * Indicates if this iterator's size is accessible via {@link #size()}
-     * 
-     * @return <code>true</code> if this iterator's size is accessible via {@link #size()}; otherwise <code>false</code>
-     */
-    boolean hasSize();
 
     /**
      * Indicates if this iterator has warnings

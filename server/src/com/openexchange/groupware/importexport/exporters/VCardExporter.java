@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
@@ -265,13 +266,11 @@ public class VCardExporter implements Exporter {
             }
         } catch (NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-        } catch (OXException e) {
-            throw new ImportExportException(e);
-        } catch (SearchIteratorException e) {
+        } catch (ConverterException e) {
+            throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+        } catch (AbstractOXException e) {
             throw new ImportExportException(e);
         } catch (IOException e) {
-            throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
-        } catch (ConverterException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         }
 

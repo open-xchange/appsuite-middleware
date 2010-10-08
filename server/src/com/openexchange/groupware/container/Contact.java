@@ -310,7 +310,7 @@ public class Contact extends CommonObject implements Serializable {
         USERFIELD09, USERFIELD10, USERFIELD11, USERFIELD12, USERFIELD13, USERFIELD14, USERFIELD15, USERFIELD16, USERFIELD17, USERFIELD18,
         USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST
     };
-    public static final int[] ALL_COLUMNS = com.openexchange.tools.Arrays.addUniquely(CONTENT_COLUMNS, new int[]{
+    public static final int[] ALL_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[]{
         // From ContactObject itself
         INTERNAL_USERID,
         // Produces error: missing field in mapping: 593 (ContactWriter.java:603)// CONTEXTID,

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.iterator;
+package com.openexchange.groupware.tools.iterator;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.TIntHashSet;
@@ -95,6 +95,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.Code;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 

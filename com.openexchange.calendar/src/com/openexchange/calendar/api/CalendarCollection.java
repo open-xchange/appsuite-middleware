@@ -127,7 +127,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
-import com.openexchange.tools.iterator.FolderObjectIterator;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -3031,7 +3031,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
         } catch (final ContextException e) {
             throw new OXCalendarException(e);
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             throw new OXCalendarException(e);
         } finally {
             if (closeResources) {
@@ -3103,7 +3103,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
         } catch (final ContextException e) {
             throw new OXCalendarException(e);
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             throw new OXCalendarException(e);
         } finally {
             if (closeResources) {
@@ -3181,7 +3181,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
         } catch (final ContextException e) {
             throw new OXCalendarException(e);
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             throw new OXCalendarException(e);
         } finally {
             if (closeResources) {
@@ -3257,7 +3257,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
         } catch (final ContextException e) {
             throw new OXCalendarException(e);
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             throw new OXCalendarException(e);
         } finally {
             if (closeResources) {

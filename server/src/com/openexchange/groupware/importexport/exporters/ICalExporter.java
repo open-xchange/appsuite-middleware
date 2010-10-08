@@ -65,6 +65,7 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
@@ -290,12 +291,10 @@ public class ICalExporter implements Exporter {
             }
         } catch (NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-        } catch (OXException e) {
-            throw new ImportExportException(e);
-        } catch (SearchIteratorException e) {
-            throw new ImportExportException(e);
         } catch (ConversionError e) {
             throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+        } catch (AbstractOXException e) {
+            throw new ImportExportException(e);
         }
         byte[] bytes = Charsets.getBytes(icalText, Charsets.UTF_8);
         return new SizedInputStream(

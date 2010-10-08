@@ -653,14 +653,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 att.setFolderId(folderId);
                 recreate.add(att);
             }
-        } catch (final SearchIteratorException e1) {
-            throw AttachmentExceptionCodes.DELETE_FAILED.create();
-        } catch (OXException e) {
+        } catch (AbstractOXException e) {
             throw new AttachmentException(e);
         } finally {
             try {
                 iter.close();
-            } catch (final SearchIteratorException e) {
+            } catch (final AbstractOXException e) {
                 LOG.error("", e);
             }
         }

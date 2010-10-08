@@ -73,6 +73,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -140,7 +141,7 @@ public class TaskRequest {
         return timestamp;
     }
 
-    public JSONValue action(String action, JSONObject json) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
+    public JSONValue action(String action, JSONObject json) throws JSONException, AbstractOXException {
         if (!session.getUserConfiguration().hasTask()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");
         }
@@ -212,7 +213,7 @@ public class TaskRequest {
         return new JSONObject();
     }
 
-    public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
@@ -292,7 +293,7 @@ public class TaskRequest {
         return new JSONArray();
     }
 
-    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         timestamp = new Date(0);
 
         Date lastModified = null;
@@ -339,7 +340,7 @@ public class TaskRequest {
         }
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
@@ -425,7 +426,7 @@ public class TaskRequest {
         return new JSONObject();
     }
 
-    public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);

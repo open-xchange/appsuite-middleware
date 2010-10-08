@@ -65,6 +65,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
@@ -102,41 +103,17 @@ public class Tasks extends DataServlet {
             final JSONValue responseObj = taskRequest.action(action, jsonObj);
             response.setTimestamp(taskRequest.getTimestamp());
             response.setData(responseObj);
-        } catch (final OXMandatoryFieldException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final OXConflictException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-            LOG.error(oje.getMessage(), oje);
-            response.setException(oje);
-        } catch (final OXJSONException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final OXFolderNotFoundException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final OXObjectNotFoundException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final OXPermissionException e) {
-            LOG.info(e.getMessage(), e);
-            response.setException(e);
-        } catch (final SearchIteratorException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final AjaxException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final OXException e) {
+        } catch (final AbstractOXException e) {
             if (e.getCategory() == Category.USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);
             }
             response.setException(e);
+         } catch (final JSONException e) {
+            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            LOG.error(oje.getMessage(), oje);
+            response.setException(oje);
         }
         writeResponse(response, httpServletResponse);
     }
@@ -186,16 +163,7 @@ public class Tasks extends DataServlet {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-        } catch (final OXJSONException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final SearchIteratorException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final AjaxException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (final OXException e) {
+        } catch (final AbstractOXException e) {
             if (e.getCategory() == Category.USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {

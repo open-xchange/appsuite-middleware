@@ -79,9 +79,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSessionAdapter;
 

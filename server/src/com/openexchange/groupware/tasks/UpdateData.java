@@ -70,6 +70,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -79,7 +80,7 @@ import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
-import com.openexchange.tools.Arrays;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
@@ -765,7 +766,7 @@ class UpdateData {
         }
     }
 
-    void makeNextRecurrence(final Session session) throws TaskException, OXException {
+    void makeNextRecurrence(final Session session) throws AbstractOXException {
         if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE == updated.getStatus() && Arrays.contains(
             getModifiedFields(),
             Status.SINGLETON.getId())) {

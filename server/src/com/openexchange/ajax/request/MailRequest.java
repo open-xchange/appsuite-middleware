@@ -59,6 +59,7 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.api.OXPermissionException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
@@ -107,7 +108,7 @@ public final class MailRequest {
      * @param jsonObject - the instance of <code>{@link JSONObject}</code> keeping request's data
      * @param mailInterface - the instance of <code>{@link MailServletInterface}</code> to access mail module
      */
-    public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface) throws SearchIteratorException, JSONException, MailException, OXPermissionException {
+    public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface) throws AbstractOXException, JSONException {
         if (!session.getUserConfiguration().hasWebMail()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "mail");
         }

@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -77,7 +78,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.iterator.FolderObjectIterator;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -143,10 +144,12 @@ public final class SystemSharedFolder {
             final boolean hasNext = searchIterator.hasNext();
             retval.setSubfolderIDs(hasNext ? null : new String[0]);
             retval.setSubscribedSubfolders(hasNext);
+        } catch (AbstractOXException e) {
+            throw new FolderException(e);
         } finally {
             try {
                 searchIterator.close();
-            } catch (final SearchIteratorException e) {
+            } catch (final AbstractOXException e) {
                 LOG.error("Failed closing search iterator.", e);
             }
         }

@@ -1057,7 +1057,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
         } catch (SQLException e) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
-        } catch (SearchIteratorException e) {
+        } catch (AbstractOXException e) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(1));
         } finally {
             if (stmt != null) {

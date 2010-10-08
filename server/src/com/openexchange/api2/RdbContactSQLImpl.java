@@ -115,9 +115,9 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.tools.Arrays;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.PrefetchIterator;
+import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -624,7 +624,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
 
-        return new PrefetchIterator<Contact>(si);
+        try {
+            return new PrefetchIterator<Contact>(si);
+        } catch (AbstractOXException e) {
+            throw new OXException(e);
+        }
     }
 
     public Contact getObjectById(final int objectId, final int fid) throws OXObjectNotFoundException, OXConflictException, ContactException {
@@ -800,7 +804,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 }
             }
         }
-        return new PrefetchIterator<Contact>(si);
+        try {
+            return new PrefetchIterator<Contact>(si);
+        } catch (AbstractOXException e) {
+            throw new ContactException(e);
+        }
     }
 
     public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws ContactException {
@@ -844,7 +852,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 }
             }
         }
-        return new PrefetchIterator<Contact>(si);
+        try {
+            return new PrefetchIterator<Contact>(si);
+        } catch (AbstractOXException e) {
+            throw new ContactException(e);
+        }
     }
 
     public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXPermissionException, OXConcurrentModificationException, OXException {
@@ -986,7 +998,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(0), I(ctx.getContextId())));
             }
             return new SearchIteratorDelegator<Contact>(retval.iterator(), size);
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             throw new ContactException(e);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, "");
@@ -1017,7 +1029,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return tmp.toArray();
     }
 
-    private int addQueriedContacts(final int[] cols, final List<Contact> retval, final int[][] object_id) throws SQLException, SearchIteratorException, OXException {
+    private int addQueriedContacts(final int[] cols, final List<Contact> retval, final int[][] object_id) throws SQLException, AbstractOXException {
         final Connection readcon;
         try {
             readcon = DBPool.pickup(ctx);
@@ -1043,7 +1055,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 ps = contactSQL.getSqlStatement(readcon);
                 res = ps.executeQuery();
                 searchIterator = new ContactObjectIterator(res, ps, cols, true, readcon);
-                if (searchIterator.hasSize()) {
+                if (searchIterator.size() != -1) {
                     final int size = searchIterator.size();
                     for (int i = 0; i < size; i++) {
                         retval.add(searchIterator.next());

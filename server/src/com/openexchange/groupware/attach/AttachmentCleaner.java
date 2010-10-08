@@ -145,17 +145,15 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
         
         } catch (final TransactionException e) {
             rollback(e);
-        } catch (final OXException e) {
-            rollback(e);
-        } catch (final SearchIteratorException e) {
-            rollback(e);
         } catch (final ContextException e) {
             LL.log(e);
+        } catch (final AbstractOXException e) {
+            rollback(e);
         } finally {
             if(iter != null) {
                 try {
                     iter.close();
-                } catch (final SearchIteratorException e) {
+                } catch (final AbstractOXException e) {
                     LL.log(e);
                 }
             }

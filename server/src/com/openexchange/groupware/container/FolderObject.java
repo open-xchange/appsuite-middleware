@@ -855,7 +855,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final SearchIteratorException e) {
+                } catch (final AbstractOXException e) {
                     LOG.error("SearchIterator cannot be closed", e);
                 }
             }
@@ -901,14 +901,14 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @throws SQLException If a SQL error occurs
      * @throws SearchIteratorException If an iterator error occurs
      */
-    public final List<FolderObject> getVisibleSubfolders(final User userObj, final UserConfiguration userConfig, final Context ctx) throws DBPoolingException, OXException, SQLException, SearchIteratorException {
+    public final List<FolderObject> getVisibleSubfolders(final User userObj, final UserConfiguration userConfig, final Context ctx) throws SQLException, AbstractOXException {
         return getVisibleSubfolders(userObj.getId(), userObj.getGroups(), userConfig, ctx);
     }
 
     /**
      * Returns a <code>java.util.List</code> containing all user-visible subfolders
      */
-    public final List<FolderObject> getVisibleSubfolders(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws DBPoolingException, OXException, SQLException, SearchIteratorException {
+    public final List<FolderObject> getVisibleSubfolders(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws AbstractOXException, SQLException {
         if (b_subfolderFlag && !subfolderFlag) {
             return new ArrayList<FolderObject>(0);
         }
@@ -927,7 +927,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             } else {
                 iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null);
             }
-            if (iter.hasSize()) {
+            if (iter.size() != -1) {
                 final int size = iter.size();
                 retval = new ArrayList<FolderObject>(size);
                 for (int i = 0; i < size; i++) {
