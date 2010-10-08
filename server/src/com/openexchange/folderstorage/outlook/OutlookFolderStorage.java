@@ -364,6 +364,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
         }
+        TCM.clear();
         final boolean started = folderStorage.startTransaction(storageParameters, true);
         try {
             folderStorage.clearFolder(realTreeId, folderId, storageParameters);
@@ -415,6 +416,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        TCM.clear();
         /*
          * Create only if folder could not be stored in real storage
          */
@@ -469,6 +471,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        TCM.clear();
         /*
          * Delete from tables if present
          */
@@ -635,6 +638,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
         }
+        TCM.clear();
         final boolean started = folderStorage.startTransaction(storageParameters, true);
         try {
             final Folder realFolder = folderStorage.getFolder(realTreeId, folderId, StorageType.WORKING, storageParameters);
@@ -1668,6 +1672,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        TCM.clear();
         /*
          * Update only if folder is contained
          */
