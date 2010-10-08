@@ -648,8 +648,12 @@ public final class HTMLServiceImpl implements HTMLService {
             return htmlContent;
         }
     }
-
+    
     public String getConformHTML(final String htmlContent, final String charset) {
+        return getConformHTML(htmlContent, charset, true);
+    }
+
+    public String getConformHTML(final String htmlContent, final String charset, final boolean replaceUrls) {
         if (null == htmlContent) {
             /*
              * Nothing to do...
@@ -684,12 +688,18 @@ public final class HTMLServiceImpl implements HTMLService {
         }
         html = processDownlevelRevealedConditionalComments(html);
         html = removeXHTMLCData(html);
+        
         /*
          * Check URLs
          */
-        final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
-        HTMLParser.parse(html, handler);
-        return handler.getHTML();
+        if (replaceUrls) {
+            final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
+            HTMLParser.parse(html, handler);
+            return handler.getHTML();
+        } else {
+            return html;
+        }
+
     }
 
     private static final Pattern PATTERN_XHTML_CDATA;

@@ -157,12 +157,13 @@ public final class HTMLProcessing {
         String retval = null;
         final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
         if (isHtml) {
-            retval = htmlService.getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset);
+            retval = htmlService.getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset, false);
             if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                 /*
                  * Filter according to white-list
                  */
                 retval = htmlService.filterWhitelist(retval);
+                
                 if (!usm.isAllowHTMLImages()) {
                     retval = htmlService.filterExternalImages(retval, modified);
                 }

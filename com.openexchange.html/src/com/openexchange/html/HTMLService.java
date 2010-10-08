@@ -171,12 +171,23 @@ public interface HTMLService {
 
     /**
      * Creates valid HTML from specified HTML content conform to W3C standards.
+     * Non-ascii-URLs will be replaced with puny-code-encoded URLs.
      * 
      * @param htmlContent The HTML content
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
      */
     String getConformHTML(String htmlContent, String charset);
+    
+    /**
+     * Creates valid HTML from specified HTML content conform to W3C standards.
+     * 
+     * @param htmlContent The HTML content
+     * @param charset The charset parameter
+     * @param checkUrls Define if non-ascii-URLs shell be replaced with puny-code-encoded URLs
+     * @return The HTML content conform to W3C standards
+     */
+    String getConformHTML(String htmlContent, String charset, boolean replaceUrls);
 
     /**
      * Pretty prints specified HTML content.
