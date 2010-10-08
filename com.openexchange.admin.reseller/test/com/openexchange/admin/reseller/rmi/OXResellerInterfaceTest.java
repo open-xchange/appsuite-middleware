@@ -85,9 +85,11 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     private static OXContextInterface oxctx = null;
 
     @BeforeClass
-    public static void startup() throws MalformedURLException, RemoteException, NotBoundException {
+    public static void startup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
         oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
         oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+        final Credentials creds = DummyMasterCredentials();
+        oxresell.initDatabaseRestrictions(creds);
     }
     
     @AfterClass
@@ -106,19 +108,6 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         oxresell.removeDatabaseRestrictions(creds);
     }
     
-//    @Test
-//    public void testRemoveDatabaseRestrictions() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
-//        final Credentials creds = DummyMasterCredentials();
-//    
-//        oxresell.removeDatabaseRestrictions(creds);
-//    }
-
-    @Test
-    public void testInitDatabaseRestrictions() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
-        final Credentials creds = DummyMasterCredentials();
-    
-        oxresell.initDatabaseRestrictions(creds);
-    }
     
     @Test
     public void testUpdateModuleAccessRestrictions() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
@@ -270,15 +259,15 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         assertEquals("getData returned wrong data",adm.getDisplayname(), dbadm.getDisplayname());
     }
 
-    @Test
-    public void testList() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException {
-        final Credentials creds = DummyMasterCredentials();
-        ResellerAdmin[] res = oxresell.list("*", creds);
-        for(final ResellerAdmin adm : res) {
-            System.out.println(adm);
-        }
-        assertEquals("list must return three entries",4, res.length);
-    }
+//    @Test
+//    public void testList() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException {
+//        final Credentials creds = DummyMasterCredentials();
+//        ResellerAdmin[] res = oxresell.list("*", creds);
+//        for(final ResellerAdmin adm : res) {
+//            System.out.println(adm);
+//        }
+//        assertEquals("list must return three entries",4, res.length);
+//    }
 
     @Test
     public void testApplyRestrictionsToContext() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
