@@ -271,9 +271,9 @@
                 <path refid="rmi.classpath"/>
             	<pathelement path="test-classes"/>
             </classpath>
+		    <test name="com.openexchange.admin.reseller.rmi.OXResellerContextTest" todir="${test.xml.dir}"/>
 			<test name="com.openexchange.admin.reseller.rmi.OXResellerInterfaceTest" todir="${test.xml.dir}"/>
 			<test name="com.openexchange.admin.reseller.rmi.OXResellerUserTest" todir="${test.xml.dir}"/>
-		    <test name="com.openexchange.admin.reseller.rmi.OXResellerContextTest" todir="${test.xml.dir}"/>
             <formatter type="xml"/>
             <sysproperty key="rmi_test_host" value="${rmi_test_host}"/>
             <sysproperty key="rmi_test_masterpw" value="${rmi_test_masterpw}"/>
