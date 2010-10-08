@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.arrays;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -94,10 +93,10 @@ public final class Arrays {
         }
         final Set<Integer> tmp = new HashSet<Integer>();
         for (final int i : toExtend) {
-            tmp.add(I(i));
+            tmp.add(new Integer(i));
         }
         for (final int i : other) {
-            tmp.add(I(i));
+            tmp.add(new Integer(i));
         }
         final int[] retval = new int[tmp.size()];
         int pos = 0;
