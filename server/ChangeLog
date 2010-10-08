@@ -1,3 +1,6 @@
+* 2010-10-08 - steffen.templin@open-xchange.com
+ - Bugfix #17195: Malformed URLs in HTML-Mails
+ 
 * 2010-10-08 - thorben.betten@open-xchange.com
 
  - Bugfix #17162: Changed error codes' detail numbers
