@@ -70,7 +70,7 @@ public interface SmartDriveFactoryService {
      *            <li>{@link SmartDriveConstants#CONFIG_PASSWORD} - The optional password for HTTP authentication</code></li>
      *            </ul>
      * @return A new SmartDrive access for given SmartDrive user name
-     * @throws SmartDriveException If SmartDrive access cannot be created for specified user name
+     * @throws SmartDriveException If a SmartDrive access cannot be created for specified user name
      */
     SmartDriveAccess createSmartDriveAccess(String userName, String url, Map<String, Object> configuration) throws SmartDriveException;
 
