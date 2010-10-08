@@ -83,7 +83,7 @@ public class ContactMergeratorTest extends TestCase {
     }
 
 
-    public void testSortIntegerColumn() throws SearchIteratorException, OXException {
+    public void testSortIntegerColumn() throws Exception {
         SearchIterator<Contact> c1 = contactsWithIDs(11, 101, 1001);
         SearchIterator<Contact> c2 = contactsWithIDs(21,22,23);
         SearchIterator<Contact> c3 = contactsWithIDs(31,32,33);
@@ -93,7 +93,7 @@ public class ContactMergeratorTest extends TestCase {
         assertIDs(merged, 11,21,22,23,31,32,33,101,1001);
     }
     
-    private void assertIDs(ContactMergerator merged, int...ids) throws SearchIteratorException, OXException {
+    private void assertIDs(ContactMergerator merged, int...ids) throws Exception {
         int index = 0;
         while(merged.hasNext()) {
             Contact c = merged.next();

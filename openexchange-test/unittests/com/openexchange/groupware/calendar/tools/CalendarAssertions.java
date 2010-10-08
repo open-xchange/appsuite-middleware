@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -109,7 +110,7 @@ public class CalendarAssertions {
     }
 
 
-    public static void assertInPrivateFolder(final CommonAppointments appointments , final Appointment appointment) throws OXException {
+    public static void assertInPrivateFolder(final CommonAppointments appointments , final Appointment appointment) throws AbstractOXException {
         for(final Appointment currentAppointment : appointments.getPrivateAppointments()) {
             if(appointment.getObjectID() == currentAppointment.getObjectID()) {
                 return;

@@ -62,7 +62,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {
 
-    public void testParticipantsAgreeViaDifferentLoadMethods() throws OXException, SQLException, SearchIteratorException {
+    public void testParticipantsAgreeViaDifferentLoadMethods() throws Exception {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1);
         appointments.save(appointment);
         clean.add(appointment);

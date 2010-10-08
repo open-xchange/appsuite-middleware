@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class SlowCalendarTests extends AbstractCalendarTest {
     // Bug #11148
-    public void testShouldSurviveLoadingInvalidPattern() throws SQLException, OXException, DBPoolingException {
+    public void testShouldSurviveLoadingInvalidPattern() throws Exception {
         final CalendarDataObject cdao = appointments.buildRecurringAppointment();
 
         appointments.save(cdao);

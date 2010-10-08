@@ -58,7 +58,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 public class Bug11059Test extends CalendarSqlTest {
     // Bug 11059
-    public void testShouldRespectReadPermissions() throws OXException {
+    public void testShouldRespectReadPermissions() throws Exception {
         final FolderObject folder = folders.createPublicFolderFor(
             session,
             ctx,

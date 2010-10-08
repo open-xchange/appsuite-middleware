@@ -71,7 +71,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tx.Undoable;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -314,10 +313,6 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public void commitDBTransaction(final Undoable undo) {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public void rollbackDBTransaction() {

@@ -52,6 +52,7 @@ package com.openexchange.groupware.calendar.calendarsqltests;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.List;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -62,7 +63,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 public class Bug4778Test extends CalendarSqlTest {
     // Bug 4778
 
-    public void testFreebusyResultShouldContainTitleIfItIsReadableViaASharedFolder() throws OXException, SearchIteratorException {
+    public void testFreebusyResultShouldContainTitleIfItIsReadableViaASharedFolder() throws AbstractOXException {
         final CalendarDataObject appointment = appointments.buildBasicAppointment(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
         appointments.save(appointment);
         clean.add(appointment);

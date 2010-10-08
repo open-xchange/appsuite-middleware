@@ -62,7 +62,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 public class Bug11803Test extends CalendarSqlTest {
     // Bug 11803
 
-    public void testFreeBusyResultShouldOnlyContainRecurrenceInSpecifiedInterval() throws OXException, SearchIteratorException {
+    public void testFreeBusyResultShouldOnlyContainRecurrenceInSpecifiedInterval() throws Exception {
         final Date start = D("07/02/2008 10:00");
         final Date end = D("07/02/2008 12:00");
         // Create Weekly recurrence

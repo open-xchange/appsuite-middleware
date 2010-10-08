@@ -53,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.AbstractInfostoreTest;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -98,7 +99,7 @@ public class LockExpiryTest extends AbstractInfostoreTest {
         factory.endRequest(200);
     }
     
-    public void testExpiredLocksOnInfoitemsHaveThemShowUpInUpdatesResponse() throws WebdavProtocolException, UnsupportedEncodingException, InterruptedException, OXException, SearchIteratorException {
+    public void testExpiredLocksOnInfoitemsHaveThemShowUpInUpdatesResponse() throws WebdavProtocolException, UnsupportedEncodingException, InterruptedException, AbstractOXException {
         FolderCollection folderCollection = resolveFolder(testCollection);
         folderCollection.create();
         

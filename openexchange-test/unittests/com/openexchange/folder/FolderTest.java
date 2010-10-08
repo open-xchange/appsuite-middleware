@@ -1115,7 +1115,7 @@ public class FolderTest extends TestCase {
             SearchIterator<?> it = null;
             try {
                 it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, null);
-                if (it.hasSize()) {
+                if (it.size() != -1) {
                     final int size = it.size();
                     assertTrue(size >= 3);
                     for (int i = 0; i < size; i++) {
@@ -1151,7 +1151,7 @@ public class FolderTest extends TestCase {
                 final SearchIterator<?> it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
                         null);
                 try {
-                    if (it.hasSize()) {
+                    if (it.size() != -1) {
                         final int size = it.size();
                         assertTrue(size >= 1);
                         for (int i = 0; i < size; i++) {

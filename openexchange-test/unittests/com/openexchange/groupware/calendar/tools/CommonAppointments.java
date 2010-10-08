@@ -65,6 +65,7 @@ import java.util.TimeZone;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.database.DBPoolingException;
@@ -286,16 +287,16 @@ public class CommonAppointments {
 
     }
 
-    public List<Appointment> getPrivateAppointments() throws OXException {
+    public List<Appointment> getPrivateAppointments() throws AbstractOXException {
        return getAppointmentsInFolder(privateFolder);
 
     }
 
-    public List<Appointment> getAppointmentsInFolder(final int folderId) throws OXException {
+    public List<Appointment> getAppointmentsInFolder(final int folderId) throws AbstractOXException {
         return getAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID});
     }
     
-    public List<Appointment> getAppointmentsInFolder(final int folderId, int[] columns) throws OXException {
+    public List<Appointment> getAppointmentsInFolder(final int folderId, int[] columns) throws AbstractOXException {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
             final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(folderId, columns, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
@@ -314,7 +315,7 @@ public class CommonAppointments {
         }
     }
 
-    public List<Appointment> getModifiedInFolder(final int folderId, final long since) throws OXException {
+    public List<Appointment> getModifiedInFolder(final int folderId, final long since) throws AbstractOXException {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
 
@@ -331,7 +332,7 @@ public class CommonAppointments {
         }
     }
 
-    public List<Appointment> getDeletedInFolder(final int folderId, final long since) throws OXException {
+    public List<Appointment> getDeletedInFolder(final int folderId, final long since) throws AbstractOXException {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
 

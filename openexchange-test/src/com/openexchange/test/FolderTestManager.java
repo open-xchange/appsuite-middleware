@@ -79,7 +79,7 @@ import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.Arrays;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**

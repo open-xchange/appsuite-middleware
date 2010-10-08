@@ -101,7 +101,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
     }
     
 
-    public void testSearchInSpecificFolders() throws SearchIteratorException, OXException {
+    public void testSearchInSpecificFolders() throws Exception {
         
         final ContactSearchObject contactSearchObject = new ContactSearchObject();
         contactSearchObject.addFolder(1);
@@ -117,7 +117,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
         
     }
     
-    public void testSearchEverywhere() throws SearchIteratorException, OXException {
+    public void testSearchEverywhere() throws Exception {
         final ContactSearchObject contactSearchObject = new ContactSearchObject();
         
         
@@ -127,7 +127,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
         assertIDs(contacts, 1,2,3,11,12,13,21,22,23,31,32,33);
     }
     
-    private void assertIDs(final SearchIterator<Contact> results, final int...ids) throws SearchIteratorException, OXException {
+    private void assertIDs(final SearchIterator<Contact> results, final int...ids) throws Exception {
         int index = 0;
         while(results.hasNext()) {
             final Contact c = results.next();

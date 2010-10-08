@@ -12,23 +12,23 @@ public class AbstractTimedResultTest extends TestCase{
     
     private TestTimedResult results;
 
-    public void testExtractsLargestTimestampAfterIteration() throws SearchIteratorException, OXException {
+    public void testExtractsLargestTimestampAfterIteration() throws Exception {
         consume(results, 1,2,6,4,3);
         assertEquals(6, results.sequenceNumber());
     }
     
-    public void testExtractsTimestampBeforeIteration() throws SearchIteratorException, OXException {
+    public void testExtractsTimestampBeforeIteration() throws Exception {
         assertEquals(6, results.sequenceNumber());
         consume(results, 1,2,6,4,3);
     }
     
-    public void testExtractsTimestampInIteration() throws SearchIteratorException, OXException {
+    public void testExtractsTimestampInIteration() throws Exception {
         consume(results, 1,2,6);
         assertEquals(6, results.sequenceNumber());
         consume(results, 4,3);
     }
     
-    private void consume(TestTimedResult ttr, long...values) throws SearchIteratorException, OXException {
+    private void consume(TestTimedResult ttr, long...values) throws Exception {
         SearchIterator<Thing> iter = ttr.results();
         for(int i = 0; i < values.length; i++) {
             long timestamp = values[i];
