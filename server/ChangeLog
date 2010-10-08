@@ -1,6 +1,10 @@
 * 2010-10-08 - steffen.templin@open-xchange.com
 
- - Bugfix #17195 - Malformed URL-Parameters in HTML-Mails
+ - Bugfix #16634: Searching in public calendar results only show appointments where user is participant
+
+* 2010-10-08 - steffen.templin@open-xchange.com
+
+ - Bugfix #17195: Malformed URL-Parameters in HTML-Mails
 
 * 2010-10-08 - thorben.betten@open-xchange.com
 

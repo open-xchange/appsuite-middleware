@@ -1101,6 +1101,133 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         return CalendarMySQL.select;
     }
+    
+    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final String orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append("SELECT ");
+        sb.append(columns);
+        sb.append(" FROM prg_dates pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ? AND pdm.cid = ? WHERE ");
+        
+        if (searchObj.hasFolders()) {
+            int folderId = searchObj.getFolders()[0];
+            int folderType = folderAccess.getFolderType(folderId, uid);
+            
+            if (folderType == FolderObject.PRIVATE) {
+                sb.append("(pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + uid + ")");
+            } else {
+                // Folder is shared or public
+                
+                final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, uid);
+                final EffectivePermission folderPermission = folderAccess.getFolderPermission(folderId, uid, userConfig);
+                
+                final boolean canReadAll = folderPermission.canReadAllObjects();
+                if (folderType == FolderObject.SHARED) {
+                    int owner = folderAccess.getFolderOwner(folderId);
+                    if (canReadAll) {
+                        sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + owner + ")");
+                    } else {
+                        sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
+                    }
+                } else if (folderType == FolderObject.PUBLIC) {
+                    if (canReadAll) {
+                        sb.append("(pd.fid = " + folderId + ")");
+                    } else {
+                        sb.append("(pd.fid = " + folderId + " AND pd.created_from = " + uid + ")");
+                    }
+                }
+            }
+        } else {
+            // Perform search over all folders in which the user has the right to see elements.      
+            
+            sb.append("(");
+            
+            // Look into the users private folders
+            boolean first = true;
+            for (int folder : cfo.getPrivateFolders()) {
+                if (first) {
+                    sb.append("(pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + uid + ")");
+                    first = false;
+                } else {
+                    sb.append(" OR (pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + uid + ")");
+                }                
+            }
+            
+            // Look into folders that are shared to the user
+            // where he can read all objects
+            for (int folder : cfo.getSharedReadableAll()) {
+                int owner = folderAccess.getFolderOwner(folder);
+                if (first) {                    
+                    sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
+                    first = false;
+                } else {
+                    sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
+                }                
+            }
+            
+            // where he can read own objects
+            for (int folder : cfo.getSharedReadableOwn()) {
+                int owner = folderAccess.getFolderOwner(folder);
+                if (first) {
+                    sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
+                    first = false;
+                } else {
+                    sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
+                }                
+            }
+            
+            // Look into public folders
+            // where the user can read all objects
+            for (int folder : cfo.getPublicReadableAll()) {
+                if (first) {
+                    sb.append("(pd.fid = " + folder + ")");
+                    first = false;
+                } else {
+                    sb.append(" OR (pd.fid = " + folder + ")");
+                }                
+            }
+            
+            // where the user can read own objects
+            for (int folder : cfo.getPublicReadableOwn()) {
+                if (first) {
+                    sb.append("(pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
+                    first = false;
+                } else {
+                    sb.append(" OR (pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
+                }                
+            }
+            
+            sb.append(")");
+        }
+        
+        // Look for pattern            
+        String pattern = searchObj.getPattern();
+        if (pattern != null) {
+            sb.append(" AND (pd.field01 LIKE ? OR pd.field09 LIKE ?)");
+            pattern = StringCollection.prepareForSearch(pattern);
+        }
+        
+        sb.append(" ORDER BY ");
+        String orderby = collection.getFieldName(orderBy);
+        if (orderby == null) {
+            orderby = collection.getFieldName(Appointment.START_DATE);
+        }
+        sb.append("pd." + orderby);
+        if (orderDir != null) {
+            sb.append(" ");
+            sb.append(orderDir);
+        }
+        
+        final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setInt(1, ctx.getContextId());
+        pst.setInt(2, ctx.getContextId());
+        
+        if (pattern != null) {
+            pst.setString(3, pattern);
+            pst.setString(4, pattern);
+        }        
+        
+        return pst;
+    }
 
     public final PreparedStatement getSearchQuery(final String select, final int uid, final int groups[], final UserConfiguration uc, final int orderBy, final String orderDir, final AppointmentSearchObject searchobject, final Context c, final Connection readcon, final CalendarFolderObject cfo, boolean isShared) throws SQLException, OXException {
         final StringBuilder sb = new StringBuilder(128);

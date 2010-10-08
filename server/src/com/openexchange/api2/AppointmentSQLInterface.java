@@ -174,20 +174,18 @@ public interface AppointmentSQLInterface {
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
     public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, String orderDir, int cols[]) throws OXException, SQLException;
-
+    
     /**
-     * Lists all apointments where the titlematch the given searchpattern
-     * @param searchpattern
-     * The searchpattern
-     * @param folderId
-     * folder id where to search
-     * @param cols
-     * fields that will be added to the data object
-     * @return A SearchIterator contains AppointmentObjects
-     * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
+     * Lists all appointments where the title or description matches the given pattern in the {@link AppointmentSearchObject}.
+     * @param searchObj The {@link AppointmentSearchObject}.
+     * @param cols Fields that will be added to the data object.
+     * @param orderBy The field for ordering the results.
+     * @param orderDir The direction for ordering the results.
+     * @return A SearchIterator containing AppointmentObjects
+     * @throws OXException
      */
-    public SearchIterator<Appointment> searchAppointments(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
-
+    public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, String orderDir, int[] cols) throws OXException;
+    
     /**
      * Loads one appointment by the given ID
      * @param objectId

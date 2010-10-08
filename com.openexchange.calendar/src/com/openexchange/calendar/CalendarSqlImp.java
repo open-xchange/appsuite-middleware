@@ -67,6 +67,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link CalendarSqlImp} - The calendar SQL interface
@@ -151,6 +152,8 @@ public interface CalendarSqlImp {
 
     long attachmentAction(int folderId, int oid, int uid, Session session, Context c, int numberOfAttachments) throws OXException;
 
+    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final String orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException;
+    
     PreparedStatement getSearchQuery(String select,  int uid, int groups[], UserConfiguration uc, int orderBy, String orderDir, AppointmentSearchObject searchobject, Context c, Connection readcon, CalendarFolderObject cfo, boolean isShared) throws SQLException, OXException;
 
     PreparedStatement getActiveAppointments(Context c, int uid, Date d1, Date d2, String select, Connection readcon) throws SQLException;

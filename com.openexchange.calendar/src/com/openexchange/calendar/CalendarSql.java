@@ -978,6 +978,98 @@ public class CalendarSql implements AppointmentSQLInterface {
     public SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, final int cols[]) throws OXException, SQLException {
         return getAppointmentsByExtendedSearch(searchobject, orderBy, orderDir, cols, 0, 0);
     }
+    
+    public SearchIterator<Appointment> searchAppointments(final AppointmentSearchObject searchObj, final int orderBy, final String orderDir, int[] cols) throws OXException {
+        if (session == null) {
+            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+        }
+        
+        final Context ctx = Tools.getContext(session);
+        final User user = Tools.getUser(session, ctx);
+        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        cols = recColl.checkAndAlterCols(cols);
+        
+        Connection readcon = null;
+        try {
+            readcon = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
+            throw new OXException(e);
+        }
+        
+        boolean closeCon = true;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final OXFolderAccess folderAccess = new OXFolderAccess(readcon, ctx);   
+            final CalendarOperation co = new CalendarOperation();
+            
+            CalendarFolderObject cfo = null;
+            if (searchObj.hasFolders()) {
+                final int folderId = searchObj.getFolders()[0];
+                final EffectivePermission folderPermission = folderAccess.getFolderPermission(folderId, user.getId(), userConfig);
+
+                if (folderPermission.isFolderVisible() && (folderPermission.canReadAllObjects() || folderPermission.canReadOwnObjects())) {
+                    co.setRequestedFolder(folderId);
+                } else {
+                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_READ));
+                }
+            } else {
+                // Missing folder attribute indicates a search over all calendar folders the user can see,
+                // so create a list with all folders in which the user is allowed to see appointments                
+                try {
+                    cfo = recColl.getAllVisibleAndReadableFolderObject(user.getId(), user.getGroups(), ctx, userConfig, readcon);
+                } catch (SearchIteratorException e) {
+                    throw new OXException(e);
+                } catch (DBPoolingException e) {
+                    throw new OXException(e);
+                } catch (SQLException e) {
+                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+                }
+                
+//                final int ara[] = new int[1];
+//                ara[0] = Appointment.PARTICIPANTS;
+//                cols = recColl.enhanceCols(cols, ara, 1);
+            }
+            
+            final StringBuilder columnBuilder = new StringBuilder();
+            boolean first = true;
+            for (int i = 0; i < cols.length; i++) {
+                final String temp = recColl.getFieldName(cols[i]);
+                
+                if (temp != null) {
+                    if (first) {
+                        columnBuilder.append(temp);
+                        first = false;
+                    } else {
+                        columnBuilder.append(",");
+                        columnBuilder.append(temp);
+                    }
+                }
+            }
+            
+            stmt = cimp.getSearchStatement(user.getId(), searchObj, cfo, folderAccess, columnBuilder.toString(), orderBy, orderDir, ctx, readcon);
+            rs = cimp.getResultSet(stmt);
+            co.setResultSet(rs, stmt, cols, cimp, readcon, 0, 0, session, ctx);       
+            
+            // Don't close connection, it's used within the SearchIterator
+            closeCon = false;
+            
+            return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
+        } catch (SQLException e) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+        } catch (SearchIteratorException e) {
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(1));
+        } finally {
+            if (stmt != null) {
+                recColl.closeResultSet(rs);
+                recColl.closePreparedStatement(stmt);
+            }
+            
+            if (closeCon && readcon != null) {
+                DBPool.push(ctx, readcon);
+            }
+        }
+    }
 
     private SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, int cols[], final int from, final int to) throws OXException {
         if (session == null) {
@@ -1053,16 +1145,6 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<Appointment> searchAppointments(final String searchpattern, final int fid, final int orderBy, final String orderDir, final int[] cols) throws OXException {
-        final AppointmentSearchObject searchobject = new AppointmentSearchObject();
-        searchobject.setPattern(searchpattern);
-        searchobject.setFolder(fid);
-        try {
-            return getAppointmentsByExtendedSearch(searchobject, orderBy, orderDir, cols);
-        } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
-        }
-    }
 
     public final long attachmentAction(int folderId, final int oid, final int uid, Session session, final Context c, final int numberOfAttachments) throws OXException {
         return cimp.attachmentAction(folderId, oid, uid, session, c, numberOfAttachments);
@@ -1283,6 +1365,4 @@ public class CalendarSql implements AppointmentSQLInterface {
     public boolean getIncludePrivateAppointments() {
         return this.includePrivateAppointments;
     }
-
-
 }
