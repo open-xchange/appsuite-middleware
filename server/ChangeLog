@@ -10,6 +10,7 @@
 
  - Bugfix #17199: Proper cache invalidation after folder move operation
  - Bugfix #17161: Immediate delivery of delete event for mails
+ - Bugfix #17198: Proper respect to property "com.openexchange.mail.ignoreSubscription"
 
 * 2010-10-07 - karsten.will@open-xchange.com
 

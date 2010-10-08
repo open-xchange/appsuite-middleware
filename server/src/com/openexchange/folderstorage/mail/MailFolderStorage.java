@@ -518,6 +518,18 @@ public final class MailFolderStorage implements FolderStorage {
             final Session session = storageParameters.getSession();
             final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, session, accesses);
 
+            final MailAccount mailAccount;
+            try {
+                final MailAccountStorageService storageService =
+                    MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                mailAccount =
+                    storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
+            } catch (final ServiceException e) {
+                throw new FolderException(e);
+            } catch (final MailAccountException e) {
+                throw new FolderException(e);
+            }
+
             final MailFolderImpl retval;
             final boolean hasSubfolders;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
@@ -525,8 +537,8 @@ public final class MailFolderStorage implements FolderStorage {
                 retval =
                     new MailFolderImpl(
                         rootFolder,
-                        mailAccess.getAccountId(),
-                        mailAccess.getMailConfig().getCapabilities().getCapabilities(),
+                        accountId,
+                        mailAccess.getMailConfig(),
                         null);
                 /*
                  * Set proper name for non-primary account
@@ -535,18 +547,8 @@ public final class MailFolderStorage implements FolderStorage {
                     /*
                      * Set proper name
                      */
-                    try {
-                        final MailAccountStorageService storageService =
-                            MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-                        final MailAccount mailAccount =
-                            storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
-                        if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                            retval.setName(mailAccount.getName());
-                        }
-                    } catch (final ServiceException e) {
-                        throw new FolderException(e);
-                    } catch (final MailAccountException e) {
-                        throw new FolderException(e);
+                    if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                        retval.setName(mailAccount.getName());
                     }
                 }
                 hasSubfolders = rootFolder.hasSubfolders();
@@ -559,8 +561,8 @@ public final class MailFolderStorage implements FolderStorage {
                 retval =
                     new MailFolderImpl(
                         mailFolder,
-                        mailAccess.getAccountId(),
-                        mailAccess.getMailConfig().getCapabilities().getCapabilities(),
+                        accountId,
+                        mailAccess.getMailConfig(),
                         new MailAccessFullnameProvider(mailAccess));
                 hasSubfolders = mailFolder.hasSubfolders();
             }
