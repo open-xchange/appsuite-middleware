@@ -94,6 +94,11 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
     private static final String HTTPS = "https";
 
     /**
+     * The HTTP identifier constant.
+     */
+    private static final String HTTP = "http";
+
+    /**
      * The HTTP protocol constant.
      */
     private static final Protocol PROTOCOL_HTTP = Protocol.getProtocol("http");
@@ -104,7 +109,7 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
 
     private final String userName;
 
-    private final String url;
+    private final URL url;
 
     private final HttpClient client;
 
@@ -122,9 +127,16 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
      */
     public SmartDriveAccessImpl(final String userName, final String url, final Map<String, Object> configuration) throws SmartDriveException {
         super();
-        this.url = url;
         this.userName = userName;
-        client = createNewHttpClient(url, configuration);
+        /*
+         * The URL to SmartDrive server
+         */
+        try {
+            this.url = new URL(url);
+        } catch (final MalformedURLException e) {
+            throw SmartDriveExceptionCodes.INVALID_URL.create(e, url);
+        }
+        client = createNewHttpClient(this.url, configuration);
     }
 
     public SmartDriveStatefulAccess getStatefulAccess() {
@@ -136,7 +148,7 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
 
     public SmartDriveStatelessAccess getStatelessAccess() {
         if (null == statelessAccess) {
-            statelessAccess = new SmartDriveStatelessAccessImpl(userName, client, this);
+            statelessAccess = new SmartDriveStatelessAccessImpl(userName, url, client, this);
         }
         return statelessAccess;
     }
@@ -147,43 +159,29 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
      * @return The newly created {@link HttpClient}
      * @throws FileStorageException If creation fails
      */
-    private static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration) throws SmartDriveException {
-        /*
-         * The URL to SmartDrive server
-         */
-        final URL url;
-        try {
-            url = new URL(urlStr);
-        } catch (final MalformedURLException e) {
-            throw SmartDriveExceptionCodes.INVALID_URL.create(e, urlStr, e.getMessage());
-        }
+    private static HttpClient createNewHttpClient(final URL url, final Map<String, Object> configuration) throws SmartDriveException {
         /*
          * Create host configuration or URI
          */
         final HostConfiguration hostConfiguration;
         {
-            final String host = url.getHost();
-            if (HTTPS.equalsIgnoreCase(url.getProtocol())) {
+            final String protocol = url.getProtocol();
+            if (HTTPS.equalsIgnoreCase(protocol)) {
                 int port = url.getPort();
                 if (port == -1) {
                     port = 443;
                 }
-                /*
-                 * Own HTTPS host configuration and relative URI
-                 */
-                final Protocol httpsProtocol = new Protocol(HTTPS, ((ProtocolSocketFactory) new TrustAllAdapter()), port);
                 hostConfiguration = new HostConfiguration();
-                hostConfiguration.setHost(host, port, httpsProtocol);
-            } else {
+                hostConfiguration.setHost(url.getHost(), port, new Protocol(HTTPS, ((ProtocolSocketFactory) new TrustAllAdapter()), port));
+            } else if (HTTP.equalsIgnoreCase(protocol)) {
                 int port = url.getPort();
                 if (port == -1) {
                     port = 80;
                 }
-                /*
-                 * HTTP host configuration and relative URI
-                 */
                 hostConfiguration = new HostConfiguration();
-                hostConfiguration.setHost(host, port, PROTOCOL_HTTP);
+                hostConfiguration.setHost(url.getHost(), port, PROTOCOL_HTTP);
+            } else {
+                throw SmartDriveExceptionCodes.UNSUPPORTED_PROTOCOL.create(protocol);
             }
         }
         /*

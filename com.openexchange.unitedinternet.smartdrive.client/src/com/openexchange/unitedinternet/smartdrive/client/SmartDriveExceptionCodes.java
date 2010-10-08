@@ -117,6 +117,11 @@ public enum SmartDriveExceptionCodes implements OXErrorMessage {
      * Invalid URL: %1$s
      */
     INVALID_URL(SmartDriveExceptionMessages.INVALID_URL_MSG, Category.CODE_ERROR, 14),
+    /**
+     * Unsupported protocol for SmartDrive server access: %1$s
+     */
+    UNSUPPORTED_PROTOCOL(SmartDriveExceptionMessages.UNSUPPORTED_PROTOCOL_MSG, Category.CODE_ERROR, 15),
+    
     
     
     ;

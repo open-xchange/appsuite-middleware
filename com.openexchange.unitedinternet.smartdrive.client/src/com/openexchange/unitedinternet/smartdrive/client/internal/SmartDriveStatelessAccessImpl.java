@@ -51,6 +51,7 @@ package com.openexchange.unitedinternet.smartdrive.client.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -77,16 +78,29 @@ public final class SmartDriveStatelessAccessImpl implements SmartDriveStatelessA
 
     private final String requestPrefix;
 
+    private final String userName;
+
     private String downloadToken;
 
     /**
      * Initializes a new {@link SmartDriveStatelessAccessImpl}.
      */
-    public SmartDriveStatelessAccessImpl(final String userName, final HttpClient client, final SmartDriveAccess access) {
+    public SmartDriveStatelessAccessImpl(final String userName, final URL smartDriveServerUrl, final HttpClient client, final SmartDriveAccess access) {
         super();
         this.access = access;
         this.client = client;
-        requestPrefix = new StringBuilder(16).append("/data/").append(userName).append('/').toString();
+        this.userName = userName;
+        String path = smartDriveServerUrl.getPath();
+        if (null != path && path.length() > 0) {
+            if (path.charAt(0) != '/') {
+                path = '/' + path;
+            }
+            requestPrefix =
+                new StringBuilder(16).append(path.endsWith("/") ? path.substring(0, path.length() - 1) : path).append("/data/").append(
+                    userName).append('/').toString();
+        } else {
+            requestPrefix = new StringBuilder(16).append("/data/").append(userName).append('/').toString();
+        }
     }
 
     private String getDownloadToken() throws SmartDriveException {
@@ -172,5 +186,4 @@ public final class SmartDriveStatelessAccessImpl implements SmartDriveStatelessA
             throw SmartDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-
 }

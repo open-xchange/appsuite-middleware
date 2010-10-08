@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -92,19 +93,32 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
     private final String requestPrefix;
 
     private final HttpClient client;
-    
-    private final String smartDriveServerUrl;
+
+    private final URL smartDriveServerUrl;
+
+    private final String userName;
 
     private String sessionId;
 
     /**
      * Initializes a new {@link SmartDriveStatefulAccessImpl}.
      */
-    public SmartDriveStatefulAccessImpl(final String userName, final String smartDriveServerUrl, final HttpClient client) {
+    public SmartDriveStatefulAccessImpl(final String userName, final URL smartDriveServerUrl, final HttpClient client) {
         super();
         this.client = client;
         this.smartDriveServerUrl = smartDriveServerUrl;
-        requestPrefix = new StringBuilder(16).append("/op/").append(userName).append('/').toString();
+        this.userName = userName;
+        String path = smartDriveServerUrl.getPath();
+        if (null != path && path.length() > 0) {
+            if (path.charAt(0) != '/') {
+                path = '/' + path;
+            }
+            requestPrefix =
+                new StringBuilder(16).append(path.endsWith("/") ? path.substring(0, path.length() - 1) : path).append("/op/").append(
+                    userName).append('/').toString();
+        } else {
+            requestPrefix = new StringBuilder(16).append("/op/").append(userName).append('/').toString();
+        }
         ensureStatefulCookies();
     }
 
@@ -167,7 +181,7 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
             throw SmartDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     public SmartDriveResponse<List<SmartDriveResource>> list(final String pathOfDirectory) throws SmartDriveException {
         try {
             final String uriStr = getURI("list", pathOfDirectory);
@@ -1017,7 +1031,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                          * Expect the body to be a JSON object
                          */
                         final JSONObject errorDesc = new JSONObject(body);
-                        throw SmartDriveExceptionCodes.UNEXPECTED_STATUS.create(Integer.valueOf(errorDesc.getInt("errorCode")), errorDesc.getString("errorMessage"));
+                        throw SmartDriveExceptionCodes.UNEXPECTED_STATUS.create(
+                            Integer.valueOf(errorDesc.getInt("errorCode")),
+                            errorDesc.getString("errorMessage"));
                     }
                     throw SmartDriveExceptionCodes.CONFLICT.create(targetDirPath + "/" + targetFileName);
                 }

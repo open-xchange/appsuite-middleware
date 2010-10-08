@@ -101,6 +101,9 @@ public final class SmartDriveExceptionMessages implements LocalizableStrings {
     // Invalid URL: %1$s
     public static final String INVALID_URL_MSG = "Invalid URL: %1$s";
 
+    // Unsupported protocol for SmartDrive server access: %1$s
+    public static final String UNSUPPORTED_PROTOCOL_MSG = "Unsupported protocol for SmartDrive server access: %1$s";
+
     /**
      * Initializes a new {@link SmartDriveExceptionMessages}.
      */
