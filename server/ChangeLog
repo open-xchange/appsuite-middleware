@@ -1,6 +1,7 @@
 * 2010-10-08 - thorben.betten@open-xchange.com
 
  - Bugfix #17199: Proper cache invalidation after folder move operation
+ - Bugfix #17161: Immediate delivery of delete event for mails
 
 * 2010-10-07 - karsten.will@open-xchange.com
 
