@@ -140,6 +140,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
             try {
                 client.executeMethod(method);
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_NOT_FOUND == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(smartDriveServerUrl);
                 }
@@ -192,6 +195,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_NOT_FOUND == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(pathOfDirectory);
                 }
@@ -249,6 +255,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_NOT_FOUND == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(pathOfDirectory);
                 }
@@ -306,6 +315,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_GENERAL_ERROR == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(pathOfDirectory);
                 }
@@ -362,6 +374,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_GENERAL_ERROR == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(srcPath);
                 }
@@ -441,6 +456,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_GENERAL_ERROR == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(srcPath);
                 }
@@ -528,6 +546,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_GENERAL_ERROR == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(pathOfDirectory);
                 }
@@ -626,6 +647,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_GENERAL_ERROR == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(srcPath);
                 }
@@ -679,6 +703,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_NOT_FOUND == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(resourcePath);
                 }
@@ -744,6 +771,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_NOT_FOUND == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(resourcePath);
                 }
@@ -815,6 +845,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_NOT_FOUND == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(pathOfDirectory);
                 }
@@ -886,6 +919,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_NOT_FOUND == status) {
                     throw SmartDriveExceptionCodes.NOT_FOUND.create(pathOfDirectory);
                 }
@@ -946,6 +982,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_GENERAL_ERROR == status) {
                     throw SmartDriveExceptionCodes.GENERAL_ERROR.create(method.getStatusText());
                 }
@@ -1018,6 +1057,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
                 client.executeMethod(method);
                 final long duration = System.currentTimeMillis() - start;
                 final int status = method.getStatusCode();
+                if (SC_UNAUTHORIZED == status) {
+                    throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, smartDriveServerUrl);
+                }
                 if (SC_GENERAL_ERROR == status) {
                     throw SmartDriveExceptionCodes.GENERAL_ERROR.create(method.getStatusText());
                 }

@@ -104,6 +104,9 @@ public final class SmartDriveExceptionMessages implements LocalizableStrings {
     // Unsupported protocol for SmartDrive server access: %1$s
     public static final String UNSUPPORTED_PROTOCOL_MSG = "Unsupported protocol for SmartDrive server access: %1$s";
 
+    // SmartDrive user "%1$s" is not authenticated for stateful access to SmarTDrive server "%2$s".
+    public static final String UNAUTHORIZED_MSG = "SmartDrive user \"%1$s\" is not authenticated for stateful access to SmarTDrive server \"%2$s\".";
+
     /**
      * Initializes a new {@link SmartDriveExceptionMessages}.
      */

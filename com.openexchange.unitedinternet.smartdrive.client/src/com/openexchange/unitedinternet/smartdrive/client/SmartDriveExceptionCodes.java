@@ -121,6 +121,10 @@ public enum SmartDriveExceptionCodes implements OXErrorMessage {
      * Unsupported protocol for SmartDrive server access: %1$s
      */
     UNSUPPORTED_PROTOCOL(SmartDriveExceptionMessages.UNSUPPORTED_PROTOCOL_MSG, Category.CODE_ERROR, 15),
+    /**
+     * SmartDrive user "%1$s" is not authenticated for stateful access to SmarTDrive server "%2$s".
+     */
+    UNAUTHORIZED(SmartDriveExceptionMessages.UNAUTHORIZED_MSG, Category.CODE_ERROR, 16),
     
     
     

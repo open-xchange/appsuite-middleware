@@ -113,9 +113,11 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
 
     private final HttpClient client;
 
-    private SmartDriveStatefulAccess statefulAccess;
+    private volatile boolean authenticated;
 
-    private SmartDriveStatelessAccess statelessAccess;
+    private volatile SmartDriveStatefulAccess statefulAccess;
+
+    private volatile SmartDriveStatelessAccess statelessAccess;
 
     /**
      * Initializes a new {@link SmartDriveAccessImpl}.
@@ -139,18 +141,44 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
         client = createNewHttpClient(this.url, configuration);
     }
 
-    public SmartDriveStatefulAccess getStatefulAccess() {
-        if (null == statefulAccess) {
-            statefulAccess = new SmartDriveStatefulAccessImpl(userName, url, client);
+    private void authenticate() throws SmartDriveException {
+        if (!authenticated) {
+            synchronized (this) {
+                if (!authenticated) {
+                    String sessionId = null;
+                    
+                    client.getParams().setParameter(HTTP_CLIENT_PARAM_SESSION_ID, sessionId);
+                    authenticated = true;
+                }
+            }
         }
-        return statefulAccess;
+    }
+
+    public SmartDriveStatefulAccess getStatefulAccess() throws SmartDriveException {
+        SmartDriveStatefulAccess tmp = statefulAccess;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = statefulAccess;
+                if (null == tmp) {
+                    authenticate();
+                    statefulAccess = tmp = new SmartDriveStatefulAccessImpl(userName, url, client);
+                }
+            }
+        }
+        return tmp;
     }
 
     public SmartDriveStatelessAccess getStatelessAccess() {
-        if (null == statelessAccess) {
-            statelessAccess = new SmartDriveStatelessAccessImpl(userName, url, client, this);
+        SmartDriveStatelessAccess tmp = statelessAccess;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = statelessAccess;
+                if (null == tmp) {
+                    statelessAccess = tmp = new SmartDriveStatelessAccessImpl(userName, url, client, this);
+                }
+            }
         }
-        return statelessAccess;
+        return tmp;
     }
 
     /**

@@ -56,8 +56,28 @@ package com.openexchange.unitedinternet.smartdrive.client;
  */
 public interface SmartDriveAccess extends SmartDriveConstants {
 
-    SmartDriveStatefulAccess getStatefulAccess();
+    /**
+     * Gets the stateful access to SmartDrive server.
+     * <p>
+     * Methods provided by stateful access require the SmartDrive user being authenticated.
+     * 
+     * @return The stateful access to SmartDrive server
+     * @throws SmartDriveException If stateful access to SmartDrive server cannot be returned
+     */
+    SmartDriveStatefulAccess getStatefulAccess() throws SmartDriveException;
 
-    SmartDriveStatelessAccess getStatelessAccess();
+    /**
+     * Gets the stateless access to SmartDrive server.
+     * <p>
+     * Authentication and authorization is performed by checking tokens. There are two kind of tokens:
+     * <ul>
+     * <li>Download token</li>
+     * <li>Upload token</li>
+     * </ul>
+     * 
+     * @return The stateless access to SmartDrive server
+     * @throws SmartDriveException If stateless access to SmartDrive server cannot be returned
+     */
+    SmartDriveStatelessAccess getStatelessAccess() throws SmartDriveException;
 
 }
