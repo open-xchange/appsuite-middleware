@@ -68,7 +68,7 @@ public final class SmartDriveFactoryServiceImpl implements SmartDriveFactoryServ
         super();
     }
 
-    public SmartDriveAccess createSmartDriveAccess(String userName, String url, Map<String, Object> configuration) throws SmartDriveException {
+    public SmartDriveAccess createSmartDriveAccess(final String userName, final String url, final Map<String, Object> configuration) throws SmartDriveException {
         return new SmartDriveAccessImpl(userName, url, configuration);
     }
 
