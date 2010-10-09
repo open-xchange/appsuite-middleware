@@ -81,6 +81,8 @@ public final class PooledEvent implements Delayed {
 
     private final int hash;
 
+    private boolean async;
+
     /**
      * Initializes a new {@link PooledEvent} with {@link PushEventConstants#TOPIC default topic}.
      * 
@@ -109,6 +111,7 @@ public final class PooledEvent implements Delayed {
      */
     public PooledEvent(final String topic, final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
         super();
+        async = true;
         this.topic = topic;
         stamp = System.currentTimeMillis();
         this.contextId = contextId;
@@ -129,6 +132,32 @@ public final class PooledEvent implements Delayed {
         result = prime * result + (contentRelated ? 1 : 0);
         result = prime * result + (immediateDelivery ? 1 : 0);
         hash = result;
+    }
+
+    /**
+     * Sets whether the event should be delivered asynchronously (default behavior). If <code>false</code>
+     * {@link EventPool#put(PooledEvent)} does not return to the caller until delivery of the event is completed.
+     * <p>
+     * <b>Note</b>: Works only if this pooled event is considered for immediate delivery.
+     * 
+     * @param async <code>true</code> to deliver asynchronously; otherwise <code>false</code>
+     * @return This pooled event with new behavior applied
+     */
+    public PooledEvent setAsync(final boolean async) {
+        this.async = async;
+        return this;
+    }
+
+    /**
+     * Checks whether the event should be delivered asynchronously.
+     * 
+     * @return <code>true</code> to deliver asynchronously; otherwise <code>false</code>
+     */
+    public boolean isAsync() {
+        /*
+         * Asynchronous delivery if either non-immediate delivery or async
+         */
+        return !immediateDelivery || async;
     }
 
     public long getDelay(final TimeUnit unit) {

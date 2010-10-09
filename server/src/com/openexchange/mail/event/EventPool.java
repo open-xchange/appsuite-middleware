@@ -271,7 +271,7 @@ public final class EventPool implements Runnable {
     }
 
     private void broadcastEvent(final PooledEvent pooledEvent) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
         properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(pooledEvent.getContextId()));
         properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(pooledEvent.getUserId()));
         properties.put(PushEventConstants.PROPERTY_SESSION, pooledEvent.getSession());
@@ -285,9 +285,13 @@ public final class EventPool implements Runnable {
         final String topic = pooledEvent.getTopic();
         final Event event = new Event(null == topic ? PushEventConstants.TOPIC : topic, properties);
         /*
-         * Finally post it
+         * Finally deliver it
          */
-        eventAdmin.postEvent(event);
+        if (pooledEvent.isAsync()) {
+            eventAdmin.postEvent(event);
+        } else {
+            eventAdmin.sendEvent(event);
+        }
         if (DEBUG_ENABLED) {
             LOG.debug(new StringBuilder(64).append("Notified ").append(pooledEvent.isContentRelated() ? "content-related" : "hierarchical").append(
                 "-wise changed folder \"").append(pooledEvent.getFullname()).append("\" in account ").append(pooledEvent.getAccountId()).append(

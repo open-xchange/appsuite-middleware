@@ -69,12 +69,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.api2.OXException;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
@@ -84,14 +86,23 @@ import com.openexchange.dataretention.RetentionData;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupStorage;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException.Code;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -107,6 +118,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -582,9 +594,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
-        postEvent(accountId, fullname, true, true);
+        postEvent(accountId, fullname, true, true, false);
         if (!hd) {
-            postEvent(accountId, trashFullname, true, true);
+            postEvent(accountId, trashFullname, true, true, false);
         }
         return true;
     }
@@ -1231,7 +1243,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return appendMessages(destFolder, mails, force, true);
     }
     
-    public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force, boolean isImport) throws MailException {
+    public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force, final boolean isImport) throws MailException {
         if ((mails == null) || (mails.length == 0)) {
             return new String[0];
         }
@@ -1276,23 +1288,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         
-        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
         if (isImport) {
-            ArrayList<String> idList = new ArrayList<String>();
-            for (MailMessage mail : mails) {
-                MailImportResult mir = new MailImportResult();
+            final ArrayList<String> idList = new ArrayList<String>();
+            for (final MailMessage mail : mails) {
+                final MailImportResult mir = new MailImportResult();
                 mir.setMail(mail);
                 try {
-                    String[] idStr = messageStorage.appendMessages(fullname, new MailMessage[] {mail});
+                    final String[] idStr = messageStorage.appendMessages(fullname, new MailMessage[] {mail});
                     mir.setId(idStr[0]);
                     idList.add(idStr[0]);
-                } catch (MailException e) {
+                } catch (final MailException e) {
                     mir.setException(e);                
                 }
                 mailImportResults.add(mir);
             }
             
-            String[] ids = new String[idList.size()];
+            final String[] ids = new String[idList.size()];
             for (int i = 0; i < idList.size(); i++) {
                 ids[i] = idList.get(i);
             }
@@ -1861,6 +1873,81 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
+    public void sendFormMail(final ComposedMailMessage composedMail, final int groupId, final int accountId) throws MailException {
+        /*
+         * Initialize
+         */
+        initConnection(accountId);
+        final MailTransport transport = MailTransport.getInstance(session, accountId);
+        try {
+            /*
+             * Resolve group to users
+             */
+            final GroupStorage gs = GroupStorage.getInstance();
+            final Group group = gs.getGroup(groupId, ctx);
+            final int[] members = group.getMember();
+            /*
+             * Get user storage/contact interface to load user and its contact
+             */
+            final UserStorage us = UserStorage.getInstance();
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                FolderObject.SYSTEM_LDAP_FOLDER_ID,
+                session);
+            /*
+             * Needed variables
+             */
+            final String content = (String) composedMail.getContent();
+            final StringBuilder builder = new StringBuilder(content.length() + 64);
+            final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
+            final Map<Locale, String> greetings = new HashMap<Locale, String>(4);
+            for (final int userId : members) {
+                final User user = us.getUser(userId, ctx);
+                /*
+                 * Get user's contact
+                 */
+                final Contact contact = contactInterface.getUserById(userId);
+                /*
+                 * Determine locale
+                 */
+                final Locale locale = user.getLocale();
+                /*
+                 * Compose text
+                 */
+                String greeting = greetings.get(locale);
+                if (null == greeting) {
+                    greeting = new StringHelper(locale).getString(MailStrings.GREETING);
+                    greetings.put(locale, greeting);
+                }
+                builder.setLength(0);
+                builder.append(greeting).append(' ');
+                builder.append(contact.getGivenName()).append(' ').append(contact.getSurName());
+                builder.append("<br><br>").append(content);
+                final TextBodyMailPart part = provider.getNewTextBodyPart(builder.toString());
+                /*
+                 * TODO: Clone composed mail?
+                 */
+                composedMail.setBodyPart(part);
+                composedMail.removeTo();
+                composedMail.removeBcc();
+                composedMail.removeCc();
+                composedMail.addTo(new QuotedInternetAddress(user.getMail()));
+                /*
+                 * Finally send mail
+                 */
+                transport.sendMailMessage(composedMail, ComposeType.NEW);
+            }
+        } catch (final LdapException e) {
+            throw new MailException(e);
+        } catch (final OXException e) {
+            throw new MailException(e);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } finally {
+            transport.close();
+        }
+    }
+
+    @Override
     public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId) throws MailException {
         /*
          * Initialize
@@ -2257,7 +2344,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         mailAccess.getMessageStorage().updateMessageColorLabel(fullname, msgUID, newColorLabel);
-        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true);
+        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true, false);
         /*
          * Update caches
          */
@@ -2325,7 +2412,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         mailAccess.getMessageStorage().updateMessageFlags(fullname, mailIDs, flagBits, flagVal);
-        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true);
+        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true, false);
         final boolean spamAction = (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0));
         if (spamAction) {
             final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
@@ -2501,6 +2588,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session));
     }
 
+    private void postEvent(final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean async) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        EventPool.getInstance().put(
+            new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session).setAsync(async));
+    }
+
     private void postEvent(final String topic, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery) {
         if (MailAccount.DEFAULT_ID != accountId) {
             /*
@@ -2511,9 +2609,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         EventPool.getInstance().put(new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session));
     }
 
+    private void postEvent(final String topic, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean async) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        EventPool.getInstance().put(new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session).setAsync(async));
+    }
+
     @Override
     public MailImportResult[] getMailImportResults() {
-        MailImportResult[] mars = new MailImportResult[mailImportResults.size()];
+        final MailImportResult[] mars = new MailImportResult[mailImportResults.size()];
         for (int i = 0; i < mars.length; i++) {
             mars[i] = mailImportResults.get(i);
         }
