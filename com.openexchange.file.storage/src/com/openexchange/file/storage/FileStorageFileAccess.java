@@ -154,8 +154,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param id The ID to check for
      * @param version The version to check for
      * @return true when the file exists and is readable, false otherwise.
+     * @throws FileStorageException 
      */
-    public boolean exists(String folderId, String id, int version);
+    public boolean exists(String folderId, String id, int version) throws FileStorageException;
     
     /**
      * Load the metadata about a file
