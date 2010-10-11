@@ -450,5 +450,7 @@ public abstract class MailServletInterface {
     public MailImportResult[] getMailImportResults() {
         return new MailImportResult[0];
     }
+    
+    public abstract void sendFormMail(final ComposedMailMessage composedMail, final int groupId, final int accountId) throws MailException;
 
 }

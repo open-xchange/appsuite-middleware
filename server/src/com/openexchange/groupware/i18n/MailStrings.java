@@ -101,4 +101,6 @@ public class MailStrings implements LocalizableStrings {
     // Indicates the elapsed date for affected message's attachments
     public static final String PUBLISHED_ATTACHMENTS_APPENDIX = "The links will be deleted by #DATE#";
 
+    public static final String GREETING = "Hello Earthlings! Take me to your leader"; // FIXME: Fixed compile error
+
 }
