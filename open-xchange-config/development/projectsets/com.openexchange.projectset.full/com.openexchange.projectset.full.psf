@@ -79,5 +79,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.file.storage.webdav,com.openexchange.file.storage.webdav"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.unitedinternet.smartdrive.client,com.openexchange.unitedinternet.smartdrive.client"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.tx,com.openexchange.tx"/>
+<project reference="1.0,:pserver:petra.netline.de:/var/lib/cvs,open-xchange/com.openexchange.file.storage,com.openexchange.file.storage"/>
 </provider>
 </psf>
