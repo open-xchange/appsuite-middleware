@@ -126,7 +126,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
     }
 
     public int size() {
-        throw new UnsupportedOperationException("Method size() not implemented");
+        return -1;
     }
 
     public boolean hasSize() {

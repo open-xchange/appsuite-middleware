@@ -703,9 +703,6 @@ public class InfostoreRequest extends CommonRequest {
                 return next != null;
             }
 
-            public boolean hasSize() {
-                return false;
-            }
 
             public boolean hasWarnings() {
                 return iter.hasWarnings();
@@ -738,7 +735,7 @@ public class InfostoreRequest extends CommonRequest {
             }
 
             public int size() {
-                throw new UnsupportedOperationException("Don't know my size!");
+                return -1;
             }
             
         };

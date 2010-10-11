@@ -445,7 +445,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         }
 
         public int size() {
-            throw new UnsupportedOperationException("Mehtod size() not implemented");
+            return -1;
         }
 
         public boolean hasSize() {

@@ -131,7 +131,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         @Override
         public int size() {
-            return 0;
+            return -1;
         }
 
         @Override
@@ -710,7 +710,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         if (prefetchQueue != null) {
             return prefetchQueue.size() + (next == null ? 0 : 1);
         }
-        throw new UnsupportedOperationException("Method size() not implemented");
+        return -1;
     }
 
     public boolean hasSize() {

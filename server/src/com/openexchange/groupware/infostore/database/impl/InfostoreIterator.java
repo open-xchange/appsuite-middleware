@@ -321,7 +321,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
     public int size() {
-        throw new UnsupportedOperationException();
+        return -1;
     }
 
 

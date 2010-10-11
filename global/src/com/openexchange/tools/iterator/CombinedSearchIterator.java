@@ -112,7 +112,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
     }
 
     public int size() {
-        throw new UnsupportedOperationException("Mehtod size() not implemented");
+        return -1;
     }
 
     public boolean hasSize() {

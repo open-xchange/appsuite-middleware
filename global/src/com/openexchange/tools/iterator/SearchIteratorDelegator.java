@@ -121,7 +121,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
 
     public int size() {
         if (size < 0) {
-            throw new UnsupportedOperationException("Size has not been set for this iterator");
+            return -1;
         }
         return size;
     }

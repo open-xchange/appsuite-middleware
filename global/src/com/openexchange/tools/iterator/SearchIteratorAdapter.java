@@ -118,7 +118,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     public int size() {
         if (!b_size) {
-            throw new UnsupportedOperationException("Size has not been set for this iterator");
+            return -1;
         }
         return size;
     }

@@ -136,10 +136,6 @@ public class ContactMergerator implements SearchIterator<Contact>{
         return next != null;
     }
 
-    public boolean hasSize() {
-        return false;
-    }
-
     public boolean hasWarnings() {
         return false;
     }
@@ -161,7 +157,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
     }
 
     public int size() {
-        return 0;
+        return -1;
     }
     
     private static final class RememberingIterator {

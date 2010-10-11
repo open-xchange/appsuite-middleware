@@ -1263,7 +1263,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
 
         public int size() {
-            throw new UnsupportedOperationException("Mehtod size() not implemented");
+            return -1;
         }
 
         public boolean hasSize() {

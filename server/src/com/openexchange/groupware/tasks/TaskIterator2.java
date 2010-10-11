@@ -270,7 +270,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     }
 
     public int size() {
-        throw new UnsupportedOperationException("Method not implemented");
+        return -1;
     }
 
     public void run() {
