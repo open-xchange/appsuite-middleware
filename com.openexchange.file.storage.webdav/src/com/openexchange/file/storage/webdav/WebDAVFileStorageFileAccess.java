@@ -203,7 +203,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#removeVersion(java.lang.String, java.lang.String, int[])
      */
-    public String[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException {
+    public int[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }

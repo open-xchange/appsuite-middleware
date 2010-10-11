@@ -236,7 +236,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws FileStorageException
      */
-    public String[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException;
+    public int[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException;
 
     /**
      * Unlocks a given file.
