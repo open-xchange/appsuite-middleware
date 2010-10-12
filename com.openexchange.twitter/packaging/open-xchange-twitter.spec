@@ -48,7 +48,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Twitter Bundle
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange >= @OXVERSION@
 %if 0%{?sles_version} >= 10
 Requires:   open-xchange-xerces-ibm
 Conflicts:  open-xchange-xerces-sun
