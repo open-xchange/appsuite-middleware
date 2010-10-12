@@ -103,8 +103,12 @@ import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
+import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
+import com.openexchange.folder.internal.FolderServiceImpl;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupInit;
+import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -320,6 +324,8 @@ public final class Init {
         startAndInjectEventBundle();
         startAndInjectContextService();
         startAndInjectUserService();
+        startAndInjectGroupService();
+        startAndInjectFolderService();
         startAndInjectResourceService();
         startAndInjectContactService();
         startAndInjectContactCollector();
@@ -618,6 +624,22 @@ public final class Init {
             final UserService us = new UserServiceImpl();
             services.put(UserService.class, us);
             ServerServiceRegistry.getInstance().addService(UserService.class, us);
+        }
+    }
+
+    private static void startAndInjectGroupService() {
+        if (null == ServerServiceRegistry.getInstance().getService(GroupService.class)) {
+            final GroupService us = new GroupServiceImpl();
+            services.put(GroupService.class, us);
+            ServerServiceRegistry.getInstance().addService(GroupService.class, us);
+        }
+    }
+
+    private static void startAndInjectFolderService() {
+        if (null == ServerServiceRegistry.getInstance().getService(FolderService.class)) {
+            FolderService fs = new FolderServiceImpl();
+            services.put(FolderService.class, fs);
+            ServerServiceRegistry.getInstance().addService(FolderService.class, fs);
         }
     }
 
