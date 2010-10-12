@@ -50,9 +50,14 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.results.Results;
 
 
 
@@ -65,14 +70,12 @@ import com.openexchange.groupware.AbstractOXException;
 public class AllTest extends FileActionTest {
     
     public void testMissingParameters() {
-        
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
         } catch (AbstractOXException x) {
             assertTrue(true);
         }
-        
     }
     
     public void testAction() throws AbstractOXException {
@@ -83,16 +86,26 @@ public class AllTest extends FileActionTest {
             .param("order", "desc")
             .param("timezone", "Europe/Berlin");
         
-        fileAccess().expectCall("getDocuments", "12", Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME), File.Field.TITLE, SortDirection.DESC).andReturn(null); // FIXME:
+        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
+        fileAccess().expectCall("getDocuments", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult()); 
         
         perform();
         
-        //checkResult(assertion());
+        fileAccess().assertAllWereCalled();
+        
+        assertEquals(TimeZone.getTimeZone("Europe/Berlin"), writer().getTimeZone());
+        assertEquals(columns, writer().getColumns());
     }
 
     @Override
     public AbstractFileAction createAction() {
-        return new AllAction();
+        return new AllAction() {
+            
+            @Override
+            protected FileMetadataWriter getWriter() {
+                return writer();
+            }
+        };
     }
     
     

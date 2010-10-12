@@ -49,45 +49,44 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.json.FileTest;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.json.JSONAssertion;
-import com.openexchange.sim.SimBuilder;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.tools.iterator.SearchIterator;
-import junit.framework.TestCase;
 
 
 /**
- * {@link FileActionTest}
+ * {@link CollectingFileWriter}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class FileActionTest extends FileTest {
+public class CollectingFileWriter extends FileMetadataWriter {
     
-    protected AbstractFileAction action;
-    protected AJAXRequestResult result;
-    
-    protected CollectingFileWriter writer = new CollectingFileWriter();
-    
+    private SearchIterator<File> files;
+    private List<Field> columns;
+    private TimeZone timeZone;
+
     @Override
-    public void setUp() throws Exception {
-        action = createAction();
+    public JSONArray write(SearchIterator<File> files, List<Field> columns, TimeZone timeZone) {
+        this.files = files;
+        this.columns = columns;
+        this.timeZone = timeZone;
+        return new JSONArray();
     }
     
-    public AJAXRequestResult perform() throws AbstractOXException {
-        return result = action.handle(request);
+    
+    public SearchIterator<File> getFiles() {
+        return files;
     }
     
-    public CollectingFileWriter writer() {
-        return writer;
+    public List<Field> getColumns() {
+        return columns;
     }
     
-    public abstract AbstractFileAction createAction();
-    
-    
-    
- }
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+}

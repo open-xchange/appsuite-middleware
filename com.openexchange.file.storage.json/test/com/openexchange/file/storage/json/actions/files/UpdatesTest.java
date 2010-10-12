@@ -49,45 +49,72 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.json.FileTest;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.json.JSONAssertion;
-import com.openexchange.sim.SimBuilder;
-import com.openexchange.tools.iterator.SearchIterator;
-import junit.framework.TestCase;
-
+import com.openexchange.groupware.results.Results;
+import static com.openexchange.time.TimeTools.D;
 
 /**
- * {@link FileActionTest}
+ * {@link UpdatesTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class FileActionTest extends FileTest {
+public class UpdatesTest extends FileActionTest {
+
+    public void testMissingParameters() {
+        try {
+            action.handle(request());
+            fail("Expected Exception due to missing parameters");
+        } catch (AbstractOXException x) {
+            assertTrue(true);
+        }
+    }
     
-    protected AbstractFileAction action;
-    protected AJAXRequestResult result;
+    public void testAction() throws AbstractOXException {
+        request()
+            .param("folder", "12")
+            .param("columns", "1,700,702") // id, title and filename
+            .param("timestamp", ""+D("Yesterday at 12:00").getTime())
+            .param("sort", "700")
+            .param("order", "desc")
+            .param("ignore", "deleted")
+            .param("timezone", "Europe/Berlin");
+        
+        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
+        fileAccess().expectCall("getDelta", "12", D("Yesterday at 12:00").getTime(), columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta()); 
+        
+        perform();
+        
+        fileAccess().assertAllWereCalled();
+        
+    }
     
-    protected CollectingFileWriter writer = new CollectingFileWriter();
+    public void testTimestampDefaultsToDistantPast() throws AbstractOXException {
+        request()
+        .param("folder", "12")
+        .param("columns", "1,700,702") // id, title and filename
+        .param("sort", "700")
+        .param("order", "desc")
+        .param("ignore", "deleted")
+        .param("timezone", "Europe/Berlin");
     
+        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
+        fileAccess().expectCall("getDelta", "12", FileStorageFileAccess.DISTANT_PAST, columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta()); 
+    
+        perform();
+    
+        fileAccess().assertAllWereCalled();
+    
+    }
+
     @Override
-    public void setUp() throws Exception {
-        action = createAction();
+    public AbstractFileAction createAction() {
+        return new UpdatesAction();
     }
-    
-    public AJAXRequestResult perform() throws AbstractOXException {
-        return result = action.handle(request);
-    }
-    
-    public CollectingFileWriter writer() {
-        return writer;
-    }
-    
-    public abstract AbstractFileAction createAction();
-    
-    
-    
- }
+
+}

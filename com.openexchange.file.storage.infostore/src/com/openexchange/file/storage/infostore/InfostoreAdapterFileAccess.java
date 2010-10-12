@@ -1,6 +1,7 @@
 package com.openexchange.file.storage.infostore;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageException;
@@ -96,7 +97,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public boolean exists(String folderId, String id, int version) throws FileStorageException {
+    public boolean exists(String id, int version) throws FileStorageException {
         try {
             return infostore.exists( ID(id), version, ctx, user, userConfig);
         } catch (AbstractOXException e) {
@@ -105,7 +106,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public InputStream getDocument(String folderId, String id, int version) throws FileStorageException {
+    public InputStream getDocument(String id, int version) throws FileStorageException {
         try {
             return infostore.getDocument(ID( id ), version, ctx, user, userConfig);
         } catch (AbstractOXException e) {
@@ -114,7 +115,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public File getFileMetadata(String folderId, String id, int version) throws FileStorageException {
+    public File getFileMetadata(String id, int version) throws FileStorageException {
         try {
             DocumentMetadata documentMetadata = infostore.getDocumentMetadata(ID( id ), version, ctx, user, userConfig);
             return new InfostoreFile( documentMetadata ); 
@@ -122,9 +123,9 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
             throw new FileStorageException(e);
         }
     }
-
+    
     @Override
-    public void lock(String folderId, String id, long diff) throws FileStorageException {
+    public void lock(String id, long diff) throws FileStorageException {
         try {
             infostore.lock(ID( id ), diff, sessionObj);
         } catch (AbstractOXException e) {
@@ -142,12 +143,12 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public String[] removeDocument(String[][] ids, long sequenceNumber) throws FileStorageException {
+    public List<String> removeDocument(List<String> ids, long sequenceNumber) throws FileStorageException {
         int[] infostoreIDs = IDS(ids);
         
         try {
             int[] conflicted = infostore.removeDocument(infostoreIDs, sequenceNumber, sessionObj);
-            String[] retval = toStrings(conflicted);
+            List<String> retval = toStrings(conflicted);
             return retval;
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
@@ -155,7 +156,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public int[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException {
+    public int[] removeVersion(String id, int[] versions) throws FileStorageException {
         try {
             return infostore.removeVersion(ID(id), versions, sessionObj);
         } catch (AbstractOXException e) {
@@ -200,7 +201,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public void touch(String folderId, String id) throws FileStorageException {
+    public void touch(String id) throws FileStorageException {
         try {
             infostore.touch(ID(id), sessionObj);
         } catch (AbstractOXException e) {
@@ -209,7 +210,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public void unlock(String folderId, String id) throws FileStorageException {
+    public void unlock(String id) throws FileStorageException {
         try {
             infostore.unlock(ID(id), sessionObj);
         } catch (AbstractOXException e) {
@@ -268,7 +269,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public TimedResult<File> getDocuments(String[][] ids, List<Field> columns) throws FileStorageException {
+    public TimedResult<File> getDocuments(List<String> ids, List<Field> columns) throws FileStorageException {
         int[] infostoreIDs = IDS(ids);
         TimedResult<DocumentMetadata> documents;
         try {
@@ -282,7 +283,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public TimedResult<File> getVersions(String folderId, String id) throws FileStorageException {
+    public TimedResult<File> getVersions(String id) throws FileStorageException {
         try {
             TimedResult<DocumentMetadata> versions = infostore.getVersions(ID(id), ctx, user, userConfig);
             return new InfostoreTimedResult(versions);
@@ -292,7 +293,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> columns) throws FileStorageException {
+    public TimedResult<File> getVersions(String id, List<Field> columns) throws FileStorageException {
         try {
             TimedResult<DocumentMetadata> versions = infostore.getVersions(ID(id), FieldMapping.getMatching(columns), ctx, user, userConfig);
             return new InfostoreTimedResult(versions);
@@ -302,7 +303,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> columns, Field sort, SortDirection order) throws FileStorageException {
+    public TimedResult<File> getVersions(String id, List<Field> columns, Field sort, SortDirection order) throws FileStorageException {
         try {
             TimedResult<DocumentMetadata> versions = infostore.getVersions(ID(id), FieldMapping.getMatching(columns), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ctx, user, userConfig);
             return new InfostoreTimedResult(versions);
@@ -354,18 +355,18 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         return Long.parseLong(folderId);
     }
     
-    private static String[] toStrings(int[] numbers) {
-        String[] retval = new String[numbers.length];
+    private static List<String> toStrings(int[] numbers) {
+        List<String> retval = new ArrayList<String>(numbers.length);
         for(int i = 0; i < numbers.length; i++) {
-            retval[i] = String.valueOf(numbers[i]);
+            retval.add(String.valueOf(numbers[i]));
         }
         return retval;
     }
     
-    private static int[] IDS(String[][] ids) {
-        int[] infostoreIDs = new int[ids.length];
-        for(int i = 0; i < ids.length; i++) {
-           infostoreIDs[i] = ID(ids[i][1]);
+    private static int[] IDS(List<String> ids) {
+        int[] infostoreIDs = new int[ids.size()];
+        for(int i = 0; i < ids.size(); i++) {
+           infostoreIDs[i] = ID(ids.get(i));
         }
         return infostoreIDs;
     }

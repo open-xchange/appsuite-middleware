@@ -49,45 +49,50 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.json.FileTest;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.json.JSONAssertion;
-import com.openexchange.sim.SimBuilder;
-import com.openexchange.tools.iterator.SearchIterator;
-import junit.framework.TestCase;
+import com.openexchange.groupware.results.Results;
 
 
 /**
- * {@link FileActionTest}
+ * {@link ListTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class FileActionTest extends FileTest {
+public class ListTest extends FileActionTest {
+
+    public void testMissingParameters() {
+        try {
+            action.handle(request());
+            fail("Expected Exception due to missing parameters");
+        } catch (AbstractOXException x) {
+            assertTrue(true);
+        }
+    }
     
-    protected AbstractFileAction action;
-    protected AJAXRequestResult result;
-    
-    protected CollectingFileWriter writer = new CollectingFileWriter();
-    
+    public void testAction() throws AbstractOXException, JSONException {
+        request()
+            .param("columns", "1,700,702") // id, title and filename
+            .param("timezone", "Europe/Berlin").body(new JSONArray("[{ folder: 'folder', id: 'id1'}, {folder: 'folder', id: 'id2'}]"));
+        
+        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
+        fileAccess().expectCall("getDocuments", Arrays.asList("id1", "id2"), columns).andReturn(Results.emptyTimedResult()); 
+        
+        perform();
+        
+        fileAccess().assertAllWereCalled();
+    }
+
     @Override
-    public void setUp() throws Exception {
-        action = createAction();
+    public AbstractFileAction createAction() {
+        return new ListAction();
     }
-    
-    public AJAXRequestResult perform() throws AbstractOXException {
-        return result = action.handle(request);
-    }
-    
-    public CollectingFileWriter writer() {
-        return writer;
-    }
-    
-    public abstract AbstractFileAction createAction();
-    
-    
-    
- }
+
+}

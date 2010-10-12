@@ -49,8 +49,16 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -61,5 +69,34 @@ import com.openexchange.tools.servlet.AjaxException;
 public interface InfostoreRequest {
 
     void require(Param...params) throws AjaxException ;
+    
+    void requireBody() throws AjaxException;
+
+    public FileStorageFileAccess getFileAccess() throws AbstractOXException;
+
+    String getId();
+
+    int getVersion();
+    
+    String getFolderId() throws AbstractOXException;
+
+    List<Field> getColumns() throws AbstractOXException;
+
+    Field getSortingField() throws AbstractOXException;
+
+    SortDirection getSortingOrder() throws AbstractOXException;
+ 
+    TimeZone getTimezone() throws AbstractOXException;
+    
+    ServerSession getSession() throws AjaxException;
+
+    long getTimestamp() throws AjaxException;
+
+    Set<String> getIgnore() throws AjaxException;
+
+    List<String> getIds() throws AjaxException;
+
+
+    
 
 }

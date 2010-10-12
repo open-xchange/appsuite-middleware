@@ -184,4 +184,24 @@ public class SimServerSession implements ServerSession {
         // TODO Auto-generated method stub
         
     }
+
+
+    
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+
+    
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+
+    
+    public void setUserConfig(UserConfiguration userConfig) {
+        this.userConfig = userConfig;
+    }
+    
+    
 }

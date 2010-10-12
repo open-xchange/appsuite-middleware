@@ -52,42 +52,25 @@ package com.openexchange.file.storage.json.actions.files;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.json.FileTest;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.json.JSONAssertion;
-import com.openexchange.sim.SimBuilder;
-import com.openexchange.tools.iterator.SearchIterator;
-import junit.framework.TestCase;
-
 
 /**
- * {@link FileActionTest}
- *
+ * {@link VersionsAction}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class FileActionTest extends FileTest {
-    
-    protected AbstractFileAction action;
-    protected AJAXRequestResult result;
-    
-    protected CollectingFileWriter writer = new CollectingFileWriter();
-    
+public class VersionsAction extends AbstractFileAction {
+
     @Override
-    public void setUp() throws Exception {
-        action = createAction();
+    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+        request.require(Param.ID);
+        
+        FileStorageFileAccess fileAccess = request.getFileAccess();
+        
+        TimedResult<File> versions = fileAccess.getVersions(request.getId(), request.getColumns(), request.getSortingField(), request.getSortingOrder());
+        
+        return result(versions, request);
     }
-    
-    public AJAXRequestResult perform() throws AbstractOXException {
-        return result = action.handle(request);
-    }
-    
-    public CollectingFileWriter writer() {
-        return writer;
-    }
-    
-    public abstract AbstractFileAction createAction();
-    
-    
-    
- }
+
+}

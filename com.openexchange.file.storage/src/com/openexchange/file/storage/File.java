@@ -289,7 +289,7 @@ public interface File {
             newArgs[0] = arg;
             System.arraycopy(args, 0, newArgs, 1, args.length);
             for (Field field : values()) {
-                arg = (T) field.handle(handler, args);
+                arg = (T) field.handle(handler, newArgs);
             }
             return arg;
         }
@@ -301,8 +301,30 @@ public interface File {
             }
         }
         
-        public static Field get(String key) {
-            return byName.get(key);
+        private static final Map<Integer, Field> byNumber = new HashMap<Integer, Field>();
+        
+        static {
+            for (Field field : values()) {
+                byNumber.put(field.getNumber(), field);
+            }
         }
+        
+        public static Field get(String key) {
+            if(key == null) {
+                return null;
+            }
+            Field field = byName.get(key);
+            if(field != null) {
+                 return field;
+            }
+            try {
+                int number = Integer.parseInt(key);
+                return byNumber.get(number);
+            } catch (NumberFormatException x) {
+                return null;
+            }
+        }
+        
+      
     }
 }

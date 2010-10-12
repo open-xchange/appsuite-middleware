@@ -47,47 +47,50 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.files;
+package com.openexchange.file.storage.json;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.json.FileTest;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.json.JSONAssertion;
-import com.openexchange.sim.SimBuilder;
-import com.openexchange.tools.iterator.SearchIterator;
 import junit.framework.TestCase;
-
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
+import com.openexchange.sim.SimBuilder;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link FileActionTest}
- *
+ * {@link FileTest}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class FileActionTest extends FileTest {
-    
-    protected AbstractFileAction action;
-    protected AJAXRequestResult result;
-    
-    protected CollectingFileWriter writer = new CollectingFileWriter();
-    
-    @Override
-    public void setUp() throws Exception {
-        action = createAction();
+public class FileTest extends TestCase {
+
+    protected SimBuilder fileAccessBuilder;
+
+    protected TestFriendlyInfostoreRequest request;
+
+    public TestFriendlyInfostoreRequest request() {
+        return request = new TestFriendlyInfostoreRequest() {
+            
+            private FileStorageFileAccess files = null;
+            
+            @Override
+            public FileStorageFileAccess getFileAccess() {
+                if(files != null) {
+                    return files;
+                }
+                if (fileAccessBuilder != null) {
+                    files = fileAccessBuilder.getSim(FileStorageFileAccess.class);
+                } else {
+                    files = null;
+                }
+                return files;
+            }
+            
+        };
     }
-    
-    public AJAXRequestResult perform() throws AbstractOXException {
-        return result = action.handle(request);
+
+    public SimBuilder fileAccess() {
+        if (fileAccessBuilder != null) {
+            return fileAccessBuilder;
+        }
+        return fileAccessBuilder = new SimBuilder();
     }
-    
-    public CollectingFileWriter writer() {
-        return writer;
-    }
-    
-    public abstract AbstractFileAction createAction();
-    
-    
-    
- }
+}

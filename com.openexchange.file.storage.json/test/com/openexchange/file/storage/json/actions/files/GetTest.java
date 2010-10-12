@@ -49,45 +49,50 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.json.FileTest;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.json.JSONAssertion;
-import com.openexchange.sim.SimBuilder;
-import com.openexchange.tools.iterator.SearchIterator;
-import junit.framework.TestCase;
 
 
 /**
- * {@link FileActionTest}
+ * {@link GetTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class FileActionTest extends FileTest {
+public class GetTest extends FileActionTest {
     
-    protected AbstractFileAction action;
-    protected AJAXRequestResult result;
+    public void testMissingParameters() {
+        try {
+            action.handle(request());
+            fail("Expected Exception due to missing parameters");
+        } catch (AbstractOXException x) {
+            assertTrue(true);
+        }
+    }
     
-    protected CollectingFileWriter writer = new CollectingFileWriter();
+    public void testAction() throws AbstractOXException {
+        request().param("id", "12");
+        
+        fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(new DefaultFile());
     
+        perform();
+        
+        fileAccess().assertAllWereCalled();
+    }
+    
+    public void testWithVersionNumber() throws AbstractOXException {
+        request().param("id", "12").param("version", "2");
+        
+        fileAccess().expectCall("getFileMetadata", "12", 2).andReturn(new DefaultFile());
+    
+        perform();
+        
+        fileAccess().assertAllWereCalled();
+    }
+
     @Override
-    public void setUp() throws Exception {
-        action = createAction();
+    public AbstractFileAction createAction() {
+        return new GetAction();
     }
-    
-    public AJAXRequestResult perform() throws AbstractOXException {
-        return result = action.handle(request);
-    }
-    
-    public CollectingFileWriter writer() {
-        return writer;
-    }
-    
-    public abstract AbstractFileAction createAction();
-    
-    
-    
- }
+
+}

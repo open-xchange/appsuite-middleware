@@ -50,6 +50,9 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
+import com.openexchange.tools.session.SimServerSession;
 
 
 /**
@@ -60,7 +63,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 public class TestFriendlyInfostoreRequest extends AJAXInfostoreRequest {
     
     public TestFriendlyInfostoreRequest() {
-        super(new AJAXRequestData());
+        super(new AJAXRequestData(), new SimServerSession(new SimContext(1), new SimUser(), null));
+        ((SimUser) getSimSession().getUser()).setTimeZone("UTC");
     }
     
     public TestFriendlyInfostoreRequest param(String key, String value) {
@@ -72,4 +76,9 @@ public class TestFriendlyInfostoreRequest extends AJAXInfostoreRequest {
         data.setData(body);
         return this;
     }
+    
+    public SimServerSession getSimSession() {
+        return (SimServerSession) getSession();
+    }
+
 }

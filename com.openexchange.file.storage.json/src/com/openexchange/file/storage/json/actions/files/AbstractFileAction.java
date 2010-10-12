@@ -49,8 +49,18 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.Date;
+import org.json.JSONArray;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -58,10 +68,21 @@ import com.openexchange.groupware.AbstractOXException;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractFileAction {
+public abstract class AbstractFileAction implements AJAXActionService{
+    
+    private static final FileMetadataWriter fileWriter = new FileMetadataWriter();
+    
     public static enum Param {
+        ID("id"),
         FOLDER_ID("folder"),
-        COLUMNS("columns");
+        VERSION("version"),
+        COLUMNS("columns"), 
+        SORT("sort"), 
+        ORDER("order"), 
+        TIMEZONE("timezone"), 
+        TIMESTAMP("timestamp"), 
+        IGNORE("ignore")  
+        ;
         
         String name;
         
@@ -74,5 +95,48 @@ public abstract class AbstractFileAction {
         }
     }
     
+    protected FileMetadataWriter getWriter() {
+        return fileWriter;
+    }
+    
     public abstract AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException;
+    
+    public AJAXRequestResult result(TimedResult<File> documents, InfostoreRequest request) throws AbstractOXException {
+        SearchIterator<File> results = documents.results();
+        try {
+            return new AJAXRequestResult(getWriter().write(results, request.getColumns(), request.getTimezone()), new Date(documents.sequenceNumber()));
+        } finally {
+            results.close();
+        }
+    }
+
+    public AJAXRequestResult result(Delta<File> delta, InfostoreRequest request) throws AbstractOXException {
+        SearchIterator<File> results = delta.results();
+        JSONArray array = null;
+        try {
+           array = getWriter().write(results, request.getColumns(), request.getTimezone());
+        } finally {
+            results.close();
+        }
+        SearchIterator<File> deleted = delta.getDeleted();
+        try {
+            while(deleted.hasNext()) {
+                array.put(deleted.next().getId());
+            }
+        } finally {
+            deleted.close();
+        }
+        
+        return new AJAXRequestResult(array, new Date(delta.sequenceNumber()));
+    }
+    
+    public AJAXRequestResult result(File file, InfostoreRequest request) throws AbstractOXException {
+        return new AJAXRequestResult(getWriter().write(file, request.getTimezone()), new Date(file.getSequenceNumber()));
+    }
+    
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        return handle(new AJAXInfostoreRequest(request, session));
+    }
+    
+    
 }

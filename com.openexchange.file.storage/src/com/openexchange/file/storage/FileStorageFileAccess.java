@@ -86,6 +86,11 @@ public interface FileStorageFileAccess extends TransactionAware {
     public static final long DISTANT_FUTURE = Long.MAX_VALUE;
 
     /**
+     * A sequence number that can be considered smaller than all others
+     */
+    public static final long DISTANT_PAST = Long.MIN_VALUE;
+
+    /**
      * Denotes a {@link SortDirection}
      */
     public static enum SortDirection {
@@ -146,17 +151,29 @@ public interface FileStorageFileAccess extends TransactionAware {
             }
         }
 
+        public static SortDirection get(String name) {
+            if(name == null) {
+                return DEFAULT;
+            }
+            for (SortDirection dir : values()) {
+                if(dir.name().equalsIgnoreCase(name)) {
+                    return dir;
+                }
+            }
+            return null;
+        }
+
     }
 
     /**
      * Find out whether the file with a given ID exists or not.
-     * 
      * @param id The ID to check for
      * @param version The version to check for
+     * 
      * @return true when the file exists and is readable, false otherwise.
      * @throws FileStorageException 
      */
-    public boolean exists(String folderId, String id, int version) throws FileStorageException;
+    public boolean exists(String id, int version) throws FileStorageException;
     
     /**
      * Load the metadata about a file
@@ -165,7 +182,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return The File Metadata
      * @throws FileStorageException
      */
-    public File getFileMetadata(String folderId, String id, int version) throws FileStorageException;
+    public File getFileMetadata(String id, int version) throws FileStorageException;
     
     /**
      * Save the file metadata.
@@ -191,7 +208,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws FileStorageException
      */
-    public InputStream getDocument(String folderId, String id, int version) throws FileStorageException;
+    public InputStream getDocument(String id, int version) throws FileStorageException;
 
     /**
      * Save the file metadata and binary content
@@ -222,12 +239,12 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Removes the documents with the given IDs from the folder. Documents ids that could not be removed due to an edit-delete conflict are returned.
-     * @param ids The ids to remove 
+     * @param ids TODO
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @return
      * @throws FileStorageException
      */
-    public String[] removeDocument(String[][] ids, long sequenceNumber) throws FileStorageException;
+    public List<String> removeDocument(List<String> ids, long sequenceNumber) throws FileStorageException;
  
     /**
      * Remove a certain version of a file
@@ -236,14 +253,14 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws FileStorageException
      */
-    public int[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException;
+    public int[] removeVersion(String id, int[] versions) throws FileStorageException;
 
     /**
      * Unlocks a given file.
      * @param id The file to unlock
      * @throws FileStorageException
      */
-    public void unlock(String folderId, String id) throws FileStorageException;
+    public void unlock(String id) throws FileStorageException;
     
     /**
      * Locks a given file for the given duration (in milliseconds)
@@ -251,14 +268,14 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param diff The duration in milliseconds
      * @throws FileStorageException
      */
-    public void lock(String folderId, String id, long diff) throws FileStorageException;
+    public void lock(String id, long diff) throws FileStorageException;
 
     /**
      * Updates a files sequence number
      * @param id The file whose sequence number should be updated
      * @throws FileStorageException
      */
-    public void touch(String folderId, String id) throws FileStorageException;
+    public void touch(String id) throws FileStorageException;
 
     /**
      * List a folders content
@@ -294,7 +311,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws FileStorageException
      */
-    public TimedResult<File> getVersions(String folderId, String id) throws FileStorageException;
+    public TimedResult<File> getVersions(String id) throws FileStorageException;
 
     /**
      * List all versions of a document loading the given columns
@@ -303,7 +320,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws FileStorageException
      */
-    public TimedResult<File> getVersions(String folderId, String id, List<File.Field> columns) throws FileStorageException;
+    public TimedResult<File> getVersions(String id, List<File.Field> columns) throws FileStorageException;
 
     /**
      * List all versions of a document loading the given columns sorted according to the given field in a given order
@@ -312,16 +329,16 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws FileStorageException
      */
-    public TimedResult<File> getVersions(String folderId, String id, List<File.Field> columns, File.Field sort, SortDirection order) throws FileStorageException;
+    public TimedResult<File> getVersions(String id, List<File.Field> columns, File.Field sort, SortDirection order) throws FileStorageException;
 
     /**
      * Load the document metadata with the given ids
-     * @param ids The documents ids 
+     * @param ids TODO
      * @param columns The fields to load
      * @return
      * @throws FileStorageException
      */
-    public TimedResult<File> getDocuments(String[][] ids, List<File.Field> columns) throws FileStorageException;
+    public TimedResult<File> getDocuments(List<String> ids, List<File.Field> columns) throws FileStorageException;
     
     /**
      * Get changes in a given folder since a certain sequence number
