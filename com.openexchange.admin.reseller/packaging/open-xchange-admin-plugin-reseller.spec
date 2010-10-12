@@ -2,6 +2,7 @@
 # norootforbuild
 
 Name:           open-xchange-admin-plugin-reseller
+#!BuildIgnore: post-build-checks
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin-soap >= @OXVERSION@ open-xchange-admin-plugin-autocontextid >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
@@ -76,6 +77,8 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
+
 %define adminbundle	com.openexchange.admin.jar
 %define oxprefix	/opt/open-xchange
 %define adminhostingbundle com.openexchange.admin.plugin.hosting.jar
