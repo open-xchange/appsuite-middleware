@@ -1,3 +1,7 @@
+* 2010-10-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #17131: Changed object events now contain every user identifier and folder identifier that might be affected.
+
 * 2010-10-08 - steffen.templin@open-xchange.com
 
  - Bugfix #16634: Searching in public calendar results only show appointments where user is participant

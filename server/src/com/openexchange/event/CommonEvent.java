@@ -49,6 +49,8 @@
 
 package com.openexchange.event;
 
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.session.Session;
 
 
@@ -162,4 +164,10 @@ public interface CommonEvent {
      */
     public Session getSession();
 
+    /**
+     * Return a map containing the affected users identifiers as keys. The corresponding value contains a set of folder identifier that the
+     * user has to refresh to be up to date. 
+     * @return a map with user identifier as keys and folder identifier sets as values.
+     */
+    public Map<Integer, Set<Integer>> getAffectedUsersWithFolder();
 }

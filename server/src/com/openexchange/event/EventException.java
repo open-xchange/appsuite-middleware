@@ -47,33 +47,23 @@
  *
  */
 
-
-
 package com.openexchange.event;
+
+import com.openexchange.groupware.AbstractOXException;
 
 /**
  * EventException
- * TODO Error codes
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class EventException extends Exception
-{
+public class EventException extends AbstractOXException {
 
-	private static final long serialVersionUID = -222137092481203634L;
+    private static final long serialVersionUID = -222137092481203634L;
 
-	public EventException() {
-		super();
-	}
-	
-	public EventException(final String message) {
-		super(message);
-	}
-	
-	public EventException(final String message, final Exception exc) {
-		super(message, exc);
-	}
-	
-	public EventException(final Exception exc) {
-		super(exc);
-	}
+    public EventException(final String message) {
+        super(message);
+    }
+
+    public EventException(AbstractOXException e) {
+        super(e);
+    }
 }

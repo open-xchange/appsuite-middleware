@@ -49,6 +49,8 @@
 
 package com.openexchange.event.impl;
 
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.session.Session;
 
@@ -62,6 +64,8 @@ public final class CommonEventImpl implements CommonEvent {
     private final int contextId;
 
     private final int userId;
+
+    private final Map<Integer, Set<Integer>> affectedUsersWithFolder;
 
     private final int module;
 
@@ -77,9 +81,11 @@ public final class CommonEventImpl implements CommonEvent {
 
     private final Session session;
 
-    public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
-        this.userId = userId;
+    public CommonEventImpl(final int contextId, int userId, Map<Integer, Set<Integer>> affectedUsersWithFolder, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
+        super();
         this.contextId = contextId;
+        this.userId = userId;
+        this.affectedUsersWithFolder = affectedUsersWithFolder;
         this.action = action;
         this.module = module;
         this.actionObj = actionObj;
@@ -123,5 +129,9 @@ public final class CommonEventImpl implements CommonEvent {
 
     public Session getSession() {
         return session;
+    }
+
+    public Map<Integer, Set<Integer>> getAffectedUsersWithFolder() {
+        return affectedUsersWithFolder;
     }
 }

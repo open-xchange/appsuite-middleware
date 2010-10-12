@@ -49,6 +49,8 @@
 
 package com.openexchange.event.impl;
 
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.event.RemoteEvent;
@@ -68,8 +70,8 @@ public final class EventFactoryServiceImpl implements EventFactoryService {
         super();
     }
 
-    public CommonEvent newCommonEvent(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
-        return new CommonEventImpl(userId, contextId, action, module, actionObj, oldObj, sourceFolder, destinationFolder, session);
+    public CommonEvent newCommonEvent(final int contextId, final int userId, Map<Integer, Set<Integer>> affectedUsers, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
+        return new CommonEventImpl(contextId, userId, affectedUsers, action, module, actionObj, oldObj, sourceFolder, destinationFolder, session);
     }
 
     public RemoteEvent newRemoteEvent(final int folderId, final int userId, final int contextId, final int action, final int module, final long timestamp) {

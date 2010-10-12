@@ -49,6 +49,8 @@
 
 package com.openexchange.event;
 
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.session.Session;
 
 /**
@@ -61,8 +63,9 @@ public interface EventFactoryService {
     /**
      * Creates a new common event from specified arguments.
      * 
-     * @param userId The user ID
      * @param contextId The context ID
+     * @param userId The user ID
+     * @param affectedUsersWithFolder a map containing the affected users as keys and a set of folders to refresh as values.
      * @param action The action constant (one of {@link GenericEvent#INSERT}, {@link GenericEvent#UPDATE}, etc.)
      * @param module The module
      * @param actionObj The action object
@@ -72,7 +75,7 @@ public interface EventFactoryService {
      * @param session The session
      * @return A new common event ready for being distributed
      */
-    public CommonEvent newCommonEvent(int userId, int contextId, int action, int module, Object actionObj, Object oldObj, Object sourceFolder, Object destinationFolder, Session session);
+    public CommonEvent newCommonEvent(int contextId, int userId, Map<Integer, Set<Integer>> affectedUsersWithFolder, int action, int module, Object actionObj, Object oldObj, Object sourceFolder, Object destinationFolder, Session session);
 
     /**
      * Creates a new remote event from specified arguments.
