@@ -606,7 +606,9 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(EventFactoryService.class.getName(), new EventFactoryServiceImpl(), null));
 
         // Register folder service
-        registrationList.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+        FolderService folderService = new FolderServiceImpl();
+        registrationList.add(context.registerService(FolderService.class.getName(), folderService, null));
+        ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
 
         // Register contact interface discovery service
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
