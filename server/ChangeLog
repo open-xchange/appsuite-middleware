@@ -1,3 +1,8 @@
+* 2010-10-12 - choeger@open-xchange.com
+
+ - Bugfix #17237 - Incorrect file permissions for configuration files in
+   packages -twitter and -mailfilter
+
 * 2010-10-08 - steffen.templin@open-xchange.com
  - Bugfix #17195: Malformed URLs in HTML-Mails
  
