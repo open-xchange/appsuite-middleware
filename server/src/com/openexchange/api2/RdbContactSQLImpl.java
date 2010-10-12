@@ -1306,7 +1306,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 stmt.setBytes(2, dbUUID(contributor));
                 stmt.setBytes(3, dbUUID(aggregator));
                 stmt.setBytes(4, dbUUID(contributor));
-            } else if(onlyOldContacts){
+            } else if(onlyOldContacts && prevState != ContactUnificationState.UNDEFINED){
                 stmt = con.prepareStatement("UPDATE aggregatingContacts SET contributor = ?, aggregator = ?, state = ? WHERE (contributor = ? OR contributor = ?) AND (aggregator = ? OR aggregator = ?)");
                 stmt.setBytes(1, dbUUID(aggregator));
                 stmt.setBytes(2, dbUUID(contributor));
