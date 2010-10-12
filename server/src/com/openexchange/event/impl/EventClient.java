@@ -685,6 +685,10 @@ public class EventClient {
         Map<Integer, Set<Integer>> retval = getAffectedUsers(folders);
         for (CalendarObject object : objects) {
             getFolderSet(retval, userId).add(I(object.getParentFolderID()));
+            UserParticipant[] participants = object.getUsers();
+            if (null == participants) {
+                continue;
+            }
             for (UserParticipant participant : object.getUsers()) {
                 final int participantId = participant.getIdentifier();
                 if (UserParticipant.NO_ID == participantId) {
