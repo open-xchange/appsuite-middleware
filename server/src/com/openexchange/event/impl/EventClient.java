@@ -592,7 +592,12 @@ public class EventClient {
     }
 
     public void modify(final DocumentMetadata oldDocument, final DocumentMetadata newDocument, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) oldDocument.getFolderId(), (int) newDocument.getFolderId());
+        final Map<Integer, Set<Integer>> affectedUsers;
+        if (null == oldDocument) {
+            affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) newDocument.getFolderId());
+        } else {
+            affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) oldDocument.getFolderId(), (int) newDocument.getFolderId());
+        }
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.INFOSTORE, newDocument, oldDocument, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -684,6 +689,9 @@ public class EventClient {
     private Map<Integer, Set<Integer>> getAffectedUsers(CalendarObject[] objects, FolderObject[] folders) throws EventException {
         Map<Integer, Set<Integer>> retval = getAffectedUsers(folders);
         for (CalendarObject object : objects) {
+            if (null == object) {
+                continue;
+            }
             getFolderSet(retval, userId).add(I(object.getParentFolderID()));
             UserParticipant[] participants = object.getUsers();
             if (null == participants) {
@@ -696,7 +704,7 @@ public class EventClient {
                 }
                 getFolderSet(retval, participantId);
                 int folderId = participant.getPersonalFolderId();
-                if (UserParticipant.NO_PFID == folderId) {
+                if (UserParticipant.NO_PFID == folderId || 0 == folderId) {
                     continue;
                 }
                 try {
