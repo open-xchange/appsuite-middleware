@@ -162,13 +162,13 @@ public final class ConfirmTask {
             final EventClient eventClient = new EventClient(session);
             switch (changedParticipant.getConfirm()) {
             case CalendarObject.ACCEPT:
-                eventClient.accept(changedTask);
+                eventClient.accept(getOrigTask(), changedTask);
                 break;
             case CalendarObject.DECLINE:
-                eventClient.declined(changedTask);
+                eventClient.declined(getOrigTask(), changedTask);
                 break;
             case CalendarObject.TENTATIVE:
-                eventClient.tentative(changedTask);
+                eventClient.tentative(getOrigTask(), changedTask);
                 break;
             }
         } catch (final EventException e) {

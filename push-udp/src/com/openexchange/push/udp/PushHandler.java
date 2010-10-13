@@ -49,9 +49,13 @@
 
 package com.openexchange.push.udp;
 
-import java.text.MessageFormat;
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,21 +63,14 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
-import com.openexchange.folder.FolderException;
-import com.openexchange.folder.FolderService;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.event.EventException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
-import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link PushHandler} - The push {@link EventHandler event handler}.
@@ -82,29 +79,23 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class PushHandler implements EventHandler {
 
-    private GroupStorage groupStorage;
-
     private static final Log LOG = LogFactory.getLog(PushHandler.class);
 
-    /**
-     * Initializes a new {@link PushHandler push handler}
-     */
     public PushHandler() {
         super();
     }
 
-    public void handleEvent(final Event event) {
-        final CommonEvent genericEvent;
+    public void handleEvent(final Event e) {
+        final CommonEvent event;
         {
-            final Object obj = event.getProperty(CommonEvent.EVENT_KEY);
+            final Object obj = e.getProperty(CommonEvent.EVENT_KEY);
             if (obj == null) {
                 return;
             }
-            genericEvent = (CommonEvent) obj;
+            event = (CommonEvent) obj;
         }
 
-        final int userId = genericEvent.getUserId();
-        final int contextId = genericEvent.getContextId();
+        final int contextId = event.getContextId();
 
         final Context ctx;
         try {
@@ -115,149 +106,45 @@ public class PushHandler implements EventHandler {
             return;
         }
 
-        final int module = genericEvent.getModule();
+        final int module = event.getModule();
 
-        final FolderObject parentFolder = (FolderObject) genericEvent.getSourceFolder();
+        final FolderObject parentFolder = (FolderObject) event.getSourceFolder();
         if (parentFolder == null && module != Types.EMAIL) {
             LOG.warn("folder object in event is null");
             return;
         }
-
-        if (module == Types.APPOINTMENT) {
-            final int[] users = getAffectedUsers4Object(parentFolder, ctx);
-            final Appointment appointmentObj = (Appointment) genericEvent.getActionObj();
-            event(
-                userId,
-                appointmentObj.getObjectID(),
-                appointmentObj.getParentFolderID(),
-                users,
-                module,
-                ctx,
-                getTimestamp(appointmentObj.getLastModified()));
-            // Check for move action
-            check4MoveAction(userId, (Appointment) genericEvent.getOldObj(), appointmentObj.getParentFolderID(), module, ctx);
-        } else if (module == Types.TASK) {
-            final int[] users = getAffectedUsers4Object(parentFolder, ctx);
-            final Task taskObj = (Task) genericEvent.getActionObj();
-            event(userId, taskObj.getObjectID(), taskObj.getParentFolderID(), users, module, ctx, getTimestamp(taskObj.getLastModified()));
-            // Check for move action
-            check4MoveAction(userId, (Task) genericEvent.getOldObj(), taskObj.getParentFolderID(), module, ctx);
-        } else if (module == Types.CONTACT) {
-            final int[] users = getAffectedUsers4Object(parentFolder, ctx);
-            final Contact contactObj = (Contact) genericEvent.getActionObj();
-            event(
-                userId,
-                contactObj.getObjectID(),
-                contactObj.getParentFolderID(),
-                users,
-                module,
-                ctx,
-                getTimestamp(contactObj.getLastModified()));
-            // Check for move action
-            check4MoveAction(userId, (Contact) genericEvent.getOldObj(), contactObj.getParentFolderID(), module, ctx);
-        } else if (module == Types.FOLDER) {
-            final int[] users = getAffectedUsers4Folder(parentFolder, ctx);
-            final FolderObject folderObj = (FolderObject) genericEvent.getActionObj();
-            event(
-                userId,
-                folderObj.getObjectID(),
-                folderObj.getParentFolderID(),
-                users,
-                module,
-                ctx,
-                getTimestamp(folderObj.getLastModified()));
-            // Check for move action
-            check4MoveAction(userId, (FolderObject) genericEvent.getOldObj(), folderObj.getParentFolderID(), module, ctx);
-        } else if (module == Types.EMAIL) {
-            final int[] users = new int[] { userId };
-            event(userId, 1, 1, users, module, ctx, 0);
-        } else if (module == Types.INFOSTORE) {
-            final int[] users = getAffectedUsers4Object(parentFolder, ctx);
-            final DocumentMetadata object = (DocumentMetadata) genericEvent.getActionObj();
-            event(userId, object.getId(), (int) object.getFolderId(), users, module, ctx, getTimestamp(object.getLastModified()));
-            // Check for move action
-            check4MoveAction(userId, (DocumentMetadata) genericEvent.getOldObj(), (int) object.getFolderId(), module, ctx);
-        } else {
+        switch (module) {
+        case Types.APPOINTMENT:
+        case Types.TASK:
+        case Types.CONTACT:
+        case Types.FOLDER:
+            for (Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
+                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((DataObject) event.getActionObj()));
+            }
+            break;
+        case Types.EMAIL:
+            event(1, new int[] { event.getUserId() }, module, ctx, 0);
+            break;
+        case Types.INFOSTORE:
+            for (Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
+                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(((DocumentMetadata) event.getActionObj()).getLastModified()));
+            }
+            break;
+        default:
             LOG.warn("Got event with unimplemented module: " + module);
         }
     }
 
-    private static void event(final int userId, final int objectId, final int folderId, final int[] users, final int module, final Context ctx, final long timestamp) {
+    private static void event(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp) {
         if (users == null) {
             return;
         }
-
         try {
-            final PushObject pushObject = new PushObject(folderId, module, ctx.getContextId(), users, false, timestamp);
-            PushOutputQueue.add(pushObject);
-        } catch (final Exception exc) {
-            LOG.error("event", exc);
-        }
-    }
-
-    private void check4MoveAction(final int userId, final FolderChildObject oldObj, final int folderId, final int module, final Context ctx) {
-        if (null != oldObj && oldObj.getParentFolderID() != folderId) {
-            /*
-             * Obviously object was moved, therefore an event for old folder is needed, too
-             */
-            final FolderObject oldFolder;
-            try {
-                final FolderService folderService = PushServiceRegistry.getServiceRegistry().getService(FolderService.class);
-                if (null == folderService) {
-                    LOG.error("missing folder service", new Throwable());
-                    return;
-                }
-                oldFolder = folderService.getFolderObject(oldObj.getParentFolderID(), ctx.getContextId());
-            } catch (final FolderException e) {
-                LOG.error("cannot load folder by id: " + oldObj.getParentFolderID(), e);
-                return;
-            }
-            final int[] oldUsers = getAffectedUsers4Object(oldFolder, ctx);
-            event(userId, oldObj.getObjectID(), oldObj.getParentFolderID(), oldUsers, module, ctx, oldObj.getLastModified().getTime());
-        }
-    }
-
-    private void check4MoveAction(final int userId, final FolderObject oldObj, final int folderId, final int module, final Context ctx) {
-        if (null != oldObj && oldObj.getParentFolderID() != folderId) {
-            /*
-             * Obviously object was moved, therefore an event for old folder is needed, too
-             */
-            final FolderObject oldFolder;
-            try {
-                final FolderService folderService = PushServiceRegistry.getServiceRegistry().getService(FolderService.class);
-                if (null == folderService) {
-                    LOG.error("missing folder service", new Throwable());
-                    return;
-                }
-                oldFolder = folderService.getFolderObject(oldObj.getParentFolderID(), ctx.getContextId());
-            } catch (final FolderException e) {
-                LOG.error("cannot load folder by id: " + oldObj.getParentFolderID(), e);
-                return;
-            }
-            final int[] oldUsers = getAffectedUsers4Folder(oldFolder, ctx);
-            event(userId, oldObj.getObjectID(), oldObj.getParentFolderID(), oldUsers, module, ctx, getTimestamp(oldObj.getLastModified()));
-        }
-    }
-
-    private void check4MoveAction(final int userId, final DocumentMetadata oldObj, final int folderId, final int module, final Context ctx) {
-        if (null != oldObj && oldObj.getFolderId() != folderId) {
-            /*
-             * Obviously object was moved, therefore an event for old folder is needed, too
-             */
-            final FolderObject oldFolder;
-            try {
-                final FolderService folderService = PushServiceRegistry.getServiceRegistry().getService(FolderService.class);
-                if (null == folderService) {
-                    LOG.error("missing folder service", new Throwable());
-                    return;
-                }
-                oldFolder = folderService.getFolderObject((int) oldObj.getFolderId(), ctx.getContextId());
-            } catch (final FolderException e) {
-                LOG.error(MessageFormat.format("cannot load folder by id: {0}", Long.valueOf(oldObj.getFolderId())), e);
-                return;
-            }
-            final int[] oldUsers = getAffectedUsers4Object(oldFolder, ctx);
-            event(userId, oldObj.getId(), (int) oldObj.getFolderId(), oldUsers, module, ctx, getTimestamp(oldObj.getLastModified()));
+            PushOutputQueue.add(new PushObject(folderId, module, ctx.getContextId(), users, false, timestamp));
+        } catch (final EventException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
         }
     }
 
@@ -265,74 +152,22 @@ public class PushHandler implements EventHandler {
         return lastModified == null ? 0 : lastModified.getTime();
     }
 
-    protected int[] getAffectedUsers4Object(final FolderObject folderObj, final Context ctx) {
-        try {
-            groupStorage = GroupStorage.getInstance();
+    private static long getTimestamp(DataObject object) {
+        return null == object ? 0 : getTimestamp(object.getLastModified()); 
+    }
 
-            final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
-
-            final Set<Integer> hs = new HashSet<Integer>(oclp.length);
-
-            for (final OCLPermission p : oclp) {
-                if (p.canReadOwnObjects() || p.canReadAllObjects()) {
-                    if (p.isGroupPermission()) {
-                        final Group g = groupStorage.getGroup(p.getEntity(), ctx);
-                        addMembers(g, hs);
-                    } else {
-                        hs.add(Integer.valueOf(p.getEntity()));
-                    }
+    private static final Map<Integer, Set<Integer>> transform(Map<Integer, Set<Integer>> map) {
+        Map<Integer, Set<Integer>> retval = new HashMap<Integer, Set<Integer>>();
+        for (Entry<Integer, Set<Integer>> entry : map.entrySet()) {
+            for (Integer folderId : entry.getValue()) {
+                Set<Integer> users = retval.get(folderId);
+                if (null == users) {
+                    users = new HashSet<Integer>();
+                    retval.put(folderId, users);
                 }
+                users.add(entry.getKey());
             }
-
-            return hashSet2Array(hs);
-        } catch (final Exception exc) {
-            LOG.error("getAffectedUser4Object", exc);
         }
-
-        return new int[] {};
+        return retval;
     }
-
-    protected int[] getAffectedUsers4Folder(final FolderObject folderObj, final Context ctx) {
-        try {
-            groupStorage = GroupStorage.getInstance();
-
-            final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
-
-            final Set<Integer> hs = new HashSet<Integer>(oclp.length);
-
-            for (final OCLPermission p : oclp) {
-                if (p.isFolderVisible()) {
-                    if (p.isGroupPermission()) {
-                        final Group g = groupStorage.getGroup(p.getEntity(), ctx);
-                        addMembers(g, hs);
-                    } else {
-                        hs.add(Integer.valueOf(p.getEntity()));
-                    }
-                }
-            }
-
-            return hashSet2Array(hs);
-        } catch (final Exception exc) {
-            LOG.error("getAffectedUsers4Folder", exc);
-        }
-
-        return new int[] {};
-    }
-
-    protected void addMembers(final Group g, final Set<Integer> hs) {
-        final int members[] = g.getMember();
-        for (final int member : members) {
-            hs.add(Integer.valueOf(member));
-        }
-    }
-
-    protected int[] hashSet2Array(final Set<Integer> hs) {
-        final int[] arr = new int[hs.size()];
-        int counter = 0;
-        for (final Integer integer : hs) {
-            arr[counter++] = integer.intValue();
-        }
-        return arr;
-    }
-
 }

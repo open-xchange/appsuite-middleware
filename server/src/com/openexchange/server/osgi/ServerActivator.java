@@ -480,7 +480,9 @@ public final class ServerActivator extends DeferredActivator {
         // Register server's services
         registrationList.add(context.registerService(CharsetProvider.class.getName(), new CustomCharsetProvider(), null));
         registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
-        registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
+        GroupService groupService = new GroupServiceImpl();
+        registrationList.add(context.registerService(GroupService.class.getName(), groupService, null));
+        ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
         registrationList.add(context.registerService(
             ResourceService.class.getName(),
             ServerServiceRegistry.getInstance().getService(ResourceService.class, true),
@@ -606,7 +608,9 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(EventFactoryService.class.getName(), new EventFactoryServiceImpl(), null));
 
         // Register folder service
-        registrationList.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+        FolderService folderService = new FolderServiceImpl();
+        registrationList.add(context.registerService(FolderService.class.getName(), folderService, null));
+        ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
 
         // Register contact interface discovery service
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();

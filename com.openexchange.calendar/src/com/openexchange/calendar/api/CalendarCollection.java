@@ -2274,10 +2274,10 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
             final FolderObject sourceFolder = getFolder(session, folderId);
             eventclient.modify(oldAppointment, newAppointment, sourceFolder); // TODO
-        } catch (final AbstractOXException e) {
-            throw new OXCalendarException(e);
         } catch (final EventException e) {
             throw new OXCalendarException(OXCalendarException.Code.EVENT_ERROR, e, e.getMessage());
+        } catch (final AbstractOXException e) {
+            throw new OXCalendarException(e);
         }
 
     }
