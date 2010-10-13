@@ -3,7 +3,7 @@
  - Bugfix #17237 - Incorrect file permissions for configuration files in 
    packages -twitter and -mailfilter
 
-* 2010-10-12 - marcus.klein@open-xchange.com
+* 2010-10-13 - marcus.klein@open-xchange.com
 
  - Bugfix #17131: Changed object events now contain every user identifier and folder identifier that might be affected.
 
