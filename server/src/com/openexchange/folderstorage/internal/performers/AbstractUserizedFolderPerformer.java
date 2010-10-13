@@ -73,6 +73,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -167,7 +168,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 tmp = timeZone;
                 if (null == tmp) {
                     final TimeZone tz = null == decorator ? null : decorator.getTimeZone();
-                    timeZone = tmp = (tz == null ? Tools.getTimeZone(getUser().getTimeZone()) : tz);
+                    timeZone = tmp = (tz == null ? TimeZoneUtils.getTimeZone(getUser().getTimeZone()) : tz);
                 }
             }
         }
