@@ -1,3 +1,9 @@
+open-xchange-global (6.18.1.0-5) unstable; urgency=low
+
+  * first build for 6.18.1-rev5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 14 Oct 2010 14:48:06 +0200
+
 open-xchange-global (6.18.1.0-4) unstable; urgency=low
 
   * first build for 6.18.1-rev4

@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -582,8 +582,27 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Oct 14 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16833: Added publication target name strings to I18N process.
+ - Bugfix #17162: Using consistent codes for not visible and not found folders.
+* Thu Oct 14 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16833: Added publication target name strings to I18N process.
+* Wed Oct 13 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17131: Changed object events now contain every user identifier and folder identifier that might be affected.
+ - Bugfix #17230: Using the mainstream tool method to get a time zone.
+* Tue Oct 12 2010 - choeger@open-xchange.com
+ - Bugfix #17237 - Incorrect file permissions for configuration files in
+   packages -twitter and -mailfilter
+* Fri Oct 08 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17162: Changed error codes' detail numbers
+ - Bugfix #17199: Proper cache invalidation after folder move operation
+ - Bugfix #17198: Proper respect to property "com.openexchange.mail.ignoreSubscription"
+* Fri Oct 08 2010 - steffen.templin@open-xchange.com
+ - Bugfix #17195: Malformed URLs in HTML-Mails
 * Tue Oct 05 2010 - marcus.klein@open-xchange.com
  - Bugfix #17027: Correctly sending deleted folder identifier in folder updates response.
+* Thu Sep 30 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17107: Direct instantiation of POP3Access instance
 * Wed Sep 29 2010 - marcus.klein@open-xchange.com
  - Bugfix #17063: Removed WWW-Authenticate header proclaiming the backend supports digest authentication.
 * Tue Sep 28 2010 - choeger@open-xchange.com
@@ -1169,6 +1188,8 @@ fi
 * Mon Feb 15 2010 - thorben.betten@open-xchange.com
  - Bugfix #15365: Added admin daemon to build files
  - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
+* Sun Feb 14 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17175: Remove of occurrences value.
 * Fri Feb 12 2010 - thorben.betten@open-xchange.com
  - Bugfix #15350: Fixed retrieval of session from given cookies
  - Bugfix #14946: No null values in response to client
