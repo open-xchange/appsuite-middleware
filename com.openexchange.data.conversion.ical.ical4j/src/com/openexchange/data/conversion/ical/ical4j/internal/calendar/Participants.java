@@ -277,7 +277,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             if (icalP.status != -1)
                 up.setConfirm(icalP.status);
             
-            cObj.addParticipant( new UserParticipant(user.getId()) ); //TODO Is that a bug? Which one?
+            cObj.addParticipant(up);
         }
 
         final List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
