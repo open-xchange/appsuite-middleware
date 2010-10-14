@@ -106,6 +106,7 @@ public final class FolderTestSuite {
 
         // And finally bug tests.
         tests.addTestSuite(Bug12393Test.class);
+        tests.addTestSuite(Bug16899Test.class);
 
         // New folder API bug tests
         tests.addTestSuite(Bug15752Test.class);
