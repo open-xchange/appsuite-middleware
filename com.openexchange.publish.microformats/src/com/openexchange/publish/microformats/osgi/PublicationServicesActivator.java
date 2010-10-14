@@ -59,6 +59,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
+import com.openexchange.publish.microformats.FormStrings;
 import com.openexchange.publish.microformats.InfostoreFileServlet;
 import com.openexchange.publish.microformats.MicroformatServlet;
 import com.openexchange.publish.microformats.OXMFPublicationService;
@@ -78,7 +79,7 @@ public class PublicationServicesActivator implements BundleActivator {
         contactPublisher = new OXMFPublicationService();
         contactPublisher.setFolderType("contacts");
         contactPublisher.setRootURL("/publications/contacts");
-        contactPublisher.setTargetDisplayName("OXMF Contacts");
+        contactPublisher.setTargetDisplayName(FormStrings.TARGET_NAME_CONTACTS);
         contactPublisher.setTargetId("com.openexchange.publish.microformats.contacts.online");
         contactPublisher.setDefaultTemplateName("contacts.tmpl");
         
@@ -93,7 +94,7 @@ public class PublicationServicesActivator implements BundleActivator {
         infostorePublisher = new OXMFPublicationService();
         infostorePublisher.setFolderType("infostore");
         infostorePublisher.setRootURL("/publications/infostore");
-        infostorePublisher.setTargetDisplayName("OXMF Infostore");
+        infostorePublisher.setTargetDisplayName(FormStrings.TARGET_NAME_INFOSTORE);
         infostorePublisher.setTargetId("com.openexchange.publish.microformats.infostore.online");
         infostorePublisher.setDefaultTemplateName("infostore.tmpl");
         InfostoreFileServlet.setInfostorePublisher(infostorePublisher);
