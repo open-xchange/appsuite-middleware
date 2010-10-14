@@ -1,3 +1,7 @@
+* 2010-10-14 - choeger@open-xchange.com
+ 
+ - Bugfix #17204: [L3] movecontextfilestore doesn't work if rsync isn't installed
+ 
 * 2010-10-04 - choeger@open-xchange.com
 
  - Bugfix #12012: showruntimestats missed the $JAVA_XTRAOPTS causes failure on

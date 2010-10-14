@@ -49,6 +49,7 @@ Summary:        Open Xchange Admin Hosting Plugin
 Requires:       open-xchange-admin-plugin-hosting-lib >= @OXVERSION@
 Requires:       open-xchange-admin-plugin-hosting-client >= @OXVERSION@
 Requires:       open-xchange-admin >= @OXVERSION@
+Requires:       rsync
 Conflicts:	open-xchange-admin-plugin-context-light
 #
 
