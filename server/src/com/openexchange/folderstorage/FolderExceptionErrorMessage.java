@@ -70,9 +70,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
      */
     IO_ERROR(FolderExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 1002),
     /**
-     * SQL error: %1$s
+     * Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
+     * <p>
+     * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
      */
-    SQL_ERROR(FolderExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 1003),
+    FOLDER_NOT_VISIBLE(FolderExceptionMessages.FOLDER_NOT_VISIBLE_MSG, Category.PERMISSION, 3),
     /**
      * No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
      */
@@ -86,15 +88,13 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
      */
     MISSING_SESSION(FolderExceptionMessages.MISSING_SESSION_MSG, Category.CODE_ERROR, 1006),
     /**
-     * Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
-     * <p>
-     * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
+     * SQL error: %1$s
      */
-    FOLDER_NOT_VISIBLE(FolderExceptionMessages.FOLDER_NOT_VISIBLE_MSG, Category.PERMISSION, 1007),
+    SQL_ERROR(FolderExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 1007),
     /**
-     * JSON error: %1$s
+     * Folder "%1$s" could not be found in tree "%2$s".
      */
-    JSON_ERROR(FolderExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 1008),
+    NOT_FOUND(FolderExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 8),
     /**
      * Missing tree identifier.
      */
@@ -152,9 +152,9 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
      */
     CONCURRENT_MODIFICATION(FolderExceptionMessages.CONCURRENT_MODIFICATION_MSG, Category.CONCURRENT_MODIFICATION, 1022),
     /**
-     * Folder "%1$s" could not be found in tree "%2$s".
+     * JSON error: %1$s
      */
-    NOT_FOUND(FolderExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 1023),
+    JSON_ERROR(FolderExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 1023),
     /**
      * No default folder available for content type "%1$s" in tree "%2$s".
      */
