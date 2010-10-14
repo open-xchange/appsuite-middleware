@@ -1,3 +1,7 @@
+* 2010-10-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #16833: Added publication target name strings to I18N process.
+
 * 2010-10-13 - marcus.klein@open-xchange.com
 
  - Bugfix #17131: Changed object events now contain every user identifier and folder identifier that might be affected.

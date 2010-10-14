@@ -60,6 +60,8 @@ public class FormStrings implements LocalizableStrings {
 
     public static final String FORM_LABEL_URL = "URL";
 
+    public static final String TARGET_NAME_INFOSTORE_DOCUMENT = "Publish Infostore Document";
+
     public FormStrings() {
         super();
     }
