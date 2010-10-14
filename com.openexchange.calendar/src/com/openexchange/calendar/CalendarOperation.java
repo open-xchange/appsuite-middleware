@@ -1447,8 +1447,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
          */
         final int retval;
         if (pattern_change) {
-            if (!changeStartDate)
+            if (!changeStartDate) {
                 calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
+                cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+            }
             cdao.setRecurrence(null);
 
             recColl.checkRecurring(cdao);
