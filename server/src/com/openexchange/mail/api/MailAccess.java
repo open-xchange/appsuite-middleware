@@ -65,7 +65,6 @@ import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -651,20 +650,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             /*
              * Admin mail login is not permitted per configuration
              */
-            Context ctx;
-            final String key = MailSessionParameterNames.getParamSessionContext();
+            final Context ctx;
             try {
-                ctx = (Context) session.getParameter(key);
-            } catch (final ClassCastException e1) {
-                ctx = null;
-            }
-            if (ctx == null) {
-                try {
-                    ctx = ContextStorage.getStorageContext(session.getContextId());
-                } catch (final ContextException e) {
-                    throw new MailException(e);
-                }
-                session.setParameter(key, ctx);
+                ctx = ContextStorage.getStorageContext(session.getContextId());
+            } catch (final ContextException e) {
+                throw new MailException(e);
             }
             if (session.getUserId() == ctx.getMailadmin()) {
                 throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(ctx.getContextId()));
