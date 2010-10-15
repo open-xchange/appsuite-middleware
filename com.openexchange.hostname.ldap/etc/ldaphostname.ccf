@@ -1,0 +1,17 @@
+# Configuration of cache for mail messages.
+jcs.region.LDAPHostname=
+jcs.region.LDAPHostname.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.LDAPHostname.cacheattributes.MaxObjects=10000000
+jcs.region.LDAPHostname.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.LDAPHostname.cacheattributes.UseMemoryShrinker=true
+jcs.region.LDAPHostname.cacheattributes.MaxMemoryIdleTimeSeconds=60
+jcs.region.LDAPHostname.cacheattributes.ShrinkerIntervalSeconds=30
+jcs.region.LDAPHostname.cacheattributes.MaxSpoolPerRun=500
+jcs.region.LDAPHostname.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.LDAPHostname.elementattributes.IsEternal=false
+jcs.region.LDAPHostname.elementattributes.MaxLifeSeconds=3600
+jcs.region.LDAPHostname.elementattributes.IdleTime=60
+# NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
+jcs.region.LDAPHostname.elementattributes.IsSpool=false
+jcs.region.LDAPHostname.elementattributes.IsRemote=false
+jcs.region.LDAPHostname.elementattributes.IsLateral=false
