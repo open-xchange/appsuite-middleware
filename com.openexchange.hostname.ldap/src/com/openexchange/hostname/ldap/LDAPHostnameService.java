@@ -109,12 +109,36 @@ public class LDAPHostnameService implements HostnameService {
                 context.reconnect(null);
             }
             
+            if (LOG.isDebugEnabled()) {
+                final StringBuilder sb = new StringBuilder('\n');
+                sb.append("LDAP search triggered with:\n");
+                sb.append("Filter: ");
+                sb.append(ownFilter);
+                sb.append('\n');
+                sb.append("BaseDN: ");
+                sb.append(ownBaseDN);
+                sb.append('\n');
+                sb.append("Scope: ");
+                sb.append(scope);
+                sb.append('\n');
+                sb.append("ldapReturnField: ");
+                sb.append(ldapReturnField);
+                sb.append('\n');
+                LOG.debug(sb.toString());
+            }
             final NamingEnumeration<SearchResult> search = context.search(ownBaseDN, ownFilter, getSearchControls(ldapReturnField, scope));
             // We will only catch the first element...
             while (null != search && search.hasMoreElements()) {
                 final SearchResult next = search.next();
                 final Attributes attributes = next.getAttributes();
-                return getAttribute(ldapReturnField, attributes);
+                final String attribute = getAttribute(ldapReturnField, attributes);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Found result: " + attribute);
+                }
+                return attribute;
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("No result found");
             }
             return null;
         } finally {
