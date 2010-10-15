@@ -37,54 +37,7 @@ public class LDAPHostnameService implements HostnameService {
         instance = LDAPHostnameCache.getInstance();
     }
 
-    private static int getSearchControl(final SearchScope searchScope) {
-        switch (searchScope) {
-        case one:
-            return SearchControls.ONELEVEL_SCOPE;
-        case base:
-            return SearchControls.OBJECT_SCOPE;
-        case sub:
-            return SearchControls.SUBTREE_SCOPE;
-        default:
-            return -1;
-        }
-    }
-
-    public String getHostname(int userId, int contextId) {
-        try {
-            final String hostnameFromCache = instance.getHostnameFromCache(contextId);
-            if (null == hostnameFromCache) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Hostname for context " + contextId + " is not contained in the cache any more, fetching from LDAP");
-                }
-                final String hostname = fetchFromLdap(contextId);
-                if (null != hostname) {
-                    instance.addHostnameToCache(contextId, hostname);
-                }
-                return hostname;
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Using hostname for context " + contextId + " from cache");
-                }
-                return hostnameFromCache;
-            }
-        } catch (final InvalidNameException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
-        } catch (final AuthenticationException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
-        } catch (final NamingException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
-        } catch (final ConfigurationException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
-        } catch (final OXCachingException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
-        } catch (final RuntimeException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
-        }
-        return null;
-    }
-
-    private String fetchFromLdap(int contextId) throws ConfigurationException, NamingException {
+    private static String fetchFromLdap(int contextId) throws ConfigurationException, NamingException {
         LdapContext context = null;
         try {
             final ConfigurationService service = HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
@@ -148,7 +101,7 @@ public class LDAPHostnameService implements HostnameService {
         }
     }
 
-    private String getAttribute(final String attributename, final Attributes attributes) throws NamingException {
+    private static String getAttribute(final String attributename, final Attributes attributes) throws NamingException {
         final Attribute attribute = attributes.get(attributename);
         if (null != attribute) {
             if (1 < attribute.size()) {
@@ -161,8 +114,8 @@ public class LDAPHostnameService implements HostnameService {
             return null;
         }
     }
-    
-    private Hashtable<String, String> getBasicLDAPProperties(String uri) {
+
+    private static Hashtable<String, String> getBasicLDAPProperties(String uri) {
         final Hashtable<String, String> env = new Hashtable<String, String>(4, 1f);
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         // Enable connection pooling
@@ -189,15 +142,62 @@ public class LDAPHostnameService implements HostnameService {
      * @param contextId
      * @return
      */
-    private String getRightFilter(final String filter, final int contextId) {
+    private static String getRightFilter(final String filter, final int contextId) {
         return filter.replace(PLACEHOLDER, String.valueOf(contextId));
     }
     
-    private SearchControls getSearchControls(final String ldapReturnField, final SearchScope scope) {
+    private static int getSearchControl(final SearchScope searchScope) {
+        switch (searchScope) {
+        case one:
+            return SearchControls.ONELEVEL_SCOPE;
+        case base:
+            return SearchControls.OBJECT_SCOPE;
+        case sub:
+            return SearchControls.SUBTREE_SCOPE;
+        default:
+            return -1;
+        }
+    }
+
+    private static SearchControls getSearchControls(final String ldapReturnField, final SearchScope scope) {
         final SearchControls searchControls = new SearchControls();
         searchControls.setSearchScope(getSearchControl(scope));
         searchControls.setReturningAttributes(new String[] { ldapReturnField });
         return searchControls;
+    }
+    
+    public String getHostname(int userId, int contextId) {
+        try {
+            final String hostnameFromCache = instance.getHostnameFromCache(contextId);
+            if (null == hostnameFromCache) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Hostname for context " + contextId + " is not contained in the cache any more, fetching from LDAP");
+                }
+                final String hostname = fetchFromLdap(contextId);
+                if (null != hostname) {
+                    instance.addHostnameToCache(contextId, hostname);
+                }
+                return hostname;
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Using hostname for context " + contextId + " from cache");
+                }
+                return hostnameFromCache;
+            }
+        } catch (final InvalidNameException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final AuthenticationException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final NamingException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final ConfigurationException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final OXCachingException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final RuntimeException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        }
+        return null;
     }
 
 }

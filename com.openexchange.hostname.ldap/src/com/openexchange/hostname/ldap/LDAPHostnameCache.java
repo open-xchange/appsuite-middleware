@@ -69,7 +69,6 @@ public class LDAPHostnameCache {
         }
     }
 
-    
     /**
      * Fetches the appropriate lock.
      * 
@@ -111,7 +110,7 @@ public class LDAPHostnameCache {
         
     }
     
-    public String getHostnameFromCache(final int cid) throws OXCachingException {
+    public String getHostnameFromCache(final int cid) {
         if (null == cache) {
             return null;
         }
@@ -126,26 +125,6 @@ public class LDAPHostnameCache {
         
     }
 
-    /**
-     * Initializes cache reference.
-     * 
-     * @throws OXCachingException If initializing the cache reference fails
-     */
-    public void initCache() throws OXCachingException {
-        /*
-         * Check for proper started mail cache configuration
-         */
-        if (cache != null) {
-            return;
-        }
-        try {
-            cache = HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).getCache(REGION_NAME);
-        } catch (final CacheException e) {
-            LOG.error(e.getMessage(), e);
-            throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
-        }
-    }
-    
     public void outputSettings() throws CacheException {
         final ElementAttributes defaultElementAttributes = cache.getDefaultElementAttributes();
         final StringBuilder sb = new StringBuilder('\n');
@@ -177,6 +156,26 @@ public class LDAPHostnameCache {
         sb.append(defaultElementAttributes.getIsSpool());
         sb.append('\n');
         LOG.info(sb.toString());
+    }
+    
+    /**
+     * Initializes cache reference.
+     * 
+     * @throws OXCachingException If initializing the cache reference fails
+     */
+    private void initCache() throws OXCachingException {
+        /*
+         * Check for proper started mail cache configuration
+         */
+        if (cache != null) {
+            return;
+        }
+        try {
+            cache = HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).getCache(REGION_NAME);
+        } catch (final CacheException e) {
+            LOG.error(e.getMessage(), e);
+            throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
+        }
     }
     
 
