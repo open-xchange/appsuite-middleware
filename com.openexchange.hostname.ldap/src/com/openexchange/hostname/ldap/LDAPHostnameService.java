@@ -27,24 +27,27 @@ import com.openexchange.hostname.ldap.services.HostnameLDAPServiceRegistry;
 public class LDAPHostnameService implements HostnameService {
 
     private static final Log LOG = LogFactory.getLog(LDAPHostnameService.class);
-    
+
     private static final String PLACEHOLDER = "%i";
 
-    public LDAPHostnameService() {
+    final LDAPHostnameCache instance;
+
+    public LDAPHostnameService() throws OXCachingException {
         super();
+        instance = LDAPHostnameCache.getInstance();
     }
 
     public String getHostname(int userId, int contextId) {
         try {
-            final LDAPHostnameCache instance = LDAPHostnameCache.getInstance();
             final String hostnameFromCache = instance.getHostnameFromCache(contextId);
-            instance.outputSettings();
             if (null == hostnameFromCache) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Hostname for context " + contextId + " is not contained in the cache any more, fetching from LDAP");
                 }
                 final String hostname = fetchFromLdap(contextId);
-                instance.addHostnameToCache(contextId, hostname);
+                if (null != hostname) {
+                    instance.addHostnameToCache(contextId, hostname);
+                }
                 return hostname;
             } else {
                 if (LOG.isDebugEnabled()) {
@@ -52,19 +55,27 @@ public class LDAPHostnameService implements HostnameService {
                 }
                 return hostnameFromCache;
             }
-        } catch (OXCachingException e) {
-            // TODO look for right handling
-            e.printStackTrace();
-            return null;
+        } catch (final InvalidNameException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final AuthenticationException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final NamingException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final ConfigurationException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final OXCachingException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+        } catch (final RuntimeException e) {
+            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
         }
+        return null;
     }
 
-    private String fetchFromLdap(int contextId) {
+    private String fetchFromLdap(int contextId) throws ConfigurationException, NamingException {
         LdapContext context = null;
-        String dn = null;
         try {
             final ConfigurationService service = HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-            dn = LDAPHostnameProperties.getProperty(service, Property.bind_dn);
+            final String dn = LDAPHostnameProperties.getProperty(service, Property.bind_dn);
             final String password = LDAPHostnameProperties.getProperty(service, Property.bind_password);
             final String ldapReturnField = LDAPHostnameProperties.getProperty(service, Property.result_attribute);
             final String ownBaseDN = LDAPHostnameProperties.getProperty(service, Property.search_base);
@@ -73,7 +84,6 @@ public class LDAPHostnameService implements HostnameService {
             final Boolean bind = LDAPHostnameProperties.getProperty(service, Property.bind);
             final String url = LDAPHostnameProperties.getProperty(service, Property.ldap_url);
             final String ownFilter = getRightFilter(filter, contextId);
-            
             
             context = new InitialLdapContext(getBasicLDAPProperties(url), null);
             if (bind.equals(Boolean.TRUE)) {
@@ -93,27 +103,12 @@ public class LDAPHostnameService implements HostnameService {
                 final Attributes attributes = next.getAttributes();
                 return getAttribute(ldapReturnField, attributes);
             }
-        } catch (final InvalidNameException e) {
-            LOG.error("Login failed for dn " + dn + ":",e);
-        } catch (final AuthenticationException e) {
-            LOG.error("Login failed for dn " + dn + ":",e);
-        } catch (final NamingException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (ConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            return null;
         } finally {
-            try {
-                if( context != null ) {
-                    context.close();
-                }
-            } catch (NamingException e) {
-                LOG.error(e.getMessage(), e);
+            if( context != null ) {
+                context.close();
             }
         }
-
-        
-        return null;
     }
 
     private SearchControls getSearchControls(final String ldapReturnField, final SearchScope scope) {
@@ -134,24 +129,17 @@ public class LDAPHostnameService implements HostnameService {
         return filter.replace(PLACEHOLDER, String.valueOf(contextId));
     }
     
-    private String getAttribute(final String attributename, final Attributes attributes) {
-        try {
-            final Attribute attribute = attributes.get(attributename);
-            if (null != attribute) {
-                if (1 < attribute.size()) {
-                    // If we have multi-value attributes we only pick up the first one
-                    return (String) attribute.get(0);
-                } else {
-                    return (String) attribute.get();
-                }
+    private String getAttribute(final String attributename, final Attributes attributes) throws NamingException {
+        final Attribute attribute = attributes.get(attributename);
+        if (null != attribute) {
+            if (1 < attribute.size()) {
+                // If we have multi-value attributes we only pick up the first one
+                return (String) attribute.get(0);
             } else {
-                return null;
+                return (String) attribute.get();
             }
-        } catch (final NamingException e) {
-            // TODO Handle ex
-            e.printStackTrace();
+        } else {
             return null;
-            //throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
         }
     }
 
@@ -187,6 +175,5 @@ public class LDAPHostnameService implements HostnameService {
         
         return env;
     }
-
 
 }
