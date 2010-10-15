@@ -137,7 +137,7 @@ public class Activator extends DeferredActivator {
     }
 
     private void checkConfiguration() throws ConfigurationException {
-        LDAPHostnameProperties.check(HostnameLDAPServiceRegistry.getServiceRegistry(), Property.values(), "LDAPHostname");
+        LDAPHostnameProperties.check(HostnameLDAPServiceRegistry.getServiceRegistry(), Property.values(), LDAPHostnameCache.REGION_NAME);
     }
 
     private void activateCaching() throws ConfigurationException {
