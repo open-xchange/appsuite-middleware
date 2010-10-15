@@ -105,7 +105,6 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -256,37 +255,20 @@ public class MIMEMessageFiller {
         /*
          * Set organization to context-admin's company field setting
          */
-        final Object org = session.getParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR);
-        if (null == org) {
-            /*
-             * Get context's admin contact object
-             */
-            try {
-                final ContactInterface contactInterface =
-                    ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
-                        FolderObject.SYSTEM_LDAP_FOLDER_ID,
-                        session);
+        try {
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                FolderObject.SYSTEM_LDAP_FOLDER_ID,
+                session);
 
-                final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
-                if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-                    final String encoded =
-                        MimeUtility.fold(
-                            14,
-                            MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
-                    session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, encoded);
-                    mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
-                } else {
-                    session.setParameter(MessageHeaders.HDR_ORGANIZATION, "=?null?=");
-                }
-            } catch (final Exception e) {
-                LOG.error("Header \"Organization\" could not be set", e);
-                session.setParameter(MessageHeaders.HDR_ORGANIZATION, "=?null?=");
+            final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
+            if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
+                final String encoded = MimeUtility.fold(
+                    14,
+                    MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
+                mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
             }
-        } else if (!"=?null?=".equals(org.toString())) {
-            /*
-             * Apply value from session parameter
-             */
-            mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, org.toString());
+        } catch (final Exception e) {
+            LOG.error("Header \"Organization\" could not be set", e);
         }
         /*
          * Add header X-Originating-IP containing the IP address of the client

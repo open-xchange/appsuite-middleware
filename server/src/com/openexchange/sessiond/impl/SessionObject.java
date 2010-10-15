@@ -52,8 +52,7 @@ package com.openexchange.sessiond.impl;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.mail.Session;
-import com.openexchange.groupware.ldap.Credentials;
+import com.openexchange.session.Session;
 
 /**
  * {@link SessionObject} - Implements {@link com.openexchange.session.Session}.
@@ -61,7 +60,7 @@ import com.openexchange.groupware.ldap.Credentials;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionObject implements com.openexchange.session.Session {
+public class SessionObject implements Session {
 
     private final String sessionid;
 
@@ -90,10 +89,6 @@ public class SessionObject implements com.openexchange.session.Session {
     private String randomToken;
 
     private int contextId;
-
-    private Credentials cred;
-
-    private Session mailSession;
 
     private String login;
 
@@ -196,14 +191,6 @@ public class SessionObject implements com.openexchange.session.Session {
         return contextId;
     }
 
-    public void setCredentials(final Credentials cred) {
-        this.cred = cred;
-    }
-
-    public Credentials getCredentials() {
-        return cred;
-    }
-
     public void setLoginName(final String loginName) {
         this.loginName = loginName;
     }
@@ -218,14 +205,6 @@ public class SessionObject implements com.openexchange.session.Session {
 
     public String getRandomToken() {
         return randomToken;
-    }
-
-    public Session getMailSession() {
-        return mailSession;
-    }
-
-    public void setMailSession(final Session mailSession) {
-        this.mailSession = mailSession;
     }
 
     public String getSecret() {

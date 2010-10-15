@@ -56,10 +56,10 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 import javax.activation.DataHandler;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
-import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
@@ -72,9 +72,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -437,27 +435,12 @@ public class MailObject {
              * Set organization
              */
             try {
-                final Object org = session.getParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR);
-                if (null == org) {
-                    /*
-                     * Get context's admin contact object
-                     */
-                    final Context ctx = ContextStorage.getStorageContext(session);
-                    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                        ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
-                    final Contact c = contactInterface.getUserById(ctx.getMailadmin(),
-                        false);
-                    if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-                        session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, c.getCompany());
-                        msg.setHeader(HEADER_ORGANIZATION, c.getCompany());
-                    } else {
-                        session.setParameter(HEADER_ORGANIZATION, "null");
-                    }
-                } else if (!"null".equals(org.toString())) {
-                    /*
-                     * Apply value from session parameter
-                     */
-                    msg.setHeader(HEADER_ORGANIZATION, org.toString());
+                final Context ctx = ContextStorage.getStorageContext(session);
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
+                final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
+                if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
+                    msg.setHeader(HEADER_ORGANIZATION, c.getCompany());
                 }
             } catch (final Exception e) {
                 LOG.warn("Header \"Organization\" could not be set", e);

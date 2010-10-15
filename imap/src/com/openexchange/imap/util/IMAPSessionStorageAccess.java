@@ -61,8 +61,6 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public final class IMAPSessionStorageAccess {
 
-    private static final String SESSION_KEY = "imap.sessStorage";
-
     private static final boolean ENABLED = false;
 
     /**
@@ -73,17 +71,7 @@ public final class IMAPSessionStorageAccess {
     }
 
     private static IMAPSessionStorage ensureExistence(final Session session) {
-        IMAPSessionStorage param = (IMAPSessionStorage) session.getParameter(SESSION_KEY);
-        if (null == param) {
-            synchronized (session) {
-                param = (IMAPSessionStorage) session.getParameter(SESSION_KEY);
-                if (null == param) {
-                    param = new IMAPSessionStorage(session);
-                    session.setParameter(SESSION_KEY, param);
-                }
-            }
-        }
-        return param;
+        return new IMAPSessionStorage(session);
     }
 
     /**
