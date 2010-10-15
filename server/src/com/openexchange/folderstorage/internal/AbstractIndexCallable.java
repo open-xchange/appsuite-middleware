@@ -63,7 +63,7 @@ public abstract class AbstractIndexCallable<V> implements Callable<V> {
     /**
      * The logger.
      */
-    protected final org.apache.commons.logging.Log logger;
+    protected final Log log;
 
     /**
      * The index assigned to this callable.
@@ -74,21 +74,11 @@ public abstract class AbstractIndexCallable<V> implements Callable<V> {
      * Initializes a new {@link AbstractIndexCallable}.
      * 
      * @param index The index assigned to this callable
+     * @param log The logger
      */
-    protected AbstractIndexCallable(final int index) {
-        this(index, null);
-    }
-
-    /**
-     * Initializes a new {@link AbstractIndexCallable}.
-     * 
-     * @param index The index assigned to this callable
-     * @param logger The logger
-     */
-    protected AbstractIndexCallable(final int index, final Log logger) {
+    protected AbstractIndexCallable(final int index, final Log log) {
         super();
         this.index = index;
-        this.logger = logger;
+        this.log = log;
     }
-
 }

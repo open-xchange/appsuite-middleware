@@ -184,7 +184,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                             try {
                                 subfolder = tmp.getFolder(treeId, id, newParameters);
                             } catch (final FolderException e) {
-                                logger.warn(
+                                log.warn(
                                     new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
                                         "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
                                     e);
