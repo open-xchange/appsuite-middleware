@@ -123,10 +123,6 @@ public class AbstractContactTest {
             return delegateSessionObject.getCreationtime();
         }
         @Override
-        public Credentials getCredentials() {
-            return delegateSessionObject.getCredentials();
-        }
-        @Override
         public String getHost() {
             return delegateSessionObject.getHost();
         }
@@ -145,10 +141,6 @@ public class AbstractContactTest {
         @Override
         public String getLoginName() {
             return delegateSessionObject.getLoginName();
-        }
-        @Override
-        public Session getMailSession() {
-            return delegateSessionObject.getMailSession();
         }
         @Override
         public String getPassword() {
@@ -194,10 +186,6 @@ public class AbstractContactTest {
             delegateSessionObject.setCreationtime(creationtime);
         }
         @Override
-        public void setCredentials(final Credentials cred) {
-            delegateSessionObject.setCredentials(cred);
-        }
-        @Override
         public void setHost(final String host) {
             delegateSessionObject.setHost(host);
         }
@@ -216,10 +204,6 @@ public class AbstractContactTest {
         @Override
         public void setLoginName(final String loginName) {
             delegateSessionObject.setLoginName(loginName);
-        }
-        @Override
-        public void setMailSession(final Session mailSession) {
-            delegateSessionObject.setMailSession(mailSession);
         }
         @Override
         public void setPassword(final String password) {
