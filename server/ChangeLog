@@ -1,4 +1,8 @@
-* 2010-02-14 - martin.herfurth@open-xchange.com
+* 2010-10-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #17271: Made logger mandatory for AbstractIndexCallable to prevent possible NullPointerExceptions.
+
+* 2010-10-14 - martin.herfurth@open-xchange.com
  
  - Bugfix #17175: Remove of occurrences value.
 

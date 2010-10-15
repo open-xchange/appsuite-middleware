@@ -228,7 +228,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 final CompletionService<Object> completionService =
                     new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
                 for (int i = 0; i < subfolderIds.length; i++) {
-                    completionService.submit(new AbstractIndexCallable<Object>(i) {
+                    completionService.submit(new AbstractIndexCallable<Object>(i, LOG) {
 
                         public Object call() throws FolderException {
                             final StorageParameters newParameters = newStorageParameters();
@@ -239,7 +239,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 try {
                                     subfolder = folderStorage.getFolder(treeId, id, newParameters);
                                 } catch (final FolderException e) {
-                                    logger.warn(
+                                    log.warn(
                                         new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(
                                             treeId).append("\" could not be fetched from storage \"").append(
                                             folderStorage.getClass().getSimpleName()).append("\"").toString(),
@@ -420,7 +420,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                         try {
                             subfolder = tmp.getFolder(treeId, id, newParameters);
                         } catch (final FolderException e) {
-                            logger.warn(
+                            log.warn(
                                 new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
                                     "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
                                 e);
