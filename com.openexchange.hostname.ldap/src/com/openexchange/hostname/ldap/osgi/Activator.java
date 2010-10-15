@@ -55,7 +55,6 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hostname.ldap.LDAPHostnameCache;
 import com.openexchange.hostname.ldap.LDAPHostnameService;
@@ -121,11 +120,15 @@ public class Activator extends DeferredActivator {
 
             checkConfiguration();
             
-            // register hostname service to modify hostnames in directlinks
+            activateCaching();
+            
+            // register hostname service to modify hostnames in directlinks, this will also init the cache class
             hostnameservice = new LDAPHostnameService();
+            
+            LDAPHostnameCache.getInstance().outputSettings();
+            
             hostname_registration = context.registerService(HostnameService.class.getName(), hostnameservice, null);
 
-            activateCaching();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -133,20 +136,13 @@ public class Activator extends DeferredActivator {
 
     }
 
-    private void checkConfiguration() throws com.openexchange.hostname.ldap.configuration.ConfigurationException {
+    private void checkConfiguration() throws ConfigurationException {
         LDAPHostnameProperties.check(HostnameLDAPServiceRegistry.getServiceRegistry(), Property.values(), "LDAPHostname");
     }
 
     private void activateCaching() throws ConfigurationException {
-        String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
-        if (cacheConfigFile == null) {
-            /*
-             * Not found via system config, try configuration service
-             */
-            cacheConfigFile = LDAPHostnameProperties.getProperty(HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), Property.cache_config_file);
-        }
+        final String cacheConfigFile = LDAPHostnameProperties.getProperty(HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), Property.cache_config_file);
         try {
-            System.out.println("Cache config file: " + cacheConfigFile);
             HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
         } catch (final CacheException e) {
             throw new ConfigurationException(e);
