@@ -165,7 +165,7 @@ public class LDAPHostnameCache {
      */
     private void initCache() throws OXCachingException {
         /*
-         * Check for proper started mail cache configuration
+         * Check for proper started hostname cache configuration
          */
         if (cache != null) {
             return;
