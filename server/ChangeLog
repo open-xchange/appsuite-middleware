@@ -1,6 +1,6 @@
 * 2010-10-15 - marcus.klein@open-xchange.com
 
- - Bugfix #17271: Made logger mandatory for AbstractIndexCallable to prevent possible NullPointerExceptions.
+ - Bugfix #17242: Made logger mandatory for AbstractIndexCallable to prevent possible NullPointerExceptions.
 
 * 2010-10-14 - martin.herfurth@open-xchange.com
  
