@@ -156,8 +156,11 @@ public class LDAPHostnameCache {
         sb.append("\tIdle time: ");
         sb.append(defaultElementAttributes.getIdleTime());
         sb.append('\n');
-        sb.append("\tMax life time: ");
+        sb.append("\tMax life: ");
         sb.append(defaultElementAttributes.getMaxLifeSeconds());
+        sb.append('\n');
+        sb.append("\tTime To Live time: ");
+        sb.append(defaultElementAttributes.getTimeToLiveSeconds());
         sb.append('\n');
         sb.append("\tSize: ");
         sb.append(defaultElementAttributes.getSize());
