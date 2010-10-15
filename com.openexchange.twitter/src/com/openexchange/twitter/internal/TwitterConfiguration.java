@@ -212,7 +212,7 @@ public final class TwitterConfiguration {
     }
 
     private static boolean isValidVersionString(final String version) {
-        return version != null && Pattern.compile("[\\d\\w]+([\\d\\w]+)*").matcher(version).matches();
+        return version != null && Pattern.compile("[\\d\\w]+([\\.,-][\\d\\w]+)*").matcher(version).matches();
     }
 
 }
