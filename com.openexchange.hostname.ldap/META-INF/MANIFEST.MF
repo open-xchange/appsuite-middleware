@@ -15,5 +15,6 @@ Import-Package: com.openexchange.cache,
  com.openexchange.java,
  com.openexchange.mail,
  com.openexchange.server.osgiservice,
+ com.openexchange.tools.ssl,
  org.apache.commons.logging,
  org.osgi.framework
