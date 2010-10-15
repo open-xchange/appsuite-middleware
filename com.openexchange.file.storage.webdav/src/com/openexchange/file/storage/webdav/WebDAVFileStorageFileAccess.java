@@ -312,6 +312,66 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         
     }
 
+    public boolean exists(String id, int version) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public File getFileMetadata(String id, int version) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public InputStream getDocument(String id, int version) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public List<String> removeDocument(List<String> ids, long sequenceNumber) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public int[] removeVersion(String id, int[] versions) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void unlock(String id) throws FileStorageException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void lock(String id, long diff) throws FileStorageException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void touch(String id) throws FileStorageException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public TimedResult<File> getVersions(String id) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public TimedResult<File> getVersions(String id, List<Field> columns) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public TimedResult<File> getVersions(String id, List<Field> columns, Field sort, SortDirection order) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public TimedResult<File> getDocuments(List<String> ids, List<Field> columns) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
   
 
 }
