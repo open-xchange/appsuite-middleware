@@ -136,19 +136,6 @@ public class Activator extends DeferredActivator {
 
     }
 
-    private void checkConfiguration() throws ConfigurationException {
-        LDAPHostnameProperties.check(HostnameLDAPServiceRegistry.getServiceRegistry(), Property.values(), LDAPHostnameCache.REGION_NAME);
-    }
-
-    private void activateCaching() throws ConfigurationException {
-        final String cacheConfigFile = LDAPHostnameProperties.getProperty(HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), Property.cache_config_file);
-        try {
-            HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
-        } catch (final CacheException e) {
-            throw new ConfigurationException(e);
-        }
-    }
-
     @Override
     protected void stopBundle() throws Exception {
         try {
@@ -163,6 +150,19 @@ public class Activator extends DeferredActivator {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
+    }
+
+    private void activateCaching() throws ConfigurationException {
+        final String cacheConfigFile = LDAPHostnameProperties.getProperty(HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), Property.cache_config_file);
+        try {
+            HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
+        } catch (final CacheException e) {
+            throw new ConfigurationException(e);
+        }
+    }
+
+    private void checkConfiguration() throws ConfigurationException {
+        LDAPHostnameProperties.check(HostnameLDAPServiceRegistry.getServiceRegistry(), Property.values(), LDAPHostnameCache.REGION_NAME);
     }
 
     private void deactivateCaching() {
