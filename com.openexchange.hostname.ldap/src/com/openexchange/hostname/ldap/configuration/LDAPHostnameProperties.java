@@ -47,6 +47,13 @@ public class LDAPHostnameProperties {
                 }
             } else if (Boolean.class.equals(clazz)) {
                 return (T) clazz.cast(Boolean.valueOf(property));
+            } else if (Enum.class.equals(clazz.getSuperclass())) {
+                try {
+                    Enum valueOf = Enum.valueOf(clazz.asSubclass(Enum.class), property);
+                    return (T) valueOf;
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
             } else {
                 return null;
             }
@@ -85,10 +92,8 @@ public class LDAPHostnameProperties {
             } else if (Enum.class.equals(clazz.getSuperclass())) {
                 try {
                     Enum valueOf = Enum.valueOf(clazz.asSubclass(Enum.class), property);
-                    System.out.println("Value of: " + valueOf);
                     return (T) valueOf;
                 } catch (IllegalArgumentException e) {
-                    System.out.println("Property wrong");
                     return null;
                 }
             } else {
