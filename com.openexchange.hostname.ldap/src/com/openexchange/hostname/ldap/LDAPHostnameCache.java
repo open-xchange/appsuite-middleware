@@ -9,10 +9,7 @@ import com.openexchange.cache.OXCachingException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
-import com.openexchange.caching.StatisticElement;
-import com.openexchange.caching.Statistics;
 import com.openexchange.hostname.ldap.services.HostnameLDAPServiceRegistry;
 import com.openexchange.java.Autoboxing;
 
@@ -149,32 +146,34 @@ public class LDAPHostnameCache {
         
     }
     
-    public void outputSettings() {
-        try {
-            final ElementAttributes defaultElementAttributes = cache.getDefaultElementAttributes();
-            System.out.println("Create time " + defaultElementAttributes.getCreateTime());
-            System.out.println("Idle time " + defaultElementAttributes.getIdleTime());
-            System.out.println("Last access time " + defaultElementAttributes.getLastAccessTime());
-            System.out.println("Max life time " + defaultElementAttributes.getMaxLifeSeconds());
-        } catch (CacheException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        final CacheStatistics statistics = cache.getStatistics();
-        final StatisticElement[] statElements = statistics.getStatElements();
-        for (final StatisticElement elem : statElements) {
-            System.out.println(elem.getName() + " : " + elem.getData());
-        }
-        System.out.println("----------------------");
-        final Statistics[] auxiliaryCacheStats = statistics.getAuxiliaryCacheStats();
-        for (final Statistics stat : auxiliaryCacheStats) {
-            System.out.println(stat.getTypeName());
-            final StatisticElement[] statElements2 = stat.getStatElements();
-            for (final StatisticElement elem : statElements2) {
-                System.out.println(elem.getName() + " : " + elem.getData());
-            }
-        }
+    public void outputSettings() throws CacheException {
+        final ElementAttributes defaultElementAttributes = cache.getDefaultElementAttributes();
+        final StringBuilder sb = new StringBuilder('\n');
+        sb.append("Cache setting for hostname ldap bundle:\n");
+        sb.append("\tCreate time: ");
+        sb.append(defaultElementAttributes.getCreateTime());
+        sb.append('\n');
+        sb.append("\tIdle time: ");
+        sb.append(defaultElementAttributes.getIdleTime());
+        sb.append('\n');
+        sb.append("\tMax life time: ");
+        sb.append(defaultElementAttributes.getMaxLifeSeconds());
+        sb.append('\n');
+        sb.append("\tSize: ");
+        sb.append(defaultElementAttributes.getSize());
+        sb.append('\n');
+        sb.append("\tIsEternal: ");
+        sb.append(defaultElementAttributes.getIsEternal());
+        sb.append('\n');
+        sb.append("\tIsLateral: ");
+        sb.append(defaultElementAttributes.getIsLateral());
+        sb.append('\n');
+        sb.append("\tIsRemote: ");
+        sb.append(defaultElementAttributes.getIsRemote());
+        sb.append("\tIsSpool: ");
+        sb.append(defaultElementAttributes.getIsSpool());
+        sb.append('\n');
+        LOG.info(sb.toString());
     }
     
 
