@@ -37,6 +37,19 @@ public class LDAPHostnameService implements HostnameService {
         instance = LDAPHostnameCache.getInstance();
     }
 
+    private static int getSearchControl(final SearchScope searchScope) {
+        switch (searchScope) {
+        case one:
+            return SearchControls.ONELEVEL_SCOPE;
+        case base:
+            return SearchControls.OBJECT_SCOPE;
+        case sub:
+            return SearchControls.SUBTREE_SCOPE;
+        default:
+            return -1;
+        }
+    }
+
     public String getHostname(int userId, int contextId) {
         try {
             final String hostnameFromCache = instance.getHostnameFromCache(contextId);
@@ -111,24 +124,6 @@ public class LDAPHostnameService implements HostnameService {
         }
     }
 
-    private SearchControls getSearchControls(final String ldapReturnField, final SearchScope scope) {
-        final SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(getSearchControl(scope));
-        searchControls.setReturningAttributes(new String[] { ldapReturnField });
-        return searchControls;
-    }
-
-    /**
-     * Sets the contextid inside the filter syntax
-     * 
-     * @param filter
-     * @param contextId
-     * @return
-     */
-    private String getRightFilter(final String filter, final int contextId) {
-        return filter.replace(PLACEHOLDER, String.valueOf(contextId));
-    }
-    
     private String getAttribute(final String attributename, final Attributes attributes) throws NamingException {
         final Attribute attribute = attributes.get(attributename);
         if (null != attribute) {
@@ -140,19 +135,6 @@ public class LDAPHostnameService implements HostnameService {
             }
         } else {
             return null;
-        }
-    }
-
-    private static int getSearchControl(final SearchScope searchScope) {
-        switch (searchScope) {
-        case one:
-            return SearchControls.ONELEVEL_SCOPE;
-        case base:
-            return SearchControls.OBJECT_SCOPE;
-        case sub:
-            return SearchControls.SUBTREE_SCOPE;
-        default:
-            return -1;
         }
     }
     
@@ -174,6 +156,24 @@ public class LDAPHostnameService implements HostnameService {
         }
         
         return env;
+    }
+
+    /**
+     * Sets the contextid inside the filter syntax
+     * 
+     * @param filter
+     * @param contextId
+     * @return
+     */
+    private String getRightFilter(final String filter, final int contextId) {
+        return filter.replace(PLACEHOLDER, String.valueOf(contextId));
+    }
+    
+    private SearchControls getSearchControls(final String ldapReturnField, final SearchScope scope) {
+        final SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(getSearchControl(scope));
+        searchControls.setReturningAttributes(new String[] { ldapReturnField });
+        return searchControls;
     }
 
 }

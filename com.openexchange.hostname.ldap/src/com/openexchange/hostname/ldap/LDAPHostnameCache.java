@@ -15,18 +15,28 @@ import com.openexchange.java.Autoboxing;
 
 public class LDAPHostnameCache {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LDAPHostnameCache.class);
-    
     public final static String REGION_NAME = "LDAPHostname";
+    
+    private static final ConcurrentMap<Object, ReadWriteLock> contextLocks = new ConcurrentHashMap<Object, ReadWriteLock>();
     
     private static final Object[] EMPTY_ARGS = new Object[0];
     
-    private static final ConcurrentMap<Object, ReadWriteLock> contextLocks = new ConcurrentHashMap<Object, ReadWriteLock>();
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LDAPHostnameCache.class);
     
     private static volatile LDAPHostnameCache singleton;
     
     private Cache cache;
     
+    /**
+     * Singleton instantiation.
+     * 
+     * @throws OXCachingException If cache instantiation fails
+     */
+    private LDAPHostnameCache() throws OXCachingException {
+        super();
+        initCache();
+    }
+
     /**
      * Gets the singleton instance.
      * 
@@ -59,6 +69,7 @@ public class LDAPHostnameCache {
         }
     }
 
+    
     /**
      * Fetches the appropriate lock.
      * 
@@ -78,37 +89,6 @@ public class LDAPHostnameCache {
     }
 
     
-    /**
-     * Singleton instantiation.
-     * 
-     * @throws OXCachingException If cache instantiation fails
-     */
-    private LDAPHostnameCache() throws OXCachingException {
-        super();
-        initCache();
-    }
-
-    
-    
-    /**
-     * Initializes cache reference.
-     * 
-     * @throws OXCachingException If initializing the cache reference fails
-     */
-    public void initCache() throws OXCachingException {
-        /*
-         * Check for proper started mail cache configuration
-         */
-        if (cache != null) {
-            return;
-        }
-        try {
-            cache = HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).getCache(REGION_NAME);
-        } catch (final CacheException e) {
-            LOG.error(e.getMessage(), e);
-            throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
-        }
-    }
     
     public void addHostnameToCache(final int cid, final String hostname) throws OXCachingException {
         if (null == cache) {
@@ -130,7 +110,7 @@ public class LDAPHostnameCache {
         }
         
     }
-
+    
     public String getHostnameFromCache(final int cid) throws OXCachingException {
         if (null == cache) {
             return null;
@@ -144,6 +124,26 @@ public class LDAPHostnameCache {
             readLock.unlock();
         }
         
+    }
+
+    /**
+     * Initializes cache reference.
+     * 
+     * @throws OXCachingException If initializing the cache reference fails
+     */
+    public void initCache() throws OXCachingException {
+        /*
+         * Check for proper started mail cache configuration
+         */
+        if (cache != null) {
+            return;
+        }
+        try {
+            cache = HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).getCache(REGION_NAME);
+        } catch (final CacheException e) {
+            LOG.error(e.getMessage(), e);
+            throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
+        }
     }
     
     public void outputSettings() throws CacheException {
