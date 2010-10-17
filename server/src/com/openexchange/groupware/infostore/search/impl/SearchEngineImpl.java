@@ -74,7 +74,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.infostore.SearchEngine;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -93,7 +93,7 @@ import com.openexchange.tools.sql.SearchStrings;
  * SearchEngineImpl
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
-public class SearchEngineImpl extends DBService implements SearchEngine {
+public class SearchEngineImpl extends DBService implements InfostoreSearchEngine {
 
     static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
     private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();

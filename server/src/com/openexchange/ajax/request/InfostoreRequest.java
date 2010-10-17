@@ -83,7 +83,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.SearchEngine;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.ThreadLocalSessionHolder;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
@@ -449,25 +449,25 @@ public class InfostoreRequest extends CommonRequest {
             final JSONObject queryObject = (JSONObject) req.getBody();
             final String query = queryObject.getString(SearchFields.PATTERN);
 
-            int folderId = SearchEngine.NO_FOLDER;
+            int folderId = InfostoreSearchEngine.NO_FOLDER;
             final String folderS = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
             if (null != folderS) {
                 folderId = Integer.parseInt(folderS);
             }
 
-            int start = SearchEngine.NOT_SET;
+            int start = InfostoreSearchEngine.NOT_SET;
             final String startS = req.getParameter(AJAXServlet.PARAMETER_START);
             if (null != startS) {
                 start = Integer.parseInt(startS);
             }
 
-            int end = SearchEngine.NOT_SET;
+            int end = InfostoreSearchEngine.NOT_SET;
             final String endS = req.getParameter(AJAXServlet.PARAMETER_END);
             if (null != endS) {
                 end = Integer.parseInt(endS);
             }
 
-            if (start == SearchEngine.NOT_SET && end == SearchEngine.NOT_SET) {
+            if (start == InfostoreSearchEngine.NOT_SET && end == InfostoreSearchEngine.NOT_SET) {
                 final String limitS = req.getParameter(AJAXServlet.PARAMETER_LIMIT);
                 if (limitS != null) {
                     final int limit = Integer.parseInt(limitS);
@@ -782,7 +782,7 @@ public class InfostoreRequest extends CommonRequest {
 
     protected void delete(final int[] ids, final TIntIntHashMap folderMapping, final long timestamp) {
         final InfostoreFacade infostore = getInfostore();
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
 
         int[] notDeleted = new int[0];
         if (ids.length != 0) {
@@ -851,7 +851,7 @@ public class InfostoreRequest extends CommonRequest {
 
     protected void detach(final int objectId, final int[] ids, final long timestamp) {
         final InfostoreFacade infostore = getInfostore();
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
 
         int[] notDetached = new int[0];
         long newTimestamp = 0;
@@ -908,7 +908,7 @@ public class InfostoreRequest extends CommonRequest {
 
     protected void newDocument(final DocumentMetadata newDocument) throws JSONException {
         final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
         try {
 
             infostore.startTransaction();
@@ -957,7 +957,7 @@ public class InfostoreRequest extends CommonRequest {
 
         final AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
         final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
         InputStream in = null;
         try {
             attachmentBase.startTransaction();
@@ -1029,7 +1029,7 @@ public class InfostoreRequest extends CommonRequest {
 
     protected void update(final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) {
         final InfostoreFacade infostore = getInfostore(updated.getFolderId());
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
 
         try {
 
@@ -1083,7 +1083,7 @@ public class InfostoreRequest extends CommonRequest {
             final Metadata[] presentFields) {
 
         final InfostoreFacade infostore = getInfostore(updated.getFolderId());
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
         DocumentMetadata metadata = null;
 
         try {
@@ -1221,7 +1221,7 @@ public class InfostoreRequest extends CommonRequest {
 
     protected void search(final String query, final Metadata[] cols, final int folderId, final Metadata sortedBy,
             final int dir, final int start, final int end, final String timeZoneId) {
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
 
         try {
             searchEngine.startTransaction();
@@ -1259,7 +1259,7 @@ public class InfostoreRequest extends CommonRequest {
         return Infostore.getInfostore(folderId);
     }
 
-    protected SearchEngine getSearchEngine() {
+    protected InfostoreSearchEngine getSearchEngine() {
         return Infostore.SEARCH_ENGINE;
     }
 

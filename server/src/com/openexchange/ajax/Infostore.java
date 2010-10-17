@@ -83,7 +83,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.SearchEngine;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.ThreadLocalSessionHolder;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
@@ -132,7 +132,7 @@ public class Infostore extends PermissionServlet {
         FACADE.setSessionHolder(ThreadLocalSessionHolder.getInstance());
     }
 
-    public static final SearchEngine SEARCH_ENGINE = new SearchEngineImpl(new DBPoolProvider());
+    public static final InfostoreSearchEngine SEARCH_ENGINE = new SearchEngineImpl(new DBPoolProvider());
     static {
         SEARCH_ENGINE.setTransactional(true);
     }
@@ -388,7 +388,7 @@ public class Infostore extends PermissionServlet {
         res.setContentType(MIME_TEXT_HTML);
 
         final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
         FileInputStream in = null;
         try {
 
@@ -469,7 +469,7 @@ public class Infostore extends PermissionServlet {
         res.setContentType(MIME_TEXT_HTML);
 
         final InfostoreFacade infostore = getInfostore(updated.getFolderId());
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
 
         try {
 
@@ -519,7 +519,7 @@ public class Infostore extends PermissionServlet {
         res.setContentType(MIME_TEXT_HTML);
 
         final InfostoreFacade infostore = getInfostore();
-        final SearchEngine searchEngine = getSearchEngine();
+        final InfostoreSearchEngine searchEngine = getSearchEngine();
         DocumentMetadata metadata = null;
 
         try {
@@ -741,7 +741,7 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    protected void rollback(final InfostoreFacade infostore, final SearchEngine searchEngine, final HttpServletResponse res, final Throwable t, final String action, final boolean post) {
+    protected void rollback(final InfostoreFacade infostore, final InfostoreSearchEngine searchEngine, final HttpServletResponse res, final Throwable t, final String action, final boolean post) {
         if (infostore != null) {
             try {
                 infostore.rollback();
@@ -796,7 +796,7 @@ public class Infostore extends PermissionServlet {
         return FACADE;
     }
 
-    protected SearchEngine getSearchEngine() {
+    protected InfostoreSearchEngine getSearchEngine() {
         return SEARCH_ENGINE;
     }
 

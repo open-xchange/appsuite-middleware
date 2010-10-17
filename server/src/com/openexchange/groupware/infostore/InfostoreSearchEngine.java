@@ -57,7 +57,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tx.TransactionAware;
 
-public interface SearchEngine extends TransactionAware{
+public interface InfostoreSearchEngine extends TransactionAware{
 	
 	public static final int DESC = -1;
 	public static final int ASC = 1;

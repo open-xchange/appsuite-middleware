@@ -124,6 +124,7 @@ import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.settings.PreferencesItemService;

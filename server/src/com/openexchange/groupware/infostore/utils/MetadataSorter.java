@@ -55,13 +55,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.SearchEngine;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 
 public class MetadataSorter {
 
 	private String field = Metadata.TITLE_LITERAL.getName();
-	private int direction = SearchEngine.ASC;
+	private int direction = InfostoreSearchEngine.ASC;
 	
 	private DocumentMetadata[] metadata;
 	private List<DocumentMetadata> metadataList;
@@ -92,7 +92,7 @@ public class MetadataSorter {
 				return -1;
 			}
 			switch(direction){
-			case SearchEngine.DESC : return v2.compareTo(v1); 
+			case InfostoreSearchEngine.DESC : return v2.compareTo(v1); 
 			default : return v1.compareTo(v2);
 			}
 		}
