@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: File Storage Composition Plug-in
+Bundle-SymbolicName: com.openexchange.file.storage.composition
+Bundle-Version: 6.18.2.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.datatypes.genericonf,
+ com.openexchange.file.storage,
+ com.openexchange.groupware,
+ com.openexchange.groupware.results,
+ com.openexchange.session,
+ com.openexchange.tools.id,
+ com.openexchange.tools.iterator,
+ com.openexchange.tx,
+ gnu.trove
+Export-Package: com.openexchange.file.storage.composition
