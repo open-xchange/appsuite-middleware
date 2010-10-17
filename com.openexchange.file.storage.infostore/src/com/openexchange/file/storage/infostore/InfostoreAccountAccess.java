@@ -54,6 +54,7 @@ import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -91,7 +92,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
         if(files != null) {
             return files;
         }
-        return files = new InfostoreAdapterFileAccess(session, service.getInfostore());
+        return files = new InfostoreAdapterFileAccess(session, service.getInfostore(), service.getSearch(), this);
     }
 
     @Override
@@ -131,6 +132,11 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
     @Override
     public boolean ping() throws FileStorageException {
         return true;
+    }
+
+    @Override
+    public FileStorageService getService() {
+        return service;
     }
 
 }

@@ -56,6 +56,7 @@ import java.util.List;
 import com.openexchange.file.storage.meta.FileComparator;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tx.TransactionAware;
 
 /**
@@ -64,7 +65,73 @@ import com.openexchange.tx.TransactionAware;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface FileStorageFileAccess extends TransactionAware {
+    
+    public static class IDTuple {
+        private String folder;
+        private String id;
+        
+        public IDTuple(String folder, String id) {
+            this.folder = folder;
+            this.id = id;
+        }
 
+        public String getFolder() {
+            return folder;
+        }
+
+        public void setFolder(String folder) {
+            this.folder = folder;
+        }
+        
+        public String getId() {
+            return id;
+        }
+        
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+            result = prime * result + ((id == null) ? 0 : id.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            IDTuple other = (IDTuple) obj;
+            if (folder == null) {
+                if (other.folder != null) {
+                    return false;
+                }
+            } else if (!folder.equals(other.folder)) {
+                return false;
+            }
+            if (id == null) {
+                if (other.id != null) {
+                    return false;
+                }
+            } else if (!id.equals(other.id)) {
+                return false;
+            }
+            return true;
+        }
+        
+        
+    }
+    
     /**
      * A version number pointing at the current version of a file
      */
@@ -74,6 +141,11 @@ public interface FileStorageFileAccess extends TransactionAware {
      * An ID value denoting a newly created file, or a file that should be created
      */
     public static final String NEW = null;
+    
+    /**
+     * A folderId indicating all folders. Useful for searching.
+     */
+    public static final String ALL_FOLDERS = null;
 
     /**
      * An undefined last modified value
@@ -89,6 +161,11 @@ public interface FileStorageFileAccess extends TransactionAware {
      * A sequence number that can be considered smaller than all others
      */
     public static final long DISTANT_PAST = Long.MIN_VALUE;
+
+    /**
+     * Indicates a range that is not defined. Useful for search.
+     */
+    public static final int NOT_SET = -11;
 
     /**
      * Denotes a {@link SortDirection}
@@ -167,22 +244,23 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Find out whether the file with a given ID exists or not.
+     * @param folder TODO
      * @param id The ID to check for
      * @param version The version to check for
-     * 
      * @return true when the file exists and is readable, false otherwise.
      * @throws FileStorageException 
      */
-    public boolean exists(String id, int version) throws FileStorageException;
+    public boolean exists(String folder, String id, int version) throws FileStorageException;
     
     /**
      * Load the metadata about a file
+     * @param folder TODO
      * @param id The id of the file
      * @param version The version number of the file. May pass in CURRENT_VERSION to load the current version
      * @return The File Metadata
      * @throws FileStorageException
      */
-    public File getFileMetadata(String id, int version) throws FileStorageException;
+    public File getFileMetadata(String folder, String id, int version) throws FileStorageException;
     
     /**
      * Save the file metadata.
@@ -203,12 +281,13 @@ public interface FileStorageFileAccess extends TransactionAware {
     
     /**
      * Load the documents content
+     * @param folder TODO
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
      * @return
      * @throws FileStorageException
      */
-    public InputStream getDocument(String id, int version) throws FileStorageException;
+    public InputStream getDocument(String folder, String id, int version) throws FileStorageException;
 
     /**
      * Save the file metadata and binary content
@@ -244,38 +323,42 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws FileStorageException
      */
-    public List<String> removeDocument(List<String> ids, long sequenceNumber) throws FileStorageException;
+    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws FileStorageException;
  
     /**
      * Remove a certain version of a file
+     * @param folder TODO
      * @param id The file id whose version is to be removed
      * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
      * @return
      * @throws FileStorageException
      */
-    public int[] removeVersion(String id, int[] versions) throws FileStorageException;
+    public int[] removeVersion(String folder, String id, int[] versions) throws FileStorageException;
 
     /**
      * Unlocks a given file.
+     * @param folder TODO
      * @param id The file to unlock
      * @throws FileStorageException
      */
-    public void unlock(String id) throws FileStorageException;
+    public void unlock(String folder, String id) throws FileStorageException;
     
     /**
      * Locks a given file for the given duration (in milliseconds)
+     * @param folder TODO
      * @param id The file to lock
      * @param diff The duration in milliseconds
      * @throws FileStorageException
      */
-    public void lock(String id, long diff) throws FileStorageException;
+    public void lock(String folder, String id, long diff) throws FileStorageException;
 
     /**
      * Updates a files sequence number
+     * @param folder TODO
      * @param id The file whose sequence number should be updated
      * @throws FileStorageException
      */
-    public void touch(String id) throws FileStorageException;
+    public void touch(String folder, String id) throws FileStorageException;
 
     /**
      * List a folders content
@@ -307,29 +390,32 @@ public interface FileStorageFileAccess extends TransactionAware {
     
     /**
      * List all versions of a document
+     * @param folder TODO
      * @param id The documents id
      * @return
      * @throws FileStorageException
      */
-    public TimedResult<File> getVersions(String id) throws FileStorageException;
+    public TimedResult<File> getVersions(String folder, String id) throws FileStorageException;
 
     /**
      * List all versions of a document loading the given columns
+     * @param folder TODO
      * @param id The documents id
      * @param columns The columns to load
      * @return
      * @throws FileStorageException
      */
-    public TimedResult<File> getVersions(String id, List<File.Field> columns) throws FileStorageException;
+    public TimedResult<File> getVersions(String folder, String id, List<File.Field> columns) throws FileStorageException;
 
     /**
      * List all versions of a document loading the given columns sorted according to the given field in a given order
+     * @param folder TODO
      * @param id The documents id
      * @param columns The columns to load
      * @return
      * @throws FileStorageException
      */
-    public TimedResult<File> getVersions(String id, List<File.Field> columns, File.Field sort, SortDirection order) throws FileStorageException;
+    public TimedResult<File> getVersions(String folder, String id, List<File.Field> columns, File.Field sort, SortDirection order) throws FileStorageException;
 
     /**
      * Load the document metadata with the given ids
@@ -338,7 +424,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws FileStorageException
      */
-    public TimedResult<File> getDocuments(List<String> ids, List<File.Field> columns) throws FileStorageException;
+    public TimedResult<File> getDocuments(List<IDTuple> ids, List<File.Field> columns) throws FileStorageException;
     
     /**
      * Get changes in a given folder since a certain sequence number
@@ -364,5 +450,24 @@ public interface FileStorageFileAccess extends TransactionAware {
      */
     public Delta<File> getDelta(String folderId, long updateSince, List<File.Field> columns, File.Field sort, SortDirection order, boolean ignoreDeleted) throws FileStorageException;
 
+    /**
+     * Search for a given file.
+     * 
+     * @param query The search query 
+     * @param cols Which fields to load
+     * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
+     * @param sort Which field to sort by. May be null.
+     * @param order The order in which to sort
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return
+     * @throws FileStorageException
+     */
+    public SearchIterator<File> search(String query, List<File.Field> cols, String folderId, File.Field sort, SortDirection order, int start, int end) throws FileStorageException;
     
+    /**
+     * Retrieve the parent account access.
+     */
+    public FileStorageAccountAccess getAccountAccess();
+
 }

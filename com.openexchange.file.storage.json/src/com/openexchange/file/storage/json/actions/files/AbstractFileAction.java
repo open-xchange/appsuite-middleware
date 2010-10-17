@@ -50,7 +50,10 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Date;
+import java.util.List;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -60,32 +63,33 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.tx.TransactionException;
 
 /**
  * {@link AbstractFileAction}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractFileAction implements AJAXActionService{
-    
+public abstract class AbstractFileAction implements AJAXActionService {
+
     private static final FileMetadataWriter fileWriter = new FileMetadataWriter();
-    
+
     public static enum Param {
         ID("id"),
         FOLDER_ID("folder"),
         VERSION("version"),
-        COLUMNS("columns"), 
-        SORT("sort"), 
-        ORDER("order"), 
-        TIMEZONE("timezone"), 
-        TIMESTAMP("timestamp"), 
-        IGNORE("ignore")  
-        ;
-        
+        COLUMNS("columns"),
+        SORT("sort"),
+        ORDER("order"),
+        TIMEZONE("timezone"),
+        TIMESTAMP("timestamp"),
+        IGNORE("ignore"), 
+        DIFF("diff");
+
         String name;
-        
+
         private Param(String name) {
             this.name = name;
         }
@@ -94,17 +98,18 @@ public abstract class AbstractFileAction implements AJAXActionService{
             return name;
         }
     }
-    
+
     protected FileMetadataWriter getWriter() {
         return fileWriter;
     }
-    
+
     public abstract AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException;
-    
+
     public AJAXRequestResult result(TimedResult<File> documents, InfostoreRequest request) throws AbstractOXException {
         SearchIterator<File> results = documents.results();
         try {
-            return new AJAXRequestResult(getWriter().write(results, request.getColumns(), request.getTimezone()), new Date(documents.sequenceNumber()));
+            return new AJAXRequestResult(getWriter().write(results, request.getColumns(), request.getTimezone()), new Date(
+                documents.sequenceNumber()));
         } finally {
             results.close();
         }
@@ -114,29 +119,96 @@ public abstract class AbstractFileAction implements AJAXActionService{
         SearchIterator<File> results = delta.results();
         JSONArray array = null;
         try {
-           array = getWriter().write(results, request.getColumns(), request.getTimezone());
+            array = getWriter().write(results, request.getColumns(), request.getTimezone());
         } finally {
             results.close();
         }
         SearchIterator<File> deleted = delta.getDeleted();
         try {
-            while(deleted.hasNext()) {
+            while (deleted.hasNext()) {
                 array.put(deleted.next().getId());
             }
         } finally {
             deleted.close();
         }
-        
+
         return new AJAXRequestResult(array, new Date(delta.sequenceNumber()));
     }
-    
+
     public AJAXRequestResult result(File file, InfostoreRequest request) throws AbstractOXException {
         return new AJAXRequestResult(getWriter().write(file, request.getTimezone()), new Date(file.getSequenceNumber()));
     }
-    
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
-        return handle(new AJAXInfostoreRequest(request, session));
+
+
+    public AJAXRequestResult result(List<String> ids, InfostoreRequest request) throws AbstractOXException {
+        JSONArray array = new JSONArray();
+        try {
+            for (String id : ids) {
+                JSONObject object = new JSONObject();
+                object.put("id", id);
+                object.put("folder", request.getFolderForID(id));
+                array.put(object);
+            }
+        } catch (JSONException x) {
+            throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
+        }
+
+        return new AJAXRequestResult(array);
     }
     
+    public AJAXRequestResult result(int[] versions, long sequenceNumber, InfostoreRequest request) throws AbstractOXException {
+        JSONArray array = new JSONArray();
+        for (int i : versions) {
+            array.put(i);
+        }
+        
+        return new AJAXRequestResult(array, new Date(sequenceNumber));
+    }
     
+    public AJAXRequestResult success(long sequenceNumber) {
+        return new AJAXRequestResult(true, new Date(sequenceNumber));
+    }
+    
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        AJAXInfostoreRequest req = new AJAXInfostoreRequest(request, session);
+        try {
+            before(req);
+            AJAXRequestResult result = handle(req);
+            success(req, result);
+            return result;
+        } catch (AbstractOXException x) {
+            failure(req,x);
+            throw x;
+        } catch (Throwable t) {
+            failure(req,t);
+            throw new AjaxException(AjaxException.Code.UnexpectedError, t.getMessage());
+        } finally {
+            after(req);
+        }
+    }
+
+    protected void after(AJAXInfostoreRequest req) throws AbstractOXException{
+        // TODO Auto-generated method stub
+        
+    }
+
+   
+    protected void failure(AJAXInfostoreRequest req, Throwable throwable) throws AbstractOXException{
+        // TODO Auto-generated method stub
+        
+    }
+
+    
+    protected void success(AJAXInfostoreRequest req, AJAXRequestResult result) throws AbstractOXException{
+        // TODO Auto-generated method stub
+        
+    }
+
+   
+    protected void before(AJAXInfostoreRequest req) throws AbstractOXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+
 }

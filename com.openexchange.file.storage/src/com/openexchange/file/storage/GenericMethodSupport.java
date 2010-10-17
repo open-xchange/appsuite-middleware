@@ -74,14 +74,14 @@ public class GenericMethodSupport {
     }
     
     protected String string(int i, Object...args) {
-        if(args[i] == null || args.length >= i) {
+        if(args[i] == null || args.length <= i) {
             return null;
         }
         return args[i].toString();
     }
     
     protected int integer(int i, Object...args) {
-        if(args[i] == null || args.length >= i) {
+        if(args[i] == null || args.length <= i) {
             return -1;
         }
         Object o = args[i];
@@ -95,7 +95,7 @@ public class GenericMethodSupport {
     }
     
     protected Date date(int i, Object...args) {
-        if(args[i] == null || args.length >= i) {
+        if(args[i] == null || args.length <= i) {
             return null;
         }
         Object o = args[i];
@@ -108,7 +108,7 @@ public class GenericMethodSupport {
     }
     
     protected long longValue(int i, Object...args) {
-        if(args[i] == null || args.length >= i) {
+        if(args[i] == null || args.length <= i) {
             return -1;
         }
         return coerceToLong(args[i]);

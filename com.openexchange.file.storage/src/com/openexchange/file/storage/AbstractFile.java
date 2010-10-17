@@ -77,6 +77,14 @@ public abstract class AbstractFile implements File {
         FileFieldHandling.copy(other, this);
     }
     
+    public void copyInto(File other, Field...fields) {
+        FileFieldHandling.copy(this, other, fields);
+    }
+    
+    public void copyFrom(File other, Field...fields) {
+        FileFieldHandling.copy(other, this, fields);
+    }
+    
     public Set<File.Field> differences(final File other) {
         return Field.inject(new AbstractFileFieldHandler() {
 
@@ -101,6 +109,10 @@ public abstract class AbstractFile implements File {
             }
         }
         return true;
+    }
+    
+    public boolean equals(Object other) {
+        return equals((File)other, File.Field.ID, File.Field.values());
     }
     
     @Override

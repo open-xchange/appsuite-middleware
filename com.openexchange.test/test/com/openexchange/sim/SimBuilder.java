@@ -83,6 +83,10 @@ public class SimBuilder {
         return this;
     }
     
+    public void andDo(Block block) {
+        last.setBlock(block);
+    }
+    
     public <T> T getSim(Class<T> klass, Class...classes) {
         return DynamicSim.compose(klass, classes, (List<DynamicSim>) expectedCalls); // *shrug*
     }

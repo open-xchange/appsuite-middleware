@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -210,6 +211,58 @@ public class InfostoreRequestTest extends FileTest {
         List<String> ids = request().body(new JSONArray("[{id: 'id1', folder: 'folder'}, {id: 'id2', folder: 'folder'}]")).getIds();
         assertEquals(Arrays.asList("id1", "id2"), ids);
         
+    }
+    
+    public void testGetVersions() throws JSONException, AjaxException {
+        int[] versions = request().body(new JSONArray("[1,3,5]")).getVersions();
+        
+        assertEquals(1, versions[0]);
+        assertEquals(3, versions[1]);
+        assertEquals(5, versions[2]);
+        
+    }
+    
+    public void testGetDiff() {
+        long diff = request().param("diff", "1337").getDiff();
+        assertEquals(1337l, diff);
+        
+        diff = request().getDiff();
+        assertEquals(-1l, diff);
+    }
+    
+    public void testStartAndEnd() {
+        request().param("start", "10").param("end", "20");
+        assertEquals(10, request.getStart());
+        assertEquals(20, request.getEnd());
+        
+    }
+    
+    public void testLimit() {
+        request().param("limit", "12");
+        
+        assertEquals(0, request.getStart());
+        assertEquals(11, request.getEnd());
+    }
+    
+    public void testStartAndEndUnset() {
+        request();
+        assertEquals(FileStorageFileAccess.NOT_SET, request.getStart());
+        assertEquals(FileStorageFileAccess.NOT_SET, request.getEnd());
+    }
+    
+    public void testSearchFolder() throws AbstractOXException {
+        String searchFolderId = request().param("folder", "12").getSearchFolderId();
+        assertEquals("12", searchFolderId);
+    }
+    
+    public void testSearchFolderDefaultsToAllFolders() throws AbstractOXException {
+        String searchFolderId = request().getSearchFolderId();
+        assertEquals(FileStorageFileAccess.ALL_FOLDERS, searchFolderId);
+    }
+    
+    public void testSearchQuery() throws JSONException, AjaxException {
+        String searchQuery = request().body(new JSONObject("{pattern: 'somePattern'}")).getSearchQuery();
+        assertEquals("somePattern", searchQuery);
     }
 
 }

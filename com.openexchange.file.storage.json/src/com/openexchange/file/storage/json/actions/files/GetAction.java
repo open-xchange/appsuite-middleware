@@ -52,6 +52,7 @@ package com.openexchange.file.storage.json.actions.files;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.AbstractOXException;
 
 
@@ -66,7 +67,7 @@ public class GetAction extends AbstractFileAction {
     public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
         request.require(Param.ID);
         
-        FileStorageFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
         
         File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
         

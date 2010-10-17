@@ -55,12 +55,14 @@ import java.util.Set;
 import org.apache.commons.httpclient.HttpClient;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tx.TransactionException;
 
 /**
@@ -83,7 +85,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#exists(java.lang.String, java.lang.String, int)
      */
-    public boolean exists(String folderId, String id, int version) {
+    public boolean exists(String folder, String id, int version) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -107,7 +109,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocument(java.lang.String, java.lang.String, int)
      */
-    public InputStream getDocument(String folderId, String id, int version) throws FileStorageException {
+    public InputStream getDocument(String folder, String id, int version) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -137,9 +139,9 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String[][], java.util.List)
+     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.List<String>[], java.util.List)
      */
-    public TimedResult<File> getDocuments(String[][] ids, List<Field> columns) throws FileStorageException {
+    public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> columns) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -147,7 +149,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#getFileMetadata(java.lang.String, java.lang.String, int)
      */
-    public File getFileMetadata(String folderId, String id, int version) throws FileStorageException {
+    public File getFileMetadata(String folder, String id, int version) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -155,7 +157,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#getVersions(java.lang.String, java.lang.String)
      */
-    public TimedResult<File> getVersions(String folderId, String id) throws FileStorageException {
+    public TimedResult<File> getVersions(String folder, String id) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -163,7 +165,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#getVersions(java.lang.String, java.lang.String, java.util.List)
      */
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> columns) throws FileStorageException {
+    public TimedResult<File> getVersions(String folder, String id, List<Field> columns) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -171,7 +173,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#getVersions(java.lang.String, java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
      */
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> columns, Field sort, SortDirection order) throws FileStorageException {
+    public TimedResult<File> getVersions(String folder, String id, List<Field> columns, Field sort, SortDirection order) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -179,7 +181,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#lock(java.lang.String, java.lang.String, long)
      */
-    public void lock(String folderId, String id, long diff) throws FileStorageException {
+    public void lock(String folder, String id, long diff) throws FileStorageException {
         // TODO Auto-generated method stub
         
     }
@@ -193,9 +195,9 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.lang.String[][], long)
+     * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.lang.List<String>[], long)
      */
-    public String[] removeDocument(String[][] ids, long sequenceNumber) throws FileStorageException {
+    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -203,7 +205,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#removeVersion(java.lang.String, java.lang.String, int[])
      */
-    public int[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException {
+    public int[] removeVersion(String folder, String id, int[] versions) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -243,7 +245,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#touch(java.lang.String, java.lang.String)
      */
-    public void touch(String folderId, String id) throws FileStorageException {
+    public void touch(String folder, String id) throws FileStorageException {
         // TODO Auto-generated method stub
         
     }
@@ -251,7 +253,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     /* (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageFileAccess#unlock(java.lang.String, java.lang.String)
      */
-    public void unlock(String folderId, String id) throws FileStorageException {
+    public void unlock(String unlock, String id) throws FileStorageException {
         // TODO Auto-generated method stub
         
     }
@@ -312,62 +314,18 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         
     }
 
-    public boolean exists(String id, int version) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public File getFileMetadata(String id, int version) throws FileStorageException {
+    /* (non-Javadoc)
+     * @see com.openexchange.file.storage.FileStorageFileAccess#search(java.lang.String, java.util.List, java.lang.String, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, int, int)
+     */
+    public SearchIterator<File> search(String query, List<Field> cols, String folderId, Field sort, SortDirection order, int start, int end) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public InputStream getDocument(String id, int version) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public List<String> removeDocument(List<String> ids, long sequenceNumber) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public int[] removeVersion(String id, int[] versions) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public void unlock(String id) throws FileStorageException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void lock(String id, long diff) throws FileStorageException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void touch(String id) throws FileStorageException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public TimedResult<File> getVersions(String id) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public TimedResult<File> getVersions(String id, List<Field> columns) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public TimedResult<File> getVersions(String id, List<Field> columns, Field sort, SortDirection order) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public TimedResult<File> getDocuments(List<String> ids, List<Field> columns) throws FileStorageException {
+    /* (non-Javadoc)
+     * @see com.openexchange.file.storage.FileStorageFileAccess#getAccountAccess()
+     */
+    public FileStorageAccountAccess getAccountAccess() {
         // TODO Auto-generated method stub
         return null;
     }

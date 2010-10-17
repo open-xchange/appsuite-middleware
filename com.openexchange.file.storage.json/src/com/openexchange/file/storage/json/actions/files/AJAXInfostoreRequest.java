@@ -63,116 +63,137 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
+import static com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 
 /**
  * {@link AJAXInfostoreRequest}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AJAXInfostoreRequest implements InfostoreRequest{
+public class AJAXInfostoreRequest implements InfostoreRequest {
 
     protected AJAXRequestData data;
+
     private List<Field> columns;
+
     private Field sortingField;
+
     private ServerSession session;
+
     private Map<String, String> folderMapping = new HashMap<String, String>();
+
     private List<String> ids = null;
+
+    private int[] versions;
+
+    private static final FileMetadataParser parser = new FileMetadataParser();
     
+    private File file;
+    
+    private List<File.Field> fields;
     
     public AJAXInfostoreRequest(AJAXRequestData requestData, ServerSession session) {
         this.data = requestData;
         this.session = session;
     }
 
-    public void require(Param... params) throws AjaxException {
+    public InfostoreRequest require(Param... params) throws AjaxException {
         String[] names = new String[params.length];
         for (int i = 0; i < params.length; i++) {
             names[i] = params[i].getName();
         }
         List<String> missingParameters = data.getMissingParameters(names);
-        if(!missingParameters.isEmpty()) {
+        if (!missingParameters.isEmpty()) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, missingParameters.toString());
         }
+        return this;
     }
-    
-    public void requireBody() throws AjaxException {
-        if(data.getData() == null) {
+
+    public InfostoreRequest requireBody() throws AjaxException {
+        if (data.getData() == null) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "data");
         }
+        return this;
     }
     
+    public InfostoreRequest requireFileMetadata() throws AjaxException {
+        return requireBody(); 
+    }
+
     public String getFolderId() throws AbstractOXException {
         return data.getParameter(Param.FOLDER_ID.getName());
     }
 
     public List<Field> getColumns() throws AbstractOXException {
-        if(columns != null) {
+        if (columns != null) {
             return columns;
         }
-        
+
         String parameter = data.getParameter(Param.COLUMNS.getName());
-        if(parameter == null || parameter.equals("")) {
+        if (parameter == null || parameter.equals("")) {
             return columns = Arrays.asList(File.Field.values());
         }
         String[] columnStrings = parameter.split("\\s*,\\s*");
         List<Field> fields = new ArrayList<Field>(columnStrings.length);
         List<String> unknownColumns = new ArrayList<String>(columnStrings.length);
-        
+
         for (String columnNumberOrName : columnStrings) {
             Field field = Field.get(columnNumberOrName);
-            if(field == null) {
+            if (field == null) {
                 unknownColumns.add(columnNumberOrName);
             } else {
-                fields.add( field );
+                fields.add(field);
             }
         }
-        
-        if(!unknownColumns.isEmpty()) {
+
+        if (!unknownColumns.isEmpty()) {
             throw new AjaxException(AjaxException.Code.InvalidParameterValue, Param.COLUMNS.getName(), unknownColumns.toString());
         }
-        
+
         return columns = fields;
     }
-    
+
     public Field getSortingField() throws AbstractOXException {
-        if(sortingField != null) {
+        if (sortingField != null) {
             return sortingField;
         }
         String sort = data.getParameter(Param.SORT.getName());
-        if(sort == null) {
+        if (sort == null) {
             return null;
         }
         Field field = sortingField = Field.get(sort);
-        if(field == null) {
+        if (field == null) {
             throw new AjaxException(AjaxException.Code.InvalidParameterValue, Param.SORT.getName(), sort);
         }
         return field;
     }
 
-    public SortDirection getSortingOrder() throws AbstractOXException{
+    public SortDirection getSortingOrder() throws AbstractOXException {
         SortDirection sortDirection = SortDirection.get(data.getParameter(Param.ORDER.getName()));
-        if(sortDirection == null) {
+        if (sortDirection == null) {
             throw new AjaxException(AjaxException.Code.InvalidParameterValue, Param.ORDER.getName(), sortDirection);
         }
         return sortDirection;
     }
-    
+
     public TimeZone getTimezone() throws AbstractOXException {
         String parameter = data.getParameter(Param.TIMEZONE.getName());
-        if(parameter == null) {
+        if (parameter == null) {
             parameter = getSession().getUser().getTimeZone();
         }
         return TimeZone.getTimeZone(parameter);
     }
 
-    public FileStorageFileAccess getFileAccess() {
+    public IDBasedFileAccess getFileAccess() {
         return null;
     }
 
@@ -186,7 +207,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest{
 
     public int getVersion() {
         String parameter = data.getParameter(Param.VERSION.getName());
-        if(parameter == null) {
+        if (parameter == null) {
             return FileStorageFileAccess.CURRENT_VERSION;
         }
         return Integer.parseInt(parameter);
@@ -194,46 +215,135 @@ public class AJAXInfostoreRequest implements InfostoreRequest{
 
     public Set<String> getIgnore() {
         String parameter = data.getParameter(Param.IGNORE.getName());
-        if(parameter == null) {
+        if (parameter == null) {
             return Collections.emptySet();
         }
-        
+
         return new HashSet<String>(Arrays.asList(parameter.split("\\s*,\\s*")));
     }
 
     public long getTimestamp() {
         String parameter = data.getParameter(Param.TIMESTAMP.getName());
-        if(parameter == null) {
+        if (parameter == null) {
             return FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER;
         }
-        
+
         return Long.parseLong(parameter);
     }
-    
+
     public List<String> getIds() throws AjaxException {
         parseIDList();
         return ids;
     }
 
+    public String getFolderForID(String id) throws AjaxException {
+        parseIDList();
+        return folderMapping.get(id);
+    }
+
     private void parseIDList() throws AjaxException {
         try {
-            if(ids != null) {
+            if (ids != null) {
                 return;
             }
             JSONArray array = (JSONArray) data.getData();
             ids = new ArrayList<String>(array.length());
-            for(int i = 0, size = array.length(); i < size; i++) {
+            for (int i = 0, size = array.length(); i < size; i++) {
                 JSONObject tuple = array.getJSONObject(i);
                 String id = tuple.getString(Param.ID.getName());
                 ids.add(id);
-                
+
                 folderMapping.put(id, tuple.optString(Param.FOLDER_ID.getName()));
             }
         } catch (JSONException x) {
             throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
         }
-        
+
     }
 
+    public int[] getVersions() throws AjaxException {
+        if (versions != null) {
+            return versions;
+        }
+        JSONArray body = (JSONArray) data.getData();
+
+        try {
+            versions = new int[body.length()];
+            for (int i = 0; i < versions.length; i++) {
+                versions[i] = body.getInt(i);
+            }
+        } catch (JSONException x) {
+            throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
+        }
+        return versions;
+    }
+
+    public long getDiff() {
+        String parameter = data.getParameter(Param.DIFF.getName());
+        if (parameter == null) {
+            return -1;
+        }
+        return Long.parseLong(parameter);
+    }
+
+    public int getStart() {
+        String parameter = data.getParameter("start");
+        if(parameter == null ) {
+            if(data.getParameter("limit") != null){
+                return 0;
+            }
+            return FileStorageFileAccess.NOT_SET;
+        }
+        return Integer.valueOf(parameter);
+    }
+
+    public int getEnd() {
+        String parameter = data.getParameter("end");
+        if(parameter == null) {
+            parameter = data.getParameter("limit");
+            if(parameter == null) {
+                return FileStorageFileAccess.NOT_SET;
+            }
+            return Integer.valueOf(parameter)-1;
+        }
+        return Integer.valueOf(parameter);
+    }
+
+    public String getSearchFolderId() throws AbstractOXException {
+        return getFolderId();
+    }
+
+    public String getSearchQuery() throws AjaxException {
+        Object data2 = data.getData();
+        if(data2 == null) {
+            return "";
+        }
+        JSONObject queryObject = (JSONObject) data2;
+        
+        try {
+            return queryObject.getString("pattern");
+        } catch (JSONException x) {
+            throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
+        }
+    }
+    
+    protected void parseFile() throws AbstractOXException {
+        if(file != null) {
+            return;
+        }
+        JSONObject object = (JSONObject) data.getData();
+        file = parser.parse(object); 
+        fields = parser.getFields(object);
+    }
+    
+    public File getFile() throws AbstractOXException {
+        parseFile();
+        return file;
+    }
+    
+    public List<Field> getSentColumns() throws AbstractOXException {
+        parseFile();
+        return fields;
+    }
 
 }

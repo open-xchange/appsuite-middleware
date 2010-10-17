@@ -67,6 +67,7 @@ public class DynamicSim implements InvocationHandler{
     private boolean wasCalled;
     
     private Expectation expectation;
+    private Block block;
 
     public DynamicSim(Expectation expectation) {
         super();
@@ -81,6 +82,9 @@ public class DynamicSim implements InvocationHandler{
         }
         if(retval != null) {
             return retval;
+        }
+        if(block != null) {
+            return block.perform(proxy, args);
         }
         return null;
     }
@@ -145,6 +149,10 @@ public class DynamicSim implements InvocationHandler{
 
     public void setException(Throwable x) {
         this.exception = x;
+    }
+
+    public void setBlock(Block block) {
+        this.block = block;
     }
 
 

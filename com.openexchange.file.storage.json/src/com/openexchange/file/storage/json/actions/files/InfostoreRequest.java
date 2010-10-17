@@ -49,12 +49,14 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
-import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -68,15 +70,17 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface InfostoreRequest {
 
-    void require(Param...params) throws AjaxException ;
+    InfostoreRequest require(Param...params) throws AjaxException ;
     
-    void requireBody() throws AjaxException;
+    InfostoreRequest requireBody() throws AjaxException;
 
-    public FileStorageFileAccess getFileAccess() throws AbstractOXException;
+    InfostoreRequest requireFileMetadata() throws AjaxException;
 
-    String getId();
+    public IDBasedFileAccess getFileAccess() throws AbstractOXException;
 
-    int getVersion();
+    String getId() throws AbstractOXException;
+
+    int getVersion() throws AbstractOXException;
     
     String getFolderId() throws AbstractOXException;
 
@@ -95,6 +99,25 @@ public interface InfostoreRequest {
     Set<String> getIgnore() throws AjaxException;
 
     List<String> getIds() throws AjaxException;
+
+    String getFolderForID(String id) throws AjaxException;
+
+    int[] getVersions() throws AjaxException;
+
+    long getDiff() throws AbstractOXException;
+
+    String getSearchQuery() throws AbstractOXException;
+
+    String getSearchFolderId() throws AbstractOXException;
+
+    int getStart() throws AbstractOXException;
+
+    int getEnd() throws AbstractOXException;
+
+    File getFile() throws AbstractOXException;
+
+    List<File.Field> getSentColumns() throws AbstractOXException;
+
 
 
     

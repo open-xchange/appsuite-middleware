@@ -58,6 +58,7 @@ import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.session.Session;
 
 
@@ -70,6 +71,7 @@ public class InfostoreFileStorageService implements FileStorageService {
 
     private static final FileStorageService INSTANCE = new InfostoreFileStorageService();
     private InfostoreFacade infostore;
+    private InfostoreSearchEngine search;
 
     @Override
     public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws FileStorageException {
@@ -115,6 +117,15 @@ public class InfostoreFileStorageService implements FileStorageService {
     
     public void setInfostore(InfostoreFacade infostore) {
         this.infostore = infostore;
+    }
+    
+    // Override this for OSGi Lookup.
+    public InfostoreSearchEngine getSearch() {
+        return search;
+    }
+    
+    public void setSearch(InfostoreSearchEngine search) {
+        this.search = search;
     }
 
 }

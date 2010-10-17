@@ -53,6 +53,7 @@ import java.util.Date;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;
 import static com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param.*;
@@ -68,7 +69,7 @@ public class AllAction extends AbstractFileAction {
     public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
         request.require(FOLDER_ID);
         
-        FileStorageFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
         
         TimedResult<File> documents = fileAccess.getDocuments(request.getFolderId(), request.getColumns(), request.getSortingField(), request.getSortingOrder());
         

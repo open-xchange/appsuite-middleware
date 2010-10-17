@@ -91,5 +91,11 @@ public interface FileStorageAccountAccess extends FileStorageResource {
      * @throws FileStorageException If returning the root folder fails
      */
     public FileStorageFolder getRootFolder() throws FileStorageException;
+    
+    /**
+     * Retrieve the parent file storage service
+     * @return
+     */
+    public FileStorageService getService();
 
 }

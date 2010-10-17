@@ -94,7 +94,23 @@ public class Called implements Expectation {
         
         int index = 0;
         for (Object object : args) {
-            assertEquals("Argument mismatch at "+index, this.args[index++],object);
+            if(int[].class.isInstance(this.args[index])) {
+                // We only care for content;
+                if(!int[].class.isInstance(object)) {
+                    fail("Argument mismatch at "+index);
+                }
+                int[] expected = (int[]) this.args[index++];
+                int[] provided = (int[]) object;
+                
+                assertEquals("Argument mismatch at "+index+". Different Array sizes.", expected.length, provided.length);
+                
+                for(int i = 0; i < expected.length; i++){
+                    assertEquals("Argument mismatch at "+index+". Different values in array at index "+i, expected[i], provided[i]);
+                }
+                
+            } else {
+                assertEquals("Argument mismatch at "+index, this.args[index++],object);
+            }
         }
                     
     }

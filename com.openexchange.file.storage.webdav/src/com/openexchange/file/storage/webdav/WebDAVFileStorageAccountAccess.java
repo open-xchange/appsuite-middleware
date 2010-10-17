@@ -79,6 +79,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.session.WebDAVHttpClientRegistry;
 import com.openexchange.session.Session;
 
@@ -374,6 +375,14 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.file.storage.FileStorageAccountAccess#getService()
+     */
+    public FileStorageService getService() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

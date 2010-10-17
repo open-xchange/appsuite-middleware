@@ -155,6 +155,10 @@ public interface File {
     
     public void copyFrom(File other);
     
+    public void copyInto(File other, Field...fields);
+    
+    public void copyFrom(File other, Field...fields);
+    
     public Set<File.Field> differences(File other);
     
     public boolean equals(File other, Field criterium, Field...criteria);

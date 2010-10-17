@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json;
 
 import junit.framework.TestCase;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.tools.session.ServerSession;
@@ -69,15 +70,15 @@ public class FileTest extends TestCase {
     public TestFriendlyInfostoreRequest request() {
         return request = new TestFriendlyInfostoreRequest() {
             
-            private FileStorageFileAccess files = null;
+            private IDBasedFileAccess files = null;
             
             @Override
-            public FileStorageFileAccess getFileAccess() {
+            public IDBasedFileAccess getFileAccess() {
                 if(files != null) {
                     return files;
                 }
                 if (fileAccessBuilder != null) {
-                    files = fileAccessBuilder.getSim(FileStorageFileAccess.class);
+                    files = fileAccessBuilder.getSim(IDBasedFileAccess.class);
                 } else {
                     files = null;
                 }
