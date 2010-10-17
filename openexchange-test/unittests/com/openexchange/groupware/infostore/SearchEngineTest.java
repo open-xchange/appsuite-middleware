@@ -81,7 +81,7 @@ import com.openexchange.tx.TransactionException;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class SearchEngineTest extends TestCase {
-    private SearchEngine searchEngine;
+    private InfostoreSearchEngine searchEngine;
 
     private Context ctx = null;
     private User user = null;
@@ -155,7 +155,7 @@ public class SearchEngineTest extends TestCase {
                                 createWithTitle("Hallo");
         
 
-        final SearchIterator iter = searchEngine.search("%",new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, folderId, Metadata.TITLE_LITERAL, SearchEngine.ASC,0,10,ctx, user, userConfig);
+        final SearchIterator iter = searchEngine.search("%",new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, folderId, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC,0,10,ctx, user, userConfig);
 
         assertTrue(iter.hasNext());
         final DocumentMetadata gotDoc = (DocumentMetadata) iter.next();
@@ -194,7 +194,7 @@ public class SearchEngineTest extends TestCase {
 
     private void assertSurvivesOrder(final Metadata[] metadata) {
         try {
-           searchEngine.search("*",metadata,folderId,metadata[0],SearchEngine.ASC, 0, 10, ctx, user, userConfig); 
+           searchEngine.search("*",metadata,folderId,metadata[0],InfostoreSearchEngine.ASC, 0, 10, ctx, user, userConfig); 
         } catch (final Exception x) {
             fail(x.getMessage());
             x.printStackTrace();
