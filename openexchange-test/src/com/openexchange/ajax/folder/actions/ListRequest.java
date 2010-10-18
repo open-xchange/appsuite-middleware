@@ -68,12 +68,23 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
     private final int[] columns;
 
     private final boolean ignoreMail;
+    
+    private final boolean failOnError;
 
+    public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail, boolean failOnError) {
+        super(api);
+        this.parentFolder = parentFolder;
+        this.columns = columns;
+        this.ignoreMail = ignoreMail;
+        this.failOnError = failOnError;
+    }
+    
     public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail) {
         super(api);
         this.parentFolder = parentFolder;
         this.columns = columns;
         this.ignoreMail = ignoreMail;
+        this.failOnError = true;
     }
 
     public ListRequest(API api, String parentFolder) {
@@ -107,6 +118,6 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
     }
 
     public ListParser getParser() {
-        return new ListParser(columns, true);
+        return new ListParser(columns, failOnError);
     }
 }

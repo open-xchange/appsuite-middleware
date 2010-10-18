@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.folder;
 
+import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Iterator;
-
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -59,18 +62,20 @@ import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * 
  * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
- *
  */
 public class Bug16899Test extends AbstractAJAXSession {
-	private AJAXClient client;
+
+    private AJAXClient client;
 
     /**
      * Initializes a new {@link Bug16899Test}.
+     * 
      * @param name name of the test.
      */
     public Bug16899Test(String name) {
@@ -83,15 +88,15 @@ public class Bug16899Test extends AbstractAJAXSession {
         client = getClient();
     }
 
-    public void testBug16899() throws Throwable {
-    	FolderObject folder = Create.createPrivateFolder("Bug 16899 Test", FolderObject.MAIL, client.getValues().getUserId());
-    	folder.setFullName("default0/INBOX/Bug 16899 Test");
-    	InsertRequest insertFolder = new InsertRequest(API.OX_OLD, folder);
-    	InsertResponse execute = client.execute(insertFolder);
+    public void testBug16899() throws Exception {
+        FolderObject folder = Create.createPrivateFolder("Bug 16899 Test", FolderObject.MAIL, client.getValues().getUserId());
+        folder.setFullName("default0/INBOX/Bug 16899 Test");
+        InsertRequest insertFolder = new InsertRequest(API.OX_OLD, folder);
+        InsertResponse execute = client.execute(insertFolder);
 
-    	execute.fillObject(folder);
-    	
-    	String inbox = client.getValues().getInboxFolder();
+        execute.fillObject(folder);
+
+        String inbox = client.getValues().getInboxFolder();
         ListRequest request = new ListRequest(API.OUTLOOK, inbox);
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
@@ -104,12 +109,13 @@ public class Bug16899Test extends AbstractAJAXSession {
             }
         }
         assertTrue("Testfolder not found in inbox.", found);
-        
+
         DeleteRequest deleteFolder = new DeleteRequest(API.OX_OLD, folder);
         client.execute(deleteFolder);
-        
-        request = new ListRequest(API.OUTLOOK, inbox);
-		response = client.execute(request);
+
+        request = new ListRequest(API.OUTLOOK, inbox, FolderObject.ALL_COLUMNS, false, false);
+        response = client.execute(request);
+
         iter = response.getFolder();
         found = false;
         while (iter.hasNext()) {
