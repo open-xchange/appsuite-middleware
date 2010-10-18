@@ -59,6 +59,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -68,7 +70,7 @@ import com.openexchange.session.Session;
  */
 final class SessionContainer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessionContainer.class);
+    private static final Log LOG = LogFactory.getLog(SessionContainer.class);
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
