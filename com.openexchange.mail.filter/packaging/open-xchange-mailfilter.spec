@@ -131,6 +131,8 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/mailfilter.properties
 %changelog
+* Mon Oct 18 2010 - choeger@open-xchange.com
+ - Bugfix #17274: Unable to install OX on SLES10, SLES11 or RHEL5
 * Tue Sep 21 2010 - steffen.templin@open-xchange.com
  - Bugfix #16747: After removal of the admin mode oxadmin is able to manage 
  				  the users sieve scripts again within a normal groupware session.
