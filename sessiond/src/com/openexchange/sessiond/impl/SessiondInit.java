@@ -59,10 +59,6 @@ import com.openexchange.server.Initialization;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.cache.SessionCacheConfiguration;
-import com.openexchange.sessiond.cache.SessionCacheTimer;
-import com.openexchange.sessiond.services.SessiondServiceRegistry;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessiondInit} - Initializes sessiond service
@@ -74,13 +70,11 @@ public class SessiondInit implements Initialization {
 
     private static final Log LOG = LogFactory.getLog(SessiondInit.class);
 
-    private SessiondConfigImpl config;
+    private SessiondConfigInterface config;
 
     private final AtomicBoolean started = new AtomicBoolean();
 
     private static final SessiondInit singleton = new SessiondInit();
-
-    private ScheduledTimerTask sessionCacheTimer;
 
     public static SessiondInit getInstance() {
         return singleton;
@@ -111,9 +105,6 @@ public class SessiondInit implements Initialization {
             }
 
             SessionCacheConfiguration.getInstance().start();
-            
-            final TimerService timer = SessiondServiceRegistry.getServiceRegistry().getService(TimerService.class, true);
-            sessionCacheTimer = timer.scheduleWithFixedDelay(new SessionCacheTimer(), 0, 30000);
         }
     }
 
@@ -121,10 +112,6 @@ public class SessiondInit implements Initialization {
         if (!started.get()) {
             LOG.error(SessiondInit.class.getName() + " has not been started");
             return;
-        }
-        if (null != sessionCacheTimer) {
-            sessionCacheTimer.cancel(false);
-            sessionCacheTimer = null;
         }
         SessionCacheConfiguration.getInstance().stop();
         SessionCache.releaseInstance();

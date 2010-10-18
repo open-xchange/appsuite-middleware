@@ -55,6 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -67,6 +68,8 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * Object handling the multi threaded access to session container. Excessive locking is used to secure container data structures.
@@ -79,26 +82,27 @@ final class SessionData {
 
     private final LinkedList<SessionContainer> sessionList;
     private final LinkedList<Map<String, String>> userList;
-    private final LinkedList<Map<String, String>> randomList;
+    private final Map<String, String> randoms;
 
     private final Lock rlock;
     private final Lock wlock;
 
     private final int maxSessions;
+    private final long randomTokenTimeout;
 
-    SessionData(final int containerCount, final int maxSessions) {
+    SessionData(final int containerCount, final int maxSessions, long randomTokenTimeout) {
         super();
+        this.maxSessions = maxSessions;
+        this.randomTokenTimeout = randomTokenTimeout;
         sessionList = new LinkedList<SessionContainer>();
         userList = new LinkedList<Map<String, String>>();
-        randomList = new LinkedList<Map<String, String>>();
+        randoms = new ConcurrentHashMap<String, String>();
         final ReadWriteLock rwlock = new ReentrantReadWriteLock(true);
         rlock = rwlock.readLock();
         wlock = rwlock.writeLock();
-        this.maxSessions = maxSessions;
         for (int i = 0; i < containerCount; i++) {
-            sessionList.add(0, new SessionContainer(maxSessions));
-            userList.add(0, new ConcurrentHashMap<String, String>(maxSessions));
-            randomList.add(0, new ConcurrentHashMap<String, String>(maxSessions));
+            sessionList.add(0, new SessionContainer());
+            userList.add(0, new ConcurrentHashMap<String, String>());
         }
     }
 
@@ -108,7 +112,7 @@ final class SessionData {
         try {
             sessionList.clear();
             userList.clear();
-            randomList.clear();
+            randoms.clear();
         } finally {
             wlock.unlock();
         }
@@ -123,11 +127,9 @@ final class SessionData {
         // A write access to lists
         wlock.lock();
         try {
-            sessionList.addFirst(new SessionContainer(maxSessions));
-            userList.addFirst(new ConcurrentHashMap<String, String>(maxSessions));
-            randomList.addFirst(new ConcurrentHashMap<String, String>(maxSessions));
+            sessionList.addFirst(new SessionContainer());
+            userList.addFirst(new ConcurrentHashMap<String, String>());
             userList.removeLast();
-            randomList.removeLast();
             final List<SessionControl> retval = new ArrayList<SessionControl>(maxSessions);
             retval.addAll(sessionList.removeLast().getSessionControls());
             return retval;
@@ -223,15 +225,17 @@ final class SessionData {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
         // Adding a session is a writing operation. Other threads requesting a session should be blocked.
+        final SessionControl control;
         wlock.lock();
         try {
-            final SessionControl control = sessionList.getFirst().put(session, lifeTime);
+            control = sessionList.getFirst().put(session, lifeTime);
             userList.getFirst().put(session.getLoginName(), session.getSessionID());
-            randomList.getFirst().put(session.getRandomToken(), session.getSessionID());
-            return control;
+            randoms.put(session.getRandomToken(), session.getSessionID());
         } finally {
             wlock.unlock();
         }
+        scheduleRandomTokenRemover(session.getRandomToken());
+        return control;
     }
 
     int countSessions() {
@@ -280,7 +284,7 @@ final class SessionData {
                 sessionList.get(i).removeSessionById(sessionId);
                 final Session session = control.getSession();
                 userList.get(i).remove(session.getLoginName());
-                randomList.get(i).remove(session.getRandomToken());
+                randoms.remove(session.getRandomToken());
             } finally {
                 wlock.unlock();
             }
@@ -294,19 +298,16 @@ final class SessionData {
         // A read-only access to session & random list
         rlock.lock();
         try {
-            for (int i = 0; i < randomList.size(); i++) {
-                final Map<String, String> random = randomList.get(i);
-                if (random.containsKey(randomToken)) {
-                    final String sessionId = random.get(randomToken);
-                    final SessionControl sessionControl = sessionList.get(i).getSessionById(sessionId);
-                    if (sessionControl.getCreationTime() + randomTimeout >= System.currentTimeMillis()) {
-                        final Session session = sessionControl.getSession();
-                        session.removeRandomToken();
-                        random.remove(randomToken);
-                        // Set local IP
-                        ((SessionImpl) session).setLocalIp(localIp);
-                        return sessionControl;
-                    }
+            if (randoms.containsKey(randomToken)) {
+                final String sessionId = randoms.get(randomToken);
+                final SessionControl sessionControl = getSession(sessionId);
+                if (sessionControl.getCreationTime() + randomTimeout >= System.currentTimeMillis()) {
+                    final Session session = sessionControl.getSession();
+                    session.removeRandomToken();
+                    randoms.remove(randomToken);
+                    // Set local IP
+                    ((SessionImpl) session).setLocalIp(localIp);
+                    return sessionControl;
                 }
             }
         } finally {
@@ -328,7 +329,7 @@ final class SessionData {
                     final String random = session.getRandomToken();
                     if (null != random) {
                         // If session is access through random token, random token is removed in the session.
-                        randomList.get(i).remove(random);
+                        randoms.remove(random);
                     }
                     unscheduleTask2MoveSession2FirstContainer(sessionId);
                     return sessionControl;
@@ -366,8 +367,6 @@ final class SessionData {
                     final Session session = sessionControl.getSession();
                     userList.get(i).remove(session.getLoginName());
                     userList.getFirst().put(session.getLoginName(), session.getSessionID());
-                    randomList.get(i).remove(session.getRandomToken());
-                    randomList.getFirst().put(session.getRandomToken(), session.getSessionID());
                     LOG.trace("Moved from container " + i + " to first one.");
                     movedSession = true;
                 }
@@ -383,6 +382,15 @@ final class SessionData {
             wlock.unlock();
         }
         unscheduleTask2MoveSession2FirstContainer(sessionId);
+    }
+
+    void removeRandomToken(String randomToken) {
+        wlock.lock();
+        try {
+            randoms.remove(randomToken);
+        } finally {
+            wlock.unlock();
+        }
     }
 
     private final Map<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
@@ -448,6 +456,49 @@ final class SessionData {
         public Void call() {
             move2FirstContainer(sessionId);
             return null;
+        }
+    }
+
+    private TimerService timerService;
+    Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
+
+    public void addTimerService(final TimerService service) {
+        timerService = service;
+    }
+
+    public void removeTimerService() {
+        for (ScheduledTimerTask timerTask : removers.values()) {
+            timerTask.cancel();
+        }
+        timerService = null;
+    }
+
+    private void scheduleRandomTokenRemover(String randomToken) {
+        RandomTokenRemover remover = new RandomTokenRemover(randomToken);
+        if (null == timerService) {
+            remover.run();
+        } else {
+            ScheduledTimerTask timerTask = timerService.schedule(remover, randomTokenTimeout, TimeUnit.MILLISECONDS);
+            removers.put(randomToken, timerTask);
+        }
+    }
+
+    private class RandomTokenRemover implements Runnable {
+
+        private final String randomToken;
+
+        RandomTokenRemover(String randomToken) {
+            super();
+            this.randomToken = randomToken;
+        }
+
+        public void run() {
+            try {
+                removers.remove(randomToken);
+                removeRandomToken(randomToken);
+            } catch (Throwable t) {
+                LOG.error(t.getMessage(), t);
+            }
         }
     }
 }

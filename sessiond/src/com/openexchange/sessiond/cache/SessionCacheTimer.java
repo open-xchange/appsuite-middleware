@@ -51,6 +51,8 @@ package com.openexchange.sessiond.cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * This timer tests the outgoing connections of the session cache.
@@ -59,26 +61,30 @@ import org.apache.commons.logging.LogFactory;
  */
 public class SessionCacheTimer implements Runnable {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(SessionCacheTimer.class);
 
-    /**
-     * Default constructor.
-     */
+    private static ScheduledTimerTask sessionCacheTimer;
+
     public SessionCacheTimer() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void run() {
         try {
             SessionCache.getInstance().testConnection();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
+        }
+    }
+
+    public static void addTimerService(TimerService service) {
+        sessionCacheTimer = service.scheduleWithFixedDelay(new SessionCacheTimer(), 0, 30000);
+    }
+
+    public static void removeTimerService() {
+        if (null != sessionCacheTimer) {
+            sessionCacheTimer.cancel(false);
+            sessionCacheTimer = null;
         }
     }
 }

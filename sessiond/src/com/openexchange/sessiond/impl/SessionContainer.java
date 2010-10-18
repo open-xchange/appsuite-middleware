@@ -80,15 +80,10 @@ final class SessionContainer {
 
     private final ConcurrentMap<UserKey, Map<String, Object>> userSessions;
 
-    /**
-     * Initializes a new {@link SessionContainer session container}.
-     * 
-     * @param maxSessions The max. number of sessions kept by this container
-     */
-    SessionContainer(final int maxSessions) {
+    SessionContainer() {
         super();
-        sessionIdMap = new ConcurrentHashMap<String, SessionControl>(maxSessions);
-        userSessions = new ConcurrentHashMap<UserKey, Map<String, Object>>(maxSessions);
+        sessionIdMap = new ConcurrentHashMap<String, SessionControl>();
+        userSessions = new ConcurrentHashMap<UserKey, Map<String, Object>>();
     }
 
     /**

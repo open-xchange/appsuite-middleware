@@ -94,7 +94,7 @@ public final class SessiondActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class };
     }
 
     @Override
@@ -146,6 +146,7 @@ public final class SessiondActivator extends DeferredActivator {
             sessiondServiceRegistration = context.registerService(SessiondService.class.getName(), new SessiondServiceImpl(), null);
             trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementRegisterer(context)));
             trackers.add(new ServiceTracker(context, ThreadPoolService.class.getName(), new ThreadPoolTracker(context)));
+            trackers.add(new ServiceTracker(context, TimerService.class.getName(), new TimerServiceTracker(context)));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }

@@ -55,10 +55,9 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * SessionConfig
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
 public class SessiondConfigImpl extends AbstractConfigWrapper implements SessiondConfigInterface {
 
     private static final Log LOG = LogFactory.getLog(SessiondConfigImpl.class);
@@ -104,11 +103,11 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements Session
         }
     }
 
-    public int getSessionContainerTimeout() {
+    public int getSessionContainerTimeout() { // calc
         return sessionContainerTimeout;
     }
 
-    public int getNumberOfSessionContainers() {
+    public int getNumberOfSessionContainers() { // calc
         return numberOfSessionContainers;
     }
 
@@ -120,7 +119,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements Session
         return maxSessionPerUser;
     }
 
-    public int getLifeTime() {
+    public int getLifeTime() { // 1 week
         return sessionDefaultLifeTime;
     }
 

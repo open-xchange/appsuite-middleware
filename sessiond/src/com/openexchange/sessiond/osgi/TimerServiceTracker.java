@@ -52,26 +52,28 @@ package com.openexchange.sessiond.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.sessiond.cache.SessionCacheTimer;
 import com.openexchange.sessiond.impl.SessionHandler;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 
 /**
- * {@link ThreadPoolTracker}
+ * {@link TimerServiceTracker}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ThreadPoolTracker implements ServiceTrackerCustomizer {
+public class TimerServiceTracker implements ServiceTrackerCustomizer {
 
     private final BundleContext context;
 
-    public ThreadPoolTracker(final BundleContext context) {
+    public TimerServiceTracker(final BundleContext context) {
         super();
         this.context = context;
     }
 
     public Object addingService(final ServiceReference reference) {
-        final ThreadPoolService service = (ThreadPoolService) context.getService(reference);
-        SessionHandler.addThreadPoolService(service);
+        final TimerService service = (TimerService) context.getService(reference);
+        SessionHandler.addTimerService(service);
+        SessionCacheTimer.addTimerService(service);
         return service;
     }
 
@@ -80,7 +82,8 @@ public class ThreadPoolTracker implements ServiceTrackerCustomizer {
     }
 
     public void removedService(final ServiceReference reference, final Object service) {
-        SessionHandler.removeThreadPoolService();
+        SessionCacheTimer.removeTimerService();
+        SessionHandler.removeTimerService();
         context.ungetService(reference);
     }
 }

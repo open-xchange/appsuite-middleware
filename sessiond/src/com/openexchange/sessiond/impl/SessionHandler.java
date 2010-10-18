@@ -70,7 +70,6 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.cache.SessionCache;
-import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -115,7 +114,7 @@ public final class SessionHandler {
      */
     public static void init(final SessiondConfigInterface newConfig) {
         SessionHandler.config = newConfig;
-        sessionData = new SessionData(newConfig.getNumberOfSessionContainers(), newConfig.getMaxSessions());
+        sessionData = new SessionData(newConfig.getNumberOfSessionContainers(), newConfig.getMaxSessions(), config.getRandomTokenTimeout());
         if (initialized.compareAndSet(false, true)) {
             try {
                 sessionIdGenerator = SessionIdGenerator.getInstance();
@@ -124,15 +123,6 @@ public final class SessionHandler {
             }
 
             noLimit = (newConfig.getMaxSessions() == 0);
-
-            final TimerService timer = SessiondServiceRegistry.getServiceRegistry().getService(TimerService.class);
-            if (timer != null) {
-                sessiondTimer =
-                    timer.scheduleWithFixedDelay(
-                        new SessiondTimer(),
-                        newConfig.getSessionContainerTimeout(),
-                        newConfig.getSessionContainerTimeout());
-            }
         }
     }
 
@@ -379,10 +369,6 @@ public final class SessionHandler {
             sessionIdGenerator = null;
             config = null;
             noLimit = false;
-            if (sessiondTimer != null) {
-                sessiondTimer.cancel(true);
-                sessiondTimer = null;
-            }
         }
     }
 
@@ -440,5 +426,21 @@ public final class SessionHandler {
 
     public static void removeThreadPoolService() {
         sessionData.removeThreadPoolService();
+    }
+
+    public static void addTimerService(TimerService service) {
+        sessiondTimer = service.scheduleWithFixedDelay(
+            new SessiondTimer(),
+            config.getSessionContainerTimeout(),
+            config.getSessionContainerTimeout());
+        sessionData.addTimerService(service);
+    }
+
+    public static void removeTimerService() {
+        if (sessiondTimer != null) {
+            sessiondTimer.cancel(false);
+            sessiondTimer = null;
+        }
+        sessionData.removeTimerService();
     }
 }
