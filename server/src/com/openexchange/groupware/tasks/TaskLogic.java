@@ -77,6 +77,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -447,7 +448,7 @@ public final class TaskLogic {
 
     private static void moveToFirstOccurrence(Task task) throws TaskException {
         // WebDAV/XML sets null values if value is missing.
-        if (!task.containsStartDate() || !task.containsEndDate() || null == task.getStartDate() || null == task.getEndDate()) {
+        if (!task.containsStartDate() || !task.containsEndDate() || null == task.getStartDate() || null == task.getEndDate() || !task.containsRecurrenceType() || CalendarObject.NO_RECURRENCE == task.getRecurrenceType()) {
             return;
         }
         try {
