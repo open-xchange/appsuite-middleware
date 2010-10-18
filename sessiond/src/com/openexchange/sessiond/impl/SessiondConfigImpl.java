@@ -58,7 +58,7 @@ import com.openexchange.config.ConfigurationService;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class SessiondConfigImpl extends AbstractConfigWrapper implements SessiondConfigInterface {
+public class SessiondConfigImpl implements SessiondConfigInterface {
 
     private static final Log LOG = LogFactory.getLog(SessiondConfigImpl.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
@@ -125,5 +125,17 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements Session
 
     public int getRandomTokenTimeout() {
         return randomTokenTimeout;
+    }
+
+    public static int parseProperty(final ConfigurationService prop, final String name, final int value) {
+        final String tmp = prop.getProperty(name, "");
+        if (tmp.trim().length() > 0) {
+            try {
+                return Integer.parseInt(tmp);
+            } catch (final NumberFormatException ex) {
+                LOG.warn("property no parsable: " + name + ':' + value);
+            }
+        }
+        return value;
     }
 }
