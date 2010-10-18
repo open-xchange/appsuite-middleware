@@ -1,3 +1,7 @@
+* 2010-10-18 - choeger@open-xchange.com
+
+ - Bugfix #17274: Unable to install OX on SLES10, SLES11 or RHEL5
+ 
 * 2010-09-21 - steffen.templin@open-xchange.com
 
  - Bugfix #16747: After removal of the admin mode oxadmin is able to manage 
