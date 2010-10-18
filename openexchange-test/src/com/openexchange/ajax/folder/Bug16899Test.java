@@ -49,11 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
-import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Iterator;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -62,9 +58,7 @@ import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
@@ -101,15 +95,18 @@ public class Bug16899Test extends AbstractAJAXSession {
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         boolean found = false;
+        System.out.println("First ListRequest:");
         while (iter.hasNext()) {
             final FolderObject fo = iter.next();
-            if (fo.containsFullName() && fo.getFullName().equals(folder.getFullName())) {
+            System.out.println(fo.getFullName());
+            if (fo.containsFullName() && fo.getFullName().equals(folder.getFullName())) {            	
                 found = true;
                 break;
             }
         }
         assertTrue("Testfolder not found in inbox.", found);
-
+        
+        System.out.println("Delete request");
         DeleteRequest deleteFolder = new DeleteRequest(API.OX_OLD, folder);
         client.execute(deleteFolder);
 
@@ -118,8 +115,10 @@ public class Bug16899Test extends AbstractAJAXSession {
 
         iter = response.getFolder();
         found = false;
+        System.out.println("Second ListRequest:");
         while (iter.hasNext()) {
             final FolderObject fo = iter.next();
+            System.out.println(fo.getFullName());
             if (fo.containsFullName() && fo.getFullName().equals(inbox)) {
                 found = true;
                 break;
@@ -127,6 +126,8 @@ public class Bug16899Test extends AbstractAJAXSession {
         }
         assertFalse("Testfolder was not deleted.", found);
         assertNull("Error during ListRequest.", response.getException());
+        
+        System.out.println("finished");
     }
 
 }
