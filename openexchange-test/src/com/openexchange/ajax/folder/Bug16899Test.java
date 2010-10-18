@@ -83,6 +83,7 @@ public class Bug16899Test extends AbstractAJAXSession {
     }
 
     public void testBug16899() throws Exception {
+    	System.out.println("###### START TEST 16899 ######");
         FolderObject folder = Create.createPrivateFolder("Bug 16899 Test", FolderObject.MAIL, client.getValues().getUserId());
         folder.setFullName("default0/INBOX/Bug 16899 Test");
         InsertRequest insertFolder = new InsertRequest(API.OX_OLD, folder);
