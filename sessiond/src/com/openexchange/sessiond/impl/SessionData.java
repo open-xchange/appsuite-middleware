@@ -81,7 +81,6 @@ final class SessionData {
     static final Log LOG = LogFactory.getLog(SessionData.class);
 
     private final LinkedList<SessionContainer> sessionList;
-    private final LinkedList<Map<String, String>> userList;
     private final Map<String, String> randoms;
 
     private final Lock rlock;
@@ -95,14 +94,12 @@ final class SessionData {
         this.maxSessions = maxSessions;
         this.randomTokenTimeout = randomTokenTimeout;
         sessionList = new LinkedList<SessionContainer>();
-        userList = new LinkedList<Map<String, String>>();
         randoms = new ConcurrentHashMap<String, String>();
         final ReadWriteLock rwlock = new ReentrantReadWriteLock(true);
         rlock = rwlock.readLock();
         wlock = rwlock.writeLock();
         for (int i = 0; i < containerCount; i++) {
             sessionList.add(0, new SessionContainer());
-            userList.add(0, new ConcurrentHashMap<String, String>());
         }
     }
 
@@ -111,7 +108,6 @@ final class SessionData {
         wlock.lock();
         try {
             sessionList.clear();
-            userList.clear();
             randoms.clear();
         } finally {
             wlock.unlock();
@@ -128,8 +124,6 @@ final class SessionData {
         wlock.lock();
         try {
             sessionList.addFirst(new SessionContainer());
-            userList.addFirst(new ConcurrentHashMap<String, String>());
-            userList.removeLast();
             final List<SessionControl> retval = new ArrayList<SessionControl>(maxSessions);
             retval.addAll(sessionList.removeLast().getSessionControls());
             return retval;
@@ -229,7 +223,6 @@ final class SessionData {
         wlock.lock();
         try {
             control = sessionList.getFirst().put(session, lifeTime);
-            userList.getFirst().put(session.getLoginName(), session.getSessionID());
             randoms.put(session.getRandomToken(), session.getSessionID());
         } finally {
             wlock.unlock();
@@ -283,7 +276,6 @@ final class SessionData {
             try {
                 sessionList.get(i).removeSessionById(sessionId);
                 final Session session = control.getSession();
-                userList.get(i).remove(session.getLoginName());
                 randoms.remove(session.getRandomToken());
             } finally {
                 wlock.unlock();
@@ -325,7 +317,6 @@ final class SessionData {
                 if (container.containsSessionId(sessionId)) {
                     final SessionControl sessionControl = container.removeSessionById(sessionId);
                     final Session session = sessionControl.getSession();
-                    userList.get(i).remove(session.getLoginName());
                     final String random = session.getRandomToken();
                     if (null != random) {
                         // If session is access through random token, random token is removed in the session.
@@ -364,9 +355,6 @@ final class SessionData {
                 if (container.containsSessionId(sessionId)) {
                     final SessionControl sessionControl = container.removeSessionById(sessionId);
                     sessionList.getFirst().putSessionControl(sessionControl);
-                    final Session session = sessionControl.getSession();
-                    userList.get(i).remove(session.getLoginName());
-                    userList.getFirst().put(session.getLoginName(), session.getSessionID());
                     LOG.trace("Moved from container " + i + " to first one.");
                     movedSession = true;
                 }

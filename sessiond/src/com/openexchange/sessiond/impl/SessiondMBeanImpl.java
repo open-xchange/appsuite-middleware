@@ -60,8 +60,6 @@ import com.openexchange.sessiond.SessiondMBean;
  */
 public final class SessiondMBeanImpl extends StandardMBean implements SessiondMBean {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessiondMBeanImpl.class);
-
     /**
      * Initializes a new {@link SessiondMBeanImpl}
      * 
