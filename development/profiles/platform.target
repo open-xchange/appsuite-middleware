@@ -10,19 +10,19 @@
 <location path="${eclipse_home}" type="Directory"/>
 </locations>
 <includeBundles>
-<plugin id="org.apache.commons.logging.source"/>
-<plugin id="org.apache.commons.logging"/>
-<plugin id="javax.servlet.source"/>
-<plugin id="org.eclipse.equinox.event.source"/>
-<plugin id="org.apache.commons.cli"/>
-<plugin id="org.apache.commons.lang"/>
+<plugin id="org.apache.log4j" version="1.2.15.v201005080500"/>
 <plugin id="org.eclipse.osgi"/>
-<plugin id="org.eclipse.osgi.source"/>
+<plugin id="org.apache.commons.cli"/>
+<plugin id="org.eclipse.equinox.ds"/>
+<plugin id="org.apache.commons.logging" version="1.1.1.v201005080502"/>
 <plugin id="org.eclipse.equinox.event"/>
-<plugin id="org.eclipse.osgi.services"/>
+<plugin id="org.eclipse.osgi.source"/>
+<plugin id="org.eclipse.equinox.util"/>
 <plugin id="javax.servlet" version="2.4.0.v200806031604"/>
+<plugin id="org.apache.commons.lang" version="2.4.0.v201005080502"/>
+<plugin id="org.eclipse.osgi.services"/>
 <plugin id="org.eclipse.osgi.services.source"/>
-<plugin id="org.apache.log4j" version="1.2.13.v200903072027"/>
+<plugin id="org.eclipse.equinox.event.source"/>
 </includeBundles>
 <environment>
 <os>linux</os>
