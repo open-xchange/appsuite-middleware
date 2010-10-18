@@ -61,72 +61,17 @@ import com.openexchange.config.ConfigurationService;
 
 public class SessiondConfigImpl extends AbstractConfigWrapper implements SessiondConfigInterface {
 
-    private boolean isServerSocketEnabled = false;
-
-    private boolean isServerObjectStreamSocketEnabled = false;
-
-    private boolean isTcpClientSocketEnabled = false;
-
-    private int sessionContainerTimeout = 4200000;
-
-    private int numberOfSessionContainers = 8;
-
-    private int serverPort = 33333;
-
-    private int serverObjectStreamPort = 33335;
-
-    private int maxSession = 5000;
-
-    private int maxSessionPerUser;
-
-    private String serverBindAddress = "localhost";
-
-    private boolean isDoubleLoginPermitted = true;
-
-    private String sessionAuthUser = "mailadmin";
-
-    private boolean isSecureConnectionEnabled = false;
-
-    private int sessionDefaultLifeTime = 3600000;
-
-    private int randomTokenTimeout = 60000;
-
-    private String caFile = null;
-
-    private String certFile = null;
-
-    private String keyFile = null;
-
-    private static boolean isInit;
-
     private static final Log LOG = LogFactory.getLog(SessiondConfigImpl.class);
-
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private int sessionContainerTimeout = 4200000;
+    private int numberOfSessionContainers = 8;
+    private int maxSession = 5000;
+    private int maxSessionPerUser;
+    private int sessionDefaultLifeTime = 3600000;
+    private int randomTokenTimeout = 60000;
+
     public SessiondConfigImpl(final ConfigurationService conf) {
-        this(conf, false);
-    }
-
-    public SessiondConfigImpl(final ConfigurationService conf, final boolean ignoreIsInit) {
-        if (!ignoreIsInit && isInit) {
-            return;
-        }
-
-        isServerSocketEnabled = parseProperty(conf, "com.openexchange.sessiond.isServerSocketEnabled", false);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.isServerSocketEnabled=" + isServerSocketEnabled);
-        }
-
-        isServerObjectStreamSocketEnabled = parseProperty(conf, "com.openexchange.sessiond.isServerObjectStreamSocketEnabled", false);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.isServerObjectStreamSocketEnabled=" + isServerObjectStreamSocketEnabled);
-        }
-
-        isTcpClientSocketEnabled = parseProperty(conf, "com.openexchange.sessiond.isTcpClientSocketEnabled", false);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.isTcpClientSocketEnabled=" + isTcpClientSocketEnabled);
-        }
-
         sessionContainerTimeout = parseProperty(conf, "com.openexchange.sessiond.sessionContainerTimeout", sessionContainerTimeout);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.sessionContainerTimeout=" + sessionContainerTimeout);
@@ -135,16 +80,6 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements Session
         numberOfSessionContainers = parseProperty(conf, "com.openexchange.sessiond.numberOfSessionContainers", numberOfSessionContainers);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.numberOfSessionContainers=" + numberOfSessionContainers);
-        }
-
-        serverPort = parseProperty(conf, "com.openexchange.sessiond.serverPort", serverPort);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.serverPort=" + serverPort);
-        }
-
-        serverObjectStreamPort = parseProperty(conf, "com.openexchange.sessiond.serverObjectStreamPort", serverObjectStreamPort);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.serverObjectStreamPort=" + serverObjectStreamPort);
         }
 
         maxSession = parseProperty(conf, "com.openexchange.sessiond.maxSession", maxSession);
@@ -158,26 +93,6 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements Session
             LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser=" + maxSessionPerUser);
         }
 
-        serverBindAddress = parseProperty(conf, "com.openexchange.sessiond.serverBindAddress", serverBindAddress);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.serverBindAddress=" + serverBindAddress);
-        }
-
-        isDoubleLoginPermitted = parseProperty(conf, "com.openexchange.sessiond.isDoubleLoginPermitted", isDoubleLoginPermitted);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.isDoubleLoginPermitted=" + isDoubleLoginPermitted);
-        }
-
-        sessionAuthUser = parseProperty(conf, "com.openexchange.sessiond.sessionAuthUser", sessionAuthUser);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.sessionAuthUser=" + sessionAuthUser);
-        }
-
-        isSecureConnectionEnabled = parseProperty(conf, "com.openexchange.sessiond.isSecureConnection", false);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.isSecureConnection=" + isSecureConnectionEnabled);
-        }
-
         sessionDefaultLifeTime = parseProperty(conf, "com.openexchange.sessiond.sessionDefaultLifeTime", sessionDefaultLifeTime);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime=" + sessionDefaultLifeTime);
@@ -187,41 +102,6 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements Session
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout=" + randomTokenTimeout);
         }
-
-        caFile = parseProperty(conf, "com.openexchange.sessiond.caFile", (String) null);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.caFile=" + caFile);
-        }
-
-        certFile = parseProperty(conf, "com.openexchange.sessiond.certFile", (String) null);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.certFile=" + certFile);
-        }
-
-        keyFile = parseProperty(conf, "com.openexchange.sessiond.keyFile", (String) null);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.keyFile=" + keyFile);
-        }
-    }
-
-    public int getServerPort() {
-        return serverPort;
-    }
-
-    public int getServerObjectStreamPort() {
-        return serverObjectStreamPort;
-    }
-
-    public boolean isServerSocketEnabled() {
-        return isServerSocketEnabled;
-    }
-
-    public boolean isServerObjectStreamSocketEnabled() {
-        return isServerObjectStreamSocketEnabled;
-    }
-
-    public boolean isTcpClientSocketEnabled() {
-        return isTcpClientSocketEnabled;
     }
 
     public int getSessionContainerTimeout() {
@@ -240,32 +120,8 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements Session
         return maxSessionPerUser;
     }
 
-    public String getServerBindAddress() {
-        return serverBindAddress;
-    }
-
-    public boolean isDoubleLoginPermitted() {
-        return isDoubleLoginPermitted;
-    }
-
-    public String getSessionAuthUser() {
-        return sessionAuthUser;
-    }
-
     public int getLifeTime() {
         return sessionDefaultLifeTime;
-    }
-
-    public String getCAFile() {
-        return caFile;
-    }
-
-    public String getCertFile() {
-        return certFile;
-    }
-
-    public String getKeyFile() {
-        return keyFile;
     }
 
     public int getRandomTokenTimeout() {

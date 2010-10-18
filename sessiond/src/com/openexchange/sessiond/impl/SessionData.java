@@ -78,13 +78,10 @@ final class SessionData {
     static final Log LOG = LogFactory.getLog(SessionData.class);
 
     private final LinkedList<SessionContainer> sessionList;
-
     private final LinkedList<Map<String, String>> userList;
-
     private final LinkedList<Map<String, String>> randomList;
 
     private final Lock rlock;
-
     private final Lock wlock;
 
     private final int maxSessions;

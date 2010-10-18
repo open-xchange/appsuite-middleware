@@ -2,21 +2,6 @@
 # sessiond.properties
 #
 
-# start a sessiond socket
-com.openexchange.sessiond.isServerSocketEnabled:false
-
-# start a sessiond object stream socket
-com.openexchange.sessiond.isServerObjectStreamSocketEnabled:false
-
-# sessiond socket on this port
-com.openexchange.sessiond.serverPort:@sessiondport@
-
-# sessiond socket on this object stream port
-com.openexchange.sessiond.serverObjectStreamPort:33335
-
-# enable communication between client and server over tcp
-com.openexchange.sessiond.isTcpClientSocketEnabled:false
-
 # session container timeout in milliseconds. After this time session container
 # are rotaded, which means the oldest one will be destroyed and a new one gets
 # created.
@@ -31,33 +16,12 @@ com.openexchange.sessiond.maxSession:5000
 # maximum number of concurrent sessions per user, a value less than or equal to zero means unlimited
 com.openexchange.sessiond.maxSessionPerUser:100
 
-# accept only sockets from this address
-com.openexchange.sessiond.serverBindAddress:localhost
-
-# allow users to be logged in multiple times.
-com.openexchange.sessiond.isDoubleLoginPermitted:true
-	
-# the user who can request and kick sessions
-com.openexchange.sessiond.sessionAuthUser:mailadmin
-
-# use secure socket connection
-com.openexchange.sessiond.isSecureSocketConnectionEnabled:false
-
 # maxiumum value in milliseconds a session is allowed to be kept without 
 # request.
 com.openexchange.sessiond.sessionDefaultLifeTime:3600000
 
 # The configuration file for session cache
 com.openexchange.sessiond.sessionCacheConfig:@oxgroupwaresysconfdir@/sessioncache.ccf
-
-# CA File
-com.openexchange.sessiond.caFile:
-
-# Cert File
-com.openexchange.sessiond.certFile:
-
-# Key File
-com.openexchange.sessiond.keyFile:
 
 # Whether autologin is allowed or not
 com.openexchange.sessiond.autologin:false

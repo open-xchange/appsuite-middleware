@@ -51,43 +51,20 @@ package com.openexchange.sessiond.impl;
 
 /**
  * SessionConfig
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
 public interface SessiondConfigInterface {
 
-    public int getServerPort();
+    int getSessionContainerTimeout();
 
-    public int getServerObjectStreamPort();
+    int getNumberOfSessionContainers();
 
-    public boolean isServerSocketEnabled();
+    int getMaxSessions();
 
-    public boolean isServerObjectStreamSocketEnabled();
+    int getMaxSessionsPerUser();
 
-    public boolean isTcpClientSocketEnabled();
+    int getLifeTime();
 
-    public int getSessionContainerTimeout();
-
-    public int getNumberOfSessionContainers();
-
-    public int getMaxSessions();
-
-    public int getMaxSessionsPerUser();
-
-    public String getServerBindAddress();
-
-    public boolean isDoubleLoginPermitted();
-
-    public String getSessionAuthUser();
-
-    public int getLifeTime();
-
-    public int getRandomTokenTimeout();
-
-    public String getCAFile();
-
-    public String getCertFile();
-
-    public String getKeyFile();
+    int getRandomTokenTimeout();
 }

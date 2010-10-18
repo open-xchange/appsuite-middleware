@@ -350,7 +350,6 @@
         <antcall target="patchOSGiIni"/>
         <antcall target="patchFileLoggingProperties"/>
         <antcall target="patchScriptConf"/>
-        <antcall target="patchSessiondProperties"/>
         <antcall target="patchPathInProperties"/>
     </target>
 
@@ -383,16 +382,10 @@
         </replace>
     </target>
 
-    <target name="patchSessiondProperties">
-        <move tofile="${patch.conf.dir}/sessiond.properties" file="${patch.conf.dir}/sessiond.properties.in" overwrite="true"/>
-        <replace file="${patch.conf.dir}/sessiond.properties">
-            <replacefilter token="@sessiondport@" value="33333"/>
-        </replace>
-    </target>
-
     <target name="patchPathInProperties">
-        <move tofile="${patch.conf.dir}/system.properties" file="${patch.conf.dir}/system.properties.in" overwrite="true"/>
         <move tofile="${patch.conf.dir}/import.properties" file="${patch.conf.dir}/import.properties.in" overwrite="true"/>
+        <move tofile="${patch.conf.dir}/sessiond.properties" file="${patch.conf.dir}/sessiond.properties.in" overwrite="true"/>
+        <move tofile="${patch.conf.dir}/system.properties" file="${patch.conf.dir}/system.properties.in" overwrite="true"/>
 
         <replace dir="${patch.conf.dir}" includes="*.properties">
             <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
