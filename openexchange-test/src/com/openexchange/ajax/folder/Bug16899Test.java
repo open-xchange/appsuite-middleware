@@ -58,6 +58,7 @@ import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -92,7 +93,7 @@ public class Bug16899Test extends AbstractAJAXSession {
         execute.fillObject(folder);
 
         String inbox = client.getValues().getInboxFolder();
-        ListRequest request = new ListRequest(API.OUTLOOK, inbox);
+        ListRequest request = new ListRequest(API.OUTLOOK, inbox, FolderObject.ALL_COLUMNS, false, false);
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         boolean found = false;
@@ -109,7 +110,9 @@ public class Bug16899Test extends AbstractAJAXSession {
         
         System.out.println("Delete request");
         DeleteRequest deleteFolder = new DeleteRequest(API.OX_OLD, folder);
-        client.execute(deleteFolder);
+        CommonDeleteResponse deleteResponse = client.execute(deleteFolder);
+        
+        assertNull("Error during folder deletion", deleteResponse.getException());
 
         request = new ListRequest(API.OUTLOOK, inbox, FolderObject.ALL_COLUMNS, false, false);
         response = client.execute(request);
@@ -121,11 +124,13 @@ public class Bug16899Test extends AbstractAJAXSession {
             final FolderObject fo = iter.next();
             System.out.println(fo.getFullName());
             if (fo.containsFullName() && fo.getFullName().equals(inbox)) {
+            	System.out.println("found..." + fo.getFullName());
                 found = true;
                 break;
             }
         }
         assertFalse("Testfolder was not deleted.", found);
+        
         assertNull("Error during ListRequest.", response.getException());
         
         System.out.println("finished");
