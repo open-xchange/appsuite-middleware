@@ -280,20 +280,21 @@ final class SessionData {
             } finally {
                 wlock.unlock();
             }
+            unscheduleTask2MoveSession2FirstContainer(sessionId);
             return null;
         }
         control.updateLastAccessed();
         return control;
     }
 
-    SessionControl getSessionByRandomToken(final String randomToken, final long randomTimeout, final String localIp) {
+    SessionControl getSessionByRandomToken(final String randomToken, final String localIp) {
         // A read-only access to session & random list
         rlock.lock();
         try {
             if (randoms.containsKey(randomToken)) {
                 final String sessionId = randoms.get(randomToken);
                 final SessionControl sessionControl = getSession(sessionId);
-                if (sessionControl.getCreationTime() + randomTimeout >= System.currentTimeMillis()) {
+                if (sessionControl.getCreationTime() + randomTokenTimeout >= System.currentTimeMillis()) {
                     final Session session = sessionControl.getSession();
                     session.removeRandomToken();
                     randoms.remove(randomToken);

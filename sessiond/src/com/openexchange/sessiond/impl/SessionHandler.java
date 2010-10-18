@@ -263,7 +263,7 @@ public final class SessionHandler {
     }
 
     protected static Session getSessionByRandomToken(final String randomToken, final String localIp) {
-        final SessionControl sessionControl = sessionData.getSessionByRandomToken(randomToken, config.getRandomTokenTimeout(), localIp);
+        final SessionControl sessionControl = sessionData.getSessionByRandomToken(randomToken, localIp);
         if (null == sessionControl) {
             return null;
         }
