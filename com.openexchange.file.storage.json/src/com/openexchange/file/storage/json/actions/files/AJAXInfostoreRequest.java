@@ -72,7 +72,6 @@ import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
-import static com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 
 /**
  * {@link AJAXInfostoreRequest}
