@@ -73,7 +73,6 @@
 
     <target name="patchConfigFiles">
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
-        <antcall target="patchSessiondProperties"/>
     	<antcall target="patchCrawlerProperties"/>
         <antcall target="patchPath"/>
         <antcall target="patchDataRetentionProperties"/>
@@ -83,13 +82,6 @@
         <fail message="Define confGroupSubstPatch." unless="confGroupSubstPatch"/>
         <fail message="Define confAdminSubstPatch." unless="confAdminSubstPatch"/>
         <antcall target="patchAdminPath"/>
-    </target>
-
-    <target name="patchSessiondProperties">
-        <move tofile="${patch.conf.dir}/sessiond.properties" file="${patch.conf.dir}/sessiond.properties.in" overwrite="true"/>
-        <replace file="${patch.conf.dir}/sessiond.properties">
-            <replacefilter token="@sessiondport@" value="33333"/>
-        </replace>
     </target>
 	
 	<target name="patchCrawlerProperties">
