@@ -49,21 +49,23 @@
 
 package com.openexchange.calendar.recurrence;
 
-
 /**
- *  OXCalendarException
- *  @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * RecurringException
+ * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
 public class RecurringException extends Exception {
-    
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 6780786273935450790L;
-	private final int value;
-    private final Code code;    
-    
+
+    private static class Code {
+
+        private final String message;
+        private final int id;
+        
+        Code(final String message, final int id) {
+            this.message = message;
+            this.id = id;
+        }
+    }
+
     public static final Code UNKOWN_DAYS_VALUE = new Code("Unknown days", 1);
     public static final Code RECURRING_MISSING_INTERVAL = new Code("Interval missing", 2);
     public static final Code RECURRING_MISSING_MONTLY_INTERVAL = new Code("Missing day in month", 3);
@@ -75,32 +77,22 @@ public class RecurringException extends Exception {
     public static final Code RECURRING_MISSING_YEARLY_TYPE = new Code("Missing day in month", 9);
     public static final Code UNEXPECTED_ERROR = new Code("Unexpected exception.", 10);
     public static final Code PATTERN_TOO_COMPLEX = new Code("Pattern is too complex, giving up", 11);
-    
-    static class Code {
-        private final String message;
-        
-        private final int id;
-        
-        private Code(final String message, final int id) {
-            this.message = message;
-            this.id = id;
-        }
-    }
-   
-   
-   
-    
+    public static final Code UNKNOWN_RECURRENCE_TYPE = new Code("Unknown recurrence type", 12);
+
+	private static final long serialVersionUID = 6780786273935450790L;
+	private final int value;
+    private final Code code;    
+
     public RecurringException(final Code code, final int value) {
         this.code = code;
         this.value = value;
     }
-    
+
     public Code getCode() {
         return code;
     }
-    
+
     public int getValue() {
         return value;
     }
-    
 }
