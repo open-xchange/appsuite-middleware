@@ -1,0 +1,11 @@
+open-xchange-hostname-ldap (6.18.1.0-2) unstable; urgency=low
+
+  * second build with some minor improvements
+
+ -- Dennis Sieben <dennis.sieben@open-xchange.com>  Mon, 18 Oct 2010 09:04:56 +0200
+
+open-xchange-hostname-ldap (6.18.1.0-1) unstable; urgency=low
+
+  * first version
+
+ -- Dennis Sieben <dennis.sieben@open-xchange.com>  Fri, 15 Oct 2010 11:04:56 +0200
