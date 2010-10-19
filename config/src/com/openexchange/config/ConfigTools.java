@@ -49,9 +49,9 @@
 
 package com.openexchange.config;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * {@link ConfigTools} collect common parsing operations for configuration options.
@@ -59,15 +59,17 @@ import java.util.Map;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigTools {
-    private static final Map<String, Long> UNITS = new HashMap<String, Long>() {{
-        put("MS", 1l);
-        put("S", 1000l);
-        put("M", 1000*60l);
-        put("H", 1000*60*60l);
-        put("D", 1000*60*60*24l);
-        put("W", 1000*60*60*24*7l);
+    private static final Map<String, Long> UNITS = new HashMap<String, Long>() {
+        private static final long serialVersionUID = 4341197305332412108L;
+    {
+        put("MS", L(1l));
+        put("S", L(1000l));
+        put("M", L(1000l*60));
+        put("H", L(1000l*60*60));
+        put("D", L(1000l*60*60*24));
+        put("W", L(1000l*60*60*24*7));
     }};
-    
+
     /**
      * A timespan specification consists of a number and a unit of measurement. Units are:
      * ms for miliseconds
