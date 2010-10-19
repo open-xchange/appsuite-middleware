@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -62,53 +63,47 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     private static final Log LOG = LogFactory.getLog(SessiondConfigImpl.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final long SHORT_CONTAINER_LIFE_TIME = 10l * 1000l;
+    private static final long LONG_CONTAINER_LIFE_TIME = 60l * 60l * 1000l;
 
-    private int sessionContainerTimeout = 4200000;
-    private int numberOfSessionContainers = 8;
     private int maxSession = 5000;
-    private int maxSessionPerUser;
-    private int sessionDefaultLifeTime = 3600000;
-    private int randomTokenTimeout = 60000;
+    private int maxSessionPerUser = 100;
+    private long sessionShortLifeTime = 60l * 60l * 1000l;
+    private long randomTokenTimeout = 60l * 1000l;
+    private long longLifeTime = 7l * 24l * 60l * 60l * 1000l;
 
     public SessiondConfigImpl(final ConfigurationService conf) {
-        sessionContainerTimeout = parseProperty(conf, "com.openexchange.sessiond.sessionContainerTimeout", sessionContainerTimeout);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.sessionContainerTimeout=" + sessionContainerTimeout);
-        }
-
-        numberOfSessionContainers = parseProperty(conf, "com.openexchange.sessiond.numberOfSessionContainers", numberOfSessionContainers);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.numberOfSessionContainers=" + numberOfSessionContainers);
-        }
-
         maxSession = parseProperty(conf, "com.openexchange.sessiond.maxSession", maxSession);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession=" + maxSession);
         }
 
-        maxSessionPerUser = 0;
         maxSessionPerUser = parseProperty(conf, "com.openexchange.sessiond.maxSessionPerUser", maxSessionPerUser);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser=" + maxSessionPerUser);
         }
 
-        sessionDefaultLifeTime = parseProperty(conf, "com.openexchange.sessiond.sessionDefaultLifeTime", sessionDefaultLifeTime);
+        sessionShortLifeTime = parseProperty(conf, "com.openexchange.sessiond.sessionDefaultLifeTime", (int) sessionShortLifeTime);
         if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime=" + sessionDefaultLifeTime);
+            LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime=" + sessionShortLifeTime);
         }
 
-        randomTokenTimeout = parseProperty(conf, "com.openexchange.sessiond.randomTokenTimeout", randomTokenTimeout);
+        String tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", "1M");
+        randomTokenTimeout = ConfigTools.parseTimespan(tmp);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout=" + randomTokenTimeout);
         }
+
+        tmp = conf.getProperty("com.openexchange.sessiond.sessionLongLifeTime", "1W");
+        longLifeTime = ConfigTools.parseTimespan(tmp);
     }
 
-    public int getSessionContainerTimeout() { // calc
-        return sessionContainerTimeout;
+    public long getSessionContainerTimeout() {
+        return SHORT_CONTAINER_LIFE_TIME;
     }
 
-    public int getNumberOfSessionContainers() { // calc
-        return numberOfSessionContainers;
+    public long getNumberOfSessionContainers() {
+        return sessionShortLifeTime / SHORT_CONTAINER_LIFE_TIME;
     }
 
     public int getMaxSessions() {
@@ -119,19 +114,27 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         return maxSessionPerUser;
     }
 
-    public int getLifeTime() { // 1 week
-        return sessionDefaultLifeTime;
+    public long getLifeTime() {
+        return sessionShortLifeTime;
     }
 
-    public int getRandomTokenTimeout() {
+    public long getRandomTokenTimeout() {
         return randomTokenTimeout;
     }
 
-    public static int parseProperty(final ConfigurationService prop, final String name, final int value) {
+    public long getLongLifeTime() {
+        return longLifeTime;
+    }
+
+    public long getNumberOfLongTermSessionContainers() {
+        return (longLifeTime - sessionShortLifeTime) / LONG_CONTAINER_LIFE_TIME;
+    }
+
+    public static int parseProperty(ConfigurationService prop, String name, int value) {
         final String tmp = prop.getProperty(name, "");
         if (tmp.trim().length() > 0) {
             try {
-                return Integer.parseInt(tmp);
+                return Integer.parseInt(tmp.trim());
             } catch (final NumberFormatException ex) {
                 LOG.warn("property no parsable: " + name + ':' + value);
             }

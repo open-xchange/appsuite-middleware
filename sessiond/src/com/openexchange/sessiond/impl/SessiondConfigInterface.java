@@ -56,15 +56,15 @@ package com.openexchange.sessiond.impl;
  */
 public interface SessiondConfigInterface {
 
-    int getSessionContainerTimeout();
+    long getSessionContainerTimeout();
 
-    int getNumberOfSessionContainers();
+    long getNumberOfSessionContainers();
 
     int getMaxSessions();
 
     int getMaxSessionsPerUser();
 
-    int getLifeTime();
+    long getLifeTime();
 
-    int getRandomTokenTimeout();
+    long getRandomTokenTimeout();
 }

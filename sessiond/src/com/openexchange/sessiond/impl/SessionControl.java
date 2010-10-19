@@ -77,7 +77,7 @@ public class SessionControl {
     /**
      * The life time of this session control.
      */
-    private int lifetime;
+    private long lifetime;
 
     /**
      * Initializes a new {@link SessionControl}
@@ -85,7 +85,7 @@ public class SessionControl {
      * @param session The stored session
      * @param lifetime The session's life time
      */
-    public SessionControl(final Session session, final int lifetime) {
+    public SessionControl(final Session session, final long lifetime) {
         super();
         renew0(session, lifetime);
     }
@@ -101,13 +101,13 @@ public class SessionControl {
      * 
      * @param lifetime The (new) life time to set
      */
-    public void renew(final Session session, final int lifetime) {
+    public void renew(final Session session, final long lifetime) {
         synchronized (this) {
             renew0(session, lifetime);
         }
     }
 
-    private void renew0(final Session session, final int lifetime) {
+    private void renew0(final Session session, final long lifetime) {
         this.session = session;
         this.lifetime = lifetime;
         final long now = System.currentTimeMillis();
@@ -147,7 +147,7 @@ public class SessionControl {
      * 
      * @return The session's life time in milliseconds
      */
-    public int getLifetime() {
+    public long getLifetime() {
         return lifetime;
     }
 

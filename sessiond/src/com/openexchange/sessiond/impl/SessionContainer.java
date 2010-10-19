@@ -164,7 +164,7 @@ final class SessionContainer {
      * @param timeToLive The session's time to live
      * @return The wrapping {@link SessionControl session control}.
      */
-    SessionControl put(final Session session, final int timeToLive) {
+    SessionControl put(final Session session, final long timeToLive) {
         final String sessionId = session.getSessionID();
         /*
          * Add session

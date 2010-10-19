@@ -89,7 +89,7 @@ final class SessionData {
     private final int maxSessions;
     private final long randomTokenTimeout;
 
-    SessionData(final int containerCount, final int maxSessions, long randomTokenTimeout) {
+    SessionData(final long containerCount, final int maxSessions, long randomTokenTimeout) {
         super();
         this.maxSessions = maxSessions;
         this.randomTokenTimeout = randomTokenTimeout;
@@ -214,7 +214,7 @@ final class SessionData {
         }
     }
 
-    SessionControl addSession(final Session session, final int lifeTime, final boolean noLimit) throws SessiondException {
+    SessionControl addSession(final Session session, final long lifeTime, final boolean noLimit) throws SessiondException {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
