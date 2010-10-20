@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -84,7 +85,6 @@ public class Bug16899Test extends AbstractAJAXSession {
     }
 
     public void testBug16899() throws Exception {
-    	System.out.println("###### START TEST 16899 ######");
         FolderObject folder = Create.createPrivateFolder("Bug 16899 Test", FolderObject.MAIL, client.getValues().getUserId());
         folder.setFullName("default0/INBOX/Bug 16899 Test");
         InsertRequest insertFolder = new InsertRequest(API.OX_OLD, folder);
@@ -93,47 +93,62 @@ public class Bug16899Test extends AbstractAJAXSession {
         execute.fillObject(folder);
 
         String inbox = client.getValues().getInboxFolder();
-        ListRequest request = new ListRequest(API.OUTLOOK, inbox, FolderObject.ALL_COLUMNS, false, false);
-        ListResponse response = client.execute(request);
-        Iterator<FolderObject> iter = response.getFolder();
-        boolean found = false;
-        System.out.println("First ListRequest:");
-        while (iter.hasNext()) {
-            final FolderObject fo = iter.next();
-            System.out.println(fo.getFullName());
-            if (fo.containsFullName() && fo.getFullName().equals(folder.getFullName())) {            	
-                found = true;
-                break;
-            }
-        }
-        assertTrue("Testfolder not found in inbox.", found);
         
-        System.out.println("Delete request");
+        ArrayList<FolderObject> folders = performListRequest(inbox);
+        boolean firstMatch = false;
+        for (FolderObject f : folders) {
+        	if (f.getFullName().equals(folder.getFullName())) {
+        		firstMatch = true;
+        		break;
+        	}
+        }
+        
+        assertTrue("Testfolder not found in inbox.", firstMatch);
+        folders = null;
+        
+        System.out.println("First ListRequest complete.");
+        
         DeleteRequest deleteFolder = new DeleteRequest(API.OX_OLD, folder);
         CommonDeleteResponse deleteResponse = client.execute(deleteFolder);
         
         assertNull("Error during folder deletion", deleteResponse.getException());
-
-        request = new ListRequest(API.OUTLOOK, inbox, FolderObject.ALL_COLUMNS, false, false);
-        response = client.execute(request);
-
-        iter = response.getFolder();
-        found = false;
-        System.out.println("Second ListRequest:");
-        while (iter.hasNext()) {
-            final FolderObject fo = iter.next();
-            System.out.println(fo.getFullName());
-            if (fo.containsFullName() && fo.getFullName().equals(inbox)) {
-            	System.out.println("found..." + fo.getFullName());
-                found = true;
-                break;
-            }
-        }
-        assertFalse("Testfolder was not deleted.", found);
         
+        System.out.println("Deletion complete.");
+        
+        Thread.sleep(5000);
+
+        folders = performListRequest(inbox);
+        boolean secondMatch = false;
+        for (FolderObject f : folders) {
+        	System.out.println(f.getFullName());
+        	if (f.getFullName().equals(folder.getFullName())) {
+        		secondMatch = true;
+        		break;
+        	}
+        }
+        
+        System.out.println("Second ListRequest complete.");
+        
+        assertFalse("Testfolder was not deleted.", secondMatch);     
+        
+        System.out.println("Test finished.");
+    }
+    
+    private ArrayList<FolderObject> performListRequest(String inFolder) throws Exception {
+    	ArrayList<FolderObject> folderList = new ArrayList<FolderObject>();
+    	
+    	ListRequest request = new ListRequest(API.OUTLOOK, inFolder, FolderObject.ALL_COLUMNS, false, false);
+        ListResponse response = client.execute(request);
         assertNull("Error during ListRequest.", response.getException());
         
-        System.out.println("finished");
+        Iterator<FolderObject> iter = response.getFolder();
+
+        while (iter.hasNext()) {
+            final FolderObject fo = iter.next();
+            folderList.add(fo);
+        }
+    	
+    	return folderList;
     }
 
 }
