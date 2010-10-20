@@ -106,16 +106,10 @@ public class Bug16899Test extends AbstractAJAXSession {
         assertTrue("Testfolder not found in inbox.", firstMatch);
         folders = null;
         
-        System.out.println("First ListRequest complete.");
-        
         DeleteRequest deleteFolder = new DeleteRequest(API.OX_OLD, folder);
         CommonDeleteResponse deleteResponse = client.execute(deleteFolder);
         
         assertNull("Error during folder deletion", deleteResponse.getException());
-        
-        System.out.println("Deletion complete.");
-        
-        Thread.sleep(5000);
 
         folders = performListRequest(inbox);
         boolean secondMatch = false;
@@ -127,11 +121,7 @@ public class Bug16899Test extends AbstractAJAXSession {
         	}
         }
         
-        System.out.println("Second ListRequest complete.");
-        
         assertFalse("Testfolder was not deleted.", secondMatch);     
-        
-        System.out.println("Test finished.");
     }
     
     private ArrayList<FolderObject> performListRequest(String inFolder) throws Exception {
