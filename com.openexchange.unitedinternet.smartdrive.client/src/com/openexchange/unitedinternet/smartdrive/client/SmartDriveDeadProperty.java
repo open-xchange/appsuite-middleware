@@ -69,6 +69,15 @@ public final class SmartDriveDeadProperty {
     }
 
     /**
+     * Initializes a new {@link SmartDriveDeadProperty}.
+     */
+    public SmartDriveDeadProperty(final SmartDriveDeadProperty src) {
+        this();
+        this.propertyName = src.propertyName;
+        this.value = src.value;
+    }
+
+    /**
      * Gets the property name.
      * 
      * @return The property name

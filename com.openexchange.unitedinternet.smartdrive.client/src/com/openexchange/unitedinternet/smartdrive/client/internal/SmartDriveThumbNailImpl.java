@@ -69,6 +69,15 @@ public final class SmartDriveThumbNailImpl implements SmartDriveThumbNail {
         super();
     }
 
+    /**
+     * Initializes a new {@link SmartDriveThumbNailImpl}.
+     */
+    public SmartDriveThumbNailImpl(final SmartDriveThumbNail src) {
+        this();
+        this.mimeType = src.getMimeType();
+        this.url = src.getUrl();
+    }
+
     public String getUrl() {
         return url;
     }
