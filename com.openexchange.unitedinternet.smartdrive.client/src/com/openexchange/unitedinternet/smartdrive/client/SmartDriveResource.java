@@ -96,9 +96,9 @@ public interface SmartDriveResource {
     List<SmartDriveDeadProperty> getDeadProperties();
 
     /**
-     * Gets the <b>optional</b> map of thumbnails.
+     * Gets the <b>optional</b> map of thumb nails.
      * 
-     * @return The <b>optional</b> map of thumbnails
+     * @return The <b>optional</b> map of thumb nails
      */
     Map<String, SmartDriveThumbNail> getThumbNails();
 

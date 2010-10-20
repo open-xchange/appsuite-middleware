@@ -90,11 +90,11 @@ public abstract class AbstractSmartDriveResource implements SmartDriveResource {
     }
 
     public Date getCreationDate() {
-        return creationDate;
+        return creationDate == null ? null : new Date(creationDate.getTime());
     }
 
     public Date getLastModified() {
-        return lastModified;
+        return lastModified == null ? null : new Date(lastModified.getTime());
     }
 
     public String getDownloadToken() {

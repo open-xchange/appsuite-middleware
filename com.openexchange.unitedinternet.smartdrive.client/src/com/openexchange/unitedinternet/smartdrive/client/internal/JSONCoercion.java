@@ -63,7 +63,7 @@ public final class JSONCoercion {
      * @return <code>true</code> if specified object needs to be coerced to JSON; otherwise <code>false</code>
      */
     public static boolean needsJSONCoercion(final Object value) {
-        return (value instanceof Map) || (value instanceof Collection) || isArray(value);
+        return (value instanceof Map<?, ?>) || (value instanceof Collection<?>) || isArray(value);
     }
 
     /**
