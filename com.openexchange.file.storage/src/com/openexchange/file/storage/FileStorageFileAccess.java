@@ -67,10 +67,11 @@ import com.openexchange.tx.TransactionAware;
 public interface FileStorageFileAccess extends TransactionAware {
     
     public static class IDTuple {
+
         private String folder;
         private String id;
         
-        public IDTuple(String folder, String id) {
+        public IDTuple(final String folder, final String id) {
             this.folder = folder;
             this.id = id;
         }
@@ -79,7 +80,7 @@ public interface FileStorageFileAccess extends TransactionAware {
             return folder;
         }
 
-        public void setFolder(String folder) {
+        public void setFolder(final String folder) {
             this.folder = folder;
         }
         
@@ -87,7 +88,7 @@ public interface FileStorageFileAccess extends TransactionAware {
             return id;
         }
         
-        public void setId(String id) {
+        public void setId(final String id) {
             this.id = id;
         }
 
@@ -101,7 +102,7 @@ public interface FileStorageFileAccess extends TransactionAware {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -111,7 +112,7 @@ public interface FileStorageFileAccess extends TransactionAware {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            IDTuple other = (IDTuple) obj;
+            final IDTuple other = (IDTuple) obj;
             if (folder == null) {
                 if (other.folder != null) {
                     return false;
@@ -185,8 +186,8 @@ public interface FileStorageFileAccess extends TransactionAware {
          */
         public static final SortDirection DEFAULT = ASC;
 
-        public Comparator<File> comparatorBy(File.Field by) {
-            FileComparator fileComparator = new FileComparator(by);
+        public Comparator<File> comparatorBy(final File.Field by) {
+            final FileComparator fileComparator = new FileComparator(by);
             switch (this) {
             case ASC:
                 return fileComparator;
@@ -196,8 +197,8 @@ public interface FileStorageFileAccess extends TransactionAware {
             return null;
         }
 
-        public Comparator<File> comparatorBy(File.Field by, Comparator comparator) {
-            FileComparator fileComparator = new FileComparator(by, comparator);
+        public Comparator<File> comparatorBy(final File.Field by, final Comparator comparator) {
+            final FileComparator fileComparator = new FileComparator(by, comparator);
             switch (this) {
             case ASC:
                 return fileComparator;
@@ -207,11 +208,11 @@ public interface FileStorageFileAccess extends TransactionAware {
             return null;
         }
         
-        public void sort(List<File> collection, File.Field by) {
+        public void sort(final List<File> collection, final File.Field by) {
             Collections.sort(collection, comparatorBy(by));
         }
 
-        public void sort(List<File> collection, File.Field by, Comparator comparator) {
+        public void sort(final List<File> collection, final File.Field by, final Comparator comparator) {
             Collections.sort(collection, comparatorBy(by, comparator));
         }
 
@@ -219,20 +220,20 @@ public interface FileStorageFileAccess extends TransactionAware {
 
             private Comparator<File> delegate = null;
 
-            public InverseComparator(Comparator<File> delegate) {
+            public InverseComparator(final Comparator<File> delegate) {
                 this.delegate = delegate;
             }
 
-            public int compare(File o1, File o2) {
+            public int compare(final File o1, final File o2) {
                 return -delegate.compare(o1, o2);
             }
         }
 
-        public static SortDirection get(String name) {
+        public static SortDirection get(final String name) {
             if(name == null) {
                 return DEFAULT;
             }
-            for (SortDirection dir : values()) {
+            for (final SortDirection dir : values()) {
                 if(dir.name().equalsIgnoreCase(name)) {
                     return dir;
                 }
