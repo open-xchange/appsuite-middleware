@@ -1470,7 +1470,7 @@ public class OXContainerConverter {
         // TZ is ignored
         // GEO is ignored
         // TITLE
-        addProperty(object, "TITLE", contact.getEmployeeType());
+        addProperty(object, "TITLE", contact.getProfession());
         // ROLE
         addProperty(object, "ROLE", contact.getPosition());
         // LOGO is ignored

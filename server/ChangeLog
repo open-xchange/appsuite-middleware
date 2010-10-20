@@ -1,3 +1,7 @@
+* 2010-10-20 - steffen.templin@open-xchange.com
+
+ - Bugfix #17072: Contact field 'Profession' not exported to VCards.
+
 * 2010-10-18 - marcus.klein@open-xchange.com
 
  - Bugfix #17275: Throwing an exception in recurrence type is not known instead of returning a null recurring results.
