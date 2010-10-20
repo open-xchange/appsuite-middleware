@@ -124,7 +124,7 @@ public abstract class AbstractSmartDriveResource implements SmartDriveResource {
      * @param creationDate The creation date to set
      */
     public void setCreationDate(final Date creationDate) {
-        this.creationDate = creationDate;
+        this.creationDate = creationDate == null ? null : new Date(creationDate.getTime());
     }
 
     /**
@@ -133,7 +133,7 @@ public abstract class AbstractSmartDriveResource implements SmartDriveResource {
      * @param lastModified The last modified to set
      */
     public void setLastModified(final Date lastModified) {
-        this.lastModified = lastModified;
+        this.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
     }
 
     /**
@@ -151,16 +151,32 @@ public abstract class AbstractSmartDriveResource implements SmartDriveResource {
      * @param deadProperties The dead properties to set
      */
     public void setDeadProperties(final List<? extends SmartDriveDeadProperty> deadProperties) {
-        this.deadProperties = null == deadProperties ? null : new ArrayList<SmartDriveDeadProperty>(deadProperties);
+        if (null == deadProperties) {
+            this.deadProperties = null;
+        } else {
+            final List<SmartDriveDeadProperty> thisDeadProperties = new ArrayList<SmartDriveDeadProperty>(deadProperties.size());
+            for (final SmartDriveDeadProperty deadProperty : deadProperties) {
+                thisDeadProperties.add(new SmartDriveDeadProperty(deadProperty));
+            }
+            this.deadProperties = thisDeadProperties;
+        }
     }
 
     /**
-     * Sets the thumbnails
+     * Sets the thumb nails
      * 
-     * @param thumbNails The thumbnails to set
+     * @param thumbNails The thumb nails to set
      */
     public void setThumbNails(final Map<String, ? extends SmartDriveThumbNail> thumbNails) {
-        this.thumbNails = null == thumbNails ? null : new HashMap<String, SmartDriveThumbNail>(thumbNails);
+        if (null == thumbNails) {
+            this.thumbNails = null;
+        } else {
+            final Map<String, SmartDriveThumbNail> thisMap = new HashMap<String, SmartDriveThumbNail>(thumbNails.size());
+            for (final Map.Entry<String, ? extends SmartDriveThumbNail> entry : thumbNails.entrySet()) {
+                thisMap.put(entry.getKey(), new SmartDriveThumbNailImpl(entry.getValue()));
+            }
+            this.thumbNails = thisMap;
+        }
     }
 
 }
