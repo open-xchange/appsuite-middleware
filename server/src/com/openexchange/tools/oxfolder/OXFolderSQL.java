@@ -59,6 +59,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -359,7 +360,50 @@ public final class OXFolderSQL {
     }
 
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
-
+    
+    /**
+     * Returns an {@link ArrayList} of folders whose name and module matches the given parameters in the given parent folder.
+     * @param folderId
+     * @param parent The parent folder whose subfolders shall be looked up
+     * @param folderName The folder name to look for
+     * @param module The folder module
+     * @param readConArg A readable connection (may be <code>null</code>)
+     * @param ctx The context
+     * @return A list of folders with the same name and module.
+     * @throws DBPoolingException
+     * @throws SQLException
+     */
+    public static ArrayList<Integer> lookUpFolders(final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
+    	Connection readCon = readConArg;
+        boolean closeReadCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        ArrayList<Integer> folderList = new ArrayList<Integer>();
+        try {
+            if (readCon == null) {
+                readCon = DBPool.pickup(ctx);
+                closeReadCon = true;
+            }
+            stmt = readCon.prepareStatement(SQL_LOOKUPFOLDER);
+            stmt.setInt(1, ctx.getContextId()); // cid
+            stmt.setInt(2, parent); // parent
+            stmt.setString(3, folderName); // fname
+            stmt.setInt(4, module); // module
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                final int fuid = rs.getInt(1);
+                final String fname = rs.getString(2);
+                if (folderName.equals(fname)) {
+                    folderList.add(fuid);
+                }
+            }
+        } finally {
+            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+        }
+        
+        return folderList;
+    }
+    
     /**
      * Checks for a duplicate folder in parental folder. A folder is treated as a duplicate if name and module are equal.
      * 

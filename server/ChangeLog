@@ -1,5 +1,9 @@
 * 2010-10-20 - steffen.templin@open-xchange.com
 
+ - Bugfix #17261: Duplicate folder exception is thrown for synchronizing contact folder 'Vorgeschlagene Kontakte' with Outlook 2010.
+ 
+* 2010-10-20 - steffen.templin@open-xchange.com
+
  - Bugfix #17072: Contact field 'Profession' not exported to VCards.
 
 * 2010-10-18 - marcus.klein@open-xchange.com
