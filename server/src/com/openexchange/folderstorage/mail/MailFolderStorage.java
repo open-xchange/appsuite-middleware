@@ -515,18 +515,7 @@ public final class MailFolderStorage implements FolderStorage {
             final int accountId = argument.getAccountId();
             final String fullname = argument.getFullname();
 
-            final ServerSession session;
-            {
-                final Session s = storageParameters.getSession();
-                if (null == s) {
-                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-                }
-                if (s instanceof ServerSession) {
-                    session = (ServerSession) s;
-                } else {
-                    session = new ServerSessionAdapter(s);
-                }
-            }
+            final ServerSession session = getServerSession(storageParameters);
             final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, session, accesses);
 
             final MailAccount mailAccount;
@@ -657,6 +646,17 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    private static ServerSession getServerSession(final StorageParameters storageParameters) throws FolderException, ContextException {
+        final Session s = storageParameters.getSession();
+        if (null == s) {
+            throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+        }
+        if (s instanceof ServerSession) {
+            return (ServerSession) s;
+        }
+        return new ServerSessionAdapter(s);
+    }
+
     private static MailFolder getMailFolder(final String treeId, final int accountId, final String fullname, final boolean createIfAbsent, final Session session, final MailAccess<?, ?> mailAccess) throws MailException {
         try {
             return mailAccess.getFolderStorage().getFolder(fullname);
@@ -735,18 +735,7 @@ public final class MailFolderStorage implements FolderStorage {
 
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final ServerSession session;
-            {
-                final Session s = storageParameters.getSession();
-                if (null == s) {
-                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-                }
-                if (s instanceof ServerSession) {
-                    session = (ServerSession) s;
-                } else {
-                    session = new ServerSessionAdapter(s);
-                }
-            }
+            final ServerSession session = getServerSession(storageParameters);
 
             if (PRIVATE_FOLDER_ID.equals(parentId)) {
                 /*
