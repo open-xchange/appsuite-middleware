@@ -1,3 +1,7 @@
+* 2010-10-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #17161: Fixed NPE
+
 * 2010-10-20 - steffen.templin@open-xchange.com
 
  - Bugfix #17261: Duplicate folder exception is thrown for synchronizing contact folder 'Vorgeschlagene Kontakte' with Outlook 2010.
