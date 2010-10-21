@@ -153,6 +153,25 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-473
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/sessiond.properties
+   for prop in com.openexchange.sessiond.isServerSocketEnabled com.openexchange.sessiond.isServerObjectStreamSocketEnabled com.openexchange.sessiond.serverPort com.openexchange.sessiond.serverObjectStreamPort com.openexchange.sessiond.isTcpClientSocketEnabled com.openexchange.sessiond.serverBindAddress com.openexchange.sessiond.isDoubleLoginPermitted com.openexchange.sessiond.sessionAuthUser com.openexchange.sessiond.isSecureSocketConnectionEnabled com.openexchange.sessiond.caFile com.openexchange.sessiond.certFile com.openexchange.sessiond.keyFile com.openexchange.sessiond.sessionContainerTimeout com.openexchange.sessiond.numberOfSessionContainers; do
+      if ox_exists_property $prop $pfile; then
+	  ox_remove_property $prop $pfile
+      fi
+   done
+   if ! ox_exists_property com.openexchange.sessiond.randomTokenTimeout $pfile; then
+      ox_set_property com.openexchange.sessiond.randomTokenTimeout 1M $pfile
+   fi
+   if ! ox_exists_property com.openexchange.sessiond.sessionLongLifeTime $pfile; then
+      ox_set_property com.openexchange.sessiond.sessionLongLifeTime 1W $pfile
+   fi
+   pfile=/opt/open-xchange/etc/groupware/system.properties
+   if ox_exists_property SESSIONDPROPERTIES $pfile; then
+      ox_remove_property SESSIONDPROPERTIES $pfile
+   fi
+
    # SoftwareChange_Request-378
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/imap.properties
