@@ -57,10 +57,9 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.server.services.I18nServices;
 
 /**
- * StringHelper
+ * {@link StringHelper} - Helper class to translate strings.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StringHelper {
@@ -69,20 +68,17 @@ public class StringHelper {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private Locale locale;
+    private final Locale locale;
 
     /**
      * Initializes a string replacer using the given locale.
      * 
-     * @param locale locale to translate string to. If <code>null</code> is
+     * @param locale The locale to translate string to. If <code>null</code> is
      *            given, no replacement takes place.
      */
     public StringHelper(final Locale locale) {
         super();
-        if (null != locale && locale.getLanguage().equalsIgnoreCase("en")) {
-            return;
-        }
-        this.locale = locale;
+        this.locale = (null != locale && "en".equalsIgnoreCase(locale.getLanguage())) ? null : locale;
     }
 
     /**
@@ -95,9 +91,8 @@ public class StringHelper {
         if (null == locale) {
             return key;
         }
-        I18nService tool;
         try {
-            tool = I18nServices.getInstance().getService(locale);
+            final I18nService tool = I18nServices.getInstance().getService(locale);
             if (tool == null) {
                 if (DEBUG) {
                     LOG.debug("No service for " + locale + "  found. Using default for bundle ");
@@ -107,7 +102,7 @@ public class StringHelper {
             return tool.getLocalized(key);
         } catch (final MissingResourceException x) {
             if (DEBUG) {
-                LOG.debug("MissingResource for " + locale + ". Using default for bundle ");
+                LOG.debug("MissingResource for " + locale + ". Using default for bundle ", x);
             }
             return key;
         }
@@ -115,10 +110,7 @@ public class StringHelper {
 
     @Override
     public int hashCode() {
-        if (locale == null) {
-            return 0;
-        }
-        return locale.getClass().hashCode();
+        return (locale == null) ? 0 : locale.getClass().hashCode();
     }
 
     @Override
