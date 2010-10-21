@@ -76,11 +76,14 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
@@ -261,9 +264,9 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
              * Insert default primary mail account folder (INBOX)
              */
             final DummyFolder folder = new DummyFolder();
-            folder.setName("Inbox");
+            folder.setName(new StringHelper(UserStorage.getStorageUser(user, ctx).getLocale()).getString(MailStrings.INBOX));
             folder.setID(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"));
-            folder.setTreeID("1");
+            folder.setTreeID(FolderStorage.PRIVATE_ID);
             folder.setParentID(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
             folder.setSubscribed(true);
             Insert.insertFolder(ctx.getContextId(), 1, user, folder);

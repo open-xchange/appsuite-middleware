@@ -66,8 +66,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -515,7 +515,18 @@ public final class MailFolderStorage implements FolderStorage {
             final int accountId = argument.getAccountId();
             final String fullname = argument.getFullname();
 
-            final Session session = storageParameters.getSession();
+            final ServerSession session;
+            {
+                final Session s = storageParameters.getSession();
+                if (null == s) {
+                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+                }
+                if (s instanceof ServerSession) {
+                    session = (ServerSession) s;
+                } else {
+                    session = new ServerSessionAdapter(s);
+                }
+            }
             final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, session, accesses);
 
             final MailAccount mailAccount;
@@ -539,6 +550,7 @@ public final class MailFolderStorage implements FolderStorage {
                         rootFolder,
                         accountId,
                         mailAccess.getMailConfig(),
+                        session.getUser().getLocale(),
                         null);
                 /*
                  * Set proper name for non-primary account
@@ -563,6 +575,7 @@ public final class MailFolderStorage implements FolderStorage {
                         mailFolder,
                         accountId,
                         mailAccess.getMailConfig(),
+                        session.getUser().getLocale(),
                         new MailAccessFullnameProvider(mailAccess));
                 hasSubfolders = mailFolder.hasSubfolders();
             }
@@ -638,6 +651,8 @@ public final class MailFolderStorage implements FolderStorage {
 
             return retval;
         } catch (final MailException e) {
+            throw new FolderException(e);
+        } catch (final ContextException e) {
             throw new FolderException(e);
         }
     }

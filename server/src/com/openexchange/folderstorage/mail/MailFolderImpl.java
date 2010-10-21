@@ -49,10 +49,12 @@
 
 package com.openexchange.folderstorage.mail;
 
+import java.util.Locale;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
@@ -63,6 +65,8 @@ import com.openexchange.folderstorage.mail.contentType.SpamContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -145,14 +149,17 @@ public final class MailFolderImpl extends AbstractFolder {
      * @param fullnameProvider The (optional) fullname provider
      * @throws FolderException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final Locale locale, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
         super();
         final String fullname = mailFolder.getFullname();
         id = MailFolderUtility.prepareFullname(accountId, fullname);
-        name = "INBOX".equals(fullname) ? "Inbox" : mailFolder.getName();
+        {
+            final StringHelper strHelper = new StringHelper(locale);
+            name = "INBOX".equals(fullname) ? strHelper.getString(MailStrings.INBOX) : mailFolder.getName();
+        }
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
         parent =
-            mailFolder.isRootFolder() ? String.valueOf(1) : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
+            mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
         final MailPermission[] mailPermissions = mailFolder.getPermissions();
         permissions = new Permission[mailPermissions.length];
         for (int i = 0; i < mailPermissions.length; i++) {
