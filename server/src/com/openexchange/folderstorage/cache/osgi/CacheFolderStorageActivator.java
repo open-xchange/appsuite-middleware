@@ -212,13 +212,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
                 final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
                 try {
-                    tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, contentRelated.booleanValue(), session);
+                    tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
                 } catch (final FolderException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
         };
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+        final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
         dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC_ATTR);
         eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
     }
