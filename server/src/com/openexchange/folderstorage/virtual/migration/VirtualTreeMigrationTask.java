@@ -266,7 +266,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
             final DummyFolder folder = new DummyFolder();
             folder.setName(new StringHelper(UserStorage.getStorageUser(user, ctx).getLocale()).getString(MailStrings.INBOX));
             folder.setID(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"));
-            folder.setTreeID(FolderStorage.PRIVATE_ID);
+            folder.setTreeID("1");
             folder.setParentID(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
             folder.setSubscribed(true);
             Insert.insertFolder(ctx.getContextId(), 1, user, folder);
