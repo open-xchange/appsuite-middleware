@@ -65,6 +65,9 @@ public class MailStrings implements LocalizableStrings {
         super();
     }
 
+    // The internationalized name for the INBOX mail folder
+    public static final String INBOX = "Inbox";
+
     // The internationalized subject for a read acknowledgement
     public static final String ACK_SUBJECT = "Read Acknowledgement";
 
@@ -101,6 +104,8 @@ public class MailStrings implements LocalizableStrings {
     // Indicates the elapsed date for affected message's attachments
     public static final String PUBLISHED_ATTACHMENTS_APPENDIX = "The links will be deleted by #DATE#";
 
-    public static final String GREETING = "Hello Earthlings! Take me to your leader"; // FIXME: Fixed compile error
+    // The greeting used for form mails. E.g.
+    // "Dear Sir or Madam Jane Doe"
+    public static final String GREETING = "Dear Sir or Madam";
 
 }

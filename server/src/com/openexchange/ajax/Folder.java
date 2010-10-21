@@ -105,9 +105,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.Groups;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
@@ -144,7 +146,6 @@ import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -161,11 +162,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Folder extends SessionServlet {
-
-    /**
-     * The constant for Inbox mail folder. TODO: Should be read from StringHelper utility class!
-     */
-    private static final String DEF_NAME_INBOX = "Inbox";
 
     private static final String STR_INBOX = "INBOX";
 
@@ -996,7 +992,7 @@ public class Folder extends SessionServlet {
                                 putter.setJSONArray(ja);
                                 // TODO: Translation for INBOX?!
                                 for (int j = 0; j < writers.length; j++) {
-                                    writers[j].writeField(putter, mailInterface.getAccountID(), f, DEF_NAME_INBOX, -1, null, -1, all);
+                                    writers[j].writeField(putter, mailInterface.getAccountID(), f, strHelper.getString(MailStrings.INBOX), -1, null, -1, all);
                                 }
                                 jsonWriter.value(ja);
                             } else {
