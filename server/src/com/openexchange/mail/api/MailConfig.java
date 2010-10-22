@@ -49,9 +49,14 @@
 
 package com.openexchange.mail.api;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -382,27 +387,41 @@ public abstract class MailConfig {
         final MailAccountStorageService storageService =
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         if (isDefaultAccount) {
-            final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
-            if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
-                /*
-                 * Find user name by user's imap login
-                 */
-                final MailAccount[] accounts = storageService.resolveLogin(pattern, server, ctx.getContextId());
-                final int[] retval = new int[accounts.length];
-                for (int i = 0; i < retval.length; i++) {
-                    retval[i] = accounts[i].getUserId();
+            switch (MailProperties.getInstance().getLoginSource()) {
+            case USER_IMAPLOGIN:
+            case PRIMARY_EMAIL:
+                final MailAccount[] accounts;
+                switch (MailProperties.getInstance().getLoginSource()) {
+                case USER_IMAPLOGIN:
+                    accounts = storageService.resolveLogin(pattern, ctx.getContextId());
+                    break;
+                case PRIMARY_EMAIL:
+                    accounts = storageService.resolvePrimaryAddr(pattern, ctx.getContextId());
+                    break;
+                default:
+                    throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail login source.");
                 }
-                return retval;
-            }
-            if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
-                final MailAccount[] accounts = storageService.resolvePrimaryAddr(pattern, server, ctx.getContextId());
-                final int[] retval = new int[accounts.length];
-                for (int i = 0; i < retval.length; i++) {
-                    retval[i] = accounts[i].getUserId();
+                Set<Integer> userIds = new HashSet<Integer>();
+                for (MailAccount candidate : accounts) {
+                    final InetSocketAddress shouldMatch;
+                    switch (MailProperties.getInstance().getMailServerSource()) {
+                    case USER:
+                        shouldMatch = toSocketAddr(candidate.generateMailServerURL(), 143);
+                        break;
+                    case GLOBAL:
+                        shouldMatch = toSocketAddr(MailProperties.getInstance().getMailServer(), 143);
+                        break;
+                    default:
+                        throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail server source.");
+                    }
+                    if (server.equals(shouldMatch)) {
+                        userIds.add(I(candidate.getUserId()));
+                    }
                 }
-                return retval;
+                return I2i(userIds);
+            case USER_NAME:
+                return new int[] { UserStorage.getInstance().getUserId(pattern, ctx) };
             }
-            return new int[] { UserStorage.getInstance().getUserId(pattern, ctx) };
         }
         /*
          * Find user name by user's imap login

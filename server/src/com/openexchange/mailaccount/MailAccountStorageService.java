@@ -227,12 +227,11 @@ public interface MailAccountStorageService {
      * Gets the mail accounts of the users whose primary email address matches specified email on specified server.
      * 
      * @param primaryAddress The primary email address
-     * @param server The server's internet address
      * @param cid The context ID
      * @return The mail accounts of the users whose login matches specified login on specified server
      * @throws MailAccountException If resolving the primary address fails
      */
-    public MailAccount[] resolvePrimaryAddr(String primaryAddress, InetSocketAddress server, int cid) throws MailAccountException;
+    public MailAccount[] resolvePrimaryAddr(String primaryAddress, int cid) throws MailAccountException;
 
     /**
      * Gets the mail account matching specified primary email address of given user in given context.
