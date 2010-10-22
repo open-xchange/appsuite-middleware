@@ -1,3 +1,7 @@
+* 2010-10-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #17304: IMAP server ACL access identifier are now properly resolved if a global imap server configuration is used.
+
 * 2010-10-21 - thorben.betten@open-xchange.com
 
  - Bugfix #17161: Fixed NPE

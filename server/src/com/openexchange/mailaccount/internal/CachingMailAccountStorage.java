@@ -259,14 +259,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
     }
 
-    public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final InetSocketAddress server, final int cid) throws MailAccountException {
+    public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final int cid) throws MailAccountException {
         final int[][] idsAndUsers = delegate.resolvePrimaryAddr2IDs(primaryAddress, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
         for (final int[] idAndUser : idsAndUsers) {
-            final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
-            if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
-                l.add(candidate);
-            }
+            l.add(getMailAccount(idAndUser[0], idAndUser[1], cid));
         }
         return l.toArray(new MailAccount[l.size()]);
     }
