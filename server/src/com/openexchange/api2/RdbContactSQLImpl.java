@@ -1296,13 +1296,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         PreparedStatement stmt = null;
         try {
             con = DBPool.pickupWriteable(ctx);
-            boolean onlyOldContacts = true;
+            boolean contacsAlreadyHadUUID = true;
 
             for (Contact c : new Contact[] { aggregator, contributor }) {
                 if (!c.containsUserField20()) {
                     c.setUserField20(UUID.randomUUID().toString());
                     updateContactObject(c, c.getParentFolderID(), new Date());
-                    onlyOldContacts = false;
+                    contacsAlreadyHadUUID = false;
                 }
             }
             ContactUnificationState prevState = getAssociationBetween(aggregator, contributor);
@@ -1311,14 +1311,16 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             if(prevState == state)
                 return;
             
-            // state == undefined => remove all possible entries
-            if(onlyOldContacts && ContactUnificationState.UNDEFINED == state){
+            boolean contactsHaveDefinedState = (prevState != ContactUnificationState.UNDEFINED);
+            
+			// state == undefined => remove all possible entries
+            if(contacsAlreadyHadUUID && ContactUnificationState.UNDEFINED == state){
                 stmt = con.prepareStatement("DELETE FROM aggregatingContacts WHERE (contributor = ? OR contributor = ?) AND (aggregator = ? OR aggregator = ?)");
                 stmt.setBytes(1, dbUUID(aggregator));
                 stmt.setBytes(2, dbUUID(contributor));
                 stmt.setBytes(3, dbUUID(aggregator));
                 stmt.setBytes(4, dbUUID(contributor));
-            } else if(onlyOldContacts && prevState != ContactUnificationState.UNDEFINED){
+            } else if(contacsAlreadyHadUUID && contactsHaveDefinedState ){
                 stmt = con.prepareStatement("UPDATE aggregatingContacts SET contributor = ?, aggregator = ?, state = ? WHERE (contributor = ? OR contributor = ?) AND (aggregator = ? OR aggregator = ?)");
                 stmt.setBytes(1, dbUUID(aggregator));
                 stmt.setBytes(2, dbUUID(contributor));
@@ -1420,7 +1422,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         try {
             con = DBPool.pickup(ctx);
 
-            stmt = con.prepareStatement("SELECT state FROM aggregatingContacts WHERE aggregator IN (?,?) OR contributor IN (?,?) AND aggregator != contributor");
+            stmt = con.prepareStatement("SELECT state FROM aggregatingContacts WHERE aggregator IN (?,?) AND contributor IN (?,?) AND aggregator != contributor");
             byte[] val1 = UUIDs.toByteArray(uuid1);
             byte[] val2 = UUIDs.toByteArray(uuid2);
             stmt.setBytes(1, val1);
