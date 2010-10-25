@@ -163,6 +163,14 @@ public class AggregatingContactTest extends AbstractAJAXSession{
         assertEquals("Should have no associated contacts", 0, associatedContacts.size());
     }
     
+    public void testWorksWithUUIDsNotGivenByFinalContactModule() throws Exception {
+    	
+    }
+    
+    public void testWorksWithMoreThanOneAssociatedPair() throws Exception {
+    	
+    }
+    
     public void testSecurity() throws Exception {
         contactMgr.associateTwoContacts(aggregator, contributor);
         UUID aggregatorUUID = UUID.fromString( contactMgr.getAction(aggregator).getUserField20());
