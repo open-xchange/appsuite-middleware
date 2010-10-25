@@ -1,3 +1,7 @@
+* 2010-10-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #17330: Safe check if fullname of a mail folder contains proper account identifier
+
 * 2010-10-22 - marcus.klein@open-xchange.com
 
  - Bugfix #17304: IMAP server ACL access identifier are now properly resolved if a global imap server configuration is used.
