@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -582,11 +582,21 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Oct 25 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17330: Proper folder fullname when renaming a folder on root level
+* Fri Oct 22 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17304: IMAP server ACL access identifier are now properly resolved if a global imap server configuration is used.
+* Thu Oct 21 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17161: Fixed NPE
+* Fri Oct 15 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17242: Made logger mandatory for AbstractIndexCallable to prevent possible NullPointerExceptions.
 * Thu Oct 14 2010 - marcus.klein@open-xchange.com
  - Bugfix #16833: Added publication target name strings to I18N process.
  - Bugfix #17162: Using consistent codes for not visible and not found folders.
 * Thu Oct 14 2010 - marcus.klein@open-xchange.com
  - Bugfix #16833: Added publication target name strings to I18N process.
+* Thu Oct 14 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17175: Remove of occurrences value.
 * Wed Oct 13 2010 - marcus.klein@open-xchange.com
  - Bugfix #17131: Changed object events now contain every user identifier and folder identifier that might be affected.
  - Bugfix #17230: Using the mainstream tool method to get a time zone.
@@ -1188,8 +1198,6 @@ fi
 * Mon Feb 15 2010 - thorben.betten@open-xchange.com
  - Bugfix #15365: Added admin daemon to build files
  - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
-* Sun Feb 14 2010 - martin.herfurth@open-xchange.com
- - Bugfix #17175: Remove of occurrences value.
 * Fri Feb 12 2010 - thorben.betten@open-xchange.com
  - Bugfix #15350: Fixed retrieval of session from given cookies
  - Bugfix #14946: No null values in response to client

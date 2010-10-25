@@ -1,3 +1,9 @@
+open-xchange-contactcollector (6.18.1.0-6) unstable; urgency=low
+
+  * first build for public ptf 2010-10-22
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 25 Oct 2010 14:57:05 +0200
+
 open-xchange-contactcollector (6.18.1.0-5) unstable; urgency=low
 
   * first build for 6.18.1-rev5
