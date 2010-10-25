@@ -403,23 +403,21 @@ public final class ReminderRequest {
         final AppointmentSQLInterface calendarSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final Appointment calendarDataObject;
+        
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
         } catch (final SQLException e) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
         }
+        
         final RecurringResultsInterface recurringResults;
         try {
             // Until is always set to 00:00:00 UTC so we have to recalculate it to get the last occurrence too.
             final long end_mod = calendarDataObject.getEndDate().getTime() % Constants.MILLI_DAY;
             Date until = null;
-            until = new Date(calendarDataObject.getUntil().getTime() + end_mod);
+            until = new Date(calendarDataObject.getUntil().getTime() + end_mod + tz.getOffset(calendarDataObject.getUntil().getTime()));
             
-            recurringResults = recColl.calculateRecurring(
-                calendarDataObject,
-                calendarDataObject.getStartDate().getTime(),
-                until.getTime(),
-                0);
+            recurringResults = recColl.calculateRecurring(calendarDataObject, reminder.getDate().getTime(), until.getTime(), 0);
         } catch (final OXException e) {
             LOG.error(
                 "Can't calculate next recurrence for appointment " + reminder.getTargetId() + " in context " + sessionObj.getContextId(),
