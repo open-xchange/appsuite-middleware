@@ -444,7 +444,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null == t) {
             return null;
         }
-        t.start();
+        try {
+            t.start();
+        } catch (final OutOfMemoryError oome) {
+            // unable to create new native thread
+            // handle as error
+            return null;
+        }
         return next;
     }
 
