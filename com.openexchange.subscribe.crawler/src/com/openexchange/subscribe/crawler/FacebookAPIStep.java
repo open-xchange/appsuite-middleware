@@ -66,6 +66,7 @@ import com.facebook.api.schema.Location;
 import com.facebook.api.schema.User;
 import com.facebook.api.schema.UsersGetInfoResponse;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
@@ -121,7 +122,11 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                 1,
                 "http://www.facebook.com");
             step.execute(webClient);
-            // HtmlPage pageAfterLogin = step.getOutput();
+            // grant access to the application (needed only the first time someone uses the subscription)
+            HtmlPage page = step.getOutput();
+            PageByNamedHtmlElementStep step2 = new PageByNamedHtmlElementStep("", 0, "grant_clicked");
+            step2.setInput(page);
+            step2.execute(webClient);            
             webClient.closeAllWindows();
 
             // fetch session key

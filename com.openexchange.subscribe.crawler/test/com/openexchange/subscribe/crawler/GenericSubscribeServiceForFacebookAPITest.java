@@ -69,7 +69,7 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
-        crawler.setPriority(10);
+        crawler.setPriority(11);
         
         List<Step> steps = new LinkedList<Step>();
         FacebookAPIStep facebookAPIStep = new FacebookAPIStep();
