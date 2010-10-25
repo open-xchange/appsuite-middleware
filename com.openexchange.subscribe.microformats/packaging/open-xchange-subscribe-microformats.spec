@@ -57,6 +57,9 @@ Conflicts:  open-xchange-xerces-sun
 Requires:   open-xchange-xerces-sun
 Conflicts:  open-xchange-xerces-ibm
 %endif
+%if 0%{?centos_version}
+BuildRequires:  java-1.6.0-openjdk-devel
+%endif
 #
 
 %description

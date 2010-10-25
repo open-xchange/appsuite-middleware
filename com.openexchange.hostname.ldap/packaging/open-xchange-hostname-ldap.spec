@@ -37,6 +37,9 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
+%if 0%{?centos_version}
+BuildRequires:  java-1.6.0-openjdk-devel
+%endif
 Version:	@OXVERSION@
 %define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
