@@ -1,7 +1,7 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
 displayName: Facebook
 id: com.openexchange.subscribe.crawler.facebook
-priority: 10
+priority: 11
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
