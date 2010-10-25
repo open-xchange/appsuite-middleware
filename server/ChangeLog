@@ -1,6 +1,6 @@
 * 2010-10-25 - thorben.betten@open-xchange.com
 
- - Bugfix #17330: Safe check if fullname of a mail folder contains proper account identifier
+ - Bugfix #17330: Proper folder fullname when renaming a folder on root level
 
 * 2010-10-22 - marcus.klein@open-xchange.com
 

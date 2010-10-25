@@ -1039,13 +1039,11 @@ public final class MailFolderStorage implements FolderStorage {
                 final int parentAccountID = mfd.getParentAccountId();
                 if (accountId == parentAccountID) {
                     final String newParent = mfd.getParentFullname();
-                    final StringBuilder newFullname;
-                    if (MailFolder.DEFAULT_FOLDER_ID.equals(newParent)) {
-                        newFullname = new StringBuilder(mfd.containsName() ? mfd.getName() : oldName);
-                    } else {
-                        newFullname = new StringBuilder(newParent).append(mfd.getSeparator());
-                        newFullname.append(mfd.containsName() ? mfd.getName() : oldName);
+                    final StringBuilder newFullname = new StringBuilder(16);
+                    if (!MailFolder.DEFAULT_FOLDER_ID.equals(newParent)) {
+                        newFullname.append(newParent).append(mfd.getSeparator());
                     }
+                    newFullname.append(mfd.containsName() ? mfd.getName() : oldName);
                     if (!newParent.equals(oldParent)) { // move & rename
                         final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
                         fullname = mailAccess.getFolderStorage().moveFolder(fullname, newFullname.toString());
