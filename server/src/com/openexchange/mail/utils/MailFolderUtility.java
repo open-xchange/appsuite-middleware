@@ -156,7 +156,15 @@ public final class MailFolderUtility {
             return new StringBuilder(length + 4).append(fullname).append(accountId).toString();
         }
         if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-            return fullname;
+            /*
+             * Ensure given account ID is contained
+             */
+            final String tmpFullname = prepareMailFolderParam(fullname).getFullname();
+            if (MailFolder.DEFAULT_FOLDER_ID.equals(tmpFullname)) {
+                return new StringBuilder(length + 4).append(fullname).append(tmpFullname).toString();
+            }
+            return new StringBuilder(LEN + length + 4).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append(
+                MailProperties.getInstance().getDefaultSeparator()).append(tmpFullname).toString();
         }
         return new StringBuilder(LEN + length + 4).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append(
             MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
