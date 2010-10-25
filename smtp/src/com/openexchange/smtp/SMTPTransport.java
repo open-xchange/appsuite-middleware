@@ -56,6 +56,8 @@ import static java.util.regex.Matcher.quoteReplacement;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Properties;
@@ -120,6 +122,8 @@ public final class SMTPTransport extends MailTransport {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SMTPTransport.class);
 
     private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
+
+    private static final String LAST_SEND_TIME = "com.openexchange.smtp.lastSendTimestamp";
 
     private final Queue<Runnable> pendingInvocations;
 
@@ -454,6 +458,17 @@ public final class SMTPTransport extends MailTransport {
 
     @Override
     public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws MailException {
+        final SMTPConfig smtpConfig = getTransportConfig0();
+        final int smtpRateLimit = smtpConfig.getSMTPProperties().getSmtpRateLimit();
+        if (smtpRateLimit > 0) {
+            synchronized (session) {
+                final Long parameter = (Long) session.getParameter(LAST_SEND_TIME);
+                if (null != parameter && (parameter.longValue() + smtpRateLimit) >= System.currentTimeMillis()) {
+                    final NumberFormat numberInstance = DecimalFormat.getNumberInstance(UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale());
+                    throw new SMTPException(SMTPException.Code.SENT_QUOTA_EXCEEDED, numberInstance.format(((double) smtpRateLimit) / 1000));
+                }
+            }
+        }
         try {
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), new UnsynchronizedByteArrayInputStream(asciiBytes));
             /*
@@ -466,7 +481,6 @@ public final class SMTPTransport extends MailTransport {
             try {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-                final SMTPConfig smtpConfig = getTransportConfig0();
                 try {
                     if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
                         final String encPass = encodePassword(smtpConfig.getPassword());
@@ -484,6 +498,11 @@ public final class SMTPTransport extends MailTransport {
                 try {
                     saveChangesSafe(smtpMessage);
                     transport.sendMessage(smtpMessage, recipients);
+                    if (smtpRateLimit > 0) {
+                        synchronized (session) {
+                            session.setParameter(LAST_SEND_TIME, Long.valueOf(System.currentTimeMillis()));
+                        }
+                    }
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 } finally {
                     transport.close();
@@ -499,13 +518,24 @@ public final class SMTPTransport extends MailTransport {
 
     @Override
     public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients) throws MailException {
+        final SMTPConfig smtpConfig = getTransportConfig0();
+        final int smtpRateLimit = smtpConfig.getSMTPProperties().getSmtpRateLimit();
+        if (smtpRateLimit > 0) {
+            synchronized (session) {
+                final Long parameter = (Long) session.getParameter(LAST_SEND_TIME);
+                if (null != parameter && (parameter.longValue() + smtpRateLimit) >= System.currentTimeMillis()) {
+                    final NumberFormat numberInstance =
+                        DecimalFormat.getNumberInstance(UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale());
+                    throw new SMTPException(SMTPException.Code.SENT_QUOTA_EXCEEDED, numberInstance.format(((double) smtpRateLimit) / 1000));
+                }
+            }
+        }
         try {
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
             /*
              * Fill message dependent on send type
              */
             final long startPrep = System.currentTimeMillis();
-            final SMTPConfig smtpConfig = getTransportConfig0();
             final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm);
             composedMail.setFiller(smtpFiller);
             try {
@@ -530,8 +560,8 @@ public final class SMTPTransport extends MailTransport {
                 }
                 smtpFiller.setSendHeaders(composedMail, smtpMessage);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
-                        System.currentTimeMillis() - startPrep).append("msec").toString());
+                    LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(System.currentTimeMillis()
+                        - startPrep).append("msec").toString());
                 }
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
@@ -555,6 +585,11 @@ public final class SMTPTransport extends MailTransport {
                      * TODO: Do encryption here
                      */
                     transport.sendMessage(smtpMessage, recipients);
+                    if (smtpRateLimit > 0) {
+                        synchronized (session) {
+                            session.setParameter(LAST_SEND_TIME, Long.valueOf(System.currentTimeMillis()));
+                        }
+                    }
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 } finally {
                     transport.close();

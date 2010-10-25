@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.smtp.config;
 
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -95,5 +94,12 @@ public interface ISMTPProperties extends ITransportProperties {
      * @return the smtpConnectionTimeout
      */
     public int getSmtpConnectionTimeout();
+
+    /**
+     * Gets the smtpRateLimit
+     * 
+     * @return the smtpRateLimit
+     */
+    public int getSmtpRateLimit();
 
 }

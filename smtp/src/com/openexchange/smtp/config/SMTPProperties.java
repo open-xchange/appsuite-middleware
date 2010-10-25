@@ -94,6 +94,8 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
 
     private int smtpConnectionTimeout;
 
+    private int smtpRateLimit;
+
     /**
      * Initializes a new {@link SMTPProperties}
      */
@@ -155,15 +157,28 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             final String smtpConTimeoutStr = configuration.getProperty("com.openexchange.smtp.smtpConnectionTimeout", "10000").trim();
             try {
                 smtpConnectionTimeout = Integer.parseInt(smtpConTimeoutStr);
-                logBuilder.append("\tSMTP Timeout: ").append(smtpConnectionTimeout).append('\n');
+                logBuilder.append("\tSMTP Connection Timeout: ").append(smtpConnectionTimeout).append('\n');
             } catch (final NumberFormatException e) {
                 smtpConnectionTimeout = 10000;
-                logBuilder.append("\tSMTP Timeout: Invalid value \"").append(smtpConTimeoutStr).append("\". Setting to fallback ").append(
+                logBuilder.append("\tSMTP Connection Timeout: Invalid value \"").append(smtpConTimeoutStr).append("\". Setting to fallback ").append(
                     smtpConnectionTimeout).append('\n');
 
             }
         }
 
+        {
+            final String smtpRateLimitStr = configuration.getProperty("com.openexchange.smtp.smtpRateLimit", "0").trim();
+            try {
+                smtpRateLimit = Integer.parseInt(smtpRateLimitStr);
+                logBuilder.append("\tSMTP Rate limit: ").append(smtpRateLimit).append('\n');
+            } catch (final NumberFormatException e) {
+                smtpRateLimit = 0;
+                logBuilder.append("\tSMTP Rate limit: Invalid value \"").append(smtpRateLimitStr).append("\". Setting to fallback ").append(
+                    smtpRateLimit).append('\n');
+                
+            }
+        }
+        
         logBuilder.append("Global SMTP properties successfully loaded!");
         if (LOG.isInfoEnabled()) {
             LOG.info(logBuilder.toString());
@@ -179,6 +194,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         smtpAuthEnc = null;
         smtpTimeout = 0;
         smtpConnectionTimeout = 0;
+        smtpRateLimit = 0;
     }
 
     public String getSmtpLocalhost() {
@@ -203,6 +219,10 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
 
     public int getSmtpConnectionTimeout() {
         return smtpConnectionTimeout;
+    }
+
+    public int getSmtpRateLimit() {
+        return smtpRateLimit;
     }
 
     public int getReferencedPartLimit() {
