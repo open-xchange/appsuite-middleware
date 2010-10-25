@@ -37,6 +37,9 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
+%if 0%{?centos_version}
+BuildRequires:  java-1.6.0-openjdk-devel
+%endif
 Version:        @OXVERSION@
 %define         ox_release 0
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
@@ -68,9 +71,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 %define docroot /var/www/html
 %else
 %define docroot /srv/www/htdocs
-%endif
-%if 0%{?centos_version}
-BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 
 ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
