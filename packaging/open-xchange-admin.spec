@@ -55,6 +55,9 @@ Requires:  mysql-client >= 5.0.0
 %if 0%{?fedora_version} || 0%{?rhel_version}
 Requires:  mysql >= 5.0.0
 %endif
+%if 0%{?centos_version}
+BuildRequires:  java-1.6.0-openjdk-devel
+%endif
 #
 
 %package -n	open-xchange-admin-client
