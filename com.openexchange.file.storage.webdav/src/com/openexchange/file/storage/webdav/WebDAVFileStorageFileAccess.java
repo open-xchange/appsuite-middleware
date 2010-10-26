@@ -64,6 +64,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
+import org.apache.jackrabbit.webdav.DavMethods;
 import org.apache.jackrabbit.webdav.MultiStatus;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.DavMethod;
@@ -73,10 +74,14 @@ import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropPatchMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.client.methods.UnLockMethod;
+import org.apache.jackrabbit.webdav.header.CodedUrlHeader;
+import org.apache.jackrabbit.webdav.header.IfHeader;
 import org.apache.jackrabbit.webdav.lock.Scope;
 import org.apache.jackrabbit.webdav.lock.Type;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.apache.jackrabbit.webdav.transaction.TransactionConstants;
+import org.apache.jackrabbit.webdav.transaction.TransactionInfo;
 import org.w3c.dom.Element;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -162,6 +167,8 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     private final WebDAVFileStorageAccountAccess accountAccess;
 
+    private volatile String transactionToken;
+
     /**
      * Initializes a new {@link WebDAVFileStorageFileAccess}.
      */
@@ -188,24 +195,187 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
     }
 
-    public void startTransaction() throws TransactionException {
-        // TODO Auto-generated method stub
+    private void initMethod(final String folderId, final String id, final DavMethod davMethod) {
+        initMethod(folderId, id, davMethod, !isLockMethod(davMethod));
+    }
 
+    private void initMethod(final String folderId, final String id, final DavMethod davMethod, final boolean addIfHeader) {
+        if (addIfHeader) {
+            // http://blog.ropardo.ro/getting-the-lock-token-for-an-item-in-jackrabbit/
+            // http://www.koders.com/java/fid411ED72BF4F6D245D33A7E6A4F48127AF190657A.aspx?s=mdef:getUserId
+            final String thisTransactionToken = this.transactionToken;
+            if (null != thisTransactionToken) {
+                CodedUrlHeader codedUrl = new CodedUrlHeader("Transaction", thisTransactionToken);
+                davMethod.setRequestHeader(codedUrl);
+                codedUrl = new CodedUrlHeader(TransactionConstants.HEADER_TRANSACTIONID, thisTransactionToken);
+                davMethod.setRequestHeader(codedUrl);
+            }
+            // Lock token from former exclusive lock for a certain item
+            final String lockToken = lockTokenMap.get(new LockTokenKey(folderId, id));
+            if (null != lockToken) {
+                final IfHeader ifH = new IfHeader(new String[] { lockToken });
+                davMethod.setRequestHeader(ifH.getHeaderName(), ifH.getHeaderValue());
+            }
+        }
+    }
+
+    private static boolean isLockMethod(final DavMethod method) {
+        final int code = DavMethods.getMethodCode(method.getName());
+        return DavMethods.DAV_LOCK == code || DavMethods.DAV_UNLOCK == code;
+    }
+
+    public void startTransaction() throws TransactionException {
+        if (null != transactionToken) {
+            /*
+             * Transaction already started
+             */
+            return;
+        }
+        try {
+            /*-
+             * Check
+             * 
+             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
+             */
+            final URI uri = new URI(rootUri, true);
+            /*
+             * Create proper LockInfo
+             */
+            // final LockInfo lockInfo = new LockInfo(DavConstants.INFINITE_TIMEOUT);
+            // lockInfo.setType(Type.create(TransactionConstants.XML_TRANSACTION, DavConstants.NAMESPACE)); // or lockInfo.setType(TransactionConstants.TRANSACTION); with different namespace "dcr" instead of "d"
+            // lockInfo.setScope(Scope.create(TransactionConstants.XML_GLOBAL, DavConstants.NAMESPACE)); // or lockInfo.setScope(TransactionConstants.GLOBAL); with different namespace "dcr" instead of "d"
+            // final LockMethod lockMethod = new LockMethod(uri.toString(), lockInfo);
+            
+            final LockMethod lockMethod = new LockMethod(uri.toString(), TransactionConstants.LOCAL, TransactionConstants.TRANSACTION, null, DavConstants.INFINITE_TIMEOUT, true);
+            try {
+                client.executeMethod(lockMethod);
+                /*
+                 * Check if request was successfully executed
+                 */
+                lockMethod.checkSuccess();
+                /*
+                 * Obtain & remember lock token
+                 */
+                final String lockToken = lockMethod.getLockToken();
+                transactionToken = lockToken;
+            } finally {
+                lockMethod.releaseConnection();
+            }
+        } catch (final HttpException e) {
+            throw new TransactionException(WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage()));
+        } catch (final IOException e) {
+            throw new TransactionException(FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage()));
+        } catch (final DavException e) {
+            throw new TransactionException(WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage()));
+        }
     }
 
     public void commit() throws TransactionException {
-        // TODO Auto-generated method stub
-
+        if (null == transactionToken) {
+            /*
+             * Transaction not started
+             */
+            return;
+        }
+        try {
+            /*-
+             * Check
+             * 
+             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
+             */
+            final URI uri = new URI(rootUri, true);
+            final UnLockMethod method = new UnLockMethod(uri.toString(), transactionToken);
+            try {
+                method.setRequestBody(new TransactionInfo(true)); // COMMIT
+                client.executeMethod(method);
+                /*
+                 * Check if request was successfully executed
+                 */
+                method.checkSuccess();
+                transactionToken = null;
+            } finally {
+                method.releaseConnection();
+            }
+        } catch (final HttpException e) {
+            throw new TransactionException(WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage()));
+        } catch (final IOException e) {
+            throw new TransactionException(FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage()));
+        } catch (final DavException e) {
+            throw new TransactionException(WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage()));
+        }
     }
 
     public void rollback() throws TransactionException {
-        // TODO Auto-generated method stub
-
+        if (null == transactionToken) {
+            /*
+             * Transaction not started
+             */
+            return;
+        }
+        try {
+            /*-
+             * Check
+             * 
+             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
+             */
+            final URI uri = new URI(rootUri, true);
+            final UnLockMethod method = new UnLockMethod(uri.toString(), transactionToken);
+            try {
+                method.setRequestBody(new TransactionInfo(false)); // ROLL-BACK
+                client.executeMethod(method);
+                /*
+                 * Check if request was successfully executed
+                 */
+                method.checkSuccess();
+                transactionToken = null;
+            } finally {
+                method.releaseConnection();
+            }
+        } catch (final HttpException e) {
+            throw new TransactionException(WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage()));
+        } catch (final IOException e) {
+            throw new TransactionException(FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage()));
+        } catch (final DavException e) {
+            throw new TransactionException(WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage()));
+        }
     }
 
     public void finish() throws TransactionException {
-        // TODO Auto-generated method stub
-
+        /*
+         * TODO: A commit?
+         */
+        if (null == transactionToken) {
+            /*
+             * Transaction not started
+             */
+            return;
+        }
+        try {
+            /*-
+             * Check
+             * 
+             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
+             */
+            final URI uri = new URI(rootUri, true);
+            final UnLockMethod method = new UnLockMethod(uri.toString(), transactionToken);
+            try {
+                method.setRequestBody(new TransactionInfo(true));
+                client.executeMethod(method);
+                /*
+                 * Check if request was successfully executed
+                 */
+                method.checkSuccess();
+                transactionToken = null;
+            } finally {
+                method.releaseConnection();
+            }
+        } catch (final HttpException e) {
+            throw new TransactionException(WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage()));
+        } catch (final IOException e) {
+            throw new TransactionException(FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage()));
+        } catch (final DavException e) {
+            throw new TransactionException(WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage()));
+        }
     }
 
     public void setTransactional(final boolean transactional) {
@@ -233,6 +403,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final URI uri = new URI(folderId + '/' + id, true);
             final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
             try {
+                initMethod(folderId, id, propFindMethod);
                 client.executeMethod(propFindMethod);
                 /*
                  * Check if request was successfully executed
@@ -300,6 +471,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final URI uri = new URI(folderId + '/' + id, true);
             final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
             try {
+                initMethod(folderId, id, propFindMethod);
                 client.executeMethod(propFindMethod);
                 /*
                  * Check if request was successfully executed
@@ -375,8 +547,9 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
              * 
              * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
              */
-            final String folder = file.getFolderId();
-            final URI uri = new URI(folder + '/' + file.getId(), true);
+            final String folderId = file.getFolderId();
+            final String id = file.getId();
+            final URI uri = new URI(folderId + '/' + id, true);
             /*
              * Convert file to DAV representation
              */
@@ -384,6 +557,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final DavMethod propPatchMethod =
                 new PropPatchMethod(uri.toString(), davRepr.getSetProperties(), davRepr.getRemoveProperties());
             try {
+                initMethod(folderId, id, propPatchMethod);
                 client.executeMethod(propPatchMethod);
                 /*
                  * Check if request was successfully executed
@@ -419,6 +593,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final URI uri = new URI(folderId + '/' + id, true);
             final GetMethod getMethod = new GetMethod(uri.toString());
             try {
+                // initMethod(folderId, id, getMethod);
                 client.executeMethod(getMethod);
                 /*
                  * Check if request was successfully executed
@@ -467,11 +642,13 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             /*
              * Save content
              */
-            final String folder = file.getFolderId();
-            final URI uri = new URI(folder + '/' + file.getId(), true);
+            final String folderId = file.getFolderId();
+            final String id = file.getId();
+            final URI uri = new URI(folderId + '/' + id, true);
             final PutMethod putMethod = new PutMethod(uri.toString());
             putMethod.setRequestEntity(new InputStreamRequestEntity(data));
             try {
+                initMethod(folderId, id, putMethod);
                 client.executeMethod(putMethod);
                 /*
                  * Check if request was successfully executed
@@ -523,6 +700,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 final URI uri = new URI(folderId + '/' + id, true);
                 final DeleteMethod deleteMethod = new DeleteMethod(uri.toString());
                 try {
+                    initMethod(folderId, id, deleteMethod);
                     client.executeMethod(deleteMethod);
                     /*
                      * Check if request was successfully executed
@@ -563,6 +741,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final URI uri = new URI(folderId + '/' + id, true);
             final DeleteMethod deleteMethod = new DeleteMethod(uri.toString());
             try {
+                initMethod(folderId, id, deleteMethod);
                 client.executeMethod(deleteMethod);
                 /*
                  * Check if request was successfully executed
@@ -606,6 +785,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final URI uri = new URI(folderId + '/' + id, true);
             final UnLockMethod unlockMethod = new UnLockMethod(uri.toString(), lockToken);
             try {
+                initMethod(folderId, id, unlockMethod);
                 client.executeMethod(unlockMethod);
                 /*
                  * Check if request was successfully executed
@@ -632,8 +812,9 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
              */
             final URI uri = new URI(folderId + '/' + id, true);
             final LockMethod lockMethod =
-                new LockMethod(uri.toString(), Scope.EXCLUSIVE, Type.WRITE, accountAccess.getUser(), DavConstants.INFINITE_TIMEOUT, true);
+                new LockMethod(uri.toString(), Scope.EXCLUSIVE, Type.WRITE, null /*accountAccess.getUser()*/, DavConstants.INFINITE_TIMEOUT, true);
             try {
+                initMethod(folderId, id, lockMethod);
                 client.executeMethod(lockMethod);
                 /*
                  * Check if request was successfully executed
