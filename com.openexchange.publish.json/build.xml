@@ -30,6 +30,7 @@
     <property name="commonjar" value="common.jar"/>
     <property name="jsonjar" value="json.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
+    <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="publishjar" value="com.openexchange.publish.jar"/>
     <property name="publishbasicjar" value="com.openexchange.publish.basic.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
@@ -44,6 +45,7 @@
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
+        <pathelement location="${bundlesdir}/${configjar}"/>
         <pathelement location="${bundlesdir}/${genconfjar}"/>
         <pathelement location="${bundlesdir}/${publishjar}"/>
         <pathelement location="${bundlesdir}/${publishbasicjar}"/>
