@@ -47,19 +47,14 @@
  *
  */
 
-
 package com.openexchange.publish.json.osgi;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.security.auth.login.ConfigurationSpi;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
