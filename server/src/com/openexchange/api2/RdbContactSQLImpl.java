@@ -1408,7 +1408,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         try {
             con = DBPool.pickup(ctx);
 
-            stmt = con.prepareStatement("SELECT state FROM aggregatingContacts WHERE aggregator IN (?,?) OR contributor IN (?,?) AND aggregator != contributor");
+            stmt = con.prepareStatement("SELECT state FROM aggregatingContacts WHERE aggregator IN (?,?) AND contributor IN (?,?) AND aggregator != contributor");
             byte[] val1 = UUIDs.toByteArray(uuid1);
             byte[] val2 = UUIDs.toByteArray(uuid2);
             stmt.setBytes(1, val1);
