@@ -231,7 +231,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public void unlock(String folder, String id) throws FileStorageException {
+    public void unlock(String folderId, String id) throws FileStorageException {
         try {
             infostore.unlock(ID(id), sessionObj);
         } catch (AbstractOXException e) {

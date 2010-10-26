@@ -353,11 +353,11 @@ public interface FileStorageFileAccess extends TransactionAware {
     /**
      * Unlocks a given file.
      * 
-     * @param folder The folder identifier
+     * @param folderId The folder identifier
      * @param id The file to unlock
      * @throws FileStorageException
      */
-    public void unlock(String folder, String id) throws FileStorageException;
+    public void unlock(String folderId, String id) throws FileStorageException;
 
     /**
      * Locks a given file for the given duration (in milliseconds)
