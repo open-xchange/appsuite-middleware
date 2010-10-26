@@ -86,6 +86,9 @@ public final class WebDAVFileStorageExceptionMessages implements LocalizableStri
     // Invalid or missing credentials to access WebDAV server "%1$s".
     public static final String INVALID_CREDS_MSG = "Invalid or missing credentials to access WebDAV server \"%1$s\".";
 
+    // The resource is not a file: %1$s
+    public static final String NOT_A_FILE_MSG = "The resource is not a file: %1$s";
+
     /**
      * Initializes a new {@link WebDAVFileStorageExceptionMessages}.
      */

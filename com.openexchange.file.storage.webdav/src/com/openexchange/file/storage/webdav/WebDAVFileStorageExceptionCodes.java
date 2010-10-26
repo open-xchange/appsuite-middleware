@@ -96,7 +96,11 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
     /**
      * Invalid or missing credentials to access WebDAV server "%1$s".
      */
-    INVALID_CREDS(WebDAVFileStorageExceptionMessages.INVALID_CREDS_MSG, Category.CODE_ERROR, 9);
+    INVALID_CREDS(WebDAVFileStorageExceptionMessages.INVALID_CREDS_MSG, Category.CODE_ERROR, 9),
+    /**
+     * The resource is not a file: %1$s
+     */
+    NOT_A_FILE(WebDAVFileStorageExceptionMessages.NOT_A_FILE_MSG, Category.CODE_ERROR, 10);
     
 
     private final Category category;
