@@ -69,7 +69,7 @@ import com.openexchange.file.storage.rdb.groupware.FileStorageRdbCreateTableTask
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbDeleteListener;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
 import com.openexchange.file.storage.rdb.internal.RdbFileStorageAccountManagerProvider;
-import com.openexchange.file.storage.rdb.secret.FileStorageSecretHandling;
+import com.openexchange.file.storage.rdb.secret.RdbFileStorageSecretHandling;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTask;
@@ -170,9 +170,9 @@ public class FileStorageRdbActivator extends DeferredActivator {
             /*
              * Initialize and start service trackers
              */
-            trackers = new ArrayList<ServiceTracker>();
-            final ServiceTracker messagingServiceTracker = new ServiceTracker(context, FileStorageService.class.getName(), null);
-            trackers.add(messagingServiceTracker);
+            trackers = new ArrayList<ServiceTracker>(2);
+            final ServiceTracker fileStorageServiceTracker = new ServiceTracker(context, FileStorageService.class.getName(), null);
+            trackers.add(fileStorageServiceTracker);
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
@@ -180,7 +180,13 @@ public class FileStorageRdbActivator extends DeferredActivator {
              * Initialize and register services
              */
             registrations = new ArrayList<ServiceRegistration>();
+            /*
+             * The account manager provider which supports all file storages (but with low ranking)
+             */
             registrations.add(context.registerService(FileStorageAccountManagerProvider.class.getName(), new RdbFileStorageAccountManagerProvider(), null));
+            /*
+             * The update task/create table service
+             */
             final FileStorageRdbCreateTableTask createTableTask = new FileStorageRdbCreateTableTask();
             registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
 
@@ -189,16 +195,19 @@ public class FileStorageRdbActivator extends DeferredActivator {
                 }
             }, null));
             registrations.add(context.registerService(CreateTableService.class.getName(), createTableTask, null));
+            /*
+             * The delete listener
+             */
             registrations.add(context.registerService(DeleteListener.class.getName(), new FileStorageRdbDeleteListener(), null));
             /*
              * Secret Handling
              */
             {
-                final FileStorageSecretHandling secretHandling = new FileStorageSecretHandling() {
+                final RdbFileStorageSecretHandling secretHandling = new RdbFileStorageSecretHandling() {
 
                     @Override
                     protected Collection<FileStorageService> getFileStorageServices() {
-                        final Object[] objects = messagingServiceTracker.getServices();
+                        final Object[] objects = fileStorageServiceTracker.getServices();
                         if (objects == null) {
                             return Collections.emptyList();
                         }

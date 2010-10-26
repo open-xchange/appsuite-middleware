@@ -58,16 +58,16 @@ import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link FileStorageSecretHandling}
+ * {@link RdbFileStorageSecretHandling}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class FileStorageSecretHandling implements SecretConsistencyCheck, SecretMigrator {
+public abstract class RdbFileStorageSecretHandling implements SecretConsistencyCheck, SecretMigrator {
 
     /**
-     * Initializes a new {@link FileStorageSecretHandling}.
+     * Initializes a new {@link RdbFileStorageSecretHandling}.
      */
-    protected FileStorageSecretHandling() {
+    protected RdbFileStorageSecretHandling() {
         super();
     }
 
