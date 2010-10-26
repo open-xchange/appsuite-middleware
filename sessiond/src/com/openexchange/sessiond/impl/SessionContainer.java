@@ -161,22 +161,21 @@ final class SessionContainer {
      * Wraps specified session by a newly created {@link SessionControl} object and puts it into this container
      * 
      * @param session The session to put
-     * @param timeToLive The session's time to live
      * @return The wrapping {@link SessionControl session control}.
      */
-    SessionControl put(final Session session, final long timeToLive) {
+    SessionControl put(final Session session) {
         final String sessionId = session.getSessionID();
         /*
          * Add session
          */
         SessionControl sessionControl = sessionIdMap.get(sessionId);
         if (null == sessionControl) {
-            final SessionControl newSessionControl = new SessionControl(session, timeToLive);
+            final SessionControl newSessionControl = new SessionControl(session);
             sessionControl = sessionIdMap.putIfAbsent(sessionId, newSessionControl);
             if (null == sessionControl) {
                 sessionControl = newSessionControl;
             } else {
-                sessionControl.renew(session, timeToLive);
+                sessionControl.renew(session);
                 if (DEBUG_ENABLED) {
                     LOG.debug(new StringBuilder("session REBORN sessionid=").append(sessionId));
                 }
@@ -263,32 +262,6 @@ final class SessionContainer {
     }
 
     /**
-     * Converts this container to a newly created {@link Map map} holding this container's current sessions.
-     * <p>
-     * Changes made to any {@link Session} objects are reflected in this container.
-     * 
-     * @return The newly created {@link Map map} holding this container's sessions.
-     */
-    Map<String, Session> convert() {
-        final Map<String, Session> retval = new HashMap<String, Session>(sessionIdMap.size());
-        for (final Entry<String, SessionControl> e : sessionIdMap.entrySet()) {
-            retval.put(e.getKey(), e.getValue().getSession());
-        }
-        return retval;
-    }
-
-    /**
-     * Creates an {@link Iterator iterator} over the session IDs in this container.
-     * <p>
-     * The {@link Iterator#remove()} is not reflected in this container.
-     * 
-     * @return A newly created {@link Iterator iterator} over the session IDs in this container.
-     */
-    Iterator<String> getSessionIds() {
-        return new HashSet<String>(sessionIdMap.keySet()).iterator();
-    }
-
-    /**
      * Returns a collection view of the {@link SessionControl} objects contained in this container. The collection is
      * <b><small>not</small></b> backed by the container, so changes to the map are not reflected in the container, but changes made to any
      * {@link SessionControl} object is reflected in this container.
@@ -298,52 +271,4 @@ final class SessionContainer {
     Collection<SessionControl> getSessionControls() {
         return new ArrayList<SessionControl>(sessionIdMap.values());
     }
-
-    /**
-     * Simple key class for user ID and context ID.
-     */
-    private static final class UserKey {
-
-        private final int userId;
-
-        private final int cid;
-
-        private final int hash;
-
-        public UserKey(final int userId, final int cid) {
-            super();
-            this.userId = userId;
-            this.cid = cid;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + userId;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof UserKey)) {
-                return false;
-            }
-            final UserKey other = (UserKey) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            return true;
-        }
-
-    } // End of UserKey
-
 }

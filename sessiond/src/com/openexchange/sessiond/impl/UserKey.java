@@ -50,25 +50,48 @@
 package com.openexchange.sessiond.impl;
 
 /**
- * SessionConfig
- *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * Simple key class for user ID and context ID.
  */
-public interface SessiondConfigInterface {
+final class UserKey {
 
-    long getSessionContainerTimeout();
+    private final int userId;
 
-    long getLongTermSessionContainerTimeout();
+    private final int cid;
 
-    long getNumberOfSessionContainers();
+    private final int hash;
 
-    int getMaxSessions();
+    public UserKey(final int userId, final int cid) {
+        super();
+        this.userId = userId;
+        this.cid = cid;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + cid;
+        result = prime * result + userId;
+        hash = result;
+    }
 
-    int getMaxSessionsPerUser();
+    @Override
+    public int hashCode() {
+        return hash;
+    }
 
-    long getLifeTime();
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof UserKey)) {
+            return false;
+        }
+        final UserKey other = (UserKey) obj;
+        if (cid != other.cid) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        return true;
+    }
 
-    long getRandomTokenTimeout();
-
-    long getNumberOfLongTermSessionContainers();
 }

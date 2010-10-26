@@ -141,4 +141,8 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         }
         return value;
     }
+
+    public long getLongTermSessionContainerTimeout() {
+        return LONG_CONTAINER_LIFE_TIME;
+    }
 }

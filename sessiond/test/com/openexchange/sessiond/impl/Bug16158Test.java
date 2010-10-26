@@ -78,7 +78,7 @@ public class Bug16158Test extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        sessionData = new SessionData(100, 1, 60000);
+        sessionData = new SessionData(100, 1, 60000, 60480000l);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
         final SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
@@ -86,7 +86,7 @@ public class Bug16158Test extends TestCase {
         session.setSessionID(idGenerator.createSessionId(null, null));
         session.setLoginName("bug16158");
         session.setRandomToken(idGenerator.createRandomId());
-        sessionData.addSession(session, RUNTIME * 2, true);
+        sessionData.addSession(session, true);
         for (int i = 0; i < finders.length; i++) {
             finders[i] = new SessionFinder();
             finderThreads[i] = new Thread(finders[i]);
@@ -195,7 +195,7 @@ public class Bug16158Test extends TestCase {
                 } catch (final InterruptedException e) {
                     e.printStackTrace();
                 }
-                final List<SessionControl> removed = sessionData.rotate();
+                final List<SessionControl> removed = sessionData.rotateShort();
                 timeout = !removed.isEmpty();
             }
         }

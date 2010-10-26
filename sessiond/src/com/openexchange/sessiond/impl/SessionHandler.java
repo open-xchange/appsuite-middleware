@@ -98,7 +98,9 @@ public final class SessionHandler {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static ScheduledTimerTask sessiondTimer;
+    private static ScheduledTimerTask shortSessionContainerRotator;
+
+    private static ScheduledTimerTask longSessionContainerRotator;
 
     /**
      * Initializes a new {@link SessionHandler session handler}
@@ -114,7 +116,11 @@ public final class SessionHandler {
      */
     public static void init(final SessiondConfigInterface newConfig) {
         SessionHandler.config = newConfig;
-        sessionData = new SessionData(newConfig.getNumberOfSessionContainers(), newConfig.getMaxSessions(), config.getRandomTokenTimeout());
+        sessionData = new SessionData(
+            config.getNumberOfSessionContainers(),
+            config.getMaxSessions(),
+            config.getRandomTokenTimeout(),
+            config.getNumberOfLongTermSessionContainers());
         if (initialized.compareAndSet(false, true)) {
             try {
                 sessionIdGenerator = SessionIdGenerator.getInstance();
@@ -189,7 +195,7 @@ public final class SessionHandler {
         /*
          * Add session
          */
-        sessionData.addSession(session, config.getLifeTime(), noLimit);
+        sessionData.addSession(session, noLimit);
         /*
          * Post event for created session
          */
@@ -324,7 +330,7 @@ public final class SessionHandler {
                 } else {
                     // A cache hit! Add to local session containers
                     LOG.info("Migrate session: " + cachedSession.getSessionId());
-                    return sessionData.addSession(new SessionImpl(cachedSession), config.getLifeTime(), noLimit);
+                    return sessionData.addSession(new SessionImpl(cachedSession), noLimit);
                 }
             }
         } catch (final CacheException e) {
@@ -346,25 +352,36 @@ public final class SessionHandler {
         if (DEBUG) {
             LOG.debug("getSessions");
         }
-        return sessionData.getSessions();
+        return sessionData.getShortTermSessions();
     }
 
     protected static void cleanUp() {
         if (DEBUG) {
             LOG.debug("session cleanup");
         }
-        final List<SessionControl> sessionControls = sessionData.rotate();
+        final List<SessionControl> sessionControls = sessionData.rotateShort();
         if (INFO) {
             for (final SessionControl sessionControl : sessionControls) {
                 LOG.info("Session timed out. ID: " + sessionControl.getSession().getSessionID());
             }
         }
+        // TODO not removal but delete temporary data
         postContainerRemoval(sessionControls);
+    }
+
+    protected static void cleanUpLongTerm() {
+        List<SessionControl> controls = sessionData.rotateLongTerm();
+        if (INFO) {
+            for (SessionControl control : controls) {
+                LOG.info("Session timed out. ID: " + control.getSession().getSessionID());
+            }
+        }
+        postContainerRemoval(controls);
     }
 
     public static void close() {
         if (initialized.compareAndSet(true, false)) {
-            postContainerRemoval(sessionData.getSessions());
+            postContainerRemoval(sessionData.getShortTermSessions());
             sessionData.clear();
             sessionIdGenerator = null;
             config = null;
@@ -429,17 +446,25 @@ public final class SessionHandler {
     }
 
     public static void addTimerService(TimerService service) {
-        sessiondTimer = service.scheduleWithFixedDelay(
-            new SessiondTimer(),
+        sessionData.addTimerService(service);
+        shortSessionContainerRotator = service.scheduleWithFixedDelay(
+            new ShortSessionContainerRotator(),
             config.getSessionContainerTimeout(),
             config.getSessionContainerTimeout());
-        sessionData.addTimerService(service);
+        longSessionContainerRotator = service.scheduleWithFixedDelay(
+            new LongSessionContainerRotator(),
+            config.getLongTermSessionContainerTimeout(),
+            config.getLongTermSessionContainerTimeout());
     }
 
     public static void removeTimerService() {
-        if (sessiondTimer != null) {
-            sessiondTimer.cancel(false);
-            sessiondTimer = null;
+        if (longSessionContainerRotator != null) {
+            longSessionContainerRotator.cancel(false);
+            longSessionContainerRotator = null;
+        }
+        if (shortSessionContainerRotator != null) {
+            shortSessionContainerRotator.cancel(false);
+            shortSessionContainerRotator = null;
         }
         sessionData.removeTimerService();
     }

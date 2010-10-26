@@ -107,7 +107,7 @@ public class SessiondServiceImpl implements SessiondService {
     public Collection<Session> getSessions(final int userId, final int contextId) {
         final SessionControl[] sessionControls = SessionHandler.getUserSessions(userId, contextId);
         if (null == sessionControls || 0 == sessionControls.length) {
-            return Collections.<Session> emptyList();
+            return Collections.emptyList();
         }
         final int length = sessionControls.length;
         final List<Session> list = new ArrayList<Session>(length);

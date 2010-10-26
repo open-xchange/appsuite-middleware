@@ -65,29 +65,18 @@ public class SessionControl {
     private long creationTime;
 
     /**
-     * The last-accessed time stamp.
-     */
-    private long lastAccessed;
-
-    /**
      * The associated session.
      */
     private Session session;
 
     /**
-     * The life time of this session control.
-     */
-    private long lifetime;
-
-    /**
      * Initializes a new {@link SessionControl}
      * 
      * @param session The stored session
-     * @param lifetime The session's life time
      */
-    public SessionControl(final Session session, final long lifetime) {
+    public SessionControl(final Session session) {
         super();
-        renew0(session, lifetime);
+        renew0(session);
     }
 
     /**
@@ -98,21 +87,16 @@ public class SessionControl {
      * <li>Sets creation time stamp to current time millis</li>
      * <li>Sets last-accessed time stamp to current time millis</li>
      * </ul>
-     * 
-     * @param lifetime The (new) life time to set
      */
-    public void renew(final Session session, final long lifetime) {
+    public void renew(final Session sessionParam) {
         synchronized (this) {
-            renew0(session, lifetime);
+            renew0(sessionParam);
         }
     }
 
-    private void renew0(final Session session, final long lifetime) {
-        this.session = session;
-        this.lifetime = lifetime;
-        final long now = System.currentTimeMillis();
-        creationTime = now;
-        lastAccessed = now;
+    private void renew0(final Session sessionParam) {
+        this.session = sessionParam;
+        creationTime = System.currentTimeMillis();
     }
 
     /**
@@ -132,40 +116,4 @@ public class SessionControl {
     public long getCreationTime() {
         return creationTime;
     }
-
-    /**
-     * Gets the last-accessed timestamp.
-     * 
-     * @return The last-accessed timestamp
-     */
-    public long getLastAccessed() {
-        return lastAccessed;
-    }
-
-    /**
-     * Gets the session's life time in milliseconds
-     * 
-     * @return The session's life time in milliseconds
-     */
-    public long getLifetime() {
-        return lifetime;
-    }
-
-    /**
-     * Updates session's last-accessed timestamp.
-     */
-    public void updateLastAccessed() {
-        lastAccessed = System.currentTimeMillis();
-    }
-
-    /**
-     * Checks if a session is still valid. Therefore the maximum lifetime of a session, a disabled context and a disabled user are checked.
-     * 
-     * @param session Session to check.
-     * @return <code>true</code> if the session is still valid.
-     */
-    public boolean isValid() {
-        return ((lastAccessed + lifetime) >= System.currentTimeMillis());
-    }
-
 }

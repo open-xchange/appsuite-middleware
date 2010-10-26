@@ -57,11 +57,11 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class SessiondTimer implements Runnable {
+public class ShortSessionContainerRotator implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(SessiondTimer.class);
+    private static final Log LOG = LogFactory.getLog(ShortSessionContainerRotator.class);
 
-    public SessiondTimer() {
+    public ShortSessionContainerRotator() {
         super();
     }
 

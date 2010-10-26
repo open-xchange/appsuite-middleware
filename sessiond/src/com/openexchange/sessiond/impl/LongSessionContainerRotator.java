@@ -49,26 +49,27 @@
 
 package com.openexchange.sessiond.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
- * SessionConfig
+ * This timer rotates the containers in the SessionHandler.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface SessiondConfigInterface {
+public class LongSessionContainerRotator implements Runnable {
 
-    long getSessionContainerTimeout();
+    private static final Log LOG = LogFactory.getLog(LongSessionContainerRotator.class);
 
-    long getLongTermSessionContainerTimeout();
+    public LongSessionContainerRotator() {
+        super();
+    }
 
-    long getNumberOfSessionContainers();
-
-    int getMaxSessions();
-
-    int getMaxSessionsPerUser();
-
-    long getLifeTime();
-
-    long getRandomTokenTimeout();
-
-    long getNumberOfLongTermSessionContainers();
+    public void run() {
+        try {
+            SessionHandler.cleanUpLongTerm();
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+        }
+    }
 }
