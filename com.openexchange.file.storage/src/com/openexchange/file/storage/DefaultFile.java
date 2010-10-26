@@ -93,7 +93,7 @@ public class DefaultFile extends AbstractFile {
 
     private int numberOfVersions;
 
-    private Map<String, String> properties = new HashMap<String, String>();
+    private Map<String, String> properties;
 
     private String title;
 
@@ -107,14 +107,19 @@ public class DefaultFile extends AbstractFile {
 
     private static final String DEFAULT_TYPE = "application/octet-stream";
 
+    /**
+     * Initializes a new {@link DefaultFile}.
+     */
     public DefaultFile() {
         super();
+        fileMIMEType = DEFAULT_TYPE;
+        properties = new HashMap<String, String>();
     }
-    
-    public DefaultFile(File file) {
+
+    public DefaultFile(final File file) {
         copyFrom(file);
     }
-    
+
     public String getCategories() {
         return categories;
     }
@@ -144,9 +149,6 @@ public class DefaultFile extends AbstractFile {
     }
 
     public String getFileMIMEType() {
-        if(fileMIMEType == null) {
-            return DEFAULT_TYPE;
-        }
         return fileMIMEType;
     }
 
@@ -182,12 +184,26 @@ public class DefaultFile extends AbstractFile {
         return numberOfVersions;
     }
 
-    public String getProperty(String key) {
+    public String getProperty(final String key) {
         return properties.get(key);
     }
 
     public Set<String> getPropertyNames() {
         return properties.keySet();
+    }
+
+    /**
+     * Sets specified property. A <code>null</code> value removes the property.
+     * 
+     * @param name The name
+     * @param value The value or <code>null</code> for removal
+     */
+    public void setProperty(final String name, final String value) {
+        if (null == value) {
+            properties.remove(name);
+        } else {
+            properties.put(name, value);
+        }
     }
 
     public long getSequenceNumber() {
@@ -217,82 +233,83 @@ public class DefaultFile extends AbstractFile {
         return isCurrentVersion;
     }
 
-    public void setCategories(String categories) {
+    public void setCategories(final String categories) {
         this.categories = categories;
     }
 
-    public void setColorLabel(int color) {
+    public void setColorLabel(final int color) {
         this.colorLabel = color;
     }
 
-    public void setCreated(Date creationDate) {
+    public void setCreated(final Date creationDate) {
         this.created = creationDate;
     }
 
-    public void setCreatedBy(int creator) {
+    public void setCreatedBy(final int creator) {
         this.createdBy = creator;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
-    public void setFileMD5Sum(String sum) {
+    public void setFileMD5Sum(final String sum) {
         this.fileMD5Sum = sum;
     }
 
-    public void setFileMIMEType(String type) {
+    public void setFileMIMEType(final String type) {
         this.fileMIMEType = type;
     }
 
-    public void setFileName(String fileName) {
+    public void setFileName(final String fileName) {
         this.fileName = fileName;
     }
-    public void setFileSize(long length) {
+
+    public void setFileSize(final long length) {
         this.fileSize = length;
     }
 
-    public void setFolderId(String folderId) {
+    public void setFolderId(final String folderId) {
         this.folderId = folderId;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
-    public void setIsCurrentVersion(boolean bool) {
+    public void setIsCurrentVersion(final boolean bool) {
         this.isCurrentVersion = bool;
     }
 
-    public void setLastModified(Date now) {
+    public void setLastModified(final Date now) {
         this.lastModified = now;
     }
 
-    public void setLockedUntil(Date lockedUntil) {
+    public void setLockedUntil(final Date lockedUntil) {
         this.lockedUntil = lockedUntil;
     }
 
-    public void setModifiedBy(int lastEditor) {
+    public void setModifiedBy(final int lastEditor) {
         this.modifiedBy = lastEditor;
     }
 
-    public void setNumberOfVersions(int numberOfVersions) {
+    public void setNumberOfVersions(final int numberOfVersions) {
         this.numberOfVersions = numberOfVersions;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
-    public void setURL(String url) {
+    public void setURL(final String url) {
         this.url = url;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(final int version) {
         this.version = version;
     }
 
-    public void setVersionComment(String string) {
+    public void setVersionComment(final String string) {
         this.versionComment = string;
     }
 
