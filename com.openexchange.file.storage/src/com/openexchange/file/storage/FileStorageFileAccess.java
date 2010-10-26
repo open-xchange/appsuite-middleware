@@ -65,13 +65,12 @@ import com.openexchange.tx.TransactionAware;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface FileStorageFileAccess extends TransactionAware {
-
+    
     public static class IDTuple {
 
         private String folder;
-
         private String id;
-
+        
         public IDTuple(final String folder, final String id) {
             this.folder = folder;
             this.id = id;
@@ -84,11 +83,11 @@ public interface FileStorageFileAccess extends TransactionAware {
         public void setFolder(final String folder) {
             this.folder = folder;
         }
-
+        
         public String getId() {
             return id;
         }
-
+        
         public void setId(final String id) {
             this.id = id;
         }
@@ -130,9 +129,10 @@ public interface FileStorageFileAccess extends TransactionAware {
             }
             return true;
         }
-
+        
+        
     }
-
+    
     /**
      * A version number pointing at the current version of a file
      */
@@ -142,7 +142,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * An ID value denoting a newly created file, or a file that should be created
      */
     public static final String NEW = null;
-
+    
     /**
      * A folderId indicating all folders. Useful for searching.
      */
@@ -207,7 +207,7 @@ public interface FileStorageFileAccess extends TransactionAware {
             }
             return null;
         }
-
+        
         public void sort(final List<File> collection, final File.Field by) {
             Collections.sort(collection, comparatorBy(by));
         }
@@ -230,11 +230,11 @@ public interface FileStorageFileAccess extends TransactionAware {
         }
 
         public static SortDirection get(final String name) {
-            if (name == null) {
+            if(name == null) {
                 return DEFAULT;
             }
             for (final SortDirection dir : values()) {
-                if (dir.name().equalsIgnoreCase(name)) {
+                if(dir.name().equalsIgnoreCase(name)) {
                     return dir;
                 }
             }
@@ -245,18 +245,16 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Find out whether the file with a given ID exists or not.
-     * 
      * @param folderId The folder identifier
      * @param id The ID to check for
      * @param version The version to check for
      * @return true when the file exists and is readable, false otherwise.
-     * @throws FileStorageException
+     * @throws FileStorageException 
      */
     public boolean exists(String folderId, String id, int version) throws FileStorageException;
-
+    
     /**
      * Load the metadata about a file
-     * 
      * @param folderId The folder identifier
      * @param id The id of the file
      * @param version The version number of the file. May pass in CURRENT_VERSION to load the current version
@@ -264,31 +262,26 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws FileStorageException
      */
     public File getFileMetadata(String folderId, String id, int version) throws FileStorageException;
-
+    
     /**
      * Save the file metadata.
-     * 
      * @param file The metadata to save
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
-     *            DISTANT_FUTURE to circumvent the check
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
      * @throws FileStorageException
      */
-    public void saveFileMetadata(File file, long sequenceNumber) throws FileStorageException; // No modifiedColumns means all columns
+    public void saveFileMetadata(File file, long sequenceNumber) throws FileStorageException ; // No modifiedColumns means all columns
 
     /**
      * Save the file metadata.
-     * 
      * @param file The metadata to save
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
-     *            DISTANT_FUTURE to circumvent the check
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
      * @param modifiedFields The fields to save. All other fields will be ignored
      * @throws FileStorageException
      */
-    public void saveFileMetadata(File file, long sequenceNumber, List<File.Field> modifiedFields) throws FileStorageException;
-
+    public void saveFileMetadata(File file, long sequenceNumber, List<File.Field> modifiedFields) throws FileStorageException ;
+    
     /**
      * Load the documents content
-     * 
      * @param folderId The folder identifier
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
@@ -299,29 +292,25 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Save the file metadata and binary content
-     * 
      * @param file The metadata to save
      * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
-     *            DISTANT_FUTURE to circumvent the check
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
      * @throws FileStorageException
      */
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws FileStorageException;
+    public void saveDocument(File file, InputStream data, long sequenceNumber) throws FileStorageException ;
 
     /**
      * Save the file metadata.
-     * 
      * @param file The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @throws FileStorageException
      */
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws FileStorageException;
-
+    public void saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws FileStorageException ;
+    
     /**
      * Remove all documents in the given folder.
-     * 
      * @param folderId The folder to clear
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @throws FileStorageException
@@ -329,19 +318,16 @@ public interface FileStorageFileAccess extends TransactionAware {
     public void removeDocument(String folderId, long sequenceNumber) throws FileStorageException;
 
     /**
-     * Removes the documents with the given identifiers from the folder. Documents identifiers that could not be removed due to an
-     * edit-delete conflict are returned.
-     * 
+     * Removes the documents with the given identifiers from the folder. Documents identifiers that could not be removed due to an edit-delete conflict are returned.
      * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @return
      * @throws FileStorageException
      */
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws FileStorageException;
-
+ 
     /**
      * Remove a certain version of a file
-     * 
      * @param folderId The folder identifier
      * @param id The file id whose version is to be removed
      * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
@@ -352,16 +338,14 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Unlocks a given file.
-     * 
      * @param folder The folder identifier
      * @param id The file to unlock
      * @throws FileStorageException
      */
     public void unlock(String folder, String id) throws FileStorageException;
-
+    
     /**
      * Locks a given file for the given duration (in milliseconds)
-     * 
      * @param folderId The folder identifier
      * @param id The file to lock
      * @param diff The duration in milliseconds
@@ -371,7 +355,6 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Updates a files sequence number
-     * 
      * @param folderId The folder identifier
      * @param id The file whose sequence number should be updated
      * @throws FileStorageException
@@ -380,7 +363,6 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List a folders content
-     * 
      * @param folderId The folder whose contents to list
      * @return
      * @throws FileStorageException
@@ -389,7 +371,6 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List a folders content loading only the fields given
-     * 
      * @param folderId The folder whose contents to list
      * @param fields The fields to load
      * @return
@@ -398,8 +379,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     public TimedResult<File> getDocuments(String folderId, List<File.Field> fields) throws FileStorageException;
 
     /**
-     * List a folders content loading only the fields given and sorting by a certain field either ascending or descending.
-     * 
+     * List a folders content loading only the fields given and sorting by a certain field either ascendingly or descendingly
      * @param folderId The folder whose contents to list
      * @param fields The fields to load
      * @param sort The field to sort by
@@ -408,10 +388,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws FileStorageException
      */
     public TimedResult<File> getDocuments(String folderId, List<File.Field> fields, File.Field sort, SortDirection order) throws FileStorageException;
-
+    
     /**
-     * List all versions of a file
-     * 
+     * List all versions of a document
      * @param folderId The folder identifier
      * @param id The documents id
      * @return
@@ -421,7 +400,6 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List all versions of a document loading the given fields
-     * 
      * @param folder The folder identifier
      * @param id The documents id
      * @param fields The fields to load
@@ -432,7 +410,6 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List all versions of a document loading the given fields sorted according to the given field in a given order
-     * 
      * @param folder The folder identifier
      * @param id The documents id
      * @param fields The fields to load
@@ -443,17 +420,15 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Load the document metadata with the given identifiers.
-     * 
      * @param ids The identifiers
      * @param fields The fields to load
      * @return
      * @throws FileStorageException
      */
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<File.Field> fields) throws FileStorageException;
-
+    
     /**
      * Get changes in a given folder since a certain sequence number
-     * 
      * @param folderId The folder to examine
      * @param updateSince The sequence number to check against
      * @param fields The fields to load
@@ -465,7 +440,6 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Get changes in a given folder since a certain sequence number
-     * 
      * @param folderId The folder to examine
      * @param updateSince The sequence number to check against
      * @param fields The fields to load
@@ -480,7 +454,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     /**
      * Search for a given file.
      * 
-     * @param query The search query
+     * @param query The search query 
      * @param fields Which fields to load
      * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
      * @param sort Which field to sort by. May be null.
@@ -491,7 +465,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws FileStorageException
      */
     public SearchIterator<File> search(String query, List<File.Field> fields, String folderId, File.Field sort, SortDirection order, int start, int end) throws FileStorageException;
-
+    
     /**
      * Retrieve the parent account access.
      */
