@@ -314,10 +314,10 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param file The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
-     * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @param modifiedFields The fields to save. All other fields will be ignored
      * @throws FileStorageException
      */
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws FileStorageException;
+    public void saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields) throws FileStorageException;
 
     /**
      * Remove all documents in the given folder.
@@ -398,7 +398,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     public TimedResult<File> getDocuments(String folderId, List<File.Field> fields) throws FileStorageException;
 
     /**
-     * List a folders content loading only the fields given and sorting by a certain field either ascendingly or descendingly
+     * List a folders content loading only the fields given and sorting by a certain field either ascending or descending.
      * 
      * @param folderId The folder whose contents to list
      * @param fields The fields to load
@@ -410,7 +410,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     public TimedResult<File> getDocuments(String folderId, List<File.Field> fields, File.Field sort, SortDirection order) throws FileStorageException;
 
     /**
-     * List all versions of a document
+     * List all versions of a file
      * 
      * @param folderId The folder identifier
      * @param id The documents id

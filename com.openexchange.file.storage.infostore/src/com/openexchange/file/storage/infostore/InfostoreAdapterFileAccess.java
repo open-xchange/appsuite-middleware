@@ -195,9 +195,9 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedColumns) throws FileStorageException {
+    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws FileStorageException {
         try {
-            infostore.saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedColumns), sessionObj );
+            infostore.saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), sessionObj );
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
