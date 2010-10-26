@@ -657,8 +657,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public void touch(final String folderId, final String id) throws FileStorageException {
-        // TODO Auto-generated method stub
-
+        // ???
     }
 
     public TimedResult<File> getDocuments(final String folderId) throws FileStorageException {
@@ -712,8 +711,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public FileStorageAccountAccess getAccountAccess() {
-        // TODO Auto-generated method stub
-        return null;
+        return accountAccess;
     }
 
 }
