@@ -1,3 +1,7 @@
+* 2010-10-26 - tobias.prinz@open-xchange.com
+
+ - Userstory 5247: Publications can now be configured to run on different (sub-)domains, HTML white-listing can be disabled.
+ 
 * 2010-10-25 - thorben.betten@open-xchange.com
 
  - Bugfix #17330: Proper folder fullname when renaming a folder on root level
