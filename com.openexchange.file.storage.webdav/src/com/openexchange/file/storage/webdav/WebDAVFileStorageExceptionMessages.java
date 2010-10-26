@@ -89,6 +89,9 @@ public final class WebDAVFileStorageExceptionMessages implements LocalizableStri
     // The resource is not a file: %1$s
     public static final String NOT_A_FILE_MSG = "The resource is not a file: %1$s";
 
+    // Versioning not supported by WebDAV.
+    public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by WebDAV.";
+
     /**
      * Initializes a new {@link WebDAVFileStorageExceptionMessages}.
      */

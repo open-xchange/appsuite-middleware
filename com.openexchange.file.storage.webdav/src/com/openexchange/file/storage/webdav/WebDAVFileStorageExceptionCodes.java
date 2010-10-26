@@ -100,7 +100,11 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
     /**
      * The resource is not a file: %1$s
      */
-    NOT_A_FILE(WebDAVFileStorageExceptionMessages.NOT_A_FILE_MSG, Category.CODE_ERROR, 10);
+    NOT_A_FILE(WebDAVFileStorageExceptionMessages.NOT_A_FILE_MSG, Category.CODE_ERROR, 10),
+    /**
+     * Versioning not supported by WebDAV.
+     */
+    VERSIONING_NOT_SUPPORTED(WebDAVFileStorageExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 11);
     
 
     private final Category category;
