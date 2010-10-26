@@ -245,7 +245,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Find out whether the file with a given ID exists or not.
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The ID to check for
      * @param version The version to check for
      * @return true when the file exists and is readable, false otherwise.
@@ -255,7 +255,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     
     /**
      * Load the metadata about a file
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The id of the file
      * @param version The version number of the file. May pass in CURRENT_VERSION to load the current version
      * @return The File Metadata
@@ -282,7 +282,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     
     /**
      * Load the documents content
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
      * @return
@@ -318,8 +318,8 @@ public interface FileStorageFileAccess extends TransactionAware {
     public void removeDocument(String folderId, long sequenceNumber) throws FileStorageException;
 
     /**
-     * Removes the documents with the given IDs from the folder. Documents ids that could not be removed due to an edit-delete conflict are returned.
-     * @param ids TODO
+     * Removes the documents with the given identifiers from the folder. Documents identifiers that could not be removed due to an edit-delete conflict are returned.
+     * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @return
      * @throws FileStorageException
@@ -328,7 +328,7 @@ public interface FileStorageFileAccess extends TransactionAware {
  
     /**
      * Remove a certain version of a file
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The file id whose version is to be removed
      * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
      * @return
@@ -338,7 +338,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Unlocks a given file.
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The file to unlock
      * @throws FileStorageException
      */
@@ -346,7 +346,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     
     /**
      * Locks a given file for the given duration (in milliseconds)
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The file to lock
      * @param diff The duration in milliseconds
      * @throws FileStorageException
@@ -355,7 +355,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Updates a files sequence number
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The file whose sequence number should be updated
      * @throws FileStorageException
      */
@@ -391,7 +391,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     
     /**
      * List all versions of a document
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The documents id
      * @return
      * @throws FileStorageException
@@ -400,7 +400,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List all versions of a document loading the given columns
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The documents id
      * @param columns The columns to load
      * @return
@@ -410,7 +410,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List all versions of a document loading the given columns sorted according to the given field in a given order
-     * @param folder TODO
+     * @param folder The folder identifier
      * @param id The documents id
      * @param columns The columns to load
      * @return
@@ -419,8 +419,8 @@ public interface FileStorageFileAccess extends TransactionAware {
     public TimedResult<File> getVersions(String folder, String id, List<File.Field> columns, File.Field sort, SortDirection order) throws FileStorageException;
 
     /**
-     * Load the document metadata with the given ids
-     * @param ids TODO
+     * Load the document metadata with the given identifiers.
+     * @param ids The identifiers
      * @param columns The fields to load
      * @return
      * @throws FileStorageException
