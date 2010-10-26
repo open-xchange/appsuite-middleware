@@ -104,9 +104,9 @@ public final class WebDAVFileStorageService implements FileStorageService {
 
     private void applyAccountManager() throws FileStorageException {
         try {
-            final FileStorageAccountManagerLookupService lookupService =
-                WebDAVFileStorageServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true);
-            accountManager = lookupService.getAccountManagerFor(this);
+            accountManager =
+                WebDAVFileStorageServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true).getAccountManagerFor(
+                    this);
         } catch (final ServiceException e) {
             throw new FileStorageException(e);
         }
