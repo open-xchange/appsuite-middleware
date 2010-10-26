@@ -50,71 +50,40 @@
 package com.openexchange.file.storage.webdav;
 
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseDateProperty;
+import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseIntProperty;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseStringProperty;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-import java.util.regex.Pattern;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
-import com.openexchange.file.storage.DefaultFileStorageFolder;
-import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageException;
-import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.FileStorageFileAccess;
 
 /**
- * {@link WebDAVFileStorageFolder}
+ * {@link WebDAVFileStorageFile}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
-
-    private static final Pattern SPLIT = Pattern.compile(" *, *");
+public final class WebDAVFileStorageFile extends DefaultFile {
 
     /**
-     * Initializes a new {@link WebDAVFileStorageFolder}.
-     */
-    public WebDAVFileStorageFolder(final String uri, final String rootUri, final int userId) {
-        super();
-        id = uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
-        if (id.equalsIgnoreCase(rootUri)) {
-            rootFolder = true;
-            parentId = "";
-        } else {
-            rootFolder = false;
-            final int pos = id.lastIndexOf('/');
-            parentId = pos > 0 ? id.substring(0, pos) : rootUri;
-        }
-        b_rootFolder = true;
-        holdsFiles = true;
-        b_holdsFiles = true;
-        holdsFolders = true;
-        b_holdsFolders = true;
-        exists = true;
-        subscribed = true;
-        b_subscribed = true;
-        final DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
-        permission.setEntity(userId);
-        permissions = Collections.<FileStoragePermission> singletonList(permission);
-    }
-
-    /**
-     * Parses specified value of header <code>"Allow"</code>.
+     * Initializes a new {@link WebDAVFileStorageFile}.
      * 
-     * @param allow The value of header <code>"Allow"</code>
+     * @param folderId The folder identifier; e.g. "http://webdav-server.com/Telephone%20Lines"
+     * @param id The file identifier; e.g. "lines.pdf"
+     * @param userId The user identifier
      */
-    public void parseAllowHeader(final String allow) {
-        if (null == allow) {
-            capabilities = Collections.emptySet();
-        } else {
-            final String[] sa = SPLIT.split(allow, 0);
-            final Set<String> allowedCmds = new HashSet<String>(sa.length);
-            for (final String element : sa) {
-                allowedCmds.add(element.toUpperCase(Locale.ENGLISH));
-            }
-            capabilities = allowedCmds;
-        }
+    public WebDAVFileStorageFile(final String folderId, final String id, final int userId) {
+        super();
+        setFolderId(folderId);
+        setCreatedBy(userId);
+        setModifiedBy(userId);
+        setId(id);
+        setVersion(FileStorageFileAccess.CURRENT_VERSION);
+        setIsCurrentVersion(true);
+        /*
+         * TODO: Again: How does id look like? Complete URI?
+         */
+        setURL(folderId + '/' + id);
     }
 
     /**
@@ -122,13 +91,23 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
      * 
      * @param propertySet The DAV property set of associated MultiStatus response
      * @throws FileStorageException If parsing DAV property set fails
+     * @return This WebDAV file with property set applied
      */
-    public void parseDavPropertySet(final DavPropertySet propertySet) throws FileStorageException {
+    public WebDAVFileStorageFile parseDavPropertySet(final DavPropertySet propertySet) throws FileStorageException {
         if (null != propertySet) {
-            creationDate = parseDateProperty(DavConstants.PROPERTY_CREATIONDATE, propertySet);
-            lastModifiedDate = parseDateProperty(DavConstants.PROPERTY_GETLASTMODIFIED, propertySet);
-            name = parseStringProperty(DavConstants.PROPERTY_DISPLAYNAME, propertySet);
+            setCreated(parseDateProperty(DavConstants.PROPERTY_CREATIONDATE, propertySet));
+            setLastModified(parseDateProperty(DavConstants.PROPERTY_GETLASTMODIFIED, propertySet));
+            setFileName(parseStringProperty(DavConstants.PROPERTY_DISPLAYNAME, propertySet));
+            setFileMIMEType(parseStringProperty(DavConstants.PROPERTY_GETCONTENTTYPE, propertySet));
+            setFileSize(parseIntProperty(DavConstants.PROPERTY_GETCONTENTLENGTH, propertySet));
+            setTitle(getFileName());
+            /*
+             * Add other DAV properties as file properties
+             */
+            setProperty(DavConstants.PROPERTY_GETETAG, parseStringProperty(DavConstants.PROPERTY_GETETAG, propertySet));
+            setProperty(DavConstants.PROPERTY_GETCONTENTLANGUAGE, parseStringProperty(DavConstants.PROPERTY_GETCONTENTLANGUAGE, propertySet));
         }
+        return this;
     }
 
 }

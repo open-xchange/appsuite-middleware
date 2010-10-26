@@ -120,9 +120,11 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     private final Session session;
 
+    private final String user;
+
     private volatile FileStorageFolderAccess folderAccess;
 
-    private FileStorageFileAccess fileAccess;
+    private volatile WebDAVFileStorageFileAccess fileAccess;
 
     /**
      * Initializes a new {@link WebDAVFileStorageAccountAccess}.
@@ -132,6 +134,16 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         httpClientRef = new AtomicReference<HttpClient>();
         this.account = account;
         this.session = session;
+        user = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_LOGIN);
+    }
+
+    /**
+     * Gets the name of the WebDAV user.
+     * 
+     * @return The name of te WebDAV user
+     */
+    public String getUser() {
+        return user;
     }
 
     public void connect() throws FileStorageException {
@@ -158,6 +170,12 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
     }
 
     public void close() {
+        final WebDAVFileStorageFileAccess thisFileAccess = fileAccess;
+        if (null != thisFileAccess) {
+            thisFileAccess.cleanUp();
+            fileAccess = null;
+        }
+        folderAccess = null;
         /*
          * Close is performed when last session gone by WebDAVHttpClientRegistry
          */
@@ -205,12 +223,12 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         if (null == client) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        FileStorageFileAccess tmp = fileAccess;
+        WebDAVFileStorageFileAccess tmp = fileAccess;
         if (null == tmp) {
             synchronized (this) {
                 tmp = fileAccess;
                 if (null == tmp) {
-                    fileAccess = tmp = new WebDAVFileStorageFileAccess(client, account, session);
+                    fileAccess = tmp = new WebDAVFileStorageFileAccess(client, account, this, session);
                 }
             }
         }
@@ -377,7 +395,8 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountAccess#getService()
      */
     public FileStorageService getService() {
