@@ -90,6 +90,7 @@ import com.openexchange.user.UserService;
  * {@link MicroformatServlet}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - HTML whitelisting, same-origin-policy stuff
  */
 public class MicroformatServlet extends OnlinePublicationServlet {
 
@@ -105,8 +106,9 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final String CONTEXTID = "ctx";
 
-    private static PublicationDataLoaderService dataLoader = null;
+    private static final String USE_WHITELISTING_PROPERTY_NAME = "com.openexchange.publish.microformats.usesWhitelisting";
 
+    private static PublicationDataLoaderService dataLoader = null;
 
     private static Map<String, Map<String, Object>> additionalTemplateVariables = new HashMap<String, Map<String, Object>>();
 
@@ -126,6 +128,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     }
 
     private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
+
+	
     static {
         TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -220,8 +224,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             StringWriter htmlWriter = new StringWriter();
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
-            html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
-            html = htmlService.filterWhitelist(html, "microformatWhitelist");
+            if(isUsingWhitelisting()){
+            	html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
+            	html = htmlService.filterWhitelist(html, "microformatWhitelist");
+            }
             resp.getWriter().write(html);
             
 
@@ -232,7 +238,12 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         }
     }
 
-    private Contact getContact(final PublicationSession publicationSession, final Context context, final int contactId) throws OXException {
+    private boolean isUsingWhitelisting() {
+    	boolean retVal = configService.getBoolProperty(USE_WHITELISTING_PROPERTY_NAME, false); 
+		return retVal;
+	}
+
+	private Contact getContact(final PublicationSession publicationSession, final Context context, final int contactId) throws OXException {
         final ContactInterface contactInterface = contacts.getContactInterfaceProvider(FolderObject.SYSTEM_LDAP_FOLDER_ID, context.getContextId()).newContactInterface(publicationSession);
         final Contact contact = contactInterface.getObjectById(contactId, FolderObject.SYSTEM_LDAP_FOLDER_ID);
         return contact;

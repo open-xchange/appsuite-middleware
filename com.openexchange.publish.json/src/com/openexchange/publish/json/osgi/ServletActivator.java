@@ -52,10 +52,15 @@ package com.openexchange.publish.json.osgi;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.security.auth.login.ConfigurationSpi;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -74,7 +79,7 @@ public class ServletActivator extends DeferredActivator {
     private static final String TARGET_ALIAS = "ajax/publicationTargets";
     private static final String PUB_ALIAS = "ajax/publications";
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PublicationTargetDiscoveryService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PublicationTargetDiscoveryService.class, ConfigurationService.class };
 
     private ComponentRegistration componentRegistration;
 
@@ -101,6 +106,11 @@ public class ServletActivator extends DeferredActivator {
             return;
         }
         
+        ConfigurationService config = getService(ConfigurationService.class);
+        if(config == null){
+        	return;
+        }
+        
         PublicationMultipleHandlerFactory publicationHandlerFactory = new PublicationMultipleHandlerFactory(discovery, new EntityMap());
         PublicationTargetMultipleHandlerFactory publicationTargetHandlerFactory = new PublicationTargetMultipleHandlerFactory(discovery);
         
@@ -109,6 +119,7 @@ public class ServletActivator extends DeferredActivator {
         
         
         PublicationServlet.setFactory(publicationHandlerFactory);
+        PublicationServlet.setConfigurationService(config);
         PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
         
         final HttpService httpService = getService(HttpService.class);

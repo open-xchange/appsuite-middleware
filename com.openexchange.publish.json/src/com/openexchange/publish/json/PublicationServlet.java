@@ -53,6 +53,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.MultipleAdapterServlet;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.session.ServerSession;
 
@@ -65,9 +66,19 @@ public class PublicationServlet extends MultipleAdapterServlet {
 
     private static PublicationMultipleHandlerFactory multipleFactory;
 
+	private static ConfigurationService config;
+
+    private static final String PROPERTY_USE_OTHER_DOMAIN = "com.openexchange.publish.domain";
+    private static final String PROPERTY_USE_OTHER_SUBDOMAIN = "com.openexchange.publish.subdomain";
+    
     public static void setFactory(PublicationMultipleHandlerFactory factory) {
         multipleFactory = factory;
     }
+    
+	public static void setConfigurationService(ConfigurationService config2) {
+		config = config2;
+	}
+
 
     @Override
     protected MultipleHandler createMultipleHandler() {
@@ -93,6 +104,17 @@ public class PublicationServlet extends MultipleAdapterServlet {
     
     protected String getServerURL(HttpServletRequest req) {
         String protocol = req.isSecure() ? "https://" : "http://";
+        String otherDomain = config.getProperty(PROPERTY_USE_OTHER_DOMAIN);
+        String separateSubdomain = config.getProperty(PROPERTY_USE_OTHER_SUBDOMAIN);
+        
+        if(otherDomain != null){
+        	return protocol + otherDomain;
+        }
+        
+        if(separateSubdomain != null){
+        	return protocol + separateSubdomain + "." + req.getServerName();
+        }
+        
         return protocol + req.getServerName();
     }
 
