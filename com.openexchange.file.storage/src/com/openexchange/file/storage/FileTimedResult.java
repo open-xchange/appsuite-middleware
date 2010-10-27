@@ -54,26 +54,29 @@ import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
-
 /**
  * {@link FileTimedResult}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileTimedResult extends AbstractTimedResult<File> {
 
     /**
-     * Initializes a new {@link FileTimedResult}.
+     * Initializes a new {@link FileTimedResult} from given collection.
+     * 
+     * @param collection The collection
      */
     public FileTimedResult(final Collection<File> collection) {
         super(new SearchIteratorAdapter<File>(collection.iterator()));
     }
 
     /**
-     * Initializes a new {@link FileTimedResult}.
+     * Initializes a new {@link FileTimedResult} from given search iterator.
+     * 
+     * @param iter The search iterator
      */
-    public FileTimedResult(final SearchIterator<File> results) {
-        super(results);
+    public FileTimedResult(final SearchIterator<File> iter) {
+        super(iter);
     }
 
     @Override
