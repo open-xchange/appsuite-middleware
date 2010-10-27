@@ -1,0 +1,4 @@
+open-xchange-file-storage-composition (6.18.2.0-0) unstable; urgency=low
+  * Initial version
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 10 Feb 2010 22:02:38 +0100
