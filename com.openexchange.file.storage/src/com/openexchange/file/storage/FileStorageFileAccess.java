@@ -480,7 +480,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     /**
      * Search for a given file.
      * 
-     * @param query The search query
+     * @param pattern The search pattern possibly containing wild-cards
      * @param fields Which fields to load
      * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
      * @param sort Which field to sort by. May be null.
@@ -490,7 +490,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws FileStorageException
      */
-    public SearchIterator<File> search(String query, List<File.Field> fields, String folderId, File.Field sort, SortDirection order, int start, int end) throws FileStorageException;
+    public SearchIterator<File> search(String pattern, List<File.Field> fields, String folderId, File.Field sort, SortDirection order, int start, int end) throws FileStorageException;
 
     /**
      * Retrieve the parent account access.

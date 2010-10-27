@@ -334,10 +334,10 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
     
     @Override
-    public SearchIterator<File> search(String query, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws FileStorageException {
+    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws FileStorageException {
         int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Integer.parseInt(folderId);
         try {
-            SearchIterator<DocumentMetadata> iterator = search.search(query, FieldMapping.getMatching(fields), folder, FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), start, end, ctx, user, userConfig);
+            SearchIterator<DocumentMetadata> iterator = search.search(pattern, FieldMapping.getMatching(fields), folder, FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), start, end, ctx, user, userConfig);
             return new InfostoreSearchIterator(iterator);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
