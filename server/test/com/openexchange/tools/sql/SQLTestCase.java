@@ -94,7 +94,7 @@ public abstract class SQLTestCase extends TestCase {
     }
 
     protected void loadProperties() throws IOException {
-        String filename = System.getProperty("com.openexchange.test.sql.properties", "conf/sql.properties");
+        String filename = System.getProperty("com.openexchange.test.sql.properties", "testconf/sql.properties");
         properties = new Properties();
         InputStream input = null;
         try {
