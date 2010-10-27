@@ -12,10 +12,12 @@ public class GetContactForUserRequest extends AbstractContactRequest<GetResponse
 
 	private String id;
 	private boolean failOnError;
+	private TimeZone timezone;
 
-	public GetContactForUserRequest(int id, boolean failOnError){
+	public GetContactForUserRequest(int id, boolean failOnError, TimeZone tz){
 		this.id = String.valueOf(id);
 		this.failOnError = failOnError;
+		this.timezone = tz;
 	}
 	
 	public Method getMethod() {
@@ -30,7 +32,7 @@ public class GetContactForUserRequest extends AbstractContactRequest<GetResponse
 	}
 
 	public GetParser getParser() {
-		return new GetParser(failOnError, TimeZone.getDefault());
+		return new GetParser(failOnError, timezone);
 	}
 
 	public Object getBody() throws IOException, JSONException {
