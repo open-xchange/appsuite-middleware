@@ -133,7 +133,7 @@ public final class WebDAVFileStorageDavRepr {
         }
     }
 
-    private void setProperty0(String name, String value) {
+    private void setProperty0(final String name, final String value) {
         if (null == value) {
             removeProperties.add(DavPropertyName.create(name, DavConstants.NAMESPACE));
         } else {
@@ -147,7 +147,7 @@ public final class WebDAVFileStorageDavRepr {
      * @param name The property name
      * @param value The property value or <code>null</code> to indicate removal
      */
-    public void setProperty(String name, String value) {
+    public void setProperty(final String name, final String value) {
         setProperty0(name, value);
     }
 

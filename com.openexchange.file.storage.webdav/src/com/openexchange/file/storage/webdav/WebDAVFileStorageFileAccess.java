@@ -210,7 +210,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         if (addIfHeader) {
             // http://blog.ropardo.ro/getting-the-lock-token-for-an-item-in-jackrabbit/
             // http://www.koders.com/java/fid411ED72BF4F6D245D33A7E6A4F48127AF190657A.aspx?s=mdef:getUserId
-            final String thisTransactionToken = this.transactionToken;
+            final String thisTransactionToken = transactionToken;
             if (null != thisTransactionToken) {
                 CodedUrlHeader codedUrl = new CodedUrlHeader("Transaction", thisTransactionToken);
                 davMethod.setRequestHeader(codedUrl);
@@ -942,7 +942,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws FileStorageException {
-        List<File> list = new ArrayList<File>(ids.size());
+        final List<File> list = new ArrayList<File>(ids.size());
         for (final IDTuple idTuple : ids) {
             list.add(getFileMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION));
         }
