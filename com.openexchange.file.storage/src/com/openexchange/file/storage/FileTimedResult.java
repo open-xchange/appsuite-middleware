@@ -49,8 +49,10 @@
 
 package com.openexchange.file.storage;
 
+import java.util.Collection;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 
 /**
@@ -59,6 +61,13 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileTimedResult extends AbstractTimedResult<File> {
+
+    /**
+     * Initializes a new {@link FileTimedResult}.
+     */
+    public FileTimedResult(final Collection<File> collection) {
+        super(new SearchIteratorAdapter<File>(collection.iterator()));
+    }
 
     /**
      * Initializes a new {@link FileTimedResult}.
