@@ -131,14 +131,13 @@ public final class AppointmentConverters {
         tmp.add(new LastModified<VEvent, Appointment>());
 
         tmp.add(new CreatedBy<VEvent, Appointment>());
+        tmp.add(new Sequence<VEvent, Appointment>());
         
         // All standard converters
         final List<AttributeConverter<VEvent, Appointment>> all = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
         final Participants<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();
         participants.setVerifier(new PrivateAppointmentsHaveNoParticipants());
         all.add(participants);
-        final Sequence<VEvent, Appointment> sequence = new Sequence<VEvent, Appointment>();
-        all.add(sequence);
         ALL = all.toArray(new AttributeConverter[all.size()]);
         
         // Special Participant Converters for IMip

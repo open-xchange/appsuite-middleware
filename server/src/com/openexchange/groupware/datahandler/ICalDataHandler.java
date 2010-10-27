@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -78,6 +79,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -123,12 +125,18 @@ public abstract class ICalDataHandler implements DataHandler {
             if (appointment.containsUid() && (uid = appointment.getUid()) != null)
                 objectId = appointmentSql.resolveUid(uid);
                 
-            if (objectId != 0 && confirm != null) {
-                try {
-                    updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
-                } catch (OXPermissionException e) {
-                    handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
+            if (objectId != 0) {
+                if (confirm != null) {
+                    try {
+                        updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
+                    } catch (OXPermissionException e) {
+                        handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
+                    }
                 }
+                appointment.setObjectID(objectId);
+                appointment.setIgnoreConflicts(true);
+                updateAppointment(appointment, calendarFolder, appointmentSql);
+                folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, calendarFolder).put(CalendarFields.ID, objectId));
             } else {
                 appointment.setParentFolderID(calendarFolder);
                 appointment.setIgnoreConflicts(true);
@@ -140,6 +148,19 @@ public abstract class ICalDataHandler implements DataHandler {
         }
     }
     
+    private void updateAppointment(CalendarDataObject appointment, int calendarFolder, AppointmentSQLInterface appointmentSql) throws OXException {
+        try {
+            CalendarDataObject loadAppointment = appointmentSql.getObjectById(appointment.getObjectID(), calendarFolder);
+            if (loadAppointment.getSequence() >= appointment.getSequence()) {
+                return;
+            }
+        } catch (SQLException e) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+        }
+        
+        appointmentSql.updateAppointmentObject(appointment, calendarFolder, new Date());
+    }
+
     private void handleWithoutPermission(Session session, CalendarDataObject appointment, int calendarFolder, Confirm confirm, AppointmentSQLInterface appointmentSql) throws OXException {
         appointment.removeUid();
         appointment.removeObjectID();

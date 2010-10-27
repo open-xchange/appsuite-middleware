@@ -298,6 +298,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     static int fillUpdateArray(final CalendarDataObject cdao, final CalendarDataObject edao, final int ucols[]) {
         int uc = 0;
+        if (cdao.containsSequence() && recColl.check(I(cdao.getSequence()), I(edao.getSequence())) && recColl.getFieldName(Appointment.SEQUENCE) != null) {
+            ucols[uc++] = Appointment.SEQUENCE;
+        }
         if (cdao.containsTitle() && recColl.check(cdao.getTitle(), edao.getTitle()) && recColl.getFieldName(Appointment.TITLE) != null) {
             ucols[uc++] = Appointment.TITLE;
         }
@@ -380,6 +383,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
 
         final boolean isInsert = !cdao.containsObjectID();
+        handleSequence(cdao, edao, isInsert);
         if (isInsert) {
             checkInsertMandatoryFields(cdao);
             handleFullTime(cdao, null);
@@ -555,6 +559,38 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
         return isInsert;
+    }
+
+    /**
+     * @param cdao
+     * @param edao
+     * @param isInsert
+     * @throws OXCalendarException 
+     */
+    private void handleSequence(CalendarDataObject cdao, CalendarDataObject edao, boolean isInsert) throws OXCalendarException {
+        if (isInsert) {
+            if (cdao.containsSequence() && cdao.getSequence() != 0)
+                throw new OXCalendarException(OXCalendarException.Code.INVALID_SEQUENCE, cdao.getSequence());
+            
+            cdao.setSequence(0);
+        } else {
+            if (!cdao.containsSequence() && !edao.containsSequence())
+                cdao.setSequence(1);
+            
+            else if (!cdao.containsSequence() && edao.containsSequence())
+                cdao.setSequence(edao.getSequence() + 1);
+            
+            else if (cdao.containsSequence() && edao.containsSequence() && cdao.getSequence() <= edao.getSequence())
+                cdao.setSequence(edao.getSequence() + 1);
+                //TODO: throw new OXCalendarException(OXCalendarException.Code.INVALID_SEQUENCE, cdao.getSequence());
+            
+            else if (cdao.containsSequence() && edao.containsSequence() && cdao.getSequence() > edao.getSequence())
+                ;
+            
+            else if (cdao.containsSequence() && !edao.containsSequence())
+                ;
+            
+        }
     }
 
     /**

@@ -344,6 +344,12 @@ public class CalendarMySQL implements CalendarSqlImp {
                 stmt.setString(pos, cdao.getTimezoneFallbackUTC());
             }
         });
+        STATEMENT_FILLERS.put(Integer.valueOf(Appointment.SEQUENCE), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                stmt.setInt(pos, cdao.getSequence());
+            }
+        });
     }
 
     public CalendarMySQL() {

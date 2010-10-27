@@ -870,14 +870,21 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     msg.message = new StringTemplate(message).render(p.getLocale(), clone);
                 }
             } else {
+                String textMessage = "";
                 if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
                     final String template = Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_UPDATE_MAIL_EXT : Notifications.TASK_UPDATE_MAIL_EXT;
-                    msg.message = new StringTemplate(template).render(p.getLocale(), renderMap);
+                    textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else if (!canRead) {
                     final String template = state.getModule() == Types.APPOINTMENT ? Notifications.APPOINTMENT_UPDATE_MAIL_NO_ACCESS : Notifications.TASK_UPDATE_MAIL_NO_ACCESS;
-                    msg.message = new StringTemplate(template).render(p.getLocale(), renderMap);
+                    textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else {
-                    msg.message = createTemplate.render(p.getLocale(), renderMap);
+                    textMessage = createTemplate.render(p.getLocale(), renderMap);
+                }
+                
+                if (cal.getRecurrenceType() == Appointment.NO_RECURRENCE && p.type == Participant.EXTERNAL_USER) {
+                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
+                } else {
+                    msg.message = textMessage;
                 }
             }
         } else {
