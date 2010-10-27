@@ -125,7 +125,7 @@ public abstract class AbstractFile implements File {
     }
 
     public boolean matches(final String pattern, final Field... fields) {
-        final Set<Field> set = null == fields || fields.length == 0 ? DEFAULT_SEARCH_FIELDS : EnumSet.copyOf(Arrays.asList(fields));
+        final Set<Field> set = null == fields || 0 == fields.length ? DEFAULT_SEARCH_FIELDS : EnumSet.copyOf(Arrays.asList(fields));
         final Pattern regex = Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
         final FileFieldGet fileFieldGet = new FileFieldGet();
         for (final Field field : set) {
