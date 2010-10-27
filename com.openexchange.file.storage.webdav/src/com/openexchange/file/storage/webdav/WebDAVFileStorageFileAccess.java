@@ -52,6 +52,9 @@ package com.openexchange.file.storage.webdav;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -79,7 +82,9 @@ import org.apache.jackrabbit.webdav.header.IfHeader;
 import org.apache.jackrabbit.webdav.lock.Scope;
 import org.apache.jackrabbit.webdav.lock.Type;
 import org.apache.jackrabbit.webdav.property.DavProperty;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.transaction.TransactionConstants;
 import org.apache.jackrabbit.webdav.transaction.TransactionInfo;
 import org.w3c.dom.Element;
@@ -90,11 +95,13 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tx.TransactionException;
 
 /**
@@ -210,11 +217,13 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 codedUrl = new CodedUrlHeader(TransactionConstants.HEADER_TRANSACTIONID, thisTransactionToken);
                 davMethod.setRequestHeader(codedUrl);
             }
-            // Lock token from former exclusive lock for a certain item
-            final String lockToken = lockTokenMap.get(new LockTokenKey(folderId, id));
-            if (null != lockToken) {
-                final IfHeader ifH = new IfHeader(new String[] { lockToken });
-                davMethod.setRequestHeader(ifH.getHeaderName(), ifH.getHeaderValue());
+            if (null != folderId && null != id) {
+                // Lock token from former exclusive lock for a certain item
+                final String lockToken = lockTokenMap.get(new LockTokenKey(folderId, id));
+                if (null != lockToken) {
+                    final IfHeader ifH = new IfHeader(new String[] { lockToken });
+                    davMethod.setRequestHeader(ifH.getHeaderName(), ifH.getHeaderValue());
+                }
             }
         }
     }
@@ -232,21 +241,25 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             return;
         }
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final URI uri = new URI(rootUri, true);
             /*
              * Create proper LockInfo
              */
             // final LockInfo lockInfo = new LockInfo(DavConstants.INFINITE_TIMEOUT);
-            // lockInfo.setType(Type.create(TransactionConstants.XML_TRANSACTION, DavConstants.NAMESPACE)); // or lockInfo.setType(TransactionConstants.TRANSACTION); with different namespace "dcr" instead of "d"
-            // lockInfo.setScope(Scope.create(TransactionConstants.XML_GLOBAL, DavConstants.NAMESPACE)); // or lockInfo.setScope(TransactionConstants.GLOBAL); with different namespace "dcr" instead of "d"
+            // lockInfo.setType(Type.create(TransactionConstants.XML_TRANSACTION, DavConstants.NAMESPACE)); // or
+            // lockInfo.setType(TransactionConstants.TRANSACTION); with different namespace "dcr" instead of "d"
+            // lockInfo.setScope(Scope.create(TransactionConstants.XML_GLOBAL, DavConstants.NAMESPACE)); // or
+            // lockInfo.setScope(TransactionConstants.GLOBAL); with different namespace "dcr" instead of "d"
             // final LockMethod lockMethod = new LockMethod(uri.toString(), lockInfo);
-            
-            final LockMethod lockMethod = new LockMethod(uri.toString(), TransactionConstants.LOCAL, TransactionConstants.TRANSACTION, null, DavConstants.INFINITE_TIMEOUT, true);
+
+            final LockMethod lockMethod =
+                new LockMethod(
+                    uri.toString(),
+                    TransactionConstants.LOCAL,
+                    TransactionConstants.TRANSACTION,
+                    null,
+                    DavConstants.INFINITE_TIMEOUT,
+                    true);
             try {
                 client.executeMethod(lockMethod);
                 /*
@@ -278,11 +291,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             return;
         }
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final URI uri = new URI(rootUri, true);
             final UnLockMethod method = new UnLockMethod(uri.toString(), transactionToken);
             try {
@@ -313,11 +321,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             return;
         }
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final URI uri = new URI(rootUri, true);
             final UnLockMethod method = new UnLockMethod(uri.toString(), transactionToken);
             try {
@@ -342,40 +345,8 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     public void finish() throws TransactionException {
         /*
-         * TODO: A commit?
+         * Nope
          */
-        if (null == transactionToken) {
-            /*
-             * Transaction not started
-             */
-            return;
-        }
-        try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
-            final URI uri = new URI(rootUri, true);
-            final UnLockMethod method = new UnLockMethod(uri.toString(), transactionToken);
-            try {
-                method.setRequestBody(new TransactionInfo(true));
-                client.executeMethod(method);
-                /*
-                 * Check if request was successfully executed
-                 */
-                method.checkSuccess();
-                transactionToken = null;
-            } finally {
-                method.releaseConnection();
-            }
-        } catch (final HttpException e) {
-            throw new TransactionException(WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage()));
-        } catch (final IOException e) {
-            throw new TransactionException(FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage()));
-        } catch (final DavException e) {
-            throw new TransactionException(WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage()));
-        }
     }
 
     public void setTransactional(final boolean transactional) {
@@ -389,17 +360,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public void setCommitsTransaction(final boolean commits) {
-        // TODO Auto-generated method stub
-
+        // Nope
     }
 
     public boolean exists(final String folderId, final String id, final int version) throws FileStorageException {
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final URI uri = new URI(folderId + '/' + id, true);
             final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
             try {
@@ -421,7 +386,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     tmp.setEscapedPath(multiStatusResponse.getHref());
                     if (uri.equals(tmp)) {
                         /*
-                         * Get for 200 (OK) status
+                         * Set for 200 (OK) status
                          */
                         final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
                         if (null != propertySet && !propertySet.isEmpty()) {
@@ -462,12 +427,10 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public File getFileMetadata(final String folderId, final String id, final int version) throws FileStorageException {
+        if (version != CURRENT_VERSION) {
+            throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+        }
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final URI uri = new URI(folderId + '/' + id, true);
             final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
             try {
@@ -489,7 +452,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     tmp.setEscapedPath(multiStatusResponse.getHref());
                     if (uri.equals(tmp)) {
                         /*
-                         * Get for 200 (OK) status
+                         * Set for 200 (OK) status
                          */
                         final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
                         if (null != propertySet && !propertySet.isEmpty()) {
@@ -542,11 +505,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     private void saveFileMetadata0(final File file, final List<Field> modifiedFields) throws FileStorageException {
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final String folderId = file.getFolderId();
             final String id = file.getId();
             final URI uri = new URI(folderId + '/' + id, true);
@@ -585,11 +543,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     public InputStream getDocument(final String folderId, final String id, final int version) throws FileStorageException {
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final URI uri = new URI(folderId + '/' + id, true);
             final GetMethod getMethod = new GetMethod(uri.toString());
             try {
@@ -692,11 +645,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             for (final IDTuple idTuple : ids) {
                 final String folderId = idTuple.getFolder();
                 final String id = idTuple.getId();
-                /*-
-                 * Check
-                 * 
-                 * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-                 */
                 final URI uri = new URI(folderId + '/' + id, true);
                 final DeleteMethod deleteMethod = new DeleteMethod(uri.toString());
                 try {
@@ -728,16 +676,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     public int[] removeVersion(final String folderId, final String id, final int[] versions) throws FileStorageException {
         for (final int version : versions) {
-            if (version != FileStorageFileAccess.CURRENT_VERSION) {
+            if (version != CURRENT_VERSION) {
                 throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
             }
         }
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final URI uri = new URI(folderId + '/' + id, true);
             final DeleteMethod deleteMethod = new DeleteMethod(uri.toString());
             try {
@@ -775,11 +718,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     private void unlock0(final LockTokenKey lockTokenKey, final String lockToken) throws FileStorageException {
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final String folderId = lockTokenKey.getFolderId();
             final String id = lockTokenKey.getId();
             final URI uri = new URI(folderId + '/' + id, true);
@@ -805,14 +743,15 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     public void lock(final String folderId, final String id, final long diff) throws FileStorageException {
         try {
-            /*-
-             * Check
-             * 
-             * TODO: How does id look like? Complete URI? Or intended to be appended to folder URI?
-             */
             final URI uri = new URI(folderId + '/' + id, true);
             final LockMethod lockMethod =
-                new LockMethod(uri.toString(), Scope.EXCLUSIVE, Type.WRITE, null /*accountAccess.getUser()*/, DavConstants.INFINITE_TIMEOUT, true);
+                new LockMethod(
+                    uri.toString(),
+                    Scope.EXCLUSIVE,
+                    Type.WRITE,
+                    null /* accountAccess.getUser() */,
+                    DavConstants.INFINITE_TIMEOUT,
+                    true);
             try {
                 initMethod(folderId, id, lockMethod);
                 client.executeMethod(lockMethod);
@@ -838,61 +777,355 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public void touch(final String folderId, final String id) throws FileStorageException {
-        // ???
+        /*
+         * Update last-modified time stamp
+         */
+        try {
+            final URI uri = new URI(folderId + '/' + id, true);
+            /*
+             * Create DAV representation
+             */
+            final DavPropertySet setProperties = new DavPropertySet();
+            setProperties.add(new DefaultDavProperty<String>(
+                DavConstants.PROPERTY_GETLASTMODIFIED,
+                WebDAVFileStorageResourceUtil.getDateProperty(new Date()),
+                DavConstants.NAMESPACE));
+            final DavMethod propPatchMethod = new PropPatchMethod(uri.toString(), setProperties, new DavPropertyNameSet());
+            try {
+                initMethod(folderId, id, propPatchMethod);
+                client.executeMethod(propPatchMethod);
+                /*
+                 * Check if request was successfully executed
+                 */
+                propPatchMethod.checkSuccess();
+            } finally {
+                propPatchMethod.releaseConnection();
+            }
+        } catch (final HttpException e) {
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final DavException e) {
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            if (e instanceof FileStorageException) {
+                throw (FileStorageException) e;
+            }
+            if (e instanceof AbstractOXException) {
+                throw new FileStorageException((AbstractOXException) e);
+            }
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public TimedResult<File> getDocuments(final String folderId) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileTimedResult(getFileList(folderId, null));
     }
 
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileTimedResult(getFileList(folderId, fields));
+    }
+
+    private List<File> getFileList(final String folderId, final List<Field> fields) throws FileStorageException {
+        try {
+            /*
+             * Check
+             */
+            final URI uri = new URI(folderId, true);
+            final List<File> files;
+            final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
+            try {
+                initMethod(folderId, null, propFindMethod);
+                client.executeMethod(propFindMethod);
+                /*
+                 * Check if request was successfully executed
+                 */
+                propFindMethod.checkSuccess();
+                /*
+                 * Get MultiStatus response
+                 */
+                final MultiStatus multiStatus = propFindMethod.getResponseBodyAsMultiStatus();
+                /*
+                 * Find MultiStatus for specified folder URI
+                 */
+                final URI tmp = new URI(folderId, true);
+                final MultiStatusResponse[] multiStatusResponses = multiStatus.getResponses();
+                files = new ArrayList<File>(multiStatusResponses.length);
+                for (final MultiStatusResponse multiStatusResponse : multiStatusResponses) {
+                    final String href = multiStatusResponse.getHref();
+                    tmp.setEscapedPath(href);
+                    if (uri.equals(tmp)) {
+                        /*
+                         * Set for 200 (OK) status
+                         */
+                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                        if (null == propertySet || propertySet.isEmpty()) {
+                            throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
+                                folderId,
+                                account.getId(),
+                                WebDAVConstants.ID,
+                                Integer.valueOf(session.getUserId()),
+                                Integer.valueOf(session.getContextId()));
+                        }
+                        /*
+                         * Check for collection
+                         */
+                        @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
+                            (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
+                        final Element resourceType = davProperty.getValue();
+                        if (null == resourceType || !"collection".equalsIgnoreCase(resourceType.getLocalName())) {
+                            /*
+                             * Not a collection
+                             */
+                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(folderId);
+                        }
+                    } else {
+                        /*
+                         * Set for 200 (OK) status
+                         */
+                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                        if (null != propertySet && !propertySet.isEmpty()) {
+                            /*
+                             * Check for collection
+                             */
+                            @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
+                                (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
+                            final Element resourceType = davProperty.getValue();
+                            if (null == resourceType || !"collection".equalsIgnoreCase(resourceType.getLocalName())) {
+                                /*
+                                 * File
+                                 */
+                                files.add(new WebDAVFileStorageFile(folderId, extractFileName(href), session.getUserId()).parseDavPropertySet(propertySet, fields));
+                            }
+                        }
+                    }
+                }
+            } finally {
+                propFindMethod.releaseConnection();
+            }
+            return files;
+        } catch (final FileStorageException e) {
+            throw e;
+        } catch (final HttpException e) {
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final DavException e) {
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        final List<File> files = getFileList(folderId, fields);
+        /*
+         * Sort list
+         */
+        Collections.sort(files, order.comparatorBy(sort));
+        /*
+         * Return sorted result
+         */
+        return new FileTimedResult(files);
     }
 
     public TimedResult<File> getVersions(final String folderId, final String id) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
     public TimedResult<File> getVersions(final String folder, final String id, final List<Field> fields) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileTimedResult(Collections.singletonList(getFileMetadata(folder, id, CURRENT_VERSION)));
     }
 
-    public TimedResult<File> getVersions(final String folder, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws FileStorageException {
+        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
     public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        List<File> list = new ArrayList<File>(ids.size());
+        for (final IDTuple idTuple : ids) {
+            list.add(getFileMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION));
+        }
+        return  new FileTimedResult(list);
     }
 
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws FileStorageException {
-        // TODO Auto-generated method stub
+        // either all or none
         return null;
     }
 
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws FileStorageException {
-        // TODO Auto-generated method stub
+        // either all or none
         return null;
     }
 
-    public SearchIterator<File> search(final String query, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+    public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws FileStorageException {
+        final List<File> results;
+        if (ALL_FOLDERS.equals(folderId)) {
+            /*
+             * Recursively search files in directories
+             */
+            results = new ArrayList<File>();
+            recursiveSearchFile(pattern, rootUri, fields, results);
+        } else {
+            /*
+             * Get files from folder
+             */
+            results = getFileList(folderId, fields);
+            /*
+             * Filter by search pattern
+             */
+            for (final Iterator<File> iterator = results.iterator(); iterator.hasNext();) {
+                final File file = iterator.next();
+                if (!file.matches(pattern)) {
+                    iterator.remove();
+                }
+            }
+        }
+        /*
+         * Empty?
+         */
+        if (results.isEmpty()) {
+            return SearchIteratorAdapter.createEmptyIterator();
+        }
+        /*
+         * Sort
+         */
+        Collections.sort(results, order.comparatorBy(sort));
+        /*
+         * Consider start/end index
+         */
+        if (start != NOT_SET && end != NOT_SET && end > start) {
+
+            final int fromIndex = start;
+            int toIndex = end;
+            if ((fromIndex) > results.size()) {
+                /*
+                 * Return empty iterator if start is out of range
+                 */
+                return SearchIteratorAdapter.createEmptyIterator();
+            }
+            /*
+             * Reset end index if out of range
+             */
+            if (toIndex >= results.size()) {
+                toIndex = results.size();
+            }
+            /*
+             * Return
+             */
+            final List<File> subList = results.subList(fromIndex, toIndex);
+            return new SearchIteratorAdapter<File>(subList.iterator(), subList.size());
+        }
+        /*
+         * Return sorted result
+         */
+        return new SearchIteratorAdapter<File>(results.iterator(), results.size());
+    }
+
+    private void recursiveSearchFile(final String pattern, final String folderId, final List<Field> fields, final List<File> results) throws FileStorageException {
+        try {
+            /*
+             * Check
+             */
+            final URI uri = new URI(folderId, true);
+            final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
+            try {
+                initMethod(folderId, null, propFindMethod);
+                client.executeMethod(propFindMethod);
+                /*
+                 * Check if request was successfully executed
+                 */
+                propFindMethod.checkSuccess();
+                /*
+                 * Get MultiStatus response
+                 */
+                final MultiStatus multiStatus = propFindMethod.getResponseBodyAsMultiStatus();
+                /*
+                 * Find MultiStatus for specified folder URI
+                 */
+                final URI tmp = new URI(folderId, true);
+                final MultiStatusResponse[] multiStatusResponses = multiStatus.getResponses();
+                for (final MultiStatusResponse multiStatusResponse : multiStatusResponses) {
+                    final String href = multiStatusResponse.getHref();
+                    tmp.setEscapedPath(href);
+                    if (uri.equals(tmp)) {
+                        /*
+                         * Set for 200 (OK) status
+                         */
+                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                        if (null == propertySet || propertySet.isEmpty()) {
+                            throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
+                                folderId,
+                                account.getId(),
+                                WebDAVConstants.ID,
+                                Integer.valueOf(session.getUserId()),
+                                Integer.valueOf(session.getContextId()));
+                        }
+                        /*
+                         * Check for collection
+                         */
+                        @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
+                            (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
+                        final Element resourceType = davProperty.getValue();
+                        if (null == resourceType || !"collection".equalsIgnoreCase(resourceType.getLocalName())) {
+                            /*
+                             * Not a collection
+                             */
+                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(folderId);
+                        }
+                    } else {
+                        /*
+                         * Set for 200 (OK) status
+                         */
+                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                        if (null != propertySet && !propertySet.isEmpty()) {
+                            /*
+                             * Check for collection
+                             */
+                            @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
+                                (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
+                            final Element resourceType = davProperty.getValue();
+                            if (null != resourceType && "collection".equalsIgnoreCase(resourceType.getLocalName())) {
+                                /*
+                                 * A directory
+                                 */
+                                recursiveSearchFile(pattern, tmp.toString(), fields, results);
+                            } else {
+                                /*
+                                 * File
+                                 */
+                                final WebDAVFileStorageFile davFile = new WebDAVFileStorageFile(folderId, extractFileName(href), session.getUserId()).parseDavPropertySet(propertySet, fields);
+                                if (davFile.matches(pattern)) {
+                                    results.add(davFile);
+                                }
+                            }
+                        }
+                    }
+                }
+            } finally {
+                propFindMethod.releaseConnection();
+            }
+        } catch (final FileStorageException e) {
+            throw e;
+        } catch (final HttpException e) {
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final DavException e) {
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
+    }
+
+    private static String extractFileName(final String href) {
+        final int pos = href.lastIndexOf('/');
+        return pos > 0 ? href.substring(pos + 1) : href;
     }
 
 }
