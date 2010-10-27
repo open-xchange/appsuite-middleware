@@ -50,12 +50,44 @@
 package com.openexchange.tx;
 
 public interface TransactionAware {
-	public void startTransaction() throws TransactionException;
-	public void commit() throws TransactionException;
-	public void rollback() throws TransactionException;
-	public void finish() throws TransactionException;
-	public void setTransactional(boolean transactional);
-	public void setRequestTransactional(boolean transactional);
+
+    /**
+     * Starts the transaction.
+     * 
+     * @throws TransactionException If transaction start-up fails
+     */
+    public void startTransaction() throws TransactionException;
+
+    /**
+     * Commits the transaction.
+     * 
+     * @throws TransactionException If transaction commit fails
+     */
+    public void commit() throws TransactionException;
+
+    /**
+     * Rolls-back the transaction.
+     * 
+     * @throws TransactionException If transaction roll-back fails
+     */
+    public void rollback() throws TransactionException;
+
+    /**
+     * Performs possible clean-up operations after a commit/roll-back.
+     * 
+     * @throws TransactionException If clean-up fails
+     */
+    public void finish() throws TransactionException;
+
+    public void setTransactional(boolean transactional);
+
+    public void setRequestTransactional(boolean transactional);
+
+    /**
+     * Sets whether auto-commit is activated or not.
+     * 
+     * @param commits <code>true</code> if auto-commit is activated; otherwise <code>false</code>
+     */
     public void setCommitsTransaction(boolean commits);
-        
+
 }
