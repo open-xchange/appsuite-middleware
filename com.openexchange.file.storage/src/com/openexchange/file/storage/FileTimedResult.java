@@ -67,7 +67,7 @@ public class FileTimedResult extends AbstractTimedResult<File> {
      * @param collection The collection
      */
     public FileTimedResult(final Collection<File> collection) {
-        super(new SearchIteratorAdapter<File>(collection.iterator()));
+        super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
     }
 
     /**

@@ -433,13 +433,13 @@ public interface FileStorageFileAccess extends TransactionAware {
     /**
      * List all versions of a document loading the given fields sorted according to the given field in a given order
      * 
-     * @param folder The folder identifier
+     * @param folderId The folder identifier
      * @param id The documents id
      * @param fields The fields to load
      * @return
      * @throws FileStorageException
      */
-    public TimedResult<File> getVersions(String folder, String id, List<File.Field> fields, File.Field sort, SortDirection order) throws FileStorageException;
+    public TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields, File.Field sort, SortDirection order) throws FileStorageException;
 
     /**
      * Load the document metadata with the given identifiers.
