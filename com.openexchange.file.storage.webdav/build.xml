@@ -23,6 +23,7 @@
     <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
     <!-- Bundle dependencies -->
+	<property name="commonBundle" value="com.openexchange.common"/>
 	<!-- <property name="xmlBundle" value="com.openexchange.xml"/> -->
 
     <!-- JAR names for classpath -->
@@ -35,6 +36,8 @@
     <property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="filestoragejar" value="com.openexchange.file.storage.jar"/>
 	<property name="txjar" value="com.openexchange.tx.jar"/>
+
+	<property name="commonjar" value="common.jar"/>
 
     <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -54,6 +57,8 @@
         <pathelement location="${bundlesdir}/${filestoragejar}"/>
     	<pathelement location="${bundlesdir}/${txjar}"/>
 
+    	<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+    	
         <fileset refid="3rdpartyjars"/>
     </path>
 
