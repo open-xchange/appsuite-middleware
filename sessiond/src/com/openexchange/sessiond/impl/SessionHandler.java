@@ -192,17 +192,11 @@ public final class SessionHandler {
             new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, sessionIdGenerator.createSecretId(
                 loginName,
                 Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash);
-        /*
-         * Add session
-         */
+        // Add session
         sessionData.addSession(session, noLimit);
-        /*
-         * Post event for created session
-         */
+        // Post event for created session
         postSessionCreation(session);
-        /*
-         * Return session ID
-         */
+        // Return session ID
         return sessionId;
     }
 
@@ -359,14 +353,13 @@ public final class SessionHandler {
         if (DEBUG) {
             LOG.debug("session cleanup");
         }
-        final List<SessionControl> sessionControls = sessionData.rotateShort();
+        final List<SessionControl> controls = sessionData.rotateShort();
         if (INFO) {
-            for (final SessionControl sessionControl : sessionControls) {
+            for (final SessionControl sessionControl : controls) {
                 LOG.info("Session timed out. ID: " + sessionControl.getSession().getSessionID());
             }
         }
-        // TODO not removal but delete temporary data
-        postContainerRemoval(sessionControls);
+        postSessionDataRemoval(controls);
     }
 
     protected static void cleanUpLongTerm() {
@@ -433,6 +426,37 @@ public final class SessionHandler {
             eventAdmin.postEvent(event);
             if (DEBUG) {
                 LOG.debug("Posted event for removed session container");
+            }
+        }
+    }
+
+    private static void postSessionDataRemoval(final List<SessionControl> controls) {
+        final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+        if (eventAdmin != null) {
+            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
+            final Map<String, Session> eventMap = new HashMap<String, Session>();
+            for (final SessionControl sessionControl : controls) {
+                final Session session = sessionControl.getSession();
+                eventMap.put(session.getSessionID(), session);
+            }
+            dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
+            final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_DATA, dic);
+            eventAdmin.postEvent(event);
+            if (DEBUG) {
+                LOG.debug("Posted event for removing temporary session data.");
+            }
+        }
+    }
+
+    static void postSessionReactivation(final Session session) {
+        final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+        if (eventAdmin != null) {
+            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
+            dic.put(SessiondEventConstants.PROP_SESSION, session);
+            final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
+            eventAdmin.postEvent(event);
+            if (DEBUG) {
+                LOG.debug("Posted event for added session");
             }
         }
     }

@@ -60,9 +60,6 @@ import org.osgi.service.event.EventConstants;
  */
 public final class SessiondEventConstants {
 
-    /**
-     * Initializes a new {@link SessiondEventConstants}
-     */
     private SessiondEventConstants() {
         super();
     }
@@ -78,6 +75,19 @@ public final class SessiondEventConstants {
     public static final String TOPIC_REMOVE_CONTAINER = "com/openexchange/sessiond/remove/container";
 
     /**
+     * This event topic is used when sessions walk into the long term session life time container. If this event is emitted all temporary
+     * session data should be removed. A complete UI reload is suggested to get the session back out of the long term life time container or
+     * at first, we expect that to reduce the amount of used memory.
+     */
+    public static final String TOPIC_REMOVE_DATA = "com/openexchange/sessiond/remove/data";
+
+    /**
+     * This event topic is used when a session is reactivated from the long term session life time container. Background tasks for the
+     * session can be reactivated on this event again.
+     */
+    public static final String TOPIC_REACTIVATE_SESSION = "com/openexchange/sessiond/reactivate/session";
+
+    /**
      * The topic on single session creation.
      */
     public static final String TOPIC_ADD_SESSION = "com/openexchange/sessiond/add/session";
@@ -87,7 +97,7 @@ public final class SessiondEventConstants {
      * <p>
      * Needed on event handler registration to a bundle context.
      */
-    private static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_ADD_SESSION };
+    private static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_REMOVE_DATA, TOPIC_ADD_SESSION };
 
     /**
      * Gets an array of {@link String string} including all known topics.

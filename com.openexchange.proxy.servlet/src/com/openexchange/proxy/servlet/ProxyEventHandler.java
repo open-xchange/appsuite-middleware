@@ -51,6 +51,8 @@ package com.openexchange.proxy.servlet;
 
 import java.text.MessageFormat;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.session.Session;
@@ -63,14 +65,8 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public final class ProxyEventHandler implements EventHandler {
 
-    /**
-     * The logger constant.
-     */
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ProxyEventHandler.class);
+    private static final Log LOG = LogFactory.getLog(ProxyEventHandler.class);
 
-    /**
-     * Initializes a new {@link ProxyEventHandler}.
-     */
     public ProxyEventHandler() {
         super();
     }
@@ -79,32 +75,23 @@ public final class ProxyEventHandler implements EventHandler {
         final String topic = event.getTopic();
         try {
             if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                /*
-                 * A single session was removed
-                 */
+                // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 ProxyRegistryImpl.getInstance().dropRegistrationsFor(session.getSessionID());
-            } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                /*
-                 * A session container was removed
-                 */
+            } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                // A session container was removed
                 @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
                     (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                /*
-                 * For each session
-                 */
+                // For each session
                 for (final Session session : sessionContainer.values()) {
                     ProxyRegistryImpl.getInstance().dropRegistrationsFor(session.getSessionID());
                 }
             } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
                 // final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                /*
-                 * Nothing to do for an added session
-                 */
+                // Nothing to do for an added session
             }
         } catch (final Exception e) {
             LOG.error(MessageFormat.format("Error while handling SessionD event \"{0}\": {1}", topic, e.getMessage()), e);
         }
     }
-
 }

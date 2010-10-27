@@ -51,6 +51,8 @@ package com.openexchange.mail.cache;
 
 import java.text.MessageFormat;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.cache.OXCachingException;
@@ -74,7 +76,7 @@ public final class MailSessionEventHandler implements EventHandler {
     /**
      * The logger constant.
      */
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailSessionEventHandler.class);
+    static final Log LOG = LogFactory.getLog(MailSessionEventHandler.class);
 
     /**
      * Whether logger allows debug.
@@ -87,7 +89,7 @@ public final class MailSessionEventHandler implements EventHandler {
      * @return The topics
      */
     public static String[] getTopics() {
-        return new String[] { SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER };
+        return new String[] { SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_DATA, SessiondEventConstants.TOPIC_REMOVE_CONTAINER };
     }
 
     /**
@@ -124,7 +126,7 @@ public final class MailSessionEventHandler implements EventHandler {
             try {
                 if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                     dropSessionCaches((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
-                } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
                     @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
                         (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                     for (final Session session : sessionContainer.values()) {

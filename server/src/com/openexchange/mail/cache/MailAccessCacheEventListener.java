@@ -53,6 +53,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -61,6 +63,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.mail.MailException;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link MailAccessCacheEventListener} - Listens for removed session containers to dispose its cached mail access instances.
@@ -69,21 +72,17 @@ import com.openexchange.session.Session;
  */
 public final class MailAccessCacheEventListener implements EventHandlerRegistration {
 
-    private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(MailAccessCacheEventListener.class);
+    private static final Log LOG = LogFactory.getLog(MailAccessCacheEventListener.class);
 
     private ServiceRegistration serviceRegistration;
 
-    /**
-     * Initializes a new {@link MailAccessCacheEventListener}.
-     */
     public MailAccessCacheEventListener() {
         super();
     }
 
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
-        if ("com/openexchange/sessiond/remove/container".equals(topic)) {
+        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
             final @SuppressWarnings("unchecked") Map<String, Session> sessions =
                 (Map<String, Session>) event.getProperty("com.openexchange.sessiond.container");
             final MailAccessCache mac;
@@ -111,7 +110,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
 
     public void registerService(final BundleContext context) {
         final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>();
-        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/sessiond/remove/container" });
+        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_REMOVE_DATA, SessiondEventConstants.TOPIC_REMOVE_CONTAINER });
         serviceRegistration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }
 

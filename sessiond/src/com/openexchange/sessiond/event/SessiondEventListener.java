@@ -65,14 +65,14 @@ public interface SessiondEventListener {
      * 
      * @param session The removed session
      */
-    public void handleSessionRemoval(Session session);
+    void handleSessionRemoval(Session session);
 
     /**
      * Handles the removal of specified session container
      * 
      * @param sessions The removed session container
      */
-    public void handleContainerRemoval(Map<String, Session> sessions);
+    void handleContainerRemoval(Map<String, Session> sessions);
 
     /**
      * Handles the specified error
@@ -81,4 +81,19 @@ public interface SessiondEventListener {
      */
     public void handleError(SessiondException error);
 
+    /**
+     * Implementations should remove all temporary data for those sessions because they are not used for a longer time frame and are now
+     * stored in the long term session life time container. This should use as less memory as possible.
+     *
+     * @param sessions the sessions put into long term container.
+     */
+    void handleSessionDataRemoval(Map<String, Session> sessions);
+
+    /**
+     * Implementations can restore temporary session information on this event. It is emitted if a session walks from the long term life
+     * time container back to the normal ones.
+     *
+     * @param session reactivated sessions.
+     */
+    void handleSessionReactivation(Session session);
 }

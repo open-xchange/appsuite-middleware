@@ -493,13 +493,14 @@ final class SessionData {
     }
 
     void move2FirstContainerLongTerm(final String sessionId) {
+        SessionControl control = null;
         wlock.lock();
         longTermLock.lock();
         try {
             boolean movedSession = false;
             for (int i = 0; i < longTermList.size(); i++) {
                 Map<String, SessionControl> longTermMap = longTermList.get(i);
-                SessionControl control = longTermMap.remove(sessionId);
+                control = longTermMap.remove(sessionId);
                 if (null == control) {
                     continue;
                 }
@@ -519,6 +520,9 @@ final class SessionData {
             wlock.unlock();
         }
         unscheduleTask2MoveSession2FirstContainer(sessionId);
+        if (null != control) {
+            SessionHandler.postSessionReactivation(control.getSession());
+        }
     }
 
     void removeRandomToken(String randomToken) {

@@ -157,6 +157,17 @@ public final class SessiondEventHandler implements EventHandler {
             for (final SessiondEventListener listener : listeners) {
                 listener.handleContainerRemoval(sessions);
             }
+        } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+            final @SuppressWarnings("unchecked") Map<String, Session> sessions =
+                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+            for (final SessiondEventListener listener : listeners) {
+                listener.handleSessionDataRemoval(sessions);
+            }
+        } else if (SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
+            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+            for (final SessiondEventListener listener : listeners) {
+                listener.handleSessionReactivation(session);
+            }
         } else {
             final SessiondException error = SessionExceptionCodes.UNKNOWN_EVENT_TOPIC.create(topic == null ? "null" : topic);
             for (final SessiondEventListener listener : listeners) {
