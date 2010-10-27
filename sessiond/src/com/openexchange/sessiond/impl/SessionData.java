@@ -57,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -579,7 +578,10 @@ final class SessionData {
     private void unscheduleTask2MoveSession2FirstContainer(final String sessionId) {
         tasksLock.lock();
         try {
-            tasks.remove(sessionId).deactivate();
+            Move2FirstContainerTask task = tasks.remove(sessionId);
+            if (null != task) {
+                task.deactivate();
+            }
         } finally {
             tasksLock.unlock();
         }
