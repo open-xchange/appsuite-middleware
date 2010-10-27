@@ -63,7 +63,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     private static final Log LOG = LogFactory.getLog(SessiondConfigImpl.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
-    private static final long SHORT_CONTAINER_LIFE_TIME = 10l * 1000l;
+    private static final long SHORT_CONTAINER_LIFE_TIME = 6l * 60l * 1000l;
     private static final long LONG_CONTAINER_LIFE_TIME = 60l * 60l * 1000l;
 
     private int maxSession = 5000;
