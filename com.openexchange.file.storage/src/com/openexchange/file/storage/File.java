@@ -64,7 +64,7 @@ import java.util.Set;
 public interface File {
 
     /**
-     * Them default search fields.
+     * The default search fields: {@link Field#TITLE}, {@link Field#FILENAME}, {@link Field#DESCRIPTION}, {@link Field#URL}, {@link Field#CATEGORIES}, {@link Field#VERSION_COMMENT}
      */
     public static final Set<Field> DEFAULT_SEARCH_FIELDS = Collections.unmodifiableSet(EnumSet.of(Field.TITLE, Field.FILENAME, Field.DESCRIPTION, Field.URL, Field.CATEGORIES, Field.VERSION_COMMENT));
 
