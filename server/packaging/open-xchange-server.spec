@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -611,6 +611,48 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Oct 26 2010 - tobias.prinz@open-xchange.com
+ - Userstory 5247: Publications can now be configured to run on different (sub-)domains, HTML white-listing can be disabled.
+* Mon Oct 25 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17330: Proper folder fullname when renaming a folder on root level
+ - Bugfix #17179: Handling an OutOfMemoryError on thread start-up as a rejected execution event
+* Fri Oct 22 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17304: IMAP server ACL access identifier are now properly resolved if a global imap server configuration is used.
+* Thu Oct 21 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17161: Fixed NPE
+* Wed Oct 20 2010 - steffen.templin@open-xchange.com
+ - Bugfix #17072: Contact field 'Profession' not exported to VCards.
+* Wed Oct 20 2010 - steffen.templin@open-xchange.com
+ - Bugfix #17261: Duplicate folder exception is thrown for synchronizing contact folder 'Vorgeschlagene Kontakte' with Outlook 2010.
+* Mon Oct 18 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17275: Throwing an exception in recurrence type is not known instead of returning a null recurring results.
+* Fri Oct 15 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17242: Made logger mandatory for AbstractIndexCallable to prevent possible NullPointerExceptions.
+* Thu Oct 14 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16833: Added publication target name strings to I18N process.
+ - Bugfix #17162: Using consistent codes for not visible and not found folders.
+* Thu Oct 14 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17175: Remove of occurrences value.
+* Wed Oct 13 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17131: Changed object events now contain every user identifier and folder identifier that might be affected.
+ - Bugfix #17230: Using the mainstream tool method to get a time zone.
+* Tue Oct 12 2010 - choeger@open-xchange.com
+ - Bugfix #17237 - Incorrect file permissions for configuration files in 
+   packages -twitter and -mailfilter
+* Fri Oct 08 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17199: Proper cache invalidation after folder move operation
+ - Bugfix #17161: Immediate delivery of delete event for mails
+ - Bugfix #17198: Proper respect to property "com.openexchange.mail.ignoreSubscription"
+* Fri Oct 08 2010 - steffen.templin@open-xchange.com
+ - Bugfix #17195: Malformed URL-Parameters in HTML-Mails
+* Fri Oct 08 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16634: Searching in public calendar results only show appointments where user is participant
+* Thu Oct 07 2010 - karsten.will@open-xchange.com
+ - Bugfix #17197: Crawler updates missing
+* Thu Oct 07 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17197: Bugfix #17196: Avoid NPE in shutdown of com.openexchange.secret.recovery.json bundle.
+* Thu Oct 07 2010 - karsten.will@open-xchange.com
+ - Bugfix #16734: Xing subscription stops
 * Tue Oct 05 2010 - marcus.klein@open-xchange.com
  - Bugfix #17027: Correctly sending deleted folder identifier in folder updates response.
 * Fri Oct 01 2010 - thorben.betten@open-xchange.com

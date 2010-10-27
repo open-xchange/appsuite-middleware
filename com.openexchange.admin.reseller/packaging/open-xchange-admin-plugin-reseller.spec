@@ -41,7 +41,7 @@ BuildRequires:  java-devel-icedtea saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -121,3 +121,5 @@ mv doc javadoc
 /opt/open-xchange/bundles/com.openexchange.axis2/services/*
 
 %changelog
+* Mon Nov 02 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.

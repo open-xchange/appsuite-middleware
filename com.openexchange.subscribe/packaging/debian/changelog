@@ -1,3 +1,9 @@
+open-xchange-subscribe (6.18.2.0-1) unstable; urgency=low
+
+  * first build for 6.18.2-rev1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 27 Oct 2010 19:09:48 +0200
+
 open-xchange-subscribe (6.18.2.0-0) unstable; urgency=low
 
   * 6.18.2 cycle
