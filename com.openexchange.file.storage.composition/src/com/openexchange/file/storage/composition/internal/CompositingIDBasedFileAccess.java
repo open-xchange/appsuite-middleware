@@ -455,9 +455,9 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return retval;
     }
 
-    protected abstract FileStorageService getFileStorageService(String serviceId);
+    protected abstract FileStorageService getFileStorageService(String serviceId) throws FileStorageException;
 
-    protected abstract List<FileStorageService> getAllFileStorageServices();
+    protected abstract List<FileStorageService> getAllFileStorageServices() throws FileStorageException;
 
     // Transaction Handling
     /*
