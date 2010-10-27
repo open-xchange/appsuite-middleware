@@ -52,6 +52,9 @@ package com.openexchange.file.storage.webdav;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseDateProperty;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseIntProperty;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseStringProperty;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import com.openexchange.file.storage.DefaultFile;
@@ -80,9 +83,6 @@ public final class WebDAVFileStorageFile extends DefaultFile {
         setId(id);
         setVersion(FileStorageFileAccess.CURRENT_VERSION);
         setIsCurrentVersion(true);
-        /*
-         * TODO: Again: How does id look like? Complete URI?
-         */
         setURL(folderId + '/' + id);
     }
 
@@ -94,13 +94,38 @@ public final class WebDAVFileStorageFile extends DefaultFile {
      * @return This WebDAV file with property set applied
      */
     public WebDAVFileStorageFile parseDavPropertySet(final DavPropertySet propertySet) throws FileStorageException {
+        return parseDavPropertySet(propertySet, null);
+    }
+
+    /**
+     * Parses specified DAV property set of associated MultiStatus response.
+     * 
+     * @param propertySet The DAV property set of associated MultiStatus response
+     * @param fields The fields to consider
+     * @throws FileStorageException If parsing DAV property set fails
+     * @return This WebDAV file with property set applied
+     */
+    public WebDAVFileStorageFile parseDavPropertySet(final DavPropertySet propertySet, final List<Field> fields) throws FileStorageException {
         if (null != propertySet) {
-            setCreated(parseDateProperty(DavConstants.PROPERTY_CREATIONDATE, propertySet));
-            setLastModified(parseDateProperty(DavConstants.PROPERTY_GETLASTMODIFIED, propertySet));
-            setFileName(parseStringProperty(DavConstants.PROPERTY_DISPLAYNAME, propertySet));
-            setFileMIMEType(parseStringProperty(DavConstants.PROPERTY_GETCONTENTTYPE, propertySet));
-            setFileSize(parseIntProperty(DavConstants.PROPERTY_GETCONTENTLENGTH, propertySet));
-            setTitle(getFileName());
+            final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
+            if (set.contains(Field.CREATED)) {
+                setCreated(parseDateProperty(DavConstants.PROPERTY_CREATIONDATE, propertySet));
+            }
+            if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
+                setLastModified(parseDateProperty(DavConstants.PROPERTY_GETLASTMODIFIED, propertySet));
+            }
+            if (set.contains(Field.FILENAME)) {
+                setFileName(parseStringProperty(DavConstants.PROPERTY_DISPLAYNAME, propertySet));
+            }
+            if (set.contains(Field.FILE_MIMETYPE)) {
+                setFileMIMEType(parseStringProperty(DavConstants.PROPERTY_GETCONTENTTYPE, propertySet));
+            }
+            if (set.contains(Field.FILE_SIZE)) {
+                setFileSize(parseIntProperty(DavConstants.PROPERTY_GETCONTENTLENGTH, propertySet));
+            }
+            if (set.contains(Field.TITLE)) {
+                setTitle(getFileName());
+            }
             /*
              * Add other DAV properties as file properties
              */
