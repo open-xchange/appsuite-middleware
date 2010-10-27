@@ -50,7 +50,9 @@
 package com.openexchange.file.storage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +62,11 @@ import java.util.Set;
  * A {@link File} represents the metadata known about a file
  */
 public interface File {
+
+    /**
+     * Them default search fields.
+     */
+    public static final Set<Field> DEFAULT_SEARCH_FIELDS = Collections.unmodifiableSet(EnumSet.of(Field.TITLE, Field.FILENAME, Field.DESCRIPTION, Field.URL, Field.CATEGORIES, Field.VERSION_COMMENT));
 
     String getProperty(String key);
 
@@ -162,6 +169,15 @@ public interface File {
     public Set<File.Field> differences(File other);
     
     public boolean equals(File other, Field criterium, Field...criteria);
+
+    /**
+     * Indicates whether this file matches given pattern.
+     * 
+     * @param pattern The pattern possibly containing wild-card characters
+     * @param fields The fields to consider; if <code>null</code> {@link #DEFAULT_SEARCH_FIELDS} is used
+     * @return <code>true</code> if this file matches; otherwise <code>false</code>
+     */
+    boolean matches(String pattern, Field... fields);
 
     public static enum Field {
         LAST_MODIFIED("last_modified", 5),

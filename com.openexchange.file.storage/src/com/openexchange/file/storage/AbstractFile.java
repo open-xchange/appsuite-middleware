@@ -50,10 +50,14 @@
 package com.openexchange.file.storage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import com.openexchange.file.storage.meta.FileComparator;
+import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.file.storage.meta.FileFieldHandling;
 
 
@@ -64,7 +68,6 @@ import com.openexchange.file.storage.meta.FileFieldHandling;
  */
 public abstract class AbstractFile implements File {
 
-    
     public File dup() {
         return FileFieldHandling.dup(this);
     }
@@ -111,6 +114,7 @@ public abstract class AbstractFile implements File {
         return true;
     }
     
+    @Override
     public boolean equals(Object other) {
         return equals((File)other, File.Field.ID, File.Field.values());
     }
@@ -120,5 +124,41 @@ public abstract class AbstractFile implements File {
         return FileFieldHandling.toString(this);
     }
 
+    public boolean matches(final String pattern, final Field... fields) {
+        final Set<Field> set = null == fields || fields.length == 0 ? DEFAULT_SEARCH_FIELDS : EnumSet.copyOf(Arrays.asList(fields));
+        final Pattern regex = Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
+        final FileFieldGet fileFieldGet = new FileFieldGet();
+        for (final Field field : set) {
+            final Object value = field.doSwitch(fileFieldGet, this);
+            if (null != value && regex.matcher(value.toString()).matches()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Converts specified wildcard string to a regular expression
+     * 
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    private static String wildcardToRegex(final String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
+    }
 
 }
