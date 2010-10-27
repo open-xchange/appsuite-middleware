@@ -156,19 +156,19 @@ public interface File {
 
     int getNumberOfVersions();
     
-    public File dup();
+    File dup();
     
-    public void copyInto(File other);
+    void copyInto(File other);
     
-    public void copyFrom(File other);
+    void copyFrom(File other);
     
-    public void copyInto(File other, Field...fields);
+    void copyInto(File other, Field...fields);
     
-    public void copyFrom(File other, Field...fields);
+    void copyFrom(File other, Field...fields);
     
-    public Set<File.Field> differences(File other);
+    Set<File.Field> differences(File other);
     
-    public boolean equals(File other, Field criterium, Field...criteria);
+    boolean equals(File other, Field criterium, Field...criteria);
 
     /**
      * Indicates whether this file matches given pattern.
@@ -179,7 +179,11 @@ public interface File {
      */
     boolean matches(String pattern, Field... fields);
 
+    /**
+     * An enumeration of file fields.
+     */
     public static enum Field {
+
         LAST_MODIFIED("last_modified", 5),
         CREATED("creation_date", 4),
         MODIFIED_BY("modified_by", 3),
