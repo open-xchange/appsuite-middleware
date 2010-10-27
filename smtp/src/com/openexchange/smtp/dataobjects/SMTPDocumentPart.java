@@ -73,7 +73,7 @@ public final class SMTPDocumentPart extends InfostoreDocumentMailPart {
 	 * @throws MailException
 	 *             If infostore document cannot be read
 	 */
-	public SMTPDocumentPart(final int documentId, final Session session) throws MailException {
+	public SMTPDocumentPart(final String documentId, final Session session) throws MailException {
 		super(documentId, session);
 	}
 

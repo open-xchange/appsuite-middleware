@@ -120,7 +120,7 @@ public final class SMTPProvider extends TransportProvider {
     }
 
     @Override
-    public InfostoreDocumentMailPart getNewDocumentPart(final int documentId, final Session session) throws MailException {
+    public InfostoreDocumentMailPart getNewDocumentPart(final String documentId, final Session session) throws MailException {
         return new SMTPDocumentPart(documentId, session);
     }
 

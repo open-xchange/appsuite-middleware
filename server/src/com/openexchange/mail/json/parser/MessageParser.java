@@ -287,7 +287,7 @@ public final class MessageParser {
                 final JSONArray ja = jsonObj.getJSONArray(MailJSONField.INFOSTORE_IDS.getKey());
                 final int length = ja.length();
                 for (int i = 0; i < length; i++) {
-                    final InfostoreDocumentMailPart part = provider.getNewDocumentPart(ja.getInt(i), session);
+                    final InfostoreDocumentMailPart part = provider.getNewDocumentPart(ja.getString(i), session);
                     attachmentHandler.addAttachment(part);
                 }
             }

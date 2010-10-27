@@ -219,7 +219,7 @@ public abstract class TransportProvider {
      * @return A new instance of {@link InfostoreDocumentMailPart}
      * @throws MailException If a new instance of {@link InfostoreDocumentMailPart} cannot be created
      */
-    public abstract InfostoreDocumentMailPart getNewDocumentPart(int documentId, Session session) throws MailException;
+    public abstract InfostoreDocumentMailPart getNewDocumentPart(String documentId, Session session) throws MailException;
 
     /**
      * Gets a new instance of {@link DataMailPart}
