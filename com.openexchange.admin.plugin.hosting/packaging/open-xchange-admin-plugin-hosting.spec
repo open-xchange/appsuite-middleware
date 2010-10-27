@@ -41,7 +41,7 @@ BuildRequires:  java-devel-icedtea saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -147,6 +147,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Oct 14 2010 - choeger@open-xchange.com
+ - Bugfix #17204: [L3] movecontextfilestore doesn't work if rsync isn't installed
 * Mon Oct 04 2010 - choeger@open-xchange.com
  - Bugfix #12012: showruntimestats missed the $JAVA_XTRAOPTS causes failure on
    virtuozoo containers
