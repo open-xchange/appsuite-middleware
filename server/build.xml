@@ -81,6 +81,7 @@
     <property name="htmljar" value="com.openexchange.html.jar"/>
     <property name="filestoragejar" value="com.openexchange.file.storage.jar"/>
     <property name="txjar" value="com.openexchange.tx.jar"/>
+	<property name="cryptojar" value="com.openexchange.crypto.jar"/>
     <property name="filestoragecompositionjar" value="com.openexchange.file.storage.composition.jar"/>
 
     <property name="activationjar" value="activation-1.1.1.jar"/>
@@ -133,6 +134,7 @@
         <pathelement location="${bundlesdir}/${htmljar}"/>
         <pathelement location="${bundlesdir}/${filestoragejar}"/>
         <pathelement location="${bundlesdir}/${txjar}"/>
+    	<pathelement location="${bundlesdir}/${cryptojar}"/>
         <pathelement location="${bundlesdir}/${filestoragecompositionjar}"/>
 
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>

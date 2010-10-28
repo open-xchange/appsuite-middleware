@@ -5,7 +5,7 @@
 Name:           open-xchange-server
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-secret >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@ open-xchange-tx >= @OXVERSION@
+BuildRequires: ant open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-secret >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@ open-xchange-tx >= @OXVERSION@ open-xchange-crypto >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Bundle
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-secret >= @OXVERSION@  open-xchange-management >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@ open-xchange-tx >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-secret >= @OXVERSION@  open-xchange-management >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-push >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-html >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@ open-xchange-tx >= @OXVERSION@ open-xchange-crypto >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
