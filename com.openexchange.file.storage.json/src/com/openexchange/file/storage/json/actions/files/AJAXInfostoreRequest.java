@@ -63,8 +63,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.FileMetadataParser;
@@ -94,7 +94,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     private int[] versions;
 
-    private static final FileMetadataParser parser = new FileMetadataParser();
+    private static final FileMetadataParser parser = FileMetadataParser.getInstance();
     
     private File file;
     

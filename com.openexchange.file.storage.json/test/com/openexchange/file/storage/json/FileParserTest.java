@@ -49,21 +49,24 @@
 
 package com.openexchange.file.storage.json;
 
-import static com.openexchange.json.JSONAssertion.assertValidates;
-import static com.openexchange.time.TimeTools.D;
+import static com.openexchange.file.storage.File.Field.CATEGORIES;
+import static com.openexchange.file.storage.File.Field.COLOR_LABEL;
+import static com.openexchange.file.storage.File.Field.DESCRIPTION;
+import static com.openexchange.file.storage.File.Field.FILENAME;
+import static com.openexchange.file.storage.File.Field.FOLDER_ID;
+import static com.openexchange.file.storage.File.Field.MODIFIED_BY;
+import static com.openexchange.file.storage.File.Field.NUMBER_OF_VERSIONS;
+import static com.openexchange.file.storage.File.Field.VERSION;
+import static com.openexchange.file.storage.File.Field.VERSION_COMMENT;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.ValueReaderSwitch;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.json.JSONAssertion;
-import junit.framework.TestCase;
-
-import static com.openexchange.file.storage.File.Field.*;
 
 
 /**
@@ -95,7 +98,7 @@ public class FileParserTest extends TestCase {
         object.put("version", 33);
         object.put("version_comment", "This is the best version");
         
-        File file = new FileMetadataParser().parse(object);
+        File file = FileMetadataParser.getInstance().parse(object);
         
         assertNotNull(file);
         assertEquals("cat1, cat2, cat3", file.getCategories());
@@ -131,7 +134,7 @@ public class FileParserTest extends TestCase {
         object.put("version", 33);
         object.put("version_comment", "This is the best version");
         
-        List<File.Field> fields = new FileMetadataParser().getFields(object);
+        List<File.Field> fields = FileMetadataParser.getInstance().getFields(object);
         
         for(File.Field field : EnumSet.of(CATEGORIES, COLOR_LABEL, DESCRIPTION, FILENAME, FOLDER_ID, MODIFIED_BY, NUMBER_OF_VERSIONS, VERSION, VERSION_COMMENT)) {
             assertTrue("Missing field "+field, fields.contains(field));

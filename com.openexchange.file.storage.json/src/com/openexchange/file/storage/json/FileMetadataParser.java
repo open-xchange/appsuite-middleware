@@ -59,6 +59,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldSet;
+import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -67,15 +68,31 @@ import com.openexchange.tools.servlet.AjaxException;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileMetadataParser {
+public class FileMetadataParser implements FileMetadataParserService {
 
-    private static JSONParserHandler JSON = new JSONParserHandler();
+    private static final FileMetadataParser instance = new FileMetadataParser();
+
+    /**
+     * Gets the instance.
+     * 
+     * @return The instance
+     */
+    public static FileMetadataParser getInstance() {
+        return instance;
+    }
+
+    private final JSONParserHandler jsonHandler;
     
+    private FileMetadataParser() {
+        super();
+        jsonHandler = new JSONParserHandler();
+    }
+
     public File parse(JSONObject object) throws AbstractOXException {
         DefaultFile file = new DefaultFile();
 
         try {
-            File.Field.inject(JSON, file, object);
+            File.Field.inject(jsonHandler, file, object);
         } catch (RuntimeException x) {
             if(x.getCause() != null && JSONException.class.isInstance(x.getCause())) {
                 throw new AjaxException(AjaxException.Code.JSONError, x.getCause().getMessage());
