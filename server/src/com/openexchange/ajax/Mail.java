@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -102,7 +103,6 @@ import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.ParamContainer;
-import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXMandatoryFieldException;
@@ -110,6 +110,11 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -119,8 +124,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.MailImportResult;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -179,7 +182,6 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -188,7 +190,6 @@ import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.utility.VersitUtility;
@@ -3825,7 +3826,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String destFolderIdentifier = paramContainer.checkStringParam(PARAMETER_DESTINATION_FOLDER);
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
-            final InfostoreFacade db = Infostore.FACADE;
+            final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
+            final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
             boolean performRollback = false;
             try {
                 final Context ctx = session.getContext();
@@ -3840,9 +3842,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (mailPart == null) {
                     throw new MailException(MailException.Code.NO_ATTACHMENT_FOUND, sequenceId);
                 }
-                final int destFolderID = Integer.parseInt(destFolderIdentifier);
+                final String destFolderID = destFolderIdentifier;
                 {
-                    final FolderObject folderObj = new OXFolderAccess(ctx).getFolderObject(destFolderID);
+                    final FolderObject folderObj = new OXFolderAccess(ctx).getFolderObject(Integer.parseInt(destFolderID));
                     final EffectivePermission p = folderObj.getEffectiveUserPermission(session.getUserId(), session.getUserConfiguration());
                     if (!p.isFolderVisible()) {
                         throw new OXFolderException(
@@ -3862,41 +3864,43 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Create document's meta data
                  */
-                final InfostoreParser parser = new InfostoreParser();
-                final DocumentMetadata docMetaData = parser.getDocumentMetadata(body);
-                final Set<Metadata> metSet = new HashSet<Metadata>(Arrays.asList(parser.findPresentFields(body)));
-                if (!metSet.contains(Metadata.FILENAME_LITERAL)) {
-                    docMetaData.setFileName(mailPart.getFileName());
+                final FileMetadataParserService parser = serviceRegistry.getService(FileMetadataParserService.class);
+                final JSONObject jsonFileObject = new JSONObject(body);
+                final File file = parser.parse(jsonFileObject);
+                final List<Field> fields = parser.getFields(jsonFileObject);
+                final Set<Field> set = EnumSet.copyOf(fields);
+                if (!set.contains(Field.FILENAME)) {
+                    file.setFileName(mailPart.getFileName());
                 }
-                docMetaData.setFileMIMEType(mailPart.getContentType().toString());
+                file.setFileMIMEType(mailPart.getContentType().toString());
                 /*
                  * Since file's size given from IMAP server is just an estimation and therefore does not exactly match the file's size a
                  * future file access via webdav can fail because of the size mismatch. Thus set the file size to 0 to make the infostore
                  * measure the size.
                  */
-                docMetaData.setFileSize(0);
-                if (!metSet.contains(Metadata.TITLE_LITERAL)) {
-                    docMetaData.setTitle(mailPart.getFileName());
+                file.setFileSize(0);
+                if (!set.contains(Metadata.TITLE_LITERAL)) {
+                    file.setTitle(mailPart.getFileName());
                 }
-                docMetaData.setFolderId(destFolderID);
+                file.setFolderId(destFolderID);
                 /*
                  * Start writing to infostore folder
                  */
-                db.startTransaction();
+                fileAccess.startTransaction();
                 performRollback = true;
-                db.saveDocument(docMetaData, mailPart.getInputStream(), System.currentTimeMillis(), new ServerSessionAdapter(session, ctx));
-                db.commit();
+                fileAccess.saveDocument(file, mailPart.getInputStream(), System.currentTimeMillis(), fields);
+                fileAccess.commit();
             } catch (final Exception e) {
                 if (performRollback) {
-                    db.rollback();
+                    fileAccess.rollback();
                 }
                 throw e;
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
                 }
-                if (db != null) {
-                    db.finish();
+                if (fileAccess != null) {
+                    fileAccess.finish();
                 }
             }
         } catch (final MailException e) {
