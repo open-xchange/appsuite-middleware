@@ -133,7 +133,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageSessionEventHandler;
 import com.openexchange.login.LoginHandlerService;
-import com.openexchange.login.internal.PasswordCrypter;
+//import com.openexchange.login.internal.PasswordCrypter;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
@@ -522,7 +522,7 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new MailLoginHandler(), null));
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new TransportLoginHandler(), null));
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new LastLoginRecorder(), null));
-        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
+//        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateMailAccountTables(), null));
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
