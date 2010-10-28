@@ -69,16 +69,16 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
-import com.openexchange.ajax.Infostore;
-import com.openexchange.api2.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -104,7 +104,6 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tx.TransactionException;
 import com.openexchange.user.UserService;
 
@@ -125,6 +124,8 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     private final String protocol;
 
     private final String hostName;
+
+    private final IDBasedFileAccessFactory fileAccessFactory;
 
     private boolean exceeded;
 
@@ -147,6 +148,11 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         this.hostName = hostName;
         this.transportProvider = transportProvider;
         this.session = session;
+        try {
+            fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        }
     }
 
     public void setTextPart(final TextBodyMailPart textPart) {
@@ -168,8 +174,10 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                             Long.valueOf(uploadQuotaPerFile),
                             null == fileName ? "" : fileName,
                             Long.valueOf(size));
-                    LOG.debug(new StringBuilder(64).append("Per-file quota (").append(getSize(uploadQuotaPerFile, 2, false, true)).append(
-                        ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(), e);
+                    LOG.debug(
+                        new StringBuilder(64).append("Per-file quota (").append(getSize(uploadQuotaPerFile, 2, false, true)).append(
+                            ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
+                        e);
                 }
                 exceeded = true;
             } else {
@@ -180,8 +188,10 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 if (uploadQuota > 0 && consumed > uploadQuota) {
                     if (LOG.isDebugEnabled()) {
                         final MailException e = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, Long.valueOf(uploadQuota));
-                        LOG.debug(new StringBuilder(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
-                            ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(), e);
+                        LOG.debug(
+                            new StringBuilder(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
+                                ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
+                            e);
                     }
                     exceeded = true;
                 }
@@ -246,7 +256,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             /*
              * Rollback of publications
              */
-            rollbackPublications(publications, publisher, ctx);
+            rollbackPublications(publications, publisher);
             /*
              * Re-throw exception
              */
@@ -289,7 +299,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          * Iterate recipients and split them to internal vs. external recipients
          */
         Date elapsedDate = null;
-        if(TransportProperties.getInstance().publishedDocumentsExpire()) {
+        if (TransportProperties.getInstance().publishedDocumentsExpire()) {
             elapsedDate = new Date(System.currentTimeMillis() + TransportProperties.getInstance().getPublishedDocumentTimeToLive());
         }
         final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
@@ -412,7 +422,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
             textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
             appendLinks(links, textBuilder);
-            if(elapsedDate != null) {
+            if (elapsedDate != null) {
                 textBuilder.append(
                     htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
                         DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
@@ -448,7 +458,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
                 textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
                 appendLinks(links, textBuilder);
-                if(elapsedDate != null) {
+                if (elapsedDate != null) {
                     textBuilder.append(
                         htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
                             DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
@@ -549,25 +559,19 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          * Create document meta data for current attachment
          */
         String name = attachment.getFileName();
-        if(name == null) {
-            name = "attachment"; 
+        if (name == null) {
+            name = "attachment";
         }
-        final DocumentMetadata documentMetadata = new DocumentMetadataImpl();
-        documentMetadata.setId(InfostoreFacade.NEW);
-        documentMetadata.setFolderId(folderId);
-        documentMetadata.setFileName(name);
-        documentMetadata.setFileMIMEType(attachment.getContentType().toString());
-        documentMetadata.setTitle(name);
+        final File file = new DefaultFile();
+        file.setId(FileStorageFileAccess.NEW);
+        file.setFolderId(String.valueOf(folderId));
+        file.setFileName(name);
+        file.setFileMIMEType(attachment.getContentType().toString());
+        file.setTitle(name);
         /*
          * Put attachment's document to dedicated infostore folder
          */
-        final InfostoreFacade infostoreFacade = Infostore.FACADE;
-        final ServerSession serverSession;
-        if (session instanceof ServerSession) {
-            serverSession = (ServerSession) session;
-        } else {
-            serverSession = new ServerSessionAdapter(session, ctx);
-        }
+        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         boolean retry = true;
         int count = 1;
         final StringBuilder hlp = new StringBuilder(16);
@@ -580,13 +584,13 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 /*
                  * Start InfoStore transaction
                  */
-                infostoreFacade.startTransaction();
+                fileAccess.startTransaction();
                 try {
-                    infostoreFacade.saveDocument(documentMetadata, in, Long.MAX_VALUE, serverSession);
-                    infostoreFacade.commit();
+                    fileAccess.saveDocument(file, in, FileStorageFileAccess.DISTANT_FUTURE);
+                    fileAccess.commit();
                     retry = false;
-                } catch (final InfostoreException x) {
-                    infostoreFacade.rollback();
+                } catch (final FileStorageException x) {
+                    fileAccess.rollback();
                     if (441 != x.getDetailNumber()) {
                         throw new MailException(x);
                     }
@@ -597,20 +601,21 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     final int pos = name.lastIndexOf('.');
                     final String newName;
                     if (pos >= 0) {
-                        newName = hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
+                        newName =
+                            hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
                     } else {
                         newName = hlp.append(name).append("_(").append(++count).append(')').toString();
                     }
-                    documentMetadata.setFileName(newName);
-                    documentMetadata.setTitle(newName);
-                } catch (final OXException x) {
-                    infostoreFacade.rollback();
-                    throw new MailException(x);
+                    file.setFileName(newName);
+                    file.setTitle(newName);
+                } catch (final TransactionException e) {
+                    fileAccess.rollback();
+                    throw e;
                 } catch (final Exception e) {
-                    infostoreFacade.rollback();
+                    fileAccess.rollback();
                     throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
                 } finally {
-                    infostoreFacade.finish();
+                    fileAccess.finish();
                 }
             } finally {
                 try {
@@ -625,7 +630,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          */
         final Publication publication = new Publication();
         publication.setModule("infostore/object");
-        publication.setEntityId(String.valueOf(documentMetadata.getId()));
+        publication.setEntityId(String.valueOf(file.getId()));
         publication.setContext(ctx);
         publication.setUserId(session.getUserId());
         /*
@@ -639,49 +644,43 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         /*
          * Remember publication in provided list
          */
-        publications.add(new PublicationAndInfostoreID(publication, documentMetadata.getId()));
+        publications.add(new PublicationAndInfostoreID(publication, file.getId()));
         /*
          * Return URL
          */
         return (String) publication.getConfiguration().get("url");
     } // End of publishAttachmentAndGetPath()
 
-    private void rollbackPublications(final List<PublicationAndInfostoreID> publications, final PublicationService publisher, final Context ctx) {
-        /*
-         * Remove publication one-by-one
-         */
-        final InfostoreFacade infostoreFacade = Infostore.FACADE;
-        final ServerSession serverSession;
-        if (session instanceof ServerSession) {
-            serverSession = (ServerSession) session;
-        } else {
-            serverSession = new ServerSessionAdapter(session, ctx);
-        }
+    private void rollbackPublications(final List<PublicationAndInfostoreID> publications, final PublicationService publisher) {
+        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         final long timestamp = System.currentTimeMillis();
-        final int[] arr = new int[1];
+        final List<String> arr = new ArrayList<String>(1);
         for (final PublicationAndInfostoreID publication : publications) {
             try {
                 publisher.delete(publication.publication);
             } catch (final PublicationException e) {
-                LOG.error(new StringBuilder("Publication with ID \"").append(publication.publication.getId()).append(
-                    " could not be roll-backed.").toString(), e);
+                LOG.error(
+                    new StringBuilder("Publication with ID \"").append(publication.publication.getId()).append(" could not be roll-backed.").toString(),
+                    e);
             }
             try {
-                infostoreFacade.startTransaction();
+                fileAccess.startTransaction();
                 try {
-                    arr[0] = publication.infostoreId;
-                    infostoreFacade.removeDocument(arr, timestamp, serverSession);
-                    infostoreFacade.commit();
-                } catch (final OXException x) {
-                    infostoreFacade.rollback();
+                    arr.set(0, publication.infostoreId);
+                    fileAccess.removeDocument(arr, timestamp);
+                    fileAccess.commit();
+                } catch (final FileStorageException x) {
+                    fileAccess.rollback();
                     throw x;
                 } finally {
-                    infostoreFacade.finish();
+                    fileAccess.finish();
                 }
             } catch (final TransactionException e) {
-                LOG.error(new StringBuilder("Transaction error while deleting infostore document with ID \"").append(
-                    publication.infostoreId).append("\" failed.").toString(), e);
-            } catch (final OXException e) {
+                LOG.error(
+                    new StringBuilder("Transaction error while deleting infostore document with ID \"").append(publication.infostoreId).append(
+                        "\" failed.").toString(),
+                    e);
+            } catch (final FileStorageException e) {
                 LOG.error(
                     new StringBuilder("Deleting infostore document with ID \"").append(publication.infostoreId).append("\" failed.").toString(),
                     e);
@@ -764,9 +763,9 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
         final Publication publication;
 
-        final int infostoreId;
+        final String infostoreId;
 
-        public PublicationAndInfostoreID(final Publication publication, final int infostoreId) {
+        public PublicationAndInfostoreID(final Publication publication, final String infostoreId) {
             super();
             this.publication = publication;
             this.infostoreId = infostoreId;
