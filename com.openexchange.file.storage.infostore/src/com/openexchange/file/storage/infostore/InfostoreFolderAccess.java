@@ -74,145 +74,81 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
         
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#clearFolder(java.lang.String)
-     */
-    @Override
     public void clearFolder(String folderId) throws FileStorageException {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#clearFolder(java.lang.String, boolean)
-     */
-    @Override
     public void clearFolder(String folderId, boolean hardDelete) throws FileStorageException {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#createFolder(com.openexchange.file.storage.FileStorageFolder)
-     */
-    @Override
     public String createFolder(FileStorageFolder toCreate) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String)
-     */
-    @Override
     public String deleteFolder(String folderId) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String, boolean)
-     */
-    @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#exists(java.lang.String)
-     */
-    @Override
     public boolean exists(String folderId) throws FileStorageException {
         // TODO Auto-generated method stub
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getFileQuota(java.lang.String)
-     */
-    @Override
     public Quota getFileQuota(String folderId) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getFolder(java.lang.String)
-     */
-    @Override
     public FileStorageFolder getFolder(String folderId) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getPath2DefaultFolder(java.lang.String)
-     */
-    @Override
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getQuotas(java.lang.String, com.openexchange.file.storage.Quota.Type[])
-     */
-    @Override
     public Quota[] getQuotas(String folder, Type[] types) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getRootFolder()
-     */
-    @Override
     public FileStorageFolder getRootFolder() throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getStorageQuota(java.lang.String)
-     */
-    @Override
     public Quota getStorageQuota(String folderId) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getSubfolders(java.lang.String, boolean)
-     */
-    @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#moveFolder(java.lang.String, java.lang.String)
-     */
-    @Override
     public String moveFolder(String folderId, String newParentId) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#renameFolder(java.lang.String, java.lang.String)
-     */
-    @Override
     public String renameFolder(String folderId, String newName) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#updateFolder(java.lang.String, com.openexchange.file.storage.FileStorageFolder)
-     */
-    @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;

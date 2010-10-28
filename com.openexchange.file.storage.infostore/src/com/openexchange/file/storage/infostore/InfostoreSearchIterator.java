@@ -96,7 +96,6 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
         return delegate.size();
     }
 
-    @Override
     public File next() throws AbstractOXException {
         DocumentMetadata next = delegate.next();
         if(next == null) {

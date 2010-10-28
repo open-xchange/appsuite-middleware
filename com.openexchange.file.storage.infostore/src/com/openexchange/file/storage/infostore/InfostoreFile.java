@@ -1,3 +1,4 @@
+
 package com.openexchange.file.storage.infostore;
 
 import java.util.Date;
@@ -5,7 +6,6 @@ import java.util.Set;
 import com.openexchange.file.storage.AbstractFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-
 
 /*
  *
@@ -58,7 +58,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
  * {@link InfostoreFile}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreFile extends AbstractFile implements File {
@@ -69,225 +69,180 @@ public class InfostoreFile extends AbstractFile implements File {
         this.document = documentMetadata;
     }
 
-    @Override
     public String getCategories() {
         return document.getCategories();
     }
 
-    @Override
     public int getColorLabel() {
         return document.getColorLabel();
     }
 
-    @Override
     public String getContent() {
         return document.getContent();
     }
 
-    @Override
     public Date getCreated() {
         return document.getCreationDate();
     }
 
-    @Override
     public int getCreatedBy() {
         return document.getCreatedBy();
     }
 
-    @Override
     public String getDescription() {
         return document.getDescription();
     }
 
-    @Override
     public String getFileMD5Sum() {
         return document.getFileMD5Sum();
     }
 
-    @Override
     public String getFileMIMEType() {
         return document.getFileMIMEType();
     }
 
-    @Override
     public String getFileName() {
         return document.getFileName();
     }
 
-    @Override
     public long getFileSize() {
         return document.getFileSize();
     }
 
-    @Override
     public String getFolderId() {
         return String.valueOf(document.getFolderId());
     }
 
-    @Override
     public String getId() {
         return String.valueOf(document.getId());
     }
 
-    @Override
     public Date getLastModified() {
         return document.getLastModified();
     }
 
-    @Override
     public Date getLockedUntil() {
         return document.getLockedUntil();
     }
 
-    @Override
     public int getModifiedBy() {
         return document.getModifiedBy();
     }
 
-    @Override
     public int getNumberOfVersions() {
         return document.getNumberOfVersions();
     }
 
-    @Override
     public String getProperty(String key) {
         return document.getProperty(key);
     }
 
-    @Override
     public Set<String> getPropertyNames() {
         return document.getPropertyNames();
     }
 
-    @Override
     public long getSequenceNumber() {
         return document.getSequenceNumber();
     }
 
-    @Override
     public String getTitle() {
         return document.getTitle();
     }
 
-    @Override
     public String getURL() {
         return document.getURL();
     }
 
-    @Override
     public int getVersion() {
         return document.getVersion();
     }
 
-    @Override
     public String getVersionComment() {
         return document.getVersionComment();
     }
 
-    @Override
     public boolean isCurrentVersion() {
         return document.isCurrentVersion();
     }
 
-    @Override
     public void setCategories(String categories) {
         document.setCategories(categories);
     }
 
-    @Override
     public void setColorLabel(int color) {
         document.setColorLabel(color);
     }
 
-    @Override
     public void setCreatedBy(int cretor) {
         document.setCreatedBy(cretor);
     }
 
-    @Override
     public void setCreated(Date creationDate) {
         document.setCreationDate(creationDate);
     }
 
-    @Override
     public void setDescription(String description) {
         document.setDescription(description);
     }
 
-    @Override
     public void setFileMD5Sum(String sum) {
         document.setFileMD5Sum(sum);
     }
 
-    @Override
     public void setFileMIMEType(String type) {
         document.setFileMIMEType(type);
     }
 
-    @Override
     public void setFileName(String fileName) {
         document.setFileName(fileName);
     }
 
-    @Override
     public void setFileSize(long length) {
         document.setFileSize(length);
     }
 
-    @Override
     public void setFolderId(String folderId) {
         document.setFolderId(Long.parseLong(folderId));
     }
 
-    @Override
     public void setId(String id) {
         document.setId(Integer.parseInt(id));
     }
 
-    @Override
     public void setIsCurrentVersion(boolean bool) {
         document.setIsCurrentVersion(bool);
     }
 
-    @Override
     public void setLastModified(Date now) {
         document.setLastModified(now);
     }
 
-    @Override
     public void setLockedUntil(Date lockedUntil) {
         document.setLockedUntil(lockedUntil);
     }
 
-    @Override
     public void setModifiedBy(int lastEditor) {
         document.setModifiedBy(lastEditor);
     }
 
-    @Override
     public void setNumberOfVersions(int numberOfVersions) {
         document.setNumberOfVersions(numberOfVersions);
     }
 
-    @Override
     public void setTitle(String title) {
         document.setTitle(title);
     }
 
-    @Override
     public void setURL(String url) {
         document.setURL(url);
     }
 
-    @Override
     public void setVersion(int version) {
         document.setVersion(version);
     }
 
-    @Override
     public void setVersionComment(String string) {
         document.setVersionComment(string);
     }
 
-    
 }

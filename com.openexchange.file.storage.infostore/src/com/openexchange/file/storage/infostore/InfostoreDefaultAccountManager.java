@@ -57,7 +57,6 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageExceptionMessages;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.session.Session;
 
@@ -72,22 +71,18 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     public static final String DEFAULT_ID = "infostore";
     private static final FileStorageAccount DEFAULT_ACCOUNT = new FileStorageAccount() {
 
-        @Override
         public Map<String, Object> getConfiguration() {
             return Collections.emptyMap();
         }
 
-        @Override
         public String getDisplayName() {
             return "Standard Infostore";
         }
 
-        @Override
         public FileStorageService getFileStorageService() {
             return InfostoreFileStorageService.getInstance();
         }
 
-        @Override
         public String getId() {
             return DEFAULT_ID;
         }
@@ -95,22 +90,18 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     };
     
     
-    @Override
     public String addAccount(FileStorageAccount account, Session session) throws FileStorageException {
         return "";
     }
 
-    @Override
     public boolean checkSecretCanDecryptStrings(Session session, String secret) throws FileStorageException {
         return true;
     }
 
-    @Override
     public void deleteAccount(FileStorageAccount account, Session session) throws FileStorageException {
 
     }
 
-    @Override
     public FileStorageAccount getAccount(String id, Session session) throws FileStorageException {
         if(id.equals(DEFAULT_ID)) {
             return DEFAULT_ACCOUNT;
@@ -118,17 +109,14 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
         throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, "com.openexchange.infostore");
     }
 
-    @Override
     public List<FileStorageAccount> getAccounts(Session session) throws FileStorageException {
         return Arrays.asList(DEFAULT_ACCOUNT);
     }
 
-    @Override
     public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws FileStorageException {
 
     }
 
-    @Override
     public void updateAccount(FileStorageAccount account, Session session) throws FileStorageException {
 
     }

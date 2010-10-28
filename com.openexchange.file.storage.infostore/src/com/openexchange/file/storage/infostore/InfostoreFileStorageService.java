@@ -61,47 +61,42 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link InfostoreFileStorageService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreFileStorageService implements FileStorageService {
 
     private static final FileStorageService INSTANCE = new InfostoreFileStorageService();
+
     private InfostoreFacade infostore;
+
     private InfostoreSearchEngine search;
 
-    @Override
     public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws FileStorageException {
-        if(!accountId.equals(InfostoreDefaultAccountManager.DEFAULT_ID)) {
+        if (!accountId.equals(InfostoreDefaultAccountManager.DEFAULT_ID)) {
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId());
         }
         return new InfostoreAccountAccess(session, this);
     }
 
-    @Override
     public FileStorageAccountManager getAccountManager() {
         return new InfostoreDefaultAccountManager();
     }
 
-    @Override
     public String getDisplayName() {
         return "Standard Infostore";
     }
 
-    @Override
     public String getId() {
         return "com.openexchange.infostore";
     }
 
-    @Override
     public Set<String> getSecretProperties() {
         return Collections.emptySet();
     }
 
-    @Override
     public DynamicFormDescription getFormDescription() {
         return new DynamicFormDescription();
     }
@@ -109,21 +104,21 @@ public class InfostoreFileStorageService implements FileStorageService {
     public static FileStorageService getInstance() {
         return INSTANCE;
     }
-    
+
     // Override this for OSGi Lookup, use the setter in tests
     public InfostoreFacade getInfostore() {
         return infostore;
     }
-    
+
     public void setInfostore(InfostoreFacade infostore) {
         this.infostore = infostore;
     }
-    
+
     // Override this for OSGi Lookup.
     public InfostoreSearchEngine getSearch() {
         return search;
     }
-    
+
     public void setSearch(InfostoreSearchEngine search) {
         this.search = search;
     }

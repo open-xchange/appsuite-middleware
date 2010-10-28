@@ -82,12 +82,10 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
         }
     }
 
-    @Override
     public String getAccountId() {
         return InfostoreDefaultAccountManager.DEFAULT_ID;
     }
 
-    @Override
     public FileStorageFileAccess getFileAccess() throws FileStorageException {
         if(files != null) {
             return files;
@@ -95,7 +93,6 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
         return files = new InfostoreAdapterFileAccess(session, service.getInfostore(), service.getSearch(), this);
     }
 
-    @Override
     public FileStorageFolderAccess getFolderAccess() throws FileStorageException {
         if(folders != null) {
             return folders;
@@ -103,38 +100,31 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
         return folders = new InfostoreFolderAccess(session);
     }
 
-    @Override
     public FileStorageFolder getRootFolder() throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
     public boolean cacheable() {
         return false;
     }
 
-    @Override
     public void close() {
 
     }
 
-    @Override
     public void connect() throws FileStorageException {
 
     }
 
-    @Override
     public boolean isConnected() {
         return true;
     }
 
-    @Override
     public boolean ping() throws FileStorageException {
         return true;
     }
 
-    @Override
     public FileStorageService getService() {
         return service;
     }

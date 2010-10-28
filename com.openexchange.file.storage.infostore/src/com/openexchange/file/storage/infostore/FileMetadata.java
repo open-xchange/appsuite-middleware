@@ -244,12 +244,10 @@ public class FileMetadata implements DocumentMetadata {
         file.setVersionComment(string);
     }
 
-    @Override
     public String getFilestoreLocation() {
         return null;
     }
 
-    @Override
     public void setFilestoreLocation(String string) {
         // TODO Auto-generated method stub
         

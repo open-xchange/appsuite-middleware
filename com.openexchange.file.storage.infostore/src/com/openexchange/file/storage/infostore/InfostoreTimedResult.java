@@ -69,7 +69,6 @@ public class InfostoreTimedResult implements TimedResult<File> {
         this.documents = documents;
     }
 
-    @Override
     public SearchIterator<File> results() {
         SearchIterator<DocumentMetadata> results = documents.results();
         if(results == null) {
@@ -78,7 +77,6 @@ public class InfostoreTimedResult implements TimedResult<File> {
         return new InfostoreSearchIterator(results);
     }
 
-    @Override
     public long sequenceNumber() throws AbstractOXException {
         return documents.sequenceNumber();
     }
