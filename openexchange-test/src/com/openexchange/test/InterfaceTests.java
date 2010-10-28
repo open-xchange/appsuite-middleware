@@ -107,7 +107,8 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class); */
         tests.addTestSuite(com.openexchange.ajax.FunambolTests.class);
         tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
-        
+        tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class);
+        tests.addTestSuite(com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class);
         return tests;
     }
 }
