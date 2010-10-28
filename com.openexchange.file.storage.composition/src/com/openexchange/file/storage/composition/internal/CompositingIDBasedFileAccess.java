@@ -95,13 +95,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         this.session = session;
     }
 
-    @Override
     public boolean exists(String id, int version) throws FileStorageException {
         FileID fileID = new FileID(id);
         return getFileAccess(fileID.getService(), fileID.getAccountId()).exists(fileID.getFolderId(), fileID.getFileId(), version);
     }
 
-    @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> columns, boolean ignoreDeleted) throws FileStorageException {
         FolderID folderID = new FolderID(folderId);
         Delta<File> delta = getFileAccess(folderID.getService(), folderID.getAccountId()).getDelta(
@@ -112,7 +110,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(delta, folderID.getService(), folderID.getAccountId());
     }
 
-    @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> columns, Field sort, SortDirection order, boolean ignoreDeleted) throws FileStorageException {
         FolderID folderID = new FolderID(folderId);
         Delta<File> delta = getFileAccess(folderID.getService(), folderID.getAccountId()).getDelta(
@@ -125,27 +122,23 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(delta, folderID.getService(), folderID.getAccountId());
     }
 
-    @Override
     public InputStream getDocument(String id, int version) throws FileStorageException {
         FileID fileID = new FileID(id);
 
         return getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
     }
 
-    @Override
     public TimedResult<File> getDocuments(String folderId) throws FileStorageException {
         FolderID folderID = new FolderID(folderId);
         TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId());
         return fixIDs(result, folderID.getService(), folderID.getAccountId());
     }
 
-    @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> columns) throws FileStorageException {
         FolderID folderID = new FolderID(folderId);
         return getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId(), addIDColumns(columns));
     }
 
-    @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> columns, Field sort, SortDirection order) throws FileStorageException {
         FolderID folderID = new FolderID(folderId);
         TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(
@@ -156,7 +149,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(result, folderID.getService(), folderID.getAccountId());
     }
 
-    @Override
     public TimedResult<File> getDocuments(List<String> ids, List<Field> columns) throws FileStorageException {
         final List<File> files = new ArrayList<File>(100);
         for (String id : ids) {
@@ -166,15 +158,13 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
         return new AbstractTimedResult<File>(new SearchIteratorAdapter<File>(files.iterator())) {
 
-            @Override
-            protected long extractTimestamp(File object) {
+                    protected long extractTimestamp(File object) {
                 return object.getSequenceNumber();
             }
 
         };
     }
 
-    @Override
     public File getFileMetadata(String id, int version) throws FileStorageException {
         FileID fileID = new FileID(id);
         File fileMetadata = getFileAccess(fileID.getService(), fileID.getAccountId()).getFileMetadata(
@@ -184,7 +174,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(fileMetadata, fileID.getService(), fileID.getAccountId());
     }
 
-    @Override
     public TimedResult<File> getVersions(String id) throws FileStorageException {
         FileID fileID = new FileID(id);
         TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
@@ -193,7 +182,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(result, fileID.getService(), fileID.getAccountId());
     }
 
-    @Override
     public TimedResult<File> getVersions(String id, List<Field> columns) throws FileStorageException {
         FileID fileID = new FileID(id);
         TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
@@ -203,7 +191,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(result, fileID.getService(), fileID.getAccountId());
     }
 
-    @Override
     public TimedResult<File> getVersions(String id, List<Field> columns, Field sort, SortDirection order) throws FileStorageException {
         FileID fileID = new FileID(id);
         TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
@@ -215,20 +202,17 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(result, fileID.getService(), fileID.getAccountId());
     }
 
-    @Override
     public void lock(String id, long diff) throws FileStorageException {
         FileID fileID = new FileID(id);
         getFileAccess(fileID.getService(), fileID.getAccountId()).lock(fileID.getFolderId(), fileID.getFileId(), diff);
     }
 
-    @Override
     public void removeDocument(String folderId, long sequenceNumber) throws FileStorageException {
         FolderID id = new FolderID(folderId);
 
         getFileAccess(id.getService(), id.getAccountId()).removeDocument(id.getFolderId(), sequenceNumber);
     }
 
-    @Override
     public List<String> removeDocument(List<String> ids, long sequenceNumber) throws FileStorageException {
         Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = new HashMap<FileStorageFileAccess, List<IDTuple>>();
         for (String id : ids) {
@@ -261,7 +245,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return notDeleted;
     }
 
-    @Override
     public int[] removeVersion(String id, int[] versions) throws FileStorageException {
         FileID fileID = new FileID(id);
 
@@ -323,55 +306,46 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         sourceAccess.removeDocument(Arrays.asList(new FileStorageFileAccess.IDTuple(id.getFolderId(), id.getFileId())), sequenceNumber);
     }
 
-    @Override
     public void saveDocument(final File document, final InputStream data, final long sequenceNumber) throws FileStorageException {
         save(document, new FileAccessDelegation() {
 
-            @Override
-            public void call(FileStorageFileAccess access) throws FileStorageException {
+                    public void call(FileStorageFileAccess access) throws FileStorageException {
                 access.saveDocument(document, data, sequenceNumber);
             }
             
         });
     }
 
-    @Override
     public void saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns) throws FileStorageException {
         save(document, new FileAccessDelegation() {
 
-            @Override
-            public void call(FileStorageFileAccess access) throws FileStorageException {
+                    public void call(FileStorageFileAccess access) throws FileStorageException {
                 access.saveDocument(document, data, sequenceNumber, modifiedColumns);
             }
             
         });
     }
 
-    @Override
     public void saveFileMetadata(final File document, final long sequenceNumber) throws FileStorageException {
         save(document, new FileAccessDelegation() {
 
-            @Override
-            public void call(FileStorageFileAccess access) throws FileStorageException {
+                    public void call(FileStorageFileAccess access) throws FileStorageException {
                 access.saveFileMetadata(document, sequenceNumber);
             }
             
         });
     }
 
-    @Override
     public void saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns) throws FileStorageException {
         save(document, new FileAccessDelegation() {
 
-            @Override
-            public void call(FileStorageFileAccess access) throws FileStorageException {
+                    public void call(FileStorageFileAccess access) throws FileStorageException {
                 access.saveFileMetadata(document, sequenceNumber, modifiedColumns);
             }
             
         });
     }
 
-    @Override
     public SearchIterator<File> search(String query, List<Field> cols, String folderId, Field sort, SortDirection order, int start, int end) throws FileStorageException {
         cols = addIDColumns(cols);
         if (folderId == FileStorageFileAccess.ALL_FOLDERS) {
@@ -394,13 +368,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return getFileAccess(id.getService(), id.getAccountId()).search(query, cols, id.getFolderId(), sort, order, start, end);
     }
 
-    @Override
     public void touch(String id) throws FileStorageException {
         FileID fileID = new FileID(id);
         getFileAccess(fileID.getService(), fileID.getAccountId()).touch(fileID.getFolderId(), fileID.getFileId());
     }
 
-    @Override
     public void unlock(String id) throws FileStorageException {
         FileID fileID = new FileID(id);
         getFileAccess(fileID.getService(), fileID.getAccountId()).unlock(fileID.getFolderId(), fileID.getFileId());
@@ -464,7 +436,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.AbstractService#commit(java.lang.Object)
      */
-    @Override
     protected void commit(Transaction transaction) throws TransactionException {
         // TODO Auto-generated method stub
 
@@ -474,7 +445,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.AbstractService#createTransaction()
      */
-    @Override
     protected Transaction createTransaction() throws TransactionException {
         // TODO Auto-generated method stub
         return null;
@@ -484,7 +454,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.AbstractService#rollback(java.lang.Object)
      */
-    @Override
     protected void rollback(Transaction transaction) throws TransactionException {
         // TODO Auto-generated method stub
 
@@ -494,7 +463,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.TransactionAware#setCommitsTransaction(boolean)
      */
-    @Override
     public void setCommitsTransaction(boolean commits) {
         // TODO Auto-generated method stub
 
@@ -504,7 +472,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.TransactionAware#setRequestTransactional(boolean)
      */
-    @Override
     public void setRequestTransactional(boolean transactional) {
         // TODO Auto-generated method stub
 
@@ -514,7 +481,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.TransactionAware#setTransactional(boolean)
      */
-    @Override
     public void setTransactional(boolean transactional) {
         // TODO Auto-generated method stub
 
