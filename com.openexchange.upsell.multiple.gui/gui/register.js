@@ -360,7 +360,7 @@ upsell = {
   //generates purchase mail
   _do_purchase_mail: function(data){
 	  jQuery.getJSON(
-      "/ajax/upsell/multiple?session="+parent.session+"&action=change_context_permissions&upsell_plan=" + upsell.config.feature + "&purchase_type=" + upsell.config.purchase_type,
+      "/ajax/upsell/multiple?session="+parent.session+"&action=change_context_permissions&upsell_plan=groupware_premium&feature_clicked=" + upsell.config.feature + "&purchase_type=" + upsell.config.purchase_type,
       function(data){
         upsell._close_dialouge();
         upsell.init("order_confirm");
@@ -370,11 +370,6 @@ upsell = {
 
   //reload and activate feature
   _do_reload: function(data){
-    jQuery.getJSON(
-      "/ajax/upsell/multiple?session="+parent.session+"&action=change_context_permissions&upsell_plan=" + upsell.config.feature + "&purchase_type=" + upsell.config.purchase_type,
-      function(data){
-      }
-    );
     location.reload();
   },
 };
