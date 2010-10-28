@@ -50,6 +50,7 @@
 package com.openexchange.passcrypt;
 
 import com.openexchange.authentication.LoginException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.groupware.AbstractOXException;
@@ -71,13 +72,20 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
 
     private static final String PASSCRYPT = "passcrypt";
 
-    private static final String KEY = "5ce1bcd8175f43ecaf5c809f66bd2dfb";
+    private final String key;
 
     /**
      * Initializes a new {@link PasswordCrypter}.
      */
-    public PasswordCrypter() {
+    public PasswordCrypter(final ConfigurationService configurationService) {
         super();
+        if (null == configurationService) {
+            throw new IllegalArgumentException("configurationService is null.");
+        }
+        key = configurationService.getProperty("com.openexchange.passcrypt.key");
+        if (null == key) {
+            throw new IllegalStateException("Missing property \"com.openexchange.passcrypt.key\".");
+        }
     }
 
     public void handleLogin(final LoginResult login) throws LoginException {
@@ -91,7 +99,7 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
             final String prevPassCrypt = attributeAccess.getAttribute(PASSCRYPT, user, null);
             final CryptoService cryptoService = PasscryptServiceRegistry.getServiceRegistry().getService(CryptoService.class);
             if (null != cryptoService) {
-                final String newPassCrypt = cryptoService.encrypt(login.getSession().getPassword(), KEY);
+                final String newPassCrypt = cryptoService.encrypt(login.getSession().getPassword(), key);
                 if (null == prevPassCrypt || !prevPassCrypt.equals(newPassCrypt)) {
                     attributeAccess.setAttribute(PASSCRYPT, newPassCrypt, user, login.getContext());
                 }
@@ -117,7 +125,7 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
         /*
          * Encrypt & save new secret
          */
-        final String newPassCrypt = cryptoService.encrypt(newSecret, KEY);
+        final String newPassCrypt = cryptoService.encrypt(newSecret, key);
         attributeAccess.setAttribute(PASSCRYPT, newPassCrypt, session.getUser(), session.getContext());
     }
 
