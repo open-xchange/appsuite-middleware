@@ -75,11 +75,10 @@ public class IDManglingFileCustomizer implements Customizer<File> {
         this.account = account;
     }
 
-    @Override
     public File customize(File thing) {
         return fixIDs(thing, service, account);
     }
-    
+
     public static SearchIterator<File> fixIDs(SearchIterator<File> iterator, String service, String account) {
         return new CustomizableSearchIterator<File>(iterator, new IDManglingFileCustomizer(service, account));
     }
@@ -95,7 +94,4 @@ public class IDManglingFileCustomizer implements Customizer<File> {
     public static File fixIDs(File file, String service, String account) {
         return new IDManglingFile(file, service, account);
     }
-    
-    
-
 }
