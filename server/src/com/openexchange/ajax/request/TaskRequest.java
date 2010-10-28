@@ -53,6 +53,9 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntArrayList;
 import java.util.Date;
 import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,7 +94,9 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
-public class TaskRequest {
+public class TaskRequest extends CalendarRequest {
+
+    private static final Log LOG = LogFactory.getLog(TaskRequest.class);
 
     protected final static int[] _taskFields = {
         DataObject.OBJECT_ID,
@@ -124,12 +129,6 @@ public class TaskRequest {
         Task.TRIP_METER,
         Task.COLOR_LABEL
     };
-
-    private final ServerSession session;
-
-    private Date timestamp;
-
-    private TimeZone timeZone;
 
     public TaskRequest(ServerSession session) {
         super();
@@ -183,6 +182,8 @@ public class TaskRequest {
         taskParser.parse(task, jsonobject);
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
+        
+        convertExternalToInternalUsersIfPossible(task, session.getContext(), LOG);
         sqlinterface.insertTaskObject(task);
         timestamp = task.getLastModified();
 
@@ -206,6 +207,8 @@ public class TaskRequest {
 
         task.setObjectID(id);
 
+        convertExternalToInternalUsersIfPossible(task, session.getContext(), LOG);
+        
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         sqlinterface.updateTaskObject(task, inFolder, timestamp);
         timestamp = task.getLastModified();

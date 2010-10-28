@@ -53,6 +53,7 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,12 +62,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.DateOrderObject;
 import com.openexchange.ajax.fields.AppointmentFields;
@@ -98,9 +101,11 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -110,13 +115,14 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.OXJSONException.Code;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AppointmentRequest} - Processes appointment requests.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class AppointmentRequest {
+public class AppointmentRequest extends CalendarRequest {
 
     private static final int DAY_MILLIS = 24 * 60 * 60 * 1000;
 
@@ -137,15 +143,9 @@ public class AppointmentRequest {
         Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.ORGANIZER, Appointment.UID, Appointment.SEQUENCE, Appointment.CONFIRMATIONS, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
         Appointment.NUMBER_OF_ATTACHMENTS};
 
-    private final ServerSession session;
-
     private final Context ctx;
 
     private final User user;
-
-    private Date timestamp;
-
-    private final TimeZone timeZone;
 
     private final AppointmentSqlFactoryService appointmentFactory;
 
@@ -240,7 +240,9 @@ public class AppointmentRequest {
         if (!appointmentObj.containsParentFolderID()) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_FOLDERID);
         }
-
+        
+        convertExternalToInternalUsersIfPossible(appointmentObj, ctx, LOG);
+        
         final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
         final Appointment[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
 
@@ -264,7 +266,8 @@ public class AppointmentRequest {
         return jsonResponseObj;
     }
 
-    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, OXJSONException, AjaxException {
+    
+	public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, OXJSONException, AjaxException {
         final int objectId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -280,6 +283,8 @@ public class AppointmentRequest {
 
         final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
         appointmentParser.parse(appointmentObj, jData);
+
+        convertExternalToInternalUsersIfPossible(appointmentObj, ctx, LOG);
 
         appointmentObj.setObjectID(objectId);
 
