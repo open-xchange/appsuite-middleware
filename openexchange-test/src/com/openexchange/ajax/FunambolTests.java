@@ -52,7 +52,7 @@ package com.openexchange.ajax;
 import com.openexchange.ajax.appointment.CalendarTestManagerTest;
 import com.openexchange.ajax.contact.ManagedContactTests;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.task.ManagedTaskTests;
+import com.openexchange.ajax.task.BasicManagedTaskTests;
 
 /**
  * A summary of tests written to fulfill Funambol QA requirements. These tests do exist in the test system, yet they were not collected in
@@ -113,7 +113,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 608000000&columns=1%2C4%2C5%2C20%2C209
          */
         //start and end dates are not specified in the HTTP API.
-        ManagedTaskTests test = new ManagedTaskTests("funambol: all tasks");
+        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: all tasks");
         try {
             test.setUp();
             test.testAll();
@@ -159,7 +159,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Funambol platform stores the Ids of the items handled by the sync, in this way we can understand the items handled between the
          * last sync and the current sync session.
          */
-        ManagedTaskTests test = new ManagedTaskTests("funambol: updates for tasks");
+        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: updates for tasks");
         try {
             test.setUp();
             test.testUpdateAndReceiveUpdates();
@@ -203,7 +203,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Request: http://192.168.0.76/ajax/tasks? action=get&session=cfbaa1d35d0aab24f0145f60b62c8302&folder=39&id=215&columns=1
          */
         //columns is a useless param here - get always return everything
-        ManagedTaskTests test = new ManagedTaskTests("funambol: get task");
+        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: get task");
         try {
             test.setUp();
             test.testCreateAndGet();
@@ -251,7 +251,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 15,"ignore_conflicts":true,"private_flag":false,"title":"testing","end_date":
          * 1196420400000,"start_date":1196416800000,"location":"","note":"","recurrence_type": 0,"full_time":false}
          */
-        ManagedTaskTests test = new ManagedTaskTests("funambol: update tasks");
+        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: update tasks");
         try {
             test.setUp();
             test.testUpdateAndReceiveUpdates();
@@ -296,7 +296,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 15,"folder_id":"256","ignore_conflicts":true,"private_flag":false,"title":"1","end_date":
          * 1198054800000,"start_date":1198051200000,"location":"","note":"","recurrence_type": 0,"full_time":false}
          */
-        ManagedTaskTests test = new ManagedTaskTests("funambol: add task");
+        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: add task");
         try {
             test.setUp();
             test.testCreateAndGet();
@@ -338,7 +338,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Request: http://192.168.0.76/ajax/tasks? action=delete&session=cfbaa1d35d0aab24f0145f60b62c8302&timestamp=1212762011919 Following
          * is a sample request body for a delete calendar item: REQUEST BODY: {"folder":38,"id":293}
          */
-        ManagedTaskTests test = new ManagedTaskTests("funambol: delete task");
+        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: delete task");
         try {
             test.setUp();
             test.testCreateAndDelete();

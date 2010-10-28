@@ -52,46 +52,15 @@ package com.openexchange.ajax.task;
 import static com.openexchange.groupware.calendar.TimeTools.removeMilliseconds;
 import java.util.Date;
 import junit.framework.AssertionFailedError;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TaskTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ManagedTaskTests extends AbstractAJAXSession {
+public class BasicManagedTaskTests extends ManagedTaskTest {
 
-    private TaskTestManager manager;
-
-    private int folderID;
-
-    private Task actual;
-
-    public ManagedTaskTests(String name) {
+    public BasicManagedTaskTests(String name) {
         super(name);
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        manager = new TaskTestManager(getClient());
-        folderID = getClient().getValues().getPrivateTaskFolder();
-        actual = null;
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
-    }
-
-    public Task generateTask(String title) {
-        Task task = new Task();
-        task.setParentFolderID(folderID);
-        task.setTitle(title);
-        task.setStartDate(new Date());
-        task.setEndDate(new Date());
-        return task;
     }
 
     public void testCreateAndGet() {

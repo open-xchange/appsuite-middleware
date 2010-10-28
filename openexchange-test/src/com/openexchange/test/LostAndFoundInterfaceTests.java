@@ -56,7 +56,7 @@ import com.openexchange.ajax.importexport.VCardImportExportServletTest;
 import com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest;
 import com.openexchange.ajax.task.Bug10941Test;
 import com.openexchange.ajax.task.Bug14450Test;
-import com.openexchange.ajax.task.ManagedTaskTests;
+import com.openexchange.ajax.task.BasicManagedTaskTests;
 import com.openexchange.test.osgi.BundleTestAuthentication;
 import com.openexchange.test.osgi.BundleTestIMAP;
 import com.openexchange.test.osgi.BundleTestSessionD;
@@ -80,7 +80,7 @@ public class LostAndFoundInterfaceTests {
         tests.addTestSuite(BundleTestSessionD.class);
         tests.addTestSuite(BundleTestIMAP.class);
         tests.addTestSuite(BundleTestAuthentication.class);        
-        tests.addTestSuite(ManagedTaskTests.class);
+        tests.addTestSuite(BasicManagedTaskTests.class);
         tests.addTestSuite(Bug14450Test.class);
         tests.addTestSuite(Bug10941Test.class);
         tests.addTestSuite(CreateAndDeleteInfostoreTest.class);
