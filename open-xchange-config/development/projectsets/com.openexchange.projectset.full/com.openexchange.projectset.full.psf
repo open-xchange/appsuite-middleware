@@ -80,5 +80,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.tx,com.openexchange.tx"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.file.storage.infostore,com.openexchange.file.storage.infostore"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.hostname.ldap,com.openexchange.hostname.ldap"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.passcrypt,com.openexchange.passcrypt"/>
 </provider>
 </psf>
