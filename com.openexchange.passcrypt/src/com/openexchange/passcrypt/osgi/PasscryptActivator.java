@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.passcrypt.PasswordCrypter;
@@ -82,7 +83,7 @@ public final class PasscryptActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CryptoService.class };
+        return new Class<?>[] { CryptoService.class, ConfigurationService.class };
     }
 
     @Override

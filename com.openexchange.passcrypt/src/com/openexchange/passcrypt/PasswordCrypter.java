@@ -1,0 +1,124 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.passcrypt;
+
+import com.openexchange.authentication.LoginException;
+import com.openexchange.crypto.CryptoException;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserAttributeAccess;
+import com.openexchange.login.LoginHandlerService;
+import com.openexchange.login.LoginResult;
+import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.tools.session.ServerSession;
+
+/**
+ * {@link PasswordCrypter} - Crypts password to support digest authentication mechanisms.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCheck, SecretMigrator {
+
+    private static final String PASSCRYPT = "passcrypt";
+
+    private static final String KEY = "5ce1bcd8175f43ecaf5c809f66bd2dfb";
+
+    /**
+     * Initializes a new {@link PasswordCrypter}.
+     */
+    public PasswordCrypter() {
+        super();
+    }
+
+    public void handleLogin(final LoginResult login) throws LoginException {
+        try {
+            /*
+             * Crypt & store password to support digest authentication mechanisms which require to look-up a user's password by a certain
+             * user identifier (login)
+             */
+            final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();
+            final User user = login.getUser();
+            final String prevPassCrypt = attributeAccess.getAttribute(PASSCRYPT, user, null);
+            final CryptoService cryptoService = PasscryptServiceRegistry.getServiceRegistry().getService(CryptoService.class);
+            if (null != cryptoService) {
+                final String newPassCrypt = cryptoService.encrypt(login.getSession().getPassword(), KEY);
+                if (null == prevPassCrypt || !prevPassCrypt.equals(newPassCrypt)) {
+                    attributeAccess.setAttribute(PASSCRYPT, newPassCrypt, user, login.getContext());
+                }
+            }
+        } catch (final LdapException e) {
+            throw new LoginException(e);
+        } catch (final CryptoException e) {
+            throw new LoginException(e);
+        }
+    }
+
+    public void handleLogout(final LoginResult logout) {
+        // Nothing to to.
+    }
+
+    public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+        return true;
+    }
+
+    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
+        final CryptoService cryptoService = PasscryptServiceRegistry.getServiceRegistry().getService(CryptoService.class, true);
+        final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();
+        /*
+         * Encrypt & save new secret
+         */
+        final String newPassCrypt = cryptoService.encrypt(newSecret, KEY);
+        attributeAccess.setAttribute(PASSCRYPT, newPassCrypt, session.getUser(), session.getContext());
+    }
+
+}
