@@ -234,7 +234,9 @@ public abstract class OXServlet extends WebDavServlet {
             return false;
         }
         if (null == session) {
-            // No session found by cookie
+            /*
+             * No session found by cookie
+             */
             final LoginRequest loginRequest;
             try {
                 loginRequest = parseLogin(req);
@@ -250,15 +252,17 @@ public abstract class OXServlet extends WebDavServlet {
                 if (e.getCategory() == Category.USER_INPUT) {
                     addUnauthorizedHeader(req, resp);
                     resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
-                    return false;
+                } else {
+                    LOG.error(e.getMessage(), e);
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 }
-                LOG.error(e.getMessage(), e);
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 return false;
             }
             resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
         } else {
-            // Session found by cookie
+            /*
+             * Session found by cookie
+             */
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
                 if (LOG.isDebugEnabled()) {
@@ -375,7 +379,7 @@ public abstract class OXServlet extends WebDavServlet {
             }
             return new LoginRequestImpl(login, pass, getInterface(), req);
         }
-        if (false && checkForDigestAuthorization(auth)) {
+        if (checkForDigestAuthorization(auth)) {
             /*
              * Digest auth
              */

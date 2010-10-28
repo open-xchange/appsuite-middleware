@@ -317,10 +317,10 @@ public final class DigestUtility {
             /*
              * Lookup encrypted password in user attributes
              */
-            final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();
-            final String passCrypt = attributeAccess.getAttribute("passcrypt", user, null);
-            final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class, true);
-            final String key = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("com.openexchange.passcrypt.key");
+            final String passCrypt = UserAttributeAccess.getDefaultInstance().getAttribute("passcrypt", user, null);
+            final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
+            final CryptoService cryptoService = serviceRegistry.getService(CryptoService.class, true);
+            final String key = serviceRegistry.getService(ConfigurationService.class).getProperty("com.openexchange.passcrypt.key");
             return cryptoService.decrypt(passCrypt, key);
         } catch (final ContextException e) {
             throw new WebdavException(e);
