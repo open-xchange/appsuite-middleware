@@ -63,7 +63,6 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link FileStorageCompositionActivator}
  *
