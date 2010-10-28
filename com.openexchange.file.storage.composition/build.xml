@@ -7,7 +7,6 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
-    <property name="lib.dir" value="lib"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -18,44 +17,28 @@
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
-    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-    <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
-    <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
+    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
     <!-- Bundle dependencies -->
 	<property name="commonBundle" value="com.openexchange.common"/>
-	<!-- <property name="xmlBundle" value="com.openexchange.xml"/> -->
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
-	<!-- <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/> -->
-
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="filestoragejar" value="com.openexchange.file.storage.jar"/>
 	<property name="txjar" value="com.openexchange.tx.jar"/>
-
 	<property name="trovejar" value="trove-2.1.0.jar"/>
-
-    <!-- Third party libs -->
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
-        <exclude name="CVS"/>
-    </fileset>
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
-    	<!-- <pathelement location="${bundlesdir}/${commonsloggingjar}"/> -->
-
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${filestoragejar}"/>
     	<pathelement location="${bundlesdir}/${txjar}"/>
-
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
-
-        <fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
@@ -73,7 +56,6 @@
     <target name="jar" depends="prepare,compile">
         <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
-            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
@@ -84,8 +66,10 @@
     </target>
 
     <target name="installConfig">
-        <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <mkdir dir="${destdir}/${gwbundle.d}"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <mkdir dir="${destdir}/${adbundle.d}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
