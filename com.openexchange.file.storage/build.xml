@@ -4,6 +4,9 @@
     <!-- Customizable values -->
     <property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
+	
+	<!-- Bundle dependencies -->
+	<property name="commonBundle" value="com.openexchange.common"/>
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
@@ -27,6 +30,8 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="txjar" value="com.openexchange.tx.jar"/>
+	
+	<property name="jsonjar" value="json.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -36,6 +41,8 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${txjar}"/>
+    	
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     </path>
 
     <!-- Compile -->

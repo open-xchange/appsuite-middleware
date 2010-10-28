@@ -14,6 +14,7 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.tools.iterator,
  com.openexchange.tx,
  org.apache.commons.logging,
+ org.json,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.file.storage.osgi.FileStorageActivator
