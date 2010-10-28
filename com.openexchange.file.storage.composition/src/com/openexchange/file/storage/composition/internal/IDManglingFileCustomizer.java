@@ -58,7 +58,6 @@ import com.openexchange.tools.iterator.CustomizableSearchIterator;
 import com.openexchange.tools.iterator.Customizer;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 /**
  * {@link IDManglingFileCustomizer}
  *
