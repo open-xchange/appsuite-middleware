@@ -60,13 +60,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.crypto.CryptoException;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.webdav.WebdavException;
 
 /**
@@ -308,10 +314,21 @@ public final class DigestUtility {
                 throw new WebdavException(WebdavException.Code.RESOLVING_USER_NAME_FAILED, userName);
             }
             final User user = userStorage.getUser(userId, ctx);
-            return null;
+            /*
+             * Lookup encrypted password in user attributes
+             */
+            final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();
+            final String passCrypt = attributeAccess.getAttribute("passcrypt", user, null);
+            final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class, true);
+            final String key = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("com.openexchange.passcrypt.key");
+            return cryptoService.decrypt(passCrypt, key);
         } catch (final ContextException e) {
             throw new WebdavException(e);
         } catch (final LdapException e) {
+            throw new WebdavException(e);
+        } catch (final ServiceException e) {
+            throw new WebdavException(e);
+        } catch (final CryptoException e) {
             throw new WebdavException(e);
         }
     }
