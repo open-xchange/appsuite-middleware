@@ -133,7 +133,7 @@ public final class PasscryptActivator extends DeferredActivator {
              * Register services
              */
             registrations = new ArrayList<ServiceRegistration>(2);
-            final PasswordCrypter passwordCrypter = new PasswordCrypter();
+            final PasswordCrypter passwordCrypter = new PasswordCrypter(getService(ConfigurationService.class));
             registrations.add(context.registerService(LoginHandlerService.class.getName(), passwordCrypter, null));
             registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), passwordCrypter, null));
             registrations.add(context.registerService(SecretMigrator.class.getName(), passwordCrypter, null));
