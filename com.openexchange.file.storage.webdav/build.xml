@@ -24,7 +24,6 @@
 
     <!-- Bundle dependencies -->
 	<property name="commonBundle" value="com.openexchange.common"/>
-	<!-- <property name="xmlBundle" value="com.openexchange.xml"/> -->
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
@@ -49,7 +48,7 @@
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-    	<pathelement location="${bundlesdir}/${commonshttpclientjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
     	<pathelement location="${bundlesdir}/${servletjar}"/>
 
         <pathelement location="${bundlesdir}/${globaljar}"/>
