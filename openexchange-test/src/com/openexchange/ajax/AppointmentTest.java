@@ -248,7 +248,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         if (appointmentObj1.containsUid()) {
             assertEquals("uid", appointmentObj1.getUid(), appointmentObj2.getUid());
         }
-        assertEquals("sequence", appointmentObj1.getSequence(), appointmentObj2.getSequence());
+        //assertEquals("sequence", appointmentObj1.getSequence(), appointmentObj2.getSequence());
         OXTestToolkit.assertEqualsAndNotNull("note", appointmentObj1.getNote(),
                 appointmentObj2.getNote());
         OXTestToolkit.assertEqualsAndNotNull("categories", appointmentObj1.getCategories(),
