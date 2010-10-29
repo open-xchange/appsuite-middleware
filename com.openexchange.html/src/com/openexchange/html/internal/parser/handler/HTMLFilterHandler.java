@@ -263,7 +263,12 @@ public final class HTMLFilterHandler implements HTMLHandler {
                             final StringBuilder sb = new StringBuilder();
                             String line = null;
                             while ((line = reader.readLine()) != null) {
-                                sb.append(line).append(CRLF);
+                                if (line.length() > 0 && '#' != line.charAt(0)) {
+                                    /*
+                                     * No comment line
+                                     */
+                                    sb.append(line).append(CRLF);
+                                }
                             }
                             mapStr = sb.toString();
                         } catch (final Exception e) {
