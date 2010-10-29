@@ -149,11 +149,11 @@ public class DynamicWhiteboardFactory implements OXCloseable {
                     if (p2 == null) {
                         return true;
                     }
-                    if (p1 == p2) {
+                    if (p1.equals(p2)) {
                         p1 = (Integer) reference.getProperty(Constants.SERVICE_ID);
                         p2 = (Integer) otherReference.getProperty(Constants.SERVICE_ID);
                     }
-                    return p1 > p2;
+                    return p1.intValue() > p2.intValue();
                 }
 
                 @Override
