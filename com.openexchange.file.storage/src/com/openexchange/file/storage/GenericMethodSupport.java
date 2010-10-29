@@ -51,77 +51,77 @@ package com.openexchange.file.storage;
 
 import java.util.Date;
 
-
 /**
  * {@link GenericMethodSupport}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GenericMethodSupport {
-    protected <T> T get(final int i, final Class<T> klass, final Object...args) {
-        if(i >= args.length) {
+
+    protected <T> T get(final int i, final Class<T> klass, final Object... args) {
+        if (i >= args.length) {
             return null;
         }
         return (T) args[i];
     }
-    
-    protected File md(final int i, final Object...args) {
+
+    protected File md(final int i, final Object... args) {
         return get(i, File.class, args);
     }
-    
-    protected File md(final Object...args) {
+
+    protected File md(final Object... args) {
         return md(0, args);
     }
-    
-    protected String string(final int i, final Object...args) {
-        if(args[i] == null || args.length <= i) {
+
+    protected String string(final int i, final Object... args) {
+        if (args[i] == null || args.length <= i) {
             return null;
         }
         return args[i].toString();
     }
-    
-    protected int integer(final int i, final Object...args) {
-        if(args[i] == null || args.length <= i) {
+
+    protected int integer(final int i, final Object... args) {
+        if (args[i] == null || args.length <= i) {
             return -1;
         }
         final Object o = args[i];
-        if(o instanceof Number) {
-            return ((Number)o).intValue();
+        if (o instanceof Number) {
+            return ((Number) o).intValue();
         } else if (o instanceof String) {
-            return Integer.parseInt((String)o);
+            return Integer.parseInt((String) o);
         } else {
             return integer(0, o.toString());
         }
     }
-    
-    protected Date date(final int i, final Object...args) {
-        if(args[i] == null || args.length <= i) {
+
+    protected Date date(final int i, final Object... args) {
+        if (args[i] == null || args.length <= i) {
             return null;
         }
         final Object o = args[i];
-        
-        if(o instanceof Date) {
+
+        if (o instanceof Date) {
             return (Date) o;
         }
-        
+
         return new Date(coerceToLong(o));
     }
-    
-    protected long longValue(final int i, final Object...args) {
-        if(args[i] == null || args.length <= i) {
+
+    protected long longValue(final int i, final Object... args) {
+        if (args[i] == null || args.length <= i) {
             return -1;
         }
         return coerceToLong(args[i]);
     }
 
     private long coerceToLong(final Object o) {
-        if(o instanceof Number) {
-            return ((Number)o).longValue();
+        if (o instanceof Number) {
+            return ((Number) o).longValue();
         } else if (o instanceof String) {
-            return Long.parseLong((String)o);
+            return Long.parseLong((String) o);
         } else {
             return coerceToLong(o.toString());
         }
     }
-  
+
 }
