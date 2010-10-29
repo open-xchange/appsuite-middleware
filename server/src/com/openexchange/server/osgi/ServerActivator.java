@@ -60,12 +60,14 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
@@ -221,7 +223,7 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileMetadataParserService.class, CryptoService.class
+            CryptoService.class
         };
 
     private final List<ServiceRegistration> registrationList;
@@ -471,8 +473,26 @@ public final class ServerActivator extends DeferredActivator {
                 new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
 
             // Folder Fields
-            
             serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
+
+            // FileMetadataParserService
+            serviceTrackerList.add(new ServiceTracker(context, FileMetadataParserService.class.getName(), new ServiceTrackerCustomizer() {
+                
+                public void removedService(final ServiceReference reference, final Object service) {
+                    ServerServiceRegistry.getInstance().removeService(FileMetadataParserService.class);
+                    context.ungetService(reference);
+                }
+                
+                public void modifiedService(final ServiceReference reference, final Object service) {
+                    // Nope
+                }
+                
+                public Object addingService(final ServiceReference reference) {
+                    final Object service = context.getService(reference);
+                    ServerServiceRegistry.getInstance().addService(FileMetadataParserService.class, service);
+                    return service;
+                }
+            }));
             
             // Start up server the usual way
             starter.start();
