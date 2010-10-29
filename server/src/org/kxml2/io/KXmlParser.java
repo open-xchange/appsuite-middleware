@@ -1296,6 +1296,11 @@ public class KXmlParser implements XmlPullParser {
     public char[] getTextCharacters(final int[] poslen) {
         if (type >= TEXT) {
             if (type == ENTITY_REF) {
+                if (null == name) {
+                    poslen[0] = -1;
+                    poslen[1] = -1;
+                    return null;
+                }
                 poslen[0] = 0;
                 poslen[1] = name.length();
                 return name.toCharArray();
