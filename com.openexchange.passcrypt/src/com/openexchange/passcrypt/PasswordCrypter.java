@@ -98,8 +98,9 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
             final User user = login.getUser();
             final String prevPassCrypt = attributeAccess.getAttribute(PASSCRYPT, user, null);
             final CryptoService cryptoService = PasscryptServiceRegistry.getServiceRegistry().getService(CryptoService.class);
-            if (null != cryptoService) {
-                final String newPassCrypt = cryptoService.encrypt(login.getSession().getPassword(), key);
+            final String password = login.getSession().getPassword();
+            if (null != cryptoService && null != password) {
+                final String newPassCrypt = cryptoService.encrypt(password, key);
                 if (null == prevPassCrypt || !prevPassCrypt.equals(newPassCrypt)) {
                     attributeAccess.setAttribute(PASSCRYPT, newPassCrypt, user, login.getContext());
                 }
