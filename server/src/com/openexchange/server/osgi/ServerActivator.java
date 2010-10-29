@@ -500,9 +500,15 @@ public final class ServerActivator extends DeferredActivator {
             // Folder Fields
             serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
 
-            // FileMetadataParserService
-            serviceTrackerList.add(new ServiceTracker(context, FileMetadataParserService.class.getName(), new ServiceAdderTrackerCustomizer(context)));
-            
+            /*
+             * The FileMetadataParserService needs to be tracked by a separate service tracker instead of just adding the service to
+             * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
+             */
+            serviceTrackerList.add(new ServiceTracker(
+                context,
+                FileMetadataParserService.class.getName(),
+                new ServiceAdderTrackerCustomizer(context)));
+
             // Start up server the usual way
             starter.start();
         }
