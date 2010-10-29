@@ -123,7 +123,7 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
     }
 
     public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
-        return true;
+        return false;
     }
 
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
