@@ -94,6 +94,7 @@ public class ResellerContext extends Context {
     }
 
     public ResellerContext(Context c) {
+        this.setId(c.getId());
         this.setAverage_size(c.getAverage_size());
         this.setEnabled(c.getEnabled());
         this.setFilestore_name(c.getFilestore_name());

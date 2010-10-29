@@ -63,6 +63,7 @@ public final class ResellerContextUtil {
      */
     public static Context resellerContext2Context(ResellerContext ctx) throws DuplicateExtensionException {
         Context ret = new Context();
+        ret.setId(ctx.getId());
         ret.setAverage_size(ctx.getAverage_size());
         ret.setEnabled(ctx.getEnabled());
         ret.setFilestore_name(ctx.getFilestore_name());
