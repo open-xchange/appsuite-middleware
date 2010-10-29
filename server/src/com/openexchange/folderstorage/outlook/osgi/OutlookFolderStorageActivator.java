@@ -70,7 +70,6 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
-import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -152,10 +151,10 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
             final EventHandler eventHandler = new EventHandler() {
                 
                 public void handleEvent(final Event event) {
-                    final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
-                    final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                    // final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
+                    // final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
                     // final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
-                    OutlookFolderStorage.removeFromTCM(folderId, session.getUserId(), session.getContextId());
+                    OutlookFolderStorage.clearTCM();
                 }
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);

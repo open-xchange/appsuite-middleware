@@ -266,6 +266,13 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     /**
+     * Clears TCM map.
+     */
+    public static void clearTCM() {
+        TCM.clear();
+    }
+
+    /**
      * The real tree identifier.
      */
     final String realTreeId;
