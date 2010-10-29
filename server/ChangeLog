@@ -1,3 +1,7 @@
+* 2010-10-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #17345: Changed log level to warning
+
 * 2010-10-26 - tobias.prinz@open-xchange.com
 
  - Userstory 5244: If an internal user is added as an external participant, they get transformed into an internal one automagically.

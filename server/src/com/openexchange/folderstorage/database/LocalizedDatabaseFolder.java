@@ -142,11 +142,11 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
         } catch (final InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
-            LOG.error(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
             return getName();
         } catch (final ExecutionException e) {
             final Throwable t = e.getCause();
-            LOG.error(t.getMessage(), t);
+            LOG.warn(t.getMessage(), t);
             return getName();
         }
     }
