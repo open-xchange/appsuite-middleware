@@ -22,7 +22,7 @@ setUCRVars() {
     eval $(ucr shell)
     
     descrarr=( "OXtender for MS Outlook" "OXtender for Business Mobility" )
-    pkgarr=( "open-xchange-outlook-updater" "open-xchange-meta-mobility univention-ox-usm" )
+    pkgarr=( "open-xchange-outlook-updater" "open-xchange-meta-mobility" )
     if [ "$(ucr get repository/online/component/ox/description)" != "Open-Xchange Server" ]; then
 	ucr set repository/online/component/ox/description="Open-Xchange Server"
     fi
@@ -34,18 +34,29 @@ setUCRVars() {
     for repo in oxoutlook oxmobility; do
 	# fix all descriptions
 	ucr set repository/online/component/${repo}/description="${descrarr[$cnt]}"
-	# add required packages
-	ucr set repository/online/component/${repo}/defaultpackage="${pkgarr[$cnt]}"
+
 	# set repository settings
-	if [ "$univention_ox_directory_integration_oxse" = "true" ]; then
-		ucr set "repository/online/component/${repo}/version=current" \
-			"repository/online/component/${repo}/prefix?OX6/OXSEforUCS" \
-			"repository/online/component/${repo}/server?software.open-xchange.com"
+	defpkg="${pkgarr[$cnt]}"
+	if [ "$univention_ox_directory_integration_oxse" == "true" ]; then
+	    #OXSE
+	    ucr set "repository/online/component/${repo}/version=current" \
+		    "repository/online/component/${repo}/prefix?OX6/OXSEforUCS" \
+		    "repository/online/component/${repo}/server?software.open-xchange.com"
+	    if [ "$repo" == "oxmobility" ]; then
+		defpkg="$defpkg univention-ox-usm-ox"
+	    fi
+	else
+	    # OXAE
+	    if [ "$repo" == "oxmobility" ]; then
+		defpkg="$defpkg univention-ox-usm"
+	    fi
 	fi
+	# add required packages
+	ucr set repository/online/component/${repo}/defaultpackage="$defpkg"
 
 	if echo $components | grep $repo >/dev/null; then
-	   cnt=$(( $cnt + 1 ))
-	   continue
+	    cnt=$(( $cnt + 1 ))
+	    continue
 	fi
 
         renabled=$(ucr get repository/online/component/$repo)
