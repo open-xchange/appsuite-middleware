@@ -727,19 +727,12 @@ public final class MIMEMessageConverter {
                  * Disposition-Notification-To
                  */
                 {
-                    InternetAddress[] dispNotTo = null;
-                    final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
-                    if (null != addrStr) {
-                        try {
-                            dispNotTo = QuotedInternetAddress.parse(addrStr, true);
-                        } catch (final AddressException e) {
-                            dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr) };
-                        }
-                    }
-                    if (null != dispNotTo && dispNotTo.length > 0) {
-                        mailMessage.setDispositionNotification(dispNotTo[0]);
-                    } else {
+                    final String dispNot = extMimeMessage.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
+                    if (dispNot == null) {
                         mailMessage.setDispositionNotification(null);
+                    } else {
+                        final InternetAddress[] addresses = getAddressHeader(dispNot);
+                        mailMessage.setDispositionNotification(null == addresses || 0 == addresses.length ? null : addresses[0]);
                     }
                 }
                 /*
@@ -920,7 +913,13 @@ public final class MIMEMessageConverter {
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
                 if ((val != null) && (val.length > 0)) {
-                    mailMessage.setDispositionNotification(QuotedInternetAddress.parse(val[0], true)[0]);
+                    final String dispNot = val[0];
+                    if (dispNot == null) {
+                        mailMessage.setDispositionNotification(null);
+                    } else {
+                        final InternetAddress[] addresses = getAddressHeader(dispNot);
+                        mailMessage.setDispositionNotification(null == addresses || 0 == addresses.length ? null : addresses[0]);
+                    }
                 } else {
                     mailMessage.setDispositionNotification(null);
                 }
@@ -1013,17 +1012,15 @@ public final class MIMEMessageConverter {
                  * Disposition-Notification-To
                  */
                 {
-                    InternetAddress[] dispNotTo = null;
                     final String[] addrStr = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
-                    if (null != addrStr) {
-                        try {
-                            dispNotTo = QuotedInternetAddress.parse(addrStr[0], true);
-                        } catch (final AddressException e) {
-                            dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr[0]) };
+                    if (null != addrStr && addrStr.length > 0) {
+                        final String dispNot = addrStr[0];
+                        if (dispNot == null) {
+                            mailMessage.setDispositionNotification(null);
+                        } else {
+                            final InternetAddress[] addresses = getAddressHeader(dispNot);
+                            mailMessage.setDispositionNotification(null == addresses || 0 == addresses.length ? null : addresses[0]);
                         }
-                    }
-                    if (null != dispNotTo && dispNotTo.length > 0) {
-                        mailMessage.setDispositionNotification(dispNotTo[0]);
                     } else {
                         mailMessage.setDispositionNotification(null);
                     }
@@ -1255,7 +1252,13 @@ public final class MIMEMessageConverter {
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 final String[] val = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
                 if ((val != null) && (val.length > 0)) {
-                    mailMessage.setDispositionNotification(QuotedInternetAddress.parse(val[0], true)[0]);
+                    final String dispNot = val[0];
+                    if (dispNot == null) {
+                        mailMessage.setDispositionNotification(null);
+                    } else {
+                        final InternetAddress[] addresses = getAddressHeader(dispNot);
+                        mailMessage.setDispositionNotification(null == addresses || 0 == addresses.length ? null : addresses[0]);
+                    }
                 } else {
                     mailMessage.setDispositionNotification(null);
                 }
@@ -1498,7 +1501,8 @@ public final class MIMEMessageConverter {
                 if (dispNot == null) {
                     mail.setDispositionNotification(null);
                 } else {
-                    mail.setDispositionNotification(QuotedInternetAddress.parse(dispNot, true)[0]);
+                    final InternetAddress[] addresses = getAddressHeader(dispNot);
+                    mail.setDispositionNotification(null == addresses || 0 == addresses.length ? null : addresses[0]);
                 }
             }
             {
