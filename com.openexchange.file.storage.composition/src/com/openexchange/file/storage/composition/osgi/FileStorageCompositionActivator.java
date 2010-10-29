@@ -71,7 +71,6 @@ public class FileStorageCompositionActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -112,6 +111,7 @@ public class FileStorageCompositionActivator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         if(registration != null) {
             registration.unregister();
+            registration = null;
         }
     }
     
