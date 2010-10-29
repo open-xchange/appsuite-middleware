@@ -1,6 +1,7 @@
 * 2010-10-29 - choeger@open-xchange.com
 
  - Bugfix #17347 - Outlook OXtender repository not configured correctly
+ - Bugfix #17348 - Wrong defaultpackage for component "oxmobility"
 
 * 2010-06-24 - choeger@open-xchange.com
 
