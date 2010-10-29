@@ -367,6 +367,7 @@ public final class MailFolderStorage implements FolderStorage {
             final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
             final boolean hardDelete = fullname.startsWith(trashFullname);
             mailAccess.getFolderStorage().deleteFolder(fullname, hardDelete);
+            postEvent(accountId, fullname, false, true, false, storageParameters);
             try {
                 /*
                  * Update message cache
@@ -1270,7 +1271,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (!m.isEmpty()) {
                 postEvent4Subfolders(accountId, m, params);
             }
-            postEvent(accountId, entry.getKey(), false, params);
+            postEvent(accountId, entry.getKey(), false, true, false, params);
         }
     }
 
@@ -1320,5 +1321,16 @@ public final class MailFolderStorage implements FolderStorage {
         }
         EventPool.getInstance().put(new PooledEvent(topic, params.getContextId(), params.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, params.getSession()));
     }
-    
+
+    private static void postEvent(final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean async, final StorageParameters params) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        EventPool.getInstance().put(
+            new PooledEvent(params.getContextId(), params.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, params.getSession()).setAsync(async));
+    }
+
 }
