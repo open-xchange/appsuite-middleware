@@ -94,12 +94,18 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
              * Crypt & store password to support digest authentication mechanisms which require to look-up a user's password by a certain
              * user identifier (login)
              */
-            final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();
-            final User user = login.getUser();
-            final String prevPassCrypt = attributeAccess.getAttribute(PASSCRYPT, user, null);
             final CryptoService cryptoService = PasscryptServiceRegistry.getServiceRegistry().getService(CryptoService.class);
             final String password = login.getSession().getPassword();
             if (null != cryptoService && null != password) {
+                final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();
+                final User user = login.getUser();
+                /*
+                 * Previous pass-crypt
+                 */
+                final String prevPassCrypt = attributeAccess.getAttribute(PASSCRYPT, user, null);
+                /*
+                 * New pass-crypt
+                 */
                 final String newPassCrypt = cryptoService.encrypt(password, key);
                 if (null == prevPassCrypt || !prevPassCrypt.equals(newPassCrypt)) {
                     attributeAccess.setAttribute(PASSCRYPT, newPassCrypt, user, login.getContext());
