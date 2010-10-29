@@ -36,6 +36,12 @@ setUCRVars() {
 	ucr set repository/online/component/${repo}/description="${descrarr[$cnt]}"
 	# add required packages
 	ucr set repository/online/component/${repo}/defaultpackage="${pkgarr[$cnt]}"
+	# set repository settings
+	if [ "$univention_ox_directory_integration_oxse" = "true" ]; then
+		ucr set "repository/online/component/${repo}/version=current" \
+			"repository/online/component/${repo}/prefix?OX6/OXSEforUCS" \
+			"repository/online/component/${repo}/server?software.open-xchange.com"
+	fi
 
 	if echo $components | grep $repo >/dev/null; then
 	   cnt=$(( $cnt + 1 ))
