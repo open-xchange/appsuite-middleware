@@ -199,6 +199,31 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class ServerActivator extends DeferredActivator {
 
+    private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer {
+
+        private final BundleContext context;
+
+        public ServiceAdderTrackerCustomizer(BundleContext context) {
+            super();
+            this.context = context;
+        }
+
+        public void removedService(final ServiceReference reference, final Object service) {
+            ServerServiceRegistry.getInstance().removeService(FileMetadataParserService.class);
+            context.ungetService(reference);
+        }
+
+        public void modifiedService(final ServiceReference reference, final Object service) {
+            // Nope
+        }
+
+        public Object addingService(final ServiceReference reference) {
+            final Object service = context.getService(reference);
+            ServerServiceRegistry.getInstance().addService(FileMetadataParserService.class, service);
+            return service;
+        }
+    }
+
     private static final Log LOG = LogFactory.getLog(ServerActivator.class);
 
     /**
@@ -476,23 +501,7 @@ public final class ServerActivator extends DeferredActivator {
             serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
 
             // FileMetadataParserService
-            serviceTrackerList.add(new ServiceTracker(context, FileMetadataParserService.class.getName(), new ServiceTrackerCustomizer() {
-                
-                public void removedService(final ServiceReference reference, final Object service) {
-                    ServerServiceRegistry.getInstance().removeService(FileMetadataParserService.class);
-                    context.ungetService(reference);
-                }
-                
-                public void modifiedService(final ServiceReference reference, final Object service) {
-                    // Nope
-                }
-                
-                public Object addingService(final ServiceReference reference) {
-                    final Object service = context.getService(reference);
-                    ServerServiceRegistry.getInstance().addService(FileMetadataParserService.class, service);
-                    return service;
-                }
-            }));
+            serviceTrackerList.add(new ServiceTracker(context, FileMetadataParserService.class.getName(), new ServiceAdderTrackerCustomizer(context)));
             
             // Start up server the usual way
             starter.start();
