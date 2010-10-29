@@ -1,3 +1,7 @@
+* 2010-10-29 - choeger@open-xchange.com
+
+ - Bugfix #17347 - Outlook OXtender repository not configured correctly
+
 * 2010-06-24 - choeger@open-xchange.com
 
  - Bugfix #16354 - strange package dependencies for open-xchange-meta-singleserver
