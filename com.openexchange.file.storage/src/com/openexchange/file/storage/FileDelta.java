@@ -70,7 +70,7 @@ public class FileDelta extends DeltaImpl<File> {
      * @param deletedFiles The deleted files
      * @param sequenceNumber The sequence number
      */
-    public FileDelta(Collection<File> newFiles, Collection<File> modifiedFiles, Collection<File> deletedFiles, long sequenceNumber) {
+    public FileDelta(final Collection<File> newFiles, final Collection<File> modifiedFiles, final Collection<File> deletedFiles, final long sequenceNumber) {
         super(searchIteratorFor(newFiles), searchIteratorFor(modifiedFiles), searchIteratorFor(deletedFiles), sequenceNumber);
     }
 
@@ -82,7 +82,7 @@ public class FileDelta extends DeltaImpl<File> {
      * @param deletedFiles The iterator for deleted files
      * @param sequenceNumber The sequence number
      */
-    public FileDelta(SearchIterator<File> newFiles, SearchIterator<File> modifiedFiles, SearchIterator<File> deletedFiles, long sequenceNumber) {
+    public FileDelta(final SearchIterator<File> newFiles, final SearchIterator<File> modifiedFiles, final SearchIterator<File> deletedFiles, final long sequenceNumber) {
         super(newFiles, modifiedFiles, deletedFiles, sequenceNumber);
     }
 

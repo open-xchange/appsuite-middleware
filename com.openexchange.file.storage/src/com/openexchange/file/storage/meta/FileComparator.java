@@ -65,16 +65,16 @@ public class FileComparator implements Comparator<File>{
     private Comparator delegate = null;
     private File.Field by = null;
     
-    public FileComparator(File.Field by) {
+    public FileComparator(final File.Field by) {
         this.by = by;
     }
     
-    public FileComparator(File.Field by, Comparator comparator) {
+    public FileComparator(final File.Field by, final Comparator comparator) {
         this.by = by;
-        this.delegate = comparator;
+        delegate = comparator;
     }
     
-    public int compare(File o1, File o2) {
+    public int compare(final File o1, final File o2) {
         if(o1 == o2) {
             return 0;
         }
@@ -87,8 +87,8 @@ public class FileComparator implements Comparator<File>{
             return 1;
         }
         
-        Object v1 = by.doSwitch(GET, o1);
-        Object v2 = by.doSwitch(GET, o2);
+        final Object v1 = by.doSwitch(GET, o1);
+        final Object v2 = by.doSwitch(GET, o2);
         
         if(v1 == v2) {
             return 0;

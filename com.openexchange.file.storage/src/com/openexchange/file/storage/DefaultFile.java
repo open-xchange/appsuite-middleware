@@ -238,15 +238,15 @@ public class DefaultFile extends AbstractFile {
     }
 
     public void setColorLabel(final int color) {
-        this.colorLabel = color;
+        colorLabel = color;
     }
 
     public void setCreated(final Date creationDate) {
-        this.created = creationDate;
+        created = creationDate;
     }
 
     public void setCreatedBy(final int creator) {
-        this.createdBy = creator;
+        createdBy = creator;
     }
 
     public void setDescription(final String description) {
@@ -254,11 +254,11 @@ public class DefaultFile extends AbstractFile {
     }
 
     public void setFileMD5Sum(final String sum) {
-        this.fileMD5Sum = sum;
+        fileMD5Sum = sum;
     }
 
     public void setFileMIMEType(final String type) {
-        this.fileMIMEType = type;
+        fileMIMEType = type;
     }
 
     public void setFileName(final String fileName) {
@@ -266,7 +266,7 @@ public class DefaultFile extends AbstractFile {
     }
 
     public void setFileSize(final long length) {
-        this.fileSize = length;
+        fileSize = length;
     }
 
     public void setFolderId(final String folderId) {
@@ -278,11 +278,11 @@ public class DefaultFile extends AbstractFile {
     }
 
     public void setIsCurrentVersion(final boolean bool) {
-        this.isCurrentVersion = bool;
+        isCurrentVersion = bool;
     }
 
     public void setLastModified(final Date now) {
-        this.lastModified = now;
+        lastModified = now;
     }
 
     public void setLockedUntil(final Date lockedUntil) {
@@ -290,7 +290,7 @@ public class DefaultFile extends AbstractFile {
     }
 
     public void setModifiedBy(final int lastEditor) {
-        this.modifiedBy = lastEditor;
+        modifiedBy = lastEditor;
     }
 
     public void setNumberOfVersions(final int numberOfVersions) {
@@ -310,7 +310,7 @@ public class DefaultFile extends AbstractFile {
     }
 
     public void setVersionComment(final String string) {
-        this.versionComment = string;
+        versionComment = string;
     }
 
 }

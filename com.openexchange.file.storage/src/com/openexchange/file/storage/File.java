@@ -208,11 +208,11 @@ public interface File {
         LAST_MODIFIED_UTC("last_modified_utc", 6),
         NUMBER_OF_VERSIONS("number_of_versions", 711);
 
-        private int number;
+        private final int number;
 
-        private String name;
+        private final String name;
 
-        private Field(String name, int number) {
+        private Field(final String name, final int number) {
             this.number = number;
             this.name = name;
         }
@@ -225,7 +225,7 @@ public interface File {
             return number;
         }
 
-        public Object doSwitch(FileFieldSwitcher switcher, Object... args) {
+        public Object doSwitch(final FileFieldSwitcher switcher, final Object... args) {
             switch (this) {
             case LAST_MODIFIED:
                 return switcher.lastModified(args);
@@ -274,45 +274,45 @@ public interface File {
             case NUMBER_OF_VERSIONS:
                 return switcher.numberOfVersions(args);
             default:
-                throw new IllegalArgumentException("Don't know field: " + this.getName());
+                throw new IllegalArgumentException("Don't know field: " + getName());
             }
         }
 
-        public static List<Object> forAllFields(FileFieldSwitcher switcher, Object... args) {
-            List<Object> retval = new ArrayList<Object>(values().length);
-            for (Field field : values()) {
+        public static List<Object> forAllFields(final FileFieldSwitcher switcher, final Object... args) {
+            final List<Object> retval = new ArrayList<Object>(values().length);
+            for (final Field field : values()) {
                 retval.add(field.doSwitch(switcher, args));
             }
             return retval;
         }
 
-        public static <T> T inject(FileFieldSwitcher switcher, T arg, Object... args) {
-            Object[] newArgs = new Object[args.length + 1];
+        public static <T> T inject(final FileFieldSwitcher switcher, T arg, final Object... args) {
+            final Object[] newArgs = new Object[args.length + 1];
             newArgs[0] = arg;
             System.arraycopy(args, 0, newArgs, 1, args.length);
-            for (Field field : values()) {
+            for (final Field field : values()) {
                 arg = (T) field.doSwitch(switcher, args);
             }
             return arg;
         }
 
-        public Object handle(FileFieldHandler handler, Object... args) {
+        public Object handle(final FileFieldHandler handler, final Object... args) {
             return handler.handle(this, args);
         }
 
-        public static List<Object> forAllFields(FileFieldHandler handler, Object... args) {
-            List<Object> retval = new ArrayList<Object>(values().length);
-            for (Field field : values()) {
+        public static List<Object> forAllFields(final FileFieldHandler handler, final Object... args) {
+            final List<Object> retval = new ArrayList<Object>(values().length);
+            for (final Field field : values()) {
                 retval.add(field.handle(handler, args));
             }
             return retval;
         }
 
-        public static <T> T inject(FileFieldHandler handler, T arg, Object... args) {
-            Object[] newArgs = new Object[args.length + 1];
+        public static <T> T inject(final FileFieldHandler handler, T arg, final Object... args) {
+            final Object[] newArgs = new Object[args.length + 1];
             newArgs[0] = arg;
             System.arraycopy(args, 0, newArgs, 1, args.length);
-            for (Field field : values()) {
+            for (final Field field : values()) {
                 arg = (T) field.handle(handler, newArgs);
             }
             return arg;
@@ -320,7 +320,7 @@ public interface File {
 
         private static final Map<String, Field> byName = new HashMap<String, Field>();
         static {
-            for (Field field : values()) {
+            for (final Field field : values()) {
                 byName.put(field.getName(), field);
             }
         }
@@ -328,23 +328,23 @@ public interface File {
         private static final Map<Integer, Field> byNumber = new HashMap<Integer, Field>();
         
         static {
-            for (Field field : values()) {
+            for (final Field field : values()) {
                 byNumber.put(field.getNumber(), field);
             }
         }
         
-        public static Field get(String key) {
+        public static Field get(final String key) {
             if(key == null) {
                 return null;
             }
-            Field field = byName.get(key);
+            final Field field = byName.get(key);
             if(field != null) {
                  return field;
             }
             try {
-                int number = Integer.parseInt(key);
+                final int number = Integer.parseInt(key);
                 return byNumber.get(number);
-            } catch (NumberFormatException x) {
+            } catch (final NumberFormatException x) {
                 return null;
             }
         }

@@ -58,120 +58,120 @@ import com.openexchange.file.storage.AbstractFileFieldSwitcher;
  */
 public class FileFieldSet extends AbstractFileFieldSwitcher {
 
-    public Object categories(Object... args) {
+    public Object categories(final Object... args) {
         md(args).setCategories(string(1, args));
         return ret(args);
     }
 
-    public Object colorLabel(Object... args) {
+    public Object colorLabel(final Object... args) {
         md(args).setColorLabel(integer(1, args));
         return ret(args);
     }
 
-    public Object content(Object... args) {
+    public Object content(final Object... args) {
         return ret(args);
     }
 
-    public Object created(Object... args) {
+    public Object created(final Object... args) {
         md(args).setCreated(date(1, args));
         return ret(args);
     }
 
-    public Object createdBy(Object... args) {
+    public Object createdBy(final Object... args) {
         md(args).setCreatedBy(integer(1, args));
         return ret(args);
     }
 
-    public Object currentVersion(Object... args) {
+    public Object currentVersion(final Object... args) {
         return ret(args);
     }
 
-    public Object description(Object... args) {
+    public Object description(final Object... args) {
         md(args).setDescription(string(1, args));
         return ret(args);
     }
 
-    public Object fileMd5sum(Object... args) {
+    public Object fileMd5sum(final Object... args) {
         md(args).setFileMD5Sum(string(1, args));
         return ret(args);
     }
 
-    public Object fileMimetype(Object... args) {
+    public Object fileMimetype(final Object... args) {
         md(args).setFileMIMEType(string(1, args));
         return ret(args);
     }
 
-    public Object fileSize(Object... args) {
+    public Object fileSize(final Object... args) {
         md(args).setFileSize(longValue(1, args));
         return ret(args);
     }
 
-    public Object filename(Object... args) {
+    public Object filename(final Object... args) {
         md(args).setFileName(string(1, args));
         return ret(args);
     }
 
-    public Object folderId(Object... args) {
+    public Object folderId(final Object... args) {
         md(args).setFolderId(string(1, args));
         return ret(args);
     }
 
-    public Object id(Object... args) {
+    public Object id(final Object... args) {
         md(args).setId(string(1, args));
         return ret(args);
     }
 
-    public Object lastModified(Object... args) {
+    public Object lastModified(final Object... args) {
         md(args).setLastModified(date(1, args));
         return ret(args);
     }
 
-    public Object lastModifiedUtc(Object... args) {
+    public Object lastModifiedUtc(final Object... args) {
         md(args).setLastModified(date(1, args));
         return ret(args);
     }
 
-    public Object lockedUntil(Object... args) {
+    public Object lockedUntil(final Object... args) {
         md(args).setLockedUntil(date(1, args));
         return ret(args);
     }
 
-    public Object modifiedBy(Object... args) {
+    public Object modifiedBy(final Object... args) {
         md(args).setModifiedBy(integer(1, args));
         return ret(args);
     }
 
-    public Object numberOfVersions(Object... args) {
+    public Object numberOfVersions(final Object... args) {
         md(args).setNumberOfVersions(integer(1, args));
         return ret(args);
     }
 
-    public Object sequenceNumber(Object... args) {
+    public Object sequenceNumber(final Object... args) {
         return ret(args);
     }
 
-    public Object title(Object... args) {
+    public Object title(final Object... args) {
         md(args).setTitle(string(1, args));
         return ret(args);
     }
 
-    public Object url(Object... args) {
+    public Object url(final Object... args) {
         md(args).setURL(string(1, args));
         return ret(args);
     }
 
-    public Object version(Object... args) {
+    public Object version(final Object... args) {
         md(args).setVersion(integer(1, args));
         return ret(args);
     }
 
 
-    public Object versionComment(Object... args) {
+    public Object versionComment(final Object... args) {
         md(args).setVersionComment(string(1, args));
         return ret(args);
     }
 
-    private Object ret(Object[] args) {
+    private Object ret(final Object[] args) {
         if (args.length >= 3 && null != args[2]) {
             return args[2];
         }

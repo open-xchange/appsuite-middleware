@@ -50,10 +50,7 @@
 package com.openexchange.file.storage.composition.osgi;
 
 import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -79,12 +76,12 @@ public class FileStorageCompositionActivator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         
     }
 
@@ -92,7 +89,7 @@ public class FileStorageCompositionActivator extends DeferredActivator {
     protected void startBundle() throws Exception {
         registration = context.registerService(IDBasedFileAccessFactory.class.getName(), new IDBasedFileAccessFactory() {
 
-            public IDBasedFileAccess createAccess(Session session) {
+            public IDBasedFileAccess createAccess(final Session session) {
                 return new CompositingIDBasedFileAccess(session) {
 
                     @Override
@@ -101,7 +98,7 @@ public class FileStorageCompositionActivator extends DeferredActivator {
                     }
 
                     @Override
-                    protected FileStorageService getFileStorageService(String serviceId) throws FileStorageException {
+                    protected FileStorageService getFileStorageService(final String serviceId) throws FileStorageException {
                         return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
                     }
                     

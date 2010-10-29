@@ -63,15 +63,15 @@ public class FolderID {
     private String accountId;
     private String folderId;
     
-    public FolderID(String service, String accountId, String folderId) {
+    public FolderID(final String service, final String accountId, final String folderId) {
         super();
         this.service = service;
         this.accountId = accountId;
         this.folderId = folderId;
     }
     
-    public FolderID(String uniqueID) {
-        List<String> unmangled = IDMangler.unmangle(uniqueID);
+    public FolderID(final String uniqueID) {
+        final List<String> unmangled = IDMangler.unmangle(uniqueID);
         service = unmangled.get(0);
         accountId = unmangled.get(1);
         folderId = unmangled.get(2);
@@ -82,7 +82,7 @@ public class FolderID {
         return service;
     }
     
-    public void setService(String service) {
+    public void setService(final String service) {
         this.service = service;
     }
     
@@ -91,7 +91,7 @@ public class FolderID {
     }
 
     
-    public void setAccountId(String accountId) {
+    public void setAccountId(final String accountId) {
         this.accountId = accountId;
     }
 
@@ -99,7 +99,7 @@ public class FolderID {
         return folderId;
     }
     
-    public void setFolderId(String folderId) {
+    public void setFolderId(final String folderId) {
         this.folderId = folderId;
     }
     

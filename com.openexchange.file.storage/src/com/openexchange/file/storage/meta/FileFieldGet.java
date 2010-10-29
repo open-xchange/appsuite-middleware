@@ -59,95 +59,95 @@ import com.openexchange.file.storage.AbstractFileFieldSwitcher;
  */
 public class FileFieldGet extends AbstractFileFieldSwitcher {
 
-    public Object categories(Object... args) {
+    public Object categories(final Object... args) {
         return md( args ).getCategories();
     }
 
-    public Object colorLabel(Object... args) {
+    public Object colorLabel(final Object... args) {
         return md( args ).getColorLabel();
     }
 
-    public Object content(Object... args) {
+    public Object content(final Object... args) {
         return md( args ).getContent();
     }
 
-    public Object created(Object... args) {
+    public Object created(final Object... args) {
         return md( args ).getCreated();
     }
 
-    public Object createdBy(Object... args) {
+    public Object createdBy(final Object... args) {
         return md( args ).getCreatedBy();
     }
 
-    public Object currentVersion(Object... args) {
+    public Object currentVersion(final Object... args) {
         return md( args ).isCurrentVersion();
     }
 
-    public Object description(Object... args) {
+    public Object description(final Object... args) {
         return md( args ).getDescription();
     }
 
-    public Object fileMd5sum(Object... args) {
+    public Object fileMd5sum(final Object... args) {
         return md( args ).getFileMD5Sum();
     }
 
-    public Object fileMimetype(Object... args) {
+    public Object fileMimetype(final Object... args) {
         return md( args ).getFileMIMEType();
     }
 
-    public Object fileSize(Object... args) {
+    public Object fileSize(final Object... args) {
         return md( args ).getFileSize();
     }
 
-    public Object filename(Object... args) {
+    public Object filename(final Object... args) {
         return md( args ).getFileName();
     }
 
-    public Object folderId(Object... args) {
+    public Object folderId(final Object... args) {
         return md( args ).getFolderId();
     }
 
-    public Object id(Object... args) {
+    public Object id(final Object... args) {
         return md( args ).getId();
     }
 
-    public Object lastModified(Object... args) {
+    public Object lastModified(final Object... args) {
         return md( args ).getLastModified();
     }
 
-    public Object lastModifiedUtc(Object... args) {
+    public Object lastModifiedUtc(final Object... args) {
         return md( args ).getLastModified();
     }
 
-    public Object lockedUntil(Object... args) {
+    public Object lockedUntil(final Object... args) {
         return md( args ).getLockedUntil();
     }
 
-    public Object modifiedBy(Object... args) {
+    public Object modifiedBy(final Object... args) {
         return md( args ).getModifiedBy();
     }
 
-    public Object numberOfVersions(Object... args) {
+    public Object numberOfVersions(final Object... args) {
         return md( args ).getNumberOfVersions();
     }
 
-    public Object sequenceNumber(Object... args) {
+    public Object sequenceNumber(final Object... args) {
         return md( args ).getSequenceNumber();
     }
 
-    public Object title(Object... args) {
+    public Object title(final Object... args) {
         return md( args ).getTitle();
     }
 
-    public Object url(Object... args) {
+    public Object url(final Object... args) {
         return md( args ).getURL();
     }
 
-    public Object version(Object... args) {
+    public Object version(final Object... args) {
         return md( args ).getVersion();
     }
 
-    public Object versionComment(Object... args) {
+    public Object versionComment(final Object... args) {
         return md( args ).getVersionComment();
     }
 

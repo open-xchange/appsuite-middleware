@@ -67,15 +67,15 @@ public class FileID {
 
     private String fileId;
 
-    public FileID(String serviceId, String accountId, String folderId, String fileId) {
+    public FileID(final String serviceId, final String accountId, final String folderId, final String fileId) {
         this.serviceId = serviceId;
         this.accountId = accountId;
         this.folderId = folderId;
         this.fileId = fileId;
     }
 
-    public FileID(String uniqueID) {
-        List<String> unmangled = IDMangler.unmangle(uniqueID);
+    public FileID(final String uniqueID) {
+        final List<String> unmangled = IDMangler.unmangle(uniqueID);
 
         serviceId = unmangled.get(0);
         accountId = unmangled.get(1);
@@ -87,7 +87,7 @@ public class FileID {
         return serviceId;
     }
 
-    public void setService(String serviceId) {
+    public void setService(final String serviceId) {
         this.serviceId = serviceId;
     }
 
@@ -95,7 +95,7 @@ public class FileID {
         return accountId;
     }
 
-    public void setAccountId(String accountId) {
+    public void setAccountId(final String accountId) {
         this.accountId = accountId;
     }
 
@@ -103,7 +103,7 @@ public class FileID {
         return folderId;
     }
 
-    public void setFolderId(String folderId) {
+    public void setFolderId(final String folderId) {
         this.folderId = folderId;
     }
 
@@ -111,7 +111,7 @@ public class FileID {
         return fileId;
     }
 
-    public void setFileId(String fileId) {
+    public void setFileId(final String fileId) {
         this.fileId = fileId;
     }
 

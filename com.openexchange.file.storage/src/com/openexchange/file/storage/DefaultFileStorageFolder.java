@@ -489,7 +489,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
      * 
      * @param creationDate The creation date to set
      */
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(final Date creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -498,7 +498,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
      * 
      * @param lastModifiedDate The last modified date to set
      */
-    public void setLastModifiedDate(Date lastModifiedDate) {
+    public void setLastModifiedDate(final Date lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
 

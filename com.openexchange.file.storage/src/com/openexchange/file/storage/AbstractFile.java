@@ -72,28 +72,28 @@ public abstract class AbstractFile implements File {
         return FileFieldHandling.dup(this);
     }
     
-    public void copyInto(File other) {
+    public void copyInto(final File other) {
         FileFieldHandling.copy(this, other);
     }
     
-    public void copyFrom(File other) {
+    public void copyFrom(final File other) {
         FileFieldHandling.copy(other, this);
     }
     
-    public void copyInto(File other, Field...fields) {
+    public void copyInto(final File other, final Field...fields) {
         FileFieldHandling.copy(this, other, fields);
     }
     
-    public void copyFrom(File other, Field...fields) {
+    public void copyFrom(final File other, final Field...fields) {
         FileFieldHandling.copy(other, this, fields);
     }
     
     public Set<File.Field> differences(final File other) {
         return Field.inject(new AbstractFileFieldHandler() {
 
-            public Object handle(Field field, Object... args) {
-                Set set = get(0,Set.class,args);
-                int comparison = new FileComparator(field).compare(AbstractFile.this, other);
+            public Object handle(final Field field, final Object... args) {
+                final Set set = get(0,Set.class,args);
+                final int comparison = new FileComparator(field).compare(AbstractFile.this, other);
                 if(comparison != 0) {
                     set.add(field);
                 }
@@ -103,10 +103,10 @@ public abstract class AbstractFile implements File {
         }, new HashSet<File.Field>());
     }
     
-    public boolean equals(File other, Field criterium, Field...criteria) {
-        List<Field> fields = new ArrayList<Field>(1 + criteria.length);
+    public boolean equals(final File other, final Field criterium, final Field...criteria) {
+        final List<Field> fields = new ArrayList<Field>(1 + criteria.length);
         
-        for (Field field : fields) {
+        for (final Field field : fields) {
             if(0 != new FileComparator(field).compare(this, other)) {
                 return false;
             }
@@ -115,7 +115,7 @@ public abstract class AbstractFile implements File {
     }
     
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(final Object other) {
         return equals((File)other, File.Field.ID, File.Field.values());
     }
     

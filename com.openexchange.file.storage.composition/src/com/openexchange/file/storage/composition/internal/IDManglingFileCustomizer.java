@@ -65,32 +65,32 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class IDManglingFileCustomizer implements Customizer<File> {
     
-    private String service;
-    private String account;
+    private final String service;
+    private final String account;
     
-    public IDManglingFileCustomizer(String service, String account) {
+    public IDManglingFileCustomizer(final String service, final String account) {
         super();
         this.service = service;
         this.account = account;
     }
 
-    public File customize(File thing) {
+    public File customize(final File thing) {
         return fixIDs(thing, service, account);
     }
 
-    public static SearchIterator<File> fixIDs(SearchIterator<File> iterator, String service, String account) {
+    public static SearchIterator<File> fixIDs(final SearchIterator<File> iterator, final String service, final String account) {
         return new CustomizableSearchIterator<File>(iterator, new IDManglingFileCustomizer(service, account));
     }
     
-    public static TimedResult<File> fixIDs(TimedResult<File> result, String service, String account) {
+    public static TimedResult<File> fixIDs(final TimedResult<File> result, final String service, final String account) {
         return new CustomizableTimedResult<File>(result, new IDManglingFileCustomizer(service, account));
     }
     
-    public static Delta<File> fixIDs(Delta<File> delta, String service, String account) {
+    public static Delta<File> fixIDs(final Delta<File> delta, final String service, final String account) {
         return new CustomizableDelta<File>(delta, new IDManglingFileCustomizer(service, account));
     }
     
-    public static File fixIDs(File file, String service, String account) {
+    public static File fixIDs(final File file, final String service, final String account) {
         return new IDManglingFile(file, service, account);
     }
 }

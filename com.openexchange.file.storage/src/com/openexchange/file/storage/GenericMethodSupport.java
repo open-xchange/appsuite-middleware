@@ -58,33 +58,33 @@ import java.util.Date;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GenericMethodSupport {
-    protected <T> T get(int i, Class<T> klass, Object...args) {
+    protected <T> T get(final int i, final Class<T> klass, final Object...args) {
         if(i >= args.length) {
             return null;
         }
         return (T) args[i];
     }
     
-    protected File md(int i, Object...args) {
+    protected File md(final int i, final Object...args) {
         return get(i, File.class, args);
     }
     
-    protected File md(Object...args) {
+    protected File md(final Object...args) {
         return md(0, args);
     }
     
-    protected String string(int i, Object...args) {
+    protected String string(final int i, final Object...args) {
         if(args[i] == null || args.length <= i) {
             return null;
         }
         return args[i].toString();
     }
     
-    protected int integer(int i, Object...args) {
+    protected int integer(final int i, final Object...args) {
         if(args[i] == null || args.length <= i) {
             return -1;
         }
-        Object o = args[i];
+        final Object o = args[i];
         if(o instanceof Number) {
             return ((Number)o).intValue();
         } else if (o instanceof String) {
@@ -94,11 +94,11 @@ public class GenericMethodSupport {
         }
     }
     
-    protected Date date(int i, Object...args) {
+    protected Date date(final int i, final Object...args) {
         if(args[i] == null || args.length <= i) {
             return null;
         }
-        Object o = args[i];
+        final Object o = args[i];
         
         if(o instanceof Date) {
             return (Date) o;
@@ -107,14 +107,14 @@ public class GenericMethodSupport {
         return new Date(coerceToLong(o));
     }
     
-    protected long longValue(int i, Object...args) {
+    protected long longValue(final int i, final Object...args) {
         if(args[i] == null || args.length <= i) {
             return -1;
         }
         return coerceToLong(args[i]);
     }
 
-    private long coerceToLong(Object o) {
+    private long coerceToLong(final Object o) {
         if(o instanceof Number) {
             return ((Number)o).longValue();
         } else if (o instanceof String) {
