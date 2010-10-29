@@ -254,6 +254,18 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     /**
+     * Removes specified folder from TCM map.
+     * 
+     * @param fullname The folder full name
+     * @param user The user identifier
+     * @param contextId The context identifier
+     */
+    public static void removeFromTCM(final String fullname, final int user, final int contextId) {
+        final Key key = new Key(fullname, Integer.parseInt(OutlookFolderStorage.OUTLOOK_TREE_ID), user, contextId);
+        TCM.remove(key);
+    }
+
+    /**
      * The real tree identifier.
      */
     final String realTreeId;
