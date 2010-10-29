@@ -3,6 +3,7 @@
  - Bugfix #17345: Changed log level to warning
  - Bugfix #17231: Proper parsing of address header "Disposition-Notification-To"
  - Bugfix #17212: Fixed NPE in kXML library
+ - Bugfix #17337: Removing 'base' tag from whitelist.properties to properly display referenced images
 
 * 2010-10-26 - tobias.prinz@open-xchange.com
 
