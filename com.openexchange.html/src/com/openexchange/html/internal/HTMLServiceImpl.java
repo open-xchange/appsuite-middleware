@@ -423,11 +423,12 @@ public final class HTMLServiceImpl implements HTMLService {
         return handler.getHTML();
     }
 
-    public String filterWhitelist(final String htmlContent, String configName) {
-        if (!configName.endsWith(".properties")) {
-            configName += ".properties";
+    public String filterWhitelist(final String htmlContent, final String configName) {
+        String confName = configName;
+        if (!confName.endsWith(".properties")) {
+            confName += ".properties";
         }
-        String definition = getConfiguration().getText(configName);
+        final String definition = getConfiguration().getText(confName);
         if (definition == null) {
             // Apparently, the file was not found, so we'll just fall back to the default whitelist
             return filterWhitelist(htmlContent);
