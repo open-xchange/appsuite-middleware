@@ -3864,7 +3864,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Create document's meta data
                  */
-                final FileMetadataParserService parser = serviceRegistry.getService(FileMetadataParserService.class);
+                final FileMetadataParserService parser = serviceRegistry.getService(FileMetadataParserService.class, true);
                 final JSONObject jsonFileObject = new JSONObject(body);
                 final File file = parser.parse(jsonFileObject);
                 final List<Field> fields = parser.getFields(jsonFileObject);
