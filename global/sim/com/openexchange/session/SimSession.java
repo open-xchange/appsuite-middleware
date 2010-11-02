@@ -65,6 +65,7 @@ public class SimSession implements Session {
     private Map<String, Object> parameters = new HashMap<String, Object>();
     private int contextId;
     private int userId;
+    private String password;
 
     public SimSession() {
         super();
@@ -103,7 +104,11 @@ public class SimSession implements Session {
     }
 
     public String getPassword() {
-        return null;
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getRandomToken() {
