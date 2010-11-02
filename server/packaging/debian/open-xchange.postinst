@@ -24,15 +24,22 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
+  # prevent bash from expanding, see bug 13316
+  GLOBIGNORE='*'
+
+  # SoftwareChange_Request-486
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/whitelist.properties
+  if ox_exists_property html.tag.base $pfile; then
+      ox_remove_property html.tag.base $pfile
+  fi
+  
   # SoftwareChange_Request-479
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/smtp.properties
   if ! ox_exists_property com.openexchange.smtp.smtpRateLimit $pfile; then
       ox_set_property com.openexchange.smtp.smtpRateLimit 0 $pfile
   fi
-
-  # prevent bash from expanding, see bug 13316
-  GLOBIGNORE='*'
 
   # SoftwareChange_Request-473
   # -----------------------------------------------------------------------

@@ -156,6 +156,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-486
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/whitelist.properties
+   if ox_exists_property html.tag.base $pfile; then
+      ox_remove_property html.tag.base $pfile
+   fi
+
    # SoftwareChange_Request-479
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/smtp.properties
