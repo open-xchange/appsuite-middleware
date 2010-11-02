@@ -52,6 +52,7 @@ package com.openexchange.file.storage.webdav;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 
@@ -120,6 +121,8 @@ public final class WebDAVFileStorageResourceUtil {
      */
     private static final SimpleDateFormat WEBDAV_DATE = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
+    private static final SimpleDateFormat WEBDAV_DATE_FROM_EXCHANGE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
     /**
      * Gets the date property value from specified date.
      * 
@@ -149,18 +152,47 @@ public final class WebDAVFileStorageResourceUtil {
             if (null == datePropertyValue) {
                 return null;
             }
-            synchronized (WEBDAV_DATE) {
-                try {
-                    return WEBDAV_DATE.parse(datePropertyValue);
-                } catch (final ParseException e) {
-                    throw WebDAVFileStorageExceptionCodes.INVALID_DATE_PROPERTY.create(datePropertyValue);
-                }
+            Date ret = parseDate(datePropertyValue, WEBDAV_DATE);
+            if (null != ret) {
+                return ret;
             }
+            ret = parseDate(datePropertyValue, WEBDAV_DATE_FROM_EXCHANGE);
+            if (null != ret) {
+                return ret;
+            }
+            ret = DateUtil.parseDate(datePropertyValue);
+            if (null == ret) {
+                throw WebDAVFileStorageExceptionCodes.INVALID_DATE_PROPERTY.create(datePropertyValue);
+            }
+            return ret;
         } catch (final ClassCastException e) {
             throw WebDAVFileStorageExceptionCodes.INVALID_DATE_PROPERTY.create(e, name);
         } catch (final Exception e) {
             throw WebDAVFileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static Date parseDate(final String datePropertyValue, final SimpleDateFormat sdf) {
+        synchronized (sdf) {
+            try {
+                return sdf.parse(datePropertyValue);
+            } catch (final ParseException e) {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Checks if specified folder identifier ends with a <code>'/'</code> character.
+     * 
+     * @param folderId The folder identifier to check
+     * @return The checked folder identifier
+     */
+    public static String checkFolderId(final String folderId) {
+        if (folderId.endsWith("/")) {
+            return folderId;
+        }
+        return new StringBuilder(folderId).append('/').toString();
     }
 
 }

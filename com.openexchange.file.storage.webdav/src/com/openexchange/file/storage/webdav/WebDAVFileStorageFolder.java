@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.webdav;
 
+import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.checkFolderId;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseDateProperty;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseStringProperty;
 import java.util.Collections;
@@ -77,14 +78,14 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
      */
     public WebDAVFileStorageFolder(final String uri, final String rootUri, final int userId) {
         super();
-        id = uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
+        id = checkFolderId(uri);
         if (id.equalsIgnoreCase(rootUri)) {
             rootFolder = true;
             parentId = "";
         } else {
             rootFolder = false;
-            final int pos = id.lastIndexOf('/');
-            parentId = pos > 0 ? id.substring(0, pos) : rootUri;
+            final int pos = id.substring(0, id.length() - 1).lastIndexOf('/');
+            parentId = pos > 0 ? checkFolderId(id.substring(0, pos)) : rootUri;
         }
         b_rootFolder = true;
         holdsFiles = true;
