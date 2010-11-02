@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -111,12 +112,15 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     protected Date lastModifiedDate;
 
+    protected Map<String, Object> properties;
+
     /**
      * Initializes a new {@link DefaultFileStorageFolder}.
      */
     public DefaultFileStorageFolder() {
         super();
         fileCount = -1;
+        properties = Collections.emptyMap();
     }
 
     /**
@@ -500,6 +504,19 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
      */
     public void setLastModifiedDate(final Date lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    /**
+     * Sets the properties
+     * 
+     * @param properties The properties to set
+     */
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
     }
 
 }

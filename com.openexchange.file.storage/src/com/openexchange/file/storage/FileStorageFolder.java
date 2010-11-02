@@ -51,6 +51,7 @@ package com.openexchange.file.storage;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -110,10 +111,10 @@ public interface FileStorageFolder extends FileStorageConstants {
     /**
      * Gets the permission for currently logged-in user accessing this folder
      * <p>
-     * The returned permission should reflect user's permission regardless if file storage system supports permissions or not. An instance of
-     * {@link DefaultFileStoragePermission} is supposed to be returned on missing permissions support except for the root folder. The root
-     * folder should indicate no object permissions in any case, but the folder permission varies if file storage system allows subfolder
-     * creation below root folder or not. The returned permission must reflect the allowed behavior.
+     * The returned permission should reflect user's permission regardless if file storage system supports permissions or not. An instance
+     * of {@link DefaultFileStoragePermission} is supposed to be returned on missing permissions support except for the root folder. The
+     * root folder should indicate no object permissions in any case, but the folder permission varies if file storage system allows
+     * subfolder creation below root folder or not. The returned permission must reflect the allowed behavior.
      * 
      * @return The own permission
      */
@@ -205,5 +206,12 @@ public interface FileStorageFolder extends FileStorageConstants {
      * @see #isHoldsFiles()
      */
     public int getFileCount();
+
+    /**
+     * Gets the properties associated with this folder.
+     * 
+     * @return The properties
+     */
+    public Map<String, Object> getProperties();
 
 }
