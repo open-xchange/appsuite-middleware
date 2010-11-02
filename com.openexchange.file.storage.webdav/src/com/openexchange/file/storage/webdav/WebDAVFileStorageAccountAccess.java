@@ -146,6 +146,15 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         return user;
     }
 
+    /**
+     * Gets the associated session
+     * 
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
+    }
+
     public void connect() throws FileStorageException {
         if (null != httpClientRef.get()) {
             return;
