@@ -69,11 +69,14 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.Results;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.Block;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tx.TransactionException;
 import static org.junit.Assert.*;
 
 /**
@@ -89,23 +92,23 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     private FileStorageFileAccess files;
 
-    private final SimBuilder fileAccess = new SimBuilder();
+    private SimBuilder fileAccess = new SimBuilder();
 
     private String accountId;
 
-    private final FileID fileId = new FileID("com.openexchange.test", "account 23", "folder", "id");
+    private FileID fileId = new FileID("com.openexchange.test", "account 23", "folder", "id");
 
-    private final FolderID folderId = new FolderID(fileId.getService(), fileId.getAccountId(), fileId.getFolderId());
+    private FolderID folderId = new FolderID(fileId.getService(), fileId.getAccountId(), fileId.getFolderId());
 
     private String serviceId2;
 
     private String accountId2;
 
-    private final FileID fileId2 = new FileID("com.openexchange.test2", "account 12", "folder2", "id2");
+    private FileID fileId2 = new FileID("com.openexchange.test2", "account 12", "folder2", "id2");
 
-    private final FolderID folderId2 = new FolderID(fileId2.getService(), fileId2.getAccountId(), fileId2.getFolderId());
+    private FolderID folderId2 = new FolderID(fileId2.getService(), fileId2.getAccountId(), fileId2.getFolderId());
     
-    private final IDSetter setId = new IDSetter(fileId.getFileId());
+    private IDSetter setId = new IDSetter(fileId.getFileId());
     
     
 
@@ -114,11 +117,11 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     @Override
-    protected FileStorageService getFileStorageService(final String serviceId) {
+    protected FileStorageService getFileStorageService(String serviceId) {
         if (this.serviceId == null) {
             this.serviceId = serviceId;
         } else {
-            serviceId2 = serviceId;
+            this.serviceId2 = serviceId;
         }
         return this;
     }
@@ -213,13 +216,17 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testGetDocuments4() throws FileStorageException {
-        final DefaultFile defaultFile = new DefaultFile();
+        DefaultFile defaultFile = new DefaultFile();
         defaultFile.setLastModified(new Date());
         defaultFile.setId(fileId.getFileId());
         defaultFile.setFolderId(fileId.getFolderId());
 
+        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
+            true);
         fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
             defaultFile);
+        fileAccess.expectCall("exists", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
+            true);
         fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
             defaultFile);
 
@@ -233,7 +240,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testGetFileMetadata() throws FileStorageException {
-        final DefaultFile file = new DefaultFile();
+        DefaultFile file = new DefaultFile();
         file.setId(fileId.getFileId());
         file.setFolderId(fileId.getFolderId());
 
@@ -318,7 +325,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     // Somewhat brittle test
     @Test
     public void testRemoveDocuments() throws FileStorageException {
-        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
+        FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
         fileAccess.expectCall("hashCode").andReturn(1); // Look if it's there
         fileAccess.expectCall("hashCode").andReturn(1); // Store it
         fileAccess.expectCall("hashCode").andReturn(2); // Look if it's there
@@ -327,12 +334,12 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         fileAccess.expectCall("removeDocument", Arrays.asList(tuple), 12l).andReturn(Arrays.asList(tuple));
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
-        final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
+        FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
         fileAccess.expectCall("removeDocument", Arrays.asList(tuple2), 12l).andReturn(Arrays.asList(tuple2));
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
-        final List<String> ids = Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID());
-        final List<String> conflicted = removeDocument(ids, 12);
+        List<String> ids = Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID());
+        List<String> conflicted = removeDocument(ids, 12);
 
         assertEquals(Arrays.asList(new FileID(getId(), getAccountId(), fileId.getFolderId(), fileId.getFileId()).toUniqueID(), new FileID(
             getId(),
@@ -348,7 +355,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testRemoveVersions() throws FileStorageException {
-        final int[] versions = new int[] { 1, 2, 3 };
+        int[] versions = new int[] { 1, 2, 3 };
 
         fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions);
 
@@ -404,7 +411,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     // create file
     @Test
     public void testCreateDocument1() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
 
@@ -420,7 +427,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testCreateDocument2() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
 
@@ -436,7 +443,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testCreateMetadata1() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
 
@@ -452,7 +459,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testCreateMetadata2() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
 
@@ -470,7 +477,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     
     @Test
     public void testUpdateDocument1() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
@@ -486,7 +493,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testUpdateDocument2() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
@@ -502,7 +509,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testUpdateMetadata1() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
@@ -518,7 +525,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testUpdateMetadata2() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
@@ -536,12 +543,12 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     
     @Test
     public void testMoveACompleteFileWithANewUpload() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
         
         // Firstly the file should be created in the destination as a new file
-        final File destinationFile = new DefaultFile();
+        File destinationFile = new DefaultFile();
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
         
@@ -564,19 +571,19 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     
     @Test
     public void testPartialMetadataWithANewUpload() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
         file.setTitle("New Title"); // And we want to set a new title
         
         // Since this is only a partial file, firstly the original document should be loaded
-        final File storedFile = new DefaultFile();
+        File storedFile = new DefaultFile();
         storedFile.setTitle("Old Title");
         storedFile.setDescription("Old Description"); // We want to keep the old description
         fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(storedFile);
         
         // Next the file should be created in the destination as a new file
-        final File destinationFile = new DefaultFile();
+        File destinationFile = new DefaultFile();
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
         
@@ -593,7 +600,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         // The document will receive a new ID
         assertEquals(file.getId(), fileId.toUniqueID());
         
-        final File fileThatWasCreated = setId.getFile();
+        File fileThatWasCreated = setId.getFile();
         
         assertEquals("New Title", fileThatWasCreated.getTitle());
         assertEquals("Old Description", fileThatWasCreated.getDescription());
@@ -601,7 +608,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     
     @Test
     public void testMoveCompleteFileWithoutUpload() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
         
@@ -609,7 +616,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         fileAccess.expectCall("getDocument", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(EMPTY_INPUT_STREAM);
         
         // Next the file should be created in the destination as a new file, with the input stream provided above
-        final File destinationFile = new DefaultFile();
+        File destinationFile = new DefaultFile();
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
         
@@ -629,7 +636,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     
     @Test
     public void testMovePartialFileWithoutUpload() throws FileStorageException {
-        final File file = new DefaultFile();
+        File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
         file.setTitle("New Title"); // And we want to set a new title
@@ -638,13 +645,13 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         fileAccess.expectCall("getDocument", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(EMPTY_INPUT_STREAM);
         
         // Since this is only a partial file, firstly the original document should be loaded
-        final File storedFile = new DefaultFile();
+        File storedFile = new DefaultFile();
         storedFile.setTitle("Old Title");
         storedFile.setDescription("Old Description"); // We want to keep the old description
         fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(storedFile);
         
         // Next the file should be created in the destination as a new file
-        final File destinationFile = new DefaultFile();
+        File destinationFile = new DefaultFile();
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
         
@@ -661,7 +668,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         // The document will receive a new ID
         assertEquals(file.getId(), fileId.toUniqueID());
         
-        final File fileThatWasCreated = setId.getFile();
+        File fileThatWasCreated = setId.getFile();
         
         assertEquals("New Title", fileThatWasCreated.getTitle());
         assertEquals("Old Description", fileThatWasCreated.getDescription());
@@ -677,11 +684,11 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         assertEquals(fileId2.getService(), serviceId2);
     }
 
-    public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws FileStorageException {
+    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws FileStorageException {
         if (this.accountId == null) {
             this.accountId = accountId;
         } else {
-            accountId2 = accountId;
+            this.accountId2 = accountId;
         }
         assertSame(this.session, session);
         return this;
@@ -821,7 +828,6 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         return this;
     }
 
-    @Override
     protected List<FileStorageService> getAllFileStorageServices() {
         return Arrays.asList((FileStorageService) this, this);
     }
@@ -831,7 +837,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#addAccount(com.openexchange.file.storage.FileStorageAccount,
      * com.openexchange.session.Session)
      */
-    public String addAccount(final FileStorageAccount account, final Session session) throws FileStorageException {
+    public String addAccount(FileStorageAccount account, Session session) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -841,7 +847,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#checkSecretCanDecryptStrings(com.openexchange.session.Session,
      * java.lang.String)
      */
-    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws FileStorageException {
+    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws FileStorageException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -851,7 +857,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#deleteAccount(com.openexchange.file.storage.FileStorageAccount,
      * com.openexchange.session.Session)
      */
-    public void deleteAccount(final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void deleteAccount(FileStorageAccount account, Session session) throws FileStorageException {
         // TODO Auto-generated method stub
 
     }
@@ -860,7 +866,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountManager#getAccount(java.lang.String, com.openexchange.session.Session)
      */
-    public FileStorageAccount getAccount(final String id, final Session session) throws FileStorageException {
+    public FileStorageAccount getAccount(String id, Session session) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -869,8 +875,8 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountManager#getAccounts(com.openexchange.session.Session)
      */
-    public List<FileStorageAccount> getAccounts(final Session session) throws FileStorageException {
-        final FileStorageAccount account = new FileStorageAccount() {
+    public List<FileStorageAccount> getAccounts(Session session) throws FileStorageException {
+        FileStorageAccount account = new FileStorageAccount() {
 
                     public Map<String, Object> getConfiguration() {
                 // TODO Auto-generated method stub
@@ -899,7 +905,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#migrateToNewSecret(java.lang.String, java.lang.String,
      * com.openexchange.session.Session)
      */
-    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws FileStorageException {
+    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws FileStorageException {
         // TODO Auto-generated method stub
 
     }
@@ -909,7 +915,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#updateAccount(com.openexchange.file.storage.FileStorageAccount,
      * com.openexchange.session.Session)
      */
-    public void updateAccount(final FileStorageAccount account, final Session session) throws FileStorageException {
+    public void updateAccount(FileStorageAccount account, Session session) throws FileStorageException {
         // TODO Auto-generated method stub
 
     }
@@ -919,7 +925,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         private String id;
         private File file;
 
-        private IDSetter(final String id) {
+        private IDSetter(String id) {
             super();
             this.id = id;
         }
@@ -928,12 +934,12 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
             return id;
         }
 
-        public void setId(final String id) {
+        public void setId(String id) {
             this.id = id;
         }
 
-            public Object perform(final Object self, final Object... arguments) {
-            (file = (File) arguments[0]).setId(id);
+            public Object perform(Object self, Object... arguments) {
+            (this.file = (File) arguments[0]).setId(id);
             return null;
         }
         

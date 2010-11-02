@@ -47,74 +47,40 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.file.storage.json.actions.files;
 
-import java.util.List;
-import com.openexchange.tools.id.IDMangler;
+import java.util.Date;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.groupware.AbstractOXException;
 
 
 /**
- * {@link FolderID}
+ * {@link CopyAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FolderID {
-    private String service;
-    private String accountId;
-    private String folderId;
-    
-    public FolderID(String service, String accountId, String folderId) {
-        super();
-        this.service = service;
-        this.accountId = accountId;
-        this.folderId = folderId;
-    }
-    
-    public FolderID(String uniqueID) {
-        List<String> unmangled = IDMangler.unmangle(uniqueID);
-        if(unmangled.size() == 3) {
-            service = unmangled.get(0);
-            accountId = unmangled.get(1);
-            folderId = unmangled.get(2);
+public class CopyAction extends AbstractWriteAction {
+
+    @Override
+    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+        request.require(Param.ID).requireFileMetadata();
+        
+        IDBasedFileAccess fileAccess = request.getFileAccess();
+        
+        String id = request.getId();
+        File file = request.getFile();
+        String folder = file.getFolderId();
+
+        String newId = null;
+        if(request.hasUploads()) {
+            newId = fileAccess.copy(id, folder, file, request.getUploadedFileData(), request.getSentColumns());
         } else {
-            service = "com.openexchange.infostore";
-            accountId = "infostore";
-            folderId = uniqueID;
+            newId = fileAccess.copy(id, folder, file, null, request.getSentColumns());
         }
-    }
-    
-    
-    public String getService() {
-        return service;
-    }
-    
-    public void setService(String service) {
-        this.service = service;
-    }
-    
-    public String getAccountId() {
-        return accountId;
+        
+        return new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
     }
 
-    
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
-    }
-
-    public String getFolderId() {
-        return folderId;
-    }
-    
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-    
-    public String toUniqueID() {
-        if(service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
-            return folderId;
-        }
-        return IDMangler.mangle(service, accountId, folderId);
-    }
-    
-    
 }

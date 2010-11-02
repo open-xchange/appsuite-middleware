@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -59,6 +60,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -117,9 +119,16 @@ public interface InfostoreRequest {
     File getFile() throws AbstractOXException;
 
     List<File.Field> getSentColumns() throws AbstractOXException;
-
-
-
     
+    public boolean hasUploads() throws AbstractOXException;
+    
+    public InputStream getUploadedFileData() throws AbstractOXException;
 
+    int getAttachedId();
+
+    int getModule();
+
+    int getAttachment();
+
+    AttachmentBase getAttachmentBase();
 }

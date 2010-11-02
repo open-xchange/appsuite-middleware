@@ -67,6 +67,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.Attachment;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
@@ -114,6 +115,7 @@ import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -129,6 +131,7 @@ import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -137,6 +140,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageSessionEventHandler;
 import com.openexchange.login.LoginHandlerService;
+//import com.openexchange.login.internal.PasswordCrypter;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
@@ -198,8 +202,8 @@ import com.openexchange.xml.spring.SpringParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServerActivator extends DeferredActivator {
-
-    private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer {
+	
+	private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer {
 
         private final BundleContext context;
 
@@ -223,7 +227,8 @@ public final class ServerActivator extends DeferredActivator {
             return service;
         }
     }
-
+	
+	
     private static final Log LOG = LogFactory.getLog(ServerActivator.class);
 
     /**
@@ -247,8 +252,7 @@ public final class ServerActivator extends DeferredActivator {
         {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
-            CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            CryptoService.class
+            CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class, CryptoService.class
         };
 
     private final List<ServiceRegistration> registrationList;
@@ -498,8 +502,9 @@ public final class ServerActivator extends DeferredActivator {
                 new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
 
             // Folder Fields
+            
             serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
-
+            
             /*
              * The FileMetadataParserService needs to be tracked by a separate service tracker instead of just adding the service to
              * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
@@ -508,7 +513,7 @@ public final class ServerActivator extends DeferredActivator {
                 context,
                 FileMetadataParserService.class.getName(),
                 new ServiceAdderTrackerCustomizer(context)));
-
+            
             // Start up server the usual way
             starter.start();
         }
@@ -639,7 +644,12 @@ public final class ServerActivator extends DeferredActivator {
         // Register Infostore
 
         registrationList.add(context.registerService(InfostoreFacade.class.getName(), Infostore.FACADE, null));
+        registrationList.add(context.registerService(InfostoreSearchEngine.class.getName(), Infostore.SEARCH_ENGINE, null));
 
+        // Register AttachmentBase
+        
+        registrationList.add(context.registerService(AttachmentBase.class.getName(), Attachment.ATTACHMENT_BASE, null));
+        
         // Register ContactSQL
 
         registrationList.add(context.registerService(ContactInterfaceFactory.class.getName(), new RdbContactInterfaceFactory(), null));

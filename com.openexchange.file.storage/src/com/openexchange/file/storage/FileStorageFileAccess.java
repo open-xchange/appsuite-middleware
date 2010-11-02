@@ -285,7 +285,21 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws FileStorageException
      */
     public void saveFileMetadata(File file, long sequenceNumber, List<File.Field> modifiedFields) throws FileStorageException;
-
+    
+    /**
+     * Copy a file from a given source to a given destination. Changes to the metadata can be applied and a new file attachment
+     * may be uploaded as well.
+     * 
+     * @param source The file to copy
+     * @param dest Where to copy the file to. This is a folder id.
+     * @param update Which other changes to apply to the copy. May be null, if no changes are to be applied.
+     * @param newFile A new file to be attached to the copy. May be null, if no new file data should be attached to the file.
+     * @param The fields to use from the update. May be null if the update is null.
+     * @return The new folderId and id
+     * @throws FileStorageException
+     */
+    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<File.Field> modifiedFields) throws FileStorageException;
+    
     /**
      * Load the documents content
      * 

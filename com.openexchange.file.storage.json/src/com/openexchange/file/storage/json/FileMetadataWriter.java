@@ -106,10 +106,14 @@ public class FileMetadataWriter {
             Object value = field.doSwitch(get, args);
             
             if(Date.class.isInstance(value)) {
+                Date d = (Date) value;
                 TimeZone tz = get(1, TimeZone.class, args);
                 if(field == Field.LAST_MODIFIED_UTC) {
                     tz = UTC;
                 }
+                if(field == File.Field.LOCKED_UNTIL && (d == null || d.getTime() < System.currentTimeMillis())) {
+                    return 0;
+                } 
                 return writeDate((Date) value, tz);
             }
             

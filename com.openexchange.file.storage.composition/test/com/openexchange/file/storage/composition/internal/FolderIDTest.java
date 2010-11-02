@@ -49,72 +49,27 @@
 
 package com.openexchange.file.storage.composition.internal;
 
-import java.util.List;
-import com.openexchange.tools.id.IDMangler;
-
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
- * {@link FolderID}
+ * {@link FolderIDTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FolderID {
-    private String service;
-    private String accountId;
-    private String folderId;
+public class FolderIDTest {
     
-    public FolderID(String service, String accountId, String folderId) {
-        super();
-        this.service = service;
-        this.accountId = accountId;
-        this.folderId = folderId;
+    @Test
+    public void shouldDefaultToInfostoreAndDefaultAccount() {
+        FolderID folderID = new FolderID("12");
+        assertEquals("com.openexchange.infostore", folderID.getService());
+        assertEquals("infostore", folderID.getAccountId());
+        assertEquals("12", folderID.getFolderId());
     }
     
-    public FolderID(String uniqueID) {
-        List<String> unmangled = IDMangler.unmangle(uniqueID);
-        if(unmangled.size() == 3) {
-            service = unmangled.get(0);
-            accountId = unmangled.get(1);
-            folderId = unmangled.get(2);
-        } else {
-            service = "com.openexchange.infostore";
-            accountId = "infostore";
-            folderId = uniqueID;
-        }
+    @Test
+    public void shouldReturnSimpleUniqueIDForInfostore() {
+        FolderID folderID = new FolderID("12");
+        assertEquals("12", folderID.toUniqueID());
     }
-    
-    
-    public String getService() {
-        return service;
-    }
-    
-    public void setService(String service) {
-        this.service = service;
-    }
-    
-    public String getAccountId() {
-        return accountId;
-    }
-
-    
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
-    }
-
-    public String getFolderId() {
-        return folderId;
-    }
-    
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-    
-    public String toUniqueID() {
-        if(service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
-            return folderId;
-        }
-        return IDMangler.mangle(service, accountId, folderId);
-    }
-    
-    
 }

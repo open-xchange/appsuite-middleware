@@ -49,9 +49,11 @@
 
 package com.openexchange.folderstorage.filestorage;
 
+import java.util.List;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link FileStorageFolderIdentifier} - A parsed folder storage folder identifier:<br>
@@ -73,7 +75,7 @@ public final class FileStorageFolderIdentifier {
      * @return The fully qualified name
      */
     public static String getFQN(final String serviceId, final String accountId, final String folderId) {
-        return new StringBuilder(64).append(serviceId).append(DELIM).append(accountId).append('/').append(folderId).toString();
+        return IDMangler.mangle(serviceId, accountId, folderId);
     }
 
     /**
@@ -143,31 +145,30 @@ public final class FileStorageFolderIdentifier {
         if (null == identifier) {
             throw FolderExceptionErrorMessage.MISSING_FOLDER_ID.create();
         }
-        int pos = identifier.indexOf(DELIM);
-        if (pos <= 0) {
+        
+        List<String> components = IDMangler.unmangle(identifier);
+        
+        if (components.isEmpty() || components.size() == 1) {
             throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
         }
-        int prev = 0;
-        serviceId = identifier.substring(prev, pos);
-        prev = pos + DELIM.length();
-        pos = identifier.indexOf('/', prev);
-        if (pos <= 0) {
+        serviceId = components.get(0);
+        if (components.size() == 2) {
             /*
-             * "/" character is missing, then expect root folder
+             * Have only service and account ID, so expect root folder
              */
-            accountId = identifier.substring(prev);
+            accountId = components.get(1);
             if (accountId.length() == 0) {
                 throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
             }
             folderId = MessagingFolder.ROOT_FULLNAME;
 
-            fqn = new StringBuilder(identifier).append('/').toString();
+            fqn = IDMangler.mangle(serviceId, accountId, folderId);
         } else {
-            accountId = identifier.substring(prev, pos);
+            accountId = components.get(1);
             if (accountId.length() == 0) {
                 throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
             }
-            folderId = identifier.substring(pos + 1);
+            folderId = components.get(2);
 
             fqn = identifier;
         }

@@ -86,7 +86,8 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.groupware.upload.impl.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadFileImpl;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
@@ -772,7 +773,7 @@ public final class MessageParser {
             return;
         }
         // Create wrapping upload file
-        final UploadFile wrapper = new UploadFile();
+        final UploadFile wrapper = new UploadFileImpl();
         wrapper.setContentType(managedFile.getContentType());
         wrapper.setFileName(managedFile.getFileName());
         wrapper.setSize(managedFile.getSize());

@@ -54,7 +54,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public interface TimedResult<T> {
 
-    SearchIterator<T> results();
+    SearchIterator<T> results() throws AbstractOXException;
 
     long sequenceNumber() throws AbstractOXException;
 }

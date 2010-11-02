@@ -68,8 +68,9 @@ import com.openexchange.tools.servlet.AjaxException;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileMetadataParser implements FileMetadataParserService {
+public class FileMetadataParser implements FileMetadataParserService{
 
+	
     private static final FileMetadataParser instance = new FileMetadataParser();
 
     /**
@@ -87,7 +88,7 @@ public class FileMetadataParser implements FileMetadataParserService {
         super();
         jsonHandler = new JSONParserHandler();
     }
-
+    
     public File parse(JSONObject object) throws AbstractOXException {
         DefaultFile file = new DefaultFile();
 
@@ -130,7 +131,12 @@ public class FileMetadataParser implements FileMetadataParserService {
 
         private Object process(Field field, Object value) throws JSONException {
             switch(field) {
-            case CATEGORIES: return categories((JSONArray) value);
+            case CATEGORIES: {
+                if(String.class.isInstance(value)) {
+                    return value;
+                }
+                return categories((JSONArray) value);
+            }
             default: return value;
             }
         }

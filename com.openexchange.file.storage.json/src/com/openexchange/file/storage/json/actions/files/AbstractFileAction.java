@@ -51,6 +51,8 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,7 +75,9 @@ import com.openexchange.tx.TransactionException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractFileAction implements AJAXActionService {
-
+    private static final Log LOG = LogFactory.getLog(AbstractFileAction.class);
+    
+    
     private static final FileMetadataWriter fileWriter = new FileMetadataWriter();
 
     public static enum Param {
@@ -86,7 +90,10 @@ public abstract class AbstractFileAction implements AJAXActionService {
         TIMEZONE("timezone"),
         TIMESTAMP("timestamp"),
         IGNORE("ignore"), 
-        DIFF("diff");
+        DIFF("diff"), 
+        ATTACHED_ID("attached"), 
+        MODULE("module"), 
+        ATTACHMENT("attachment");
 
         String name;
 
@@ -107,12 +114,16 @@ public abstract class AbstractFileAction implements AJAXActionService {
 
     public AJAXRequestResult result(TimedResult<File> documents, InfostoreRequest request) throws AbstractOXException {
         SearchIterator<File> results = documents.results();
+        return results(results, documents.sequenceNumber() , request);
+    }
+
+    protected AJAXRequestResult results(SearchIterator<File> results, long timestamp, InfostoreRequest request) throws AbstractOXException {
         try {
-            return new AJAXRequestResult(getWriter().write(results, request.getColumns(), request.getTimezone()), new Date(
-                documents.sequenceNumber()));
+            return new AJAXRequestResult(getWriter().write(results, request.getColumns(), request.getTimezone()), new Date(timestamp));
         } finally {
             results.close();
         }
+    
     }
 
     public AJAXRequestResult result(Delta<File> delta, InfostoreRequest request) throws AbstractOXException {
@@ -156,6 +167,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
         return new AJAXRequestResult(array);
     }
     
+    
     public AJAXRequestResult result(int[] versions, long sequenceNumber, InfostoreRequest request) throws AbstractOXException {
         JSONArray array = new JSONArray();
         for (int i : versions) {
@@ -181,6 +193,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
             throw x;
         } catch (Throwable t) {
             failure(req,t);
+            LOG.error(t.getMessage(), t);
             throw new AjaxException(AjaxException.Code.UnexpectedError, t.getMessage());
         } finally {
             after(req);
@@ -188,25 +201,21 @@ public abstract class AbstractFileAction implements AJAXActionService {
     }
 
     protected void after(AJAXInfostoreRequest req) throws AbstractOXException{
-        // TODO Auto-generated method stub
         
     }
 
    
     protected void failure(AJAXInfostoreRequest req, Throwable throwable) throws AbstractOXException{
-        // TODO Auto-generated method stub
         
     }
 
     
     protected void success(AJAXInfostoreRequest req, AJAXRequestResult result) throws AbstractOXException{
-        // TODO Auto-generated method stub
         
     }
 
    
     protected void before(AJAXInfostoreRequest req) throws AbstractOXException {
-        // TODO Auto-generated method stub
         
     }
 

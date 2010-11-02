@@ -69,7 +69,7 @@ public class InfostoreTimedResult implements TimedResult<File> {
         this.documents = documents;
     }
 
-    public SearchIterator<File> results() {
+    public SearchIterator<File> results() throws AbstractOXException {
         SearchIterator<DocumentMetadata> results = documents.results();
         if(results == null) {
             return null;

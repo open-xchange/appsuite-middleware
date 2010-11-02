@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.groupware.upload.UploadFile;
 
 /**
  * Just a plain class that wraps information about an upload e.g. files, form fields, content type, size, etc.

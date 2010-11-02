@@ -62,14 +62,19 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.json.Enabled;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.GUI;
 import com.openexchange.file.storage.json.actions.accounts.AccountActionFactory;
 import com.openexchange.file.storage.json.multiple.AccountMultipleHandler;
+import com.openexchange.file.storage.json.multiple.FileMultipleAdapter;
+import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.file.storage.json.servlets.AccountServlet;
+import com.openexchange.file.storage.json.servlets.FileServlet;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
@@ -85,7 +90,7 @@ public class FileStorageJSONActivator extends DeferredActivator {
     private static final Log LOG = LogFactory.getLog(FileStorageJSONActivator.class);
 
     private static final Class<?>[] NEEDED_SERVICES =
-        new Class[] { FileStorageServiceRegistry.class, HttpService.class, CacheService.class };
+        new Class[] { FileStorageServiceRegistry.class, HttpService.class, CacheService.class, IDBasedFileAccessFactory.class, AttachmentBase.class };
 
     private final List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
 
@@ -129,6 +134,8 @@ public class FileStorageJSONActivator extends DeferredActivator {
             httpService.unregister("/ajax/filestorage/account");
             httpService.unregister("/ajax/filestorage/message");
             httpService.unregister("/ajax/filestorage/service");
+            httpService.unregister("/ajax/infostore");
+               
         }
 
         for (final ServiceRegistration registration : registrations) {
@@ -139,6 +146,7 @@ public class FileStorageJSONActivator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
+            Services.LOOKUP = this;
             // parser = new MessagingMessageParser();
 
             // trackers.add(new ContentParserTracker(context, parser));
@@ -176,6 +184,7 @@ public class FileStorageJSONActivator extends DeferredActivator {
 
         try {
             httpService.registerServlet("/ajax/filestorage/account", new AccountServlet(), null, null);
+            httpService.registerServlet("/ajax/infostore", new FileServlet(), null, null);
             // httpService.registerServlet("/ajax/filestorage/message", new MessagesServlet(), null, null);
             // httpService.registerServlet("/ajax/filestorage/service", new ServicesServlet(), null, null);
         } catch (final ServletException e) {
@@ -185,11 +194,11 @@ public class FileStorageJSONActivator extends DeferredActivator {
         }
 
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
+        registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new FileMultipleAdapter(), null));
         // registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
         // registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
         registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(), null));
         registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
-
         registrations.add(context.registerService(FileMetadataParserService.class.getName(), FileMetadataParser.getInstance(), null));
     }
 

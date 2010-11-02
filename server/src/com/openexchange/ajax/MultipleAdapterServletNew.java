@@ -51,12 +51,16 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.fileupload.FileUploadBase;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -69,6 +73,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -139,17 +147,22 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      * @throws IOException If an I/O error occurs
      */
     protected final void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException, ServletException {
+        final String action = req.getParameter(PARAMETER_ACTION);
+        boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
+
         final Response response = new Response();
         try {
-            final String action = req.getParameter(PARAMETER_ACTION);
             if (action == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
             }
             if(handleIndividually(action, req, resp)) {
                 return;
             }
-            
-            final AJAXRequestData data = parseRequest(req, preferStream);
+
+            final AJAXRequestData data = parseRequest(req, preferStream, isFileUpload);
+            if(handleIndividually(action, data, req, resp)) {
+                return;
+            }
             final AJAXRequestResult result = factory.createActionService(action).perform(data, getSessionObject(req));
             response.setData(result.getResultObject());
             response.setTimestamp(result.getTimestamp());
@@ -165,7 +178,18 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(resp);
         try {
-            ResponseWriter.write(response, resp.getWriter());
+            if (isFileUpload) {
+                String callback = req.getParameter("callback");
+                if(callback == null) {
+                    callback = action;
+                }
+                StringWriter w = new StringWriter();
+                ResponseWriter.write(response, w);
+                
+                resp.getWriter().print(substituteJS(w.toString(), callback));
+            } else {
+                ResponseWriter.write(response, resp.getWriter());
+            }
         } catch (final JSONException e) {
             final OXJSONException e1 = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
             LOG.error(e1.getMessage(), e1);
@@ -180,12 +204,30 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      * @param req The HTTP request object
      * @param resp The HTTP response object
      * @return <code>true</code> if operation completed successfully and therefore usual JSON handling must be omitted; otherwise <code>false</code> to fall-back to usual JSON handling
+     * @throws AbstractOXException 
      */
-    protected boolean handleIndividually(String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+    protected boolean handleIndividually(String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
+        return false;
+    }
+    
+    /**
+     * Override this to handle an action differently from the usual JSON handling. This is primarily useful for handling up- / downloads.
+     * 
+     * @param action The action parameter given
+     * @param data The parsed request
+     * @param req The HTTP request object
+     * @param resp The HTTP response object
+     * @return <code>true</code> if operation completed successfully and therefore usual JSON handling must be omitted; otherwise <code>false</code> to fall-back to usual JSON handling
+     * @throws AbstractOXException 
+     * @throws ServletException 
+     * @throws IOException 
+     * @throws AbstractOXException 
+     */
+    protected boolean handleIndividually(String action, AJAXRequestData data, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
         return false;
     }
 
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream) throws IOException {
+    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, boolean isFileUpload) throws IOException, UploadException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setSecure(req.isSecure());
         /*
@@ -197,7 +239,18 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 retval.putParameter(entry.getKey(), entry.getValue()[0]);
             }
         }
-        if (preferStream) {
+        if (isFileUpload) {
+            UploadEvent upload = processUpload(req);
+            Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
+            while(iterator.hasNext()) {
+                retval.addFile(iterator.next());
+            }
+            Iterator<String> names = upload.getFormFieldNames();
+            while(names.hasNext()) {
+                String name = names.next();
+                retval.putParameter(name, upload.getFormField(name));
+            }
+        } else if (preferStream) {
             /*
              * Pass request's stream
              */

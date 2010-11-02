@@ -47,74 +47,72 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.tools.iterator;
 
-import java.util.List;
-import com.openexchange.tools.id.IDMangler;
+import com.openexchange.groupware.AbstractOXException;
 
 
 /**
- * {@link FolderID}
+ * {@link FilteringSearchIterator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FolderID {
-    private String service;
-    private String accountId;
-    private String folderId;
+public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
+
+    private T next = null;
+    private SearchIterator<T> delegate;
     
-    public FolderID(String service, String accountId, String folderId) {
-        super();
-        this.service = service;
-        this.accountId = accountId;
-        this.folderId = folderId;
+    public FilteringSearchIterator(SearchIterator<T> delegate) throws AbstractOXException {
+        this.delegate = delegate;
+        initNext();
     }
     
-    public FolderID(String uniqueID) {
-        List<String> unmangled = IDMangler.unmangle(uniqueID);
-        if(unmangled.size() == 3) {
-            service = unmangled.get(0);
-            accountId = unmangled.get(1);
-            folderId = unmangled.get(2);
-        } else {
-            service = "com.openexchange.infostore";
-            accountId = "infostore";
-            folderId = uniqueID;
-        }
-    }
+    /**
+     * Test whether something should be included in the result or not
+     * @param thing
+     * @return
+     * @throws AbstractOXException
+     */
+    public abstract boolean accept(T thing) throws AbstractOXException;
     
     
-    public String getService() {
-        return service;
-    }
-    
-    public void setService(String service) {
-        this.service = service;
-    }
-    
-    public String getAccountId() {
-        return accountId;
+    public void addWarning(AbstractOXException warning) {
+        delegate.addWarning(warning);
     }
 
-    
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
+    public void close() throws AbstractOXException {
+        delegate.close();
     }
 
-    public String getFolderId() {
-        return folderId;
+    public AbstractOXException[] getWarnings() {
+        return delegate.getWarnings();
+    }
+
+    public boolean hasNext() throws AbstractOXException {
+        return next != null;
+    }
+
+    public boolean hasWarnings() {
+        return delegate.hasWarnings();
+    }
+
+    public T next() throws AbstractOXException {
+        T current = next;
+        initNext();
+        return current;
+    }
+
+    public int size() {
+        return -1;
     }
     
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-    
-    public String toUniqueID() {
-        if(service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
-            return folderId;
+    protected void initNext() throws AbstractOXException {
+        while(delegate.hasNext()) {
+            next = delegate.next();
+            if(accept(next)) {
+                return;
+            }
         }
-        return IDMangler.mangle(service, accountId, folderId);
+        next = null;
     }
-    
-    
 }

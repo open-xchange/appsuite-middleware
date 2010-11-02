@@ -103,6 +103,17 @@ public interface IDBasedFileAccess extends TransactionAware {
     public void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws FileStorageException ;
     
     /**
+     * Copy a file from the source to the destination.
+     * @param sourceId The file to copy
+     * @param destFolderId The folder to copy into
+     * @param update Optional updates to the copy. May be null
+     * @param newData Optional new binary data. May be null
+     * @param The fields to use from the update.
+     * @throws FileStorageException
+     */
+    public String copy(String sourceId, String destFolderId, File update, InputStream newData, List<File.Field> modifiedFields) throws FileStorageException;
+    
+    /**
      * Load the documents content
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.

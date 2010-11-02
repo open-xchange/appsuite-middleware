@@ -55,8 +55,12 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.fileupload.FileUploadBase;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingMessageAccess;
@@ -91,9 +95,9 @@ public class MessagesServlet extends MultipleAdapterServletNew {
     }
     
     @Override
-    protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
+    protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
         if(RESOLVE.equals(action)) {
-            final AJAXRequestData requestData = parseRequest(req, false);
+            final AJAXRequestData requestData = parseRequest(req, false, FileUploadBase.isMultipartContent(new ServletRequestContext(req)));
             final MessagingRequestData request = MessagingActionFactory.INSTANCE.wrapRequest(requestData, getSessionObject(req));
             
             try {

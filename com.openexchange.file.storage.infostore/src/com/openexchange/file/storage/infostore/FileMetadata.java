@@ -52,7 +52,9 @@ package com.openexchange.file.storage.infostore;
 import java.util.Date;
 import java.util.Set;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 
 
 /**
@@ -63,6 +65,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public class FileMetadata implements DocumentMetadata {
     
     private File file;
+    private String fileSpool;
 
     public FileMetadata(File document) {
         this.file = document;
@@ -109,10 +112,16 @@ public class FileMetadata implements DocumentMetadata {
     }
 
     public long getFolderId() {
+        if(file.getFolderId() == null) {
+            return -1;
+        }
         return Long.valueOf(file.getFolderId());
     }
 
     public int getId() {
+        if(file.getId() == FileStorageFileAccess.NEW) {
+            return InfostoreFacade.NEW;
+        }
         return Integer.valueOf(file.getId());
     }
 
@@ -245,12 +254,11 @@ public class FileMetadata implements DocumentMetadata {
     }
 
     public String getFilestoreLocation() {
-        return null;
+        return fileSpool;
     }
 
     public void setFilestoreLocation(String string) {
-        // TODO Auto-generated method stub
-        
+        this.fileSpool = string;
     }
     
     

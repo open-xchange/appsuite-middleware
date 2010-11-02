@@ -89,7 +89,8 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadFileImpl;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
@@ -710,7 +711,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          * ######################### ENSURE YOUR ACTION IS CONTAINED IN UPLOAD_ACTIONS ! ! ! #########################
          * ###########################################################################################################
          */
-        if (!UPLOAD_ACTIONS.contains(action) && !com.openexchange.groupware.importexport.Format.containsConstantName(action)) {
+        if (mayUpload(action)) {
             throw new UploadException(UploadCode.UNKNOWN_ACTION_VALUE, null, action);
         }
         /*
@@ -764,13 +765,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return uploadEvent;
     }
 
+    protected static boolean mayUpload(String action) {
+        return !UPLOAD_ACTIONS.contains(action) && !com.openexchange.groupware.importexport.Format.containsConstantName(action);
+    }
+
     private static final boolean isEmpty(final String str) {
         return null == str || 0 == str.length();
     }
 
-    private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir) throws Exception {
+ 	private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir) throws Exception {
         try {
-            final UploadFile retval = new UploadFile();
+            final UploadFile retval = new UploadFileImpl();
             retval.setFieldName(item.getFieldName());
             retval.setFileName(item.getName());
             retval.setContentType(item.getContentType());

@@ -56,10 +56,9 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.AbstractOXException;
 
-
 /**
  * {@link NewAction}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class NewAction extends AbstractWriteAction {
@@ -67,14 +66,18 @@ public class NewAction extends AbstractWriteAction {
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
         request.requireFileMetadata();
-        
+
         IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         File file = request.getFile();
         file.setId(FileStorageFileAccess.NEW);
-        
-        fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
-        
+
+        if (request.hasUploads()) {
+            fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        } else {
+            fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        }
+
         return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
     }
 

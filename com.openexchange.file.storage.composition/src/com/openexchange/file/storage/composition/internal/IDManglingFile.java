@@ -62,36 +62,37 @@ public class IDManglingFile implements File {
 
     private File file;
 
-    private final String id;
+    private String id;
 
-    private final String folder;
+    private String folder;
 
-    public IDManglingFile(final File file, final String service, final String account) {
+    public IDManglingFile(File file, String service, String account) {
         id = new FileID(service, account, file.getFolderId(), file.getId()).toUniqueID();
         folder = new FolderID(service, account, file.getFolderId()).toUniqueID();
+        this.file = file;
     }
 
-    public boolean matches(final String pattern, final Field... fields) {
+    public boolean matches(String pattern, Field... fields) {
         return file.matches(pattern, fields);
     }
 
-    public void copyFrom(final File other) {
+    public void copyFrom(File other) {
         file.copyFrom(other);
     }
 
-    public void copyInto(final File other) {
+    public void copyInto(File other) {
         file.copyInto(other);
     }
 
-    public void copyFrom(final File other, final Field... fields) {
+    public void copyFrom(File other, Field... fields) {
         file.copyFrom(other, fields);
     }
 
-    public void copyInto(final File other, final Field... fields) {
+    public void copyInto(File other, Field... fields) {
         file.copyInto(other, fields);
     }
 
-    public Set<Field> differences(final File other) {
+    public Set<Field> differences(File other) {
         return file.differences(other);
     }
 
@@ -99,7 +100,7 @@ public class IDManglingFile implements File {
         return file.dup();
     }
 
-    public boolean equals(final File other, final Field criterium, final Field... criteria) {
+    public boolean equals(File other, Field criterium, Field... criteria) {
         return file.equals(other, criterium, criteria);
     }
 
@@ -167,7 +168,7 @@ public class IDManglingFile implements File {
         return file.getNumberOfVersions();
     }
 
-    public String getProperty(final String key) {
+    public String getProperty(String key) {
         return file.getProperty(key);
     }
 
@@ -199,83 +200,83 @@ public class IDManglingFile implements File {
         return file.isCurrentVersion();
     }
 
-    public void setCategories(final String categories) {
+    public void setCategories(String categories) {
         file.setCategories(categories);
     }
 
-    public void setColorLabel(final int color) {
+    public void setColorLabel(int color) {
         file.setColorLabel(color);
     }
 
-    public void setCreated(final Date creationDate) {
+    public void setCreated(Date creationDate) {
         file.setCreated(creationDate);
     }
 
-    public void setCreatedBy(final int cretor) {
+    public void setCreatedBy(int cretor) {
         file.setCreatedBy(cretor);
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         file.setDescription(description);
     }
 
-    public void setFileMD5Sum(final String sum) {
+    public void setFileMD5Sum(String sum) {
         file.setFileMD5Sum(sum);
     }
 
-    public void setFileMIMEType(final String type) {
+    public void setFileMIMEType(String type) {
         file.setFileMIMEType(type);
     }
 
-    public void setFileName(final String fileName) {
+    public void setFileName(String fileName) {
         file.setFileName(fileName);
     }
 
-    public void setFileSize(final long length) {
+    public void setFileSize(long length) {
         file.setFileSize(length);
     }
 
-    public void setFolderId(final String folderId) {
+    public void setFolderId(String folderId) {
         throw new IllegalStateException("IDs are only read only with this class");
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         throw new IllegalStateException("IDs are only read only with this class");
     }
 
-    public void setIsCurrentVersion(final boolean bool) {
+    public void setIsCurrentVersion(boolean bool) {
         file.setIsCurrentVersion(bool);
     }
 
-    public void setLastModified(final Date now) {
+    public void setLastModified(Date now) {
         file.setLastModified(now);
     }
 
-    public void setLockedUntil(final Date lockedUntil) {
+    public void setLockedUntil(Date lockedUntil) {
         file.setLockedUntil(lockedUntil);
     }
 
-    public void setModifiedBy(final int lastEditor) {
+    public void setModifiedBy(int lastEditor) {
         file.setModifiedBy(lastEditor);
     }
 
-    public void setNumberOfVersions(final int numberOfVersions) {
+    public void setNumberOfVersions(int numberOfVersions) {
         file.setNumberOfVersions(numberOfVersions);
     }
 
-    public void setTitle(final String title) {
+    public void setTitle(String title) {
         file.setTitle(title);
     }
 
-    public void setURL(final String url) {
+    public void setURL(String url) {
         file.setURL(url);
     }
 
-    public void setVersion(final int version) {
+    public void setVersion(int version) {
         file.setVersion(version);
     }
 
-    public void setVersionComment(final String string) {
+    public void setVersionComment(String string) {
         file.setVersionComment(string);
     }
 }

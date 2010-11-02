@@ -179,7 +179,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
         final SearchIterator<File> searchIterator;
         try {
             searchIterator = fileAccess.getDocuments(String.valueOf(folderId), FIELDS).results();
-        } catch (final FileStorageException e) {
+        } catch (final AbstractOXException e) {
             throw new LoginException(e);
         }
         try {

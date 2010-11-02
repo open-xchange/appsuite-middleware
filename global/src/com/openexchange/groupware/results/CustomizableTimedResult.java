@@ -69,7 +69,7 @@ public class CustomizableTimedResult<T> implements TimedResult<T>{
         this.result = result;
         this.customizer = customizer;
     }
-    public SearchIterator<T> results() {
+    public SearchIterator<T> results() throws AbstractOXException {
         return new CustomizableSearchIterator<T>(result.results(), customizer);
     }
     public long sequenceNumber() throws AbstractOXException {

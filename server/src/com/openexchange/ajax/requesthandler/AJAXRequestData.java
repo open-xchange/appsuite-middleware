@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -62,6 +63,7 @@ import java.util.Map.Entry;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -90,6 +92,8 @@ public class AJAXRequestData {
     private Object data;
 
     private InputStreamProvider uploadStreamProvider;
+
+    private List<UploadFile> files = new ArrayList<UploadFile>(5);
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -253,6 +257,41 @@ public class AJAXRequestData {
             }
         }
         return missing;
+    }
+
+    /**
+     * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and
+     * not via the multiple module.
+     * @return true if one or more files were uploaded, false otherwise.
+     */
+    public boolean hasUploads() {
+        return !files.isEmpty();
+    }
+    
+    /**
+     * Retrieve file uploads.
+     * @return A list of file uploads.
+     */
+    public List<UploadFile> getFiles() {
+        return Collections.unmodifiableList(files);
+    }
+    
+    /**
+     * Retrieve a file with a given form name.
+     * @param name The name of the form field that include the file
+     * @return The file, or null if no file field of this name was found
+     */
+    public UploadFile getFile(String name) {
+        for (UploadFile file : files) {
+            if(file.getFieldName().equals(name)) {
+                return file;
+            }
+        }
+        return null;
+    }
+    
+    public void addFile(UploadFile file) {
+        files.add(file);
     }
 
 }

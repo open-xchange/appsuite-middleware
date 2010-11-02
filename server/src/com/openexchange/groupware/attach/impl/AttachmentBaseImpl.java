@@ -642,10 +642,10 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         final TimedResult<AttachmentMetadata> tr = getAttachments(folderId, objectId, moduleId, ids, QUERIES.getFields(), ctx, user, userConfig);
         boolean found = false;
 
-        final SearchIterator<AttachmentMetadata> iter = tr.results();
-
+        SearchIterator<AttachmentMetadata> iter = null;
         final List<AttachmentMetadata> recreate = new ArrayList<AttachmentMetadata>();
         try {
+            iter = tr.results();
             while (iter.hasNext()) {
                 found = true;
                 AttachmentMetadata att;

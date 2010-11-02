@@ -227,7 +227,7 @@ public class Multiple extends SessionServlet {
                     multipleHandler.close();
                     jsonWriter.endObject();
                 }
-            } else if (MODULE_INFOSTORE.equals(module)) {
+            /*} else if (MODULE_INFOSTORE.equals(module)) {
                 writeMailRequest(req);
                 final InfostoreRequest infoRequest = new InfostoreRequest(session, jsonWriter);
                 try {
@@ -236,7 +236,7 @@ public class Multiple extends SessionServlet {
                     jsonWriter.object();
                     ResponseWriter.writeException(e, jsonWriter);
                     jsonWriter.endObject();
-                }
+                } */
             } else if (MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module)) {
                 writeMailRequest(req);
                 final FolderRequest folderequest = new FolderRequest(session, jsonWriter);

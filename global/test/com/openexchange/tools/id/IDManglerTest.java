@@ -114,5 +114,20 @@ public class IDManglerTest extends TestCase {
 
         assertEquals(Arrays.asList("something\\with", "neato\\backslashes"), unmangled);
     }
+    
+    public void testContainsPrimaryDelim() {
+        List<String> unmangled = IDMangler.unmangle("some:/partial:id://component");
+        assertEquals(Arrays.asList("some:/partial:id", "component"), unmangled);
+    }
+    
+    public void testContainsFragmentsOfPrimaryDelim() {
+        String id = IDMangler.mangle("some:/service:this is", "someFolder", "someId");
+        assertNotNull(id);
+
+        List<String> unmangled = IDMangler.unmangle(id);
+
+        assertEquals(Arrays.asList("some:/service:this is", "someFolder", "someId"), unmangled);
+    }
+    
 
 }

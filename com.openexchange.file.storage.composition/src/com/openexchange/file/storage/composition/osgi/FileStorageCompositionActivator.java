@@ -50,7 +50,10 @@
 package com.openexchange.file.storage.composition.osgi;
 
 import java.util.List;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -60,6 +63,7 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.session.Session;
 
+
 /**
  * {@link FileStorageCompositionActivator}
  *
@@ -67,28 +71,30 @@ import com.openexchange.session.Session;
  */
 public class FileStorageCompositionActivator extends DeferredActivator {
 
+    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{FileStorageServiceRegistry.class};
+    
     private ServiceRegistration registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return NEEDED_SERVICES;
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Nothing to do
+    protected void handleAvailability(Class<?> clazz) {
+        
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Nothing to do
+    protected void handleUnavailability(Class<?> clazz) {
+        
     }
 
     @Override
     protected void startBundle() throws Exception {
         registration = context.registerService(IDBasedFileAccessFactory.class.getName(), new IDBasedFileAccessFactory() {
 
-            public IDBasedFileAccess createAccess(final Session session) {
+            public IDBasedFileAccess createAccess(Session session) {
                 return new CompositingIDBasedFileAccess(session) {
 
                     @Override
@@ -97,7 +103,7 @@ public class FileStorageCompositionActivator extends DeferredActivator {
                     }
 
                     @Override
-                    protected FileStorageService getFileStorageService(final String serviceId) throws FileStorageException {
+                    protected FileStorageService getFileStorageService(String serviceId) throws FileStorageException {
                         return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
                     }
                     
@@ -111,7 +117,6 @@ public class FileStorageCompositionActivator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         if(registration != null) {
             registration.unregister();
-            registration = null;
         }
     }
     

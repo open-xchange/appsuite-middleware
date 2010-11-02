@@ -82,7 +82,7 @@ public class CustomizableDelta<T> implements Delta<T>{
         return new CustomizableSearchIterator<T>(delta.getNew(), customizer);
     }
 
-    public SearchIterator<T> results() {
+    public SearchIterator<T> results() throws AbstractOXException {
         return new CustomizableSearchIterator<T>(delta.results(), customizer);
     }
 

@@ -51,7 +51,7 @@ package com.openexchange.smtp;
 
 import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.upload.impl.UploadFile;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;

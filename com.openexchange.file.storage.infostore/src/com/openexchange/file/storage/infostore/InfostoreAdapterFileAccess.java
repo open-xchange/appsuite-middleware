@@ -3,14 +3,18 @@ package com.openexchange.file.storage.infostore;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -80,6 +84,17 @@ import com.openexchange.tx.TransactionException;
  */
 public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
 
+    private static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade(); 
+    private static final Set<Long> VIRTUAL_FOLDERS = new HashSet<Long>() {
+
+        {
+            add((long) FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
+            add((long) FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+            add((long) FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+            add((long) FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+        }
+    };
+    
     private InfostoreFacade infostore;
     private InfostoreSearchEngine search;
     private Context ctx;
@@ -105,47 +120,53 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         this.accountAccess = accountAccess;
     }
 
+   
     public boolean exists(String folderId, String id, int version) throws FileStorageException {
         try {
-            return infostore.exists( ID(id), version, ctx, user, userConfig);
+            return getInfostore(folderId).exists( ID(id), version, ctx, user, userConfig);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public InputStream getDocument(String folderId, String id, int version) throws FileStorageException {
         try {
-            return infostore.getDocument(ID( id ), version, ctx, user, userConfig);
+            return getInfostore(folderId).getDocument(ID( id ), version, ctx, user, userConfig);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public File getFileMetadata(String folderId, String id, int version) throws FileStorageException {
         try {
-            DocumentMetadata documentMetadata = infostore.getDocumentMetadata(ID( id ), version, ctx, user, userConfig);
+            DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID( id ), version, ctx, user, userConfig);
             return new InfostoreFile( documentMetadata ); 
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
-
+    
+   
     public void lock(String folderId, String id, long diff) throws FileStorageException {
         try {
-            infostore.lock(ID( id ), diff, sessionObj);
+            getInfostore(folderId).lock(ID( id ), diff, sessionObj);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public void removeDocument(String folderId, long sequenceNumber) throws FileStorageException {
         try {
-            infostore.removeDocument(FOLDERID(folderId), sequenceNumber, sessionObj);
+            getInfostore(folderId).removeDocument(FOLDERID(folderId), sequenceNumber, sessionObj);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws FileStorageException {
         int[] infostoreIDs = new int[ids.size()];
         Map<Integer, IDTuple> id2folder = new HashMap<Integer, IDTuple>();
@@ -156,7 +177,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         }
         
         try {
-            int[] conflicted = infostore.removeDocument(infostoreIDs, sequenceNumber, sessionObj);
+            int[] conflicted = getInfostore(null).removeDocument(infostoreIDs, sequenceNumber, sessionObj);
             
             List<IDTuple> retval = new ArrayList<IDTuple>(conflicted.length);
             for(int id : conflicted) {
@@ -170,112 +191,125 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         }
     }
 
+   
     public int[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException {
         try {
-            return infostore.removeVersion(ID(id), versions, sessionObj);
+            return getInfostore(folderId).removeVersion(ID(id), versions, sessionObj);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public void saveDocument(File file, InputStream data, long sequenceNumber) throws FileStorageException {
         try {
-            infostore.saveDocument(new FileMetadata(file), data, sequenceNumber, sessionObj);
+            getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, sessionObj);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws FileStorageException {
         try {
-            infostore.saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), sessionObj );
+            getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), sessionObj );
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
-    public void saveFileMetadata(File file, long sequenceNumber) {
+   
+    public void saveFileMetadata(File file, long sequenceNumber) throws FileStorageException {
         try {
-            infostore.saveDocumentMetadata(new FileMetadata(file), sequenceNumber, sessionObj);
+            getInfostore(file.getFolderId()).saveDocumentMetadata(new FileMetadata(file), sequenceNumber, sessionObj);
         } catch (AbstractOXException e) {
-            new FileStorageException(e);
+            throw new FileStorageException(e);
         }
     }
 
+   
     public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws FileStorageException {
         try {
-            infostore.saveDocumentMetadata(new FileMetadata(file), sequenceNumber, FieldMapping.getMatching(modifiedFields), sessionObj);
+            getInfostore(file.getFolderId()).saveDocumentMetadata(new FileMetadata(file), sequenceNumber, FieldMapping.getMatching(modifiedFields), sessionObj);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public void touch(String folderId, String id) throws FileStorageException {
         try {
-            infostore.touch(ID(id), sessionObj);
+            getInfostore(folderId).touch(ID(id), sessionObj);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public void unlock(String folderId, String id) throws FileStorageException {
         try {
-            infostore.unlock(ID(id), sessionObj);
+            getInfostore(folderId).unlock(ID(id), sessionObj);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws FileStorageException {
         try {
-            Delta<DocumentMetadata> delta = infostore.getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(fields), ignoreDeleted, ctx, user, userConfig);
+            Delta<DocumentMetadata> delta = getInfostore(folderId).getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(fields), ignoreDeleted, ctx, user, userConfig);
             return new InfostoreDeltaWrapper(delta);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws FileStorageException {
         try {
-            Delta<DocumentMetadata> delta = infostore.getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ignoreDeleted, ctx, user, userConfig);
+            Delta<DocumentMetadata> delta = getInfostore(folderId).getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ignoreDeleted, ctx, user, userConfig);
             return new InfostoreDeltaWrapper(delta);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public TimedResult<File> getDocuments(String folderId) throws FileStorageException {
         try {
-            TimedResult<DocumentMetadata> documents = infostore.getDocuments(FOLDERID(folderId), ctx, user, userConfig);
+            TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), ctx, user, userConfig);
             return new InfostoreTimedResult(documents);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public TimedResult<File> getDocuments(String folderId, List<Field> fields) throws FileStorageException {
         try {
-            TimedResult<DocumentMetadata> documents = infostore.getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), ctx, user, userConfig);
+            TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), ctx, user, userConfig);
             return new InfostoreTimedResult(documents);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws FileStorageException {
         try {
-            TimedResult<DocumentMetadata> documents = infostore.getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ctx, user, userConfig);
+            TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ctx, user, userConfig);
             return new InfostoreTimedResult(documents);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws FileStorageException {
         int[] infostoreIDs = IDS(ids);
         TimedResult<DocumentMetadata> documents;
         try {
-            documents = infostore.getDocuments(infostoreIDs, FieldMapping.getMatching(fields), ctx, user, userConfig);
+            documents = getInfostore(null).getDocuments(infostoreIDs, FieldMapping.getMatching(fields), ctx, user, userConfig);
             return new InfostoreTimedResult(documents);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
@@ -284,33 +318,37 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         }
     }
 
+   
     public TimedResult<File> getVersions(String folderId, String id) throws FileStorageException {
         try {
-            TimedResult<DocumentMetadata> versions = infostore.getVersions(ID(id), ctx, user, userConfig);
+            TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), ctx, user, userConfig);
             return new InfostoreTimedResult(versions);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public TimedResult<File> getVersions(String folder, String id, List<Field> fields) throws FileStorageException {
         try {
-            TimedResult<DocumentMetadata> versions = infostore.getVersions(ID(id), FieldMapping.getMatching(fields), ctx, user, userConfig);
+            TimedResult<DocumentMetadata> versions = getInfostore(folder).getVersions(ID(id), FieldMapping.getMatching(fields), ctx, user, userConfig);
             return new InfostoreTimedResult(versions);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
 
+   
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws FileStorageException {
         try {
-            TimedResult<DocumentMetadata> versions = infostore.getVersions(ID(id), FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ctx, user, userConfig);
+            TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ctx, user, userConfig);
             return new InfostoreTimedResult(versions);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
         }
     }
-
+    
+   
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws FileStorageException {
         int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Integer.parseInt(folderId);
         try {
@@ -321,30 +359,38 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         }
     }
 
+
+   
     public void commit() throws TransactionException {
         infostore.commit();
     }
 
+   
     public void finish() throws TransactionException {
         infostore.finish();
     }
 
+   
     public void rollback() throws TransactionException {
         infostore.rollback();
     }
 
+   
     public void setCommitsTransaction(boolean commits) {
         infostore.setCommitsTransaction(commits);
     }
 
+   
     public void setRequestTransactional(boolean transactional) {
         infostore.setRequestTransactional(transactional);
     }
 
+   
     public void setTransactional(boolean transactional) {
         infostore.setTransactional(transactional);
     }
 
+   
     public void startTransaction() throws TransactionException {
         infostore.startTransaction();
     }
@@ -365,8 +411,38 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         return infostoreIDs;
     }
 
+   
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
+    }
+
+   
+    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFile, List<File.Field> modifiedFields) throws FileStorageException {
+        File orig = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
+        if(newFile == null && orig.getFileName() != null) {
+            newFile = getDocument(source.getFolder(), source.getId(), CURRENT_VERSION);
+        }
+        if(update != null) {
+            orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));
+        }
+        orig.setId(NEW);
+        orig.setFolderId(destFolder);
+        
+        if(newFile == null) {
+            saveFileMetadata(orig, UNDEFINED_SEQUENCE_NUMBER);
+        } else {
+            saveDocument(orig, newFile, UNDEFINED_SEQUENCE_NUMBER);
+        }
+        
+        return new IDTuple(destFolder, orig.getId());
+    }
+
+
+    public InfostoreFacade getInfostore(String folderId) {
+        if(folderId != null && VIRTUAL_FOLDERS.contains(Long.parseLong(folderId))) {
+            return VIRTUAL_INFOSTORE;
+        }
+        return infostore;
     }
 
 

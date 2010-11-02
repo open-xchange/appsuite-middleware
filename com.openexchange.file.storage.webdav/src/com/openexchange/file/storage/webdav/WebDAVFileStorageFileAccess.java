@@ -1128,4 +1128,13 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         return pos > 0 ? href.substring(pos + 1) : href;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.file.storage.FileStorageFileAccess#copy(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, com.openexchange.file.storage.File, java.io.InputStream, java.util.List)
+     */
+    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws FileStorageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
 }

@@ -73,8 +73,12 @@ public class UpdateAction extends AbstractWriteAction {
         if(file.getId() == null) {
             throw new AjaxException(AjaxException.Code.InvalidParameterValue, "Request Body", "Missing field 'id'");
         }
-        
-        fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
+
+        if( request.hasUploads() ) {
+            fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+        } else {
+            fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
+        }
 
         return success(file.getSequenceNumber());
     }

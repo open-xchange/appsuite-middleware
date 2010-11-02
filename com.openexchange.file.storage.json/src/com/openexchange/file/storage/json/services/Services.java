@@ -47,74 +47,26 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.file.storage.json.services;
 
-import java.util.List;
-import com.openexchange.tools.id.IDMangler;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link FolderID}
+ * {@link Services}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FolderID {
-    private String service;
-    private String accountId;
-    private String folderId;
-    
-    public FolderID(String service, String accountId, String folderId) {
-        super();
-        this.service = service;
-        this.accountId = accountId;
-        this.folderId = folderId;
-    }
-    
-    public FolderID(String uniqueID) {
-        List<String> unmangled = IDMangler.unmangle(uniqueID);
-        if(unmangled.size() == 3) {
-            service = unmangled.get(0);
-            accountId = unmangled.get(1);
-            folderId = unmangled.get(2);
-        } else {
-            service = "com.openexchange.infostore";
-            accountId = "infostore";
-            folderId = uniqueID;
-        }
-    }
-    
-    
-    public String getService() {
-        return service;
-    }
-    
-    public void setService(String service) {
-        this.service = service;
-    }
-    
-    public String getAccountId() {
-        return accountId;
+public class Services {
+    public static ServiceLookup LOOKUP = null;
+
+    public static IDBasedFileAccessFactory getFileAccessFactory() {
+        return LOOKUP.getService(IDBasedFileAccessFactory.class);
     }
 
-    
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
+    public static AttachmentBase getAttachmentBase() {
+        return LOOKUP.getService(AttachmentBase.class);
     }
-
-    public String getFolderId() {
-        return folderId;
-    }
-    
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-    
-    public String toUniqueID() {
-        if(service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
-            return folderId;
-        }
-        return IDMangler.mangle(service, accountId, folderId);
-    }
-    
-    
 }

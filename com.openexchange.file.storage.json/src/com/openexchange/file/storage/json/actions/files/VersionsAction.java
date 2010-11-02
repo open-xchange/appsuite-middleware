@@ -49,12 +49,17 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.FilteringSearchIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link VersionsAction}
@@ -69,9 +74,36 @@ public class VersionsAction extends AbstractFileAction {
         
         IDBasedFileAccess fileAccess = request.getFileAccess();
         
-        TimedResult<File> versions = fileAccess.getVersions(request.getId(), request.getColumns(), request.getSortingField(), request.getSortingOrder());
+        List<Field> columns = new ArrayList<File.Field>(request.getColumns());
+        if(!columns.contains(File.Field.VERSION)) {
+            columns.add(File.Field.VERSION);
+        }
+        TimedResult<File> versions = fileAccess.getVersions(request.getId(), columns, request.getSortingField(), request.getSortingOrder());
         
-        return result(versions, request);
+        return result( skipVersion0( versions ), request);
+    }
+
+    private TimedResult<File> skipVersion0(final TimedResult<File> versions) throws AbstractOXException {
+        
+        return new TimedResult<File>() {
+
+            public SearchIterator<File> results() throws AbstractOXException {
+                return new FilteringSearchIterator<File>(versions.results()) {
+
+                    @Override
+                    public boolean accept(File thing) throws AbstractOXException {
+                        return thing.getVersion() != 0;
+                    }
+
+                    
+                };
+            }
+
+            public long sequenceNumber() throws AbstractOXException {
+                return versions.sequenceNumber();
+            }
+            
+        };
     }
 
 }

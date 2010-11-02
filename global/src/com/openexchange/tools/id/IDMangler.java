@@ -59,61 +59,119 @@ import java.util.List;
  */
 public class IDMangler {
 
+    public static final String PRIMARY_DELIM = "://";
+
+    public static final String SECONDARY_DELIM = "/";
+
     public static String mangle(String... components) {
         StringBuilder id = new StringBuilder(50);
+        boolean first = true;
         for (String string : components) {
             string = escape(string);
-            id.append('[').append(string).append("]");
+            id.append(string);
+            String delim = first ? PRIMARY_DELIM : SECONDARY_DELIM;
+            id.append(delim);
+            first = false;
         }
-        id.setLength(id.length());
+        id.setLength(id.length()-1);
         return id.toString();
     }
 
     private static String escape(String string) {
-        StringBuilder escaped = new StringBuilder(string.length());
-        for(char c : string.toCharArray()) {
-            switch(c) {
-            case '[': case ']': case '\\': escaped.append('\\');
-            }
-            escaped.append(c);
-        }
-        return escaped.toString();
-    }
-
-    public static List<String> unmangle(String mangled) {
-        ArrayList<String> list = new ArrayList<String>(5);
-        StringBuilder buffer = new StringBuilder(50);
-        boolean escaped = false;
-        for (char c : mangled.toCharArray()) {
+        StringBuilder buffer = new StringBuilder(string.length() * 3);
+        for (char c : string.toCharArray()) {
             switch (c) {
-            case '\\':
-                if(escaped) {
-                    escaped = false;
-                    buffer.append(c);
-                } else {
-                    escaped = true;
-                }
+            case '/':
+                buffer.append("[/]");
                 break;
             case '[':
-                if (escaped) {
-                    escaped = false;
-                    buffer.append(c);
-                }
+                buffer.append("[[]");
                 break;
-            case ']':
-                if (escaped) {
-                    escaped = false;
-                    buffer.append(c);
-                } else {
-                    list.add(buffer.toString());
-                    buffer.setLength(0);
-                }
+            case ':':
+                buffer.append("[:]");
                 break;
             default:
                 buffer.append(c);
             }
         }
+        return buffer.toString();
+    }
 
+    private static enum ParserState {
+        APPEND, APPEND_PREFIX, PRIMARY_DELIM1, PRIMARY_DELIM2, ESCAPED;
+    }
+
+    public static List<String> unmangle(String mangled) {
+        ArrayList<String> list = new ArrayList<String>(5);
+        StringBuilder buffer = new StringBuilder(50);
+        ParserState state = ParserState.APPEND_PREFIX;
+        ParserState unescapedState = null;
+
+        for (char c : mangled.toCharArray()) {
+            switch (c) {
+            case '[': {
+                if (state == ParserState.ESCAPED) {
+                    buffer.append(c);
+                } else {
+                    unescapedState = state;
+                    state = ParserState.ESCAPED;
+                }
+                break;
+            }
+            case ']': {
+                if (state == ParserState.ESCAPED) {
+                    state = unescapedState;
+                } else {
+                    buffer.append(c);
+                }
+                break;
+            }
+            case ':': {
+                switch (state) {
+                case APPEND:
+                case ESCAPED:
+                    buffer.append(c);
+                    break;
+                case APPEND_PREFIX:
+                    state = ParserState.PRIMARY_DELIM1;
+                    break;
+                }
+                break;
+            }
+            case '/': {
+                switch (state) {
+                case APPEND:
+                    list.add(buffer.toString());
+                    buffer.setLength(0);
+                    break;
+                case APPEND_PREFIX:
+                case ESCAPED:
+                    buffer.append(c);
+                    break;
+                case PRIMARY_DELIM1:
+                    state = ParserState.PRIMARY_DELIM2;
+                    break;
+                case PRIMARY_DELIM2:
+                    list.add(buffer.toString());
+                    buffer.setLength(0);
+                    state = ParserState.APPEND;
+                    break;
+                }
+                break;
+            }
+            default: {
+                switch(state) {
+                case PRIMARY_DELIM1: buffer.append(':'); state = ParserState.APPEND_PREFIX; break;
+                case PRIMARY_DELIM2: buffer.append(":/"); state = ParserState.APPEND_PREFIX; break;
+                }
+                buffer.append(c);
+                break;
+            }
+            }
+        }
+        if (buffer.length() != 0) {
+            list.add(buffer.toString());
+        }
         return list;
     }
 }

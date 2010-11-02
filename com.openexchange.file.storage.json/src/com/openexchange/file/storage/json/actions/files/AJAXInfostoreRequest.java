@@ -49,6 +49,9 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,13 +66,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
+import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -95,6 +101,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private int[] versions;
 
     private static final FileMetadataParser parser = FileMetadataParser.getInstance();
+
+    private static final String JSON = "json";
     
     private File file;
     
@@ -118,10 +126,14 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     public InfostoreRequest requireBody() throws AjaxException {
-        if (data.getData() == null) {
+        if (data.getData() == null && !data.hasUploads() && data.getParameter("json") == null) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "data");
         }
         return this;
+    }
+    
+    public boolean has(String paramName) {
+        return data.getParameter(paramName) != null;
     }
     
     public InfostoreRequest requireFileMetadata() throws AjaxException {
@@ -193,7 +205,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     public IDBasedFileAccess getFileAccess() {
-        return null;
+        return Services.getFileAccessFactory().createAccess(session);
+    }
+    
+    public AttachmentBase getAttachmentBase() {
+        return Services.getAttachmentBase();
     }
 
     public ServerSession getSession() {
@@ -330,9 +346,42 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if(file != null) {
             return;
         }
+        requireFileMetadata();
+        
         JSONObject object = (JSONObject) data.getData();
+        if(object == null) {
+            try {
+                object = new JSONObject(data.getParameter(JSON));
+            } catch (JSONException e) {
+                throw new AjaxException(AjaxException.Code.JSONError, e.getMessage());
+            }
+        }
+
+        UploadFile uploadFile = null;
+        if(data.hasUploads()) {
+            uploadFile = data.getFiles().get(0);
+        }    
+        
         file = parser.parse(object); 
         fields = parser.getFields(object);
+        if(data.hasUploads()) {
+            if(!fields.contains(File.Field.FILENAME)) {
+                file.setFileName(uploadFile.getPreparedFileName());
+                fields.add(File.Field.FILENAME);
+            }
+            
+            if(!fields.contains(File.Field.FILE_MIMETYPE)) {
+                file.setFileMIMEType(uploadFile.getContentType());
+                fields.add(File.Field.FILE_MIMETYPE);
+            }
+            // TODO: Guess Content-Type
+            
+        }
+        
+        if(has("id") && ! fields.contains(File.Field.ID)) {
+            file.setId(getId());
+            fields.add(File.Field.ID);
+        }
     }
     
     public File getFile() throws AbstractOXException {
@@ -344,5 +393,37 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         parseFile();
         return fields;
     }
+    
+    public boolean hasUploads() throws AbstractOXException {
+        return data.hasUploads();
+    }
+    
+    public InputStream getUploadedFileData() throws AbstractOXException {
+        if(data.hasUploads()) {
+            try {
+                return new FileInputStream(data.getFiles().get(0).getTmpFile());
+            } catch (FileNotFoundException e) {
+                throw new AjaxException(AjaxException.Code.IOError,  e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    public int getAttachedId() {
+        return getInt(Param.ATTACHED_ID);
+    }
+
+    public int getAttachment() {
+        return getInt(Param.ATTACHMENT);
+    }
+
+    public int getModule() {
+        return getInt(Param.MODULE);
+    }
+
+    private int getInt(Param param) {
+        return Integer.parseInt(data.getParameter(param.getName()));
+    }
+    
 
 }
