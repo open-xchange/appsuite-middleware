@@ -143,7 +143,7 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
         appointmentObj.setOrganizer("someone else");
         appointmentObj.setUid("1234567890abcdef");
-        appointmentObj.setSequence(5);
+        appointmentObj.setSequence(0);
 
         final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
         final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
