@@ -52,7 +52,7 @@ package com.openexchange.file.storage.webdav;
 import com.openexchange.file.storage.FileStorageConstants;
 
 /**
- * {@link WebDAVConstants} - Provides useful constants for twitter.
+ * {@link WebDAVConstants} - Provides useful constants for WebDAV file storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
