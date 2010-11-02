@@ -128,7 +128,7 @@ public class VersionsTest extends InfostoreAJAXTest {
 		final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(ids));
 		final JSONArray arrayOfarrays = (JSONArray) res.getData();
 		
-		assertEquals(versions.size(), arrayOfarrays.length());
+		int numberOfVersions = versions.size();
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
 			final JSONArray comp = arrayOfarrays.getJSONArray(i);
 			assertTrue("Didn't expect "+comp.getInt(0), versions.remove(comp.getInt(0)));
@@ -138,6 +138,7 @@ public class VersionsTest extends InfostoreAJAXTest {
 				assertTrue(comp.getBoolean(1));
 			}
 		}
+        assertEquals(numberOfVersions, arrayOfarrays.length());
 		assertTrue(versions.isEmpty());
 	}
 }

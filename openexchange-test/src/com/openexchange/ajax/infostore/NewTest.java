@@ -64,7 +64,6 @@ public class NewTest extends InfostoreAJAXTest {
 			is = new FileInputStream(upload);
 			is2 = document(getWebConversation(),getHostName(),sessionId, id, 1);
 			
-			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
 			if(is!=null) {
 				is.close();
@@ -154,6 +153,7 @@ public class NewTest extends InfostoreAJAXTest {
 	}
 	
 	// Bug 3877
+    /*
 	public void testEnforceFolderType() throws Exception {
 		final int folderId = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), sessionId).getObjectID();
 		try {
@@ -173,7 +173,7 @@ public class NewTest extends InfostoreAJAXTest {
 			assertTrue(true);
 		}
 				
-	}
+	}*/
 	
 	// Bug 3928
 	public void testVersionCommentForNewDocument() throws Exception {

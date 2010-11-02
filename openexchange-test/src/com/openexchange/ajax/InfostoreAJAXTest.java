@@ -432,7 +432,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         if(res.hasError()) {
             throw new JSONException(res.getErrorMessage());
         }
-        return (Integer) res.getData();
+        return Integer.parseInt(res.getData().toString()) ;
     }
 
     public int[] delete(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
@@ -452,15 +452,19 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
     public int[][] deleteFromFolders(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws JSONException, IOException, SAXException {
 
         final JSONObject response = deleteGetResponse(webConv, protocol, hostname, sessionId, timestamp, ids);
-        final JSONArray arr = response.getJSONArray("data");
-        final int[][] notDeleted = new int[arr.length()][2];
+        if(response.has("data")) {
+            final JSONArray arr = response.getJSONArray("data");
+            final int[][] notDeleted = new int[arr.length()][2];
 
-        for(int i = 0; i < arr.length(); i++) {
-            notDeleted[i][0] = arr.getJSONObject(i).getInt("id");
-            notDeleted[i][1] = arr.getJSONObject(i).getInt("folder");
+            for(int i = 0; i < arr.length(); i++) {
+                notDeleted[i][0] = arr.getJSONObject(i).getInt("id");
+                notDeleted[i][1] = arr.getJSONObject(i).getInt("folder");
+            }
+
+            return notDeleted;
+        } else {
+            return new int[0][0];
         }
-
-        return notDeleted;
     }
 
     public JSONObject deleteGetResponse(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws JSONException, IOException, SAXException {
@@ -605,7 +609,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         }
         final WebResponse resp = webConv.getResource(req);
         final JSONObject res = extractFromCallback(resp.getText());
-        return (Integer) Response.parse(res.toString()).getData();
+        return Integer.valueOf(Response.parse(res.toString()).getData().toString());
     }
 
     public int copy(final WebConversation webConv, final String hostname, final String sessionId, final int id, final long timestamp, final Map<String, String> modified) throws MalformedURLException, JSONException, IOException, SAXException {
@@ -624,7 +628,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         if(res.hasError()) {
             throw new JSONException(res.getErrorMessage());
         }
-        return (Integer) res.getData();
+        return Integer.parseInt(res.getData().toString());
     }
 
     public Response lock(final WebConversation webConv, final String hostname, final String sessionId, final int id, final long timeDiff) throws MalformedURLException, JSONException, IOException, SAXException {

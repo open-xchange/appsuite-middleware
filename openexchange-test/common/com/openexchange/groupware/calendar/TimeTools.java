@@ -150,7 +150,7 @@ public final class TimeTools {
     }
     
 
-    private static Date applyTimeZone(final TimeZone timeZone, final Date date) {
+    public static Date applyTimeZone(final TimeZone timeZone, final Date date) {
         final SimpleDateFormat sdf = new SimpleDateFormat();
         final String dateString = sdf.format(date);
         sdf.setTimeZone(timeZone);

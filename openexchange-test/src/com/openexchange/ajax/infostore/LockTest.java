@@ -95,7 +95,7 @@ public class LockTest extends InfostoreAJAXTest {
 		final FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId(), userId);
 		// TODO create folder in one step with correct permissions.
 		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,
-		    myInfostore.getObjectID(), "NewInfostoreFolder"+Long.MAX_VALUE, "infostore", FolderObject.PUBLIC, -1, true);
+		    myInfostore.getObjectID(), "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, -1, true);
 		updateFolder(getWebConversation(),getHostName(),sessionId,userId,secondUserId,folderId,Long.MAX_VALUE);
 		
 		//folderId=228;
