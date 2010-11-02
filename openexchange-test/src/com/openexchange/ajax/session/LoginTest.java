@@ -53,7 +53,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.httpclient.Cookie;
+
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
+import com.openexchange.ajax.simple.SimpleOXClient;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.test.json.JSONAssertion;
 
@@ -168,6 +171,30 @@ public class LoginTest extends AbstractLoginTest {
         inModule("quota"); call("filestore"); // Send some request.
 
         assertNoError();
+    }
+    
+    public void testRefreshSecretActionResetsSecretCookieLifetime() throws Exception {
+        rawLogin(USER1);
+        Date oldCookie = null, newCookie = null;
+
+        Cookie[] cookies = currentClient.getClient().getState().getCookies();
+
+        for(int i = 0; i < cookies.length; i++)
+        	if(cookies[i].getName().startsWith("open-xchange-secret"))
+        		oldCookie = cookies[i].getExpiryDate();
+
+        Thread.sleep(1000);
+        raw(AJAXServlet.ACTION_REFRESH_SECRET, AJAXServlet.PARAMETER_SESSION, rawResponse.getString(AJAXServlet.PARAMETER_SESSION));
+        cookies = currentClient.getClient().getState().getCookies();
+        
+        for(int i = 0; i < cookies.length; i++)
+        	if(cookies[i].getName().startsWith("open-xchange-secret"))
+        		newCookie = cookies[i].getExpiryDate();
+        
+        assertNotNull("Precondition: Should find secret cookie after renewal", newCookie);
+        assertNotNull("Precondition: Should find secret cookie first", oldCookie);
+        
+        assertTrue("Refreshed secret cookie should have newer expiry date", newCookie.compareTo(oldCookie) > 0);
     }
     
     // Error Cases
