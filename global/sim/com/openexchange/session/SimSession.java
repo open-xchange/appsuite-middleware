@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * {@link SimSession}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class SimSession implements Session {
@@ -62,7 +62,9 @@ public class SimSession implements Session {
     private String loginName;
     private String randomToken;
     private String sessionId;
-    private Map<String,Object> parameters = new HashMap<String, Object>();
+    private Map<String, Object> parameters = new HashMap<String, Object>();
+    private int contextId;
+    private int userId;
 
     public SimSession() {
         super();
@@ -77,7 +79,7 @@ public class SimSession implements Session {
     }
 
     public int getContextId() {
-        return 0;
+        return contextId;
     }
 
     public String getLocalIp() {
@@ -129,7 +131,7 @@ public class SimSession implements Session {
     }
 
     public int getUserId() {
-        return 0;
+        return userId;
     }
 
     public String getUserlogin() {
@@ -145,19 +147,40 @@ public class SimSession implements Session {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
      */
     public void setLocalIp(String ip) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.session.Session#setHash(java.lang.String)
      */
     public void setHash(String hash) {
         // TODO Auto-generated method stub
-        
+
     }
+
+    /**
+     * Sets the contextId
+     * 
+     * @param contextId The contextId to set
+     */
+    public void setContextId(int contextId) {
+        this.contextId = contextId;
+    }
+
+    /**
+     * Sets the userId
+     * 
+     * @param userId The userId to set
+     */
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
 }
