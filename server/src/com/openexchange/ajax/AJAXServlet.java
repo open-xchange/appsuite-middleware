@@ -240,6 +240,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_RESOLVE_UID = "resolveuid";
 
     public static final String ACTION_IMPORT = "import";
+    
+    public static final String ACTION_REFRESH = "refresh";
+    
+    public static final String ACTION_REFRESH_SECRET = "refreshSecret";
 
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
