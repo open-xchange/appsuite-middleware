@@ -457,7 +457,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                     path = path.substring(0, path.length() - 1);
                 }
                 uri.setPath(new StringBuilder(path).append('/').append(name).toString());
-                newUri = uri.toString();
+                newUri = checkFolderId(uri.toString());
             }
             /*
              * Perform MOVE

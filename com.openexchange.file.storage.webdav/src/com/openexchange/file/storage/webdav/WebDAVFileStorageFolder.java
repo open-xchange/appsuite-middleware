@@ -52,12 +52,17 @@ package com.openexchange.file.storage.webdav;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.checkFolderId;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseDateProperty;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseStringProperty;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.property.DavProperty;
+import org.apache.jackrabbit.webdav.property.DavPropertyIterator;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -118,6 +123,11 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
         }
     }
 
+    private static Set<String> PARSEABLE_PROPS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        DavConstants.PROPERTY_CREATIONDATE,
+        DavConstants.PROPERTY_GETLASTMODIFIED,
+        DavConstants.PROPERTY_DISPLAYNAME)));
+
     /**
      * Parses specified DAV property set of associated MultiStatus response.
      * 
@@ -129,6 +139,20 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
             creationDate = parseDateProperty(DavConstants.PROPERTY_CREATIONDATE, propertySet);
             lastModifiedDate = parseDateProperty(DavConstants.PROPERTY_GETLASTMODIFIED, propertySet);
             name = parseStringProperty(DavConstants.PROPERTY_DISPLAYNAME, propertySet);
+            /*
+             * Iterate other properties
+             */
+            final Map<String, Object> props = new HashMap<String, Object>();
+            for (final DavPropertyIterator iterator = propertySet.iterator(); iterator.hasNext();) {
+                final DavProperty<?> property = iterator.next();
+                final String propName = property.getName().getName();
+                if (!PARSEABLE_PROPS.contains(propName)) {
+                    final Object value = property.getValue();
+                    if (value instanceof String) {
+                        props.put(property.getName().getName(), value);
+                    }
+                }
+            }
         }
     }
 
