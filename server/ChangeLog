@@ -1,3 +1,6 @@
+* 2010-11-02 - tobias.prinz@open-xchange.com
+ - Bugfix #17203 on server side: Added action=refreshSecret to Login servlet which allows to extend the expiry date for a secret cookie. 
+
 * 2010-10-29 - thorben.betten@open-xchange.com
 
  - Bugfix #17345: Changed log level to warning

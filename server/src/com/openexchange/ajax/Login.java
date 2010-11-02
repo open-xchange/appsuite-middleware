@@ -105,8 +105,13 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Login extends AJAXServlet {
 
+public class Login extends AJAXServlet {
+	private enum CookieType {
+		SESSION,
+		SECRET;
+	}
+	
     private static final long serialVersionUID = 7680745138705836499L;
 
     private static final String PARAM_NAME = "name";
@@ -151,6 +156,16 @@ public class Login extends AJAXServlet {
         } else if (ACTION_STORE.equals(action)) {
             try {
                 doStore(req, resp);
+            } catch (final AbstractOXException e) {
+                logAndSendException(resp, e);
+                return;
+            } catch (final JSONException e) {
+                log(RESPONSE_ERROR, e);
+                sendError(resp);
+            }
+        } else if (ACTION_REFRESH_SECRET.equals(action)) {
+            try {
+                doRefreshSecret(req, resp);
             } catch (final AbstractOXException e) {
                 logAndSendException(resp, e);
                 return;
@@ -386,7 +401,10 @@ public class Login extends AJAXServlet {
         return usedUIWebPath+"&"+param+"="+value+query;
     }
 
-    private void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
+    /**
+     * Writes or rewrites a cookie
+     */
+    private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, CookieType type) throws AbstractOXException, JSONException, IOException {
         if (!isAutologinEnabled()) {
             throw new AjaxException(AjaxException.Code.DisabledAction, "store");
         }
@@ -402,12 +420,23 @@ public class Login extends AJAXServlet {
 
         final Session session = SessionServlet.getSession(req, sessionId, sessiond);
 
-        writeSessionCookie(resp, session, req.isSecure());
+        if(type == CookieType.SESSION)
+        	writeSessionCookie(resp, session, req.isSecure());
+        else
+        	writeSecretCookie(resp, session, req.isSecure());
 
         final Response response = new Response();
         response.setData("1");
 
         ResponseWriter.write(response, resp.getWriter());
+    }
+    
+    private void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
+    	doCookieReWrite(req, resp, CookieType.SESSION);
+    }
+
+    private void doRefreshSecret(final HttpServletRequest req, final HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
+    	doCookieReWrite(req, resp, CookieType.SECRET);
     }
 
     private boolean isAutologinEnabled() {
