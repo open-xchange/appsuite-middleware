@@ -159,9 +159,15 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         if (null != httpClientRef.get()) {
             return;
         }
-        final String url = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
+        String url = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
         if (null == url) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(WebDAVConstants.WEBDAV_URL);
+        }
+        /*
+         * Ensure ending slash character
+         */
+        if (!url.endsWith("/")) {
+            url = url + '/';
         }
         HttpClient client = httpClientRef.get();
         if (null == client) {
