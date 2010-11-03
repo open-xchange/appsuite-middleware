@@ -62,7 +62,7 @@
 
         <pathelement location="${bundlesdir}/${filestoragejar}"/>
     	<pathelement location="${bundlesdir}/${filestoragegenericjar}"/>
-    	<pathelement location="${bundlesdir}/${filestoragecomposisitonjar}" />
+    	<pathelement location="${bundlesdir}/${filestoragecompositionjar}" />
     	<pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${codecjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
