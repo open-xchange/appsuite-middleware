@@ -70,6 +70,7 @@ import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavMethods;
 import org.apache.jackrabbit.webdav.MultiStatus;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.CopyMethod;
 import org.apache.jackrabbit.webdav.client.methods.DavMethod;
 import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.apache.jackrabbit.webdav.client.methods.LockMethod;
@@ -365,8 +366,45 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            final String fid = checkFolderId(source.getFolder());
+            final String id = source.getId();
+            final String dfid = checkFolderId(destFolder);
+            final IDTuple ret = new IDTuple();
+            ret.setFolder(dfid);
+            /*
+             * Perform COPY
+             */
+            final CopyMethod copyMethod = new CopyMethod(new URI(fid + id, true).toString(), new URI(dfid + id, true).toString(), false);
+            try {
+                initMethod(fid, id, copyMethod);
+                client.executeMethod(copyMethod);
+                copyMethod.checkSuccess();
+                ret.setId(id);
+            } finally {
+                copyMethod.releaseConnection();
+            }
+            /*
+             * Apply update to copied file
+             */
+            update.setFolderId(dfid);
+            update.setId(id);
+            saveDocument(update, newFil, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
+            /*
+             * Return
+             */
+            return ret;
+        } catch (final FileStorageException e) {
+            throw e;
+        } catch (final HttpException e) {
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final DavException e) {
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public boolean exists(final String folderId, final String id, final int version) throws FileStorageException {
