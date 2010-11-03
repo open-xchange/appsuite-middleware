@@ -1676,8 +1676,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
             }
         }
-        
-        
+
         /*
          * Wait for completion
          */
