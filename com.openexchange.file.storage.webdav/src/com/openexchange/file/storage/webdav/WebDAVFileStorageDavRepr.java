@@ -57,7 +57,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
-import org.apache.jackrabbit.webdav.property.ResourceType;
+import org.apache.jackrabbit.webdav.xml.Namespace;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 
@@ -82,9 +82,9 @@ public final class WebDAVFileStorageDavRepr {
         setProperties = new DavPropertySet();
         removeProperties = new DavPropertyNameSet();
         if (isDirectory) {
-            setProperties.add(new ResourceType(ResourceType.COLLECTION));
+            // setProperties.add(new ResourceType(ResourceType.COLLECTION));
         } else {
-            setProperties.add(new ResourceType(ResourceType.DEFAULT_RESOURCE));
+            // setProperties.add(new ResourceType(ResourceType.DEFAULT_RESOURCE));
         }
     }
 
@@ -109,35 +109,63 @@ public final class WebDAVFileStorageDavRepr {
         final Set<Field> set =
             null == modifiedColumns || modifiedColumns.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(modifiedColumns);
         if (set.contains(Field.CREATED)) {
-            setProperty0(DavConstants.PROPERTY_CREATIONDATE, WebDAVFileStorageResourceUtil.getDateProperty(file.getCreated()));
+            /*
+             * This property is read-only
+             */
+            // setProperty0(DavConstants.PROPERTY_CREATIONDATE, WebDAVFileStorageResourceUtil.getDateProperty(file.getCreated()));
         }
         if (set.contains(Field.FILENAME)) {
-            setProperty0(DavConstants.PROPERTY_DISPLAYNAME, file.getFileName());
+            setProperty0(DavConstants.PROPERTY_DISPLAYNAME, file.getTitle());
         }
-        /*
-         * No field for "getcontentlanguage" DAV property
-         */
-        setProperty0(DavConstants.PROPERTY_GETCONTENTLANGUAGE, file.getProperty(DavConstants.PROPERTY_GETCONTENTLANGUAGE));
         if (set.contains(Field.FILE_SIZE)) {
-            setProperty0(DavConstants.PROPERTY_GETCONTENTLENGTH, String.valueOf(file.getFileSize()));
+            /*
+             * This property is read-only
+             */
+            // setProperty0(DavConstants.PROPERTY_GETCONTENTLENGTH, String.valueOf(file.getFileSize()));
         }
         if (set.contains(Field.FILE_MIMETYPE)) {
-            setProperty0(DavConstants.PROPERTY_GETCONTENTTYPE, file.getFileMIMEType());
+            /*
+             * This property is read-only
+             */
+            // setProperty0(DavConstants.PROPERTY_GETCONTENTTYPE, file.getFileMIMEType());
         }
-        /*
-         * No field for "getetag" DAV property
-         */
-        setProperty0(DavConstants.PROPERTY_GETETAG, file.getProperty(DavConstants.PROPERTY_GETETAG));
         if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-            setProperty0(DavConstants.PROPERTY_GETLASTMODIFIED, WebDAVFileStorageResourceUtil.getDateProperty(file.getLastModified()));
+            /*
+             * This property is read-only
+             */
+            // setProperty0(DavConstants.PROPERTY_GETLASTMODIFIED, WebDAVFileStorageResourceUtil.getDateProperty(file.getLastModified()));
         }
+        /*-
+         * No field for "getcontentlanguage" DAV property
+         * 
+         * This property is read-only
+         */
+        // setProperty0(DavConstants.PROPERTY_GETCONTENTLANGUAGE, file.getProperty(DavConstants.PROPERTY_GETCONTENTLANGUAGE));
+        /*-
+         * No field for "getetag" DAV property
+         * 
+         * This property is read-only
+         */
+        // setProperty0(DavConstants.PROPERTY_GETETAG, file.getProperty(DavConstants.PROPERTY_GETETAG));
+        /*
+         * Custom properties
+         */
+        setProperty0("url", file.getURL(), WebDAVConstants.OX_NAMESPACE);
+        setProperty0("categories", file.getCategories(), WebDAVConstants.OX_NAMESPACE);
+        setProperty0("description", file.getDescription(), WebDAVConstants.OX_NAMESPACE);
+        setProperty0("versionComment", file.getVersionComment(), WebDAVConstants.OX_NAMESPACE);
+        setProperty0("colorLabel", String.valueOf(file.getColorLabel()), WebDAVConstants.OX_NAMESPACE);
     }
 
     private void setProperty0(final String name, final String value) {
+        setProperty0(name, value, DavConstants.NAMESPACE);
+    }
+
+    private void setProperty0(final String name, final String value, final Namespace namespace) {
         if (null == value) {
-            removeProperties.add(DavPropertyName.create(name, DavConstants.NAMESPACE));
+            removeProperties.add(DavPropertyName.create(name, namespace));
         } else {
-            setProperties.add(new DefaultDavProperty<String>(name, value, DavConstants.NAMESPACE));
+            setProperties.add(new DefaultDavProperty<String>(name, value, namespace));
         }
     }
 

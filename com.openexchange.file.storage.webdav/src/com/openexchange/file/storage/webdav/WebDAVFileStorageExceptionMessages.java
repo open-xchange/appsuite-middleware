@@ -92,6 +92,9 @@ public final class WebDAVFileStorageExceptionMessages implements LocalizableStri
     // Versioning not supported by WebDAV.
     public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by WebDAV.";
 
+    // Missing file name.
+    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
+
     /**
      * Initializes a new {@link WebDAVFileStorageExceptionMessages}.
      */

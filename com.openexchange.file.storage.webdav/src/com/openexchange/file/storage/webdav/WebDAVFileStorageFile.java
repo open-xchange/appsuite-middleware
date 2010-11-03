@@ -129,7 +129,10 @@ public final class WebDAVFileStorageFile extends DefaultFile {
             }
             if (set.contains(Field.COLOR_LABEL)) {
                 try {
-                    setColorLabel(Integer.parseInt(parseStringProperty(DavPropertyName.create("colorLabel", WebDAVConstants.OX_NAMESPACE), propertySet)));
+                    final String sColorLabel = parseStringProperty(DavPropertyName.create("colorLabel", WebDAVConstants.OX_NAMESPACE), propertySet);
+                    if (null != sColorLabel) {
+                        setColorLabel(Integer.parseInt(sColorLabel));
+                    }
                 } catch (final NumberFormatException e) {
                     // nope
                 }

@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -371,10 +370,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     public boolean exists(final String folderId, final String id, final int version) throws FileStorageException {
         try {
-            final URI uri = new URI(checkFolderId(folderId) + id, true);
-            final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
+            final String fid = checkFolderId(folderId);
+            final URI uri = new URI(fid + id, true);
+            final DavMethod propFindMethod = new PropFindMethod(fid, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
             try {
-                initMethod(folderId, id, propFindMethod);
+                initMethod(fid, id, propFindMethod);
                 client.executeMethod(propFindMethod);
                 /*
                  * Check if request was successfully executed
@@ -387,7 +387,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 /*
                  * Find MultiStatus for specified folder URI
                  */
-                final URI tmp = new URI(folderId, true);
+                final URI tmp = new URI(fid, true);
                 for (final MultiStatusResponse multiStatusResponse : multiStatus.getResponses()) {
                     tmp.setEscapedPath(multiStatusResponse.getHref());
                     if (uri.equals(tmp)) {
@@ -437,10 +437,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
         try {
-            final URI uri = new URI(checkFolderId(folderId) + id, true);
-            final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
+            final String fid = checkFolderId(folderId);
+            final URI uri = new URI(fid + id, true);
+            final DavMethod propFindMethod = new PropFindMethod(fid, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
             try {
-                initMethod(folderId, id, propFindMethod);
+                initMethod(fid, id, propFindMethod);
                 client.executeMethod(propFindMethod);
                 /*
                  * Check if request was successfully executed
@@ -453,7 +454,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 /*
                  * Find MultiStatus for specified folder URI
                  */
-                final URI tmp = new URI(folderId, true);
+                final URI tmp = new URI(fid, true);
                 for (final MultiStatusResponse multiStatusResponse : multiStatus.getResponses()) {
                     tmp.setEscapedPath(multiStatusResponse.getHref());
                     if (uri.equals(tmp)) {
@@ -477,14 +478,14 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                             /*
                              * Found file
                              */
-                            return new WebDAVFileStorageFile(folderId, id, session.getUserId()).parseDavPropertySet(propertySet);
+                            return new WebDAVFileStorageFile(fid, id, session.getUserId()).parseDavPropertySet(propertySet);
                         }
                     }
                 }
                 /*
                  * File not found
                  */
-                throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+                throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, fid);
             } finally {
                 propFindMethod.releaseConnection();
             }
@@ -512,18 +513,53 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     private void saveFileMetadata0(final File file, final List<Field> modifiedFields) throws FileStorageException {
         try {
             final String folderId = checkFolderId(file.getFolderId());
-            final String id = file.getFileName();
+            final String id;
+            {
+                final String fid = file.getId();
+                if (null == fid) {
+                    final String name = file.getFileName();
+                    if (null == name) {
+                        throw WebDAVFileStorageExceptionCodes.MISSING_FILE_NAME.create();
+                    }
+                    id = name;
+                } else {
+                    id = fid;
+                }
+            }
             final URI uri = new URI(folderId + id, true);
             /*
              * Convert file to DAV representation
              */
             final WebDAVFileStorageDavRepr davRepr = new WebDAVFileStorageDavRepr(file, modifiedFields);
-            final DavMethod davMethod;
-            if (exists(folderId, id, CURRENT_VERSION)) {
-                davMethod = new PropPatchMethod(uri.toString(), davRepr.getSetProperties(), davRepr.getRemoveProperties());
-            } else {
-                davMethod = new PutMethod(uri.toString());
+            /*
+             * Check existence
+             */
+            if (!exists(folderId, id, CURRENT_VERSION)) {
+                lock(folderId, id, FileStorageFileAccess.DISTANT_FUTURE);
+                try {
+                    /*
+                     * Perform PUT first to create the resource
+                     */
+                    final PutMethod putMethod = new PutMethod(uri.toString());
+                    try {
+                        initMethod(folderId, id, putMethod);
+                        client.executeMethod(putMethod);
+                        /*
+                         * Check if request was successfully executed
+                         */
+                        putMethod.checkSuccess();
+                        file.setId(id);
+                    } finally {
+                        putMethod.releaseConnection();
+                    }
+                } finally {
+                    unlock(folderId, id);
+                }
             }
+            /*
+             * Perform PropPatch
+             */
+            final DavMethod davMethod = new PropPatchMethod(uri.toString(), davRepr.getSetProperties(), davRepr.getRemoveProperties());
             try {
                 initMethod(folderId, id, davMethod);
                 client.executeMethod(davMethod);
@@ -531,7 +567,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                  * Check if request was successfully executed
                  */
                 davMethod.checkSuccess();
-                file.setId(id);
             } finally {
                 davMethod.releaseConnection();
             }
@@ -554,7 +589,8 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     public InputStream getDocument(final String folderId, final String id, final int version) throws FileStorageException {
         try {
-            final URI uri = new URI(checkFolderId(folderId) + id, true);
+            final String fid = checkFolderId(folderId);
+            final URI uri = new URI(fid + id, true);
             final GetMethod getMethod = new GetMethod(uri.toString());
             try {
                 // initMethod(folderId, id, getMethod);
@@ -563,7 +599,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                  * Check if request was successfully executed
                  */
                 if (HttpServletResponse.SC_NOT_FOUND == getMethod.getStatusCode()) {
-                    throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(folderId, id);
+                    throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fid, id);
                 }
                 if (HttpServletResponse.SC_OK != getMethod.getStatusCode()) {
                     throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(getMethod.getStatusText());
@@ -606,7 +642,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             /*
              * Save content
              */
-            final String folderId = file.getFolderId();
+            final String folderId = checkFolderId(file.getFolderId());
             final String id = file.getId();
             final URI uri = new URI(checkFolderId(folderId) + id, true);
             final PutMethod putMethod = new PutMethod(uri.toString());
@@ -647,14 +683,14 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public void removeDocument(final String folderId, final long sequenceNumber) throws FileStorageException {
-        accountAccess.getFolderAccess().clearFolder(folderId);
+        accountAccess.getFolderAccess().clearFolder(checkFolderId(folderId));
     }
 
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws FileStorageException {
         try {
             final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (final IDTuple idTuple : ids) {
-                final String folderId = idTuple.getFolder();
+                final String folderId = checkFolderId(idTuple.getFolder());
                 final String id = idTuple.getId();
                 final URI uri = new URI(checkFolderId(folderId) + id, true);
                 final DeleteMethod deleteMethod = new DeleteMethod(uri.toString());
@@ -693,10 +729,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             }
         }
         try {
-            final URI uri = new URI(checkFolderId(folderId) + id, true);
+            final String fid = checkFolderId(folderId);
+            final URI uri = new URI(fid + id, true);
             final DeleteMethod deleteMethod = new DeleteMethod(uri.toString());
             try {
-                initMethod(folderId, id, deleteMethod);
+                initMethod(fid, id, deleteMethod);
                 client.executeMethod(deleteMethod);
                 /*
                  * Check if request was successfully executed
@@ -722,7 +759,8 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public void unlock(final String folderId, final String id) throws FileStorageException {
-        final LockTokenKey lockTokenKey = new LockTokenKey(folderId, id);
+        final String fid = checkFolderId(folderId);
+        final LockTokenKey lockTokenKey = new LockTokenKey(fid, id);
         final String lockToken = lockTokenMap.get(lockTokenKey);
         unlock0(lockTokenKey, lockToken);
         lockTokenMap.remove(lockTokenKey);
@@ -755,7 +793,8 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     public void lock(final String folderId, final String id, final long diff) throws FileStorageException {
         try {
-            final URI uri = new URI(checkFolderId(folderId) + id, true);
+            final String fid = checkFolderId(folderId);
+            final URI uri = new URI(fid + id, true);
             final LockMethod lockMethod =
                 new LockMethod(
                     uri.toString(),
@@ -765,7 +804,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     DavConstants.INFINITE_TIMEOUT,
                     true);
             try {
-                initMethod(folderId, id, lockMethod);
+                initMethod(fid, id, lockMethod);
                 client.executeMethod(lockMethod);
                 /*
                  * Check if request was successfully executed
@@ -775,7 +814,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                  * Obtain & remember lock token
                  */
                 final String lockToken = lockMethod.getLockToken();
-                lockTokenMap.put(new LockTokenKey(folderId, id), lockToken);
+                lockTokenMap.put(new LockTokenKey(fid, id), lockToken);
             } finally {
                 lockMethod.releaseConnection();
             }
@@ -790,21 +829,22 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     public void touch(final String folderId, final String id) throws FileStorageException {
         /*
-         * Update last-modified time stamp
+         * Update last-modified time stamp through a PropPatch on a dummy property
          */
         try {
-            final URI uri = new URI(checkFolderId(folderId) + id, true);
+            final String fid = checkFolderId(folderId);
+            final URI uri = new URI(fid + id, true);
             /*
              * Create DAV representation
              */
             final DavPropertySet setProperties = new DavPropertySet();
             setProperties.add(new DefaultDavProperty<String>(
-                DavConstants.PROPERTY_GETLASTMODIFIED,
-                WebDAVFileStorageResourceUtil.getDateProperty(new Date()),
-                DavConstants.NAMESPACE));
+                "dummyProperty",
+                String.valueOf(System.currentTimeMillis()),
+                WebDAVConstants.OX_NAMESPACE));
             final DavMethod propPatchMethod = new PropPatchMethod(uri.toString(), setProperties, new DavPropertyNameSet());
             try {
-                initMethod(folderId, id, propPatchMethod);
+                initMethod(fid, id, propPatchMethod);
                 client.executeMethod(propPatchMethod);
                 /*
                  * Check if request was successfully executed

@@ -104,7 +104,11 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
     /**
      * Versioning not supported by WebDAV.
      */
-    VERSIONING_NOT_SUPPORTED(WebDAVFileStorageExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 11);
+    VERSIONING_NOT_SUPPORTED(WebDAVFileStorageExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 11),
+    /**
+     * Missing file name.
+     */
+    MISSING_FILE_NAME(WebDAVFileStorageExceptionMessages.MISSING_FILE_NAME_MSG, Category.CODE_ERROR, 12);
     
 
     private final Category category;
