@@ -51,12 +51,20 @@ package com.openexchange.file.storage.webdav;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
@@ -128,4 +136,90 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
         }
     }
     
+    public void testCopyFile() throws Exception {
+        final WebDAVFileStorageAccountAccess accountAccess = getAccountAccess();
+        accountAccess.connect();
+        try {
+            FileStorageFileAccess fileAccess = accountAccess.getFileAccess();
+            
+            final DefaultFile file = new DefaultFile();
+            file.setFileName("test.txt");
+            file.setFileMIMEType("text/plain");
+            final String folderId = accountAccess.getRootFolder().getId();
+            file.setFolderId(folderId);
+            file.setTitle("test.txt");
+
+            fileAccess.saveDocument(file, new ByteArrayInputStream("Some text...".getBytes("UTF-8")), FileStorageFileAccess.DISTANT_FUTURE);
+            try {
+                /*
+                 * Create a new folder
+                 */
+                final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
+                
+                final DefaultFileStorageFolder folder = new DefaultFileStorageFolder();
+                final String name = "TestFolder" + System.currentTimeMillis();
+                folder.setName(name);
+                final String parentId = folderAccess.getRootFolder().getId();
+                folder.setParentId(parentId);
+                final DefaultFileStoragePermission p = DefaultFileStoragePermission.newInstance();
+                p.setMaxPermissions();
+                p.setEntity(accountAccess.getSession().getUserId());
+                p.setGroup(false);
+                folder.setPermissions(Collections.<FileStoragePermission> singletonList(p));
+                folder.setSubscribed(true);
+                final String newId = folderAccess.createFolder(folder);
+                try {
+                    /*
+                     * Check its presence
+                     */
+                    FileStorageFolder[] subfolders = folderAccess.getSubfolders(parentId, true);
+                    boolean found = false;
+                    for (FileStorageFolder fileStorageFolder : subfolders) {
+                        if (newId.equals(fileStorageFolder.getId())) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        fail("Newly created folder \"" + newId + "\" not found");
+                    }
+                    /*
+                     * Copy file
+                     */
+                    final IDTuple tuple = fileAccess.copy(new IDTuple(folderId, file.getId()), newId, null, null, null);
+                    try {
+                        /*
+                         * Check
+                         */
+                        found = false;
+                        final TimedResult<File> result = fileAccess.getDocuments(newId, null);
+                        final String id = tuple.getId();
+                        for (final SearchIterator<File> iter = result.results(); iter.hasNext();) {
+                            final File next = iter.next();
+                            if (next.getId().equals(id)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            fail("Copied file \"" + file.getFileName() + "\" not found in folder \"" + newId + "\"");
+                        }
+                    } finally {
+                        final List<IDTuple> ids = new ArrayList<FileStorageFileAccess.IDTuple>(1);
+                        ids.add(tuple);
+                        fileAccess.removeDocument(ids, FileStorageFileAccess.DISTANT_FUTURE);
+                    }
+                } finally {
+                    folderAccess.deleteFolder(newId, true);
+                }
+            } finally {
+                final List<IDTuple> ids = new ArrayList<FileStorageFileAccess.IDTuple>(1);
+                ids.add(new IDTuple(folderId, file.getId()));
+                fileAccess.removeDocument(ids, FileStorageFileAccess.DISTANT_FUTURE);
+            }
+        } finally {
+            accountAccess.close();
+        }
+    }
+
 }
