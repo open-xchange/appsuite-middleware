@@ -1,7 +1,7 @@
 
 # norootforbuild
 
-Name:           open-xchange-file-storage-json
+Name:           open-xchange-file-storage-infostore
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@ open-xchange-file-storage-generic >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-tx >= @OXVERSION@
@@ -48,7 +48,7 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The Open-Xchange File Storage JSON Bundle
+Summary:        The Open-Xchange File Storage infostore Bundle
 Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-file-storage >= @OXVERSION@ open-xchange-file-storage-generic >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-tx >= @OXVERSION@
 #
 
