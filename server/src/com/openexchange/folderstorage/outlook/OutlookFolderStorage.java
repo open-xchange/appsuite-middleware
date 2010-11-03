@@ -1663,7 +1663,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                         LOG.error(e.getMessage(), e);
                     }
                 }
-                if (!fsAccounts.isEmpty()) {
+                if (fsAccounts.isEmpty()) {
+                    fsSubfolderIDs = Collections.emptyList();
+                } else {
                     Collections.sort(fsAccounts, new FileStorageAccountComparator(locale));
                     final int sz = fsAccounts.size();
                     fsSubfolderIDs = new ArrayList<String>(sz);
@@ -1673,8 +1675,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                             new FileStorageFolderIdentifier(fsa.getFileStorageService().getId(), fsa.getId(), MessagingFolder.ROOT_FULLNAME);
                         fsSubfolderIDs.add(fsfi.toString());
                     }
-                } else {
-                    fsSubfolderIDs = Collections.emptyList();
                 }
             }
         }
