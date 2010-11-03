@@ -54,6 +54,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.jackrabbit.webdav.property.DavProperty;
+import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 
 /**
@@ -68,6 +69,28 @@ public final class WebDAVFileStorageResourceUtil {
      */
     private WebDAVFileStorageResourceUtil() {
         super();
+    }
+
+    /**
+     * Parses the string from named property contained in given property set
+     * 
+     * @param davPropertyName The DAV property name
+     * @param propertySet The property set
+     * @return The string
+     * @throws WebDAVFileStorageException If string cannot be parsed
+     */
+    public static String parseStringProperty(final DavPropertyName davPropertyName, final DavPropertySet propertySet) throws WebDAVFileStorageException {
+        try {
+            @SuppressWarnings("unchecked") final DavProperty<String> stringProperty = (DavProperty<String>) propertySet.get(davPropertyName);
+            if (null == stringProperty) {
+                return null;
+            }
+            return stringProperty.getValue();
+        } catch (final ClassCastException e) {
+            throw WebDAVFileStorageExceptionCodes.INVALID_PROPERTY.create(e, davPropertyName.getName(), String.class.getName());
+        } catch (final Exception e) {
+            throw WebDAVFileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**
