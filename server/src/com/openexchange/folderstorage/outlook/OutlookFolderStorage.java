@@ -1588,28 +1588,30 @@ public final class OutlookFolderStorage implements FolderStorage {
              * Messaging accounts; except mail
              */
             final List<MessagingAccount> messagingAccounts = new ArrayList<MessagingAccount>();
-            {
-                final MessagingServiceRegistry msr = OutlookServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class);
-                if (null != msr) {
-                    try {
-                        final List<MessagingService> allServices = msr.getAllServices();
-                        for (final MessagingService messagingService : allServices) {
-                            if (!messagingService.getId().equals(MailMessagingService.ID)) {
-                                /*
-                                 * Only non-mail services
-                                 */
-                                try {
-                                    messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(parameters.getSession()));
-                                } catch (final MessagingException e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
+            final MessagingServiceRegistry msr = OutlookServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class);
+            if (null == msr) {
+                messagingSubfolderIDs = Collections.emptyList();
+            } else {
+                try {
+                    final List<MessagingService> allServices = msr.getAllServices();
+                    for (final MessagingService messagingService : allServices) {
+                        if (!messagingService.getId().equals(MailMessagingService.ID)) {
+                            /*
+                             * Only non-mail services
+                             */
+                            try {
+                                messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(parameters.getSession()));
+                            } catch (final MessagingException e) {
+                                LOG.error(e.getMessage(), e);
                             }
                         }
-                    } catch (final MessagingException e) {
-                        LOG.error(e.getMessage(), e);
                     }
+                } catch (final MessagingException e) {
+                    LOG.error(e.getMessage(), e);
                 }
-                if (!messagingAccounts.isEmpty()) {
+                if (messagingAccounts.isEmpty()) {
+                    messagingSubfolderIDs = Collections.emptyList();
+                } else {
                     Collections.sort(messagingAccounts, new MessagingAccountComparator(locale));
                     final int sz = messagingAccounts.size();
                     messagingSubfolderIDs = new ArrayList<String>(sz);
@@ -1619,8 +1621,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                             new MessagingFolderIdentifier(ma.getMessagingService().getId(), ma.getId(), MessagingFolder.ROOT_FULLNAME);
                         messagingSubfolderIDs.add(mfi.toString());
                     }
-                } else {
-                    messagingSubfolderIDs = Collections.emptyList();
                 }
             }
         }
@@ -1633,35 +1633,33 @@ public final class OutlookFolderStorage implements FolderStorage {
              * File storage accounts
              */
             final List<FileStorageAccount> fsAccounts = new ArrayList<FileStorageAccount>();
-            {
-                final FileStorageServiceRegistry fsr =
-                    OutlookServiceRegistry.getServiceRegistry().getService(FileStorageServiceRegistry.class);
-                if (null != fsr) {
-                    try {
-                        final List<FileStorageService> allServices = fsr.getAllServices();
-                        for (final FileStorageService fsService : allServices) {
-                            /*
-                             * Check if file storage service provides a root folder
-                             */
-                            final List<FileStorageAccount> userAccounts =
-                                fsService.getAccountManager().getAccounts(parameters.getSession());
-                            for (final FileStorageAccount userAccount : userAccounts) {
-                                final FileStorageAccountAccess accountAccess =
-                                    userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), parameters.getSession());
-                                accountAccess.connect();
-                                try {
-                                    final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
-                                    if (null != rootFolder) {
-                                        fsAccounts.add(userAccount);
-                                    }
-                                } finally {
-                                    accountAccess.close();
+            final FileStorageServiceRegistry fsr = OutlookServiceRegistry.getServiceRegistry().getService(FileStorageServiceRegistry.class);
+            if (null == fsr) {
+                fsSubfolderIDs = Collections.emptyList();
+            } else {
+                try {
+                    final List<FileStorageService> allServices = fsr.getAllServices();
+                    for (final FileStorageService fsService : allServices) {
+                        /*
+                         * Check if file storage service provides a root folder
+                         */
+                        final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(parameters.getSession());
+                        for (final FileStorageAccount userAccount : userAccounts) {
+                            final FileStorageAccountAccess accountAccess =
+                                userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), parameters.getSession());
+                            accountAccess.connect();
+                            try {
+                                final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
+                                if (null != rootFolder) {
+                                    fsAccounts.add(userAccount);
                                 }
+                            } finally {
+                                accountAccess.close();
                             }
                         }
-                    } catch (final FileStorageException e) {
-                        LOG.error(e.getMessage(), e);
                     }
+                } catch (final FileStorageException e) {
+                    LOG.error(e.getMessage(), e);
                 }
                 if (fsAccounts.isEmpty()) {
                     fsSubfolderIDs = Collections.emptyList();
