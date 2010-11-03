@@ -82,6 +82,7 @@ import org.apache.jackrabbit.webdav.header.IfHeader;
 import org.apache.jackrabbit.webdav.lock.Scope;
 import org.apache.jackrabbit.webdav.lock.Type;
 import org.apache.jackrabbit.webdav.property.DavProperty;
+import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
@@ -181,7 +182,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
      */
     public WebDAVFileStorageFileAccess(final HttpClient client, final FileStorageAccount account, final WebDAVFileStorageAccountAccess accountAccess, final Session session) {
         super(client, account, session);
-        rootUri = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
+        rootUri = checkFolderId((String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL));
         this.accountAccess = accountAccess;
         lockTokenMap = new ConcurrentHashMap<LockTokenKey, String>();
     }
@@ -363,7 +364,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         // Nope
     }
 
-    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws FileStorageException {
+    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws FileStorageException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -522,6 +523,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                         throw WebDAVFileStorageExceptionCodes.MISSING_FILE_NAME.create();
                     }
                     id = name;
+                    file.setId(id);
                 } else {
                     id = fid;
                 }
@@ -548,7 +550,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                          * Check if request was successfully executed
                          */
                         putMethod.checkSuccess();
-                        file.setId(id);
                     } finally {
                         putMethod.releaseConnection();
                     }
@@ -835,23 +836,20 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final String fid = checkFolderId(folderId);
             final URI uri = new URI(fid + id, true);
             /*
-             * Create DAV representation
+             * Perform PropPatch
              */
             final DavPropertySet setProperties = new DavPropertySet();
-            setProperties.add(new DefaultDavProperty<String>(
-                "dummyProperty",
-                String.valueOf(System.currentTimeMillis()),
-                WebDAVConstants.OX_NAMESPACE));
-            final DavMethod propPatchMethod = new PropPatchMethod(uri.toString(), setProperties, new DavPropertyNameSet());
+            setProperties.add(new DefaultDavProperty<String>(DavPropertyName.create("dummy", WebDAVConstants.OX_NAMESPACE), String.valueOf(System.currentTimeMillis())));
+            final DavMethod davMethod = new PropPatchMethod(uri.toString(), setProperties, new DavPropertyNameSet());
             try {
-                initMethod(fid, id, propPatchMethod);
-                client.executeMethod(propPatchMethod);
+                initMethod(folderId, id, davMethod);
+                client.executeMethod(davMethod);
                 /*
                  * Check if request was successfully executed
                  */
-                propPatchMethod.checkSuccess();
+                davMethod.checkSuccess();
             } finally {
-                propPatchMethod.releaseConnection();
+                davMethod.releaseConnection();
             }
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());

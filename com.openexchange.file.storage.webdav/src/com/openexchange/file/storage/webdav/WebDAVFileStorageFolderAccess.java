@@ -94,7 +94,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
      */
     public WebDAVFileStorageFolderAccess(final HttpClient client, final FileStorageAccount account, final Session session) {
         super(client, account, session);
-        rootUri = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
+        rootUri = checkFolderId((String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL));
     }
 
     public boolean exists(final String folderId) throws FileStorageException {
