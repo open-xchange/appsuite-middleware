@@ -73,6 +73,12 @@ import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -89,6 +95,7 @@ import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.folderstorage.filestorage.FileStorageFolderIdentifier;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.mail.MailFolderType;
@@ -1618,6 +1625,62 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
         }
         /*
+         * Obtain file storage accounts with running thread
+         */
+        final List<String> fsSubfolderIDs;
+        {
+            /*
+             * File storage accounts
+             */
+            final List<FileStorageAccount> fsAccounts = new ArrayList<FileStorageAccount>();
+            {
+                final FileStorageServiceRegistry fsr =
+                    OutlookServiceRegistry.getServiceRegistry().getService(FileStorageServiceRegistry.class);
+                if (null != fsr) {
+                    try {
+                        final List<FileStorageService> allServices = fsr.getAllServices();
+                        for (final FileStorageService fsService : allServices) {
+                            /*
+                             * Check if file storage service provides a root folder
+                             */
+                            final List<FileStorageAccount> userAccounts =
+                                fsService.getAccountManager().getAccounts(parameters.getSession());
+                            for (final FileStorageAccount userAccount : userAccounts) {
+                                final FileStorageAccountAccess accountAccess =
+                                    userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), parameters.getSession());
+                                accountAccess.connect();
+                                try {
+                                    final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
+                                    if (null != rootFolder) {
+                                        fsAccounts.add(userAccount);
+                                    }
+                                } finally {
+                                    accountAccess.close();
+                                }
+                            }
+                        }
+                    } catch (final FileStorageException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+                if (!fsAccounts.isEmpty()) {
+                    Collections.sort(fsAccounts, new FileStorageAccountComparator(locale));
+                    final int sz = fsAccounts.size();
+                    fsSubfolderIDs = new ArrayList<String>(sz);
+                    for (int i = 0; i < sz; i++) {
+                        final FileStorageAccount fsa = fsAccounts.get(i);
+                        final FileStorageFolderIdentifier fsfi =
+                            new FileStorageFolderIdentifier(fsa.getFileStorageService().getId(), fsa.getId(), MessagingFolder.ROOT_FULLNAME);
+                        fsSubfolderIDs.add(fsfi.toString());
+                    }
+                } else {
+                    fsSubfolderIDs = Collections.emptyList();
+                }
+            }
+        }
+        
+        
+        /*
          * Wait for completion
          */
         final List<String> sortedIDs;
@@ -1976,6 +2039,22 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
 
     } // End of MessagingAccountComparator
+
+    private static final class FileStorageAccountComparator implements Comparator<FileStorageAccount> {
+
+        private final Collator collator;
+
+        public FileStorageAccountComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final FileStorageAccount o1, final FileStorageAccount o2) {
+            return collator.compare(o1.getDisplayName(), o2.getDisplayName());
+        }
+
+    } // End of FileStorageAccountComparator
 
     private static final class FolderNameComparator implements Comparator<String> {
 

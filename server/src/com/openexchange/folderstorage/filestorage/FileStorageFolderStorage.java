@@ -539,11 +539,20 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     final List<FileStorageService> allServices = registry.getAllServices();
                     for (final FileStorageService fsService : allServices) {
                         /*
-                         * Check if file storage service is mail
+                         * Check if file storage service provides a root folder
                          */
                         final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(session);
                         for (final FileStorageAccount userAccount : userAccounts) {
-                            accounts.add(userAccount);
+                            FileStorageAccountAccess accountAccess = userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), session);
+                            accountAccess.connect();
+                            try {
+                                FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
+                                if (null != rootFolder) {
+                                    accounts.add(userAccount);
+                                }
+                            } finally {
+                                accountAccess.close();
+                            }
                         }
                     }
                 }
