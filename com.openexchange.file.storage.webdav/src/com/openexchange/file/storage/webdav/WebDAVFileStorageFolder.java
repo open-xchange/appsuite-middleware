@@ -67,6 +67,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 
 /**
@@ -86,7 +87,8 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
         id = checkFolderId(uri);
         if (id.equalsIgnoreCase(rootUri)) {
             rootFolder = true;
-            parentId = "";
+            id = FileStorageFolder.ROOT_FULLNAME;
+            parentId = null;
         } else {
             rootFolder = false;
             final int pos = id.substring(0, id.length() - 1).lastIndexOf('/');

@@ -56,6 +56,7 @@ import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import com.openexchange.file.storage.FileStorageFolder;
 
 /**
  * {@link WebDAVFileStorageResourceUtil} - Utility class for WebDAV resources.
@@ -203,6 +204,20 @@ public final class WebDAVFileStorageResourceUtil {
                 return null;
             }
         }
+    }
+
+    /**
+     * Checks if specified folder identifier ends with a <code>'/'</code> character.
+     * 
+     * @param folderId The folder identifier to check
+     * @param rootUri The root URI of the connected WebDAV server
+     * @return The checked folder identifier
+     */
+    public static String checkFolderId(final String folderId, final String rootUri) {
+        if (FileStorageFolder.ROOT_FULLNAME.equals(folderId)) {
+            return rootUri;
+        }
+        return checkFolderId(folderId);
     }
 
     /**

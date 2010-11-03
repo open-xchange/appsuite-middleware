@@ -167,7 +167,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             /*
              * Check
              */
-            final String fid = checkFolderId(folderId);
+            final String fid = checkFolderId(folderId, rootUri);
             final URI uri = new URI(fid, true);
             final WebDAVFileStorageFolder ret = new WebDAVFileStorageFolder(fid, rootUri, session.getUserId());
             final DavMethod propFindMethod = new PropFindMethod(fid, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
@@ -284,7 +284,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             /*
              * Check
              */
-            final String pid = checkFolderId(parentId);
+            final String pid = checkFolderId(parentId, rootUri);
             final URI uri = new URI(pid, true);
             final List<String> subDirs;
             final DavMethod propFindMethod = new PropFindMethod(pid, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
@@ -389,7 +389,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
 
     public String createFolder(final FileStorageFolder toCreate) throws FileStorageException {
         try {
-            final URI uri = new URI(checkFolderId(toCreate.getParentId()), true);
+            final URI uri = new URI(checkFolderId(toCreate.getParentId(), rootUri), true);
             final String prevPath = uri.getPath();
             uri.setPath(new StringBuilder(prevPath).append(prevPath.endsWith("/") ? "" : "/").append(toCreate.getName()).append('/').toString());
             /*
@@ -417,7 +417,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
 
     public String updateFolder(final String folderId, final FileStorageFolder toUpdate) throws FileStorageException {
         try {
-            final String fid = checkFolderId(folderId);
+            final String fid = checkFolderId(folderId, rootUri);
             if (rootUri.equalsIgnoreCase(fid)) {
                 throw WebDAVFileStorageExceptionCodes.UPDATE_DENIED.create(fid);
             }
@@ -434,7 +434,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
 
     public String moveFolder(final String folderId, final String newParentId) throws FileStorageException {
         try {
-            final String fid = checkFolderId(folderId);
+            final String fid = checkFolderId(folderId, rootUri);
             if (rootUri.equalsIgnoreCase(fid)) {
                 throw WebDAVFileStorageExceptionCodes.UPDATE_DENIED.create(fid);
             }
@@ -485,7 +485,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
 
     public String renameFolder(final String folderId, final String newName) throws FileStorageException {
         try {
-            final String fid = checkFolderId(folderId);
+            final String fid = checkFolderId(folderId, rootUri);
             if (rootUri.equalsIgnoreCase(fid)) {
                 throw WebDAVFileStorageExceptionCodes.UPDATE_DENIED.create(fid);
             }
@@ -533,7 +533,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
 
     public String deleteFolder(final String folderId, final boolean hardDelete) throws FileStorageException {
         try {
-            final String fid = checkFolderId(folderId);
+            final String fid = checkFolderId(folderId, rootUri);
             if (rootUri.equalsIgnoreCase(fid)) {
                 throw WebDAVFileStorageExceptionCodes.DELETE_DENIED.create(fid);
             }
@@ -574,7 +574,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             /*
              * Check
              */
-            final String fid = checkFolderId(folderId);
+            final String fid = checkFolderId(folderId, rootUri);
             final URI uri = new URI(fid, true);
             final List<String> subDirs;
             final List<String> files;
