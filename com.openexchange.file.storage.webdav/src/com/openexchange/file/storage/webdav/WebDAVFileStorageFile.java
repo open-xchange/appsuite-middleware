@@ -56,6 +56,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageException;
@@ -71,7 +72,7 @@ public final class WebDAVFileStorageFile extends DefaultFile {
     /**
      * Initializes a new {@link WebDAVFileStorageFile}.
      * 
-     * @param folderId The folder identifier; e.g. "http://webdav-server.com/Telephone%20Lines"
+     * @param folderId The folder identifier; e.g. "http://webdav-server.com/Telephone%20Lines/"
      * @param id The file identifier; e.g. "lines.pdf"
      * @param userId The user identifier
      */
@@ -81,9 +82,9 @@ public final class WebDAVFileStorageFile extends DefaultFile {
         setCreatedBy(userId);
         setModifiedBy(userId);
         setId(id);
+        setFileName(id);
         setVersion(FileStorageFileAccess.CURRENT_VERSION);
         setIsCurrentVersion(true);
-        setURL(folderId + '/' + id);
     }
 
     /**
@@ -114,8 +115,8 @@ public final class WebDAVFileStorageFile extends DefaultFile {
             if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
                 setLastModified(parseDateProperty(DavConstants.PROPERTY_GETLASTMODIFIED, propertySet));
             }
-            if (set.contains(Field.FILENAME)) {
-                setFileName(parseStringProperty(DavConstants.PROPERTY_DISPLAYNAME, propertySet));
+            if (set.contains(Field.TITLE)) {
+                setTitle(parseStringProperty(DavConstants.PROPERTY_DISPLAYNAME, propertySet));
             }
             if (set.contains(Field.FILE_MIMETYPE)) {
                 setFileMIMEType(parseStringProperty(DavConstants.PROPERTY_GETCONTENTTYPE, propertySet));
@@ -123,8 +124,24 @@ public final class WebDAVFileStorageFile extends DefaultFile {
             if (set.contains(Field.FILE_SIZE)) {
                 setFileSize(parseIntProperty(DavConstants.PROPERTY_GETCONTENTLENGTH, propertySet));
             }
-            if (set.contains(Field.TITLE)) {
-                setTitle(getFileName());
+            if (set.contains(Field.URL)) {
+                setURL(parseStringProperty(DavPropertyName.create("url", WebDAVConstants.OX_NAMESPACE), propertySet));
+            }
+            if (set.contains(Field.COLOR_LABEL)) {
+                try {
+                    setColorLabel(Integer.parseInt(parseStringProperty(DavPropertyName.create("colorLabel", WebDAVConstants.OX_NAMESPACE), propertySet)));
+                } catch (final NumberFormatException e) {
+                    // nope
+                }
+            }
+            if (set.contains(Field.CATEGORIES)) {
+                setCategories(parseStringProperty(DavPropertyName.create("categories", WebDAVConstants.OX_NAMESPACE), propertySet));
+            }
+            if (set.contains(Field.DESCRIPTION)) {
+                setDescription(parseStringProperty(DavPropertyName.create("description", WebDAVConstants.OX_NAMESPACE), propertySet));
+            }
+            if (set.contains(Field.VERSION_COMMENT)) {
+                setVersionComment(parseStringProperty(DavPropertyName.create("versionComment", WebDAVConstants.OX_NAMESPACE), propertySet));
             }
             /*
              * Add other DAV properties as file properties
