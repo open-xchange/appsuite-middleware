@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.webdav;
 
+import org.apache.jackrabbit.webdav.xml.Namespace;
 import com.openexchange.file.storage.FileStorageConstants;
 
 /**
@@ -82,6 +83,11 @@ public final class WebDAVConstants implements FileStorageConstants {
      * The configuration property name for timeout for WebDAV server.
      */
     public static final String WEBDAV_TIMEOUT = "timeout";
+
+    /**
+     * The Open-Xchange name space.
+     */
+    public static final Namespace OX_NAMESPACE = Namespace.getNamespace("ox", "http://www.open-xchange.com");
 
     /**
      * Initializes a new {@link WebDAVConstants}.
