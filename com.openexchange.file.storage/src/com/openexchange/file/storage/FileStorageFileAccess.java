@@ -72,7 +72,12 @@ public interface FileStorageFileAccess extends TransactionAware {
 
         private String id;
 
+        public IDTuple() {
+            super();
+        }
+
         public IDTuple(final String folder, final String id) {
+            this();
             this.folder = folder;
             this.id = id;
         }
