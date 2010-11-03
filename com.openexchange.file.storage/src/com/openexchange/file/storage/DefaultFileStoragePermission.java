@@ -63,9 +63,9 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
      * @return A new instance of {@link DefaultFileStoragePermission} with {@link #setMaxPermissions()} invoked
      */
     public static DefaultFileStoragePermission newInstance() {
-        final DefaultFileStoragePermission dmp = new DefaultFileStoragePermission();
-        dmp.setMaxPermissions();
-        return dmp;
+        final DefaultFileStoragePermission retval = new DefaultFileStoragePermission();
+        retval.setMaxPermissions();
+        return retval;
     }
 
     /*-
