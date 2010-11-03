@@ -1711,9 +1711,10 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         sortedIDs.addAll(accountSubfolderIDs);
         /*
-         * Add external messaging accounts
+         * Add external messaging accounts/file storage accounts
          */
         sortedIDs.addAll(messagingSubfolderIDs);
+        sortedIDs.addAll(fsSubfolderIDs);
         final int size = sortedIDs.size();
         final SortableId[] ret = new SortableId[size];
         for (int i = 0; i < size; i++) {
