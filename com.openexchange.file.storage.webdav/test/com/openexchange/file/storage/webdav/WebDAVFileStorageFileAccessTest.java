@@ -51,8 +51,10 @@ package com.openexchange.file.storage.webdav;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 
@@ -83,14 +85,44 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
             final String folderId = accountAccess.getRootFolder().getId();
             file.setFolderId(folderId);
             file.setTitle("test.txt");
-            
-            fileAccess.saveFileMetadata(file, FileStorageFileAccess.DISTANT_FUTURE);
 
             fileAccess.saveDocument(file, new ByteArrayInputStream("Some text...".getBytes("UTF-8")), FileStorageFileAccess.DISTANT_FUTURE);
 
             final List<IDTuple> ids = new ArrayList<FileStorageFileAccess.IDTuple>(1);
             ids.add(new IDTuple(folderId, file.getId()));
             fileAccess.removeDocument(ids, FileStorageFileAccess.DISTANT_FUTURE);
+        } finally {
+            accountAccess.close();
+        }
+    }
+    
+    public void testTouchFile() throws Exception {
+        final WebDAVFileStorageAccountAccess accountAccess = getAccountAccess();
+        accountAccess.connect();
+        try {
+            FileStorageFileAccess fileAccess = accountAccess.getFileAccess();
+            
+            final DefaultFile file = new DefaultFile();
+            file.setFileName("test.txt");
+            file.setFileMIMEType("text/plain");
+            final String folderId = accountAccess.getRootFolder().getId();
+            file.setFolderId(folderId);
+            file.setTitle("test.txt");
+
+            fileAccess.saveDocument(file, new ByteArrayInputStream("Some text...".getBytes("UTF-8")), FileStorageFileAccess.DISTANT_FUTURE);
+            try {
+                File storageFile1 = fileAccess.getFileMetadata(folderId, file.getId(), FileStorageFileAccess.CURRENT_VERSION);
+                Date lastModified1 = storageFile1.getLastModified();
+                Thread.sleep(2000);
+                fileAccess.touch(folderId, file.getId());
+                File storageFile2 = fileAccess.getFileMetadata(folderId, file.getId(), FileStorageFileAccess.CURRENT_VERSION);
+                Date lastModified2 = storageFile2.getLastModified();
+                assertTrue("Last-modified time stamp was not updated on WebDAV server.", lastModified2.after(lastModified1));
+            } finally {
+                final List<IDTuple> ids = new ArrayList<FileStorageFileAccess.IDTuple>(1);
+                ids.add(new IDTuple(folderId, file.getId()));
+                fileAccess.removeDocument(ids, FileStorageFileAccess.DISTANT_FUTURE);
+            }
         } finally {
             accountAccess.close();
         }
