@@ -390,7 +390,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                  */
                 update.setFolderId(dfid);
                 update.setId(id);
-                saveDocument(update, newFile, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
+                saveDocument(update, newFile, DISTANT_FUTURE, modifiedFields);
             }
             /*
              * Return
