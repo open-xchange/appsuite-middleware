@@ -58,10 +58,12 @@
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${genericonfstoragejar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-        <pathelement location="${bundlesdir}/${messagingjar}"/>
-        <pathelement location="${bundlesdir}/${messaginggenericjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
 
+        <pathelement location="${bundlesdir}/${filestoragejar}"/>
+    	<pathelement location="${bundlesdir}/${filestoragegenericjar}"/>
+    	<pathelement location="${bundlesdir}/${filestoragecomposisitonjar}" />
+    	<pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${codecjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     </path>
