@@ -365,7 +365,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         // Nope
     }
 
-    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws FileStorageException {
+    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFile, final List<Field> modifiedFields) throws FileStorageException {
         try {
             final String fid = checkFolderId(source.getFolder());
             final String id = source.getId();
@@ -384,12 +384,14 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             } finally {
                 copyMethod.releaseConnection();
             }
-            /*
-             * Apply update to copied file
-             */
-            update.setFolderId(dfid);
-            update.setId(id);
-            saveDocument(update, newFil, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
+            if (null != update) {
+                /*
+                 * Apply update to copied file
+                 */
+                update.setFolderId(dfid);
+                update.setId(id);
+                saveDocument(update, newFile, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
+            }
             /*
              * Return
              */
@@ -681,20 +683,32 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             /*
              * Save content
              */
-            final String folderId = checkFolderId(file.getFolderId());
-            final String id = file.getId();
-            final URI uri = new URI(checkFolderId(folderId) + id, true);
-            final PutMethod putMethod = new PutMethod(uri.toString());
-            putMethod.setRequestEntity(new InputStreamRequestEntity(data));
-            try {
-                initMethod(folderId, id, putMethod);
-                client.executeMethod(putMethod);
-                /*
-                 * Check if request was successfully executed
-                 */
-                putMethod.checkSuccess();
-            } finally {
-                putMethod.releaseConnection();
+            if (null != data) {
+                try {
+                    final String folderId = checkFolderId(file.getFolderId());
+                    final String id = file.getId();
+                    final PutMethod putMethod = new PutMethod(new URI(folderId + id, true).toString());
+                    putMethod.setRequestEntity(new InputStreamRequestEntity(data));
+                    try {
+                        initMethod(folderId, id, putMethod);
+                        client.executeMethod(putMethod);
+                        /*
+                         * Check if request was successfully executed
+                         */
+                        putMethod.checkSuccess();
+                    } finally {
+                        putMethod.releaseConnection();
+                    }
+                } finally {
+                    /*
+                     * Close given stream
+                     */
+                    try {
+                        data.close();
+                    } catch (final IOException e) {
+                        org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageFileAccess.class).error(e.getMessage(), e);
+                    }
+                }
             }
         } catch (final FileStorageException e) {
             throw e;
@@ -709,15 +723,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 throw new FileStorageException((AbstractOXException) e);
             }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            /*
-             * Close given stream
-             */
-            try {
-                data.close();
-            } catch (final IOException e) {
-                org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageFileAccess.class).error(e.getMessage(), e);
-            }
         }
     }
 
