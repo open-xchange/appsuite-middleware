@@ -60,7 +60,6 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingMessageAccess;
