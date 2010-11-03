@@ -59,6 +59,7 @@
         <pathelement location="${bundlesdir}/${genericonfstoragejar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${txjar}"/>
 
         <pathelement location="${bundlesdir}/${filestoragejar}"/>
     	<pathelement location="${bundlesdir}/${filestoragegenericjar}"/>
