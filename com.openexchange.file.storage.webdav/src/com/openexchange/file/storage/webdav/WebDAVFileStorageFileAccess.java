@@ -183,7 +183,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
      */
     public WebDAVFileStorageFileAccess(final HttpClient client, final FileStorageAccount account, final WebDAVFileStorageAccountAccess accountAccess, final Session session) {
         super(client, account, session);
-        rootUri = checkFolderId((String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL));
+        rootUri = checkFolderId(((String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL)).trim());
         this.accountAccess = accountAccess;
         lockTokenMap = new ConcurrentHashMap<LockTokenKey, String>();
     }

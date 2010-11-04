@@ -163,6 +163,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         if (null == url) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(WebDAVConstants.WEBDAV_URL);
         }
+        url = url.trim();
         /*
          * Ensure ending slash character
          */
@@ -198,11 +199,18 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
     }
 
     public boolean ping() throws FileStorageException {
-        final String url = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
+        String url = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
         if (null == url) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(WebDAVConstants.WEBDAV_URL);
         }
-        final HttpClient client = createNewHttpClient(url, account.getConfiguration());
+        url = url.trim();
+        /*
+         * Ensure ending slash character
+         */
+        if (!url.endsWith("/")) {
+            url = url + '/';
+        }
+        final HttpClient client = createNewHttpClient(url, account.getConfiguration(), session);
         checkHttpClient(url, client);
         ((MultiThreadedHttpConnectionManager) client.getHttpConnectionManager()).shutdown();
         return true;
@@ -274,7 +282,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         final String accountId = account.getId();
         HttpClient client = registry.getClient(session.getContextId(), session.getUserId(), accountId);
         if (null == client) {
-            final HttpClient newInstance = createNewHttpClient(url, account.getConfiguration());
+            final HttpClient newInstance = createNewHttpClient(url, account.getConfiguration(), session);
             checkHttpClient(url, newInstance);
             client = registry.addClient(session.getContextId(), session.getUserId(), accountId, newInstance);
             if (null == client) {
@@ -290,7 +298,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      * @return The newly created {@link HttpClient}
      * @throws FileStorageException If creation fails
      */
-    private static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration) throws FileStorageException {
+    private static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration, final Session session) throws FileStorageException {
         // http://www.jarvana.com/jarvana/view/org/apache/jackrabbit/jackrabbit-webdav/2.0-beta3/jackrabbit-webdav-2.0-beta3-javadoc.jar!/org/apache/jackrabbit/webdav/client/methods/package-summary.html
         /*
          * The URL to WebDAV server
@@ -346,7 +354,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
             final String sTimeout = (String) configuration.get(WebDAVConstants.WEBDAV_TIMEOUT);
             if (null != sTimeout) {
                 try {
-                    timeout = Integer.parseInt(sTimeout);
+                    timeout = Integer.parseInt(sTimeout.trim());
                 } catch (final NumberFormatException e) {
                     org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageAccountAccess.class).warn(
                         "Configuration property \"" + WebDAVConstants.WEBDAV_TIMEOUT + "\" is not a number: " + sTimeout);
@@ -361,13 +369,24 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         /*
          * Apply credentials
          */
-        final String login = (String) configuration.get(WebDAVConstants.WEBDAV_LOGIN);
-        final String password = (String) configuration.get(WebDAVConstants.WEBDAV_PASSWORD);
-        if (null != login && null != password) {
-            final Credentials creds = new UsernamePasswordCredentials(login, password);
-            newClient.getParams().setAuthenticationPreemptive(true);
-            newClient.getState().setCredentials(AuthScope.ANY, creds);
+        final Credentials creds;
+        {
+            final String login = (String) configuration.get(WebDAVConstants.WEBDAV_LOGIN);
+            final String password = (String) configuration.get(WebDAVConstants.WEBDAV_PASSWORD);
+            if (null != login && null != password) {
+                /*
+                 * Take credentials from configuration
+                 */
+                creds = new UsernamePasswordCredentials(login.trim(), password.trim());
+            } else {
+                /*
+                 * Configuration does not provide valid credentials. Take the ones from session as fallback.
+                 */
+                creds = new UsernamePasswordCredentials(session.getLogin(), session.getPassword());
+            }
         }
+        newClient.getParams().setAuthenticationPreemptive(true);
+        newClient.getState().setCredentials(AuthScope.ANY, creds);
         /*
          * Return
          */
