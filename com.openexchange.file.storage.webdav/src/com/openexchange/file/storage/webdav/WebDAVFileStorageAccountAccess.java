@@ -137,6 +137,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         this.account = account;
         this.session = session;
         user = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_LOGIN);
+        this.service = service;
     }
 
     /**

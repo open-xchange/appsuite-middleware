@@ -133,7 +133,7 @@ public final class WebDAVFileStorageService implements FileStorageService {
     }
 
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws FileStorageException {
-        return new WebDAVFileStorageAccountAccess(accountManager.getAccount(accountId, session), session);
+        return new WebDAVFileStorageAccountAccess(this, accountManager.getAccount(accountId, session), session);
     }
 
 }

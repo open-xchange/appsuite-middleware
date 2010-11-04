@@ -92,7 +92,7 @@ public abstract class AbstractWebDAVFileStorageTest extends TestCase {
         session.setLoginName("");
         session.setPassword("");
 
-        return new WebDAVFileStorageAccountAccess(account, session);
+        return new WebDAVFileStorageAccountAccess(null, account, session);
     }
     
 }
