@@ -79,9 +79,9 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -369,7 +369,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         private final Metadata[] columns;
         private final SearchEngineImpl s;
         private final Context ctx;
-        private final Connection readCon;
+        private Connection readCon;
         private Statement stmt;
         private final List<AbstractOXException> warnings;
 
@@ -441,7 +441,10 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 LOG.debug("",e);
             }
 
-            s.releaseReadConnection(ctx, readCon);
+            if (null != readCon) {
+                s.releaseReadConnection(ctx, readCon);
+                readCon = null;
+            }
         }
 
         public int size() {
