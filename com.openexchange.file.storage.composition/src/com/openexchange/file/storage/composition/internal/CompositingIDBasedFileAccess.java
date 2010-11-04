@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -89,10 +90,15 @@ import static com.openexchange.file.storage.composition.internal.IDManglingFileC
 public abstract class CompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedFileAccess {
 
     protected Session session;
-
+    
+    private ThreadLocal<Set<String>> connectedAccounts = new ThreadLocal<Set<String>>();
+    private ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
+    
     public CompositingIDBasedFileAccess(Session session) {
         super();
         this.session = session;
+        connectedAccounts.set(new HashSet<String>());
+        accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
     }
 
     public boolean exists(String id, int version) throws FileStorageException {
@@ -471,8 +477,17 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         FileStorageService fileStorage = getFileStorageService(serviceId);
 
         FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
-
+        connect( accountAccess );
         return accountAccess.getFileAccess();
+    }
+
+    private void connect(FileStorageAccountAccess accountAccess) throws FileStorageException {
+        String id = accountAccess.getService().getId()+"/"+accountAccess.getAccountId();
+        if(!connectedAccounts.get().contains(id)) {
+            connectedAccounts.get().add(id);
+            accountAccess.connect();
+            accessesToClose.get().add(accountAccess);
+        }
     }
 
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws FileStorageException {
@@ -482,7 +497,9 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
             FileStorageAccountManager accountManager = fileStorageService.getAccountManager();
             List<FileStorageAccount> accounts = accountManager.getAccounts(session);
             for (FileStorageAccount fileStorageAccount : accounts) {
-                retval.add(fileStorageService.getAccountAccess(fileStorageAccount.getId(), session).getFileAccess());
+                FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(fileStorageAccount.getId(), session);
+                connect( accountAccess );
+                retval.add(accountAccess.getFileAccess());
             }
         }
         return retval;
@@ -546,5 +563,14 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         // TODO Auto-generated method stub
 
     }
-
+    
+    @Override
+    public void finish() throws TransactionException {
+        connectedAccounts.get().clear();
+        for(FileStorageAccountAccess acc : accessesToClose.get()) {
+            acc.close();
+        }
+        accessesToClose.get().clear();
+        super.finish();
+    }
 }

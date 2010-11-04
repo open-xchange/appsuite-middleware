@@ -70,6 +70,7 @@ import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tx.TransactionException;
 
 /**
  * {@link InfostoreDocumentMailPart} - A {@link MailPart} implementation that provides the input stream to an infostore document
@@ -100,9 +101,10 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
      */
     public InfostoreDocumentMailPart(final String documentId, final Session session) throws MailException {
         super();
+        IDBasedFileAccess fileAccess = null;
         try {
             final IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
-            final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+            fileAccess = fileAccessFactory.createAccess(session);
             final File fileMetadata = fileAccess.getFileMetadata(documentId, FileStorageFileAccess.CURRENT_VERSION);
             setSize(fileMetadata.getFileSize());
             final String docMIMEType = fileMetadata.getFileMIMEType();
@@ -119,6 +121,14 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             throw new MailException(e);
         } catch (ServiceException e) {
             throw new MailException(e);
+        } finally{
+            if(fileAccess != null) {
+                try {
+                    fileAccess.finish();
+                } catch (TransactionException e) {
+                    // IGNORE
+                }
+            }
         }
     }
 

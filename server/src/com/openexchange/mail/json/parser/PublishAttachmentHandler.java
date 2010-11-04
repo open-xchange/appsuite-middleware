@@ -684,7 +684,7 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 LOG.error(
                     new StringBuilder("Deleting infostore document with ID \"").append(publication.infostoreId).append("\" failed.").toString(),
                     e);
-            }
+            } 
         }
     } // End of rollbackPublications()
 

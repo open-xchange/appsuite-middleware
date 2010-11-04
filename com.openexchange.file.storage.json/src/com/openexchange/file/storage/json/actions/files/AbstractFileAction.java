@@ -201,7 +201,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
     }
 
     protected void after(AJAXInfostoreRequest req) throws AbstractOXException{
-        
+        req.getFileAccess().finish();
     }
 
    

@@ -100,7 +100,6 @@ public class FileServlet extends MultipleAdapterServletNew {
 
             String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
             String userAgent = req.getHeader("user-agent");
-
             IDBasedFileAccess fileAccess = request.getFileAccess();
             File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
 
@@ -136,6 +135,7 @@ public class FileServlet extends MultipleAdapterServletNew {
                 if (documentData != null) {
                     documentData.close();
                 }
+                fileAccess.finish();
             }
 
             return true;
