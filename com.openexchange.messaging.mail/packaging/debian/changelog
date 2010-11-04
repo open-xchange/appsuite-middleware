@@ -1,3 +1,9 @@
+open-xchange-messaging-mail (6.18.2.0-3) unstable; urgency=low
+
+  * Build for 6.18.2 Rev3
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Thu,  4 Nov 2010 19:45:21 +0100
+
 open-xchange-messaging-mail (6.18.2.0-2) unstable; urgency=low
 
   * Build for 6.18.2 Rev2

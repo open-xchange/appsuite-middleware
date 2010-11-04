@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -618,6 +618,12 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Nov 04 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17421: No duplicate return to connection pool
+* Thu Nov 04 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17425: Added new server dependency and added files to spec file for c.o.file.storage.composition for RPM based distributions.
+* Thu Nov 04 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #16895: Ignoring the non-RFC element EMAIL in an iCal file ATTENDEE property 
 * Wed Nov 03 2010 - thorben.betten@open-xchange.com
  - Bugfix #17420: Ignoring file storage accounts which do not provide a root folder
 * Tue Nov 02 2010 - tobias.prinz@open-xchange.com
