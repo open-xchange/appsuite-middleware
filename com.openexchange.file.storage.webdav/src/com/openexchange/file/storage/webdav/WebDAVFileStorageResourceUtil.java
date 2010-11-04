@@ -53,9 +53,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.apache.commons.httpclient.util.DateUtil;
+import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.w3c.dom.Element;
 import com.openexchange.file.storage.FileStorageFolder;
 
 /**
@@ -82,7 +84,8 @@ public final class WebDAVFileStorageResourceUtil {
      */
     public static String parseStringProperty(final DavPropertyName davPropertyName, final DavPropertySet propertySet) throws WebDAVFileStorageException {
         try {
-            @SuppressWarnings("unchecked") final DavProperty<String> stringProperty = (DavProperty<String>) propertySet.get(davPropertyName);
+            @SuppressWarnings("unchecked") final DavProperty<String> stringProperty =
+                (DavProperty<String>) propertySet.get(davPropertyName);
             if (null == stringProperty) {
                 return null;
             }
@@ -233,4 +236,48 @@ public final class WebDAVFileStorageResourceUtil {
         return new StringBuilder(folderId).append('/').toString();
     }
 
+    /**
+     * Gets the proper href for specified DAV property set.
+     * 
+     * @param href The href as proved by multi-status response
+     * @param propertySet The DAV property set
+     * @return The proper href
+     */
+    public static String getHref(final String href, final DavPropertySet propertySet) {
+        if (null != propertySet && !propertySet.isEmpty()) {
+            /*
+             * Check for collection
+             */
+            @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
+                (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
+            final Element resourceType = davProperty.getValue();
+            return checkHref(href, (null != resourceType && "collection".equalsIgnoreCase(resourceType.getLocalName())));
+        }
+        return href;
+    }
+
+    /**
+     * Checks the href provided by a multi-status response.
+     * 
+     * @param href The multi-status response's href
+     * @param isDirectory <code>true</code> if href denotes a directory; otherwise <code>false</code>
+     * @return The checked href
+     */
+    public static String checkHref(final String href, final boolean isDirectory) {
+        return isDirectory ? checkFolderId(href) : checkFileId(href);
+    }
+
+    /**
+     * Checks specified file identifier.
+     * 
+     * @param fileId The file identifier
+     * @return The checked file identifier
+     */
+    public static String checkFileId(final String fileId) {
+        if (fileId.endsWith("/")) {
+            final int length = fileId.length();
+            return length == 1 ? "" : fileId.substring(0, length - 1);
+        }
+        return fileId;
+    }
 }
