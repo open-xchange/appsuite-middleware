@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -618,8 +618,19 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 03 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17420: Ignoring file storage accounts which do not provide a root folder
+* Tue Nov 02 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #17203 on server side: Added action=refreshSecret to Login servlet which allows to extend the expiry date for a secret cookie. 
+* Fri Oct 29 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17345: Changed log level to warning
+ - Bugfix #17231: Proper parsing of address header "Disposition-Notification-To"
+ - Bugfix #17212: Fixed NPE in kXML library
+ - Bugfix #17337: Removing 'base' tag from whitelist.properties to properly display referenced images
 * Tue Oct 26 2010 - tobias.prinz@open-xchange.com
  - Userstory 5247: Publications can now be configured to run on different (sub-)domains, HTML white-listing can be disabled.
+* Tue Oct 26 2010 - tobias.prinz@open-xchange.com
+ - Userstory 5244: If an internal user is added as an external participant, they get transformed into an internal one automagically.
 * Mon Oct 25 2010 - thorben.betten@open-xchange.com
  - Bugfix #17330: Proper folder fullname when renaming a folder on root level
  - Bugfix #17179: Handling an OutOfMemoryError on thread start-up as a rejected execution event

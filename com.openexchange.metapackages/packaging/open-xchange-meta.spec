@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -259,6 +259,9 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Fri Oct 29 2010 - choeger@open-xchange.com
+ - Bugfix #17347 - Outlook OXtender repository not configured correctly
+ - Bugfix #17348 - Wrong defaultpackage for component "oxmobility"
 * Thu Jun 24 2010 - choeger@open-xchange.com
  - Bugfix #16354 - strange package dependencies for open-xchange-meta-singleserver
  - Bugfix #16000 - Add open-xchange-mail-pushnotify to package dependency list

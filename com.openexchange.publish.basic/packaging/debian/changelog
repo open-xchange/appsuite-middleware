@@ -1,3 +1,9 @@
+open-xchange-publish-basic (6.18.2.0-2) unstable; urgency=low
+
+  * Build for 6.18.2 Rev2
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Thu,  4 Nov 2010 09:57:28 +0100
+
 open-xchange-publish-basic (6.18.2.0-1) unstable; urgency=low
 
   * first build for 6.18.2-rev1
