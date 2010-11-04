@@ -1171,6 +1171,14 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
+            if (HttpServletResponse.SC_NOT_FOUND ==  e.getErrorCode()) {
+                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
+                    folderId,
+                    account.getId(),
+                    WebDAVConstants.ID,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
