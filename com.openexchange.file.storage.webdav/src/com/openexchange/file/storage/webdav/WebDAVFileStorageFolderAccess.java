@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.webdav;
 
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.checkFolderId;
+import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.getHref;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,12 +120,12 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                  */
                 final URI tmp = new URI(folderId, true);
                 for (final MultiStatusResponse multiStatusResponse : multiStatus.getResponses()) {
-                    tmp.setEscapedPath(multiStatusResponse.getHref());
+                    /*
+                     * Get the DAV property set for 200 (OK) status
+                     */
+                    final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                    tmp.setEscapedPath(getHref(multiStatusResponse.getHref(), propertySet));
                     if (uri.equals(tmp)) {
-                        /*
-                         * Get for 200 (OK) status
-                         */
-                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
                         if (null != propertySet && !propertySet.isEmpty()) {
                             /*
                              * Check for collection
@@ -188,12 +189,12 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 boolean hasSubdir = false;
                 int fileCount = 0;
                 for (final MultiStatusResponse multiStatusResponse : multiStatus.getResponses()) {
-                    tmp.setEscapedPath(multiStatusResponse.getHref());
+                    /*
+                     * Get the DAV property set for 200 (OK) status
+                     */
+                    final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                    tmp.setEscapedPath(getHref(multiStatusResponse.getHref(), propertySet));
                     if (uri.equals(tmp)) {
-                        /*
-                         * Get for 200 (OK) status
-                         */
-                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
                         if (null == propertySet || propertySet.isEmpty()) {
                             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                                 fid,
@@ -219,10 +220,6 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                          */
                         ret.parseDavPropertySet(propertySet);
                     } else {
-                        /*
-                         * Get for 200 (OK) status
-                         */
-                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
                         if (null != propertySet && !propertySet.isEmpty()) {
                             /*
                              * Check for collection
@@ -305,12 +302,12 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 final MultiStatusResponse[] multiStatusResponses = multiStatus.getResponses();
                 subDirs = new ArrayList<String>(multiStatusResponses.length);
                 for (final MultiStatusResponse multiStatusResponse : multiStatusResponses) {
-                    tmp.setEscapedPath(multiStatusResponse.getHref());
+                    /*
+                     * Get the DAV property set for 200 (OK) status
+                     */
+                    final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                    tmp.setEscapedPath(getHref(multiStatusResponse.getHref(), propertySet));
                     if (uri.equals(tmp)) {
-                        /*
-                         * Get for 200 (OK) status
-                         */
-                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
                         if (null == propertySet || propertySet.isEmpty()) {
                             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                                 pid,
@@ -332,10 +329,6 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                             throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(pid);
                         }
                     } else {
-                        /*
-                         * Get for 200 (OK) status
-                         */
-                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
                         if (null != propertySet && !propertySet.isEmpty()) {
                             /*
                              * Check for collection
@@ -597,12 +590,12 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 subDirs = new ArrayList<String>(multiStatusResponses.length);
                 files = new ArrayList<String>(multiStatusResponses.length);
                 for (final MultiStatusResponse multiStatusResponse : multiStatusResponses) {
-                    tmp.setEscapedPath(multiStatusResponse.getHref());
+                    /*
+                     * Get the DAV property set for 200 (OK) status
+                     */
+                    final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                    tmp.setEscapedPath(getHref(multiStatusResponse.getHref(), propertySet));
                     if (uri.equals(tmp)) {
-                        /*
-                         * Get for 200 (OK) status
-                         */
-                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
                         if (null == propertySet || propertySet.isEmpty()) {
                             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                                 fid,
@@ -624,10 +617,6 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                             throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(fid);
                         }
                     } else {
-                        /*
-                         * Get for 200 (OK) status
-                         */
-                        final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
                         if (null != propertySet && !propertySet.isEmpty()) {
                             /*
                              * Check for collection

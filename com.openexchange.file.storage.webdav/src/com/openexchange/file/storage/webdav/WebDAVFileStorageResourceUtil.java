@@ -230,6 +230,9 @@ public final class WebDAVFileStorageResourceUtil {
      * @return The checked folder identifier
      */
     public static String checkFolderId(final String folderId) {
+        if (null == folderId) {
+            return null;
+        }
         if (folderId.endsWith("/")) {
             return folderId;
         }
@@ -250,6 +253,9 @@ public final class WebDAVFileStorageResourceUtil {
              */
             @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
                 (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
+            if (null == davProperty) {
+                return href;
+            }
             final Element resourceType = davProperty.getValue();
             return checkHref(href, (null != resourceType && "collection".equalsIgnoreCase(resourceType.getLocalName())));
         }
@@ -274,6 +280,9 @@ public final class WebDAVFileStorageResourceUtil {
      * @return The checked file identifier
      */
     public static String checkFileId(final String fileId) {
+        if (null == fileId) {
+            return null;
+        }
         if (fileId.endsWith("/")) {
             final int length = fileId.length();
             return length == 1 ? "" : fileId.substring(0, length - 1);
