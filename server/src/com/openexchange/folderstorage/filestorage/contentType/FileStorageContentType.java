@@ -78,12 +78,19 @@ public class FileStorageContentType implements ContentType {
 
     @Override
     public String toString() {
-        return "file";
+        // return "file";
+        /*
+         * TODO: Change to own content type when full file storage is supported. SEarch for this string to find all replacements.
+         */
+        return "infostore";
     }
 
     public int getModule() {
         // From FolderObject.FILE
-        return 14;
+        /*
+         * TODO: Change to own content type when full file storage is supported. SEarch for this string to find all replacements.
+         */
+        return 8;
     }
 
     public int getPriority() {
