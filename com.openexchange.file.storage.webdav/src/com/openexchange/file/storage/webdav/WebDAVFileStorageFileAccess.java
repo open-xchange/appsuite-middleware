@@ -1051,7 +1051,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws FileStorageException {
         final List<File> results;
-        if (ALL_FOLDERS.equals(folderId)) {
+        if (ALL_FOLDERS == folderId) {
             /*
              * Recursively search files in directories
              */
