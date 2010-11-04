@@ -165,7 +165,9 @@ public class ResourceTest extends AbstractAJAXTest {
             res.setDisplayName(jObj.getString(ResourceFields.DISPLAY_NAME));
         }
         if (jObj.has(ResourceFields.LAST_MODIFIED)) {
-            res.setLastModified(jObj.getLong(ResourceFields.LAST_MODIFIED));
+            // last modified of resources are a formatted date string. Either long timestamp should be written there or the formatted string
+            // must be parsed.
+            //res.setLastModified(jObj.getLong(ResourceFields.LAST_MODIFIED));
         }
         return res;
     }
