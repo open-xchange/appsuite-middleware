@@ -230,7 +230,7 @@ public final class IMAPFolderConverter {
         try {
             synchronized (imapFolder) {
                 final String imapFullname = imapFolder.getFullName();
-                if (0 == imapFullname.length()) {
+                if (imapFolder instanceof DefaultFolder) {
                     return convertRootFolder((DefaultFolder) imapFolder, session, imapConfig);
                 }
                 // Convert non-root folder

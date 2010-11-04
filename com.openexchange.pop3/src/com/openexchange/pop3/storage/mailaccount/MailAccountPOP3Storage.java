@@ -315,7 +315,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
                  * Check CREATE permission
                  */
                 final MailPermission ownPermission;
-                final String parentFullname = parentAndName[0];
+                String parentFullname = parentAndName[0];
+                if (0 == parentFullname.length()) {
+                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                }
                 if ("INBOX".equals(parentFullname)) {
                     ownPermission = inboxFolder.getOwnPermission();
                 } else {
