@@ -126,10 +126,12 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     private volatile WebDAVFileStorageFileAccess fileAccess;
 
+    private FileStorageService service;
+
     /**
      * Initializes a new {@link WebDAVFileStorageAccountAccess}.
      */
-    public WebDAVFileStorageAccountAccess(final FileStorageAccount account, final Session session) {
+    public WebDAVFileStorageAccountAccess(final FileStorageService service, final FileStorageAccount account, final Session session) {
         super();
         httpClientRef = new AtomicReference<HttpClient>();
         this.account = account;
@@ -419,13 +421,8 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountAccess#getService()
-     */
     public FileStorageService getService() {
-        // TODO Auto-generated method stub
-        return null;
+        return service;
     }
 
 }
