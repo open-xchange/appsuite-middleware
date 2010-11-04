@@ -311,8 +311,9 @@ public class ICal4JParser implements ICalParser {
             	}
             }
             final StringReader chunkedReader = new StringReader(
-                workaroundFor16613(
-                    workaroundFor16367(chunk.toString())
+            	workaroundFor16895(
+            		workaroundFor16613(
+            			workaroundFor16367(chunk.toString()))
                 )
             ); // FIXME: Encoding?
             return builder.build(chunkedReader); 
@@ -326,7 +327,14 @@ public class ICal4JParser implements ICalParser {
     }
 
    
-    private String workaroundFor16367(final String input) {
+    private String workaroundFor16895(String input) {
+		/* Bug in Zimbra: They like to use an EMAIL element for the 
+		 * ATTENDEE property, though there is none.
+		 */
+		return input.replaceAll("ATTENDEE([^\n]*?);EMAIL=", "ATTENDEE$1;X-ZIMBRA-EMAIL=");
+	}
+
+	private String workaroundFor16367(final String input) {
         /* Bug in MS Exchange: If you use a CN element, it must have a value.
          * MS Exchange has an empty value, which we now replace properly. 
          */
