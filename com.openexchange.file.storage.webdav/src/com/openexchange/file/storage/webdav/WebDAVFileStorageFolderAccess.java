@@ -69,9 +69,7 @@ import org.apache.jackrabbit.webdav.client.methods.MkColMethod;
 import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
 import org.apache.jackrabbit.webdav.client.methods.OptionsMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
-import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
-import org.w3c.dom.Element;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -124,26 +122,22 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                      * Get the DAV property set for 200 (OK) status
                      */
                     final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
-                    tmp.setEscapedPath(getHref(multiStatusResponse.getHref(), propertySet));
+                    final String href = getHref(multiStatusResponse.getHref(), propertySet);
+                    tmp.setEscapedPath(href);
                     if (uri.equals(tmp)) {
-                        if (null != propertySet && !propertySet.isEmpty()) {
+                        /*
+                         * Check for collection
+                         */
+                        if (!href.endsWith("/")) {
                             /*
-                             * Check for collection
+                             * Not a directory
                              */
-                            @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
-                                (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
-                            final Element resourceType = davProperty.getValue();
-                            if (null == resourceType || !"collection".equalsIgnoreCase(resourceType.getLocalName())) {
-                                /*
-                                 * Not a directory
-                                 */
-                                throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(folderId);
-                            }
-                            /*
-                             * Found directory
-                             */
-                            return true;
+                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(folderId);
                         }
+                        /*
+                         * Found directory
+                         */
+                        return true;
                     }
                 }
                 return false;
@@ -193,7 +187,8 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                      * Get the DAV property set for 200 (OK) status
                      */
                     final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
-                    tmp.setEscapedPath(getHref(multiStatusResponse.getHref(), propertySet));
+                    final String href = getHref(multiStatusResponse.getHref(), propertySet);
+                    tmp.setEscapedPath(href);
                     if (uri.equals(tmp)) {
                         if (null == propertySet || propertySet.isEmpty()) {
                             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -206,10 +201,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         /*
                          * Check for collection
                          */
-                        @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
-                            (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
-                        final Element resourceType = davProperty.getValue();
-                        if (null == resourceType || !"collection".equalsIgnoreCase(resourceType.getLocalName())) {
+                        if (!href.endsWith("/")) {
                             /*
                              * Not a collection
                              */
@@ -220,24 +212,16 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                          */
                         ret.parseDavPropertySet(propertySet);
                     } else {
-                        if (null != propertySet && !propertySet.isEmpty()) {
+                        if (href.endsWith("/")) {
                             /*
-                             * Check for collection
+                             * Sub-Directory found
                              */
-                            @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
-                                (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
-                            final Element resourceType = davProperty.getValue();
-                            if (null != resourceType && "collection".equalsIgnoreCase(resourceType.getLocalName())) {
-                                /*
-                                 * Sub-Directory found
-                                 */
-                                hasSubdir = true;
-                            } else {
-                                /*
-                                 * File
-                                 */
-                                fileCount++;
-                            }
+                            hasSubdir = true;
+                        } else {
+                            /*
+                             * File
+                             */
+                            fileCount++;
                         }
                     }
                 }
@@ -306,7 +290,8 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                      * Get the DAV property set for 200 (OK) status
                      */
                     final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
-                    tmp.setEscapedPath(getHref(multiStatusResponse.getHref(), propertySet));
+                    final String href = getHref(multiStatusResponse.getHref(), propertySet);
+                    tmp.setEscapedPath(href);
                     if (uri.equals(tmp)) {
                         if (null == propertySet || propertySet.isEmpty()) {
                             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -319,29 +304,18 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         /*
                          * Check for collection
                          */
-                        @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
-                            (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
-                        final Element resourceType = davProperty.getValue();
-                        if (null == resourceType || !"collection".equalsIgnoreCase(resourceType.getLocalName())) {
+                        if (!href.endsWith("/")) {
                             /*
                              * Not a collection
                              */
                             throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(pid);
                         }
                     } else {
-                        if (null != propertySet && !propertySet.isEmpty()) {
+                        if (href.endsWith("/")) {
                             /*
-                             * Check for collection
+                             * Sub-Directory found
                              */
-                            @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
-                                (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
-                            final Element resourceType = davProperty.getValue();
-                            if (null != resourceType && "collection".equalsIgnoreCase(resourceType.getLocalName())) {
-                                /*
-                                 * Sub-Directory found
-                                 */
-                                subDirs.add(tmp.toString());
-                            }
+                            subDirs.add(tmp.toString());
                         }
                     }
                 }
@@ -594,7 +568,8 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                      * Get the DAV property set for 200 (OK) status
                      */
                     final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
-                    tmp.setEscapedPath(getHref(multiStatusResponse.getHref(), propertySet));
+                    final String href = getHref(multiStatusResponse.getHref(), propertySet);
+                    tmp.setEscapedPath(href);
                     if (uri.equals(tmp)) {
                         if (null == propertySet || propertySet.isEmpty()) {
                             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -607,34 +582,26 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         /*
                          * Check for collection
                          */
-                        @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
-                            (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
-                        final Element resourceType = davProperty.getValue();
-                        if (null == resourceType || !"collection".equalsIgnoreCase(resourceType.getLocalName())) {
+                        if (!href.endsWith("/")) {
                             /*
                              * Not a collection
                              */
                             throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(fid);
                         }
                     } else {
-                        if (null != propertySet && !propertySet.isEmpty()) {
+                        /*
+                         * Check for collection
+                         */
+                        if (href.endsWith("/")) {
                             /*
-                             * Check for collection
+                             * Sub-Directory found
                              */
-                            @SuppressWarnings("unchecked") final DavProperty<Element> davProperty =
-                                (DavProperty<Element>) propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
-                            final Element resourceType = davProperty.getValue();
-                            if (null != resourceType && "collection".equalsIgnoreCase(resourceType.getLocalName())) {
-                                /*
-                                 * Sub-Directory found
-                                 */
-                                subDirs.add(tmp.toString());
-                            } else {
-                                /*
-                                 * File
-                                 */
-                                files.add(tmp.toString());
-                            }
+                            subDirs.add(tmp.toString());
+                        } else {
+                            /*
+                             * File
+                             */
+                            files.add(tmp.toString());
                         }
                     }
                 }
