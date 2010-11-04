@@ -165,7 +165,7 @@ public class ResourceTest extends AbstractAJAXTest {
             res.setDisplayName(jObj.getString(ResourceFields.DISPLAY_NAME));
         }
         if (jObj.has(ResourceFields.LAST_MODIFIED)) {
-            res.setDisplayName(jObj.getString(ResourceFields.LAST_MODIFIED));
+            res.setLastModified(jObj.getLong(ResourceFields.LAST_MODIFIED));
         }
         return res;
     }
