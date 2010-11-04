@@ -210,7 +210,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         if (!url.endsWith("/")) {
             url = url + '/';
         }
-        final HttpClient client = createNewHttpClient(url, account.getConfiguration(), session);
+        final HttpClient client = createNewHttpClient(url, account.getConfiguration());
         checkHttpClient(url, client);
         ((MultiThreadedHttpConnectionManager) client.getHttpConnectionManager()).shutdown();
         return true;
@@ -282,7 +282,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         final String accountId = account.getId();
         HttpClient client = registry.getClient(session.getContextId(), session.getUserId(), accountId);
         if (null == client) {
-            final HttpClient newInstance = createNewHttpClient(url, account.getConfiguration(), session);
+            final HttpClient newInstance = createNewHttpClient(url, account.getConfiguration());
             checkHttpClient(url, newInstance);
             client = registry.addClient(session.getContextId(), session.getUserId(), accountId, newInstance);
             if (null == client) {
@@ -298,7 +298,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
      * @return The newly created {@link HttpClient}
      * @throws FileStorageException If creation fails
      */
-    private static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration, final Session session) throws FileStorageException {
+    private static HttpClient createNewHttpClient(final String urlStr, final Map<String, Object> configuration) throws FileStorageException {
         // http://www.jarvana.com/jarvana/view/org/apache/jackrabbit/jackrabbit-webdav/2.0-beta3/jackrabbit-webdav-2.0-beta3-javadoc.jar!/org/apache/jackrabbit/webdav/client/methods/package-summary.html
         /*
          * The URL to WebDAV server
