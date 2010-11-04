@@ -151,12 +151,14 @@ public abstract class SessionServlet extends AJAXServlet {
             if (sessiondService == null) {
                 throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
             }
-            final ServerSession session = getSession(req, getSessionId(req), sessiondService);
-            final String sessionId = session.getSessionID();
+            String sessionId = getSessionId(req);
+            final ServerSession session = getSession(req, sessionId, sessiondService);
+            if (!sessionId.equals(session.getSessionID())) {
+                throw SessionExceptionCodes.WRONG_SESSION.create();
+            }
             final Context ctx = session.getContext();
             if (!ctx.isEnabled()) {
-                final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                sessiondCon.removeSession(sessionId);
+                sessiondService.removeSession(sessionId);
                 throw SessionExceptionCodes.CONTEXT_LOCKED.create();
             }
             checkIP(session, req.getRemoteAddr());

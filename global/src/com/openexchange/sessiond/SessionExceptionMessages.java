@@ -74,6 +74,11 @@ public final class SessionExceptionMessages implements LocalizableStrings {
 
     public static final String DUPLICATE_AUTHID_MSG = "Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s.";
 
+    // This message is thrown if an inconsistancy in SessionD bundle is detected when it returns the wrong session for a given session identifier.
+    // %1$s session identifier of returned session.
+    // %2$s given session identifier.
+    public static final String WRONG_SESSION_MSG = "SessionD returned wrong session with identifier %1$s for given session identifier %2$s.";
+
     public static final String SESSION_PARAMETER_MISSING_MSG = "The session parameter is missing.";
 
     public static final String SESSION_EXPIRED_MSG = "Your session %s expired. Please start a new browser session.";

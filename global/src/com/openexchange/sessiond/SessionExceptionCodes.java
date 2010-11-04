@@ -80,6 +80,8 @@ public enum SessionExceptionCodes implements OXErrorMessage {
 
     /** Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s. */
     DUPLICATE_AUTHID(DUPLICATE_AUTHID_MSG, Category.CODE_ERROR, 8),
+    /** SessionD returned wrong session with identifier %1$s for given session identifier %2$s. */
+    WRONG_SESSION(WRONG_SESSION_MSG, Category.CODE_ERROR, 9),
 
     SESSION_PARAMETER_MISSING(SESSION_PARAMETER_MISSING_MSG, Category.CODE_ERROR, 201, "Every AJAX request must contain a parameter named \"session\" that value contains the identifier of the session cookie."),
 
