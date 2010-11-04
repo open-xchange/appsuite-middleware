@@ -91,6 +91,7 @@ import org.apache.jackrabbit.webdav.transaction.TransactionConstants;
 import org.apache.jackrabbit.webdav.transaction.TransactionInfo;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageException;
@@ -1020,13 +1021,19 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws FileStorageException {
-        // either all or none
-        return null;
+        SearchIterator<File> f1 = SearchIteratorAdapter.createEmptyIterator();
+        SearchIterator<File> f2 = SearchIteratorAdapter.createEmptyIterator();
+        SearchIterator<File> f3 = SearchIteratorAdapter.createEmptyIterator();
+        
+        return new FileDelta(f1, f2, f3, 0l);
     }
 
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws FileStorageException {
-        // either all or none
-        return null;
+        SearchIterator<File> f1 = SearchIteratorAdapter.createEmptyIterator();
+        SearchIterator<File> f2 = SearchIteratorAdapter.createEmptyIterator();
+        SearchIterator<File> f3 = SearchIteratorAdapter.createEmptyIterator();
+        
+        return new FileDelta(f1, f2, f3, 0l);
     }
 
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws FileStorageException {
