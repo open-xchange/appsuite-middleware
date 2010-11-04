@@ -49,12 +49,13 @@
 
 package com.openexchange.tools.iterator;
 
-
 /**
  * {@link Customizer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface Customizer<T> {
-    public T customize(T thing);
+
+    T customize(T thing);
+
 }
