@@ -313,7 +313,8 @@ public class ICal4JParser implements ICalParser {
             final StringReader chunkedReader = new StringReader(
             	workaroundFor16895(
             		workaroundFor16613(
-            			workaroundFor16367(chunk.toString()))
+            			workaroundFor16367(
+            					removeAnnoyingWhitespaces(chunk.toString())))
                 )
             ); // FIXME: Encoding?
             return builder.build(chunkedReader); 
@@ -326,8 +327,19 @@ public class ICal4JParser implements ICalParser {
         return null;
     }
 
-   
-    private String workaroundFor16895(String input) {
+    /**
+     * Method written out of laziness: Because you can spread iCal attributes
+     * over several lines with newlines followed by a white space while a normal
+     * newline means a new attribute starts, one would need to parse the whole file 
+     * (with a lookahead) before fixing errors. That means no regular expressions
+     * allowed. Since spreading just makes it nicer to read for humans, this method
+     * strips those newline+whitespace elements so we can use simple regexps.
+     */
+    private String removeAnnoyingWhitespaces(String input) {
+		return input.replaceAll("\n\\s+", "");
+	}
+
+	private String workaroundFor16895(String input) {
 		/* Bug in Zimbra: They like to use an EMAIL element for the 
 		 * ATTENDEE property, though there is none.
 		 */
