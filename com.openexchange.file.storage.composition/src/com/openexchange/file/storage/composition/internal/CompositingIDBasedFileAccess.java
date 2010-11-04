@@ -91,13 +91,13 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     protected Session session;
     
-    private ThreadLocal<Set<String>> connectedAccounts = new ThreadLocal<Set<String>>();
+    private ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
     
     public CompositingIDBasedFileAccess(Session session) {
         super();
         this.session = session;
-        connectedAccounts.set(new HashSet<String>());
+        connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
         accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
     }
 
@@ -473,7 +473,10 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     protected FileStorageFileAccess getFileAccess(String serviceId, String accountId) throws FileStorageException {
-
+        FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId+"/"+accountId);
+        if(cached != null) {
+            return cached.getFileAccess();
+        }
         FileStorageService fileStorage = getFileStorageService(serviceId);
 
         FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
@@ -483,8 +486,10 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     private void connect(FileStorageAccountAccess accountAccess) throws FileStorageException {
         String id = accountAccess.getService().getId()+"/"+accountAccess.getAccountId();
-        if(!connectedAccounts.get().contains(id)) {
-            connectedAccounts.get().add(id);
+        
+        
+        if(!connectedAccounts.get().containsKey(id)) {
+            connectedAccounts.get().put(id, accountAccess);
             accountAccess.connect();
             accessesToClose.get().add(accountAccess);
         }
@@ -562,6 +567,13 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     public void setTransactional(boolean transactional) {
         // TODO Auto-generated method stub
 
+    }
+    
+    @Override
+    public void startTransaction() throws TransactionException {
+        super.startTransaction();
+        connectedAccounts.get().clear();
+        accessesToClose.get().clear();
     }
     
     @Override

@@ -107,6 +107,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private File file;
     
     private List<File.Field> fields;
+
+    private IDBasedFileAccess files;
     
     public AJAXInfostoreRequest(AJAXRequestData requestData, ServerSession session) {
         this.data = requestData;
@@ -205,7 +207,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     public IDBasedFileAccess getFileAccess() {
-        return Services.getFileAccessFactory().createAccess(session);
+        if(files != null) {
+            return files;
+        }
+        return files = Services.getFileAccessFactory().createAccess(session);
     }
     
     public AttachmentBase getAttachmentBase() {
