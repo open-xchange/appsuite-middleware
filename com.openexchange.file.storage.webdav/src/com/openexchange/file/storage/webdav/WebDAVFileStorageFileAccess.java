@@ -925,11 +925,12 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             /*
              * Check
              */
-            final URI uri = new URI(folderId, true);
+            final String fid = checkFolderId(folderId, rootUri);
+            final URI uri = new URI(fid, true);
             final List<File> files;
-            final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
+            final DavMethod propFindMethod = new PropFindMethod(fid, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
             try {
-                initMethod(folderId, null, propFindMethod);
+                initMethod(fid, null, propFindMethod);
                 client.executeMethod(propFindMethod);
                 /*
                  * Check if request was successfully executed
@@ -942,7 +943,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 /*
                  * Find MultiStatus for specified folder URI
                  */
-                final URI tmp = new URI(folderId, true);
+                final URI tmp = new URI(fid, true);
                 final MultiStatusResponse[] multiStatusResponses = multiStatus.getResponses();
                 files = new ArrayList<File>(multiStatusResponses.length);
                 for (final MultiStatusResponse multiStatusResponse : multiStatusResponses) {
@@ -955,7 +956,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     if (uri.equals(tmp)) {
                         if (null == propertySet || propertySet.isEmpty()) {
                             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
-                                folderId,
+                                fid,
                                 account.getId(),
                                 WebDAVConstants.ID,
                                 Integer.valueOf(session.getUserId()),
@@ -971,7 +972,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                             /*
                              * Not a collection
                              */
-                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(folderId);
+                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(fid);
                         }
                     } else {
                         if (null != propertySet && !propertySet.isEmpty()) {
@@ -985,7 +986,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                                 /*
                                  * File
                                  */
-                                files.add(new WebDAVFileStorageFile(folderId, extractFileName(href), session.getUserId()).parseDavPropertySet(propertySet, fields));
+                                files.add(new WebDAVFileStorageFile(fid, extractFileName(href), session.getUserId()).parseDavPropertySet(propertySet, fields));
                             }
                         }
                     }
