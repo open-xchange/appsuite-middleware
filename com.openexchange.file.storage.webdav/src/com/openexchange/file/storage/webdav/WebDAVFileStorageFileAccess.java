@@ -440,7 +440,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                         /*
                          * Check for collection
                          */
-                        if (href.endsWith("/")) {
+                        if (href.endsWith(SLASH)) {
                             /*
                              * Not a file
                              */
@@ -500,7 +500,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                         /*
                          * Check for file
                          */
-                        if (href.endsWith("/")) {
+                        if (href.endsWith(SLASH)) {
                             /*
                              * Not a file
                              */
@@ -953,7 +953,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                         /*
                          * Check for collection
                          */
-                        if (!href.endsWith("/")) {
+                        if (!href.endsWith(SLASH)) {
                             /*
                              * Not a collection
                              */
@@ -963,7 +963,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                         /*
                          * Check for file
                          */
-                        if (!href.endsWith("/")) {
+                        if (!href.endsWith(SLASH)) {
                             /*
                              * File
                              */
@@ -1142,7 +1142,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                         /*
                          * Check for collection
                          */
-                        if (!href.endsWith("/")) {
+                        if (!href.endsWith(SLASH)) {
                             /*
                              * Not a collection
                              */
@@ -1152,7 +1152,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                         /*
                          * Check for collection
                          */
-                        if (href.endsWith("/")) {
+                        if (href.endsWith(SLASH)) {
                             /*
                              * A directory
                              */
