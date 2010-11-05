@@ -84,6 +84,13 @@ public final class SessionExceptionMessages implements LocalizableStrings {
     // %1$s is replaced with the new sessions login.
     public static final String SESSIONID_COLLISION_MSG = "Got a collision while adding a new session to the session container. Colliding session has login %1$s and new session has login %2$s.";
 
+    // This message is thrown if an inconcistency in SessionD bundle is detected when a session should be fetched by its random token.
+    // %1$s is replaced with the session identifier that is returned from the data structures.
+    // %2$s is replaced with that sessions random token.
+    // %3$s is replaced with the random token for that a session should be found.
+    // %4$s is replaced with the session identifier that is fetched from the random map.
+    public static final String WRONG_BY_RANDOM_MSG = "Received wrong session %1$s having random %2$s when looking for random %3$s and session %4$s.";
+
     public static final String SESSION_PARAMETER_MISSING_MSG = "The session parameter is missing.";
 
     public static final String SESSION_EXPIRED_MSG = "Your session %s expired. Please start a new browser session.";

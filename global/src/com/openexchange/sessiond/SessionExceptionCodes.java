@@ -84,6 +84,8 @@ public enum SessionExceptionCodes implements OXErrorMessage {
     WRONG_SESSION(WRONG_SESSION_MSG, Category.CODE_ERROR, 9),
     /** Got a collision while adding a new session to the session container. Colliding session has login %1$s and new session has login %2$s. */
     SESSIONID_COLLISION(SESSIONID_COLLISION_MSG, Category.CODE_ERROR, 10),
+    /** Received wrong session %1$s having random %2$s when looking for random %3$s and session %4$s. */
+    WRONG_BY_RANDOM(WRONG_BY_RANDOM_MSG, Category.CODE_ERROR, 11),
 
     SESSION_PARAMETER_MISSING(SESSION_PARAMETER_MISSING_MSG, Category.CODE_ERROR, 201, "Every AJAX request must contain a parameter named \"session\" that value contains the identifier of the session cookie."),
 

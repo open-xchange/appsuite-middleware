@@ -408,11 +408,17 @@ final class SessionData {
         }
         final SessionControl sessionControl = getSession(sessionId);
         final SessionImpl session = sessionControl.getSession();
+        if (!randomToken.equals(session.getRandomToken())) {
+            SessiondException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
+            LOG.error(e.getMessage(), e);
+            return null;
+        }
         session.removeRandomToken();
         if (sessionControl.getCreationTime() + randomTokenTimeout < System.currentTimeMillis()) {
             return null;
         }
         // Set local IP
+        LOG.info("Changing IP of session " + session.getSessionID() + " from " + session.getLocalIp() + " to " + localIp + '.');
         session.setLocalIp(localIp);
         return sessionControl;
     }
