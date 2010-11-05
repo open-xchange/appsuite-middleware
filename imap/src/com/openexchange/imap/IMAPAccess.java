@@ -561,37 +561,37 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     public IMAPFolderStorage getFolderStorage() throws MailException {
         connected = ((imapStore != null) && imapStore.isConnected());
-        if (connected) {
-            if (null == folderStorage) {
-                folderStorage = new IMAPFolderStorage(imapStore, this, session);
-            }
-            return folderStorage;
+        if (!connected) {
+            throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
-        throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
+        if (null == folderStorage) {
+            folderStorage = new IMAPFolderStorage(imapStore, this, session);
+        }
+        return folderStorage;
     }
 
     @Override
     public IMAPMessageStorage getMessageStorage() throws MailException {
         connected = ((imapStore != null) && imapStore.isConnected());
-        if (connected) {
-            if (null == messageStorage) {
-                messageStorage = new IMAPMessageStorage(imapStore, this, session);
-            }
-            return messageStorage;
+        if (!connected) {
+            throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
-        throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
+        if (null == messageStorage) {
+            messageStorage = new IMAPMessageStorage(imapStore, this, session);
+        }
+        return messageStorage;
     }
 
     @Override
     public MailLogicTools getLogicTools() throws MailException {
         connected = ((imapStore != null) && imapStore.isConnected());
-        if (connected) {
-            if (null == logicTools) {
-                logicTools = new MailLogicTools(session, accountId);
-            }
-            return logicTools;
+        if (!connected) {
+            throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
-        throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
+        if (null == logicTools) {
+            logicTools = new MailLogicTools(session, accountId);
+        }
+        return logicTools;
     }
 
     @Override
