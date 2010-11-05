@@ -1,3 +1,7 @@
+* 2010-11-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #17389: Corrected SQL statement for removing the passcrypt user attribute.
+
 * 2010-11-05 - choeger@open-xchange.com
 
  - Bugfix #17433: Missing dependency for filestorage related infostore packages
