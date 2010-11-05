@@ -616,14 +616,13 @@ public final class IMAPFolderConverter {
                     userPermAdded |= (session.getUserId() == aclPerm.getEntity());
                     mailFolder.addPermission(aclPerm);
                 } catch (final AbstractOXException e) {
-                    if (isUnknownEntityError(e)) {
-                        if (DEBUG) {
-                            debugBuilder.setLength(0);
-                            LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acls[j].getName()).append(
-                                "\" to a system user").toString());
-                        }
-                    } else {
+                    if (!isUnknownEntityError(e)) {
                         throw new MailException(e);
+                    }
+                    if (DEBUG) {
+                        debugBuilder.setLength(0);
+                        LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acls[j].getName()).append(
+                            "\" to a system user").toString());
                     }
                 }
             }
