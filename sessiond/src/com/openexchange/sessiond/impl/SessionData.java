@@ -395,26 +395,26 @@ final class SessionData {
     }
 
     SessionControl getSessionByRandomToken(final String randomToken, final String localIp) {
-        // A read-only access to session & random list
-        rlock.lock();
+        // A read-only access to session and a write access to random list
+        final String sessionId;
+        wlock.lock();
         try {
-            // FIXME write operation
-            final String sessionId = randoms.remove(randomToken);
-            if (null == sessionId) {
-                return null;
-            }
-            final SessionControl sessionControl = getSession(sessionId);
-            final Session session = sessionControl.getSession();
-            session.removeRandomToken();
-            if (sessionControl.getCreationTime() + randomTokenTimeout < System.currentTimeMillis()) {
-                return null;
-            }
-            // Set local IP
-            ((SessionImpl) session).setLocalIp(localIp);
-            return sessionControl;
+            sessionId = randoms.remove(randomToken);
         } finally {
-            rlock.unlock();
+            wlock.unlock();
         }
+        if (null == sessionId) {
+            return null;
+        }
+        final SessionControl sessionControl = getSession(sessionId);
+        final SessionImpl session = sessionControl.getSession();
+        session.removeRandomToken();
+        if (sessionControl.getCreationTime() + randomTokenTimeout < System.currentTimeMillis()) {
+            return null;
+        }
+        // Set local IP
+        session.setLocalIp(localIp);
+        return sessionControl;
     }
 
     SessionControl clearSession(final String sessionId) {

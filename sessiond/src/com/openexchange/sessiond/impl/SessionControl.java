@@ -85,7 +85,7 @@ public class SessionControl {
      * 
      * @return The stored session
      */
-    public Session getSession() {
+    public SessionImpl getSession() {
         return session;
     }
 
