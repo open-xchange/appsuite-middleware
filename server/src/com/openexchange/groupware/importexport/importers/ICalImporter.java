@@ -254,6 +254,8 @@ public class ICalImporter extends AbstractImporter {
 
             int index = 0;
             final Iterator<CalendarDataObject> iter = appointments.iterator();
+            
+            boolean suppressNotification = (optionalParams != null && optionalParams.containsKey("suppressNotification"));
             while (iter.hasNext()) {
                 final ImportResult importResult = new ImportResult();
                 final ConversionError error = errorMap.get(index);
@@ -265,6 +267,9 @@ public class ICalImporter extends AbstractImporter {
                     appointmentObj.setContext(session.getContext());
                     appointmentObj.setParentFolderID(appointmentFolderId);
                     appointmentObj.setIgnoreConflicts(true);
+                    if (suppressNotification) {
+                    	appointmentObj.setNotification(false);
+                    }
                     // Check for possible full-time appointment
                     check4FullTime(appointmentObj);
                     try {
