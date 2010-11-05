@@ -51,17 +51,15 @@ package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link SessionContainer} - A thread-safe container for {@link Session} objects wrapped by a {@link SessionControl} object.
@@ -70,13 +68,11 @@ import com.openexchange.session.Session;
  */
 final class SessionContainer {
 
-    private static final Log LOG = LogFactory.getLog(SessionContainer.class);
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     private static final Object PRESENT = new Object();
 
     private final ConcurrentMap<String, SessionControl> sessionIdMap;
+
+    private final Lock sessionIdMapLock = new ReentrantLock();
 
     private final ConcurrentMap<UserKey, Map<String, Object>> userSessions;
 
@@ -163,27 +159,32 @@ final class SessionContainer {
      * @param session The session to put
      * @return The wrapping {@link SessionControl session control}.
      */
-    SessionControl put(final Session session) {
+    SessionControl put(final SessionImpl session) throws SessiondException {
         final String sessionId = session.getSessionID();
-        /*
-         * Add session
-         */
-        SessionControl sessionControl = sessionIdMap.get(sessionId);
-        if (null == sessionControl) {
-            final SessionControl newSessionControl = new SessionControl(session);
-            sessionControl = sessionIdMap.putIfAbsent(sessionId, newSessionControl);
+        // Add session
+        SessionControl sessionControl;
+        sessionIdMapLock.lock();
+        try {
+            sessionControl = sessionIdMap.get(sessionId);
             if (null == sessionControl) {
-                sessionControl = newSessionControl;
-            } else {
-                sessionControl.renew(session);
-                if (DEBUG_ENABLED) {
-                    LOG.debug(new StringBuilder("session REBORN sessionid=").append(sessionId));
+                final SessionControl newSessionControl = new SessionControl(session);
+                sessionControl = sessionIdMap.putIfAbsent(sessionId, newSessionControl);
+                if (null == sessionControl) {
+                    sessionControl = newSessionControl;
+                } else {
+                    String login1 = sessionControl.getSession().getLogin();
+                    String login2 = sessionControl.getSession().getLogin();
+                    throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
                 }
+            } else {
+                String login1 = sessionControl.getSession().getLogin();
+                String login2 = sessionControl.getSession().getLogin();
+                throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
             }
+        } finally {
+            sessionIdMapLock.unlock();
         }
-        /*
-         * Add session ID to user-sessions-map
-         */
+        // Add session ID to user-sessions-map
         final UserKey key = new UserKey(session.getUserId(), session.getContextId());
         Map<String, Object> sessionIds = userSessions.get(key);
         if (sessionIds == null) {
@@ -201,11 +202,17 @@ final class SessionContainer {
      * Puts specified {@link SessionControl} object into this container
      * 
      * @param sessionControl The session control to put
+     * @throws SessiondException 
      */
-    void putSessionControl(final SessionControl sessionControl) {
+    void putSessionControl(final SessionControl sessionControl) throws SessiondException {
         final Session session = sessionControl.getSession();
         final String sessionId = session.getSessionID();
-        sessionIdMap.put(sessionId, sessionControl);
+        SessionControl oldSessionControl = sessionIdMap.putIfAbsent(sessionId, sessionControl);
+        if (null != oldSessionControl) {
+            String login1 = oldSessionControl.getSession().getLogin();
+            String login2 = sessionControl.getSession().getLogin();
+            throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
+        }
         final UserKey key = new UserKey(session.getUserId(), session.getContextId());
         Map<String, Object> sessionIds = userSessions.get(key);
         if (sessionIds == null) {

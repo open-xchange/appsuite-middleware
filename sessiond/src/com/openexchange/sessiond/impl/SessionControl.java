@@ -67,35 +67,16 @@ public class SessionControl {
     /**
      * The associated session.
      */
-    private Session session;
+    private SessionImpl session;
 
     /**
      * Initializes a new {@link SessionControl}
      * 
      * @param session The stored session
      */
-    public SessionControl(final Session session) {
+    public SessionControl(final SessionImpl session) {
         super();
-        renew0(session);
-    }
-
-    /**
-     * (Atomically) Renews this session control:
-     * <ul>
-     * <li>Applies specified session</li>
-     * <li>Sets specified life time</li>
-     * <li>Sets creation time stamp to current time millis</li>
-     * <li>Sets last-accessed time stamp to current time millis</li>
-     * </ul>
-     */
-    public void renew(final Session sessionParam) {
-        synchronized (this) {
-            renew0(sessionParam);
-        }
-    }
-
-    private void renew0(final Session sessionParam) {
-        this.session = sessionParam;
+        this.session = session;
         creationTime = System.currentTimeMillis();
     }
 

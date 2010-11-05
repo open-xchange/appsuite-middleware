@@ -51,7 +51,6 @@ package com.openexchange.sessiond.impl;
 
 import java.util.List;
 import junit.framework.TestCase;
-import com.openexchange.session.SimSession;
 import com.openexchange.threadpool.SimThreadPoolService;
 
 /**
@@ -64,7 +63,7 @@ public class Bug16158Test extends TestCase {
     private static final int RUNTIME = 10000;
 
     SessionData sessionData;
-    SimSession session;
+    SessionImpl session;
     private final SessionFinder[] finders = new SessionFinder[2];
     private final Thread[] finderThreads = new Thread[finders.length];
     private final SessionRotator[] rotators = new SessionRotator[1];
@@ -82,10 +81,7 @@ public class Bug16158Test extends TestCase {
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
         final SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
-        session = new SimSession();
-        session.setSessionID(idGenerator.createSessionId(null, null));
-        session.setLoginName("bug16158");
-        session.setRandomToken(idGenerator.createRandomId());
+        session = new SessionImpl(-1, "bug16158", null, 0, idGenerator.createSessionId(null, null), null, idGenerator.createRandomId(), null, null, null, null);
         sessionData.addSession(session, true);
         for (int i = 0; i < finders.length; i++) {
             finders[i] = new SessionFinder();

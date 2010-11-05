@@ -79,6 +79,11 @@ public final class SessionExceptionMessages implements LocalizableStrings {
     // %2$s given session identifier.
     public static final String WRONG_SESSION_MSG = "SessionD returned wrong session with identifier %1$s for given session identifier %2$s.";
 
+    // This message is thrown if an inconsistency in SessionD bundle is detected when a session is added and that sessions identifier is already in use.
+    // %1$s is replaced with the already existing sessions login.
+    // %1$s is replaced with the new sessions login.
+    public static final String SESSIONID_COLLISION_MSG = "Got a collision while adding a new session to the session container. Colliding session has login %1$s and new session has login %2$s.";
+
     public static final String SESSION_PARAMETER_MISSING_MSG = "The session parameter is missing.";
 
     public static final String SESSION_EXPIRED_MSG = "Your session %s expired. Please start a new browser session.";

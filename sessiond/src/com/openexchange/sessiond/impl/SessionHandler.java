@@ -188,7 +188,7 @@ public final class SessionHandler {
         checkMaxSessPerUser(userId, context);
         checkAuthId(login, authId);
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
-        final Session session =
+        final SessionImpl session =
             new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, sessionIdGenerator.createSecretId(
                 loginName,
                 Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash);

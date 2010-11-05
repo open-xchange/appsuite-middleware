@@ -317,7 +317,7 @@ final class SessionData {
         }
     }
 
-    SessionControl addSession(final Session session, final boolean noLimit) throws SessiondException {
+    SessionControl addSession(final SessionImpl session, final boolean noLimit) throws SessiondException {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
@@ -398,6 +398,7 @@ final class SessionData {
         // A read-only access to session & random list
         rlock.lock();
         try {
+            // FIXME write operation
             final String sessionId = randoms.remove(randomToken);
             if (null == sessionId) {
                 return null;
@@ -470,7 +471,7 @@ final class SessionData {
         wlock.lock();
         try {
             boolean movedSession = false;
-            for (int i = 1; i < sessionList.size(); i++) {
+            for (int i = 1; i < sessionList.size() && !movedSession; i++) {
                 final SessionContainer container = sessionList.get(i);
                 if (container.containsSessionId(sessionId)) {
                     final SessionControl sessionControl = container.removeSessionById(sessionId);
@@ -486,6 +487,8 @@ final class SessionData {
                     LOG.warn("Was not able to move the session into the most actual container.");
                 }
             }
+        } catch (SessiondException e) {
+            LOG.error(e.getMessage(), e);
         } finally {
             wlock.unlock();
         }
@@ -498,7 +501,7 @@ final class SessionData {
         longTermLock.lock();
         try {
             boolean movedSession = false;
-            for (int i = 0; i < longTermList.size(); i++) {
+            for (int i = 0; i < longTermList.size() && !movedSession; i++) {
                 Map<String, SessionControl> longTermMap = longTermList.get(i);
                 control = longTermMap.remove(sessionId);
                 if (null == control) {
@@ -515,6 +518,8 @@ final class SessionData {
                     LOG.warn("Was not able to move the session into the most actual container.");
                 }
             }
+        } catch (SessiondException e) {
+            LOG.error(e.getMessage(), e);
         } finally {
             longTermLock.unlock();
             wlock.unlock();
