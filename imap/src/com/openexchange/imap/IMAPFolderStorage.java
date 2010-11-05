@@ -321,12 +321,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MessagingException, MailException {
         final boolean subscribed = !MailProperties.getInstance().isIgnoreSubscription() && !all;
-        final List<Folder> subfolders;
-        if (subscribed) {
-            subfolders = new ArrayList<Folder>(Arrays.asList(parent.listSubscribed(PATTERN_ALL)));
-        } else {
-            subfolders = new ArrayList<Folder>(Arrays.asList(parent.list(PATTERN_ALL)));
-        }
+        final List<Folder> subfolders =  new ArrayList<Folder>(Arrays.asList(subscribed ? parent.listSubscribed(PATTERN_ALL) : parent.list(PATTERN_ALL)));
         /*
          * Merge with namespace folders if NAMESPACE capability is present
          */
@@ -826,7 +821,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                     IMAPFolder destFolder;
                     final boolean isDestRoot;
-                    if (MailFolder.DEFAULT_FOLDER_ID.equals(newParent)) {
+                    if ("".equals(newParent)) {
                         destFolder = (IMAPFolder) imapStore.getDefaultFolder();
                         isDestRoot = true;
                     } else {
@@ -839,7 +834,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             /*
                              * Destination folder could not be found, thus an invalid name was specified by user
                              */
-                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, newParent);
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, isDestRoot ? DEFAULT_FOLDER_ID : newParent);
                         }
                     }
                     synchronized (destFolder) {
@@ -862,7 +857,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                     }
                                 } else {
                                     if (!imapConfig.getACLExtension().canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
-                                        throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, newParent);
+                                        throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, isDestRoot ? DEFAULT_FOLDER_ID : newParent);
                                     }
                                 }
                             } catch (final MessagingException e) {
@@ -878,7 +873,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                     /*
                                      * No namespace support or given parent is NOT covered by user's personal namespaces.
                                      */
-                                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, newParent);
+                                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, isDestRoot ? DEFAULT_FOLDER_ID : newParent);
                                 }
                                 if (DEBUG) {
                                     LOG.debug("MYRIGHTS command failed on namespace folder", e);
