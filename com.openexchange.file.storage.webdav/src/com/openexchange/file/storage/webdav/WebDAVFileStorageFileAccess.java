@@ -1020,20 +1020,14 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         return  new FileTimedResult(list);
     }
 
+    private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.createEmptyIterator();
+
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws FileStorageException {
-        SearchIterator<File> f1 = SearchIteratorAdapter.createEmptyIterator();
-        SearchIterator<File> f2 = SearchIteratorAdapter.createEmptyIterator();
-        SearchIterator<File> f3 = SearchIteratorAdapter.createEmptyIterator();
-        
-        return new FileDelta(f1, f2, f3, 0l);
+        return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws FileStorageException {
-        SearchIterator<File> f1 = SearchIteratorAdapter.createEmptyIterator();
-        SearchIterator<File> f2 = SearchIteratorAdapter.createEmptyIterator();
-        SearchIterator<File> f3 = SearchIteratorAdapter.createEmptyIterator();
-        
-        return new FileDelta(f1, f2, f3, 0l);
+        return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws FileStorageException {

@@ -128,7 +128,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         /*
                          * Check for collection
                          */
-                        if (!href.endsWith("/")) {
+                        if (!href.endsWith(SLASH)) {
                             /*
                              * Not a directory
                              */
@@ -201,7 +201,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         /*
                          * Check for collection
                          */
-                        if (!href.endsWith("/")) {
+                        if (!href.endsWith(SLASH)) {
                             /*
                              * Not a collection
                              */
@@ -212,7 +212,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                          */
                         ret.parseDavPropertySet(propertySet);
                     } else {
-                        if (href.endsWith("/")) {
+                        if (href.endsWith(SLASH)) {
                             /*
                              * Sub-Directory found
                              */
@@ -304,14 +304,14 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         /*
                          * Check for collection
                          */
-                        if (!href.endsWith("/")) {
+                        if (!href.endsWith(SLASH)) {
                             /*
                              * Not a collection
                              */
                             throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(pid);
                         }
                     } else {
-                        if (href.endsWith("/")) {
+                        if (href.endsWith(SLASH)) {
                             /*
                              * Sub-Directory found
                              */
@@ -358,7 +358,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
         try {
             final URI uri = new URI(checkFolderId(toCreate.getParentId(), rootUri), true);
             final String prevPath = uri.getPath();
-            uri.setPath(new StringBuilder(prevPath).append(prevPath.endsWith("/") ? "" : "/").append(toCreate.getName()).append('/').toString());
+            uri.setPath(new StringBuilder(prevPath).append(prevPath.endsWith(SLASH) ? "" : SLASH).append(toCreate.getName()).append('/').toString());
             /*
              * Perform MkCol
              */
@@ -412,7 +412,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             {
                 URI uri = new URI(fid, true);
                 String path = uri.getPath();
-                if (path.endsWith("/")) {
+                if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
                 }
                 final int pos = path.lastIndexOf('/');
@@ -420,7 +420,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
 
                 uri = new URI(newParentId, true);
                 path = uri.getPath();
-                if (path.endsWith("/")) {
+                if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
                 }
                 uri.setPath(new StringBuilder(path).append('/').append(name).toString());
@@ -463,7 +463,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             {
                 final URI uri = new URI(fid, true);
                 String path = uri.getPath();
-                if (path.endsWith("/")) {
+                if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
                 }
                 final int pos = path.lastIndexOf('/');
@@ -582,7 +582,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         /*
                          * Check for collection
                          */
-                        if (!href.endsWith("/")) {
+                        if (!href.endsWith(SLASH)) {
                             /*
                              * Not a collection
                              */
@@ -592,7 +592,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         /*
                          * Check for collection
                          */
-                        if (href.endsWith("/")) {
+                        if (href.endsWith(SLASH)) {
                             /*
                              * Sub-Directory found
                              */

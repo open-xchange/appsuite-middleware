@@ -240,7 +240,10 @@ public final class WebDAVFileStorageResourceUtil {
     }
 
     /**
-     * Gets the proper href for specified DAV property set.
+     * Gets the proper "href" attribute from specified DAV property set.
+     * <p>
+     * If DAV property set denotes a collection (directory) the returned href is ensured to end with a <code>'/'</code> character; otherwise
+     * the returned href does not end with a <code>'/'</code>.
      * 
      * @param href The href as proved by multi-status response
      * @param propertySet The DAV property set

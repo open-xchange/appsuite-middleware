@@ -53,18 +53,31 @@ import org.apache.commons.httpclient.HttpClient;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link AbstractWebDAVAccess}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractWebDAVAccess {
 
+    /**
+     * The string constant for <code>'/'</code> character.
+     */
+    protected static final String SLASH = "/";
+
+    /**
+     * The HttpClient instance.
+     */
     protected final HttpClient client;
 
+    /**
+     * The session.
+     */
     protected final Session session;
 
+    /**
+     * The associated file account.
+     */
     protected final FileStorageAccount account;
 
     /**
