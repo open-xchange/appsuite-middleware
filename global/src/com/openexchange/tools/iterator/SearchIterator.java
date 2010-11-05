@@ -64,6 +64,7 @@ public interface SearchIterator<T> {
      * return an element.)
      * 
      * @return <code>true</code> if the iterator has more elements; otherwise <code>false</code>
+     * @throws AbstractOXException If check for a further element fails
      */
     boolean hasNext() throws AbstractOXException;
 
@@ -72,15 +73,14 @@ public interface SearchIterator<T> {
      * <code>false</code> will return each element in the underlying collection exactly once.
      * 
      * @return The next element in the iteration.
-     * @exception SearchIteratorException If next element cannot be returned
-     * @throws OXException If next element cannot be returned
+     * @throws AbstractOXException If next element cannot be returned
      */
     T next() throws AbstractOXException;
 
     /**
      * Closes the search iterator
      * 
-     * @throws SearchIteratorException If closing the search iterator fails
+     * @throws AbstractOXException If closing the search iterator fails
      */
     void close() throws AbstractOXException;
 
