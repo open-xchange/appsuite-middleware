@@ -429,13 +429,13 @@ public final class IMAPFolderConverter {
                                 LOG.warn("ACLs could not be parsed", e);
                             }
                             mailFolder.removePermissions();
-                            addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
+                            addOwnACL(mailFolder);
                         }
                     } else {
-                        addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
+                        addOwnACL(mailFolder);
                     }
                 } else {
-                    addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
+                    addOwnACL(mailFolder);
                 }
                 if (MailProperties.getInstance().isUserFlagsEnabled() && exists && selectable && imapConfig.getACLExtension().canRead(
                     ownRights) && UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
@@ -594,7 +594,7 @@ public final class IMAPFolderConverter {
                             ", which denies GETACL command if no ADMINISTER right is granted."),
                         e);
                 }
-                addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig);
+                addOwnACL(mailFolder);
                 return;
             }
             throw MIMEMailException.handleMessagingException(e);
@@ -608,10 +608,12 @@ public final class IMAPFolderConverter {
                     imapFolder.getFullName(),
                     imapFolder.getSeparator());
             final StringBuilder debugBuilder = DEBUG ? new StringBuilder(128) : null;
+            boolean userPermAdded = false;
             for (int j = 0; j < acls.length; j++) {
                 final ACLPermission aclPerm = new ACLPermission();
                 try {
                     aclPerm.parseACL(acls[j], args, imapConfig, ctx);
+                    userPermAdded |= (session.getUserId() == aclPerm.getEntity());
                     mailFolder.addPermission(aclPerm);
                 } catch (final AbstractOXException e) {
                     if (isUnknownEntityError(e)) {
@@ -625,6 +627,12 @@ public final class IMAPFolderConverter {
                     }
                 }
             }
+            /*
+             * Check if permission for user was added
+             */
+            if (!userPermAdded) {
+                addOwnACL(mailFolder);
+            }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -633,17 +641,10 @@ public final class IMAPFolderConverter {
     /**
      * Adds current user's rights granted to IMAP folder as an ACL permission.
      * 
-     * @param sessionUser The session user
-     * @param mailFolder The mail folder
-     * @param ownRights The user's rights
-     * @param imapConfig The IMAP configuration
-     * @throws IMAPException If an IMAP error occurs
+     * @param mailFolder The mail folder containing own permission
      */
-    private static void addOwnACL(final int sessionUser, final MailFolder mailFolder, final Rights ownRights, final IMAPConfig imapConfig) throws IMAPException {
-        final ACLPermission aclPerm = new ACLPermission();
-        aclPerm.setEntity(sessionUser);
-        aclPerm.parseRights(ownRights, imapConfig);
-        mailFolder.addPermission(aclPerm);
+    private static void addOwnACL(final MailFolder mailFolder) {
+        mailFolder.addPermission(mailFolder.getOwnPermission());
     }
 
     /**
