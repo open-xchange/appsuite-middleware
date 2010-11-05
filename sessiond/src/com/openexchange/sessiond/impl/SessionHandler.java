@@ -145,8 +145,7 @@ public final class SessionHandler {
         if (propagate) {
             for (final SessionControl sessionControl : retval) {
                 try {
-                    SessionCache.getInstance().putCachedSessionForRemoteRemoval(
-                        ((SessionImpl) sessionControl.getSession()).createCachedSession());
+                    SessionCache.getInstance().putCachedSessionForRemoteRemoval(sessionControl.getSession().createCachedSession());
                 } catch (final CacheException e) {
                     LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
                 } catch (final ServiceException e) {
@@ -259,7 +258,7 @@ public final class SessionHandler {
             throw SessionExceptionCodes.PASSWORD_UPDATE_FAILED.create();
         }
         // TODO: Check permission via security service
-        ((SessionImpl) sessionControl.getSession()).setPassword(newPassword);
+        sessionControl.getSession().setPassword(newPassword);
     }
 
     protected static Session getSessionByRandomToken(final String randomToken, final String localIp) {
