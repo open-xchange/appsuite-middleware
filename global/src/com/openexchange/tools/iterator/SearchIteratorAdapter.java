@@ -164,10 +164,6 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
                 return 0;
             }
 
-            public boolean hasSize() {
-                return true;
-            }
-
             public void addWarning(final AbstractOXException warning) {
                 throw new UnsupportedOperationException("Method is not implemented");
             }
