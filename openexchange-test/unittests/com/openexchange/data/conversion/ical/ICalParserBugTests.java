@@ -395,7 +395,57 @@ public class ICalParserBugTests extends AbstractICalParserTest {
         +"X-GWCLASS:NORMAL\n"
         +"END:VEVENT\n"
         +"END:VCALENDAR\n";
-        Appointment appointment = parseAppointment(ical);
-
+        parseAppointment(ical);
+        assertTrue("Should not fail ith parsing error before this", true);
+    }
+    
+    //this is bug16895
+    public void testDoesNotLikeEmailElementFromZimbra() throws Exception{
+    	String ical = "BEGIN:VCALENDAR\n"
+			+ "PRODID:Zimbra-Calendar-Provider\n"
+			+ "VERSION:2.0\n"
+			+ "CALSCALE:GREGORIAN\n"
+			+ "VERSION:2.0\n"
+			+ "METHOD:REQUEST\n"
+			+ "PRODID:-//Apple Inc.//iCal 4.0.3//EN\n"
+			+ "BEGIN:VTIMEZONE\n"
+			+ "TZID:Europe/Paris\n"
+			+ "BEGIN:DAYLIGHT\n"
+			+ "TZOFFSETFROM:+0100\n"
+			+ "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n"
+			+ "DTSTART:19810329T020000\n"
+			+ "TZNAME:GMT+02:00\n"
+			+ "TZOFFSETTO:+0200\n"
+			+ "END:DAYLIGHT\n"
+			+ "BEGIN:STANDARD\n"
+			+ "TZOFFSETFROM:+0200\n"
+			+ "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n"
+			+ "DTSTART:19961027T030000\n"
+			+ "TZNAME:GMT+01:00\n"
+			+ "TZOFFSETTO:+0100\n"
+			+ "END:STANDARD\n"
+			+ "END:VTIMEZONE\n"
+			+ "BEGIN:VEVENT\n"
+			+ "CREATED:20100916T122236Z\n"
+			+ "UID:32B3BF02-6736-4AF9-A6B0-68E290E7EFED\n"
+			+ "DTEND;TZID=\"Europe/Paris\":20100917T203000\n"
+			+ "ATTENDEE;CN=Frank Hoberg;CUTYPE=INDIVIDUAL;EMAIL=frank.hoberg@open-xchange.c\n"
+			+ " om;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:frank.hoberg@\n"
+			+ " open-xchange.com\n"
+			+ "ATTENDEE;CN=Douglas Randall (Randy) Parker;CUTYPE=INDIVIDUAL;EMAIL=randall.p\n"
+			+ " arker@scality.com;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailt\n"
+			+ " o:randall.parker@scality.com\n"
+			+ "ATTENDEE;CN=Marc Villemade;CUTYPE=INDIVIDUAL;PARTSTAT=ACCEPTED:mailto:m@scal\n"
+			+ " ity.com\n"
+			+ "TRANSP:OPAQUE\n"
+			+ "SUMMARY:Sync up with Frank@OX about meeting in DC\n"
+			+ "DTSTART;TZID=\"Europe/Paris\":20100917T193000\n"
+			+ "DTSTAMP:20100916T161511Z\n"
+			+ "ORGANIZER;CN=Marc Villemade:mailto:m@scality.com\n"
+			+ "SEQUENCE:15\n"
+			+ "END:VEVENT\n"
+			+ "END:VCALENDAR";
+        parseAppointment(ical);
+        assertTrue("Should not fail ith parsing error before this", true);
     }
 }
