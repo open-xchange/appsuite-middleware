@@ -481,7 +481,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     /*
                      * Add HTML alternative part as attachment
                      */
-                    asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName);
+                    asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
                 } else if (DisplayMode.RAW.equals(displayMode)) {
                     /*
                      * Return HTML content as-is
@@ -497,7 +497,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 /*
                  * Add HTML part as attachment
                  */
-                asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName);
+                asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
             }
         } else {
             /*
@@ -562,7 +562,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                         /*
                          * Add alternative part as attachment
                          */
-                        asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName);
+                        asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
                         return true;
                     } else if (DisplayMode.RAW.equals(displayMode)) {
                         /*
@@ -622,7 +622,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     /*
                      * A plain text message body has already been detected; append inline text as an attachment, too
                      */
-                    asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName);
+                    final String content = HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                    asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, content);
                 }
             } else {
                 final String content = HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
@@ -973,14 +974,18 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return jsonObject;
     }
 
-    private void asAttachment(final String id, final String baseContentType, final int len, final String fileName) throws MailException {
+    private void asAttachment(final String id, final String baseContentType, final int len, final String fileName, final String optContent) throws MailException {
         try {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
             jsonObject.put(MailJSONField.SIZE.getKey(), len);
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
-            jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+            if (null == optContent) {
+                jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+            } else {
+                jsonObject.put(MailJSONField.CONTENT.getKey(), optContent);
+            }
             if (fileName == null) {
                 jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
             } else {

@@ -415,7 +415,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         if (bodyAdded) {
             if (isAlternative) {
                 if (containsContent("text/htm")) {
-                    asAttachment(id, contentType.getBaseType(), size, fileName);
+                    asAttachment(id, contentType.getBaseType(), size, fileName, null);
                 } else {
                     /*
                      * Check size
@@ -427,7 +427,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     asRawContent(id, contentType.getBaseType(), htmlContent, fileName);
                 }
             } else {
-                asAttachment(id, contentType.getBaseType(), size, fileName);
+                asAttachment(id, contentType.getBaseType(), size, fileName, null);
             }
         } else {
             /*
@@ -461,7 +461,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                         replaceEmptyContent(id, contentType.getBaseType(), plainTextContentArg);
                         textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
                     } else {
-                        asAttachment(id, contentType.getBaseType(), size, fileName);
+                        asAttachment(id, contentType.getBaseType(), size, fileName, null);
                     }
                 } else {
                     /*
@@ -486,7 +486,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     replaceEmptyContent(id, contentType.getBaseType(), plainTextContentArg);
                     textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
                 } else {
-                    asAttachment(id, contentType.getBaseType(), size, fileName);
+                    asAttachment(id, contentType.getBaseType(), size, fileName, plainTextContentArg);
                 }
             }
         } else {
@@ -842,7 +842,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
-    private void asAttachment(final String id, final String baseContentType, final long size, final String fileName) throws MailException {
+    private void asAttachment(final String id, final String baseContentType, final long size, final String fileName, final String optContent) throws MailException {
         try {
             final JSONObject jsonObject = new JSONObject();
             /*
@@ -872,7 +872,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             /*
              * Content
              */
-            jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+            if (null == optContent) {
+                jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+            } else {
+                jsonObject.put(MailJSONField.CONTENT.getKey(), optContent);
+            }
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
