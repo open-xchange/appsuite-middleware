@@ -114,7 +114,8 @@ public final class SmartDriveCoercion implements SmartDriveConstants {
     public static SmartDriveResource parseResourceResponse(final JSONObject jsonResource) throws SmartDriveException {
         try {
             final SmartDriveResource ret;
-            if (jsonResource.hasAndNotNull(JSON_FILE_SIZE)) {
+            
+            if (!isDirectory(jsonResource)) {
                 /*
                  * Expect a file
                  */
@@ -134,6 +135,14 @@ public final class SmartDriveCoercion implements SmartDriveConstants {
             throw SmartDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw SmartDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+    
+    private static boolean isDirectory(JSONObject jsonResource) {
+        try {
+            return jsonResource.hasAndNotNull(JSON_MIME_TYPE) && jsonResource.getString(JSON_MIME_TYPE).equals(MIME_APPLICATION_DIRECTORY);
+        } catch (JSONException e) {
+            return false;
         }
     }
 
