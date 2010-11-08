@@ -195,8 +195,9 @@ public final class CreatePerformer extends AbstractPerformer {
         boolean supported = false;
         final ContentType folderContentType = toCreate.getContentType();
         if (0 < contentTypes.length) {
+            final String cts = folderContentType.toString();
             for (final ContentType contentType : contentTypes) {
-                if (contentType.equals(folderContentType)) {
+                if (contentType.toString().equals(cts)) {
                     supported = true;
                     break;
                 }
@@ -366,8 +367,9 @@ public final class CreatePerformer extends AbstractPerformer {
         if (0 == supportedContentTypes.length) {
             return true;
         }
+        final String cts = folderContentType.toString();
         for (final ContentType supportedContentType : supportedContentTypes) {
-            if (supportedContentType.equals(folderContentType)) {
+            if (supportedContentType.toString().equals(cts)) {
                 return true;
             }
         }
