@@ -405,7 +405,7 @@ public class Login extends AJAXServlet {
      * Writes or rewrites a cookie
      */
     private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, CookieType type) throws AbstractOXException, JSONException, IOException {
-        if (!isAutologinEnabled()) {
+        if (!isAutologinEnabled() && CookieType.SESSION == type) {
             throw new AjaxException(AjaxException.Code.DisabledAction, "store");
         }
         final SessiondService sessiond = ServerServiceRegistry.getInstance().getService(SessiondService.class);
