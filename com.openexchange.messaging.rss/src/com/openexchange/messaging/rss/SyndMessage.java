@@ -51,6 +51,8 @@ package com.openexchange.messaging.rss;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -72,10 +74,15 @@ import com.openexchange.messaging.generic.Utility;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
+import com.openexchange.proxy.ImageContentTypeRestriction;
+import com.openexchange.proxy.ProxyException;
+import com.openexchange.proxy.ProxyRegistration;
+import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.session.Session;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.feed.synd.SyndImage;
 
 public class SyndMessage implements MessagingMessage {
 
@@ -86,11 +93,13 @@ public class SyndMessage implements MessagingMessage {
     private MessagingContent content;
     private final String folder;
     private final SyndFeed feed;
+    private final String sessionId;
      
     public SyndMessage(final SyndFeed feed, final SyndEntry syndEntry, final String folder, final Session session) throws MessagingException {
         entry = syndEntry;
         this.folder = folder;
         this.feed = feed;
+        this.sessionId = session.getSessionID();
         
         addStringHeader(KnownHeader.SUBJECT, syndEntry.getTitle());
         //addStringHeader(KnownHeader.FROM, syndEntry.getAuthor());
@@ -99,15 +108,15 @@ public class SyndMessage implements MessagingMessage {
         
         if(contents.size() > 0) {
             final SyndContent content = contents.get(0);
-            setContent(content, session);
+            setContent(content, sessionId);
         } else if (entry.getDescription() != null){
-            setContent(entry.getDescription(), session);
+            setContent(entry.getDescription(), sessionId);
         } else if (entry.getTitle() != null) {
-            setContent(entry.getTitleEx(), session);
+            setContent(entry.getTitleEx(), sessionId);
         }
     }
 
-    private void setContent(final SyndContent content, final Session session) throws MessagingException {
+    private void setContent(final SyndContent content, final String sessionId) throws MessagingException {
         String type = content.getType();
         if(type == null) {
             type = "text/plain";
@@ -132,7 +141,7 @@ public class SyndMessage implements MessagingMessage {
             if (null == htmlService) {
                 htmlPart.setContent(new StringContent(content.getValue()), type);
             } else {
-                htmlPart.setContent(new StringContent(htmlService.replaceImages(content.getValue(), session.getSessionID())), type);
+                htmlPart.setContent(new StringContent(htmlService.replaceImages(content.getValue(), sessionId)), type);
             }
             
             multipart.addBodyPart(htmlPart);
@@ -248,8 +257,32 @@ public class SyndMessage implements MessagingMessage {
     
     public String getPicture() {
         final SyndFeed source = (entry.getSource() != null) ? entry.getSource() : feed;
-        if(null != source.getImage()) {
-            return source.getImage().getUrl();
+        final SyndImage image = source.getImage();
+        if (null != image) {
+            try {
+                final URL imageUrl = new URL(image.getUrl());
+                /*
+                 * Check presence of ProxyRegistry
+                 */
+                final ProxyRegistry proxyRegistry = ProxyRegistryProvider.getInstance().getProxyRegistry();
+                if (null == proxyRegistry) {
+                    org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Missing ProxyRegistry service. Replacing image URL skipped.");
+                    return null;
+                }
+                return proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance())).toString();
+            } catch (final MalformedURLException e) {
+                /*
+                 * Not a valid URL
+                 */
+                org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Not a valid image URL. Replacing image URL skipped.", e);
+                return null;
+            } catch (final ProxyException e) {
+                /*
+                 * Not a valid URL
+                 */
+                org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Proxying image URL failed. Replacing image URL skipped.", e);
+                return null;
+            }
         }
         return null;
     }

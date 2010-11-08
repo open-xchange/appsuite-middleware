@@ -47,56 +47,40 @@
  *
  */
 
-package com.openexchange.messaging.rss.osgi;
+package com.openexchange.messaging.rss;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.html.HTMLService;
-import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.rss.RSSMessagingService;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.proxy.ProxyRegistry;
 
 /**
- * {@link Activator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ProxyRegistryProvider}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator implements BundleActivator {
+public final class ProxyRegistryProvider {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final ProxyRegistryProvider INSTANCE = new ProxyRegistryProvider();
 
-    private List<ServiceTracker> trackers;
-    
-	public void start(final BundleContext context) throws Exception {
-	    try {
-	        trackers = new ArrayList<ServiceTracker>(1);
-	        trackers.add(new ServiceTracker(context, HTMLService.class.getName(), new HTMLRegistryCustomizer(context)));
-	        trackers.add(new ServiceTracker(context, ProxyRegistry.class.getName(), new ProxyRegistryCustomizer(context)));
-	        for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
-	        
-	        context.registerService(MessagingService.class.getName(), new RSSMessagingService(), null);
-	    } catch (final Exception x) {
-	        LOG.error(x.getMessage(), x);
-	        throw x;
-	    }
-	}
+    public static ProxyRegistryProvider getInstance() {
+        return INSTANCE;
+    }
 
-	public void stop(final BundleContext context) throws Exception {
-	    if (null != trackers) {
-	        for (final ServiceTracker tracker : trackers) {
-                tracker.close();
-            }
-	        trackers = null;
-        }
-	    
-	    // Services are deregistered automatically by the framework
-	}
+    private final AtomicReference<ProxyRegistry> ref;
+
+    /**
+     * Initializes a new {@link ProxyRegistryProvider}.
+     */
+    private ProxyRegistryProvider() {
+        super();
+        ref = new AtomicReference<ProxyRegistry>();
+    }
+
+    public ProxyRegistry getProxyRegistry() {
+        return ref.get();
+    }
+
+    public void setProxyRegistry(final ProxyRegistry proxyRegistry) {
+        ref.set(proxyRegistry);
+    }
 
 }

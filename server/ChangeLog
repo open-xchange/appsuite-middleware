@@ -2,6 +2,7 @@
 
  - Bugfix #17173: Adding space after formatting HTML tag like "em" or "strong"
  - Partial fix for bug #17415: Delivering content for inline text attachments
+ - Bugfix #15476: Replaced favicon image URL with proxied one
 
 * 2010-11-05 - marcus.klein@open-xchange.com
 

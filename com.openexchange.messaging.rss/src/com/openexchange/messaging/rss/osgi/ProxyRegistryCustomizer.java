@@ -49,54 +49,42 @@
 
 package com.openexchange.messaging.rss.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.html.HTMLService;
-import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.rss.RSSMessagingService;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.messaging.rss.ProxyRegistryProvider;
 import com.openexchange.proxy.ProxyRegistry;
 
 /**
- * {@link Activator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ProxyRegistryCustomizer}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator implements BundleActivator {
+public final class ProxyRegistryCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private final BundleContext context;
 
-    private List<ServiceTracker> trackers;
-    
-	public void start(final BundleContext context) throws Exception {
-	    try {
-	        trackers = new ArrayList<ServiceTracker>(1);
-	        trackers.add(new ServiceTracker(context, HTMLService.class.getName(), new HTMLRegistryCustomizer(context)));
-	        trackers.add(new ServiceTracker(context, ProxyRegistry.class.getName(), new ProxyRegistryCustomizer(context)));
-	        for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
-	        
-	        context.registerService(MessagingService.class.getName(), new RSSMessagingService(), null);
-	    } catch (final Exception x) {
-	        LOG.error(x.getMessage(), x);
-	        throw x;
-	    }
-	}
+    /**
+     * Initializes a new {@link ProxyRegistryCustomizer}.
+     */
+    public ProxyRegistryCustomizer(final BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-	public void stop(final BundleContext context) throws Exception {
-	    if (null != trackers) {
-	        for (final ServiceTracker tracker : trackers) {
-                tracker.close();
-            }
-	        trackers = null;
-        }
-	    
-	    // Services are deregistered automatically by the framework
-	}
+    public Object addingService(final ServiceReference reference) {
+        final Object service = context.getService(reference);
+        ProxyRegistryProvider.getInstance().setProxyRegistry((ProxyRegistry) service);
+        return service;
+    }
+
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nope
+    }
+
+    public void removedService(final ServiceReference reference, final Object service) {
+        ProxyRegistryProvider.getInstance().setProxyRegistry(null);
+        context.ungetService(reference);
+    }
 
 }

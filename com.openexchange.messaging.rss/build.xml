@@ -35,6 +35,7 @@
     <property name="messagingjar" value="com.openexchange.messaging.jar"/>
     <property name="messaginggenjar" value="com.openexchange.messaging.generic.jar"/>
 	<property name="htmljar" value="com.openexchange.html.jar"/>
+	<property name="proxyjar" value="com.openexchange.proxy.jar"/>
 
     <property name="jdomjar" value="jdom-1.1.1.jar"/>
 
@@ -55,6 +56,7 @@
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${messaginggenjar}"/>
     	<pathelement location="${bundlesdir}/${htmljar}"/>
+    	<pathelement location="${bundlesdir}/${proxyjar}"/>
 
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
 
