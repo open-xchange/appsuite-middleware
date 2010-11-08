@@ -69,8 +69,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.mail.MessagingException;
@@ -506,6 +506,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          */
         final Map<String, Map<?, ?>> subfolders = subfolders(fullname);
         final String retval = prepareFullname(accountId, folderStorage.deleteFolder(fullname, hardDelete));
+        postEvent(accountId, fullname, false, true, false);
         try {
             /*
              * Update JSON cache
