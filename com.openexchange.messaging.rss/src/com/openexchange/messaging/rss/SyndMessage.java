@@ -82,7 +82,6 @@ import com.openexchange.session.Session;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.feed.synd.SyndImage;
 
 public class SyndMessage implements MessagingMessage {
 
@@ -257,10 +256,9 @@ public class SyndMessage implements MessagingMessage {
     
     public String getPicture() {
         final SyndFeed source = (entry.getSource() != null) ? entry.getSource() : feed;
-        final SyndImage image = source.getImage();
-        if (null != image) {
+        if (null != source.getImage()) {
             try {
-                final URL imageUrl = new URL(image.getUrl());
+                final URL imageUrl = new URL(source.getImage().getUrl());
                 /*
                  * Check presence of ProxyRegistry
                  */
