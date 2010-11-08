@@ -111,7 +111,6 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
      */
     private static final Protocol PROTOCOL_HTTP = Protocol.getProtocol("http");
 
-
     /*
      * Member stuff
      */
@@ -180,7 +179,7 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
             client.executeMethod(postMethod);
 
             Header locationHeader = postMethod.getResponseHeader("Location");
-            if(locationHeader != null) {
+            if (locationHeader != null) {
                 String redirectURLString = locationHeader.getValue();
                 URL redirectURL = new URL(redirectURLString);
 
@@ -191,11 +190,11 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
                 client.executeMethod(getMethod);
             } else {
                 getMethod = new GetMethod("/");
-                
+
                 client.executeMethod(getMethod);
             }
 
-            getMethod = new GetMethod("/userdata.js?username="+userName);
+            getMethod = new GetMethod("/userdata.js?username=" + userName);
 
             client.executeMethod(getMethod);
 

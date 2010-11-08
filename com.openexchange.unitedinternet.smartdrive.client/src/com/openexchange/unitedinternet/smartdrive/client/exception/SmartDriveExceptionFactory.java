@@ -56,7 +56,7 @@ import com.openexchange.unitedinternet.smartdrive.client.SmartDriveExceptionCode
 
 /**
  * {@link SmartDriveExceptionFactory} - Factory for creating {@link SmartDriveException}.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */

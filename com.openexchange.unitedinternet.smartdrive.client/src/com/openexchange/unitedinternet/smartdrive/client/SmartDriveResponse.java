@@ -49,7 +49,6 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
-
 /**
  * {@link SmartDriveResponse} - A SmartDrive response.
  * 

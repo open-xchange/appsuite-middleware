@@ -49,7 +49,6 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
-
 /**
  * {@link SmartDriveDeadProperty} - A SmartDrive dead property.
  * 
@@ -73,8 +72,8 @@ public final class SmartDriveDeadProperty {
      */
     public SmartDriveDeadProperty(final SmartDriveDeadProperty src) {
         this();
-        this.propertyName = src.propertyName;
-        this.value = src.value;
+        propertyName = src.propertyName;
+        value = src.value;
     }
 
     /**
@@ -112,10 +111,10 @@ public final class SmartDriveDeadProperty {
     public void setValue(final String value) {
         this.value = value;
     }
-    
+
     @Override
     public String toString() {
-        return propertyName+": "+value;
+        return propertyName + ": " + value;
     }
 
 }

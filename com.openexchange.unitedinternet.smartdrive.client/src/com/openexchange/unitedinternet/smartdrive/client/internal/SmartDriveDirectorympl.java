@@ -97,15 +97,15 @@ public final class SmartDriveDirectorympl extends AbstractSmartDriveResource imp
     public void setMimeType(final String mimeType) {
         this.mimeType = mimeType;
     }
-    
+
     public boolean isDirectory() {
         return true;
     }
-    
+
     public SmartDriveDirectory toDirectory() throws SmartDriveException {
         return this;
     }
-    
+
     public SmartDriveFile toFile() throws SmartDriveException {
         throw SmartDriveExceptionCodes.NOT_A_FILE.create();
     }

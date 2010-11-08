@@ -133,7 +133,7 @@ public enum SmartDriveExceptionCodes implements OXErrorMessage {
      * This resource is not a directory
      */
     NOT_A_DIRECTORY(SmartDriveExceptionMessages.NOT_A_DIRECTORY_MSG, Category.CODE_ERROR, 18),
-    
+
     ;
 
     private final Category category;
