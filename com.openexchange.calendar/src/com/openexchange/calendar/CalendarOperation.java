@@ -569,10 +569,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      */
     private void handleSequence(CalendarDataObject cdao, CalendarDataObject edao, boolean isInsert) throws OXCalendarException {
         if (isInsert) {
-            if (cdao.containsSequence() && cdao.getSequence() != 0)
-                throw new OXCalendarException(OXCalendarException.Code.INVALID_SEQUENCE, cdao.getSequence());
-            
-            cdao.setSequence(0);
+//            if (cdao.containsSequence() && cdao.getSequence() != 0)
+//                throw new OXCalendarException(OXCalendarException.Code.INVALID_SEQUENCE, cdao.getSequence());
+//            
+//            cdao.setSequence(0);
         } else {
             if (!cdao.containsSequence() && !edao.containsSequence())
                 cdao.setSequence(1);
