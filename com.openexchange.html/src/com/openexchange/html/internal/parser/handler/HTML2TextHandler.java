@@ -51,9 +51,14 @@ package com.openexchange.html.internal.parser.handler;
 
 import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.HTMLServiceImpl.checkURL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.html.HTMLService;
@@ -147,13 +152,13 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     private final StringBuilder textBuilder;
 
-    private String mailFolderPath;
-
     private long mailId;
 
     private int userId;
 
     private int contextId;
+
+    private String prevTag;
 
     /**
      * Initializes a new {@link HTML2TextHandler}.
@@ -201,15 +206,6 @@ public final class HTML2TextHandler implements HTMLHandler {
     }
 
     /**
-     * Sets the mail folder path for debugging purpose on {@link #handleError(String)}.
-     * 
-     * @param mailFolderPath The mail folder path to set
-     */
-    public void setMailFolderPath(final String mailFolderPath) {
-        this.mailFolderPath = mailFolderPath;
-    }
-
-    /**
      * Sets the mail ID for debugging purpose on {@link #handleError(String)}.
      * 
      * @param mailId The mail ID to set
@@ -245,59 +241,57 @@ public final class HTML2TextHandler implements HTMLHandler {
     }
 
     public void handleEndTag(final String tag) {
-        if (TAG_BODY.equalsIgnoreCase(tag)) {
+        final String ltag = tag.toLowerCase(Locale.US);
+        if (TAG_BODY.equals(ltag)) {
             insideBody = false;
-        } else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
+        } else if (appendHref && ltag.equals(TAG_A)) {
             anchorTag = false;
-        } else if (TAG_STYLE.equalsIgnoreCase(tag)) {
+        } else if (TAG_STYLE.equals(ltag)) {
             ignore = false;
-        } else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
+        } else if (TAG_SCRIPT.equals(ltag)) {
             ignore = false;
         } else if (insideBody) {
-            if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
+            if (ltag.equals(TAG_BLOCKQUOTE)) {
                 textBuilder.append(CRLF);
                 quote--;
-            } else if (tag.equalsIgnoreCase(TAG_P)) {
+            } else if (ltag.equals(TAG_P)) {
                 textBuilder.append(CRLF);
                 quoteText();
-            } else if (tag.equalsIgnoreCase(TAG_TR)) {
+            } else if (ltag.equals(TAG_TR)) {
                 // Ending table row
                 textBuilder.append(CRLF);
                 quoteText();
-            } else if (tag.equalsIgnoreCase(TAG_LI)) {
+            } else if (ltag.equals(TAG_LI)) {
                 // Ending list entry
                 textBuilder.append(CRLF);
                 quoteText();
-            } else if (tag.equalsIgnoreCase(TAG_TD)) {
+            } else if (ltag.equals(TAG_TD)) {
                 // Ending table column
                 textBuilder.append('\t');
-            } else if (tag.equalsIgnoreCase(TAG_OL) || tag.equalsIgnoreCase(TAG_UL)) {
+            } else if (ltag.equals(TAG_OL) || ltag.equals(TAG_UL)) {
                 // Ending list
                 textBuilder.append(CRLF);
                 quoteText();
-            } else if (tag.equalsIgnoreCase(TAG_PRE)) {
+            } else if (ltag.equals(TAG_PRE)) {
                 textBuilder.append(CRLF);
                 quoteText();
                 textBuilder.append(CRLF);
                 quoteText();
                 preTag = false;
-            } else if (tag.equalsIgnoreCase(TAG_H1) || tag.equalsIgnoreCase(TAG_H2) || tag.equalsIgnoreCase(TAG_H3) || tag.equalsIgnoreCase(TAG_H4) || tag.equalsIgnoreCase(TAG_H5) || tag.equalsIgnoreCase(TAG_H6) || tag.equalsIgnoreCase(TAG_ADDRESS)) {
+            } else if (ltag.equals(TAG_H1) || ltag.equals(TAG_H2) || ltag.equals(TAG_H3) || ltag.equals(TAG_H4) || ltag.equals(TAG_H5) || ltag.equals(TAG_H6) || ltag.equals(TAG_ADDRESS)) {
                 textBuilder.append(CRLF);
                 quoteText();
                 textBuilder.append(CRLF);
                 quoteText();
             }
         }
+        prevTag = ltag;
     }
 
     public void handleError(final String errorMsg) {
         final StringBuilder sb = new StringBuilder(128 + errorMsg.length());
-        sb.append("HTML parsing error occurred in mail: ").append(errorMsg);
+        sb.append("HTML parsing error occurred: ").append(errorMsg);
         boolean prefix = false;
-        if (null != mailFolderPath) {
-            sb.append("\nError information: folder='").append(mailFolderPath).append('\'');
-            prefix = true;
-        }
         if (0 != mailId) {
             if (!prefix) {
                 sb.append("\nError information:");
@@ -323,10 +317,11 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         if (insideBody) {
-            if (tag.equalsIgnoreCase(TAG_BR)) {
+            final String ltag = tag.toLowerCase(Locale.US);
+            if (ltag.equals(TAG_BR)) {
                 textBuilder.append(CRLF);
                 quoteText();
-            } else if (tag.equalsIgnoreCase(TAG_IMG)) {
+            } else if (ltag.equals(TAG_IMG)) {
                 if (attributes.containsKey(ATTR_ALT)) {
                     textBuilder.append(' ').append(attributes.get(ATTR_ALT)).append(' ');
                 } else if (attributes.containsKey(ATTR_ALT2)) {
@@ -350,30 +345,31 @@ public final class HTML2TextHandler implements HTMLHandler {
     }
 
     public void handleStartTag(final String tag, final Map<String, String> attributes) {
-        if (TAG_BODY.equalsIgnoreCase(tag)) {
+        final String ltag = tag.toLowerCase(Locale.US);
+        if (TAG_BODY.equals(ltag)) {
             insideBody = true;
-        } else if (TAG_STYLE.equalsIgnoreCase(tag)) {
+        } else if (TAG_STYLE.equals(ltag)) {
             ignore = true;
-        } else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
+        } else if (TAG_SCRIPT.equals(ltag)) {
             ignore = true;
         } else if (insideBody) {
-            if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
+            if (ltag.equals(TAG_BLOCKQUOTE)) {
                 textBuilder.append(CRLF);
                 quote++;
                 quoteText();
-            } else if (tag.equalsIgnoreCase(TAG_DIV)) {
+            } else if (ltag.equals(TAG_DIV)) {
                 textBuilder.append(CRLF);
                 quoteText();
-            } else if (tag.equalsIgnoreCase(TAG_P)) {
+            } else if (ltag.equals(TAG_P)) {
                 // textBuilder.append(CRLF);
                 // quoteText();
-            } else if (tag.equalsIgnoreCase(TAG_OL) || tag.equalsIgnoreCase(TAG_UL)) {
+            } else if (ltag.equals(TAG_OL) || ltag.equals(TAG_UL)) {
                 // Starting list
                 textBuilder.append(CRLF);
                 quoteText();
-            } else if (tag.equalsIgnoreCase(TAG_PRE)) {
+            } else if (ltag.equals(TAG_PRE)) {
                 preTag = true;
-            } else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
+            } else if (appendHref && ltag.equals(TAG_A)) {
                 anchorTag = true;
                 hrefContent = null;
                 final int size = attributes.size();
@@ -411,6 +407,8 @@ public final class HTML2TextHandler implements HTMLHandler {
      */
     private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{2,}))+");
 
+    private static final Set<String> FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("b", "i", "em", "strong")));
+
     private static final String STR_EMPTY = "";
 
     private static final String STR_BLANK = " ";
@@ -426,19 +424,24 @@ public final class HTML2TextHandler implements HTMLHandler {
                  */
                 textBuilder.append(htmlService.replaceHTMLEntities(text));
             } else {
-                if (!ignorable) {
-                    final Matcher m = PAT_TRIM.matcher(text);
+                /*
+                 * Ignorable?
+                 */
+                if (!ignorable || (null != prevTag && FORMATS.contains(prevTag))) {
                     /*
                      * Cut off JTidy's pretty-printer appendix if present
                      */
                     String preparedText;
-                    if (m.find()) {
-                        preparedText = text.substring(0, m.start() + 1);
-                    } else {
-                        preparedText = text;
+                    {
+                        final Matcher m = PAT_TRIM.matcher(text);
+                        if (m.find()) {
+                            preparedText = text.substring(0, m.start() + 1);
+                        } else {
+                            preparedText = text;
+                        }
                     }
                     /*
-                     * Remove any control characters
+                     * Remove any control characters: \n, \f, and \r
                      */
                     preparedText = PAT_CONTROL.matcher(preparedText).replaceAll(STR_EMPTY);
                     /*
@@ -454,7 +457,7 @@ public final class HTML2TextHandler implements HTMLHandler {
                         }
                         int i = 0;
                         char c = '\0';
-                        while ((i < len) && ((c = preparedText.charAt(i)) == ' ' || c == '\t')) {
+                        while ((i < len) && ((c = preparedText.charAt(i)) == '\t'/* || c == ' '*/)) {
                             i++;
                         }
                         if (i > 0) {

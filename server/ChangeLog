@@ -1,3 +1,7 @@
+* 2010-11-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #17173: Adding space after formatting HTML tag like "em" or "strong"
+
 * 2010-11-05 - marcus.klein@open-xchange.com
 
  - Bugfix #17389: Corrected SQL statement for removing the passcrypt user attribute.

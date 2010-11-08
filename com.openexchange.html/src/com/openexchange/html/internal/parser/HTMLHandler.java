@@ -113,7 +113,7 @@ public interface HTMLHandler {
      * <b>Note</b>: A text only containing whitespace characters is omitted.
      * 
      * @param text The text
-     * @param ignorable <code>true</code> if specified text may be ignored since it only serves for formatting; otherwise <code>false</code>
+     * @param ignorable <code>true</code> if specified text may be ignored since it probably serves for formatting; otherwise <code>false</code>
      */
     public void handleText(String text, boolean ignorable);
 
