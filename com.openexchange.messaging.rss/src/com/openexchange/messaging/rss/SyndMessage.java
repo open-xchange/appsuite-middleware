@@ -82,6 +82,7 @@ import com.openexchange.session.Session;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.feed.synd.SyndImage;
 
 public class SyndMessage implements MessagingMessage {
 
@@ -93,6 +94,8 @@ public class SyndMessage implements MessagingMessage {
     private final String folder;
     private final SyndFeed feed;
     private final String sessionId;
+    private boolean b_picUrl;
+    private String picUrl;
      
     public SyndMessage(final SyndFeed feed, final SyndEntry syndEntry, final String folder, final Session session) throws MessagingException {
         entry = syndEntry;
@@ -255,34 +258,39 @@ public class SyndMessage implements MessagingMessage {
     }
     
     public String getPicture() {
-        final SyndFeed source = (entry.getSource() != null) ? entry.getSource() : feed;
-        if (null != source.getImage()) {
-            try {
-                final URL imageUrl = new URL(source.getImage().getUrl());
-                /*
-                 * Check presence of ProxyRegistry
-                 */
-                final ProxyRegistry proxyRegistry = ProxyRegistryProvider.getInstance().getProxyRegistry();
-                if (null == proxyRegistry) {
-                    org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Missing ProxyRegistry service. Replacing image URL skipped.");
-                    return null;
+        if (!b_picUrl) {
+            final SyndImage image = ((entry.getSource() != null) ? entry.getSource() : feed).getImage();
+            if (null != image) {
+                try {
+                    final URL imageUrl = new URL(image.getUrl());
+                    /*
+                     * Check presence of ProxyRegistry
+                     */
+                    final ProxyRegistry proxyRegistry = ProxyRegistryProvider.getInstance().getProxyRegistry();
+                    if (null == proxyRegistry) {
+                        org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Missing ProxyRegistry service. Replacing image URL skipped.");
+                        return null;
+                    }
+                    picUrl = proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance())).toString();
+                } catch (final MalformedURLException e) {
+                    /*
+                     * Not a valid URL
+                     */
+                    org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Not a valid image URL. Replacing image URL skipped.", e);
+                    picUrl = null;
+                } catch (final ProxyException e) {
+                    /*
+                     * Not a valid URL
+                     */
+                    org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Proxying image URL failed. Replacing image URL skipped.", e);
+                    picUrl = null;
                 }
-                return proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance())).toString();
-            } catch (final MalformedURLException e) {
-                /*
-                 * Not a valid URL
-                 */
-                org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Not a valid image URL. Replacing image URL skipped.", e);
-                return null;
-            } catch (final ProxyException e) {
-                /*
-                 * Not a valid URL
-                 */
-                org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Proxying image URL failed. Replacing image URL skipped.", e);
-                return null;
+            } else {
+                picUrl = null;
             }
+            b_picUrl = true;
         }
-        return null;
+        return picUrl;
     }
     
     protected Object tryThese(final Object...objects) {
