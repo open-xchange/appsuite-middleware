@@ -101,5 +101,25 @@ public interface SmartDriveResource {
      * @return The <b>optional</b> map of thumb nails
      */
     Map<String, SmartDriveThumbNail> getThumbNails();
+    
+    /**
+     * Find out whether this resource is a directory
+     * @return <code>true</code> if this resource is a directory, <code>false</code> otherwise
+     */
+    boolean isDirectory();
+    
+    /**
+     * Turns this resource into a directory. Check with {@link #isDirectory()} beforehand.
+     * @return This resource as a directory
+     * @throws SmartDriveException - If this resource is a file
+     */
+    SmartDriveDirectory toDirectory() throws SmartDriveException;
+    
+    /**
+     * Turns this resource into a file. Check with {@link #isDirectory()} beforehand.
+     * @return This resource as a file
+     * @throws SmartDriveException - If this resource is a directory
+     */
+    SmartDriveFile toFile() throws SmartDriveException;
 
 }

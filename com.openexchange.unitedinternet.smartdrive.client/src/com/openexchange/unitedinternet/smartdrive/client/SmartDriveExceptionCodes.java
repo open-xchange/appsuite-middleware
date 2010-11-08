@@ -125,8 +125,14 @@ public enum SmartDriveExceptionCodes implements OXErrorMessage {
      * SmartDrive user "%1$s" is not authenticated for stateful access to SmarTDrive server "%2$s".
      */
     UNAUTHORIZED(SmartDriveExceptionMessages.UNAUTHORIZED_MSG, Category.CODE_ERROR, 16),
-    
-    
+    /**
+     * This resource is not a file
+     */
+    NOT_A_FILE(SmartDriveExceptionMessages.NOT_A_FILE_MSG, Category.CODE_ERROR, 17),
+    /**
+     * This resource is not a directory
+     */
+    NOT_A_DIRECTORY(SmartDriveExceptionMessages.NOT_A_DIRECTORY_MSG, Category.CODE_ERROR, 18),
     
     ;
 

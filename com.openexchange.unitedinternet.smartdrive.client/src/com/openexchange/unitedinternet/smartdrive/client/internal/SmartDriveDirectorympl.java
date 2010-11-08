@@ -50,6 +50,9 @@
 package com.openexchange.unitedinternet.smartdrive.client.internal;
 
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveDirectory;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveExceptionCodes;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveFile;
 
 /**
  * {@link SmartDriveDirectorympl}
@@ -93,6 +96,18 @@ public final class SmartDriveDirectorympl extends AbstractSmartDriveResource imp
      */
     public void setMimeType(final String mimeType) {
         this.mimeType = mimeType;
+    }
+    
+    public boolean isDirectory() {
+        return true;
+    }
+    
+    public SmartDriveDirectory toDirectory() throws SmartDriveException {
+        return this;
+    }
+    
+    public SmartDriveFile toFile() throws SmartDriveException {
+        throw SmartDriveExceptionCodes.NOT_A_FILE.create();
     }
 
 }

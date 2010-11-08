@@ -49,17 +49,25 @@
 
 package com.openexchange.unitedinternet.smartdrive.client.internal;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnectionManager;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -103,6 +111,7 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
      */
     private static final Protocol PROTOCOL_HTTP = Protocol.getProtocol("http");
 
+
     /*
      * Member stuff
      */
@@ -117,6 +126,10 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
 
     private volatile SmartDriveStatelessAccess statelessAccess;
 
+    private String password;
+
+    private boolean authenticated;
+
     /**
      * Initializes a new {@link SmartDriveAccessImpl}.
      * 
@@ -128,6 +141,7 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
     public SmartDriveAccessImpl(final String userName, final String url, final Map<String, Object> configuration) throws SmartDriveException {
         super();
         this.userName = userName;
+        this.password = (String) configuration.get(SmartDriveConstants.CONFIG_PASSWORD);
         /*
          * The URL to SmartDrive server
          */
@@ -140,9 +154,113 @@ public final class SmartDriveAccessImpl implements SmartDriveAccess {
     }
 
     private void authenticate() throws SmartDriveException {
-        String sessionId = null;
+        if (authenticated) {
+            return;
+        }
 
-        client.getParams().setParameter(HTTP_CLIENT_PARAM_SESSION_ID, sessionId);
+        GetMethod getMethod = new GetMethod("");
+        getMethod.setFollowRedirects(true);
+
+        try {
+            client.executeMethod(getMethod);
+            String site = getMethod.getResponseBodyAsString();
+
+            String action = extractAction(site);
+            Map<String, String> hidden = extractHidden(site);
+
+            hidden.put("username", userName);
+            hidden.put("password", password);
+
+            PostMethod postMethod = new PostMethod(action);
+
+            for (Map.Entry<String, String> entry : hidden.entrySet()) {
+                postMethod.setParameter(entry.getKey(), entry.getValue());
+            }
+
+            client.executeMethod(postMethod);
+
+            Header locationHeader = postMethod.getResponseHeader("Location");
+            if(locationHeader != null) {
+                String redirectURLString = locationHeader.getValue();
+                URL redirectURL = new URL(redirectURLString);
+
+                client.getHostConfiguration().setHost(redirectURL.getHost());
+
+                getMethod = new GetMethod(redirectURL.getPath() + "?" + redirectURL.getQuery());
+
+                client.executeMethod(getMethod);
+            } else {
+                getMethod = new GetMethod("/");
+                
+                client.executeMethod(getMethod);
+            }
+
+            getMethod = new GetMethod("/userdata.js?username="+userName);
+
+            client.executeMethod(getMethod);
+
+            String sessionId = extractSessionId(getMethod.getResponseBodyAsString());
+
+            client.getParams().setParameter(HTTP_CLIENT_PARAM_SESSION_ID, sessionId);
+            authenticated = true;
+        } catch (HttpException e) {
+            throw SmartDriveExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw SmartDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+
+    }
+
+    private static Pattern SESSIONID = Pattern.compile("webde.products.os.userdata.sessionid\\s+=\\s+(.+)");
+
+    private static String extractSessionId(String site) {
+        Matcher matcher = SESSIONID.matcher(site);
+        if (matcher.find()) {
+            String group = matcher.group(1);
+            return group.substring(1, group.length() - 2);
+        }
+        return "";
+    }
+
+    private static Pattern INPUT = Pattern.compile("<input[^>]*?>");
+
+    private static Pattern NAME = Pattern.compile("name=\"(.*?)\"");
+
+    private static Pattern VALUE = Pattern.compile("value=\"(.*?)\"");
+
+    private static Map<String, String> extractHidden(String site) {
+        Matcher matcher = INPUT.matcher(site);
+        Map<String, String> hidden = new HashMap<String, String>();
+
+        while (matcher.find()) {
+            String inputField = matcher.group(0);
+            String name = "", value = "";
+
+            Matcher nameMatcher = NAME.matcher(inputField);
+            if (nameMatcher.find()) {
+                name = nameMatcher.group(1);
+            }
+
+            Matcher valueMatcher = VALUE.matcher(inputField);
+            if (valueMatcher.find()) {
+                value = valueMatcher.group(1);
+            }
+
+            hidden.put(name, value);
+        }
+
+        return hidden;
+    }
+
+    private static Pattern ACTION = Pattern.compile("action=\"(.*?)\"");
+
+    private static String extractAction(String site) {
+        Matcher matcher = ACTION.matcher(site);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return "GNITZ";
     }
 
     public SmartDriveStatefulAccess getStatefulAccess() throws SmartDriveException {

@@ -112,5 +112,10 @@ public final class SmartDriveDeadProperty {
     public void setValue(final String value) {
         this.value = value;
     }
+    
+    @Override
+    public String toString() {
+        return propertyName+": "+value;
+    }
 
 }

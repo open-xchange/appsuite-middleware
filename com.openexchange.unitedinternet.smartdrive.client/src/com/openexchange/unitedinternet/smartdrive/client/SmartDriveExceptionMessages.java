@@ -107,6 +107,12 @@ public final class SmartDriveExceptionMessages implements LocalizableStrings {
     // SmartDrive user "%1$s" is not authenticated for stateful access to SmarTDrive server "%2$s".
     public static final String UNAUTHORIZED_MSG = "SmartDrive user \"%1$s\" is not authenticated for stateful access to SmarTDrive server \"%2$s\".";
 
+    // This resource is not a file
+    public static final String NOT_A_FILE_MSG = "This resource is not a file";
+
+    // This resource is not a directory
+    public static final String NOT_A_DIRECTORY_MSG = "This resource is not a directory";
+
     /**
      * Initializes a new {@link SmartDriveExceptionMessages}.
      */

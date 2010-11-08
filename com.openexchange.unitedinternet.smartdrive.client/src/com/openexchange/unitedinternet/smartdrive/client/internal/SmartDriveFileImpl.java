@@ -49,6 +49,9 @@
 
 package com.openexchange.unitedinternet.smartdrive.client.internal;
 
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveDirectory;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveExceptionCodes;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveFile;
 
 /**
@@ -78,6 +81,18 @@ public final class SmartDriveFileImpl extends AbstractSmartDriveResource impleme
      */
     public void setFileSize(final int fileSize) {
         this.fileSize = fileSize;
+    }
+    
+    public boolean isDirectory() {
+        return false;
+    }
+    
+    public SmartDriveFile toFile() throws SmartDriveException {
+        return this;
+    }
+    
+    public SmartDriveDirectory toDirectory() throws SmartDriveException {
+        throw SmartDriveExceptionCodes.NOT_A_DIRECTORY.create();
     }
 
 }
