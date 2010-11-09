@@ -61,6 +61,6 @@ public class NewInfostoreResponse extends AbstractInfostoreResponse {
     }
 
     public int getID() {
-        return ((Integer) getData()).intValue();
+        return Integer.parseInt(getResponse().getData().toString());
     }
 }
