@@ -101,8 +101,9 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
             /*
              * Check
              */
-            final URI uri = new URI(folderId, true);
-            final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
+            final String fid = checkFolderId(folderId, rootUri);
+            final URI uri = new URI(fid, true);
+            final DavMethod propFindMethod = new PropFindMethod(fid, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
             try {
                 client.executeMethod(propFindMethod);
                 /*
@@ -116,7 +117,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 /*
                  * Find MultiStatus for specified folder URI
                  */
-                final URI tmp = new URI(folderId, true);
+                final URI tmp = new URI(fid, true);
                 for (final MultiStatusResponse multiStatusResponse : multiStatus.getResponses()) {
                     /*
                      * Get the DAV property set for 200 (OK) status
@@ -132,7 +133,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                             /*
                              * Not a directory
                              */
-                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(folderId);
+                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(fid);
                         }
                         /*
                          * Found directory
