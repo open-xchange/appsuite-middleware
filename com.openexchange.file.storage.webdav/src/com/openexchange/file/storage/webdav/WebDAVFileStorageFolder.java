@@ -155,6 +155,9 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
                     }
                 }
             }
+            if (!props.isEmpty()) {
+                setProperties(props);
+            }
         }
     }
 
