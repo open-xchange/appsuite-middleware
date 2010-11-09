@@ -194,6 +194,21 @@ Authors:
 
 
 # ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-centos
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package to install OX on CentOS
+Provides:	java-sun
+
+%description -n open-xchange-meta-centos
+The Open-Xchange Meta package to install OX on CentOS
+
+Authors:
+--------
+    Open-Xchange
+
+
+# ----------------------------------------------------------------------------------------------------
+
 
 %description
 Open-Xchange Meta packages
@@ -255,6 +270,10 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-meta-mobility
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-centos
 %defattr(-,root,root)
 %doc README.TXT
 
