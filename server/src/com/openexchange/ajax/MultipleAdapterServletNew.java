@@ -179,6 +179,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         Tools.disableCaching(resp);
         try {
             if (isFileUpload) {
+                resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter("callback");
                 if(callback == null) {
                     callback = action;
