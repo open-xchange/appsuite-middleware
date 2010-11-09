@@ -509,7 +509,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                         /*
                          * Found file
                          */
-                        return new WebDAVFileStorageFile(fid, id, session.getUserId()).parseDavPropertySet(propertySet);
+                        return new WebDAVFileStorageFile(fid, id, session.getUserId(), rootUri).parseDavPropertySet(propertySet);
                     }
                 }
                 /*
@@ -967,7 +967,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                             /*
                              * File
                              */
-                            files.add(new WebDAVFileStorageFile(fid, extractFileName(href), session.getUserId()).parseDavPropertySet(propertySet, fields));
+                            files.add(new WebDAVFileStorageFile(fid, extractFileName(href), session.getUserId(), rootUri).parseDavPropertySet(propertySet, fields));
                         }
                     }
                 }
@@ -1155,7 +1155,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                             /*
                              * File
                              */
-                            final WebDAVFileStorageFile davFile = new WebDAVFileStorageFile(folderId, extractFileName(href), session.getUserId()).parseDavPropertySet(propertySet, fields);
+                            final WebDAVFileStorageFile davFile = new WebDAVFileStorageFile(folderId, extractFileName(href), session.getUserId(), rootUri).parseDavPropertySet(propertySet, fields);
                             if (davFile.matches(pattern)) {
                                 results.add(davFile);
                             }

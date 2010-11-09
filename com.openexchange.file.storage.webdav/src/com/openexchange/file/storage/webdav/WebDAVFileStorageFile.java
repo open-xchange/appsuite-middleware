@@ -61,6 +61,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
 
 /**
  * {@link WebDAVFileStorageFile}
@@ -76,8 +77,13 @@ public final class WebDAVFileStorageFile extends DefaultFile {
      * @param id The file identifier; e.g. "lines.pdf"
      * @param userId The user identifier
      */
-    public WebDAVFileStorageFile(final String folderId, final String id, final int userId) {
+    public WebDAVFileStorageFile(final String folderId, final String id, final int userId, final String rootUri) {
         super();
+        if (rootUri.equals(folderId)) {
+            setFolderId(FileStorageFolder.ROOT_FULLNAME);
+        } else {
+            setFolderId(WebDAVFileStorageResourceUtil.checkFolderId(folderId));
+        }
         setFolderId(folderId);
         setCreatedBy(userId);
         setModifiedBy(userId);
