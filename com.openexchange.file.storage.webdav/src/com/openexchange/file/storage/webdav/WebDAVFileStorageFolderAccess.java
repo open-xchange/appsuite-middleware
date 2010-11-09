@@ -666,12 +666,12 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
 
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws FileStorageException {
         final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
-
-        FileStorageFolder f = getFolder(folderId);
+        final String fid = checkFolderId(folderId, rootUri);
+        FileStorageFolder f = getFolder(fid);
         do {
             list.add(f);
             f = getFolder(f.getParentId());
-        } while (!rootUri.equals(f.getParentId()));
+        } while (!FileStorageFolder.ROOT_FULLNAME.equals(f.getParentId()));
 
         return list.toArray(new FileStorageFolder[list.size()]);
     }
