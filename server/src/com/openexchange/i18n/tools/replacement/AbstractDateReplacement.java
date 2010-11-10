@@ -238,9 +238,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
          * The date-only instance
          */
         final DateFormat format = DateFormat.getDateInstance(DateFormat.DEFAULT, l);
-        if (null != timeZone) {
-            format.setTimeZone(timeZone);
-        }
+
         return format;
     }
 

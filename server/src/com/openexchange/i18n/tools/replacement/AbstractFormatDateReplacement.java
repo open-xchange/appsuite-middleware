@@ -116,6 +116,7 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
     @Override
     public String getReplacement() {
         final String dateRepl = super.getReplacement();
+        
         final String result;
         if ((date == null || dateRepl.length() == 0) && fallback != null) {
             final StringHelper sh = new StringHelper(locale == null ? Locale.ENGLISH : locale);

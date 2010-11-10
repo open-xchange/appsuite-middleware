@@ -1088,7 +1088,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     private static String getAppointmentCreateTemplate(final EmailableParticipant p, final boolean canRead, CalendarObject cal, ServerSession session) {
-        OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
         int folderOwner = getFolderOwner(cal, session);
         if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
             if (folderOwner == session.getUserId()) {
@@ -1256,19 +1255,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             /*
              * Set end time to first occurrence's end time if necessary
              */
-            if (newObj.containsRecurrenceType() && newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
-                if (start != null && end != null) {
-                    end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
-                }
-            } else if (oldObj != null && oldObj.containsRecurrenceType() && oldObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
-                if (start != null && end != null) {
-                    end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
-                }
-            } else if (newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
+            
+            if (newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
                 if (start != null && end != null) {
                     end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
                 }
             }
+
             renderMap.put(new EndDateReplacement(end, isFulltime, isTask).setChanged(endChanged));
         }
         renderMap.put(new CreationDateReplacement(
@@ -2020,8 +2013,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         return s1.equals(s2);
     }
-
-    private static final long THIRTY_MINUTES = 1800000l;
 
     /**
      * Checks the dates of specified calendar object.

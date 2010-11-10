@@ -1,3 +1,7 @@
+* 2010-11-10
+
+ - Bugfix #17227: Wrong end date in confirmation mails.
+ 
 * 2010-11-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #17459: Delegate to correct method when saving a new infoitem.
