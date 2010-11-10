@@ -306,11 +306,11 @@ public interface FileStorageFileAccess extends TransactionAware {
     public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<File.Field> modifiedFields) throws FileStorageException;
     
     /**
-     * Load the documents content
+     * Load the file content
      * 
      * @param folderId The folder identifier
-     * @param id The id of the document
-     * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
+     * @param id The id of the file
+     * @param version The version of the file. Pass in CURRENT_VERSION for the current version of the file.
      * @return
      * @throws FileStorageException
      */
@@ -339,7 +339,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     public void saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields) throws FileStorageException;
 
     /**
-     * Remove all documents in the given folder.
+     * Remove all files in the given folder.
      * 
      * @param folderId The folder to clear
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
@@ -348,7 +348,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     public void removeDocument(String folderId, long sequenceNumber) throws FileStorageException;
 
     /**
-     * Removes the documents with the given identifiers from the folder. Documents identifiers that could not be removed due to an
+     * Removes the files with the given identifiers from the folder. Documents identifiers that could not be removed due to an
      * edit-delete conflict are returned.
      * 
      * @param ids The identifiers
@@ -432,40 +432,40 @@ public interface FileStorageFileAccess extends TransactionAware {
      * List all versions of a file
      * 
      * @param folderId The folder identifier
-     * @param id The documents id
-     * @return
+     * @param id The file's identifier
+     * @return All versions of a file
      * @throws FileStorageException
      */
     public TimedResult<File> getVersions(String folderId, String id) throws FileStorageException;
 
     /**
-     * List all versions of a document loading the given fields
+     * List all versions of a file loading the given fields
      * 
      * @param folderId The folder identifier
-     * @param id The documents id
+     * @param id The file's identifier
      * @param fields The fields to load
-     * @return
+     * @return All versions of a file with given fields loaded
      * @throws FileStorageException
      */
     public TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields) throws FileStorageException;
 
     /**
-     * List all versions of a document loading the given fields sorted according to the given field in a given order
+     * List all versions of a file loading the given fields sorted according to the given field in a given order
      * 
      * @param folderId The folder identifier
-     * @param id The documents id
+     * @param id The file's identifier
      * @param fields The fields to load
-     * @return
+     * @return All sorted versions of a file with given fields loaded
      * @throws FileStorageException
      */
     public TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields, File.Field sort, SortDirection order) throws FileStorageException;
 
     /**
-     * Load the document metadata with the given identifiers.
+     * Load the file metadata with the given identifiers.
      * 
      * @param ids The identifiers
      * @param fields The fields to load
-     * @return
+     * @return The file metadatas
      * @throws FileStorageException
      */
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<File.Field> fields) throws FileStorageException;
