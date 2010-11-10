@@ -265,23 +265,25 @@ public final class MessageUtility {
      * @throws IOException If an I/O error occurs
      */
     public static String readStream(final InputStream inStream, final String charset) throws IOException {
-        InputStreamReader isr = null;
+        final InputStreamReader isr;
         try {
-            int count = 0;
-            final char[] cbuf = new char[BUFSIZE];
             isr = new InputStreamReader(inStream, charset);
-            if ((count = isr.read(cbuf, 0, cbuf.length)) > 0) {
-                final StringBuilder sb = new StringBuilder(STRBLD_SIZE);
-                do {
-                    sb.append(cbuf, 0, count);
-                } while ((count = isr.read(cbuf)) > 0);
-                return sb.toString();
-            }
-            return STR_EMPTY;
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             return STR_EMPTY;
+        }
+        try {
+            int count = 0;
+            final char[] cbuf = new char[BUFSIZE];
+            if ((count = isr.read(cbuf, 0, cbuf.length)) <= 0) {
+                return STR_EMPTY;
+            }
+            final StringBuilder sb = new StringBuilder(STRBLD_SIZE);
+            do {
+                sb.append(cbuf, 0, count);
+            } while ((count = isr.read(cbuf)) > 0);
+            return sb.toString();
         } catch (final IOException e) {
             if ("No content".equals(e.getMessage())) {
                 /*-
@@ -292,12 +294,10 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            if (null != isr) {
-                try {
-                    isr.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+            try {
+                isr.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
     }
