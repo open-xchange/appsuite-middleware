@@ -57,6 +57,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.charset.CollectionCharsetProvider;
 import com.openexchange.charset.ModifyCharsetExtendedProvider;
+import com.openexchange.charset.ModifyCharsetStandardProvider;
 
 /**
  * {@link CharsetActivator} - Activator for com.openexchange.charset bundle
@@ -69,7 +70,9 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
 
     private CollectionCharsetProvider collectionCharsetProvider;
 
-    private CharsetProvider backupCharsetProvider;
+    private CharsetProvider backupExtendedCharsetProvider;
+
+    private CharsetProvider backupStandardCharsetProvider;
 
     private BundleContext context;
 
@@ -82,10 +85,6 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         if (addedService instanceof CharsetProvider) {
@@ -97,17 +96,10 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         return addedService;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nope
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     public void removedService(final ServiceReference reference, final Object service) {
         if (service instanceof CharsetProvider) {
             collectionCharsetProvider.removeCharsetProvider((CharsetProvider) service);
@@ -118,19 +110,21 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         context.ungetService(reference);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.charset");
 
         try {
-            final CharsetProvider[] results = ModifyCharsetExtendedProvider.modifyCharsetExtendedProvider();
-            backupCharsetProvider = results[0];
-            collectionCharsetProvider = (CollectionCharsetProvider) results[1];
+            {
+                final CharsetProvider[] results = ModifyCharsetExtendedProvider.modifyCharsetExtendedProvider();
+                backupExtendedCharsetProvider = results[0];
+                collectionCharsetProvider = (CollectionCharsetProvider) results[1];
+            }
+            {
+                final CharsetProvider[] results = ModifyCharsetStandardProvider.modifyCharsetExtendedProvider();
+                backupStandardCharsetProvider = results[0];
+            }
             if (LOG.isInfoEnabled()) {
-                LOG.info("External charset provider replaced with collection charset provider");
+                LOG.info("Standard & external charset provider replaced with collection charset provider");
             }
             /*
              * Initialize a service tracker to track bundle chars providers
@@ -147,10 +141,6 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(final BundleContext context) throws Exception {
         LOG.info("stopping bundle: com.openexchange.charset");
 
@@ -159,11 +149,13 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
             /*
              * Restore original
              */
-            ModifyCharsetExtendedProvider.restoreCharsetExtendedProvider(backupCharsetProvider);
-            backupCharsetProvider = null;
+            ModifyCharsetExtendedProvider.restoreCharsetExtendedProvider(backupExtendedCharsetProvider);
+            backupExtendedCharsetProvider = null;
+            ModifyCharsetStandardProvider.restoreCharsetExtendedProvider(backupStandardCharsetProvider);
+            backupStandardCharsetProvider = null;
             collectionCharsetProvider = null;
             if (LOG.isInfoEnabled()) {
-                LOG.info("Collection charset provider replaced with former external charset provider");
+                LOG.info("Collection charset provider replaced with former standard/external charset provider");
                 LOG.info("Charset bundle successfully stopped");
             }
         } catch (final Throwable t) {
