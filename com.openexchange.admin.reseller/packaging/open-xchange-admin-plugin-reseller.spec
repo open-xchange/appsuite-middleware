@@ -52,6 +52,7 @@ Summary:        Open Xchange Admin Reseller Plugin
 Requires:       open-xchange-admin-client >= @OXVERSION@
 Requires:       open-xchange-admin-plugin-hosting >= @OXVERSION@
 Requires:       open-xchange-admin-plugin-autocontextid >= @OXVERSION@ 
+Requires:       open-xchange-admin-plugin-autocontextid-client >= @OXVERSION@ 
 #
 %package -n	open-xchange-admin-plugin-reseller-soap
 Group:          Applications/Productivity

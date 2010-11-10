@@ -8,7 +8,7 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-admin-plugin-reseller
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin-client (>= @OXVERSION@), open-xchange-admin-plugin-hosting (>= @OXVERSION@), open-xchange-admin-plugin-autocontextid (>= @OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin-client (>= @OXVERSION@), open-xchange-admin-plugin-hosting (>= @OXVERSION@), open-xchange-admin-plugin-autocontextid (>= @OXVERSION@), open-xchange-admin-plugin-autocontextid-client (>= @OXVERSION@)
 Description: Open Xchange Admin Reseller Plugin
 
 Package: open-xchange-admin-plugin-reseller-soap
