@@ -329,9 +329,9 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     }
 
    
-    public TimedResult<File> getVersions(String folder, String id, List<Field> fields) throws FileStorageException {
+    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws FileStorageException {
         try {
-            TimedResult<DocumentMetadata> versions = getInfostore(folder).getVersions(ID(id), FieldMapping.getMatching(fields), ctx, user, userConfig);
+            TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), FieldMapping.getMatching(fields), ctx, user, userConfig);
             return new InfostoreTimedResult(versions);
         } catch (AbstractOXException e) {
             throw new FileStorageException(e);
