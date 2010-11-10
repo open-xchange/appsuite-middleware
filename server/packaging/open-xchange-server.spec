@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -618,6 +618,20 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 10 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17223: Replacing "ISO-2022-JP" charset with "CP50220" on charset encoding
+ - Bugfix #17316: Setting proper HTTP headers on .docx attachment download
+* Tue Nov 09 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17480: Proper mapping of "infostore" module to not mix up with new file storage folders
+* Mon Nov 08 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17173: Adding space after formatting HTML tag like "em" or "strong"
+ - Partial fix for bug #17415: Delivering content for inline text attachments
+ - Bugfix #15476: Replaced favicon image URL with proxied one
+* Fri Nov 05 2010 - choeger@open-xchange.com
+ - Bugfix #17433: Missing dependency for filestorage related infostore packages
+* Fri Nov 05 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17389: Corrected SQL statement for removing the passcrypt user attribute.
+ - Bugfix #17372: Notifications for imported iCal appointments can now be suppressed by using a optional parameter for the request.
 * Thu Nov 04 2010 - thorben.betten@open-xchange.com
  - Bugfix #17421: No duplicate return to connection pool
 * Thu Nov 04 2010 - marcus.klein@open-xchange.com

@@ -1,3 +1,9 @@
+open-xchange-proxy-servlet (6.18.2.0-4) unstable; urgency=low
+
+  * first build for 6.18.2-rev4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 10 Nov 2010 15:37:35 +0100
+
 open-xchange-proxy-servlet (6.18.2.0-3) unstable; urgency=low
 
   * Build for 6.18.2 Rev3
