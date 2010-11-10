@@ -272,6 +272,7 @@ application/vnd.oasis.opendocument.text-web oth
 application/vnd.olpc-sugar xo
 application/vnd.oma.dd2+xml dd2
 application/vnd.openofficeorg.extension oxt
+application/vnd.openxmlformats-officedocument.wordprocessingml.document docx
 application/vnd.osgi.dp dp
 application/vnd.palm prc pdb pqa oprc
 application/vnd.pg.format str
