@@ -61,7 +61,8 @@ import com.openexchange.tx.TransactionException;
 public abstract class AbstractWriteAction extends AbstractFileAction {
 
     @Override
-    protected void before(AJAXInfostoreRequest req) throws TransactionException {
+    protected void before(AJAXInfostoreRequest req) throws AbstractOXException {
+        super.before(req);
         req.getFileAccess().startTransaction();
     }
     
@@ -78,6 +79,7 @@ public abstract class AbstractWriteAction extends AbstractFileAction {
     @Override
     protected void after(AJAXInfostoreRequest req) throws AbstractOXException {
         req.getFileAccess().finish();
+        super.after(req);
     }
 
 }
