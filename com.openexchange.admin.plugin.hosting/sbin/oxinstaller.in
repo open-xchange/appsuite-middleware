@@ -140,9 +140,8 @@ MASTER_PASS=
 MASTER_PASS_LONG=master-pass
 MASTER_USER=oxadminmaster
 MASTER_USER_LONG=master-user
-DISABLE_RMI_AUTH=false
+DISABLE_RMI_AUTH=
 DISABLE_RMI_AUTH_LONG=disableauth
-DISABLE_RMI_AUTH_VALUES="true false"
 URL="http://$OXHOST/"
 URL_LONG=extras-link
 OXOBJECT_LINK_HOSTNAME="$OXHOST"
@@ -576,7 +575,7 @@ setup_admin()
     v_cache_hosting ${ADMINCONF}/cache.ccf LTCP $UDPDISCOVERYPORT
     v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $AMCACHEPORT ${ADMINCONF}/cache.ccf
 
-    if [ "$DISABLE_RMI_AUTH"  == "false" ] ; then
+    if [ -z "$DISABLE_RMI_AUTH" ] ; then
 	v_setprop MASTER_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
 	v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
 	echo

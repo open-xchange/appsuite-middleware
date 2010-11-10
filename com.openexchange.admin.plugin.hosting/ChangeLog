@@ -1,3 +1,7 @@
+* 2010-11-10 - choeger@open-xchange.com
+
+ - Bugfix #17507: Wrong description in online help for disabling authentication
+
 * 2010-10-14 - choeger@open-xchange.com
  
  - Bugfix #17204: [L3] movecontextfilestore doesn't work if rsync isn't installed
