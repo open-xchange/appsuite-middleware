@@ -420,8 +420,10 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
             List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(all.size());
             for (FileStorageFileAccess files : all) {
                 SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
-                FileStorageAccountAccess accountAccess = files.getAccountAccess();
-                results.add(fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
+                if(result != null) {
+                    FileStorageAccountAccess accountAccess = files.getAccountAccess();
+                    results.add(fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
+                }
             }
             try {
                 return new MergingSearchIterator<File>(order.comparatorBy(sort), results);

@@ -1,3 +1,7 @@
+* 2010-11-10 - francisco.laguna@open-xchange.com
+
+ - Bugfix #17459: Delegate to correct method when saving a new infoitem.
+ 
 * 2010-11-10 - thorben.betten@open-xchange.com
 
  - Bugfix #17223: Replacing "ISO-2022-JP" charset with "CP50220" on charset encoding

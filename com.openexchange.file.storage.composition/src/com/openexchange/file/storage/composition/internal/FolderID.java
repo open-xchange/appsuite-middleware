@@ -72,14 +72,18 @@ public class FolderID {
     
     public FolderID(String uniqueID) {
         List<String> unmangled = IDMangler.unmangle(uniqueID);
-        if(unmangled.size() == 3) {
-            service = unmangled.get(0);
-            accountId = unmangled.get(1);
-            folderId = unmangled.get(2);
-        } else {
+        if(unmangled.size() == 1) {
             service = "com.openexchange.infostore";
             accountId = "infostore";
             folderId = uniqueID;
+        } else {
+            service = unmangled.get(0);
+            accountId = unmangled.get(1);
+            if(unmangled.size() > 2) {
+                folderId = unmangled.get(2);
+            } else {
+                folderId = "";
+            }
         }
     }
     

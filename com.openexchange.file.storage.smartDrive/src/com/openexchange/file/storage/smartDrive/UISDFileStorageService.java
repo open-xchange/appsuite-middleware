@@ -70,7 +70,6 @@ public class UISDFileStorageService implements FileStorageService {
 
     public static UISDFileStorageService newInstance() throws FileStorageException {
         UISDFileStorageService service = new UISDFileStorageService();
-        service.applyAccountManager();
         return service;
     }
 
@@ -80,7 +79,10 @@ public class UISDFileStorageService implements FileStorageService {
         this.accountManager = Services.accountManagerFor(this);
     }
 
-    public FileStorageAccountManager getAccountManager() {
+    public FileStorageAccountManager getAccountManager() throws FileStorageException {
+        if(accountManager == null) {
+            applyAccountManager();
+        }
         return accountManager;
     }
 

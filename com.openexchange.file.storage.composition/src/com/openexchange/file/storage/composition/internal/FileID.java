@@ -72,21 +72,24 @@ public class FileID {
         this.accountId = accountId;
         this.folderId = folderId;
         this.fileId = fileId;
+        if(folderId == null) {
+            throw new NullPointerException("folderId must not be null");
+        }
     }
 
     public FileID(String uniqueID) {
         List<String> unmangled = IDMangler.unmangle(uniqueID);
 
-        if (unmangled.size() == 4) {
-            serviceId = unmangled.get(0);
-            accountId = unmangled.get(1);
-            folderId = unmangled.get(2);
-            fileId = unmangled.get(3);
-        } else {
+        if (unmangled.size() == 1) {
             serviceId = "com.openexchange.infostore";
             accountId = "infostore";
             folderId = null;
             fileId = uniqueID;
+        } else {
+            serviceId = unmangled.get(0);
+            accountId = unmangled.get(1);
+            folderId = unmangled.get(2);
+            fileId = unmangled.get(3);
         }
     }
 
