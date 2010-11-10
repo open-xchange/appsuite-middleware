@@ -100,7 +100,7 @@ public class CopyTest extends InfostoreAJAXTest {
         for(final Iterator keys = orig.keys(); keys.hasNext();) {
             final String key = keys.next().toString();
             if(!skipKeys.contains(key)) {
-                assertEquals(orig.get(key).toString(), copy.get(key).toString());
+                assertEquals(key+" seems to have a wrong value", orig.get(key).toString(), copy.get(key).toString());
             }
         }
 
