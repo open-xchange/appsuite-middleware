@@ -49,9 +49,12 @@
 
 package com.openexchange.unitedinternet.smartdrive.client.internal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -59,10 +62,21 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.MultipartPostMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
+import org.apache.commons.httpclient.methods.multipart.FilePart;
+import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
+import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.methods.multipart.PartSource;
+import org.apache.commons.httpclient.methods.multipart.StringPart;
+import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveAccess;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveExceptionCodes;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResource;
+import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResponse;
 import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatelessAccess;
 
 /**
@@ -80,7 +94,6 @@ public final class SmartDriveStatelessAccessImpl implements SmartDriveStatelessA
 
     private final String userName;
 
-    private String downloadToken;
 
     /**
      * Initializes a new {@link SmartDriveStatelessAccessImpl}.
@@ -95,56 +108,113 @@ public final class SmartDriveStatelessAccessImpl implements SmartDriveStatelessA
             if (path.charAt(0) != '/') {
                 path = '/' + path;
             }
-            requestPrefix =
-                new StringBuilder(16).append(path.endsWith("/") ? path.substring(0, path.length() - 1) : path).append("/data/").append(
-                    userName).append('/').toString();
+            requestPrefix = new StringBuilder(16).append(path.endsWith("/") ? path.substring(0, path.length() - 1) : path).append("/data/").append(
+                userName).append('/').toString();
         } else {
             requestPrefix = new StringBuilder(16).append("/data/").append(userName).append('/').toString();
         }
     }
 
-    private String getDownloadToken() throws SmartDriveException {
-        if (null == downloadToken) {
-            downloadToken = (String) client.getParams().getParameter(HTTP_CLIENT_PARAM_DOWNLOAD_TOKEN);
-            if (null == downloadToken) {
-                downloadToken = access.getStatefulAccess().obtainDownloadToken();
+    public InputStream downloadFile(String path) throws SmartDriveException {
+        try {
+            if (path.startsWith("/")) {
+                path = path.substring(1);
             }
+
+            String downloadToken = obtainDownloadTokenFor(path);
+            
+            
+            String downloadURL = getURI("download", path);
+
+            GetMethod get = new GetMethod(downloadURL);
+
+            get.setQueryString(new NameValuePair[] { new NameValuePair("token", downloadToken) });
+
+            client.executeMethod(get);
+
+            int status = get.getStatusCode();
+            if (SC_UNAUTHORIZED == status) {
+                throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, "");
+            }
+            if (SC_GENERAL_ERROR == status) {
+                throw SmartDriveExceptionCodes.GENERAL_ERROR.create(get.getStatusText());
+            }
+            return get.getResponseBodyAsStream();
+        } catch (HttpException e) {
+            throw SmartDriveExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw SmartDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
-        return downloadToken;
+
+    }
+    
+    public void uploadFile(String directory, final String filename, final InputStream data) throws SmartDriveException {
+        try {
+            
+            byte[] bytes = IOTools.getBytes(data);
+            
+            String uploadToken = obtainUploadTokenFor(directory);
+            
+            String uploadURL = getURI("upload");
+            
+            PostMethod multipartPostMethod = new PostMethod(uploadURL);
+
+            if (directory.startsWith("/")) {
+                directory = "/"+userName+directory;
+            } else {
+                directory = "/"+userName+"/"+directory;
+            }
+            
+            if(!directory.endsWith("/")) {
+                directory += "/";
+            }
+
+            
+            MultipartRequestEntity entity = new MultipartRequestEntity(new Part[]{
+                new StringPart("uploadToken", uploadToken),
+                new StringPart("targetFolder", directory),
+                new FilePart("file1", new ByteArrayPartSource(filename, bytes))
+            }, client.getParams());
+            
+            multipartPostMethod.setRequestEntity(entity);
+            client.executeMethod(multipartPostMethod);
+            
+            int status = multipartPostMethod.getStatusCode();
+            if (SC_UNAUTHORIZED == status) {
+                throw SmartDriveExceptionCodes.UNAUTHORIZED.create(userName, "");
+            }
+            if (SC_GENERAL_ERROR == status) {
+                throw SmartDriveExceptionCodes.GENERAL_ERROR.create(multipartPostMethod.getStatusText());
+            }
+            
+        } catch (HttpException e) {
+            throw SmartDriveExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw SmartDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
-    public InputStream downloadFile(final String filePath) throws SmartDriveException {
-        try {
-            final String uriStr = getURI("download", filePath);
-            final GetMethod method = new GetMethod(uriStr);
-            try {
-                /*
-                 * Add token
-                 */
-                final NameValuePair nvp = new NameValuePair("token", getDownloadToken());
-                method.setQueryString(new NameValuePair[] { nvp });
-                /*
-                 * Execute method
-                 */
-                client.executeMethod(method);
-                /*
-                 * Return as stream
-                 */
-                return new SmartDriveInputStream(method);
-            } catch (final HttpException e) {
-                throw SmartDriveExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
-            } catch (final IOException e) {
-                throw SmartDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } // No finally-clause, closed in SmartDriveInputStream instance when invoking close()
-        } catch (final RuntimeException e) {
-            throw SmartDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
 
     /*-
      * ---------------------------- HELPER METHODS ----------------------------
      */
 
+    private String obtainUploadTokenFor(String path) throws SmartDriveException {
+        SmartDriveResponse<List<SmartDriveResource>> response = access.getStatefulAccess().propget(path, new int[0]);
+        // TODO: Error Handling
+        SmartDriveResource resource = response.getResponse().get(0);
+        return resource.toDirectory().getUploadToken();
+    }
+
+    
+    private String obtainDownloadTokenFor(String path) throws SmartDriveException {
+        SmartDriveResponse<List<SmartDriveResource>> response = access.getStatefulAccess().propget(path, new int[0]);
+        // TODO: Error Handling
+        SmartDriveResource resource = response.getResponse().get(0);
+
+        return resource.getDownloadToken();
+    }
+    
     /**
      * Sucks method's response input stream using direct buffering.
      * 

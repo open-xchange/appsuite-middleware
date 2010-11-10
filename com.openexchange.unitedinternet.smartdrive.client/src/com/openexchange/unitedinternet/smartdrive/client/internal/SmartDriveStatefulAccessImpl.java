@@ -50,6 +50,7 @@
 package com.openexchange.unitedinternet.smartdrive.client.internal;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
@@ -113,9 +114,9 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
             if (path.charAt(0) != '/') {
                 path = '/' + path;
             }
-            requestPrefix =
-                new StringBuilder(16).append(path.endsWith("/") ? path.substring(0, path.length() - 1) : path).append("/op/").append(
-                    userName).append('/').toString();
+            requestPrefix = new StringBuilder(16).append(path.endsWith("/") ? path.substring(0, path.length() - 1) : path).append("/op/").append(
+                userName).append('/').toString();
+
         } else {
             requestPrefix = new StringBuilder(16).append("/op/").append(userName).append('/').toString();
         }
@@ -1240,4 +1241,5 @@ public final class SmartDriveStatefulAccessImpl implements SmartDriveStatefulAcc
         return startingChar == toCheck.charAt(i);
     }
 
+   
 }

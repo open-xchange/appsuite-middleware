@@ -193,7 +193,7 @@ public interface SmartDriveConstants {
 
     public static final String JSON_LAST_MODIFIED = "lastModified";
 
-    public static final String JSON_DOWNLOAD_TOKEN = "downloadToken";
+    public static final String JSON_DOWNLOAD_TOKEN = "downloadtoken";
 
     public static final String JSON_THUMB_NAILS = "thumbNails";
 
@@ -201,7 +201,7 @@ public interface SmartDriveConstants {
 
     public static final String JSON_URL = "url";
 
-    public static final String JSON_UPLOAD_TOKEN = "uploadToken";
+    public static final String JSON_UPLOAD_TOKEN = "uploadtoken";
 
     public static final String JSON_DEAD_PROPERTIES = "deadProperties";
 

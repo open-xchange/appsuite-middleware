@@ -49,6 +49,7 @@
 
 package com.openexchange.unitedinternet.smartdrive.client;
 
+import java.io.InputStream;
 import java.util.List;
 
 /**

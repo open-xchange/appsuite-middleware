@@ -73,7 +73,7 @@ public abstract class AbstractSmartDriveResource implements SmartDriveResource {
     protected Date lastModified;
 
     protected String downloadToken;
-
+    
     protected List<SmartDriveDeadProperty> deadProperties;
 
     protected Map<String, SmartDriveThumbNail> thumbNails;
@@ -178,5 +178,5 @@ public abstract class AbstractSmartDriveResource implements SmartDriveResource {
             this.thumbNails = thisMap;
         }
     }
-
+   
 }

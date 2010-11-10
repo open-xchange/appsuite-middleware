@@ -67,4 +67,14 @@ public interface SmartDriveStatelessAccess extends SmartDriveConstants {
      */
     InputStream downloadFile(String filePath) throws SmartDriveException;
 
+    /**
+     * Stores the data in the given directory under the given filename.
+     * 
+     * @param directory The full path to the directory to store this file under
+     * @param filename The filename to store this file under
+     * @param data The file data
+     * @throws SmartDriveException If the upload failed
+     */
+    void uploadFile(String directory, String filename, InputStream data) throws SmartDriveException;
+
 }
