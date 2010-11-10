@@ -91,6 +91,7 @@ import org.apache.jackrabbit.webdav.transaction.TransactionConstants;
 import org.apache.jackrabbit.webdav.transaction.TransactionInfo;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.webdav.workarounds.LiberalUnLockMethod;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -294,7 +295,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
         try {
             final URI uri = new URI(rootUri, true);
-            final UnLockMethod method = new UnLockMethod(uri.toString(), transactionToken);
+            final UnLockMethod method = new LiberalUnLockMethod(uri.toString(), transactionToken);
             try {
                 method.setRequestBody(new TransactionInfo(true)); // COMMIT
                 client.executeMethod(method);
@@ -324,7 +325,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
         try {
             final URI uri = new URI(rootUri, true);
-            final UnLockMethod method = new UnLockMethod(uri.toString(), transactionToken);
+            final UnLockMethod method = new LiberalUnLockMethod(uri.toString(), transactionToken);
             try {
                 method.setRequestBody(new TransactionInfo(false)); // ROLL-BACK
                 client.executeMethod(method);
@@ -804,7 +805,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final String folderId = lockTokenKey.getFolderId();
             final String id = lockTokenKey.getId();
             final URI uri = new URI(folderId + id, true);
-            final UnLockMethod unlockMethod = new UnLockMethod(uri.toString(), lockToken);
+            final UnLockMethod unlockMethod = new LiberalUnLockMethod(uri.toString(), lockToken);
             try {
                 initMethod(folderId, id, unlockMethod);
                 client.executeMethod(unlockMethod);
