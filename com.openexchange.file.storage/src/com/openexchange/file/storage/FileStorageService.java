@@ -94,8 +94,9 @@ public interface FileStorageService extends FileStorageConstants {
      * Gets the account manager for this file storage service.
      * 
      * @return The account manager
+     * @throws FileStorageException 
      */
-    public FileStorageAccountManager getAccountManager();
+    public FileStorageAccountManager getAccountManager() throws FileStorageException;
 
     /**
      * Gets the account access for specified account identifier.
