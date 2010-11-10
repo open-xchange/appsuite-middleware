@@ -78,6 +78,9 @@ public class IDMangler {
     }
 
     private static String escape(String string) {
+        if(string == null) {
+            return null;
+        }
         StringBuilder buffer = new StringBuilder(string.length() * 3);
         for (char c : string.toCharArray()) {
             switch (c) {
