@@ -51,6 +51,7 @@ package com.openexchange.tools.io;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -81,6 +82,22 @@ public class IOTools {
         }
         
         outputStream.flush();
+    }
+    
+    public static final byte[] getBytes(InputStream stream) throws IOException {
+        BufferedInputStream in = new BufferedInputStream(stream);
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            int i;
+            while((i = in.read()) != -1) {
+                out.write(i);
+            }
+            
+            return out.toByteArray();
+        } finally {
+            in.close();
+        }
+        
     }
  
 }
