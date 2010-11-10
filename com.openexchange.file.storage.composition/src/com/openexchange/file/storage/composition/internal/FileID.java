@@ -72,9 +72,6 @@ public class FileID {
         this.accountId = accountId;
         this.folderId = folderId;
         this.fileId = fileId;
-        if(folderId == null) {
-            throw new NullPointerException("folderId must not be null");
-        }
     }
 
     public FileID(String uniqueID) {
@@ -126,7 +123,7 @@ public class FileID {
     }
 
     public String toUniqueID() {
-        if(serviceId.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
+        if (serviceId.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
             return fileId;
         }
         return IDMangler.mangle(serviceId, accountId, folderId, fileId);
