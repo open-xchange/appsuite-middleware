@@ -1,6 +1,7 @@
 * 2010-11-10 - thorben.betten@open-xchange.com
 
  - Bugfix #17223: Replacing "ISO-2022-JP" charset with "CP50220" on charset encoding
+ - Bugfix #17316: Setting proper HTTP headers on .docx attachment download
 
 * 2010-11-09 - thorben.betten@open-xchange.com
 

@@ -186,10 +186,9 @@ public final class DownloadUtility {
              */
             in = new CombinedInputStream(sequence, in);
         }
-        contentType.setNameParameter(preparedFileName);
         return new CheckedDownload(
-            contentType.toString(),
-            new StringBuilder(64).append("inline; filename=\"").append(preparedFileName).append('"').toString(),
+            contentType.getBaseType(),
+            new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(),
             in);
     }
 
