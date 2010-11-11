@@ -66,7 +66,9 @@ public final class ContentDisposition extends ParameterizedHeader {
 
     private static final Pattern PATTERN_CONTENT_DISP = Pattern.compile("(?:inline|attachment)", Pattern.CASE_INSENSITIVE);
 
-    private static final String DEFAULT_CONTENT_DISP = Part.INLINE.toUpperCase(Locale.ENGLISH);
+    private static final String INLINE = Part.INLINE;
+
+    private static final String ATTACHMENT = Part.ATTACHMENT;
 
     private static final String PARAM_FILENAME = "filename";
 
@@ -77,7 +79,7 @@ public final class ContentDisposition extends ParameterizedHeader {
      */
     public ContentDisposition() {
         super();
-        disposition = DEFAULT_CONTENT_DISP;
+        disposition = INLINE;
         parameterList = new ParameterList();
     }
 
@@ -145,14 +147,14 @@ public final class ContentDisposition extends ParameterizedHeader {
             /*
              * Nothing to parse
              */
-            disposition = DEFAULT_CONTENT_DISP;
+            disposition = INLINE;
             parameterList = new ParameterList();
             return;
         }
         final String contentDisp = prepareParameterizedHeader(contentDispArg);
         final Matcher cdMatcher = PATTERN_CONTENT_DISP.matcher(contentDisp);
         if (!cdMatcher.find()) {
-            disposition = DEFAULT_CONTENT_DISP;
+            disposition = INLINE;
             parameterList = new ParameterList();
             return;
         }
@@ -190,6 +192,20 @@ public final class ContentDisposition extends ParameterizedHeader {
      */
     public void setDisposition(final String disposition) {
         this.disposition = disposition;
+    }
+
+    /**
+     * Sets the disposition to <code>"inline"</code>.
+     */
+    public void setInline() {
+        disposition = INLINE;
+    }
+
+    /**
+     * Sets the disposition to <code>"attachment"</code>.
+     */
+    public void setAttachment() {
+        disposition = ATTACHMENT;
     }
 
     /**
