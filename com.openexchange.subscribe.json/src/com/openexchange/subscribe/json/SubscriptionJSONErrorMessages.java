@@ -115,7 +115,7 @@ public enum SubscriptionJSONErrorMessages implements OXErrorMessage {
     }
     
     public void throwException(final Throwable cause, final Object... args) throws SubscriptionJSONException {
-        FACTORY.throwException(this, cause, args);
+        throw FACTORY.create(this, cause, args);
     }
 
     public void throwException(final Object... args) throws SubscriptionJSONException {

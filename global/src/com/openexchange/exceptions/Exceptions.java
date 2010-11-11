@@ -161,14 +161,6 @@ public abstract class Exceptions<T extends AbstractOXException> {
         return create(message.getDetailNumber(), cause, args);
     }
 
-    public void throwException(final OXErrorMessage message, final Object... args) throws T {
-        throw create(message, args);
-    }
-
-    public void throwException(final OXErrorMessage message, final Throwable cause, final Object... args) throws T {
-        throw create(message, cause, args);
-    }
-
     public SortedSet<ErrorMessage> getMessages() {
         return new TreeSet<ErrorMessage>(errors.values());
     }

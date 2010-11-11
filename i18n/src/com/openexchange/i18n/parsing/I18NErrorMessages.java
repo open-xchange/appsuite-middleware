@@ -97,7 +97,7 @@ public enum I18NErrorMessages implements OXErrorMessage {
     }
 
     public void throwException(final Throwable cause, final Object... args) throws I18NException {
-        FACTORY.throwException(this, cause, args);
+        throw FACTORY.create(this, cause, args);
     }
 
     public void throwException(final Object... args) throws I18NException {
