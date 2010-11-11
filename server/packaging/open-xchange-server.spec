@@ -156,6 +156,15 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-499
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
+   jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+   jopts=${jopts//\"/}
+   if ! echo $jopts | grep "sun.net.inetaddr.ttl" > /dev/null; then
+      ox_set_property JAVA_XTRAOPTS \""$jopts -Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10"\" $pfile
+   fi
+
    # SoftwareChange_Request-498
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/mime.types

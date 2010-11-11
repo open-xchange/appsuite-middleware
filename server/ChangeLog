@@ -1,3 +1,7 @@
+* 2010-11-11 - choeger@open-xchange.com
+
+ - Bugfix #13480: DNS is not rediscovered for E-Mail servers
+
 * 2010-11-11 - francisco.laguna@open-xchange.com
 
  - Bugfix #17449: Made code a bit more robust against null values.
