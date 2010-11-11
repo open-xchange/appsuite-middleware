@@ -94,7 +94,14 @@ public class AllAction extends AbstractMessagingAccountAction {
         final JSONArray result = new JSONArray();
         
         for (final MessagingService messagingService : services) {
-            for (final MessagingAccount account : messagingService.getAccountManager().getAccounts(session)) {
+            final boolean isMail = ("com.openexchange.messaging.mail".equals(messagingService.getId()));
+            NextAccount: for (final MessagingAccount account : messagingService.getAccountManager().getAccounts(session)) {
+                if (isMail && account.getId() == 0) {
+                    /*
+                     * The primary mail account
+                     */
+                    continue NextAccount;
+                }
                 result.put(writer.write(account));
             }
         }
