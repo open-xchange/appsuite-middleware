@@ -56,6 +56,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -64,6 +65,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.HasLoginPage;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
@@ -71,13 +73,15 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageByFormActionReturningStringStep extends AbstractStep<String, Object> implements LoginStep {
+public class LoginPageByFormActionReturningStringStep extends AbstractStep<String, Object> implements LoginStep, HasLoginPage {
    
    private static Log LOG = LogFactory.getLog(LoginPageByFormActionStep.class);
 
    private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, baseUrl, regexForReturnedString, submitName;
 
    private int numberOfForm;
+   
+   private Page loginPage;
 
    public LoginPageByFormActionReturningStringStep() {
 
@@ -103,6 +107,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
        try {
            // Get the page, fill in the credentials and submit the login form identified by its action
            loginPage = webClient.getPage(url);
+           this.loginPage = loginPage;
            HtmlForm loginForm = null;
            int numberOfFormCounter = 1;
            for (final HtmlForm form : loginPage.getForms()) {
@@ -231,6 +236,12 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
         this.submitName = submitName;
     }
 
+    
+    public Page getLoginPage() {
+        return loginPage;
+    }
+
+    
    
 }
 

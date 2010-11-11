@@ -54,6 +54,7 @@ import java.net.MalformedURLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
@@ -65,6 +66,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.HasLoginPage;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
@@ -72,13 +74,15 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> implements LoginStep {
+public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> implements LoginStep, HasLoginPage {
     
     private static Log LOG = LogFactory.getLog(LoginPageByFormActionStep.class);
 
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl, nameOfSubmit;
 
     private int numberOfForm;
+    
+    private Page loginPage;
 
     public LoginPageByFormActionStep() {
         nameOfSubmit = "";
@@ -118,6 +122,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         try {
             // Get the page, fill in the credentials and submit the login form identified by its action
             loginPage = webClient.getPage(url);
+            this.loginPage = loginPage;
             HtmlForm loginForm = null;
             int numberOfFormCounter = 1;
             for (final HtmlForm form : loginPage.getForms()) {
@@ -262,6 +267,11 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
     
     public void setNameOfSubmit(String nameOfSubmit) {
         this.nameOfSubmit = nameOfSubmit;
+    }
+
+    
+    public Page getLoginPage() {
+        return loginPage;
     }
     
     

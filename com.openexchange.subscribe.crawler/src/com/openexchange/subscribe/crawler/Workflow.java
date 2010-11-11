@@ -68,6 +68,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.HasLoginPage;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 import com.openexchange.subscribe.crawler.internal.LogoutStep;
 import com.openexchange.subscribe.crawler.internal.NeedsLoginStepString;
@@ -299,6 +300,8 @@ public class Workflow {
         if (currentStep.getInput() != null){
             if (currentStep.getInput() instanceof Page){
                 LOG.error("Bad Input causing the error at (" + currentStep.getClass() + ") : " + ((Page) currentStep.getInput()).getWebResponse().getContentAsString());
+            } if (currentStep instanceof HasLoginPage){
+                LOG.error("Bad Page causing the error at (" + currentStep.getClass() + ") : " + (((HasLoginPage) currentStep).getLoginPage().getWebResponse().getContentAsString()));
             } else {
                 LOG.error(" Bad Input causing the error at (" + currentStep.getClass() + ") : " + currentStep.getInput().toString());
             }

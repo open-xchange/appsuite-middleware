@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
@@ -64,6 +65,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.HasLoginPage;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 
@@ -72,12 +74,13 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  * This step identifies the login-form via its id. The same method is used for the fields for username and password.
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implements LoginStep {
+public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implements LoginStep, HasLoginPage {
 
     private static Log LOG = LogFactory.getLog(LoginPageByFormActionStep.class);
 
     private String url, username, password, idOfLoginForm, idOfUserField, idOfPasswordField, linkAvailableAfterLogin;
-
+    
+    private Page loginPage;
 
 
     public LoginPageByFormIDStep() {
@@ -202,5 +205,40 @@ public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implem
     public String getBaseUrl() {
         return "";
     }
+    
+    
+    public String getIdOfLoginForm() {
+        return idOfLoginForm;
+    }
 
+    
+    public void setIdOfLoginForm(String idOfLoginForm) {
+        this.idOfLoginForm = idOfLoginForm;
+    }
+
+    
+    public String getIdOfUserField() {
+        return idOfUserField;
+    }
+
+    
+    public void setIdOfUserField(String idOfUserField) {
+        this.idOfUserField = idOfUserField;
+    }
+
+    
+    public String getIdOfPasswordField() {
+        return idOfPasswordField;
+    }
+
+    
+    public void setIdOfPasswordField(String idOfPasswordField) {
+        this.idOfPasswordField = idOfPasswordField;
+    }
+
+    public Page getLoginPage() {
+        return loginPage;
+    }
+
+    
 }

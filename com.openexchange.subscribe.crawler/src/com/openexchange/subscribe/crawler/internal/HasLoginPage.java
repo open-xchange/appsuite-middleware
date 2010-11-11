@@ -49,21 +49,15 @@
 
 package com.openexchange.subscribe.crawler.internal;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.SubscriptionException;
+import com.gargoylesoftware.htmlunit.Page;
 
 /**
- * {@link LoginStep}
- * 
+ * {@link HasLoginPage}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public interface LoginStep{
+public interface HasLoginPage{
 
-    public void execute(WebClient webClient) throws SubscriptionException;
+    public abstract Page getLoginPage();
 
-    public void setUsername(String username);
-
-    public void setPassword(String password);
-    
-    public String getBaseUrl();
 }

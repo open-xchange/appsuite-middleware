@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
@@ -64,6 +65,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.HasLoginPage;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
@@ -71,11 +73,13 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements LoginStep {
+public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements LoginStep, HasLoginPage {
 
     private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
     
     private static final Log LOG = LogFactory.getLog(LoginPageStep.class);
+    
+    private Page loginPage;
 
     public LoginPageStep() {
     }
@@ -98,6 +102,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         try { 
             // Get the page, fill in the credentials and submit the login form
             loginPage = webClient.getPage(url);
+            this.loginPage = loginPage;
             final HtmlForm loginForm = loginPage.getFormByName(nameOfLoginForm);
             final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
             userfield.setValueAttribute(username);
@@ -201,4 +206,10 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         this.baseUrl = baseUrl;
     }
 
+    
+    public Page getLoginPage() {
+        return loginPage;
+    }
+
+    
 }

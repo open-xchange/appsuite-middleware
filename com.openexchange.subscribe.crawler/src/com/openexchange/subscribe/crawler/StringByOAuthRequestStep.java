@@ -68,10 +68,12 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.client.OAuthClient;
 import net.oauth.client.httpclient4.HttpClient4;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.HasLoginPage;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
@@ -79,7 +81,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class StringByOAuthRequestStep extends AbstractStep<String, Object> implements LoginStep {
+public class StringByOAuthRequestStep extends AbstractStep<String, Object> implements LoginStep, HasLoginPage {
 
     private String username, password, consumerSecret, consumerKey, requestUrl, authorizationUrl, accessUrl, callbackUrl;
 
@@ -90,6 +92,8 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     private OAuthAccessor oAuthAccessor;
 
     private static final Log LOG = LogFactory.getLog(StringByOAuthRequestStep.class);
+    
+    private Page loginPage;
 
     public StringByOAuthRequestStep() {
     }
@@ -147,6 +151,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
             // Fill out form / confirm the access otherwise
             LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
             authorizeStep.execute(webClient);
+            loginPage = authorizeStep.getLoginPage();
             HtmlPage pageWithVerifier = authorizeStep.getOutput();
             String pageString2 = pageWithVerifier.getWebResponse().getContentAsString();
             LOG.debug("Page contains the verifier : " + pageString2.contains("access-code")); 
@@ -358,5 +363,8 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     }
 
     
+    public Page getLoginPage() {
+        return loginPage;
+    }
     
 }
