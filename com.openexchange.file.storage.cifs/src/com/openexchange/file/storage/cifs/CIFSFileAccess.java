@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import jcifs.smb.NtlmPasswordAuthentication;
@@ -65,6 +66,7 @@ import jcifs.smb.SmbFileOutputStream;
 import org.apache.commons.httpclient.URI;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageException;
@@ -75,6 +77,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tx.TransactionException;
 
 /**
@@ -84,11 +87,14 @@ import com.openexchange.tx.TransactionException;
  */
 public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageFileAccess {
 
+    private final FileStorageAccountAccess accountAccess;
+   
     /**
      * Initializes a new {@link CIFSFileAccess}.
      */
-    public CIFSFileAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session) {
+    public CIFSFileAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session, final FileStorageAccountAccess accountAccess) {
         super(rootUrl, auth, account, session);
+        this.accountAccess = accountAccess;
     }
 
     public void startTransaction() throws TransactionException {
@@ -225,11 +231,20 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * Convert file to SMB representation
              */
             final SmbFile smbFile = new SmbFile(uri.toString(), auth);
+            /*
+             * Create if non-existent
+             */
+            if (!smbFile.exists()) {
+                smbFile.createNewFile();
+            }
             final long now = System.currentTimeMillis();
-            smbFile.setCreateTime(now);
-            smbFile.setIfModifiedSince(now);
+            if (set.contains(Field.CREATED)) {
+                smbFile.setCreateTime(now);
+            }
+            if (set.contains(Field.LAST_MODIFIED)) {
+                smbFile.setLastModified(now);
+            }
             smbFile.setReadWrite();
-            smbFile.createNewFile();
             return smbFile;
         } catch (final FileStorageException e) {
             throw e;
@@ -484,8 +499,35 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     public void touch(final String folderId, final String id) throws FileStorageException {
-        // TODO Auto-generated method stub
-
+        try {
+            /*
+             * Check
+             */
+            final String fid = checkFolderId(folderId, rootUrl);
+            final URI uri = new URI(fid + id, true);
+            /*
+             * Check validity
+             */
+            final SmbFile smbFile = new SmbFile(uri.toString(), auth);
+            if (!smbFile.exists()) {
+                throw CIFSExceptionCodes.NOT_FOUND.create(uri.toString());
+            }
+            if (!smbFile.isFile()) {
+                throw CIFSExceptionCodes.NOT_A_FILE.create(uri.toString());
+            }
+            /*
+             * Update
+             */
+            smbFile.setLastModified(System.currentTimeMillis());
+        } catch (final FileStorageException e) {
+            throw e;
+        } catch (final SmbException e) {
+            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public TimedResult<File> getDocuments(final String folderId) throws FileStorageException {
@@ -594,24 +636,117 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         }
     }
 
+    private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.createEmptyIterator();
+
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws FileStorageException {
-        // TODO Auto-generated method stub
-        return null;
+        final List<File> results;
+        if (ALL_FOLDERS == folderId) {
+            /*
+             * Recursively search files in directories
+             */
+            results = new ArrayList<File>();
+            recursiveSearchFile(pattern, rootUrl, fields, results);
+        } else {
+            /*
+             * Get files from folder
+             */
+            results = getFileList(folderId, fields);
+            /*
+             * Filter by search pattern
+             */
+            for (final Iterator<File> iterator = results.iterator(); iterator.hasNext();) {
+                final File file = iterator.next();
+                if (!file.matches(pattern)) {
+                    iterator.remove();
+                }
+            }
+        }
+        /*
+         * Empty?
+         */
+        if (results.isEmpty()) {
+            return SearchIteratorAdapter.createEmptyIterator();
+        }
+        /*
+         * Sort
+         */
+        Collections.sort(results, order.comparatorBy(sort));
+        /*
+         * Consider start/end index
+         */
+        if (start != NOT_SET && end != NOT_SET && end > start) {
+
+            final int fromIndex = start;
+            int toIndex = end;
+            if ((fromIndex) > results.size()) {
+                /*
+                 * Return empty iterator if start is out of range
+                 */
+                return SearchIteratorAdapter.createEmptyIterator();
+            }
+            /*
+             * Reset end index if out of range
+             */
+            if (toIndex >= results.size()) {
+                toIndex = results.size();
+            }
+            /*
+             * Return
+             */
+            final List<File> subList = results.subList(fromIndex, toIndex);
+            return new SearchIteratorAdapter<File>(subList.iterator(), subList.size());
+        }
+        /*
+         * Return sorted result
+         */
+        return new SearchIteratorAdapter<File>(results.iterator(), results.size());
+    }
+
+    private void recursiveSearchFile(final String pattern, final String folderId, final List<Field> fields, final List<File> results) throws FileStorageException {
+        try {
+            /*
+             * Check
+             */
+            final String fid = checkFolderId(folderId, rootUrl);
+            final SmbFile smbFolder = new SmbFile(fid, auth);
+            if (!smbFolder.exists()) {
+                throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+            }
+            if (!smbFolder.isDirectory()) {
+                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+            }
+            final SmbFile[] subFiles = smbFolder.listFiles();
+            for (final SmbFile subFile : subFiles) {
+                if (subFile.isDirectory()) {
+                    recursiveSearchFile(pattern, subFile.getPath(), fields, results);
+                } else {
+                    final CIFSFile file = new CIFSFile(folderId, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields);
+                    if (file.matches(pattern)) {
+                        results.add(file);
+                    }
+                }
+            }
+        } catch (final FileStorageException e) {
+            throw e;
+        } catch (final SmbException e) {
+            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public FileStorageAccountAccess getAccountAccess() {
-        // TODO Auto-generated method stub
-        return null;
+        return accountAccess;
     }
 
 }

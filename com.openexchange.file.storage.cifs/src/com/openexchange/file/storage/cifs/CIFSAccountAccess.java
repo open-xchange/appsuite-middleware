@@ -235,7 +235,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
             synchronized (this) {
                 tmp = fileAccess;
                 if (null == tmp) {
-                    fileAccess = tmp = new CIFSFileAccess(rootUrl, auth, account, session);
+                    fileAccess = tmp = new CIFSFileAccess(rootUrl, auth, account, session, this);
                 }
             }
         }
