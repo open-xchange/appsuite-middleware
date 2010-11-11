@@ -27,6 +27,18 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-490
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/servletmappings/servletmapping.properties
+  local ptmp=${pfile}.$$
+  if grep -E "^/ajax/infostore" $pfile > /dev/null; then
+      grep -vE "^/ajax/infostore" $pfile > $ptmp
+      if [ -s $ptmp ]; then
+	  cp $ptmp $pfile
+      fi
+      rm -f $ptmp
+  fi
+
   # SoftwareChange_Request-499
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh

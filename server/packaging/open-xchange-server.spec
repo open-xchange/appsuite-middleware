@@ -156,6 +156,18 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-490
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/servletmappings/servletmapping.properties
+   ptmp=${pfile}.$$
+   if grep -E "^/ajax/infostore" $pfile > /dev/null; then
+      grep -vE "^/ajax/infostore" $pfile > $ptmp
+      if [ -s $ptmp ]; then
+	  cp $ptmp $pfile
+      fi
+      rm -f $ptmp
+   fi
+
    # SoftwareChange_Request-499
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
