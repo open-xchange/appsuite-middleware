@@ -49,50 +49,34 @@
 
 package com.openexchange.file.storage.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageService;
 
 /**
- * {@link OSGIFileStorageAccountManagerLookupService}
+ * {@link OSGIEventAdminLookup}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public class OSGIFileStorageAccountManagerLookupService implements FileStorageAccountManagerLookupService {
+public class OSGIEventAdminLookup {
 
-    /**
-     * The backing list.
-     */
-    final List<FileStorageAccountManagerProvider> providers;
+    final AtomicReference<EventAdmin> eventAdminRef;
 
     /**
      * The tracker instance.
      */
     private ServiceTracker tracker;
 
-    final OSGIEventAdminLookup eventAdminLookup;
-
     /**
-     * Initializes a new {@link OSGIFileStorageAccountManagerLookupService}.
+     * Initializes a new {@link OSGIEventAdminLookup}.
      */
-    public OSGIFileStorageAccountManagerLookupService(final OSGIEventAdminLookup eventAdminLookup) {
+    public OSGIEventAdminLookup() {
         super();
-        providers = new CopyOnWriteArrayList<FileStorageAccountManagerProvider>();
-        this.eventAdminLookup = eventAdminLookup;
+        eventAdminRef = new AtomicReference<EventAdmin>();
     }
 
     /**
@@ -102,7 +86,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
      */
     public void start(final BundleContext context) {
         if (null == tracker) {
-            tracker = new ServiceTracker(context, FileStorageAccountManagerProvider.class.getName(), new Customizer(context));
+            tracker = new ServiceTracker(context, EventAdmin.class.getName(), new Customizer(context));
             tracker.open();
         }
     }
@@ -117,17 +101,13 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         }
     }
 
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws FileStorageException {
-        FileStorageAccountManagerProvider candidate = null;
-        for (final FileStorageAccountManagerProvider provider : providers) {
-            if (provider.supports(service) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {
-                candidate = provider;
-            }
-        }
-        if (null == candidate) {
-            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(service.getId());
-        }
-        return candidate.getAccountManagerFor(service);
+    /**
+     * Gets the tracked {@link EventAdmin} service
+     * 
+     * @return The tracked {@link EventAdmin} service or <code>null</code>
+     */
+    public EventAdmin getEventAdmin() {
+        return eventAdminRef.get();
     }
 
     private final class Customizer implements ServiceTrackerCustomizer {
@@ -141,31 +121,9 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
 
         public Object addingService(final ServiceReference reference) {
             final Object service = context.getService(reference);
-            if ((service instanceof FileStorageAccountManagerProvider)) {
-                final FileStorageAccountManagerProvider addMe = (FileStorageAccountManagerProvider) service;
-                synchronized (providers) {
-                    if (!providers.contains(addMe)) {
-                        providers.add(addMe);
-                        /*
-                         * Post event 
-                         */
-                        final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
-                        if (null != eventAdmin) {
-                            final Dictionary<Object, Object> dict = new Hashtable<Object, Object>(2);
-                            dict.put(FileStorageAccountManagerProvider.PROPERTY_RANKING, Integer.valueOf(addMe.getRanking()));
-                            dict.put(FileStorageAccountManagerProvider.PROPERTY_PROVIDER, addMe);
-                            final Event event = new Event(FileStorageAccountManagerProvider.TOPIC, dict);
-                            eventAdmin.postEvent(event);
-                        }
-                        return service;
-                    }
-                }
-                final org.apache.commons.logging.Log logger =
-                    org.apache.commons.logging.LogFactory.getLog(OSGIFileStorageAccountManagerLookupService.Customizer.class);
-                if (logger.isWarnEnabled()) {
-                    logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(addMe.getClass().getSimpleName()).append(
-                        " could not be added. Provider is already present.").toString());
-                }
+            if ((service instanceof EventAdmin)) {
+                eventAdminRef.set((EventAdmin) service);
+                return service;
             }
             /*
              * Adding to registry failed
@@ -181,11 +139,8 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         public void removedService(final ServiceReference reference, final Object service) {
             if (null != service) {
                 try {
-                    if (service instanceof FileStorageAccountManagerProvider) {
-                        final FileStorageAccountManagerProvider removeMe = (FileStorageAccountManagerProvider) service;
-                        synchronized (providers) {
-                            providers.remove(removeMe);
-                        }
+                    if (service instanceof EventAdmin) {
+                        eventAdminRef.set(null);
                     }
                 } finally {
                     context.ungetService(reference);

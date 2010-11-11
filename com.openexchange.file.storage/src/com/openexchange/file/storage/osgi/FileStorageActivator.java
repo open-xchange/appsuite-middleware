@@ -74,6 +74,8 @@ public final class FileStorageActivator implements BundleActivator {
 
     private OSGIFileStorageAccountManagerLookupService lookupService;
 
+    private OSGIEventAdminLookup eventAdminLookup;
+
     private List<ServiceRegistration> registrations;
 
     /**
@@ -106,7 +108,9 @@ public final class FileStorageActivator implements BundleActivator {
             /*
              * Start provider tracking
              */
-            lookupService = new OSGIFileStorageAccountManagerLookupService();
+            eventAdminLookup = new OSGIEventAdminLookup();
+            eventAdminLookup.start(context);
+            lookupService = new OSGIFileStorageAccountManagerLookupService(eventAdminLookup);
             lookupService.start(context);
             /*
              * Register services
@@ -145,6 +149,10 @@ public final class FileStorageActivator implements BundleActivator {
             if (null != registry) {
                 registry.stop();
                 registry = null;
+            }
+            if (null != eventAdminLookup) {
+                eventAdminLookup.stop();
+                eventAdminLookup = null;
             }
             /*
              * Unregister component
