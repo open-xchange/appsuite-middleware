@@ -50,7 +50,10 @@
 package com.openexchange.ajax.contact.action;
 
 import java.io.ByteArrayInputStream;
+
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.container.Contact;
 
@@ -63,12 +66,15 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	/**
 	 * Contact to insert.
 	 */
-	final Contact contactObj;
+	Contact contactObj;
 
+	JSONObject jsonObj;
+	
 	final boolean withImage;
 	
 	String fieldContent;
 
+	final int folderID;
 	
 	/**
 	 * Should the parser fail on error in server response.
@@ -93,8 +99,11 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	public InsertRequest(final Contact contactObj, final boolean failOnError) {
 		super();
 		this.contactObj = contactObj;
+		this.folderID = contactObj.getParentFolderID();
+		this.jsonObj = null;
 		this.failOnError = failOnError;
-		withImage = contactObj.containsImage1() && (null != contactObj.getImage1());
+		this.withImage = contactObj.containsImage1() && (null != contactObj.getImage1());
+		
 		if (withImage) {
 		    try {
                 fieldContent = convert(contactObj).toString();
@@ -104,10 +113,21 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
         }
 	}
 	
+	public InsertRequest(final String json) throws JSONException{
+		super();
+		this.contactObj = null;
+		this.withImage = false;
+		this.jsonObj = new JSONObject(json);
+		this.folderID = jsonObj.getInt("folder_id");
+		this.failOnError = true;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public Object getBody() throws JSONException {
+		if(jsonObj != null)
+			return jsonObj;
 		return convert(contactObj);
 	}
 	
@@ -125,14 +145,14 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	    if (withImage) {
 	        return new Parameter[] {
 	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-	            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(contactObj.getParentFolderID())),
+	            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderID)),
 	            new FieldParameter("json", fieldContent),
 	            new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactObj.getImage1()), "image/jpg")
 	        };
         }
 		return new Parameter[] {
 			new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-			new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(contactObj.getParentFolderID()))
+			new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderID))
 		};
 	}
 	
