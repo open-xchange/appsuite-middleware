@@ -60,9 +60,8 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageException;
-import com.openexchange.file.storage.webdav.WebDAVFileStorageService;
 import com.openexchange.file.storage.webdav.exception.WebDAVFileStorageExceptionFactory;
 import com.openexchange.file.storage.webdav.session.WebDAVEventHandler;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -82,6 +81,8 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
     private List<ServiceRegistration> registrations;
 
     private ComponentRegistration componentRegistration;
+
+    private Registerer registerer;
 
     /**
      * Initializes a new {@link WebDAVFileStorageActivator}.
@@ -154,13 +155,22 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
              * Register services
              */
             registrations = new ArrayList<ServiceRegistration>(2);
-            registrations.add(context.registerService(FileStorageService.class.getName(), WebDAVFileStorageService.newInstance(), null));
+            // registrations.add(context.registerService(FileStorageService.class.getName(), WebDAVFileStorageService.newInstance(), null));
             /*
              * Register event handler to detect removed sessions
              */
-            final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registrations.add(context.registerService(EventHandler.class.getName(), new WebDAVEventHandler(), serviceProperties));
+            {
+                final Dictionary<Object, Object> dict = new Hashtable<Object, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                registrations.add(context.registerService(EventHandler.class.getName(), new WebDAVEventHandler(), dict));
+            }
+
+            {
+                final Dictionary<Object, Object> dict = new Hashtable<Object, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, FileStorageAccountManagerProvider.TOPIC);
+                registerer = new Registerer(context);
+                registrations.add(context.registerService(EventHandler.class.getName(), registerer, dict));
+            }
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class).error(e.getMessage(), e);
             throw e;
@@ -170,6 +180,10 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            if (null != registerer) {
+                registerer.close();
+                registerer = null;
+            }
             /*
              * Unregister component
              */
