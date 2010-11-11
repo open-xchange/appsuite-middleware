@@ -95,7 +95,10 @@ public class HasSubscriptions implements AdditionalFolderField {
             SecretService secretService = SubscriptionServiceRegistry.getInstance().getService(SecretService.class);
             
             for (final SubscriptionSource subscriptionSource : sources) {
-                final String fn = folder.getFullName();
+                String fn = folder.getFullName();
+                if(fn == null) {
+                    fn = String.valueOf(folder.getObjectID());
+                }
                 final boolean hasSubscriptions =
                     !subscriptionSource.getSubscribeService().loadSubscriptions(
                         session.getContext(),
