@@ -121,6 +121,10 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         
     }
     
+    public I getInput() {
+        return input;
+    }
+    
     public boolean isSwitchUserAgent() {
         return switchUserAgent;
     }
@@ -140,6 +144,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         this.debuggingEnabled = debuggingEnabled;
     }
     
+    // this opens the current page in the developers browser while debugging for a fast overview.
     protected void openPageInBrowser(Page page){
         File file = new File ("./crawlerTestPage.html");
         Writer output = null;                            
@@ -152,7 +157,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
           } else if (System.getProperty("os.name").contains("Windows")){
               Runtime.getRuntime().exec("cmd.exe /C start ./crawlerTestPage.html");
           } else {
-              // Linux hopefully
+              // Linux (hopefully)
               Runtime.getRuntime().exec("firefox ./crawlerTestPage.html &");
           }
           //windows: iexplore http://www.example.com

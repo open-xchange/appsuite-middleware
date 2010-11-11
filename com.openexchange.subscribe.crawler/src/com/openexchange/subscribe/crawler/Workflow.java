@@ -62,6 +62,7 @@ import com.gargoylesoftware.htmlunit.CrawlerCookieSpec;
 import com.gargoylesoftware.htmlunit.CrawlerCookieSpecWithQuirkyQuotes;
 import com.gargoylesoftware.htmlunit.CrawlerWebConnection;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.subscribe.Subscription;
@@ -183,10 +184,16 @@ public class Workflow {
                 previousStep = currentStep;
                 // if step fails try it 2 more times before crying foul
                 if (!currentStep.executedSuccessfully()) {
+                    LOG.error("This step did not perform as expected : " + currentStep.getClass()  + ". Repeating two more times ...");
+                    logBadInput(currentStep);
                     currentStep.execute(webClient);
                     if (!currentStep.executedSuccessfully()) {
+                        LOG.error("This step failed again at repetition 1 : " + currentStep.getClass()   + ". Repeating one more time ...");
+                        logBadInput(currentStep);
                         currentStep.execute(webClient);
                         if (!currentStep.executedSuccessfully()) {
+                            LOG.error("This step failed again at repetition 2 : " + currentStep.getClass() + ". Throwing Error now.");
+                            logBadInput(currentStep);
                             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
                         }
                     }                    
@@ -287,6 +294,15 @@ public class Workflow {
         this.quirkyCookieQuotes = quirkyCookieQuotes;
     }
     
-    
+    // This should help to better understand why a step failed. May need to be expanded for other complex inputs without helpful toString()-Method ...
+    private void logBadInput(Step currentStep){
+        if (currentStep.getInput() != null){
+            if (currentStep.getInput() instanceof Page){
+                LOG.error("Bad Input causing the error at (" + currentStep.getClass() + ") : " + ((Page) currentStep.getInput()).getWebResponse().getContentAsString());
+            } else {
+                LOG.error(" Bad Input causing the error at (" + currentStep.getClass() + ") : " + currentStep.getInput().toString());
+            }
+        }
+    }
 
 }

@@ -77,6 +77,8 @@ public interface Step<O, I>{
     
     public void setInput(I input);
     
+    public I getInput();
+    
     public O getOutput();
     
     public boolean isDebuggingEnabled();
