@@ -2,7 +2,6 @@
 
  - Bugfix #17441: GMX.com URL changed again
 
-
 * 2010-11-11 - choeger@open-xchange.com
 
  - Bugfix #13480: DNS is not rediscovered for E-Mail servers
@@ -14,6 +13,7 @@
 * 2010-11-11 - thorben.betten@open-xchange.com
 
  - Bugfix #17471: SocketTimeoutException's message is no longer part of the condition to check a failed IMAP connect
+ - Bugfix #17498: Proper cache invalidation when switching unseen flag
 
 * 2010-11-10
 

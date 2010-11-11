@@ -159,7 +159,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 }
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-            dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC);
+            dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
             serviceRegistrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
