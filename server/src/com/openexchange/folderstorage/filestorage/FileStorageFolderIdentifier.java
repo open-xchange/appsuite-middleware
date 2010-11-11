@@ -74,7 +74,21 @@ public final class FileStorageFolderIdentifier {
      * @param folderId The folder identifier
      * @return The fully qualified name
      */
-    public static String getFQN(final String serviceId, final String accountId, final String folderId) {
+    public static String getFQN(final String serviceId, final String accountId, String folderId) {
+        if(serviceId == null && accountId == null) {
+            // Looks like a global and regular OX folder id.
+            return folderId; 
+        }
+        if(serviceId == null) {
+            throw new NullPointerException("In plugin supplied folder IDs, the service may not be null");
+        }
+        if(accountId == null) {
+            throw new NullPointerException("In plugin supplied folder IDs, the acccountId should not be null");
+        }
+        if(folderId == null) {
+            // Assume some kind of root folder
+            folderId = "";
+        }
         return IDMangler.mangle(serviceId, accountId, folderId);
     }
 
