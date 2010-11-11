@@ -394,8 +394,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private static final String ERR_CONNECT_TIMEOUT = "connect timed out";
-
     @Override
     protected void connectInternal() throws MailException {
         if ((imapStore != null) && imapStore.isConnected()) {
@@ -462,13 +460,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 throw e;
             } catch (final MessagingException e) {
                 /*
-                 * TODO: Re-think if exception's message should be part of condition or just checking if nested exception is an instance of
-                 * SocketTimeoutException
+                 * Check for a SocketTimeoutException
                  */
                 if (tmpDownEnabled) {
                     final Exception nextException = e.getNextException();
-                    if (SocketTimeoutException.class.isInstance(nextException) && ((SocketTimeoutException) nextException).getMessage().toLowerCase(
-                        Locale.ENGLISH).indexOf(ERR_CONNECT_TIMEOUT) != -1) {
+                    if (SocketTimeoutException.class.isInstance(nextException)) {
                         /*
                          * Remember a timed-out IMAP server on connect attempt
                          */
