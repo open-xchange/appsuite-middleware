@@ -49,6 +49,9 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -63,21 +66,18 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.results.Results;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.Block;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tx.TransactionException;
-import static org.junit.Assert.*;
 
 /**
  * {@link CompositingFileAccessTest}
@@ -828,6 +828,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         return this;
     }
 
+    @Override
     protected List<FileStorageService> getAllFileStorageServices() {
         return Arrays.asList((FileStorageService) this, this);
     }
@@ -947,6 +948,11 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
             return file;
         }
 
+    }
+
+    public FileStorageAccountManagerProvider getProvider() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
