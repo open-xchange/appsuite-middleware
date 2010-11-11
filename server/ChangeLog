@@ -1,3 +1,7 @@
+* 2010-11-11 - francisco.laguna@open-xchange.com
+
+ - Bugfix #17449: Made code a bit more robust against null values.
+
 * 2010-11-11 - thorben.betten@open-xchange.com
 
  - Bugfix #17471: SocketTimeoutException's message is no longer part of the condition to check a failed IMAP connect
