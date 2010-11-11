@@ -128,7 +128,7 @@ public class ExceptionsTest extends TestCase {
     public void testThrowExceptionByErrorMessage() {
         final NullPointerException cause = new NullPointerException();
         try {
-            exceptions.throwException(errorMessage, cause,"arg11", "arg12", "arg13", "arg14");
+            exceptions.throwException(errorMessage.getDetailNumber(), cause,"arg11", "arg12", "arg13", "arg14");
             fail("Didn't throw exception");
         } catch (final OXTestException exception) {
             assertEquals(13, exception.getDetailNumber());
