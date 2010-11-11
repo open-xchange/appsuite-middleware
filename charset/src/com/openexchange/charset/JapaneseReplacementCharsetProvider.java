@@ -52,7 +52,6 @@ package com.openexchange.charset;
 import java.nio.charset.Charset;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.Iterator;
-import java.util.Locale;
 
 /**
  * {@link JapaneseReplacementCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
@@ -83,7 +82,7 @@ public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
 
     @Override
     public Charset charsetForName(final String charsetName) {
-        if (null != charsetName && charsetName.toUpperCase(Locale.US).equals("ISO-2022-JP")) {
+        if ("ISO-2022-JP".equalsIgnoreCase(charsetName)) {
             return Charset.forName("CP50220");
         }
         /*
