@@ -62,12 +62,15 @@ public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
 
     private final CharsetProvider standardProvider;
 
+    private final Charset cp50220;
+
     /**
      * Initializes a new {@link <code>CollectionCharsetProvider</code>}
      */
     public JapaneseReplacementCharsetProvider(final CharsetProvider standardProvider) {
         super();
         this.standardProvider = standardProvider;
+        cp50220 = Charset.forName("CP50220");
     }
 
     @Override
@@ -83,7 +86,7 @@ public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
     @Override
     public Charset charsetForName(final String charsetName) {
         if ("ISO-2022-JP".equalsIgnoreCase(charsetName)) {
-            return Charset.forName("CP50220");
+            return cp50220;
         }
         /*
          * Delegate to standard provider
