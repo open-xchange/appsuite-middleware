@@ -156,6 +156,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-498
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/mime.types
+   if ! grep "openxmlformats-officedocument" >/dev/null $pfile; then
+      echo "application/vnd.openxmlformats-officedocument.wordprocessingml.document docx" >> $pfile
+   fi
+
    # SoftwareChange_Request-486
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/whitelist.properties
