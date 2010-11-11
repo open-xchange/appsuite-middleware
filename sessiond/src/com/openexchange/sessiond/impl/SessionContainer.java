@@ -173,12 +173,12 @@ final class SessionContainer {
                     sessionControl = newSessionControl;
                 } else {
                     String login1 = sessionControl.getSession().getLogin();
-                    String login2 = sessionControl.getSession().getLogin();
+                    String login2 = session.getLogin();
                     throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
                 }
             } else {
                 String login1 = sessionControl.getSession().getLogin();
-                String login2 = sessionControl.getSession().getLogin();
+                String login2 = session.getLogin();
                 throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
             }
         } finally {
