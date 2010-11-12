@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -64,14 +65,17 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.cache.SessionCacheConfiguration;
+import com.openexchange.sessiond.event.SessiondEventHandler;
 import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
+import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
@@ -86,6 +90,10 @@ public final class SessiondActivator extends DeferredActivator {
 
     private ServiceRegistration sessiondServiceRegistration;
     private final List<ServiceTracker> trackers;
+
+    private ServiceRegistration eventHandlerRegistration;
+
+    private ServiceRegistration retrievalServiceRegistration;
 
     public SessiondActivator() {
         super();
@@ -150,6 +158,16 @@ public final class SessiondActivator extends DeferredActivator {
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
+            
+            
+            SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();
+            SessiondEventHandler eventHandler = new SessiondEventHandler();
+            eventHandler.addListener(retrievalService);
+            
+            eventHandlerRegistration = eventHandler.registerSessiondEventHandler(context);
+            
+            retrievalServiceRegistration = context.registerService(SessionSpecificContainerRetrievalService.class.getName(), retrievalService, null);
+            
         } catch (final Exception e) {
             LOG.error("SessiondActivator: start: ", e);
             // Try to stop what already has been started.
@@ -168,6 +186,15 @@ public final class SessiondActivator extends DeferredActivator {
                 sessiondServiceRegistration.unregister();
                 sessiondServiceRegistration = null;
             }
+            if (null != eventHandlerRegistration) {
+                eventHandlerRegistration.unregister();
+                eventHandlerRegistration = null;
+            }
+            if(null != retrievalServiceRegistration) {
+                retrievalServiceRegistration.unregister();
+                retrievalServiceRegistration = null;
+            }
+            
             for (final ServiceTracker tracker : trackers) {
                 tracker.close();
             }
