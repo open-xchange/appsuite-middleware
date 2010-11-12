@@ -83,6 +83,10 @@ public final class AJPv13CPingRequest extends AJPv13Request {
     @Override
     public void response(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, ServletException, IOException {
         writeResponse(AJPv13Response.getCPongBytes(), ajpRequestHandler.getAJPConnection().getOutputStream(), true);
+        /*
+         * No END_RESPONSE package for CPONG response
+         */
+        ajpRequestHandler.setEndResponseSent();
     }
 
 }
