@@ -60,7 +60,7 @@ public interface SessionSpecificContainerRetrievalService {
 
     public static enum Lifecycle {
         /**
-         * Removes the values once a long-running session goes into hibernation and termination. This is the default.
+         * Removes the values once a long-running session goes into hibernation or termination. This is the default.
          */
         HIBERNATE,
 
