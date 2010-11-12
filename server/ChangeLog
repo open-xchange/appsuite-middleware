@@ -1,3 +1,7 @@
+* 2010-11-12 - choeger@open-xchange.com
+
+ - Bugfix #17518: open-xchange-file-storage-config is missing a dependency
+
 * 2010-11-12 - martin.herfurth@open-xchange.com
 
  - Bugfix #17519: NullPointerException during sync fixed..
