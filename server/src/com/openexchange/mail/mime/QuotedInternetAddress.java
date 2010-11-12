@@ -744,6 +744,9 @@ public final class QuotedInternetAddress extends InternetAddress {
      * Converts a unicode representation of an internet address to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters
      * are not allowed and STD3 ASCII rules are enforced.
      * <p>
+     * This implementation already supports EsZett character. Thanks to <a
+     * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
+     * <p>
      * <code>"someone@m&uuml;ller.de"</code> is converted to <code>"someone@xn--mller-kva.de"</code>
      * 
      * @param idnAddress The unicode representation of an internet address
@@ -760,7 +763,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 return idnAddress;
             }
             return new StringBuilder(idnAddress.length() + 8).append(idnAddress.substring(0, pos)).append('@').append(
-                gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1))).toString();
+                gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1), true)).toString();
         } catch (final gnu.inet.encoding.IDNAException e) {
             throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
         }
@@ -769,6 +772,9 @@ public final class QuotedInternetAddress extends InternetAddress {
     /**
      * Converts an ASCII-encoded address to its unicode representation. Unassigned characters are not allowed and STD3 hostnames are
      * enforced.
+     * <p>
+     * This implementation already supports EsZett character. Thanks to <a
+     * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
      * <p>
      * <code>"someone@xn--mller-kva.de"</code> is converted to <code>"someone@m&uuml;ller.de"</code>
      * 
@@ -784,7 +790,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             return aceAddress;
         }
         return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
-            gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1))).toString();
+            gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true)).toString();
     }
 
     /**
