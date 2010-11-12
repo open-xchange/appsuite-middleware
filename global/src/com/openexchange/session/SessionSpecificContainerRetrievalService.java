@@ -98,8 +98,8 @@ public interface SessionSpecificContainerRetrievalService {
      *            HIBERNATE.
      * @param initial A factory to produce initial values, in case no value has previously been bound to a certain session. May be null, in
      *            which case the initial value will always be null. Note: Initial values do not show up in iterators or #contains calls,
-     *            they will only be created on retrieval.
-     * @param cleanUp A callback to provide callers the chance to perform clean up operations of a value that will be destroyed either due
+     *            they will only be created on retrieval via #get.
+     * @param cleanUp A callback to provide callers the chance to perform clean up operations on a value that will be destroyed either due
      *            to a session changing its lifecycle state, through a destroy call or because it is deleted from the session container by a
      *            client call. May be null, in which case no cleanup will be performed.
      * @return
