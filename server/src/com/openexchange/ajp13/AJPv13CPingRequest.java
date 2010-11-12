@@ -64,6 +64,8 @@ public final class AJPv13CPingRequest extends AJPv13Request {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13CPingRequest.class);
 
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link AJPv13CPingRequest}
      * 
@@ -75,8 +77,8 @@ public final class AJPv13CPingRequest extends AJPv13Request {
 
     @Override
     public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(STR_RECEIVED_CPING);
+        if (DEBUG_ENABLED) {
+            LOG.debug(STR_RECEIVED_CPING);
         }
     }
 
