@@ -1,3 +1,7 @@
+* 2010-11-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #17527: No END_REPONSE package after a CPong response
+
 * 2010-11-12 - choeger@open-xchange.com
 
  - Bugfix #17518: open-xchange-file-storage-config is missing a dependency
