@@ -55,6 +55,8 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -75,6 +77,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
+import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -101,6 +104,9 @@ public class RdbUserStorage extends UserStorage {
     private static final String SELECT_LOGIN = "SELECT id,uid FROM login2user where cid=? AND id IN (";
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
+    
+    private static final String SQL_UPDATE_PASSWORD = "UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
+
 
     /**
      * Default constructor.
@@ -392,6 +398,10 @@ public class RdbUserStorage extends UserStorage {
         int userId = user.getId();
         String timeZone = user.getTimeZone();
         String preferredLanguage = user.getPreferredLanguage();
+        String password = user.getUserPassword();
+        String mech = user.getPasswordMech();
+        int shadowLastChanged = user.getShadowLastChange();
+        
         final Connection con;
         try {
             con = DBPool.pickupWriteable(context);
@@ -418,6 +428,26 @@ public class RdbUserStorage extends UserStorage {
             }
             if (null != user.getAttributes()) {
                 updateAttributes(context, user, con);
+            }
+            if (null != password && null != mech) {
+                String encodedPassword = null;
+                PreparedStatement stmt = null;
+                try {
+                    encodedPassword = PasswordMechanism.getEncodedPassword(mech, password);
+                    stmt = con.prepareStatement(SQL_UPDATE_PASSWORD);
+                    int pos = 1;
+                    stmt.setString(pos++, encodedPassword);
+                    stmt.setInt(pos++, shadowLastChanged);
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, userId);
+                    stmt.execute();
+                } catch (UnsupportedEncodingException e) {
+                    throw new SQLException(e.toString());
+                } catch (NoSuchAlgorithmException e) {
+                    throw new SQLException(e.toString());
+                } finally {
+                    closeSQLStuff(stmt);
+                }
             }
             con.commit();
         } catch (SQLException e) {

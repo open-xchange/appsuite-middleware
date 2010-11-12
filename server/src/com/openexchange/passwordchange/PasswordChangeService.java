@@ -64,8 +64,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.passwordchange.mechs.SHACrypt;
-import com.openexchange.passwordchange.mechs.UnixCrypt;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -80,10 +78,6 @@ import com.openexchange.sessiond.SessiondService;
 public abstract class PasswordChangeService {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PasswordChangeService.class);
-
-    private static final String MECH_CRYPT = "{CRYPT}";
-
-    private static final String MECH_SHA = "{SHA}";
 
     /**
      * Initializes a new {@link PasswordChangeService}
@@ -225,28 +219,21 @@ public abstract class PasswordChangeService {
      * @throws UserException If encoding the new password fails
      */
     protected static final String getEncodedPassword(final String mech, final String newPassword) throws UserException {
-        if (MECH_CRYPT.equals(mech)) {
-            try {
-                return UnixCrypt.crypt(newPassword);
-            } catch (final UnsupportedEncodingException e) {
-                LOG.error("Error encrypting password according to CRYPT mechanism", e);
-                throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
+        try {
+            final String cryptedPassword = PasswordMechanism.getEncodedPassword(mech, newPassword);
+            if (null == cryptedPassword) {
+                throw new UserException(UserException.Code.MISSING_PASSWORD_MECH, mech == null ? "" : mech);
             }
-        } else if (MECH_SHA.equals(mech)) {
-            try {
-                return SHACrypt.makeSHAPasswd(newPassword);
-            } catch (final NoSuchAlgorithmException e) {
-                LOG.error("Error encrypting password according to SHA mechanism", e);
-                throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
-            } catch (final UnsupportedEncodingException e) {
-                LOG.error("Error encrypting password according to SHA mechanism", e);
-                throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
-            }
-        } else {
-            throw new UserException(UserException.Code.MISSING_PASSWORD_MECH, mech == null ? "" : mech);
+            return cryptedPassword;
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Error encrypting password according to CRYPT mechanism", e);
+            throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Error encrypting password according to SHA mechanism", e);
+            throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
         }
     }
-
+    
     /*-
      * +++++++++++++++ _LoginInfo +++++++++++++++
      */

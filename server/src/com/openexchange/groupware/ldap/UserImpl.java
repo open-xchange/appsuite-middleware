@@ -144,10 +144,14 @@ public class UserImpl implements User, Cloneable {
     private String displayName;
 
     /**
+     * TODO: userPassword had been initialized with "x" in the past. This, however
+     * does not work since we now update the password of a user in {@link RdbUserStorage}
+     * 
+     * OLD comment:
      * The hashed and base64 encoded password. The default value is
      * <code>"x"</code> to cause matches fail.
      */
-    private String userPassword = "x";
+    private String userPassword = null;
 
     /**
      * Password encryption mechanism.

@@ -116,7 +116,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
         }
     }
 
-    private static final String SQL_UPDATE = "UPDATE user SET userPassword=? WHERE cid=? AND id=?";
+    private static final String SQL_UPDATE = "UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
 
     private void update(final Connection writeCon, final String encodedPassword, final int userId, final int cid) throws SQLException {
         PreparedStatement stmt = null;
@@ -124,6 +124,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             stmt = writeCon.prepareStatement(SQL_UPDATE);
             int pos = 1;
             stmt.setString(pos++, encodedPassword);
+            stmt.setInt(pos++,(int)(System.currentTimeMillis()/1000));
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
@@ -132,7 +133,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
         }
     }
 
-    private static final String SQL_DELETE = "DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?";
+    private static final String SQL_DELETE = "DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?";
 
     private void deleteAttr(final Connection writeCon, final int userId, final int cid) throws SQLException {
         PreparedStatement stmt = null;
