@@ -101,8 +101,8 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.helper.DownloadUtility;
-import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.ParamContainer;
+import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXMandatoryFieldException;
@@ -117,8 +117,8 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -250,6 +250,8 @@ public class Mail extends PermissionServlet implements UploadListener {
     private static final String UPLOAD_PARAM_HOSTNAME = "hostn";
 
     private static final String UPLOAD_PARAM_PROTOCOL = "proto";
+
+    private static final String UPLOAD_PARAM_GID = "gid";
 
     private static final String STR_UTF8 = "UTF-8";
 
@@ -3204,7 +3206,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    private final void actionPostImportMail(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private final void actionPostImportMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final Response response = actionPostImportMail(getSessionObject(req), req, ParamContainer.getInstance(req, EnumComponent.MAIL, resp));
@@ -3229,7 +3231,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         MailMessage getMail();
     }
 
-    private final Response actionPutNewMail(final ServerSession session, HttpServletRequest req, final ParamContainer paramContainer) {
+    private final Response actionPutNewMail(final ServerSession session, final HttpServletRequest req, final ParamContainer paramContainer) {
         final Response response = new Response();
         JSONValue responseData = null;
         try {
@@ -3253,7 +3255,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
             final PutNewMailData data;
             {
-                MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), req.getInputStream());
+                final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), req.getInputStream());
                 final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                 final InternetAddress fromAddress;
                 final MailMessage mail;
@@ -3319,7 +3321,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         private final int flags;
         private final BlockingQueue<MimeMessage> queue;
         
-        AppenderTask(MailServletInterface mailInterface, String folder, boolean force, int flags, BlockingQueue<MimeMessage> queue) {
+        AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
             super();
             this.mailInterface = mailInterface;
             this.folder = folder;
@@ -3331,23 +3333,23 @@ public class Mail extends PermissionServlet implements UploadListener {
             finished = true;
         }
         public MailImportResult[] call() throws Exception {
-            List<String> idList = new ArrayList<String>();
+            final List<String> idList = new ArrayList<String>();
             try {
-                List<MimeMessage> messages = new ArrayList<MimeMessage>();
-                List<MailMessage> mails = new ArrayList<MailMessage>();
+                final List<MimeMessage> messages = new ArrayList<MimeMessage>();
+                final List<MailMessage> mails = new ArrayList<MailMessage>();
                 while (!finished || !queue.isEmpty()) {
                     if (queue.isEmpty()) {
                         // Wait for at least 1 message to arrive.
                         messages.add(queue.take());
                     }
                     queue.drainTo(messages);
-                    for (MimeMessage message : messages) {                        
-                        String s = message.getHeader("Date", null);
-                        MailMessage mm = MIMEMessageConverter.convertMessage(message);
+                    for (final MimeMessage message : messages) {                        
+                        final String s = message.getHeader("Date", null);
+                        final MailMessage mm = MIMEMessageConverter.convertMessage(message);
                         mails.add(mm);
                     }
                     messages.clear();
-                    String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
+                    final String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
                     mails.clear();
                     idList.addAll(Arrays.asList(ids));
                     if (flags > 0) {
@@ -3361,12 +3363,12 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
         
         @Override
-        public void setThreadName(ThreadRenamer threadRenamer) {
+        public void setThreadName(final ThreadRenamer threadRenamer) {
             threadRenamer.rename("Mail Import Thread");
         }
     }
 
-    private final Response actionPostImportMail(ServerSession session, HttpServletRequest req, ParamContainer paramContainer) {
+    private final Response actionPostImportMail(final ServerSession session, final HttpServletRequest req, final ParamContainer paramContainer) {
         final Response response = new Response();
         JSONValue responseData = null;
         AppenderTask task;
@@ -3390,19 +3392,19 @@ public class Mail extends PermissionServlet implements UploadListener {
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
             final Future<MailImportResult []> future;
             {
-                ServletFileUpload servletFileUpload = new ServletFileUpload();
+                final ServletFileUpload servletFileUpload = new ServletFileUpload();
                 if (ServletFileUpload.isMultipartContent(req)) {
                     final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                     final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
                     task = new AppenderTask(MailServletInterface.getInstance(session), folder, force, flags, queue);                    
                     future = service.submit(task);
                     try {
-                        FileItemIterator iter = servletFileUpload.getItemIterator(req);
+                        final FileItemIterator iter = servletFileUpload.getItemIterator(req);
                         while (iter.hasNext()) {
-                            FileItemStream item = iter.next();
-                            String filename = item.getName();
+                            final FileItemStream item = iter.next();
+                            final String filename = item.getName();
                             final InputStream is = item.openStream();
-                            MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), is);
+                            final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), is);
                             final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                             if (isEmpty(fromAddr)) {
                                 // Add from address
@@ -3422,7 +3424,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             
             final MailImportResult[] mirs = future.get();            
             final JSONArray respArray = new JSONArray();
-            for (MailImportResult m : mirs) {
+            for (final MailImportResult m : mirs) {
                 if (m.hasError()) {
                     final JSONObject responseObj = new JSONObject();
                     responseObj.put(FolderChildFields.FOLDER_ID, folder);
@@ -4035,6 +4037,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          * The magic spell to disable caching
          */
         Tools.disableCaching(resp);
+        final String groupId = req.getParameter("groupId");
         final String actionStr = req.getParameter(PARAMETER_ACTION);
         if (ACTION_IMPORT.equals(actionStr)) {
             // Bypass normal standard upload process to be able to parse the request body as stream.
@@ -4062,6 +4065,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
                 uploadEvent.setParameter(UPLOAD_PARAM_HOSTNAME, req.getServerName());
                 uploadEvent.setParameter(UPLOAD_PARAM_PROTOCOL, req.isSecure() ? "https" : "http");
+                uploadEvent.setParameter(UPLOAD_PARAM_GID, groupId);
                 uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
                 fireUploadEvent(uploadEvent, listeners);
             } finally {
@@ -4136,6 +4140,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String serverName = (String) uploadEvent.getParameter(UPLOAD_PARAM_HOSTNAME);
             final PrintWriter writer = (PrintWriter) uploadEvent.getParameter(UPLOAD_PARAM_WRITER);
             final String actionStr = (String) uploadEvent.getParameter(PARAMETER_ACTION);
+            final String groupId = (String) uploadEvent.getParameter(UPLOAD_PARAM_GID);
             try {
                 final MailServletInterface mailServletInterface =
                     (MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE);
@@ -4282,6 +4287,72 @@ public class Mail extends PermissionServlet implements UploadListener {
                     response.setData(msgIdentifier);
 					final String jsResponse = substituteJS(ResponseWriter
 							.getJSON(response).toString(), actionStr);
+                    writer.write(jsResponse);
+                    writer.flush();
+                    return true;
+                } else if ("formMail".equals(action)) {
+                    /*
+                     * Check group identifier
+                     */
+                    if (null == groupId) {
+                        throw new MailException(MailException.Code.MISSING_PARAM, UPLOAD_PARAM_GID);
+                    }
+                    /*
+                     * Parse JSON data
+                     */
+                    final JSONObject jsonMailObj;
+                    {
+                        final String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
+                        if (json0 == null || json0.trim().length() == 0) {
+                            throw new MailException(MailException.Code.MISSING_PARAM, UPLOAD_FORMFIELD_MAIL);
+                        }
+                        jsonMailObj = new JSONObject(json0);
+                    }
+                    /*
+                     * Parse
+                     */
+                    final ServerSession session = (ServerSession) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
+                    /*
+                     * Resolve "From" to proper mail account to select right transport server
+                     */
+                    final InternetAddress from;
+                    try {
+                        from = MessageParser.getFromField(jsonMailObj)[0];
+                    } catch (final AddressException e) {
+                        throw MIMEMailException.handleMessagingException(e);
+                    }
+                    int accountId;
+                    try {
+                        accountId = resolveFrom2Account(session, from, true, true);
+                    } catch (final MailException e) {
+                        if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
+                            // Re-throw
+                            throw e;
+                        }
+                        LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                        // Send with default account's transport provider
+                        accountId = MailAccount.DEFAULT_ID;
+                    }
+                    /*
+                     * ... and send message
+                     */
+                    final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(
+                        jsonMailObj,
+                        uploadEvent,
+                        session,
+                        accountId,
+                        protocol,
+                        serverName);
+                    mailServletInterface.sendFormMail(composedMails[0], Integer.parseInt(groupId), accountId);
+                    for (int i = 1; i < composedMails.length; i++) {
+                        mailServletInterface.sendFormMail(composedMails[i], Integer.parseInt(groupId), accountId);
+                    }
+                    /*
+                     * Create JSON response object
+                     */
+                    final Response response = new Response();
+                    response.setData(Boolean.TRUE);
+                    final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), actionStr);
                     writer.write(jsResponse);
                     writer.flush();
                     return true;

@@ -260,6 +260,16 @@ public abstract class MailServletInterface {
     public abstract void sendReceiptAck(String folder, String msgUID, String fromAddr) throws MailException;
 
     /**
+     * Sends a form mail.
+     * 
+     * @param composedMail The form mail (without any recipients)
+     * @param groupId The identifier of the group to whose members shall receive the mail
+     * @param accountId The account identifier
+     * @throws MailException If mail transport fails
+     */
+    public abstract void sendFormMail(ComposedMailMessage composedMail, int groupId, int accountId) throws MailException;
+
+    /**
      * Sends a message described through given instance of <code>msgObj</code> and its possible file attachments contained in given instance
      * of <code>uploadEvent</code>.
      */
@@ -285,7 +295,7 @@ public abstract class MailServletInterface {
      * @return The corresponding mail IDs in destination folder
      * @throws MailException If messages cannot be appended.
      */
-    public String[] importMessages(String destFolder, MailMessage[] msgs, boolean force) throws MailException {
+    public String[] importMessages(final String destFolder, final MailMessage[] msgs, final boolean force) throws MailException {
         return appendMessages(destFolder, msgs, force);
     }
 
@@ -450,7 +460,5 @@ public abstract class MailServletInterface {
     public MailImportResult[] getMailImportResults() {
         return new MailImportResult[0];
     }
-    
-    public abstract void sendFormMail(final ComposedMailMessage composedMail, final int groupId, final int accountId) throws MailException;
 
 }
