@@ -837,13 +837,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
                     public Object call() throws Exception {
                         try {
-                            final List<Integer> ids = new ArrayList<Integer>();
                             final int cid = ctx.getContextId();
                             final Connection readCon = Database.get(ctx, false);
                             try {
                                 /*
                                  * Stay active as long as flag is true
                                  */
+                                final List<Integer> ids = new ArrayList<Integer>();
                                 while (flag.get()) {
                                     /*
                                      * Wait for IDs
