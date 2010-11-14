@@ -855,7 +855,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                                     ids.clear();
                                     waitForIDs(ids);
                                     /*
-                                     * Add future to concurrent map to mark as present
+                                     * Add future(s) to concurrent map
                                      */
                                     final int cid = ctx.getContextId();
                                     tasks.clear();
