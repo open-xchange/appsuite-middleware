@@ -818,13 +818,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         public PermissionLoader(final Context ctx) throws SearchIteratorException {
             super();
-            final AtomicBoolean flag = new AtomicBoolean(true);
-            this.flag = flag;
-            final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
-            this.permsMap = permsMap;
-            final BlockingQueue<Integer> queue = new LinkedBlockingQueue<Integer>();
-            this.queue = queue;
             try {
+                final AtomicBoolean flag = this.flag = new AtomicBoolean(true);
+                final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap = this.permsMap = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
+                final BlockingQueue<Integer> queue = this.queue = new LinkedBlockingQueue<Integer>();
                 final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
 
@@ -846,17 +843,20 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                         try {
                             final List<Integer> ids = new ArrayList<Integer>();
                             final List<FutureTask<?>> tasks = new ArrayList<FutureTask<?>>();
-                            while (flag.get()) {
+                            final Connection readCon = Database.get(ctx, false);
+                            try {
                                 /*
-                                 * Wait for IDs
+                                 * Stay active as long as flag is true
                                  */
-                                ids.clear();
-                                waitForIDs(ids);
-                                /*
-                                 * Add future to concurrent map
-                                 */
-                                final Connection readCon = Database.get(ctx, false);
-                                try {
+                                while (flag.get()) {
+                                    /*
+                                     * Wait for IDs
+                                     */
+                                    ids.clear();
+                                    waitForIDs(ids);
+                                    /*
+                                     * Add future to concurrent map to mark as present
+                                     */
                                     final int cid = ctx.getContextId();
                                     tasks.clear();
                                     for (final Integer id : ids) {
@@ -878,9 +878,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                                     for (final FutureTask<?> f : tasks) {
                                         f.run();
                                     }
-                                } finally {
-                                    Database.back(ctx, false, readCon);
                                 }
+                            } finally {
+                                Database.back(ctx, false, readCon);
                             }
                             /*
                              * Return
@@ -890,7 +890,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                             throw e;
                         }
                     }
-                }), CallerRunsBehavior.<Object> getInstance());
+                }, PermissionLoader.class.getSimpleName()), CallerRunsBehavior.<Object> getInstance());
 
             } catch (final ServiceException e) {
                 throw new SearchIteratorException(e);
