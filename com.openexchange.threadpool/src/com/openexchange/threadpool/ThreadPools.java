@@ -271,6 +271,21 @@ public final class ThreadPools {
     }
 
     /**
+     * Returns a {@link Task} object that, when called, returns the given task's result.
+     * 
+     * @param task The task to run
+     * @param prefix The thread's prefix
+     * @return A {@link Task} object
+     * @throws NullPointerException If task is <code>null</code>
+     */
+    public static <T> Task<T> task(final Callable<T> task, final String prefix) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        return new RenamingTaskAdapter<T>(task, prefix);
+    }
+
+    /**
      * Initializes a new {@link ThreadFactory}.
      * 
      * @param namePrefix The name prefix for created threads; e.g. "MyWorker-"
