@@ -68,8 +68,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -631,7 +635,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             /*
              * No permissions set, yet
              */
-            final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.getPermissionsFor(folderId);
+            final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissionsFor(folderId, 2000L);
             fo.setPermissionsAsArray(null == permissions ? getFolderPermissions(folderId) : permissions);
         }
         /*
@@ -804,7 +808,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private static final class PermissionLoader {
 
-        private final ConcurrentMap<Integer, OCLPermission[]> permsMap;
+        private final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap;
 
         private final BlockingQueue<Integer> queue;
 
@@ -816,7 +820,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             super();
             try {
                 final AtomicBoolean flag = this.flag = new AtomicBoolean(true);
-                final ConcurrentMap<Integer, OCLPermission[]> permsMap = this.permsMap = new ConcurrentHashMap<Integer, OCLPermission[]>();
+                final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap = this.permsMap = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
                 final BlockingQueue<Integer> queue = this.queue = new LinkedBlockingQueue<Integer>();
                 final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
@@ -837,13 +841,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
                     public Object call() throws Exception {
                         try {
+                            final List<Integer> ids = new ArrayList<Integer>();
+                            final List<FutureTask<?>> tasks = new ArrayList<FutureTask<?>>();
                             final Connection readCon = Database.get(ctx, false);
                             try {
                                 /*
                                  * Stay active as long as flag is true
                                  */
-                                final int cid = ctx.getContextId();
-                                final List<Integer> ids = new ArrayList<Integer>();
                                 while (flag.get()) {
                                     /*
                                      * Wait for IDs
@@ -851,14 +855,28 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                                     ids.clear();
                                     waitForIDs(ids);
                                     /*
-                                     * Add permissions to concurrent map
+                                     * Add future(s) to concurrent map
                                      */
+                                    final int cid = ctx.getContextId();
+                                    tasks.clear();
                                     for (final Integer id : ids) {
-                                        try {
-                                            permsMap.put(id, loadFolderPermissions(id.intValue(), cid, readCon));
-                                        } catch (final Exception e) {
-                                            permsMap.remove(id);
-                                        }
+                                        final FutureTask<OCLPermission[]> f = new FutureTask<OCLPermission[]>(new Callable<OCLPermission[]>() {
+                                            
+                                            public OCLPermission[] call() throws Exception {
+                                                return loadFolderPermissions(id.intValue(), cid, readCon);
+                                            }
+                                        });
+                                        permsMap.put(id, f);
+                                        /*
+                                         * Add to list
+                                         */
+                                        tasks.add(f);
+                                    }
+                                    /*
+                                     * Execute tasks with this thread
+                                     */
+                                    for (final FutureTask<?> f : tasks) {
+                                        f.run();
                                     }
                                 }
                             } finally {
@@ -909,8 +927,23 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             queue.offer(Integer.valueOf(folderId));
         }
 
-        public OCLPermission[] getPermissionsFor(final int folderId) {
-            return permsMap.get(Integer.valueOf(folderId));
+        public OCLPermission[] pollPermissionsFor(final int folderId, final long timeoutMsec) throws SearchIteratorException {
+            final Future<OCLPermission[]> f = permsMap.get(Integer.valueOf(folderId));
+            if (null == f) {
+                return null;
+            }
+            try {
+                return f.get(timeoutMsec, TimeUnit.MILLISECONDS);
+            } catch (final InterruptedException e) {
+                throw new SearchIteratorException(Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
+            } catch (final ExecutionException e) {
+                throw new SearchIteratorException(ThreadPools.launderThrowable(e, AbstractOXException.class));
+            } catch (final TimeoutException e) {
+                /*
+                 * Wait timed out
+                 */
+                return null;
+            }
         }
 
     } // End of PermissionLoader
