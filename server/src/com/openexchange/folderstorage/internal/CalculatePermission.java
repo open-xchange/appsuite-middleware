@@ -142,7 +142,7 @@ public final class CalculatePermission {
         }
         final Permission underlyingPermission;
         {
-            final int bits = folder.getBits();
+            final int bits = -1; //folder.getBits();
             if (bits >= 0) {
                 /*
                  * Get permission from bits
@@ -209,7 +209,7 @@ public final class CalculatePermission {
         final UserConfiguration userConfiguration = session.getUserConfiguration();
         final Permission underlyingPermission;
         {
-            final int bits = folder.getBits();
+            final int bits = -1;//folder.getBits();
             if (bits >= 0) {
                 /*
                  * Get permission from bits
