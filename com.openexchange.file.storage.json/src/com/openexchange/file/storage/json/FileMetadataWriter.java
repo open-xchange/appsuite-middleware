@@ -111,7 +111,7 @@ public class FileMetadataWriter {
                 if(field == Field.LAST_MODIFIED_UTC) {
                     tz = UTC;
                 }
-                if(field == File.Field.LOCKED_UNTIL && (d == null || d.getTime() < System.currentTimeMillis())) {
+                if(field == File.Field.LOCKED_UNTIL && (d == null || d.getTime() <= System.currentTimeMillis())) {
                     return 0;
                 } 
                 return writeDate((Date) value, tz);
