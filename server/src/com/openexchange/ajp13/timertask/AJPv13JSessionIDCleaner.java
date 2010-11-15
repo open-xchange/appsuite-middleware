@@ -79,7 +79,8 @@ public final class AJPv13JSessionIDCleaner implements Runnable {
 
     public void run() {
         try {
-            if (AJPv13Config.getJSessionIDTTL() <= 0) {
+            final int jSessionIDTTL = AJPv13Config.getJSessionIDTTL();
+            if (jSessionIDTTL <= 0) {
                 /*
                  * Infinite TTL
                  */
@@ -87,7 +88,7 @@ public final class AJPv13JSessionIDCleaner implements Runnable {
             }
             for (final Iterator<Map.Entry<String, Long>> iterator = jsessionids.entrySet().iterator(); iterator.hasNext();) {
                 final Map.Entry<String, Long> entry = iterator.next();
-                if ((System.currentTimeMillis() - entry.getValue().longValue()) > AJPv13Config.getJSessionIDTTL()) {
+                if ((System.currentTimeMillis() - entry.getValue().longValue()) > jSessionIDTTL) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(new StringBuilder("Removing JSESSIONID ").append(entry.getKey()));
                     }
