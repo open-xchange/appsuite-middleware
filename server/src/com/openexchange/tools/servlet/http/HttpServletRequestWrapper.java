@@ -58,6 +58,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.config.ConfigTools;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.ServletRequestWrapper;
 
@@ -279,6 +282,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
                 /*
                  * Add JSESSIONID cookie
                  */
+                configureCookie(sessionCookie);
                 ajpRequestHandler.getServletResponse().addCookie(sessionCookie);
                 return session;
             }
@@ -301,9 +305,23 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
             /*
              * Add JSESSIONID cookie
              */
+            configureCookie(sessionCookie);
             ajpRequestHandler.getServletResponse().addCookie(sessionCookie);
         }
         return session;
+    }
+
+    private static final String DEFAULT_PATH = "/";
+
+    private static void configureCookie(final Cookie sessionCookie) {
+        sessionCookie.setPath(DEFAULT_PATH);
+        final ConfigurationService configurationService =
+            ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final int maxAge =
+            (int) (ConfigTools.parseTimespan(null == configurationService ? "1W" : configurationService.getProperty(
+                "com.openexchange.cookie.ttl",
+                "1W")) / 1000);
+        sessionCookie.setMaxAge(maxAge);
     }
 
     public HttpSession getSession() {

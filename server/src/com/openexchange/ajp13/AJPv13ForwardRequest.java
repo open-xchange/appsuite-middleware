@@ -64,11 +64,8 @@ import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
-import com.openexchange.config.ConfigTools;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.codec.QuotedPrintable;
 import com.openexchange.tools.regex.RFC2616Regex;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
@@ -759,12 +756,6 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             }
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
-        jsessionIDCookie.setPath(DEFAULT_PATH);
-        final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        final int maxAge = (int) (ConfigTools.parseTimespan(null == configurationService ? "1W" : configurationService.getProperty(
-            "com.openexchange.cookie.ttl", "1W")) / 1000);
-        jsessionIDCookie.setMaxAge(maxAge);
-        // jsessionIDCookie.setMaxAge(-1); // session cookie
         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
         /*
          * HttpServletRequestWrapper.getSession() adds the JSESSIONID cookie
