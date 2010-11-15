@@ -417,7 +417,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 max = l.getTimeout();
             }
         }
-        document.setLockedUntil(new Date(System.currentTimeMillis() + max));
+        if(max > 0) {
+            document.setLockedUntil(new Date(System.currentTimeMillis() + max));
+        }
         return document;
     }
 
