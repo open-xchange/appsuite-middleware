@@ -160,6 +160,7 @@ public final class HttpSessionManagement {
         final HttpSessionWrapper httpSession;
         if (sessions.containsKey(uniqueId)) {
             httpSession = sessions.get(uniqueId);
+            httpSession.isNew(); // Touch last-accessed time stamp
         } else {
             httpSession = new HttpSessionWrapper(uniqueId);
             sessions.put(uniqueId, httpSession);
