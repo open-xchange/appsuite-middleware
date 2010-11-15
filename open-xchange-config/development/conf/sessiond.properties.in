@@ -29,4 +29,4 @@ com.openexchange.sessiond.autologin=true
 
 # Session and secret cookie TTL, relevant only if autologin is enabled as well.
 # Can contain units of measurement: D (=days) W(=weeks) H(=hours).
-com.openexchange.sessiond.cookie.ttl=1W
+# See property "com.openexchange.cookie.ttl" in file 'server.properties'.
