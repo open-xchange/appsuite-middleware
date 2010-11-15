@@ -420,10 +420,11 @@ public class Login extends AJAXServlet {
 
         final Session session = SessionServlet.getSession(req, sessionId, sessiond);
 
-        if(type == CookieType.SESSION)
-        	writeSessionCookie(resp, session, req.isSecure());
-        else
-        	writeSecretCookie(resp, session, req.isSecure());
+        if(type == CookieType.SESSION) {
+            writeSessionCookie(resp, session, req.isSecure());
+        } else {
+            writeSecretCookie(resp, session, req.isSecure());
+        }
 
         final Response response = new Response();
         response.setData("1");
