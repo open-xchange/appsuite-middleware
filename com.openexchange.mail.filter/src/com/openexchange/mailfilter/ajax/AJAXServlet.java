@@ -109,13 +109,13 @@ public abstract class AJAXServlet extends HttpServlet {
                 throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
             }
             final Session session = service.getSession(sessionId);
-            if (null != session) {
-                String secret = SessionServlet.extractSecret(session.getHash(), cookies);
-                
-                // Check if session is valid
-                if (!session.getSecret().equals(secret)) {
-                    throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
-                }
+            if (null == session) {
+                throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
+            }
+            String secret = SessionServlet.extractSecret(session.getHash(), cookies);
+            // Check if session is valid
+            if (!session.getSecret().equals(secret)) {
+                throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
             }
             
             final AbstractRequest request = createRequest();
@@ -167,13 +167,13 @@ public abstract class AJAXServlet extends HttpServlet {
                 throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
             }
             final Session session = service.getSession(sessionId);
-            if (null != session) {
-                String secret = SessionServlet.extractSecret(session.getHash(), cookies);
-                
-                // Check if session is valid
-                if (!session.getSecret().equals(secret)) {
-                    throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
-                }
+            if (null == session) {
+                throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
+            }
+            String secret = SessionServlet.extractSecret(session.getHash(), cookies);
+            // Check if session is valid
+            if (!session.getSecret().equals(secret)) {
+                throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
             }
             
             final AbstractRequest request = createRequest();

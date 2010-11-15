@@ -1,3 +1,7 @@
+* 2010-11-15 - thorben.betten@open-xchange.com
+
+ - Bugfix #17551: Fixed NPE if no session is found for mail filter request
+
 * 2010-11-15 - tobias.prinz@open-xchange.com
 
  - Bugfix #17492: Ignoring the SCHEDULE-AGENT parameter in an ical file now instead of considering the file to be broken.
