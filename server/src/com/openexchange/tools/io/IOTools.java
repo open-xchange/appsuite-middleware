@@ -77,7 +77,9 @@ public class IOTools {
         BufferedOutputStream outputStream = new BufferedOutputStream(out);
         
         int i = -1;
-        while((i = inputStream.read()) > 0) {
+        int count = 0;
+        while((i = inputStream.read()) != -1) {
+            count++;
             outputStream.write(i);
         }
         

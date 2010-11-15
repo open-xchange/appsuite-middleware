@@ -87,7 +87,7 @@ public final class UUIDSessionIdGenerator extends SessionIdGenerator {
      * 
      * @return A UUID string
      */
-    private static String randomUUID() {
+    static String randomUUID() {
         return UUIDs.getUnformattedString(UUID.randomUUID());
     }
 }

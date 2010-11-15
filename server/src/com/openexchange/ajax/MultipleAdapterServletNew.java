@@ -72,6 +72,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -231,6 +232,8 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, boolean isFileUpload) throws IOException, UploadException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setSecure(req.isSecure());
+        retval.setHostname(req.getServerName()); // Maybe use hostname service
+        retval.setRoute(AJPv13Config.getJvmRoute()); // Maybe use system name service
         /*
          * Pass all parameters to AJAX request object
          */

@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionScopedContainer;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
@@ -65,6 +66,7 @@ import com.openexchange.sessiond.event.SessiondEventListener;
 public class SessiondSessionSpecificRetrievalService implements SessionSpecificContainerRetrievalService, SessiondEventListener {
 
     private ConcurrentHashMap<String, SessionScopedContainerImpl<?>> containers = new ConcurrentHashMap<String, SessionScopedContainerImpl<?>>();
+    private ConcurrentHashMap<String, RandomTokenContainerImpl<?>> randomTokenContainer = new ConcurrentHashMap<String, RandomTokenContainerImpl<?>>();
 
     public <T> SessionScopedContainer<T> getContainer(String name, Lifecycle lifecycle, InitialValueFactory<T> initial, CleanUp<T> cleanUp) {
         if (containers.containsKey(name)) {
@@ -94,6 +96,31 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
                 container.remove(session);
             }
         }
+        for(RandomTokenContainerImpl<?> container : randomTokenContainer.values()) {
+            if(container.getLifecycle().includes(newLifecycle)) {
+                container.removeForSession(session);
+            }
+        }
+    }
+    
+    public <T> RandomTokenContainer<T> getRandomTokenContainer(String name, Lifecycle lifecycle, CleanUp<T> cleanUp) {
+        if (randomTokenContainer.contains(name)) {
+            return (RandomTokenContainer<T>) randomTokenContainer.get(name);
+        }
+        if(lifecycle == null) {
+            lifecycle = DEFAULT_LIFECYCLE;
+        }
+        RandomTokenContainerImpl<T> container = new RandomTokenContainerImpl<T>(name, lifecycle, cleanUp);
+        RandomTokenContainerImpl<?> other = randomTokenContainer.putIfAbsent(name, container);
+        if(other != null) {
+            return (RandomTokenContainer<T>) other;
+        }
+        return container;
+    }
+
+    public void destroyRandomTokenContainer(String name, CleanUp cleanUp) {
+        RandomTokenContainerImpl<?> container = randomTokenContainer.get(name);
+        container.clear(cleanUp);
     }
     
     // Event Handling
@@ -121,5 +148,9 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
     public void handleSessionRemoval(Session session) {
         handleLifecycleChange(session, Lifecycle.TERMINATE);
     }
+
+
+  
+
 
 }

@@ -95,6 +95,10 @@ public class AJAXRequestData {
 
     private List<UploadFile> files = new ArrayList<UploadFile>(5);
 
+    private String hostname;
+
+    private String route;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      * 
@@ -292,6 +296,59 @@ public class AJAXRequestData {
     
     public void addFile(UploadFile file) {
         files.add(file);
+    }
+    
+    /**
+     * Constructs a URL to this server, injecting the hostname and optionally the jvm route.
+     * @param protocol The protocol to use (http or https). If <code>null</code>, defaults to the protocol used for this request.
+     * @param path The path on the server. If <code>null</code> no path is inserted
+     * @param withRoute Whether to include the jvm route in the server URL or not 
+     * @param query The query string. If <code>null</code> no query is included
+     * @return A string builder with the URL so far, ready for meddling.
+     */
+    public StringBuilder constructURL(String protocol, String path, boolean withRoute, String query) {
+        StringBuilder url = new StringBuilder();
+        if(protocol == null) {
+            protocol = isSecure() ? "https://" : "http://";
+        }
+        url.append(protocol);
+        if(!protocol.endsWith("://")) {
+            url.append("://");
+        }
+        
+        url.append(hostname);
+        if(path != null) {
+            if(!path.startsWith("/")) {
+                url.append('/');
+            }
+            url.append(path);
+        }
+        if(withRoute) {
+            url.append(";jsessionid=12345.").append(route);
+        }
+        if(query != null) {
+            if(!query.startsWith("?")) {
+                url.append('?');
+            }
+            url.append(query);
+        }
+        return url;
+    }
+    
+    public String getHostname() {
+        return hostname;
+    }
+    
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+    
+    public String getRoute() {
+        return route;
+    }
+    
+    public void setRoute(String route) {
+        this.route = route;
     }
 
 }

@@ -67,6 +67,7 @@ import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.json.OXJSONWriter;
@@ -194,6 +195,9 @@ public class Multiple extends SessionServlet {
             /*
              * Look up appropriate multiple handler first, then step through if-else-statement
              */
+            jsonObj.put(MultipleHandler.HOSTNAME, req.getServerName());
+            jsonObj.put(MultipleHandler.ROUTE, AJPv13Config.getJvmRoute());
+            
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
             if (null != multipleHandler) {
                 writeMailRequest(req);

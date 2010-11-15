@@ -60,17 +60,17 @@ import com.openexchange.session.SessionSpecificContainerRetrievalService.CleanUp
 import com.openexchange.session.SessionSpecificContainerRetrievalService.InitialValueFactory;
 import com.openexchange.session.SessionSpecificContainerRetrievalService.Lifecycle;
 
-
 /**
  * {@link SessionScopedContainerImpl}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> {
 
     protected ConcurrentHashMap<SessionKey, T> delegate = new ConcurrentHashMap<SessionKey, T>();
-    
+
     protected InitialValueFactory<T> initial;
+
     protected CleanUp<T> cleanUp;
 
     private SessiondSessionSpecificRetrievalService manager;
@@ -78,8 +78,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
     private String name;
 
     private Lifecycle lifecycle;
-    
-    
+
     public SessionScopedContainerImpl(String name, Lifecycle lifecycle, InitialValueFactory<T> initial, CleanUp<T> cleanUp, SessiondSessionSpecificRetrievalService manager) {
         this.initial = initial;
         this.cleanUp = cleanUp;
@@ -87,9 +86,9 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
         this.name = name;
         this.lifecycle = lifecycle;
     }
-    
+
     public void clear() {
-        for(Session key : keySet()) {
+        for (Session key : keySet()) {
             remove(key);
         }
     }
@@ -98,14 +97,13 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
         return delegate.containsKey(ID(key));
     }
 
-
     public boolean containsValue(Object value) {
         return delegate.containsValue(value);
     }
 
     public Set<java.util.Map.Entry<Session, T>> entrySet() {
         Set<Map.Entry<Session, T>> entrySet = new HashSet<Map.Entry<Session, T>>();
-        for(final Map.Entry<SessionKey, T> entry : delegate.entrySet()) {
+        for (final Map.Entry<SessionKey, T> entry : delegate.entrySet()) {
             entrySet.add(new Map.Entry<Session, T>() {
 
                 public Session getKey() {
@@ -119,7 +117,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
                 public T setValue(T value) {
                     return entry.setValue(value);
                 }
-                
+
             });
         }
         return entrySet;
@@ -127,14 +125,14 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
 
     public T get(Object key) {
         key = ID(key);
-        if(!delegate.containsKey(key) && initial != null) {
+        if (!delegate.containsKey(key) && initial != null) {
             T created = initial.create();
-            T other = delegate.putIfAbsent((SessionKey)key, created);
-            if(other != null) {
-                cleanUp( created );
+            T other = delegate.putIfAbsent((SessionKey) key, created);
+            if (other != null) {
+                cleanUp(created);
                 return other;
             }
-            
+
             return created;
         }
         return delegate.get(key);
@@ -146,7 +144,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
 
     public Set<Session> keySet() {
         Set<Session> keySet = new HashSet<Session>();
-        for(SessionKey key : delegate.keySet()) {
+        for (SessionKey key : delegate.keySet()) {
             keySet.add(key.session);
         }
         return keySet;
@@ -157,7 +155,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
     }
 
     public void putAll(Map<? extends Session, ? extends T> m) {
-        for(Map.Entry<? extends Session,? extends T> entry : m.entrySet()) {
+        for (Map.Entry<? extends Session, ? extends T> entry : m.entrySet()) {
             delegate.put(ID(entry.getKey()), entry.getValue());
         }
     }
@@ -175,53 +173,55 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
     public Collection<T> values() {
         return delegate.values();
     }
-    
+
     public void clear(CleanUp<T> overrideCleanUp) {
         CleanUp<T> relevantCleanUp = (overrideCleanUp == null) ? this.cleanUp : overrideCleanUp;
-        for(SessionKey session : delegate.keySet()) {
+        for (SessionKey session : delegate.keySet()) {
             T removed = delegate.remove(session);
-            if(relevantCleanUp != null) {
+            if (relevantCleanUp != null) {
                 relevantCleanUp.clean(removed);
             }
         }
     }
-    
+
     protected void cleanUp(T value) {
-        if(cleanUp != null) {
+        if (cleanUp != null) {
             cleanUp.clean(value);
         }
     }
-    
+
     public String getName() {
         return name;
     }
-    
-    
+
     public Lifecycle getLifecycle() {
         return lifecycle;
     }
-    
+
     protected SessionKey ID(Object key) {
         return new SessionKey((Session) key);
     }
-    
+
     protected final class SessionKey {
+
         public Session session;
-        
+
         public SessionKey(Session session) {
             this.session = session;
         }
 
         @Override
         public boolean equals(Object obj) {
-            return session.getSessionID().equals(((SessionKey)obj).session.getSessionID());
+            if (String.class.isInstance(obj)) {
+                return session.getSessionID().equals((String) obj);
+            }
+            return session.getSessionID().equals(((SessionKey) obj).session.getSessionID());
         }
-        
+
         @Override
         public int hashCode() {
             return session.getSessionID().hashCode();
         }
     }
-
 
 }

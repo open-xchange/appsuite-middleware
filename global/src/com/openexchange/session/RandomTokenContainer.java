@@ -47,75 +47,39 @@
  *
  */
 
-package com.openexchange.multiple;
-
-import java.util.Collection;
-import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONValue;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.session;
 
 /**
- * {@link MultipleHandler} - Handles a multiple request.
+ * A {@link RandomTokenContainer} maintains an association of a random token string to a certain value. The lifetime of the association is
+ * scoped by the lifetime of a session.
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @see SessionSpecificContainerRetrievalService
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface MultipleHandler {
+public interface RandomTokenContainer<T> {
 
     /**
-     * The constant for the key to get the data element from passed {@link JSONObject JSON object} instance.
-     */
-    public static final String DATA = "data";
-
-    /**
-     * The constant for the key to get a subpath after the original module definition
-     */
-    public static final String PATH = "__path";
-
-    /**
-     * The constant for the key to get the hostname used in the access.
-     */
-    public static final String HOSTNAME = "__hostname";
-    
-    /**
-     * The constant for the key to get the route.
-     */
-    public static final String ROUTE = "__route";
-    
-    /**
-     * Performs the multiple request identified by specified action string.
+     * Generates a new random token an associates the value with it. The lifetime of this association is bound by the lifetime of the given
+     * session.
      * 
-     * @param action The action string denoting the request to perform
-     * @param jsonObject The JSON object providing request parameters and/or body
-     * @param session The session providing needed user data
-     * @param secure <code>true</code> for a secure connection such as HTTPS; otherwise <code>false</code>
-     * @return A {@link JSONValue} as a result of the performed request
-     * @throws AbstractOXException If performing the request fails
-     * @throws JSONException If a JSON error occurs
+     * @param session The session that the lifetime of this association is bound to.
+     * @param value The value to store.
+     * @return The newly created random token
      */
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException;
+    public String rememberForSession(Session session, T value);
 
     /**
-     * Gets the time stamp when {@link #performRequest()} has been called.
-     * 
-     * @return The time stamp associated with performed request or <code>null</code> if none available
+     * Retrieves a previously stored value for a given token.
+     * @param token The token to try to retrieve the value for.
+     * @return The previously stored value, or <code>null</code> if the association expired or no value was stored for this token.
      */
-    public Date getTimestamp();
+    public T get(String token);
 
     /**
-     * Gets the warnings.
-     * 
-     * @return The warnings
+     * Removes a value from this token container. If the value is found the clean up operation will be used on it. 
+     * @param token The token used to store the value.
+     * @return The value after having run clean up on it.
      */
-    public Collection<AbstractOXException> getWarnings();
-
-    /**
-     * Closes/frees all associated resources.
-     * <p>
-     * Must <b>not</b> throw any (runtime) exception!
-     */
-    public void close();
+    public T remove(String token);
 
 }
