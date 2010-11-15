@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-11-08 11:52+0100\n"
+"PO-Revision-Date: 2010-11-15 11:12+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -2494,6 +2494,42 @@ msgstr ""
 msgid "The path %s has already been taken"
 msgstr "Der Pfad %s wurde bereits verwendet"
 
+#. A CIFS/SMB error occurred: %1$s
+msgid "A CIFS/SMB error occurred: %1$s"
+msgstr "Es trat ein CIFS/SMB-Fehler auf: %1$s"
+
+#. Invalid CIFS/SMB URL: %1$s
+msgid "Invalid CIFS/SMB URL: %1$s"
+msgstr "Ungültige CIFS/SMB-URL: %1$s"
+
+#. CIFS/SMB URL does not denote a directory: %1$s
+msgid "CIFS/SMB URL does not denote a directory: %1$s"
+msgstr "CIFS/SMB-URL ist kein Verzeichnis:  %1$s"
+
+#. The CIFS/SMB resource does not exist: %1$s
+msgid "The CIFS/SMB resource does not exist: %1$s"
+msgstr "Die CIFS/SMB-Ressource ist nicht vorhanden: %1$s"
+
+#. Update denied for CIFS/SMB resource: %1$s
+msgid "Update denied for CIFS/SMB resource: %1$s"
+msgstr "Aktualisierung verweigert für die CIFS/SMB-Ressource: %1$s"
+
+#. Delete denied for CIFS/SMB resource: %1$s
+msgid "Delete denied for CIFS/SMB resource: %1$s"
+msgstr "Löschvorgang verweigert für die CIFS/SMB-Ressource: %1$s"
+
+#. CIFS/SMB URL does not denote a file: %1$s
+msgid "CIFS/SMB URL does not denote a file: %1$s"
+msgstr "CIFS/SMB-URL ist keine Datei: %1$s"
+
+#. Missing file name.
+msgid "Missing file name."
+msgstr "Fehlender Dateiname"
+
+#. Versioning not supported by CIFS/SMB file storage.
+msgid "Versioning not supported by CIFS/SMB file storage."
+msgstr "Versionierung wird nicht vom CIFS/SMB-Dateispeicher unterstützt."
+
 #. A HTTP error occurred: %1$s
 msgid "A HTTP error occurred: %1$s"
 msgstr "Es trat ein HTTP-Fehler auf: %1$s"
@@ -2535,10 +2571,6 @@ msgstr "Die Ressourcen ist keine Datei: %1$s"
 #. Versioning not supported by WebDAV.
 msgid "Versioning not supported by WebDAV."
 msgstr "Versionierung wird nicht von WebDAV unterstützt."
-
-#. Missing file name.
-msgid "Missing file name."
-msgstr "Fehlender Dateiname"
 
 #. File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
 msgid ""
@@ -2924,7 +2956,6 @@ msgstr "Nicht gefunden. %1$s"
 msgid "The source and destination URIs are equal: %1$s."
 msgstr "Die Quell- und Ziel-URIs sind identisch: %1$s."
 
-#. Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.
 msgid ""
 "Conflict. The resource cannot be created until one or more parental "
 "directories have been created: %1$s."
@@ -2958,13 +2989,20 @@ msgstr "Ungültige URL: %1$s"
 msgid "Unsupported protocol for SmartDrive server access: %1$s"
 msgstr "Nicht unterstütztes Protokoll für den SmartDrive Server-Zugriff: %1$s"
 
-#. SmartDrive user "%1$s" is not authenticated for stateful access to SmarTDrive server "%2$s".
 msgid ""
 "SmartDrive user \"%1$s\" is not authenticated for stateful access to "
 "SmarTDrive server \"%2$s\"."
 msgstr ""
 "SmartDrive-Benutzer \"%1$s\" ist nicht authentifiziert für einen Zugriff auf "
 "den SmarTDrive-Server \"%2$s\"."
+
+#. This resource is not a file
+msgid "This resource is not a file"
+msgstr "Diese Ressource ist keine Datei."
+
+#. This resource is not a directory
+msgid "This resource is not a directory"
+msgstr "Diese Ressource ist kein Verzeichnis."
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 msgid "Missing main extension attribute for user %1$s in context %2$s."
@@ -3075,7 +3113,9 @@ msgstr ""
 msgid ""
 "SessionD returned wrong session with identifier %1$s for given session "
 "identifier %2$s."
-msgstr "Session-ID gab falsche Session mit ID %1$s für die angegebene Session-ID %2$s zurück."
+msgstr ""
+"Session-ID gab falsche Session mit ID %1$s für die angegebene Session-ID %2"
+"$s zurück."
 
 #. This message is thrown if an inconsistency in SessionD bundle is detected when a session is added and that sessions identifier is already in use.
 #. %1$s is replaced with the already existing sessions login.
@@ -3083,7 +3123,10 @@ msgstr "Session-ID gab falsche Session mit ID %1$s für die angegebene Session-I
 msgid ""
 "Got a collision while adding a new session to the session container. "
 "Colliding session has login %1$s and new session has login %2$s."
-msgstr "Konflikt beim Hinzufügen einer neuen Session zum Session Container. Die kollidierende Session hat das Login %1$s und die neue Session hat das Login %2$s."
+msgstr ""
+"Konflikt beim Hinzufügen einer neuen Session zum Session Container. Die "
+"kollidierende Session hat das Login %1$s und die neue Session hat das Login %"
+"2$s."
 
 #. This message is thrown if an inconcistency in SessionD bundle is detected when a session should be fetched by its random token.
 #. %1$s is replaced with the session identifier that is returned from the data structures.
@@ -3093,7 +3136,9 @@ msgstr "Konflikt beim Hinzufügen einer neuen Session zum Session Container. Die
 msgid ""
 "Received wrong session %1$s having random %2$s when looking for random %3$s "
 "and session %4$s."
-msgstr "Falsche Sitzung %1$s erhalten mit zufälligem %2$s beim Suchen nach zufälligem %3$s und Session %4$s."
+msgstr ""
+"Falsche Sitzung %1$s erhalten mit zufälligem %2$s beim Suchen nach "
+"zufälligem %3$s und Session %4$s."
 
 msgid "The session parameter is missing."
 msgstr "Fehlender Session-Parameter"
