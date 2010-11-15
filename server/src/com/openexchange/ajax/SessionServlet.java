@@ -291,12 +291,14 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         return new ServerSessionAdapter(session, context, user);
     }
-    
+
     public static String extractSecret(String hash, Cookie[] cookies) {
-        String cookieName = Login.SECRET_PREFIX+hash;
-        for (Cookie cookie : cookies) {
-            if(cookie.getName().equals(cookieName)) {
-                return cookie.getValue();
+        if (null != cookies) {
+            String cookieName = Login.SECRET_PREFIX + hash;
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(cookieName)) {
+                    return cookie.getValue();
+                }
             }
         }
         return null;
