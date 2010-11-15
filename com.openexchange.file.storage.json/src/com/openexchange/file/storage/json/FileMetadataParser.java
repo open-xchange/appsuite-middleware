@@ -130,6 +130,9 @@ public class FileMetadataParser implements FileMetadataParserService{
         }
 
         private Object process(Field field, Object value) throws JSONException {
+            if (value == JSONObject.NULL) {
+                value = null;
+            }
             switch(field) {
             case CATEGORIES: {
                 if(String.class.isInstance(value)) {
@@ -142,6 +145,9 @@ public class FileMetadataParser implements FileMetadataParserService{
         }
 
         private Object categories(JSONArray value) throws JSONException {
+            if(value.length() == 0) {
+                return "";
+            }
             StringBuilder b = new StringBuilder();
             for(int i = 0, size = value.length(); i < size; i++) {
                 b.append(value.getString(i)).append(", ");
