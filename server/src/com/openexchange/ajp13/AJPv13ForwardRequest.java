@@ -650,8 +650,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                      */
                     final String id = current.getValue();
                     final int pos = id.lastIndexOf('.');
+                    final String jvmRoute = AJPv13Config.getJvmRoute();
                     if (pos > -1) {
-                        if ((AJPv13Config.getJvmRoute() != null) && !AJPv13Config.getJvmRoute().equals(id.substring(pos + 1))) {
+                        if ((jvmRoute != null) && !jvmRoute.equals(id.substring(pos + 1))) {
                             /*
                              * Different JVM route detected -> Discard
                              */
@@ -682,7 +683,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                         /*
                          * Value does not apply to pattern [UID].[JVM-ROUTE], hence only UID is given through special cookie JSESSIONID.
                          */
-                        if (AJPv13Config.getJvmRoute() != null) {
+                        if (jvmRoute != null) {
                             /*
                              * But this host defines a JVM route
                              */
