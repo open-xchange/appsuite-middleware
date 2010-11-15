@@ -1,3 +1,7 @@
+* 2010-11-15 - tobias.prinz@open-xchange.com
+
+ - Bugfix #17492: Ignoring the SCHEDULE-AGENT parameter in an ical file now instead of considering the file to be broken.
+
 * 2010-11-12 - thorben.betten@open-xchange.com
 
  - Bugfix #17527: No END_REPONSE package after a CPong response
