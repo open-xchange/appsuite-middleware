@@ -90,7 +90,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
- * @author Tobias Prinz <tobias.prinz@open-xchange.com> (bug 11958, 16367)
+ * @author Tobias Prinz <tobias.prinz@open-xchange.com> (bug workarounds)
  */
 public class ICal4JParser implements ICalParser {
 
@@ -312,10 +312,11 @@ public class ICal4JParser implements ICalParser {
             }
             final StringReader chunkedReader = new StringReader(
             	workaroundFor16895(
-            		workaroundFor16613(
-            			workaroundFor16367(
-            					removeAnnoyingWhitespaces(chunk.toString())))
-                )
+            	workaroundFor16613(
+            	workaroundFor16367(
+            	workaroundFor17492(
+            					removeAnnoyingWhitespaces(chunk.toString()
+                )))))
             ); // FIXME: Encoding?
             return builder.build(chunkedReader); 
         } catch (final IOException e) {
@@ -327,7 +328,11 @@ public class ICal4JParser implements ICalParser {
         return null;
     }
 
-    /**
+    private String workaroundFor17492(String input) {
+    	return input.replaceAll(";SCHEDULE-AGENT=", ";X-CALDAV-SCHEDULE-AGENT=");
+	}
+
+	/**
      * Method written out of laziness: Because you can spread iCal attributes
      * over several lines with newlines followed by a white space while a normal
      * newline means a new attribute starts, one would need to parse the whole file 
