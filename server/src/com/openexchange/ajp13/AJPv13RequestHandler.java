@@ -54,6 +54,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
@@ -284,11 +287,11 @@ public interface AJPv13RequestHandler {
     public void makeEqual();
 
     /**
-     * Gets the HTTP session ID
+     * Gets the HTTP session cookie.
      * 
-     * @return The HTTP session ID
+     * @return The HTTP session cookie
      */
-    public String getHttpSessionId();
+    public Cookie getHttpSessionCookie();
 
     /**
      * Checks if the HTTP session has joined a previous HTTP session
@@ -332,12 +335,12 @@ public interface AJPv13RequestHandler {
     public void setFormData(boolean isFormData);
 
     /**
-     * Sets the HTTP session ID
+     * Sets the HTTP session cookie.
      * 
-     * @param httpSessionId The HTTP session ID
+     * @param httpSessionCookie The HTTP session cookie
      * @param join <code>true</code> if the HTTP session has joined a previous HTTP session; otherwise <code>false</code>
      */
-    public void setHttpSessionId(String httpSessionId, boolean join);
+    public void setHttpSessionCookie(Cookie httpSessionCookie, boolean join);
 
     /**
      * Sets the servlet request.
@@ -347,11 +350,25 @@ public interface AJPv13RequestHandler {
     public void setServletRequest(HttpServletRequestWrapper request);
 
     /**
+     * Gets the servlet request.
+     * 
+     * @return The servlet request
+     */
+    public HttpServletRequest getServletRequest();
+
+    /**
      * Sets the servlet response.
      * 
      * @param response The servlet response
      */
     public void setServletResponse(HttpServletResponseWrapper response);
+
+    /**
+     * Gets the servlet response.
+     * 
+     * @return The servlet response
+     */
+    public HttpServletResponse getServletResponse();
 
     /**
      * Gets the forward request's bytes as a formatted string or "&lt;not enabled&gt;" if not enabled via configuration.

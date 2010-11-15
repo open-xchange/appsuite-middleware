@@ -57,7 +57,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.Arrays;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13CPingRequest;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
@@ -70,10 +73,10 @@ import com.openexchange.ajp13.AJPv13ServletInputStream;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.ajp13.AJPv13Utility;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.exception.AJPv13InvalidByteSequenceException;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
-import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.HttpServletManager;
@@ -125,7 +128,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     private boolean isFormData;
 
-    private String httpSessionId;
+    private Cookie httpSessionCookie;
 
     private boolean httpSessionJoined;
 
@@ -460,7 +463,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         serviceMethodCalled = false;
         endResponseSent = false;
         isFormData = false;
-        httpSessionId = null;
+        httpSessionCookie = null;
         httpSessionJoined = false;
         servletPath = null;
         state = State.IDLE;
@@ -591,23 +594,21 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         AJPv13ForwardRequest.parseQueryString(request, new String(contentBytes, charEnc));
     }
 
-    /**
-     * Sets the servlet request
-     * 
-     * @param request The servlet request
-     */
     public void setServletRequest(final HttpServletRequestWrapper request) {
         this.request = request;
         supplyRequestWrapperWithServlet();
     }
 
-    /**
-     * Sets the servlet response
-     * 
-     * @param response The servlet response
-     */
     public void setServletResponse(final HttpServletResponseWrapper response) {
         this.response = response;
+    }
+
+    public HttpServletRequest getServletRequest() {
+        return request;
+    }
+
+    public HttpServletResponse getServletResponse() {
+        return response;
     }
 
     /*
@@ -751,22 +752,12 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         totalRequestedContentLength = contentLength;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajp13.IAJPv13RequestHandler#getHttpSessionId()
-     */
-    public String getHttpSessionId() {
-        return httpSessionId;
+    public Cookie getHttpSessionCookie() {
+        return httpSessionCookie;
     }
 
-    /**
-     * Sets the HTTP session ID
-     * 
-     * @param httpSessionId The HTTP session ID
-     * @param join <code>true</code> if the HTTP session has joined a previous HTTP session; otherwise <code>false</code>
-     */
-    public void setHttpSessionId(final String httpSessionId, final boolean join) {
-        this.httpSessionId = httpSessionId;
+    public void setHttpSessionCookie(final Cookie httpSessionCookie, final boolean join) {
+        this.httpSessionCookie = httpSessionCookie;
         httpSessionJoined = join;
     }
 

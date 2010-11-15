@@ -59,15 +59,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
+import com.openexchange.config.ConfigTools;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.codec.QuotedPrintable;
 import com.openexchange.tools.regex.RFC2616Regex;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
@@ -102,11 +103,6 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
     private static final TIntObjectHashMap<String> httpHeaderMapping;
 
     private static final TIntObjectHashMap<String> attributeMapping;
-
-    /**
-     * A "set" to keep track of known JSESSIONIDs
-     */
-    static final ConcurrentMap<String, Long> jsessionids = new ConcurrentHashMap<String, Long>();
 
     private static final String DEFAULT_ENCODING = ServerConfig.getProperty(Property.DefaultEncoding);
 
@@ -305,25 +301,6 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             }
         }
         /*
-         * JSESSIONID
-         */
-        if (jsessionID == null) {
-            /*
-             * Look for JSESSIONID cookie, if request URI does not contain session id
-             */
-            checkJSessionIDCookie(servletRequest, servletResponse, ajpRequestHandler);
-        } else {
-            final int dot = jsessionID.lastIndexOf('.');
-            if ((dot == -1) || (AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
-                addJSessionIDCookie(jsessionID, servletResponse, ajpRequestHandler);
-            } else {
-                /*
-                 * JVM route does not match
-                 */
-                createJSessionIDCookie(servletResponse, ajpRequestHandler);
-            }
-        }
-        /*
          * Apply request/response to AJP request handler
          */
         ajpRequestHandler.setServletRequest(servletRequest);
@@ -365,6 +342,25 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                 } else {
                     servletRequest.setPathInfo(null);
                 }
+            }
+        }
+        /*
+         * JSESSIONID
+         */
+        if (jsessionID == null) {
+            /*
+             * Look for JSESSIONID cookie, if request URI does not contain session id
+             */
+            checkJSessionIDCookie(servletRequest, servletResponse, ajpRequestHandler);
+        } else {
+            final int dot = jsessionID.lastIndexOf('.');
+            if ((dot == -1) || (AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
+                addJSessionIDCookie(jsessionID, servletRequest, servletResponse, ajpRequestHandler);
+            } else {
+                /*
+                 * JVM route does not match
+                 */
+                createJSessionIDCookie(servletRequest, servletResponse, ajpRequestHandler);
             }
         }
     }
@@ -660,26 +656,28 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                              * Different JVM route detected -> Discard
                              */
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Ignoring JSESSIONID: ").append(id));
+                                LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
                             }
-                            break NextCookie;
+                            current.setMaxAge(0); // delete
+                            resp.addCookie(current);
+                            continue NextCookie;
                         }
                         /*
                          * Check known JSESSIONIDs and corresponding HTTP session
                          */
-                        if (!jsessionids.containsKey(id) || !HttpSessionManagement.isHttpSessionValid(id)) {
+                        if (!HttpSessionManagement.isHttpSessionValid(id)) {
                             /*
                              * Invalid cookie
                              */
-                            jsessionids.remove(id);
                             if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
-                            resp.removeCookie(current);
-                            break NextCookie;
+                            current.setMaxAge(0); // delete
+                            resp.addCookie(current);
+                            continue NextCookie;
                         }
                         jsessionIDCookie = current;
-                        ajpRequestHandler.setHttpSessionId(id, true);
+                        ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     } else {
                         /*
                          * Value does not apply to pattern [UID].[JVM-ROUTE], hence only UID is given through special cookie JSESSIONID.
@@ -691,40 +689,43 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
-                            break NextCookie;
+                            current.setMaxAge(0); // delete
+                            resp.addCookie(current);
+                            continue NextCookie;
                         }
                         /*
                          * Check known JSESSIONIDs and corresponding HTTP session
                          */
-                        if (!jsessionids.containsKey(id) || !HttpSessionManagement.isHttpSessionValid(id)) {
+                        if (!HttpSessionManagement.isHttpSessionValid(id)) {
                             /*
                              * Invalid cookie
                              */
-                            jsessionids.remove(id);
                             if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
-                            resp.removeCookie(current);
-                            break NextCookie;
+                            current.setMaxAge(0); // delete
+                            resp.addCookie(current);
+                            continue NextCookie;
                         }
                         jsessionIDCookie = current;
-                        ajpRequestHandler.setHttpSessionId(id, true);
+                        ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     }
                 }
             }
         }
         if (jsessionIDCookie == null) {
-            createJSessionIDCookie(resp, ajpRequestHandler);
+            createJSessionIDCookie(servletRequest, resp, ajpRequestHandler);
         }
     }
 
-    private static void createJSessionIDCookie(final HttpServletResponseWrapper resp, final AJPv13RequestHandler ajpRequestHandler) {
-        addJSessionIDCookie(null, resp, ajpRequestHandler);
+    private static void createJSessionIDCookie(final HttpServletRequestWrapper servletRequest, final HttpServletResponseWrapper resp, final AJPv13RequestHandler ajpRequestHandler) {
+        addJSessionIDCookie(null, servletRequest, resp, ajpRequestHandler);
     }
 
     private static final String DEFAULT_PATH = "/";
 
-    private static void addJSessionIDCookie(final String id, final HttpServletResponseWrapper resp, final AJPv13RequestHandler ajpRequestHandler) {
+    private static void addJSessionIDCookie(final String id, final HttpServletRequestWrapper servletRequest, final HttpServletResponseWrapper resp, final AJPv13RequestHandler ajpRequestHandler) {
+        final String jvmRoute = AJPv13Config.getJvmRoute();
         final String jsessionIdVal;
         final boolean join;
         if (id == null) {
@@ -732,8 +733,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
              * Create a new unique id
              */
             final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
-            if ((AJPv13Config.getJvmRoute() != null) && (AJPv13Config.getJvmRoute().length() > 0)) {
-                jsessionIDVal.append('.').append(AJPv13Config.getJvmRoute());
+            if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
+                jsessionIDVal.append('.').append(jvmRoute);
             }
             jsessionIdVal = jsessionIDVal.toString();
             join = true;
@@ -741,17 +742,16 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             /*
              * Check known JSESSIONIDs and corresponding HTTP session
              */
-            if (jsessionids.containsKey(id) && HttpSessionManagement.isHttpSessionValid(id)) {
+            if (HttpSessionManagement.isHttpSessionValid(id)) {
                 jsessionIdVal = id;
                 join = false;
             } else {
                 /*
                  * Invalid cookie. Create a new unique id
                  */
-                jsessionids.remove(id);
                 final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
-                if ((AJPv13Config.getJvmRoute() != null) && (AJPv13Config.getJvmRoute().length() > 0)) {
-                    jsessionIDVal.append('.').append(AJPv13Config.getJvmRoute());
+                if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
+                    jsessionIDVal.append('.').append(jvmRoute);
                 }
                 jsessionIdVal = jsessionIDVal.toString();
                 join = true;
@@ -759,10 +759,14 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
         jsessionIDCookie.setPath(DEFAULT_PATH);
-        jsessionIDCookie.setMaxAge(-1); // session cookie
-        ajpRequestHandler.setHttpSessionId(jsessionIdVal, join);
-        jsessionids.put(jsessionIdVal, Long.valueOf(System.currentTimeMillis()));
-        resp.addCookie(jsessionIDCookie);
+        final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final int maxAge = (int) (ConfigTools.parseTimespan(null == configurationService ? "1W" : configurationService.getProperty(
+            "com.openexchange.cookie.ttl", "1W")) / 1000);
+        jsessionIDCookie.setMaxAge(maxAge);
+        // jsessionIDCookie.setMaxAge(-1); // session cookie
+        ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
+        servletRequest.getSession(true);
+        // resp.addCookie(jsessionIDCookie);
     }
 
     private String parseString() throws AJPv13Exception {

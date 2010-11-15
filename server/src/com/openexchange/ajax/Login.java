@@ -425,6 +425,10 @@ public class Login extends AJAXServlet {
         } else {
             writeSecretCookie(resp, session, req.isSecure());
         }
+        /*
+         * Refresh HTTP session, too
+         */
+        req.getSession();
 
         final Response response = new Response();
         response.setData("1");
@@ -483,7 +487,7 @@ public class Login extends AJAXServlet {
         if (!autologin) {
             return;
         }
-        final String spanDef = configurationService.getProperty("com.openexchange.sessiond.cookie.ttl", "1W");
+        final String spanDef = configurationService.getProperty("com.openexchange.cookie.ttl", "1W");
         cookie.setMaxAge((int) (ConfigTools.parseTimespan(spanDef) / 1000));
         final boolean forceHTTPS = configurationService.getBoolProperty("com.openexchange.sessiond.cookie.forceHTTPS", false);
         if (forceHTTPS || secure) {

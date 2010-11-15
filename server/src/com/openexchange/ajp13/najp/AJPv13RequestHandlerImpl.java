@@ -53,7 +53,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13CPingRequest;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
@@ -125,7 +128,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     private boolean isFormData;
 
-    private String httpSessionId;
+    private Cookie httpSessionCookie;
 
     private boolean httpSessionJoined;
 
@@ -407,7 +410,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             serviceMethodCalled = false;
             endResponseSent = false;
             isFormData = false;
-            httpSessionId = null;
+            httpSessionCookie = null;
             httpSessionJoined = false;
             servletPath = null;
             state = State.IDLE;
@@ -614,23 +617,21 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         AJPv13ForwardRequest.parseQueryString(request, new String(contentBytes, charEnc));
     }
 
-    /**
-     * Sets the servlet request
-     * 
-     * @param request The servlet request
-     */
     public void setServletRequest(final HttpServletRequestWrapper request) {
         this.request = request;
         supplyRequestWrapperWithServlet();
     }
 
-    /**
-     * Sets the servlet response
-     * 
-     * @param response The servlet response
-     */
+    public HttpServletRequest getServletRequest() {
+        return request;
+    }
+
     public void setServletResponse(final HttpServletResponseWrapper response) {
         this.response = response;
+    }
+
+    public HttpServletResponse getServletResponse() {
+        return response;
     }
 
     /**
@@ -849,30 +850,19 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
-    /**
-     * Gets the HTTP session ID
-     * 
-     * @return The HTTP session ID
-     */
-    public String getHttpSessionId() {
+    public Cookie getHttpSessionCookie() {
         ajpConblocker.acquire();
         try {
-            return httpSessionId;
+            return httpSessionCookie;
         } finally {
             ajpConblocker.release();
         }
     }
 
-    /**
-     * Sets the HTTP session ID
-     * 
-     * @param httpSessionId The HTTP session ID
-     * @param join <code>true</code> if the HTTP session has joined a previous HTTP session; otherwise <code>false</code>
-     */
-    public void setHttpSessionId(final String httpSessionId, final boolean join) {
+    public void setHttpSessionCookie(final Cookie httpSessionCookie, final boolean join) {
         ajpConblocker.acquire();
         try {
-            this.httpSessionId = httpSessionId;
+            this.httpSessionCookie = httpSessionCookie;
             httpSessionJoined = join;
         } finally {
             ajpConblocker.release();

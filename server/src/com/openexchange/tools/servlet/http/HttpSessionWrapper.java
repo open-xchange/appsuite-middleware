@@ -50,7 +50,6 @@
 package com.openexchange.tools.servlet.http;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,25 +60,32 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionContext;
+import com.openexchange.config.ConfigTools;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * HttpSessionWrapper
+ * {@link HttpSessionWrapper} - A wrapper class for {@link HttpSession}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HttpSessionWrapper implements HttpSession {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpSessionWrapper.class);
+
     private final Map<String, Object> attributes;
 
     private final Map<String, Object> values;
 
-    private long creationTime = new Date(0).getTime();
+    private final int cookieTTL;
 
-    private long lastAccessedTime = new Date(0).getTime();
+    private final long creationTime;
+
+    private long lastAccessedTime;
 
     private final String id;
 
-    private int maxInactiveIntervall = -1;
+    private int maxInactiveIntervall;
 
     private ServletContext servletContext;
 
@@ -88,33 +94,57 @@ public class HttpSessionWrapper implements HttpSession {
     /**
      * Indicates if the client does not yet know about the session or if the client chooses not to join the session
      */
-    private boolean newSession = true;
+    private boolean newSession;
 
+    /**
+     * Initializes a new {@link HttpSessionWrapper}.
+     * 
+     * @param id The HTTP session identifier
+     */
     public HttpSessionWrapper(final String id) {
         super();
+        newSession = true;
+        /*
+         * Max. inactive interval set to cookie time-to-live by default
+         */
+        final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        cookieTTL =
+            (int) (ConfigTools.parseTimespan(null == configurationService ? "1W" : configurationService.getProperty(
+                "com.openexchange.cookie.ttl",
+                "1W")) / 1000);
+        maxInactiveIntervall = cookieTTL;
+        /*
+         * Initialize other stuff
+         */
         attributes = new HashMap<String, Object>();
         values = new HashMap<String, Object>();
         creationTime = lastAccessedTime = System.currentTimeMillis();
         this.id = id;
     }
+ 
+    /**
+     * Touches this session's last-accessed time stamp.
+     * 
+     * @return This session with last-accessed time stamp updated
+     */
+    public HttpSessionWrapper touch() {
+        lastAccessedTime = System.currentTimeMillis();
+        return this;
+    }
 
     public Object getAttribute(final String attributeName) {
-        lastAccessedTime = System.currentTimeMillis();
         return attributes.get(attributeName);
     }
 
     public Enumeration<?> getAttributeNames() {
-        lastAccessedTime = System.currentTimeMillis();
         return new IteratorEnumeration(attributes.keySet().iterator());
     }
 
     public long getCreationTime() {
-        lastAccessedTime = System.currentTimeMillis();
         return creationTime;
     }
 
     public String getId() {
-        lastAccessedTime = System.currentTimeMillis();
         return id;
     }
 
@@ -123,12 +153,10 @@ public class HttpSessionWrapper implements HttpSession {
     }
 
     public int getMaxInactiveInterval() {
-        lastAccessedTime = System.currentTimeMillis();
         return maxInactiveIntervall;
     }
 
     public ServletContext getServletContext() {
-        lastAccessedTime = System.currentTimeMillis();
         return servletContext;
     }
 
@@ -137,28 +165,18 @@ public class HttpSessionWrapper implements HttpSession {
     }
 
     public HttpSessionContext getSessionContext() {
-        lastAccessedTime = System.currentTimeMillis();
         return sessionContext;
     }
 
     public Object getValue(final String valueName) {
-        lastAccessedTime = System.currentTimeMillis();
         return values.get(valueName);
     }
 
     public String[] getValueNames() {
-        lastAccessedTime = System.currentTimeMillis();
-        final int size = values.size();
-        final String[] valueNames = new String[size];
-        final Iterator<String> iter = values.keySet().iterator();
-        for (int i = 0; i < size; i++) {
-            valueNames[i] = iter.next();
-        }
-        return valueNames;
+        return values.keySet().toArray(new String[values.size()]);
     }
 
     public void invalidate() {
-        lastAccessedTime = System.currentTimeMillis();
         /*
          * Remove attributes
          */
@@ -176,10 +194,13 @@ public class HttpSessionWrapper implements HttpSession {
         }
         servletContext = null;
         sessionContext = null;
+        /*
+         * Remove from management
+         */
+        HttpSessionManagement.removeHttpSession(id);
     }
 
     public boolean isNew() {
-        lastAccessedTime = System.currentTimeMillis();
         return newSession;
     }
 
@@ -188,7 +209,6 @@ public class HttpSessionWrapper implements HttpSession {
     }
 
     public void putValue(final String valueName, final Object value) {
-        lastAccessedTime = System.currentTimeMillis();
         values.put(valueName, value);
         if (value instanceof HttpSessionBindingListener) {
             final HttpSessionBindingListener listener = (HttpSessionBindingListener) value;
@@ -197,7 +217,6 @@ public class HttpSessionWrapper implements HttpSession {
     }
 
     public void removeAttribute(final String attributeName) {
-        lastAccessedTime = System.currentTimeMillis();
         final Object removedObj = attributes.remove(attributeName);
         if (removedObj instanceof HttpSessionBindingListener) {
             final HttpSessionBindingListener listener = (HttpSessionBindingListener) removedObj;
@@ -206,7 +225,6 @@ public class HttpSessionWrapper implements HttpSession {
     }
 
     public void removeValue(final String valueName) {
-        lastAccessedTime = System.currentTimeMillis();
         final Object removedObj = values.remove(valueName);
         if (removedObj instanceof HttpSessionBindingListener) {
             final HttpSessionBindingListener listener = (HttpSessionBindingListener) removedObj;
@@ -215,7 +233,6 @@ public class HttpSessionWrapper implements HttpSession {
     }
 
     public void setAttribute(final String attributeName, final Object attributeValue) {
-        lastAccessedTime = System.currentTimeMillis();
         if (attributeValue != null) {
             attributes.put(attributeName, attributeValue);
         }
@@ -226,15 +243,19 @@ public class HttpSessionWrapper implements HttpSession {
     }
 
     public void setMaxInactiveInterval(final int maxInactiveIntervall) {
-        lastAccessedTime = System.currentTimeMillis();
-        this.maxInactiveIntervall = maxInactiveIntervall;
+        if (maxInactiveIntervall < 0 || maxInactiveIntervall > cookieTTL) {
+            LOG.warn("Specified maxInactiveIntervall is negative or exceeds max. cookie time-to-live. Using max. cookie time-to-live: " + cookieTTL + "seconds");
+            this.maxInactiveIntervall = cookieTTL;
+        } else {
+            this.maxInactiveIntervall = maxInactiveIntervall;
+        }
     }
 
     private static class IteratorEnumeration implements Enumeration<Object> {
 
         private final Iterator<?> iter;
 
-        private IteratorEnumeration(final Iterator<?> iter) {
+        public IteratorEnumeration(final Iterator<?> iter) {
             this.iter = iter;
         }
 

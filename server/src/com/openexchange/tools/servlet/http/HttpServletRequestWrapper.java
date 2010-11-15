@@ -95,8 +95,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     private Principal userPrincipal;
 
-    private HttpSessionWrapper session;
-
     private boolean requestedSessionIdFromCookie = true;
 
     private boolean requestedSessionIdFromURL;
@@ -206,7 +204,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
     }
 
     public String getRequestedSessionId() {
-        return session.getId();
+        return ajpRequestHandler.getHttpSessionCookie().getValue();
     }
 
     public void setRequestURI(final String requestURI) {
@@ -266,26 +264,29 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
     }
 
     public HttpSession getSession(final boolean create) {
-        if (session != null) {
-            return session;
-        }
+        HttpSessionWrapper session = null;
         /*
          * First look-up HttpSessionManagement if a session already exists
          */
-        final String id = ajpRequestHandler.getHttpSessionId();
-        final HttpSessionWrapper httpSession = HttpSessionManagement.getHttpSession(id);
+        final Cookie sessionCookie = ajpRequestHandler.getHttpSessionCookie();
+        final String httpSessionId = sessionCookie.getValue();
+        final HttpSessionWrapper httpSession = HttpSessionManagement.getHttpSession(httpSessionId);
         if (httpSession != null) {
             if (!HttpSessionManagement.isHttpSessionExpired(httpSession)) {
                 session = httpSession;
                 session.setNew(false);
                 session.setServletContext(getServletContext());
+                /*
+                 * Add JSESSIONID cookie
+                 */
+                ajpRequestHandler.getServletResponse().addCookie(sessionCookie);
                 return session;
             }
             /*
              * Invalidate session
              */
             httpSession.invalidate();
-            HttpSessionManagement.removeHttpSession(id);
+            HttpSessionManagement.removeHttpSession(httpSessionId);
         }
         /*
          * Create a new session
@@ -294,9 +295,13 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
             /*
              * Create new session
              */
-            session = (HttpSessionWrapper) HttpSessionManagement.createAndGetHttpSession(id);
+            session = ((HttpSessionWrapper) HttpSessionManagement.createAndGetHttpSession(httpSessionId));
             session.setNew(true);
             session.setServletContext(getServletContext());
+            /*
+             * Add JSESSIONID cookie
+             */
+            ajpRequestHandler.getServletResponse().addCookie(sessionCookie);
         }
         return session;
     }
@@ -305,12 +310,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return getSession(true);
     }
 
-    public void setSession(final HttpSession session) {
-        this.session = (HttpSessionWrapper) session;
-    }
-
     public boolean isRequestedSessionIdValid() {
-        return !HttpSessionManagement.isHttpSessionExpired(session);
+        return !HttpSessionManagement.isHttpSessionExpired((HttpSessionWrapper) getSession());
     }
 
     public boolean isRequestedSessionIdFromCookie() {

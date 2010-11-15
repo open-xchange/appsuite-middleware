@@ -59,7 +59,6 @@ import javax.management.NotCompliantMBeanException;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.ajp13.AJPv13TimerTaskStarter;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
@@ -105,8 +104,6 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     private Thread[] threadArr;
 
     private final AtomicBoolean running;
-
-    private AJPv13TimerTaskStarter timerTaskStarter;
 
     /**
      * Initializes a new {@link AJPv13ServerImpl}
@@ -156,11 +153,6 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
              */
             startGate.countDown();
             AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.setNumActive(threadArr.length);
-            /*
-             * Start timer task(s)
-             */
-            timerTaskStarter = new AJPv13TimerTaskStarter();
-            timerTaskStarter.start();
         } else {
             if (LOG.isInfoEnabled()) {
                 LOG.info("AJPv13Server is already running...");
@@ -174,13 +166,6 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     @Override
     public void stopServer() {
         if (running.compareAndSet(true, false)) {
-            /*
-             * Stop timer task(s)
-             */
-            if (null != timerTaskStarter) {
-                timerTaskStarter.stop();
-                timerTaskStarter = null;
-            }
             /*
              * Stop listeners
              */

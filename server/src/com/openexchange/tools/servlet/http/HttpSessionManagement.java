@@ -65,7 +65,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class HttpSessionManagement {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpSessionManagement.class);
+    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpSessionManagement.class);
 
     private static Map<String, HttpSessionWrapper> sessions;
 
@@ -80,7 +80,7 @@ public final class HttpSessionManagement {
                 sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
                 final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                 if (null != timer) {
-                    sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(), 100, 3600000);
+                    sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(sessions), 1000, 3600000);
                 }
             }
         }
@@ -118,7 +118,8 @@ public final class HttpSessionManagement {
      * @return The HTTP session whose unique ID matches given <code>sessionId</code>.
      */
     public static HttpSessionWrapper getHttpSession(final String sessionId) {
-        return sessions.get(sessionId);
+        final HttpSessionWrapper ret = sessions.get(sessionId);
+        return null == ret ? null : ret.touch();
     }
 
     /**
@@ -160,7 +161,7 @@ public final class HttpSessionManagement {
         final HttpSessionWrapper httpSession;
         if (sessions.containsKey(uniqueId)) {
             httpSession = sessions.get(uniqueId);
-            httpSession.isNew(); // Touch last-accessed time stamp
+            httpSession.touch(); // Touch last-accessed time stamp
         } else {
             httpSession = new HttpSessionWrapper(uniqueId);
             sessions.put(uniqueId, httpSession);
@@ -214,7 +215,23 @@ public final class HttpSessionManagement {
      */
     public static boolean isHttpSessionValid(final String sessionId) {
         final HttpSessionWrapper httpSession = sessions.get(sessionId);
-        return ((httpSession == null) || (!isHttpSessionExpired(httpSession)));
+        if (null == httpSession) {
+            /*
+             * HTTP session must be present
+             */
+            return false;
+        }
+        if (isHttpSessionExpired(httpSession)) {
+            /*
+             * Expired
+             */
+            sessions.remove(sessionId);
+            return false;
+        }
+        /*
+         * Non-null and not expired
+         */
+        return true;
     }
 
     /**
@@ -233,16 +250,19 @@ public final class HttpSessionManagement {
 
     private static final class SessionRemover implements Runnable {
 
-        public SessionRemover() {
+        private final Map<String, HttpSessionWrapper> sessionsMap;
+
+        public SessionRemover(final Map<String, HttpSessionWrapper> sessionsMap) {
             super();
+            this.sessionsMap = sessionsMap;
         }
 
         public void run() {
             try {
-                for (final Iterator<Map.Entry<String, HttpSessionWrapper>> iter = sessions.entrySet().iterator(); iter.hasNext();) {
-                    final Map.Entry<String, HttpSessionWrapper> entry = iter.next();
-                    if (isHttpSessionExpired(entry.getValue())) {
-                        entry.getValue().invalidate();
+                for (final Iterator<Map.Entry<String, HttpSessionWrapper>> iter = sessionsMap.entrySet().iterator(); iter.hasNext();) {
+                    final HttpSessionWrapper session = iter.next().getValue();
+                    if (isHttpSessionExpired(session)) {
+                        session.invalidate();
                         iter.remove();
                     }
                 }
