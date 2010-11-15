@@ -130,7 +130,11 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     @Override
     public void tearDown() throws Exception {
-        removeDocumentsAndFolders();
+        try {
+            removeDocumentsAndFolders();
+        } catch (Exception x) {
+            // Ignore: We don't want exceptions thrown in tearDown to override test failures.
+        }
         this.logout();
 
         //assertEquals("Couldn't delete "+j(notDeleted),0,notDeleted.length);
