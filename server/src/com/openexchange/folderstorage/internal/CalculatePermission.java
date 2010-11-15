@@ -140,13 +140,61 @@ public final class CalculatePermission {
         } catch (final UserConfigurationException e) {
             throw new FolderException(e);
         }
+        final Permission underlyingPermission;
+        {
+            final int bits = folder.getBits();
+            if (bits >= 0) {
+                /*
+                 * Get permission from bits
+                 */
+                final DummyPermission p = new DummyPermission();
+                p.setNoPermissions();
+                final int[] permissionBits = parsePermissionBits(bits);
+                p.setFolderPermission(permissionBits[0]);
+                p.setReadPermission(permissionBits[1]);
+                p.setWritePermission(permissionBits[2]);
+                p.setDeletePermission(permissionBits[3]);
+                p.setAdmin(permissionBits[4] > 0 ? true : false);
+                underlyingPermission = p;
+            } else {
+                /*
+                 * Compute permission from all folder permissions
+                 */
+                underlyingPermission = getMaxPermission(folder.getPermissions(), userConfiguration);
+            }
+        }
         return new EffectivePermission(
-            getMaxPermission(folder.getPermissions(), userConfiguration),
+            underlyingPermission,
             folder.getID(),
             folder.getType(),
             folder.getContentType(),
             userConfiguration,
             allowedContentTypes);
+    }
+
+    private static final int[] mapping = { 0, 2, 4, -1, 8 };
+
+    /**
+     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
+     */
+    private static final int MAX_PERMISSION = 64;
+
+    private static final int[] parsePermissionBits(final int bitsArg) {
+        int bits = bitsArg;
+        final int[] retval = new int[5];
+        for (int i = retval.length - 1; i >= 0; i--) {
+            final int shiftVal = (i * 7); // Number of bits to be shifted
+            retval[i] = bits >> shiftVal;
+            bits -= (retval[i] << shiftVal);
+            if (retval[i] == MAX_PERMISSION) {
+                retval[i] = Permission.MAX_PERMISSION;
+            } else if (i < (retval.length - 1)) {
+                retval[i] = mapping[retval[i]];
+            } else {
+                retval[i] = retval[i];
+            }
+        }
+        return retval;
     }
 
     /**
@@ -159,8 +207,31 @@ public final class CalculatePermission {
      */
     public static Permission calculate(final Folder folder, final ServerSession session, final java.util.List<ContentType> allowedContentTypes) {
         final UserConfiguration userConfiguration = session.getUserConfiguration();
+        final Permission underlyingPermission;
+        {
+            final int bits = folder.getBits();
+            if (bits >= 0) {
+                /*
+                 * Get permission from bits
+                 */
+                final DummyPermission p = new DummyPermission();
+                p.setNoPermissions();
+                final int[] permissionBits = parsePermissionBits(bits);
+                p.setFolderPermission(permissionBits[0]);
+                p.setReadPermission(permissionBits[1]);
+                p.setWritePermission(permissionBits[2]);
+                p.setDeletePermission(permissionBits[3]);
+                p.setAdmin(permissionBits[4] > 0 ? true : false);
+                underlyingPermission = p;
+            } else {
+                /*
+                 * Compute permission from all folder permissions
+                 */
+                underlyingPermission = getMaxPermission(folder.getPermissions(), userConfiguration);
+            }
+        }
         return new EffectivePermission(
-            getMaxPermission(folder.getPermissions(), userConfiguration),
+            underlyingPermission,
             folder.getID(),
             folder.getType(),
             folder.getContentType(),
