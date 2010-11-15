@@ -355,12 +355,12 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         } else {
             final int dot = jsessionID.lastIndexOf('.');
             if ((dot == -1) || (AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
-                addJSessionIDCookie(jsessionID, servletRequest, servletResponse, ajpRequestHandler);
+                addJSessionIDCookie(jsessionID, servletRequest, ajpRequestHandler);
             } else {
                 /*
                  * JVM route does not match
                  */
-                createJSessionIDCookie(servletRequest, servletResponse, ajpRequestHandler);
+                createJSessionIDCookie(servletRequest, ajpRequestHandler);
             }
         }
     }
@@ -714,17 +714,17 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             }
         }
         if (jsessionIDCookie == null) {
-            createJSessionIDCookie(servletRequest, resp, ajpRequestHandler);
+            createJSessionIDCookie(servletRequest, ajpRequestHandler);
         }
     }
 
-    private static void createJSessionIDCookie(final HttpServletRequestWrapper servletRequest, final HttpServletResponseWrapper resp, final AJPv13RequestHandler ajpRequestHandler) {
-        addJSessionIDCookie(null, servletRequest, resp, ajpRequestHandler);
+    private static void createJSessionIDCookie(final HttpServletRequestWrapper servletRequest, final AJPv13RequestHandler ajpRequestHandler) {
+        addJSessionIDCookie(null, servletRequest, ajpRequestHandler);
     }
 
     private static final String DEFAULT_PATH = "/";
 
-    private static void addJSessionIDCookie(final String id, final HttpServletRequestWrapper servletRequest, final HttpServletResponseWrapper resp, final AJPv13RequestHandler ajpRequestHandler) {
+    private static void addJSessionIDCookie(final String id, final HttpServletRequestWrapper servletRequest, final AJPv13RequestHandler ajpRequestHandler) {
         final String jvmRoute = AJPv13Config.getJvmRoute();
         final String jsessionIdVal;
         final boolean join;
@@ -765,8 +765,10 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         jsessionIDCookie.setMaxAge(maxAge);
         // jsessionIDCookie.setMaxAge(-1); // session cookie
         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
+        /*
+         * HttpServletRequestWrapper.getSession() adds the JSESSIONID cookie
+         */
         servletRequest.getSession(true);
-        // resp.addCookie(jsessionIDCookie);
     }
 
     private String parseString() throws AJPv13Exception {

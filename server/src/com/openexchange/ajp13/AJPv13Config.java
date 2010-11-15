@@ -122,8 +122,6 @@ public final class AJPv13Config implements Initialization {
 
     private boolean logForwardRequest;
 
-    private int jsessionIdTTL;
-
     public void start() throws AbstractOXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(this.getClass().getName() + " already started");
@@ -161,7 +159,6 @@ public final class AJPv13Config implements Initialization {
         servletConfigs = null;
         ajpBindAddr = null;
         logForwardRequest = false;
-        jsessionIdTTL = 0;
     }
 
     private void init() throws AJPv13Exception {
@@ -315,15 +312,6 @@ public final class AJPv13Config implements Initialization {
                  * AJP_LOG_FORWARD_REQUEST
                  */
                 logForwardRequest = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_LOG_FORWARD_REQUEST", falseStr).trim());
-                /*-
-                 * AJP_JSESSIONID_TTL, default is one day -> 86400000msec
-                 */
-                try {
-                    jsessionIdTTL = Integer.parseInt(ajpProperties.getProperty("AJP_JSESSIONID_TTL", "86400000").trim());
-                } catch (final NumberFormatException e) {
-                    LOG.error("Error parsing AJP property AJP_JSESSIONID_TTL. Using default of 86400000");
-                    jsessionIdTTL = 86400000;
-                }
                 /*
                  * Log info
                  */
@@ -358,7 +346,6 @@ public final class AJPv13Config implements Initialization {
             logBuilder.append("\tAJP_JVM_ROUTE=").append(instance.jvmRoute).append('\n');
             logBuilder.append("\tAJP_CHECK_MAGIC_BYTES_STRICT=").append(instance.checkMagicBytesStrict).append('\n');
             logBuilder.append("\tAJP_LOG_FORWARD_REQUEST=").append(instance.logForwardRequest).append('\n');
-            logBuilder.append("\tAJP_JSESSIONID_TTL=").append(instance.jsessionIdTTL).append('\n');
             logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(instance.servletConfigs).append('\n');
             logBuilder.append("\tAJP_BIND_ADDR=").append(
                 instance.ajpBindAddr == null ? "* (all interfaces)" : instance.ajpBindAddr.toString());
@@ -445,13 +432,6 @@ public final class AJPv13Config implements Initialization {
 
     public static boolean isLogForwardRequest() {
         return instance.logForwardRequest;
-    }
-
-    /**
-     * @return The time-to-live in milliseconds for remembered <i>JSESSIONID</i>s
-     */
-    public static int getJSessionIDTTL() {
-        return instance.jsessionIdTTL;
     }
 
     public static String getServletConfigs() {
