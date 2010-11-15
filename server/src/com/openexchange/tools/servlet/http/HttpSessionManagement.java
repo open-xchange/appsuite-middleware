@@ -195,7 +195,14 @@ public final class HttpSessionManagement {
      * @return <code>true</code> if given HTTP session has expired; otherwise <code>false</code>
      */
     public static boolean isHttpSessionExpired(final HttpSessionWrapper httpSession) {
-        return httpSession.getMaxInactiveInterval() > 0 ? ((System.currentTimeMillis() - httpSession.getLastAccessedTime()) / 1000) > httpSession.getMaxInactiveInterval() : false;
+        final int maxInactiveInterval = httpSession.getMaxInactiveInterval();
+        if (maxInactiveInterval > 0) {
+            return ((System.currentTimeMillis() - httpSession.getLastAccessedTime()) / 1000) > maxInactiveInterval;
+        }
+        /*
+         * No inactive interval set
+         */
+        return false;
     }
 
     /**
