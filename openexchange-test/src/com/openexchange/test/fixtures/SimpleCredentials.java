@@ -49,6 +49,7 @@
 package com.openexchange.test.fixtures;
 
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.config.actions.Tree;
@@ -66,13 +67,14 @@ public class SimpleCredentials implements Cloneable {
     private TestUserConfig config;
     private TestUserConfigFactory userConfigFactory = null;
 	private ContactFinder contactFinder;
+	private Locale locale = null;
 
     public SimpleCredentials(TestUserConfigFactory userConfigFactory, ContactFinder contactFinder) {
-    	super();
-    	this.userConfigFactory = userConfigFactory;
-    	this.contactFinder = contactFinder;
+        super();
+        this.userConfigFactory = userConfigFactory;
+        this.contactFinder = contactFinder;
     }
-    
+
     public String getLogin() {
         return login;
     }
@@ -80,11 +82,11 @@ public class SimpleCredentials implements Cloneable {
     public void setLogin(final String login) {
         this.login = login;
     }
-    
+
     public String getIMAPLogin() {
         return null == this.imapLogin ? this.login : imapLogin;
     }
-    
+
     public void setIMAPLogin(final String imapLogin) {
         this.imapLogin = imapLogin;
     }
@@ -98,44 +100,56 @@ public class SimpleCredentials implements Cloneable {
     }
 
     public Contact asContact() {
-    	if (null == this.contact) {
-    		this.contact = contactFinder.getContact(this);
-    	}
+        if (null == this.contact) {
+            this.contact = contactFinder.getContact(this);
+        }
         return contact;
     }
-    
+
     public TestUserConfig getConfig() {
-    	if (null == config) {
-    		config = userConfigFactory.create(this);
-    	}
-    	return config;
+        if (null == config) {
+            config = userConfigFactory.create(this);
+        }
+        return config;
     }
-    
+
     public int getUserId() {
-    	return getConfig().getInt(Tree.Identifier);
+        return getConfig().getInt(Tree.Identifier);
     }
-    
-    public boolean hasFullGroupware(){
+
+    public boolean hasFullGroupware() {
         return getConfig().getBool(Tree.InfostoreEnabled);
     }
-    
-    public boolean hasActiveSync(){
+
+    public boolean hasActiveSync() {
         return getConfig().getBool(Tree.ActiveSync);
     }
-    
-    public boolean hasOXUpdater(){
+
+    public boolean hasOXUpdater() {
         return getConfig().getBool(Tree.OXUpdater);
     }
 
     public TimeZone getTimeZone() {
-    	return TimeZone.getTimeZone(getConfig().getString(Tree.TimeZone));
+        return TimeZone.getTimeZone(getConfig().getString(Tree.TimeZone));
     }
-    
+
+    public Locale getLocale() throws FixtureException {
+        if (null == locale) {
+            try {
+                final String[] language_country = getConfig().getString(Tree.Language).split("_");
+                locale = new Locale(language_country[0], language_country[1]);
+            } catch (final Exception e) {
+                throw new FixtureException("Unable to determine locale.", e);
+            }
+        }
+        return locale;
+    }
+
     public Calendar getCalendar() {
-    	final Calendar calendar = Calendar.getInstance(getTimeZone());
-    	calendar.setMinimalDaysInFirstWeek(4);
-    	calendar.setFirstDayOfWeek(Calendar.MONDAY);
-    	return calendar;
+        final Calendar calendar = Calendar.getInstance(getTimeZone());
+        calendar.setMinimalDaysInFirstWeek(4);
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+        return calendar;
     }
 
     public boolean equals(final Object o) {
@@ -155,17 +169,17 @@ public class SimpleCredentials implements Cloneable {
         result = (login != null ? login.hashCode() : 0);
         return result;
     }
-    
-	public String toString() {
-		return String.format("SimpleCredentials[%s]", null != this.getLogin() ? this.getLogin() : "");
-	}
-	
-	public Object clone() {
-		try {
-			return super.clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+
+    public String toString() {
+        return String.format("SimpleCredentials[%s]", null != this.getLogin() ? this.getLogin() : "");
+    }
+
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
