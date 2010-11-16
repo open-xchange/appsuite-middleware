@@ -96,6 +96,7 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -627,92 +628,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                          * A non-virtual database folder
                          */
                         final FolderObject fo = getFolderObject(folderId, ctx, con);
-                        if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
-                            /*
-                             * The system shared folder
-                             */
-                            retval = SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, ctx, con);
-                        } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
-                            /*
-                             * The system public folder
-                             */
-                            retval = SystemPublicFolder.getSystemPublicFolder(fo);
-                        } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
-                            /*
-                             * The system infostore folder
-                             */
-                            retval = SystemInfostoreFolder.getSystemInfostoreFolder(fo);
-                        } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
-                            /*
-                             * The system private folder
-                             */
-                            retval = SystemPrivateFolder.getSystemPrivateFolder(fo);
-                        } else {
-                            /*
-                             * Check for shared folder, that is folder is of type private and requesting user is different from folder's
-                             * owner
-                             */
-                            if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
-                                retval = new LocalizedDatabaseFolder(fo);
-                                retval.setName(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
-                            } else if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
-                                retval = new LocalizedDatabaseFolder(fo);
-                                retval.setName(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
-                            } else if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
-                                retval = new LocalizedDatabaseFolder(fo);
-                                retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
-                                retval.setParentID(FolderStorage.PUBLIC_ID);
-                            } else if (FolderObject.SYSTEM_GLOBAL_FOLDER_ID == folderId) {
-                                retval = new LocalizedDatabaseFolder(fo);
-                                retval.setName(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
-                                retval.setParentID(FolderStorage.PUBLIC_ID);
-                            } else if (fo.isDefaultFolder()) {
-                                /*
-                                 * A default folder: set locale-sensitive name
-                                 */
-                                if (fo.getModule() == FolderObject.TASK) {
-                                    retval = new LocalizedDatabaseFolder(fo);
-                                    retval.setName(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
-                                } else if (fo.getModule() == FolderObject.CONTACT) {
-                                    retval = new LocalizedDatabaseFolder(fo);
-                                    retval.setName(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
-                                } else if (fo.getModule() == FolderObject.CALENDAR) {
-                                    retval = new LocalizedDatabaseFolder(fo);
-                                    retval.setName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
-                                } else {
-                                    retval = new DatabaseFolder(fo);
-                                }
-                            } else {
-                                retval = new DatabaseFolder(fo);
-                            }
-                            if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUserId() != retval.getCreatedBy()) {
-                                retval.setType(SharedType.getInstance());
-                                /*
-                                 * A shared folder has no subfolders in real tree
-                                 */
-                                retval.setSubfolderIDs(new String[0]);
-                                retval.setSubscribedSubfolders(false);
-                                retval.setCacheable(false);
-                                retval.setParentID(new StringBuilder(16).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
-                            } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != folderId) {
-                                /*
-                                 * Set subfolders for non-private folder. For private folder FolderStorage.getSubfolders() is supposed to be
-                                 * used.
-                                 */
-                                final List<Integer> subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
-                                if (subfolderIds.isEmpty()) {
-                                    retval.setSubfolderIDs(new String[0]);
-                                    retval.setSubscribedSubfolders(false);
-                                } else {
-                                    final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                                    for (final Integer id : subfolderIds) {
-                                        tmp.add(id.toString());
-                                    }
-                                    retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
-                                    retval.setSubscribedSubfolders(true);
-                                }
-                            }
-                        }
+                        retval = DatabaseFolderConverter.convert(fo, user, userConfiguration, ctx, con);
                     }
                 }
             } else {
@@ -733,12 +649,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
             // TODO: Subscribed?
 
             return retval;
-        } catch (final DBPoolingException e) {
+        } catch (final FolderException e) {
+            throw e;
+        } catch (final AbstractOXException e) {
             throw new FolderException(e);
-        } catch (final OXException e) {
-            throw new FolderException(e);
-        } catch (final SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
 

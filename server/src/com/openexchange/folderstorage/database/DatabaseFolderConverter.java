@@ -87,7 +87,7 @@ public final class DatabaseFolderConverter {
     private static final TIntObjectHashMap<FolderConverter> CONVERTERS;
 
     static {
-        TIntObjectHashMap<FolderConverter> m = new TIntObjectHashMap<FolderConverter>();
+        TIntObjectHashMap<FolderConverter> m = new TIntObjectHashMap<FolderConverter>(4);
         m.put(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, new FolderConverter() {
 
             public DatabaseFolder convert(final FolderObject fo) throws FolderException {
@@ -108,7 +108,7 @@ public final class DatabaseFolderConverter {
         });
         SYSTEM_CONVERTERS = m;
 
-        m = new TIntObjectHashMap<FolderConverter>();
+        m = new TIntObjectHashMap<FolderConverter>(4);
         m.put(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
             public DatabaseFolder convert(final FolderObject fo) throws FolderException {
