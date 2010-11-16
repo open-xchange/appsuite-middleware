@@ -104,7 +104,9 @@ public class FileMetadataWriter {
 
         public Object handle(Field field, Object... args) {
             Object value = field.doSwitch(get, args);
-            
+            if(value == null && field == File.Field.LOCKED_UNTIL) {
+                return 0;
+            }
             if(Date.class.isInstance(value)) {
                 Date d = (Date) value;
                 TimeZone tz = get(1, TimeZone.class, args);
