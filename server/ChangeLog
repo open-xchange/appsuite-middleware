@@ -1,3 +1,7 @@
+* 2010-11-16 - thorben.betten@open-xchange.com
+
+ - Partial fix for bug #17203: Added "; HttpOnly" flag to server cookies and added "cookielifetime" to config tree
+
 * 2010-11-15 - thorben.betten@open-xchange.com
 
  - Bugfix #17551: Fixed NPE if no session is found for mail filter request
