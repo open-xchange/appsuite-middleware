@@ -38,7 +38,7 @@ modules/mobility (set in this plugin)
 upsell = {
   //global configuration
   config: {
-    iframeHeight: "500px", // can be edited
+    iframeHeight: "450px", // can be edited
     iframeWidth: "", // should be empty as long a graphic is used in header
     //path to plugin
     path: "plugins/com.openexchange.upsell.multiple.gui/",
