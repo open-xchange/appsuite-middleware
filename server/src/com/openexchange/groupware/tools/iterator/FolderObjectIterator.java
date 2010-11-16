@@ -883,7 +883,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                                     ids.clear();
                                     waitForIDs(ids);
                                     /*
-                                     * Add future(s) to concurrent map
+                                     * Fill future(s) from concurrent map
                                      */
                                     for (final Integer id : ids) {
                                         permsMap.get(id).set(loadFolderPermissions(id.intValue(), cid, readCon));
