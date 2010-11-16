@@ -138,6 +138,9 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
 
     public void removeForSession(Session session) {
         List<String> list = tokensPerSession.remove(session.getSessionID());
+        if(list == null) {
+            return;
+        }
         for (String token : list) {
             remove(token);
         }
