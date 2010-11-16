@@ -63,10 +63,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link CookieLifetime} - Requests configured header names which identify phishing headers
- * <p>
- * Path in config tree:<br>
- * <code>modules -&gt; mail -&gt; phishingheaders</code>
+ * {@link CookieLifetime}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
