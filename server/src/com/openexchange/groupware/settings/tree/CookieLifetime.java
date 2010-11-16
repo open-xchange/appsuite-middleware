@@ -100,18 +100,14 @@ public class CookieLifetime implements PreferencesItemService {
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                 final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null == service) {
-                    /*
-                     * Default is 1 week
-                     */
-                    setting.setSingleValue(Integer.valueOf((int) (ConfigTools.parseTimespan("1W") / 1000)));
+                /*
+                 * Check if auto-login is enabled
+                 */
+                if (null != service && service.getBoolProperty("com.openexchange.sessiond.autologin", false)) {
+                    final int maxAge = (int) (ConfigTools.parseTimespan(service.getProperty("com.openexchange.cookie.ttl", "1W")) / 1000);
+                    setting.setSingleValue(Integer.valueOf(maxAge));
                 } else {
-                    /*
-                     * Read from configuration service
-                     */
-                    setting.setSingleValue(Integer.valueOf((int) (ConfigTools.parseTimespan(service.getProperty(
-                        "com.openexchange.cookie.ttl",
-                        "1W")) / 1000)));
+                    setting.setSingleValue(Integer.valueOf(-1));
                 }
             }
         };

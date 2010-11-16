@@ -57,8 +57,8 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SharedNode;
 import com.openexchange.groupware.settings.SettingException.Code;
+import com.openexchange.groupware.settings.SharedNode;
 
 /**
  * This class is a container for the settings tree.
@@ -214,6 +214,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.CalendarNotification.class,
             com.openexchange.groupware.settings.tree.ContactID.class,
             com.openexchange.groupware.settings.tree.ContextID.class,
+            com.openexchange.groupware.settings.tree.CookieLifetime.class,
             com.openexchange.groupware.settings.tree.CurrentTime.class,
             com.openexchange.groupware.settings.tree.FastGUI.class,
             com.openexchange.groupware.settings.tree.folder.Calendar.class,
