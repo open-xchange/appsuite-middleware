@@ -58,6 +58,9 @@ import com.openexchange.groupware.AbstractOXException;
  * the methods {@link #requiredTables()} and {@link #tablesToCreate()}. The {@link #perform(Connection)} method should then create the
  * tables needed for your bundle.
  *
+ * The table must be created in its newest version. {@link UpdateTask}s are not executed after all tables have been created and the schema
+ * is marked in that way that all {@link UpdateTask}s have already been executed. 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface CreateTableService {
