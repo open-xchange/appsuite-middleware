@@ -75,7 +75,9 @@ import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -406,12 +408,26 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public InputStream getUploadedFileData() throws AbstractOXException {
         if(data.hasUploads()) {
             try {
-                return new FileInputStream(data.getFiles().get(0).getTmpFile());
+                UploadFile uploadFile = data.getFiles().get(0);
+                checkSize( uploadFile );
+                return new FileInputStream(uploadFile.getTmpFile());
             } catch (FileNotFoundException e) {
                 throw new AjaxException(AjaxException.Code.IOError,  e.getMessage());
             }
         }
         return null;
+    }
+
+    private void checkSize(UploadFile uploadFile) throws AbstractOXException{
+        final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+        if (maxSize == 0) {
+            return;
+        }
+
+        long size = uploadFile.getSize();
+        if (size > maxSize) {
+            throw new UploadSizeExceededException(size, maxSize, true);
+        }
     }
 
     public int getAttachedId() {
