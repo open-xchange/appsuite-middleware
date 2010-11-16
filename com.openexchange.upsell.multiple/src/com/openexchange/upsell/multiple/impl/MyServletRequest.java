@@ -124,7 +124,7 @@ public final class MyServletRequest  {
 	// config options
 	private static final String PROPERTY_METHOD_EXTERNAL_SHOP_API_URL = "com.openexchange.upsell.multiple.method.external.shop_api_url";
 	private static final String PROPERTY_METHOD_STATIC_SHOP_REDIR_URL = "com.openexchange.upsell.multiple.method.static.shop_redir_url";
-	private static final String PROPERTY_METHOD = "com.openexchange.upsell.multiple.method"; // one of: external, static, email
+	private static final String PROPERTY_METHOD = "com.openexchange.upsell.multiple.method"; // one of: external, static, email, direct
 	
 	// email options
 	private static final String PROPERTY_METHOD_EMAIL_ADDRESS = "com.openexchange.upsell.multiple.method.email.address";
