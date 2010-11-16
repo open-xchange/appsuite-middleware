@@ -1,3 +1,8 @@
+* 2010-11-16 - karsten.will@open-xchange.com
+
+ - Bugfix #17081 - XING subscription failed (sometimes)
+ - Bugfix #16834 - Google calendar crawler failed
+
 * 2010-11-16 - thorben.betten@open-xchange.com
 
  - Partial fix for bug #17203: Added "; HttpOnly" flag to server cookies and added "cookielifetime" to config tree
