@@ -720,8 +720,6 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         addJSessionIDCookie(null, servletRequest, ajpRequestHandler);
     }
 
-    private static final String DEFAULT_PATH = "/";
-
     private static void addJSessionIDCookie(final String id, final HttpServletRequestWrapper servletRequest, final AJPv13RequestHandler ajpRequestHandler) {
         final String jvmRoute = AJPv13Config.getJvmRoute();
         final String jsessionIdVal;
