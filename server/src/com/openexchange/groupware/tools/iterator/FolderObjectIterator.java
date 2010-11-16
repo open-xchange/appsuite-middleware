@@ -823,12 +823,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
         
         @Override
-        public void set(OCLPermission[] v) {
+        public void set(final OCLPermission[] v) {
             super.set(v);
         }
 
         @Override
-        public void setException(Throwable t) {
+        public void setException(final Throwable t) {
             super.setException(t);
         }
 
