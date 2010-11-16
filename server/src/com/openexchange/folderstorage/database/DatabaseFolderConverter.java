@@ -183,10 +183,10 @@ public final class DatabaseFolderConverter {
                  */
                 return folderConverter.convert(fo);
             }
+            final DatabaseFolder retval;
             /*
              * Look-up a converter
              */
-            final DatabaseFolder retval;
             folderConverter = CONVERTERS.get(folderId);
             if (null != folderConverter) {
                 retval = folderConverter.convert(fo);
