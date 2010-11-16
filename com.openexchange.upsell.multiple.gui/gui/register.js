@@ -38,6 +38,8 @@ modules/mobility (set in this plugin)
 upsell = {
   //global configuration
   config: {
+    iframeHeight: "500px", // can be edited
+    iframeWidth: "", // should be empty as long a graphic is used in header
     //path to plugin
     path: "plugins/com.openexchange.upsell.multiple.gui/",
     //path to files
@@ -64,7 +66,7 @@ upsell = {
             action: "upsell._get_purchase_method('trial')",
           },
           buy: {
-            content: "Buy",
+            content: _("Buy"),
             action: "upsell._get_purchase_method('buy')",
           },
         },
@@ -88,7 +90,7 @@ upsell = {
             action: "upsell._get_purchase_method('trial')",
           },
           buy: {
-            content: "Buy",
+            content: _("Buy"),
             action: "upsell._get_purchase_method('buy')",
           },
         },
@@ -179,7 +181,7 @@ upsell = {
     //Find out which feature is selected and configures content
     upsell._get_feature();
 
-    //Show upsell
+    
     upsell._show_upsell();
 
 
@@ -209,19 +211,47 @@ upsell = {
         upsell.config.template = upsell.config.path + 'templates/_' + val.template.replace(/.html.*/, "") + "/_" + val.template;
         upsell.config.js = upsell.config.path + 'templates/_' + val.template.replace(/.html.*/, "") + "/_" + val.template.replace(/.html.*/, "") + ".js";
         eval(val.init_action);
+        
       }
     });
   },
 
-  //shows upsell layer
+  //shows OX upsell layer or iframe depeding on server configuration
   _show_upsell: function(){
-    jQuery.ajax({
-      url: upsell.config.template,
-      dataType: "text",
-      success: function(data) {
-        upsell._build_window(data);
-      }
-    });
+	
+	var callback = function (type) { 
+			if (type) {
+			    // get redirect URL and show iframe 
+				jQuery.getJSON(
+						"/ajax/upsell/multiple?session="+parent.session+"&action=get_static_redirect_url&feature_clicked=" + upsell.config.feature,
+				        function(data){
+							// show iframe incl. URL within overlay
+							upsell._build_window_iframe(data.data.upsell_static_redirect_url);
+				        }
+				 );
+				
+			} else {
+			    jQuery.ajax({
+			      url: upsell.config.template,
+			      dataType: "text",
+			      success: function(data) {
+			        upsell._build_window(data);
+			      }
+			    });
+			}
+	}
+	 // check what type of upsell is configured
+	jQuery.getJSON(
+	        "/ajax/upsell/multiple?session="+parent.session+"&action=get_method",
+	        function(data){
+	           if (data.data.upsell_method === "direct"){
+	        	   callback(true);
+	           } else {
+	        	   callback(false);
+	           }
+	        }
+	 );
+		
 
   },
 
@@ -251,7 +281,28 @@ upsell = {
     jQuery.modal(data);
     jQuery.getScript(upsell.config.js);
   },
+  
+  //builds window with ifram content
+  _build_window_iframe: function(iframeurl){
+    var data =
+      '<div id="upsell_window">' +
+        '<div id="headerSection">' +
+           '<h2>' +
+             upsell.config.title +
+           '</h2>' +
+          '<a href="#" class="simplemodal-close"></a>' +
+         '</div>' +
+         '<div id="contentSection">' +
+           '<div class="contentSection" style="height: '+upsell.config.iframeHeight+'; width:'+upsell.config.iframeWidth+'">' +
+               '<iframe src="'+ iframeurl +'" width="100%" height="100%"></iframe>'
+           '</div>' +
+         '</div>' +
+         '<div id="footerSection"></div>' +
+       '</div>';
 
+    jQuery.modal(data);
+    jQuery.getScript(upsell.config.js);
+  },
   //close current window
   _close_dialouge: function(){
     jQuery.modal.close();
@@ -347,6 +398,9 @@ upsell = {
     }
   },
 
+
+  
+  
   //redirect static purchase
   _do_purchase_redirect: function(data){
 	  jQuery.getJSON(
