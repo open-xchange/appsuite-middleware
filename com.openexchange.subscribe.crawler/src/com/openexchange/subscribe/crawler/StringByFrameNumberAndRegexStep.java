@@ -108,6 +108,8 @@ public class StringByFrameNumberAndRegexStep extends AbstractStep<String, HtmlPa
                     output = matcher.group(1);
                     LOG.debug("String found is  : " + output);                    
                     executedSuccessfully = true;
+                } else {
+                    LOG.info("This pattern was not found on the page : " + regex + "\n Page: " + pageString);
                 }
             }
             index++;

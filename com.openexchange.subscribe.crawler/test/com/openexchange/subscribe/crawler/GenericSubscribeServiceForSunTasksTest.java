@@ -69,7 +69,7 @@ public class GenericSubscribeServiceForSunTasksTest extends GenericSubscribeServ
 
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
-        crawler.setDisplayName("Sun Tasks");
+        crawler.setDisplayName("JESTasks");
         crawler.setId("com.openexchange.subscribe.crawler.suntasks");
         crawler.setCrawlerApiVersion(618);
         crawler.setModule(FolderObject.TASK);
@@ -114,7 +114,7 @@ public class GenericSubscribeServiceForSunTasksTest extends GenericSubscribeServ
 
         crawler.finishUp(steps);
 
-        //findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        findOutIfThereAreTasksForThisConfiguration(username, password, crawler, true, false);
         // uncomment this if the crawler description was updated to get the new config-files
         // dumpThis(crawler, crawler.getDisplayName());
     }

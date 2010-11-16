@@ -70,7 +70,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         crawler.setDisplayName("LinkedIn");
         crawler.setId("com.openexchange.subscribe.linkedin");
         crawler.setCrawlerApiVersion(618);
-        crawler.setPriority(5);
+        crawler.setPriority(6);
         crawler.setQuirkyCookieQuotes(true);
 
         ArrayList<Step> steps = new ArrayList<Step>();
@@ -87,7 +87,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
             null,
             "email",
             "password",
-            "http://api.linkedin.com/v1/people/~/connections:(first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url)"));
+            "http://api.linkedin.com/v1/people/~/connections:(first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)"));
 
          ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
          pageParts.add(new PagePart("<person>"));
@@ -103,7 +103,9 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
          pageParts.add(new PagePart("(<day>)([0-9]*)(</day>)","birthday_day"));
          pageParts.add(new PagePart("(<main-address>)([^<]*)(</main-address>)", "address_note"));
          pageParts.add(new PagePart("(<picture-url>)([^<]*)(</picture-url>)", "image"));
-         pageParts.add(new PagePart("</person>"));
+         pageParts.add(new PagePart("(<title>)([^<]*)(</title>)", "position"));
+//         pageParts.add(new PagePart("(<company>[\\s]*<name>)([^<]*)(</name>)", "company"));
+//         pageParts.add(new PagePart("</person>"));
         
          PagePartSequence sequence = new PagePartSequence(pageParts, "", "</person>");
          steps.add(new ContactObjectsByStringAndPagePartSequenceStep(

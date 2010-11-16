@@ -96,6 +96,10 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
                 }
             }
             
+            if (debuggingEnabled){
+                openPageInBrowser(output);
+            }
+            
             if (output != null) {
                 executedSuccessfully = true;                 
             } else {

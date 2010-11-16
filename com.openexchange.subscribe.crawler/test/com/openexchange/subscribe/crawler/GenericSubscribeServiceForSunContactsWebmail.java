@@ -49,44 +49,69 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.ho.yaml.Yaml;
+import java.util.ArrayList;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.crawler.internal.Step;
 
+
 /**
- * This is NOT the preferred way to crawl Facebook. FacebookWeb delivers much more information.
+ * {@link GenericSubscribeServiceForSunContactsWebmail}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeServiceTestHelpers {
-
-    public void testGenericSubscribeServiceForFacebook() {
-        // insert valid credentials here        
+public class GenericSubscribeServiceForSunContactsWebmail extends GenericSubscribeServiceTestHelpers {
+    
+    public void testWebmailContacts(){
+        
+        // insert valid credentials here
         String username = "";
         String password = "";
 
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
-        crawler.setDisplayName("Facebook");
-        crawler.setId("com.openexchange.subscribe.crawler.facebook");
-        crawler.setPriority(11);
+        crawler.setDisplayName("JESWebmailContacts");
+        crawler.setId("com.openexchange.subscribe.crawler.suncontactswebmail");
+        crawler.setCrawlerApiVersion(618);
+        crawler.setModule(FolderObject.CONTACT);
+        crawler.setPriority(1);
+        crawler.setJavascriptEnabled(true);
         
-        List<Step> steps = new LinkedList<Step>();
-        FacebookAPIStep facebookAPIStep = new FacebookAPIStep();
-        facebookAPIStep.setActionOfLoginForm("https://login.facebook.com/login.php?login_attempt=1");
-        facebookAPIStep.setNameOfUserField("email");
-        facebookAPIStep.setNameOfPasswordField("pass");
-        facebookAPIStep.setLinkAvailableAfterLogin("(http://www.facebook.com/notifications.php)");
-        facebookAPIStep.setApiKey("d36ebc9e274a89e3bd0c239cea4acb48");
-        facebookAPIStep.setSecret("903e8006dbad9204bb74c26eb3ca2310");
-        facebookAPIStep.setBirthdayPattern("([0-9]{1,2})\\s([^\\s]*)(\\s)*([0-9]{4})*");
-        steps.add(facebookAPIStep);
+        
 
-        Workflow workflow = new Workflow(steps);
-        crawler.setWorkflowString(Yaml.dump(workflow));
+        ArrayList<Step> steps = new ArrayList<Step>();
+
+        LoginPageByFormActionRegexVerifiedByStringStep loginStep = new LoginPageByFormActionRegexVerifiedByStringStep();
+        loginStep.setUrl("https://uwc1.us.es:444/uwc/auth");
+        loginStep.setUsername(username);
+        loginStep.setPassword(password);
+        loginStep.setActionOfLoginForm(".*Login.*");
+        loginStep.setNumberOfForm(1);
+        loginStep.setNameOfUserField("IDToken1");
+        loginStep.setNameOfPasswordField("IDToken2");
+        loginStep.setStringAvailableAfterLogin(".*favicon.ico.*");
+        steps.add(loginStep);
+        
+        PageByUrlStep pageByUrlStep = new PageByUrlStep();
+        pageByUrlStep.setUrl("https://uwc1.us.es/en/mail.html?lang=en");
+        //pageByUrlStep.setDebuggingEnabled(true);
+        steps.add(pageByUrlStep);
+        
+        PageByFrameNumberStep pageByFrameNumberStep = new PageByFrameNumberStep();
+        pageByFrameNumberStep.setFrameNumber(1);
+        steps.add(pageByFrameNumberStep);
+        
+        PageByLinkRegexStep pageByLinkRegexStep = new PageByLinkRegexStep();
+        pageByLinkRegexStep.setUrl(".*displayPab.*");
+        pageByLinkRegexStep.setDebuggingEnabled(true);
+        steps.add(pageByLinkRegexStep);
+        
+                       
+        
+
+        crawler.finishUp(steps);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
-        // uncomment this if the if the crawler description was updated to get the new config-files
+        // uncomment this if the crawler description was updated to get the new config-files
         // dumpThis(crawler, crawler.getDisplayName());
     }
 }

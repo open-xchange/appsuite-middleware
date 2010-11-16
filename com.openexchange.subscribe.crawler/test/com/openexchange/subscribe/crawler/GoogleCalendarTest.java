@@ -49,44 +49,16 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.ho.yaml.Yaml;
-import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
- * This is NOT the preferred way to crawl Facebook. FacebookWeb delivers much more information.
+ * {@link GoogleCalendarTest}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeServiceTestHelpers {
-
-    public void testGenericSubscribeServiceForFacebook() {
-        // insert valid credentials here        
-        String username = "";
-        String password = "";
-
-        // create a CrawlerDescription
-        CrawlerDescription crawler = new CrawlerDescription();
-        crawler.setDisplayName("Facebook");
-        crawler.setId("com.openexchange.subscribe.crawler.facebook");
-        crawler.setPriority(11);
-        
-        List<Step> steps = new LinkedList<Step>();
-        FacebookAPIStep facebookAPIStep = new FacebookAPIStep();
-        facebookAPIStep.setActionOfLoginForm("https://login.facebook.com/login.php?login_attempt=1");
-        facebookAPIStep.setNameOfUserField("email");
-        facebookAPIStep.setNameOfPasswordField("pass");
-        facebookAPIStep.setLinkAvailableAfterLogin("(http://www.facebook.com/notifications.php)");
-        facebookAPIStep.setApiKey("d36ebc9e274a89e3bd0c239cea4acb48");
-        facebookAPIStep.setSecret("903e8006dbad9204bb74c26eb3ca2310");
-        facebookAPIStep.setBirthdayPattern("([0-9]{1,2})\\s([^\\s]*)(\\s)*([0-9]{4})*");
-        steps.add(facebookAPIStep);
-
-        Workflow workflow = new Workflow(steps);
-        crawler.setWorkflowString(Yaml.dump(workflow));
-
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
-        // uncomment this if the if the crawler description was updated to get the new config-files
-        // dumpThis(crawler, crawler.getDisplayName());
+public class GoogleCalendarTest extends GenericSubscribeServiceTestHelpers {
+    
+    public void testGoogleCalendar(){
+        checkSingleCrawler("GoogleCalendar");
     }
+
 }
