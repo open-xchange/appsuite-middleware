@@ -353,18 +353,14 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     private static final String getFormattedCookie(final Cookie cookie, final StringBuilder composer) {
         composer.append(cookie.getName()).append('=');
         composer.append(cookie.getValue());
-        if (cookie.getMaxAge() >= 0) {
-            final Date d;
-            if (cookie.getMaxAge() == 0) {
-                d = new Date(10000L); // 10sec after 01/01/1970
-            } else {
-                d = new Date(System.currentTimeMillis() + (cookie.getMaxAge() * 1000L));
-            }
+        final int maxAge = cookie.getMaxAge();
+        if (maxAge >= 0) {
             synchronized (HEADER_DATE_FORMAT) {
                 /*
                  * expires=Sat, 01-Jan-2000 00:00:00 GMT
                  */
-                composer.append(COOKIE_PARAMS[0]).append(HEADER_DATE_FORMAT.format(d));
+                composer.append(COOKIE_PARAMS[0]).append(
+                    HEADER_DATE_FORMAT.format((maxAge == 0 ? new Date(10000L) /*10sec after 01/01/1970*/: new Date(System.currentTimeMillis() + (maxAge * 1000L)))));
             }
             // composer.append("; max-age=").append(cookie.getMaxAge());
         }
@@ -380,6 +376,13 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         if (cookie.getSecure()) {
             composer.append(COOKIE_PARAMS[4]);
         }
+        /*-
+         * TODO: HttpOnly currently cannot be set in Cookie class, thus we do it hard-coded here.
+         *       This is available with Java Servlet Specification v3.0.
+         * 
+         * Append HttpOnly flag
+         */
+        composer.append("; HttpOnly");
         return composer.toString();
     }
 
