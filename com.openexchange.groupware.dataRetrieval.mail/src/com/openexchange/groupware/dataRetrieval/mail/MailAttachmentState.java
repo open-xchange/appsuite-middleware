@@ -78,7 +78,7 @@ public class MailAttachmentState {
         }
         
         this.accountId = accountId;
-        mailAccess = mailService.getMailAccess(session, accountId);
+        mailAccess = (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>)  mailService.getMailAccess(session, accountId);
         
         mailAccess.connect();
         return mailAccess;
