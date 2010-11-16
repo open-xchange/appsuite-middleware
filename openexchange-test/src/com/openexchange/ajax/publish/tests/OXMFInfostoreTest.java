@@ -101,9 +101,8 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         Pattern urlPattern = Pattern.compile("href=\"(.+?/publications/files/.+?/"+data.getId()+"/.+?)\"");
         Matcher matcher = urlPattern.matcher(website);
         boolean found = matcher.find();
-        String downloadUrl = matcher.group(1);  
-
         assertTrue("Should contain reference to a published infostore item", found);
+        String downloadUrl = matcher.group(1);  
         assertSameStream(new FileInputStream(upload), getDownload(downloadUrl));
     }
     
