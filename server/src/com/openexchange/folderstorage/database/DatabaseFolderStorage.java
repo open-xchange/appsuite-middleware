@@ -101,13 +101,13 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -1375,16 +1375,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static int getModuleByContentType(final ContentType contentType) {
-        if (TaskContentType.getInstance().equals(contentType)) {
+        final String cts = contentType.toString();
+        if (TaskContentType.getInstance().toString().equals(cts)) {
             return FolderObject.TASK;
         }
-        if (CalendarContentType.getInstance().equals(contentType)) {
+        if (CalendarContentType.getInstance().toString().equals(cts)) {
             return FolderObject.CALENDAR;
         }
-        if (ContactContentType.getInstance().equals(contentType)) {
+        if (ContactContentType.getInstance().toString().equals(cts)) {
             return FolderObject.CONTACT;
         }
-        if (InfostoreContentType.getInstance().equals(contentType)) {
+        if (InfostoreContentType.getInstance().toString().equals(cts)) {
             return FolderObject.INFOSTORE;
         }
         return FolderObject.UNBOUND;
