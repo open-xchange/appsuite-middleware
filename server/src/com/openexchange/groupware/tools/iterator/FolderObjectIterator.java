@@ -806,9 +806,37 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
     }
 
+    private static final class SetableFutureTask extends FutureTask<OCLPermission[]> {
+
+        private static final Callable<OCLPermission[]> DUMMY = new Callable<OCLPermission[]>() {
+            
+            public OCLPermission[] call() throws Exception {
+                return null;
+            }
+        };
+
+        /**
+         * Initializes a new {@link SetableFutureTask}.
+         */
+        public SetableFutureTask() {
+            super(DUMMY);
+        }
+        
+        @Override
+        public void set(OCLPermission[] v) {
+            super.set(v);
+        }
+
+        @Override
+        public void setException(Throwable t) {
+            super.setException(t);
+        }
+
+    }
+
     private static final class PermissionLoader {
 
-        private final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap;
+        private final ConcurrentMap<Integer, SetableFutureTask> permsMap;
 
         private final BlockingQueue<Integer> queue;
 
@@ -820,7 +848,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             super();
             try {
                 final AtomicBoolean flag = this.flag = new AtomicBoolean(true);
-                final ConcurrentMap<Integer, Future<OCLPermission[]>> permsMap = this.permsMap = new ConcurrentHashMap<Integer, Future<OCLPermission[]>>();
+                final ConcurrentMap<Integer, SetableFutureTask> permsMap = this.permsMap = new ConcurrentHashMap<Integer, SetableFutureTask>();
                 final BlockingQueue<Integer> queue = this.queue = new LinkedBlockingQueue<Integer>();
                 final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
@@ -840,14 +868,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     }
 
                     public Object call() throws Exception {
-                        try {
-                            final List<Integer> ids = new ArrayList<Integer>();
-                            final List<FutureTask<?>> tasks = new ArrayList<FutureTask<?>>();
+                        //try {
                             final Connection readCon = Database.get(ctx, false);
                             try {
                                 /*
                                  * Stay active as long as flag is true
                                  */
+                                final List<Integer> ids = new ArrayList<Integer>();
+                                final int cid = ctx.getContextId();
                                 while (flag.get()) {
                                     /*
                                      * Wait for IDs
@@ -857,26 +885,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                                     /*
                                      * Add future(s) to concurrent map
                                      */
-                                    final int cid = ctx.getContextId();
-                                    tasks.clear();
                                     for (final Integer id : ids) {
-                                        final FutureTask<OCLPermission[]> f = new FutureTask<OCLPermission[]>(new Callable<OCLPermission[]>() {
-                                            
-                                            public OCLPermission[] call() throws Exception {
-                                                return loadFolderPermissions(id.intValue(), cid, readCon);
-                                            }
-                                        });
-                                        permsMap.put(id, f);
-                                        /*
-                                         * Add to list
-                                         */
-                                        tasks.add(f);
-                                    }
-                                    /*
-                                     * Execute tasks with this thread
-                                     */
-                                    for (final FutureTask<?> f : tasks) {
-                                        f.run();
+                                        permsMap.get(id).set(loadFolderPermissions(id.intValue(), cid, readCon));
                                     }
                                 }
                             } finally {
@@ -886,9 +896,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                              * Return
                              */
                             return null;
-                        } catch (final InterruptedException e) {
-                            throw e;
-                        }
+                        //} catch (final InterruptedException e) {
+                        //    throw e;
+                        //}
                     }
                 }, PermissionLoader.class.getSimpleName()), CallerRunsBehavior.<Object> getInstance());
 
@@ -906,25 +916,35 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         public void stopWhenEmpty() {
             final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-            final BlockingQueue<Integer> q = queue;
-            final Future<Object> f = mainFuture;
-            final AtomicBoolean fl = flag;
-            tps.submit(ThreadPools.task(new Callable<Object>() {
-
-                public Object call() throws Exception {
-                    while (!q.isEmpty()) {
-                        // Nope
-                    }
-                    fl.set(false);
-                    f.cancel(true);
-                    return null;
+            if (null == tps) {
+                while (!queue.isEmpty()) {
+                    // Nope
                 }
-                
-            }), CallerRunsBehavior.<Object> getInstance());
+                flag.set(false);
+                mainFuture.cancel(true);
+            } else {
+                final BlockingQueue<Integer> q = queue;
+                final Future<Object> f = mainFuture;
+                final AtomicBoolean fl = flag;
+                tps.submit(ThreadPools.task(new Callable<Object>() {
+    
+                    public Object call() throws Exception {
+                        while (!q.isEmpty()) {
+                            // Nope
+                        }
+                        fl.set(false);
+                        f.cancel(true);
+                        return null;
+                    }
+                    
+                }), CallerRunsBehavior.<Object> getInstance());
+            }
         }
 
         public void submitPermissionsFor(final int folderId) {
-            queue.offer(Integer.valueOf(folderId));
+            final Integer key = Integer.valueOf(folderId);
+            permsMap.put(key, new SetableFutureTask());
+            queue.offer(key);
         }
 
         public OCLPermission[] pollPermissionsFor(final int folderId, final long timeoutMsec) throws SearchIteratorException {
