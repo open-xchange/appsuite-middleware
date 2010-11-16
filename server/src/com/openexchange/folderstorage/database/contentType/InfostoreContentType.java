@@ -90,4 +90,15 @@ public final class InfostoreContentType implements ContentType {
         return 0;
     }
 
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (this == obj) {
+//            return true;
+//        }
+//        if (!(obj instanceof ContentType)) {
+//            return false;
+//        }
+//        return toString().equals(obj.toString());
+//    }
+
 }
