@@ -73,9 +73,9 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * {@link FolderCacheManager} - Holds a cache for instances of {@link FolderObject}
@@ -387,11 +387,11 @@ public final class FolderCacheManager {
         if (!folderObj.containsObjectID()) {
             throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
         }
-        return putIfAbsentInternal(new InstanceFolderProvider(folderObj), ctx, elemAttribs);
+        return putIfAbsentInternal(new InstanceFolderProvider(folderObj.clone()), ctx, elemAttribs);
     }
 
-    private FolderObject putIfAbsentInternal(final FolderProvider folderObj, final Context ctx, final ElementAttributes elemAttribs) throws OXException {
-        final CacheKey key = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
+    private FolderObject putIfAbsentInternal(final FolderProvider folderProvider, final Context ctx, final ElementAttributes elemAttribs) throws OXException {
+        final CacheKey key = getCacheKey(ctx.getContextId(), folderProvider.getObjectID());
         cacheLock.lock();
         try {
             final Object tmp = folderCache.get(key);
@@ -410,9 +410,9 @@ public final class FolderCacheManager {
                 /*
                  * Put with default attributes
                  */
-                folderCache.put(key, folderObj.getFolderObject().clone());
+                folderCache.put(key, folderProvider.getFolderObject());
             } else {
-                folderCache.put(key, folderObj.getFolderObject().clone(), elemAttribs);
+                folderCache.put(key, folderProvider.getFolderObject(), elemAttribs);
             }
             if (null != cond) {
                 cond.signalAll();
