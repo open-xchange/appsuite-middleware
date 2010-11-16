@@ -316,13 +316,13 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
     private static void configureCookie(final Cookie sessionCookie) {
         sessionCookie.setPath(DEFAULT_PATH);
         final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        final int maxAge;
-        if (null == configurationService) {
-            maxAge = (int) (ConfigTools.parseTimespan("1W") / 1000);
-        } else {
-            maxAge = (int) (ConfigTools.parseTimespan(configurationService.getProperty("com.openexchange.cookie.ttl", "1W")) / 1000);
+        /*
+         * Check if auto-login is enabled
+         */
+        if (null != configurationService && configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false)) {
+            final int maxAge = (int) (ConfigTools.parseTimespan(configurationService.getProperty("com.openexchange.cookie.ttl", "1W")) / 1000);
+            sessionCookie.setMaxAge(maxAge);
         }
-        sessionCookie.setMaxAge(maxAge);
     }
 
     public HttpSession getSession() {
