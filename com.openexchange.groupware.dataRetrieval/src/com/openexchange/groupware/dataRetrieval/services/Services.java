@@ -47,16 +47,26 @@
  *
  */
 
-package com.openexchange.groupware.dataRetrieval;
+package com.openexchange.groupware.dataRetrieval.services;
+
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.dataRetrieval.config.Configuration;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link Constants}
+ * {@link Services}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Constants {
-    public static final String SESSION_KEY = "com.openexchange.groupware.dataRetrieval.session";
-    public static final String DATA_PROVDER_KEY = "datasource";
-    public static final String CREATED = "com.openexchange.groupware.dataRetrieval.created";
+public class Services {
+    public static ServiceLookup SERVICE_LOOKUP = null;
+    private static Configuration configuration;
+    
+    public static Configuration getConfiguration() {
+        if(configuration != null) {
+            return configuration;
+        }
+        return configuration = new Configuration(SERVICE_LOOKUP.getService(ConfigurationService.class));
+    }
 }

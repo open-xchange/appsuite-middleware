@@ -52,7 +52,10 @@ package com.openexchange.groupware.dataRetrieval.osgi;
 import java.util.Map;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.dataRetrieval.actions.RetrievalActions;
+import com.openexchange.groupware.dataRetrieval.config.Configuration;
+import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.groupware.dataRetrieval.servlets.FileDeliveryServlet;
 import com.openexchange.groupware.dataRetrieval.servlets.Paths;
 import com.openexchange.groupware.dataRetrieval.servlets.RetrievalServlet;
@@ -70,7 +73,7 @@ import com.openexchange.tools.service.ServletRegistration;
  */
 public class DataRetrievalActivator extends DeferredActivator {
 
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { HttpService.class, SessionSpecificContainerRetrievalService.class };
+    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { HttpService.class, SessionSpecificContainerRetrievalService.class, ConfigurationService.class };
 
     private static final String NAMESPACE = "com.openexchange.groupware.dataRetrieval.tokens";
 
@@ -99,6 +102,7 @@ public class DataRetrievalActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.SERVICE_LOOKUP = this;
         dataProviderRegistry = new OSGIDataProviderRegistry(context);
         dataProviderRegistry.open();
 

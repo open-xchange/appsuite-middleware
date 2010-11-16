@@ -47,16 +47,69 @@
  *
  */
 
-package com.openexchange.groupware.dataRetrieval;
+package com.openexchange.groupware.dataRetrieval.config;
+
+import java.util.Properties;
+import com.openexchange.config.ConfigurationService;
 
 
 /**
- * {@link Constants}
+ * {@link Configuration}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Constants {
-    public static final String SESSION_KEY = "com.openexchange.groupware.dataRetrieval.session";
-    public static final String DATA_PROVDER_KEY = "datasource";
-    public static final String CREATED = "com.openexchange.groupware.dataRetrieval.created";
+public class Configuration {
+    public static final String LIFETIME_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.lifetime";
+    public static final String ISONETIME_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.onetime";
+    
+    private long lifetime;
+    private boolean expireAfterAccess;
+    
+    public Configuration(ConfigurationService service) {
+        String lifetime = service.getProperty(LIFETIME_OPTIONS_NAME);
+        if(lifetime == null) {
+            this.lifetime = -1; 
+        } else {
+            this.lifetime = Long.parseLong(lifetime.trim());
+        }
+        
+        String onetime = service.getProperty(ISONETIME_OPTIONS_NAME);
+        if(onetime == null) {
+            expireAfterAccess = true;
+        } else {
+            expireAfterAccess = Boolean.parseBoolean(onetime.trim());
+        }
+    }
+    
+    public Configuration(int lifetime, boolean expireAfterAccess) {
+        super();
+        this.lifetime = lifetime;
+        this.expireAfterAccess = expireAfterAccess;
+    }
+
+    public long getLifetime() {
+        return lifetime;
+    }
+    
+    public void setLifetime(long lifetime) {
+        this.lifetime = lifetime;
+    }
+    
+    public void setExpireAfterAccess(boolean expireAfterAccess) {
+        this.expireAfterAccess = expireAfterAccess;
+    }
+
+    public boolean expiresAfterAccess() {
+        return expireAfterAccess;
+    }
+
+    public boolean hasExpired(long created) {
+        if(lifetime < 0) {
+            return false;
+        }
+        return created + lifetime < System.currentTimeMillis();
+    }
+    
+    
+    
 }

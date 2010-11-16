@@ -11,6 +11,7 @@
 	<!-- Constants -->
 	<property name="tmp.dir" value="tmp"/>
 	<property name="lib.dir" value="lib"/>
+    <property name="conf.dir" value="conf"/>
 
 	<property file="META-INF/MANIFEST.MF"/>
 	<property file="build.properties"/>
@@ -35,6 +36,7 @@
 	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar"/>
 
 	<property name="cachingjar" value="com.openexchange.caching.jar"/>
+    <property name="configjar" value="com.openexchange.configread.jar"/>
 	<property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
 	<property name="genericonfstoragejar" value="com.openexchange.datatypes.genericonf.storage.jar"/>
 	<property name="globaljar" value="com.openexchange.global.jar"/>
@@ -50,6 +52,7 @@
 		<pathelement location="${bundlesdir}/${servletjar}"/>
 
 		<pathelement location="${bundlesdir}/${globaljar}"/>
+		<pathelement location="${bundlesdir}/${configjar}"/>
 		<pathelement location="${bundlesdir}/${serverjar}"/>
 
 		<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
@@ -80,6 +83,10 @@
 	</target>
 
 	<target name="installConfig">
+		<mkdir dir="${confInstallCopyDir}"/>
+		<copy todir="${confInstallCopyDir}" overwrite="true">
+			<fileset dir="${conf.dir}"/>
+		</copy>
 		<mkdir dir="${destdir}/${bundle.d}"/>
 		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
 	</target>

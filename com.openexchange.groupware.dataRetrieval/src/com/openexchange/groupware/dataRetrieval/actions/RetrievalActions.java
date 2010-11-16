@@ -113,6 +113,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
                 final FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
                 parameters.put(Constants.SESSION_KEY, session);
+                parameters.put(Constants.CREATED, System.currentTimeMillis());
                 String token = paramMap.rememberForSession(session, parameters);
 
                 return new AJAXRequestResult(toJSON(metadata, getURI(token, request)));

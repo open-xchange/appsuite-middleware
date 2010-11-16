@@ -64,7 +64,9 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.FileMetadata;
+import com.openexchange.groupware.dataRetrieval.config.Configuration;
 import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
+import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.session.ServerSession;
@@ -83,6 +85,7 @@ public class FileDeliveryServlet extends HttpServlet {
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Configuration configuration = Services.getConfiguration();
         String token = req.getParameter("token");
         if(token == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing parameter 'token");
@@ -95,6 +98,11 @@ public class FileDeliveryServlet extends HttpServlet {
         
         String id = (String) parameters.get(Constants.DATA_PROVDER_KEY);
         ServerSession session = (ServerSession) parameters.get(Constants.SESSION_KEY);
+        
+        if(configuration.hasExpired((Long)parameters.get(Constants.CREATED))) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
         
         DataProvider provider = null;
         Object state = null;
@@ -109,6 +117,9 @@ public class FileDeliveryServlet extends HttpServlet {
             stream = setHeaders(stream, metadata, req, resp);
             
             IOTools.copy(stream, resp.getOutputStream());
+            if(configuration.expiresAfterAccess()) {
+                PARAM_MAP.remove(token);
+            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
