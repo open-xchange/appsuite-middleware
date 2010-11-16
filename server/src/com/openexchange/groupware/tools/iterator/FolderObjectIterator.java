@@ -855,13 +855,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
                     private final void waitForIDs(final List<Integer> ids) throws InterruptedException {
                         /*
-                         * Wait for an ID
+                         * Wait for an ID to become available
                          */
                         Integer folderId = queue.take();
-                        /*
-                         * Gather possibly available IDs
-                         */
                         ids.add(folderId);
+                        /*
+                         * Gather possibly available IDs but don't wait
+                         */
                         while ((folderId = queue.poll()) != null) {
                             ids.add(folderId);
                         }
