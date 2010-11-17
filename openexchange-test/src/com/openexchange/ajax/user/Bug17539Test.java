@@ -49,18 +49,36 @@
 
 package com.openexchange.ajax.user;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONArray;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.user.actions.AllRequest;
+import com.openexchange.ajax.user.actions.AllResponse;
 
-public class UserAJAXSuite extends TestSuite {
-	
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ListTest.class);
-		tests.addTestSuite(Bug13911Test.class);
-		tests.addTestSuite(Bug17539Test.class);
-		return tests;
-	}
+/**
+ * {@link Bug17539Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class Bug17539Test extends AbstractAJAXSession {
+
+    private AJAXClient client;
+
+    public Bug17539Test(final String name) {
+        super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+    }
+
+    public void testAll() throws Throwable {
+        AllRequest request = new AllRequest(null);
+        AllResponse response = client.execute(request);
+        JSONArray users = (JSONArray) response.getData();
+        assertTrue("Empty but shouldn't", users.length() > 0);
+        assertTrue("Duration of this request is too high.", response.getTotalDuration() < 5000);
+    }
 }
