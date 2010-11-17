@@ -371,7 +371,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         
         file = parser.parse(object); 
         fields = parser.getFields(object);
-        if(data.hasUploads()) {
+        if(uploadFile != null) {
             if(!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
                 file.setFileName(uploadFile.getPreparedFileName());
                 fields.add(File.Field.FILENAME);
