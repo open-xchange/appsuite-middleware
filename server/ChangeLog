@@ -1,3 +1,7 @@
+* 2010-11-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #17329: Using a blocking queue to collect addresses
+
 * 2010-11-17 - steffen.templin@open-xchange.com
 
  - Bugfix #17520: Remove old login and autologin cookies in redirects.
