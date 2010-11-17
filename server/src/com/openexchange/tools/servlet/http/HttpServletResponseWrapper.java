@@ -382,7 +382,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
          * 
          * Append HttpOnly flag
          */
-        composer.append("; HttpOnly");
+        // composer.append("; HttpOnly");
         return composer.toString();
     }
 
