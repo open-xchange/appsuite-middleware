@@ -49,9 +49,10 @@
 
 package com.openexchange.image.internal;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -64,7 +65,7 @@ public class SessionToImageRegistry {
     
     private final Map<String, String> imageIds2sessionIds;
     
-    private final Map<String, ArrayList<String>> sessionIds2imageIds;
+    private final Map<String, Set<String>> sessionIds2imageIds;
     
     private final Lock lock;
     
@@ -78,7 +79,7 @@ public class SessionToImageRegistry {
     private SessionToImageRegistry() {
         super();
         imageIds2sessionIds = new HashMap<String, String>();
-        sessionIds2imageIds = new HashMap<String, ArrayList<String>>();
+        sessionIds2imageIds = new HashMap<String, Set<String>>();
         lock = new ReentrantLock();
     }
     
@@ -100,11 +101,11 @@ public class SessionToImageRegistry {
         lock.lock();        
         imageIds2sessionIds.put(imageId, sessionId);
         
-        ArrayList<String> imageIdList;
+        Set<String> imageIdList;
         if (sessionIds2imageIds.containsKey(sessionId)) {
             imageIdList = sessionIds2imageIds.get(sessionId);
         } else {
-            imageIdList = new ArrayList<String>();
+            imageIdList = new TreeSet<String>();
             sessionIds2imageIds.put(sessionId, imageIdList);
         }
         imageIdList.add(imageId);        
@@ -125,7 +126,7 @@ public class SessionToImageRegistry {
      * @param sessionId The session id.
      * @return A list of image id's or <code>null</code> if there is no mapping for the session is.
      */
-    public ArrayList<String> getImageIds(final String sessionId) {
+    public Set<String> getImageIds(final String sessionId) {
         return sessionIds2imageIds.get(sessionId);
     }
     
@@ -141,11 +142,18 @@ public class SessionToImageRegistry {
         boolean error = false;
         
         lock.lock();        
-        final ArrayList<String> imageIds = sessionIds2imageIds.remove(sessionId);
+        final Set<String> imageIds = sessionIds2imageIds.remove(sessionId);
         
         if (imageIds != null) {
             for (final String imageId : imageIds) {
-                error |= imageIds2sessionIds.remove(imageId) == null;
+                boolean removed = imageIds2sessionIds.remove(imageId) == null;
+                error |= removed;
+                
+                if (removed) {
+                    LOG.debug("Successfully removed image " + imageId + "from SessionToImageRegistry for session " + sessionId);
+                } else {
+                    LOG.debug("Failed to remove image " + imageId + "from SessionToImageRegistry for session " + sessionId);
+                }
             }
         }        
         lock.unlock();
@@ -179,7 +187,7 @@ public class SessionToImageRegistry {
         final String sessionId = imageIds2sessionIds.remove(imageId);
         
         if (sessionId != null) {
-            final ArrayList<String> imageIdList = sessionIds2imageIds.get(sessionId);
+            final Set<String> imageIdList = sessionIds2imageIds.get(sessionId);
             if (imageIdList == null) {
                 error = true;
             } else {

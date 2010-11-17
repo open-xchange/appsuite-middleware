@@ -1,3 +1,7 @@
+* 2010-11-17 - steffen.templin@open-xchange.com
+
+ - Bugfix #17568: Errors while removing session bound images.
+
 * 2010-11-17 - thorben.betten@open-xchange.com
 
  - Bugfix #17329: Using a blocking queue to collect addresses
