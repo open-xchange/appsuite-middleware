@@ -49,37 +49,121 @@
 
 package com.openexchange.groupware.contact;
 
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactDeleteListener} - The delete listener for contact module
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ContactDeleteListener implements DeleteListener {
 
-	/**
-	 * Initializes a new {@link ContactDeleteListener}
-	 */
-	public ContactDeleteListener() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ContactDeleteListener}
+     */
+    public ContactDeleteListener() {
+        super();
+    }
 
-	public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
-		try {
-			if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-				Contacts.trashAllUserContacts(deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
-			}
-		} catch (final OXException ox) {
-			throw new DeleteFailedException(ox);
-		}
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+        try {
+            if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+                Contacts.trashAllUserContacts(deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
+                /*
+                 * Drop affected distribution list entries
+                 */
+                dropDListEntries("prg_dlist", "prg_contacts", deleteEvent.getId(), deleteEvent.getContext().getContextId(), writeCon);
+                dropDListEntries("del_dlist", "del_contacts", deleteEvent.getId(), deleteEvent.getContext().getContextId(), writeCon);
+            }
+        } catch (final OXException ox) {
+            throw new DeleteFailedException(ox);
+        }
+    }
 
-	}
+    private static void dropDListEntries(final String dlistTable, final String contactTable, final int userId, final int contextId, final Connection writeCon) throws ContactException {
+        String sql = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            /*
+             * Get those distribution lists which carry an internal user as an entry
+             */
+            sql =
+                "SELECT d.intfield01, d.intfield02 FROM " + dlistTable + " AS d JOIN " + contactTable + " AS c ON d.cid = ? AND c.cid = ? AND d.intfield02 = c.intfield01 WHERE c.userId IS NOT NULL AND c.userId = ?";
+            stmt = writeCon.prepareStatement(sql);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
+            rs = stmt.executeQuery();
+            final List<int[]> l = new ArrayList<int[]>();
+            while (rs.next()) {
+                l.add(new int[] { rs.getInt(1), rs.getInt(2) }); // distribution-list-id, contact-id
+            }
+            DBUtils.closeSQLStuff(rs, stmt);
+            /*
+             * Delete the entries which refer to the user which should be deleted
+             */
+            sql = "DELETE FROM " + dlistTable + " WHERE cid = ? AND intfield01 = ? AND intfield02 = ?";
+            stmt = writeCon.prepareStatement(sql);
+            for (final int[] arr : l) {
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, arr[0]);
+                stmt.setInt(3, arr[1]);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            DBUtils.closeSQLStuff(rs, stmt);
+            /*
+             * Check id any distribution list has no entry after deleting user's entries
+             */
+            final TIntArrayList toDelete = new TIntArrayList();
+            for (final int[] arr : l) {
+                sql = "SELECT COUNT(intfield02) FROM " + dlistTable + " WHERE cid = ? AND intfield01 = ?";
+                stmt = writeCon.prepareStatement(sql);
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, arr[0]);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    final int count = rs.getInt(1);
+                    if (0 == count) {
+                        /*
+                         * The distribution list is now empty
+                         */
+                        toDelete.add(arr[0]);
+                    }
+                }
+                DBUtils.closeSQLStuff(rs, stmt);
+            }
+            /*
+             * Delete empty distribution lists
+             */
+            if (!toDelete.isEmpty()) {
+                sql = "DELETE FROM " + contactTable + " WHERE cid = ? AND intfield01 = ?";
+                stmt = writeCon.prepareStatement(sql);
+                for (final int id : toDelete.toNativeArray()) {
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, id);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                DBUtils.closeSQLStuff(rs, stmt);
+            }
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, sql);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
 
 }
