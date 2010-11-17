@@ -196,8 +196,13 @@ public class Memorizer implements Runnable {
         }
     }
 
+    private static final int[] COLUMNS = { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, Contact.USE_COUNT };
+
     private int memorizeContact(final InternetAddress address, final Context ctx, final UserConfiguration userConfig) throws AbstractOXException {
-        Contact contact;
+        /*
+         * Convert email address to a contact
+         */
+        final Contact contact;
         try {
             contact = transformInternetAddress(address);
         } catch (final ParseException e) {
@@ -209,28 +214,33 @@ public class Memorizer implements Runnable {
             LOG.warn(e.getMessage(), e);
             return -1;
         }
+        /*
+         * Check if such a contact already exists
+         */
         final ContactInterface contactInterface =
             CCServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(
                 contact.getParentFolderID(),
                 ctx.getContextId()).newContactInterface(session);
-        Contact foundContact = null;
+        final Contact foundContact;
         {
             final ContactSearchObject searchObject = new ContactSearchObject();
             searchObject.setEmailAutoComplete(true);
             searchObject.setDynamicSearchField(new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, });
             searchObject.setDynamicSearchFieldValue(new String[] { contact.getEmail1(), contact.getEmail1(), contact.getEmail1() });
-            final int[] columns =
-                new int[] { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, Contact.USE_COUNT };
-            final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
+            final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, COLUMNS);
             try {
                 if (iterator.hasNext()) {
                     foundContact = iterator.next();
+                } else {
+                    foundContact = null;
                 }
             } finally {
                 iterator.close();
             }
         }
-
+        /*
+         * Either create contact or increment its use count
+         */
         final int retval;
         if (null == foundContact) {
             final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
