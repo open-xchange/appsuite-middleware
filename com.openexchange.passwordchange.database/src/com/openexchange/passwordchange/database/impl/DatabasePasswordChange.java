@@ -50,6 +50,9 @@
 package com.openexchange.passwordchange.database.impl;
 
 import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -61,7 +64,6 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceException;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 /**
@@ -71,11 +73,6 @@ import com.openexchange.user.UserService;
  */
 public final class DatabasePasswordChange extends PasswordChangeService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DatabasePasswordChange.class);
-
-    /**
-     * Initializes a new {@link DatabasePasswordChange}
-     */
     public DatabasePasswordChange() {
         super();
     }
@@ -90,14 +87,10 @@ public final class DatabasePasswordChange extends PasswordChangeService {
                 throw new UserException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName()));
             }
             final User user = userService.getUser(event.getSession().getUserId(), ctx);
-            /*
-             * Get encoded version of new password
-             */
+            // Get encoded version of new password
             encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
         }
-        /*
-         * Update database
-         */
+        // Update database
         final Connection writeCon;
         try {
             writeCon = Database.get(ctx, true);
@@ -112,18 +105,18 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             deleteAttr(writeCon, event.getSession().getUserId(), ctx.getContextId());
             writeCon.commit();
         } catch (final SQLException e) {
-            DBUtils.rollback(writeCon);
+            rollback(writeCon);
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } catch (final Exception e) {
-            DBUtils.rollback(writeCon);
+            rollback(writeCon);
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
-            DBUtils.autocommit(writeCon);
+            autocommit(writeCon);
             Database.back(ctx, true, writeCon);
         }
     }
 
-    private static final String SQL_UPDATE = "UPDATE user SET userPassword = ? WHERE cid = ? AND id = ?";
+    private static final String SQL_UPDATE = "UPDATE user SET userPassword=? WHERE cid=? AND id=?";
 
     private void update(final Connection writeCon, final String encodedPassword, final int userId, final int cid) throws SQLException {
         PreparedStatement stmt = null;
@@ -135,11 +128,11 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            closeSQLStuff(stmt);
         }
     }
 
-    private static final String SQL_DELETE = "DELETE user_attribute WHERE cid = ? AND id = ? AND name = ?";
+    private static final String SQL_DELETE = "DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?";
 
     private void deleteAttr(final Connection writeCon, final int userId, final int cid) throws SQLException {
         PreparedStatement stmt = null;
@@ -151,8 +144,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             stmt.setString(pos++, "passcrypt");
             stmt.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            closeSQLStuff(stmt);
         }
     }
-
 }
