@@ -125,7 +125,7 @@ public final class ContactDeleteListener implements DeleteListener {
             stmt.executeBatch();
             DBUtils.closeSQLStuff(rs, stmt);
             /*
-             * Check id any distribution list has no entry after deleting user's entries
+             * Check if any distribution list has no entry after deleting user's entries
              */
             final TIntArrayList toDelete = new TIntArrayList();
             for (final int[] arr : l) {
