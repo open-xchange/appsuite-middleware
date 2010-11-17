@@ -58,6 +58,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -85,7 +87,7 @@ import com.openexchange.user.json.writer.UserWriter;
  */
 public final class AllAction extends AbstractUserAction {
 
-    private static final User[] EMPTY_USERS = new User[0];
+    private static final Log LOG = LogFactory.getLog(AllAction.class);
 
     /**
      * The <tt>all</tt> action string.
@@ -189,26 +191,21 @@ public final class AllAction extends AbstractUserAction {
                             if (userId > 0) {
                                 users[j] = userService.getUser(userId, session.getContext());
                             } else {
-                                final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(AllAction.class);
-                                log.error("Missing internal user ID in contact " + contacts[j].getObjectID() + ": " + contacts[j].getDisplayName());
+                                LOG.error("Missing internal user ID in contact " + contacts[j].getObjectID() + ": " + contacts[j].getDisplayName());
                             }
                         }
                     } finally {
                         try {
                             it.close();
                         } catch (final Exception e) {
-                            final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(AllAction.class);
-                            log.error(e.getMessage(), e);
+                            LOG.error(e.getMessage(), e);
                         }
                     }
                 } else {
-                    /*
-                     * Order by user field
-                     */
-                    final int[] allUserIds = userService.listAllUser(session.getContext());
-                    final List<User> allUsers = new ArrayList<User>(allUserIds.length);
-                    for (final int allUserId : allUserIds) {
-                        allUsers.add(userService.getUser(allUserId, session.getContext()));
+                    // Order by user field
+                    final List<User> allUsers = new ArrayList<User>();
+                    for (User user : userService.getUser(session.getContext())) {
+                        allUsers.add(user);
                     }
                     Collections.sort(allUsers, Comparators.getComparator(
                         orderField,
@@ -219,31 +216,30 @@ public final class AllAction extends AbstractUserAction {
                     if (rhl - lhl >= allUsers.size()) {
                         rhl = allUsers.size();
                     }
-                    users = allUsers.subList(lhl, rhl).toArray(EMPTY_USERS);
-                    contacts = new Contact[users.length];
-                    for (int i = 0; i < contacts.length; i++) {
-                        contacts[i] = contactInterface.getUserById(users[i].getId(), false);
+                    users = allUsers.subList(lhl, rhl).toArray(new User[rhl - lhl]);
+                    int[] userIds = new int[users.length];
+                    for (int i = 0; i < users.length; i++) {
+                        userIds[i] = users[i].getId();
                     }
+                    contacts = contactInterface.getUsersById(userIds, false);
                 }
             } else {
-                /*
-                 * No sorting required
-                 */
-                final int[] allUserIds = userService.listAllUser(session.getContext());
-                final List<User> allUsers = new ArrayList<User>(allUserIds.length);
-                for (final int allUserId : allUserIds) {
-                    allUsers.add(userService.getUser(allUserId, session.getContext()));
+                // No sorting required
+                final List<User> allUsers = new ArrayList<User>();
+                for (User user : userService.getUser(session.getContext())) {
+                    allUsers.add(user);
                 }
                 final int lhl = leftHandLimit < 0 ? 0 : leftHandLimit;
                 int rhl = rightHandLimit <= 0 ? 50000 : rightHandLimit;
                 if (rhl - lhl >= allUsers.size()) {
                     rhl = allUsers.size();
                 }
-                users = allUsers.subList(lhl, rhl).toArray(EMPTY_USERS);
-                contacts = new Contact[users.length];
-                for (int i = 0; i < contacts.length; i++) {
-                    contacts[i] = contactInterface.getUserById(users[i].getId(), false);
+                users = allUsers.subList(lhl, rhl).toArray(new User[rhl - lhl]);
+                int[] userIds = new int[users.length];
+                for (int i = 0; i < users.length; i++) {
+                    userIds[i] = users[i].getId();
                 }
+                contacts = contactInterface.getUsersById(userIds, false);
             }
             /*
              * Determine max. last-modified time stamp

@@ -58,6 +58,8 @@ import com.openexchange.exceptions.LocalizableStrings;
  */
 public class ContactExceptionMessages implements LocalizableStrings {
 
+    public static final String USER_OUTSIDE_GLOBAL_MSG = "Found a user contact outside global address book in folder %1$d in context %2$d.";
+
     public static final String INVALID_EMAIL_MSG = "Invalid E-Mail address: '%s'. Please correct the E-Mail address.";
 
     public static final String IMAGE_SCALE_PROBLEM_MSG = "Unable to scale this contact image. Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d.";

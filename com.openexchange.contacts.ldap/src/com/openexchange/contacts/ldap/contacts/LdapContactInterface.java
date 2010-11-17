@@ -433,7 +433,12 @@ public class LdapContactInterface implements ContactInterface {
         LOG.info("Called getUserById");
         return null;
     }
-    
+
+    public Contact[] getUsersById(int[] userIds, boolean performReadCheck) throws OXException {
+        LOG.info("Called getUsersById");
+        return null;
+    }
+
     public Contact getUserById(final int userId) throws OXException {
         LOG.info("Called getUserById");
         return null;

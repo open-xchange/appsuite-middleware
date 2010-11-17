@@ -82,6 +82,16 @@ public interface UserService {
     User getUser(int uid, Context context) throws UserException;
 
     /**
+     * Reads the data for a set of user from the underlying persistent data storage.
+     * 
+     * @param uid User identifier.
+     * @return the users objects.
+     * @param context The context.
+     * @throws UserException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     */
+    User[] getUser(Context context, int[] userIds) throws UserException;
+
+    /**
      * Reads all user for the given context. Use this method if you need a lot of users from that context because this method uses
      * optimized storage loading mechanisms to get all user information from the storage fastly.
      * @param ctx the context

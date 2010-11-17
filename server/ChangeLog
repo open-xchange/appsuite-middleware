@@ -1,3 +1,7 @@
+* 2010-11-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #17539: Improved the performance when get all contacts of the global address book.
+
 * 2010-11-17 - thorben.betten@open-xchange.com
 
  - Bugfix #17329: Using a blocking queue to collect addresses

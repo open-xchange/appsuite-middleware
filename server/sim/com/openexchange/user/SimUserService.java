@@ -78,6 +78,11 @@ public class SimUserService implements UserService {
         return null;
     }
 
+    public User[] getUser(Context context, int[] userIds) throws UserException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#getUser(com.openexchange.groupware.contexts.Context)
      */

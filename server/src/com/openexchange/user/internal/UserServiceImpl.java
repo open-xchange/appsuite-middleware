@@ -79,6 +79,10 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
+    public User[] getUser(Context context, int[] userIds) throws UserException {
+        return UserStorage.getInstance().getUser(context, userIds);
+    }
+
     public User[] getUser(Context context) throws UserException {
         return UserStorage.getInstance().getUser(context);
     }

@@ -92,6 +92,8 @@ public interface ContactSql {
 
     public void setInternalUser(final int userid);
 
+    void setInternalUsers(int[] userIds);
+
     public void setSearchHabit(final String habit);
 
     public void getAllChangedSince(final long chs);

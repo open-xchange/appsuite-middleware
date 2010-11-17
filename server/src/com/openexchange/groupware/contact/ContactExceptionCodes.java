@@ -61,6 +61,8 @@ import com.openexchange.groupware.contact.internal.ContactExceptionFactory;
  */
 public enum ContactExceptionCodes implements OXErrorMessage {
 
+    /** Found a user contact outside global address book in folder %1$d in context %2$d. */
+    USER_OUTSIDE_GLOBAL(USER_OUTSIDE_GLOBAL_MSG, Category.CODE_ERROR, 1),
     /** Invalid E-Mail address: '%s'. Please correct the E-Mail address. */
     INVALID_EMAIL(INVALID_EMAIL_MSG, Category.USER_INPUT, 100),
     /** Unable to scale this contact image. Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d. */

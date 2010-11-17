@@ -68,8 +68,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
@@ -1087,8 +1089,6 @@ public final class Contacts {
     }
 
     public static Contact getUserById(final int userId, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
-
-        Contact co = null;
         final ContactSql contactSQL = new ContactMySql(ctx, user);
 
         StringBuilder sb = new StringBuilder();
@@ -1103,9 +1103,24 @@ public final class Contacts {
         sb = contactSQL.iFgetContactById(sb.toString());
         contactSQL.setSelect(sb.toString());
         contactSQL.setInternalUser(userId);
-        co = fillContactObject(contactSQL, userId, user, memberInGroups, ctx, uc, readCon);
+        return fillContactObject(contactSQL, userId, user, memberInGroups, ctx, uc, readCon);
+    }
 
-        return co;
+    public static Contact[] getUsersById(int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
+        final ContactSql contactSQL = new ContactMySql(ctx, user);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 650; i++) {
+            if (mapping[i] != null) {
+                sb.append(',');
+                sb.append("co.");
+                sb.append(mapping[i].getDBFieldName());
+            }
+        }
+        sb.deleteCharAt(0);
+        sb = contactSQL.iFgetContactById(sb.toString());
+        contactSQL.setSelect(sb.toString());
+        contactSQL.setInternalUsers(userIds);
+        return fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon);
     }
 
     public static Contact getContactById(final int objectId, final Session session) throws ContactException, ContextException, DBPoolingException, OXObjectNotFoundException {
@@ -1168,6 +1183,32 @@ public final class Contacts {
             closeSQLStuff(rs, stmt);
         }
         return co;
+    }
+
+    private static Contact[] fillContactObject(ContactSql contactSQL, int user, int[] group, Context ctx, UserConfiguration uc, Connection con) throws ContactException, OXObjectNotFoundException {
+        List<Contact> contacts = new ArrayList<Contact>();
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = contactSQL.getSqlStatement(con);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                Contact contact = new Contact();
+                int cnt = 1;
+                for (int i = 0; i < 650; i++) {
+                    if (mapping[i] != null) {
+                        mapping[i].addToContactObject(result, cnt, contact, con, user, group, ctx, uc);
+                        cnt++;
+                    }
+                }
+                contacts.add(contact);
+            }
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return contacts.toArray(new Contact[contacts.size()]);
     }
 
     public static void deleteContact(final int id, final int cid, final Connection writecon) throws ContactException {

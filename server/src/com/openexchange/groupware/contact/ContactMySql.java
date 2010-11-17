@@ -127,6 +127,8 @@ public class ContactMySql implements ContactSql {
 
     private int userid;
 
+    private int[] userIds;
+
     private boolean internal_user_only;
 
     private int objectID;
@@ -298,6 +300,14 @@ public class ContactMySql implements ContactSql {
         // get a user by id
         if (userid > 0) {
             sb.append(" (co.userid = ").append(userid).append(") AND ");
+        }
+        if (userIds != null) {
+            sb.append(" (co.userid IN (");
+            for (int userId : userIds) {
+                sb.append(userId).append(',');
+            }
+            sb.setCharAt(sb.length() - 1, ')');
+            sb.append(") AND ");
         }
 
         // range search in time for field changed_from
@@ -876,6 +886,10 @@ public class ContactMySql implements ContactSql {
 
     public void setInternalUser(final int userid) {
         this.userid = userid;
+    }
+
+    public void setInternalUsers(int[] userIds) {
+        this.userIds = userIds;
     }
 
     public void setSearchHabit(final String habit) {
@@ -1480,14 +1494,6 @@ public class ContactMySql implements ContactSql {
     private static final class TimestampSQLInjector implements SQLInjector {
 
         private final java.sql.Timestamp value;
-
-        /**
-         * Initializes a new {@link TimestampSQLInjector} which injects NULL.
-         */
-        public TimestampSQLInjector() {
-            super();
-            this.value = null;
-        }
 
         public TimestampSQLInjector(final Date value) {
             super();

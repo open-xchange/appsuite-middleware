@@ -187,6 +187,11 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
         return null;
     }
 
+    public Contact[] getUsersById(int[] userIds, boolean performReadCheck) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#searchContacts(java.lang.String, int, int, java.lang.String, int[])
      */
