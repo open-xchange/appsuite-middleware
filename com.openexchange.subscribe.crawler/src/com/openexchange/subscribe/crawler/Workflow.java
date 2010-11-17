@@ -57,6 +57,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.BrowserVersionFeatures;
 import com.gargoylesoftware.htmlunit.CrawlerCookieManager;
 import com.gargoylesoftware.htmlunit.CrawlerCookieSpec;
 import com.gargoylesoftware.htmlunit.CrawlerCookieSpecWithQuirkyQuotes;
@@ -132,13 +133,13 @@ public class Workflow {
     public Object[] execute() throws SubscriptionException {
 
         // emulate a specific browser
-        // final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_3);
         BrowserVersion browser = BrowserVersion.FIREFOX_3;
         if (mobileUserAgent) {
-            browser.setUserAgent("Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16");
-        } else {
-            browser.setUserAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1");
-        }
+            browser = new BrowserVersion("Netscape", "5.0 (Windows; en-US)",
+                "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+                (float)1.2, new BrowserVersionFeatures[0]);
+        }    
+             
         final WebClient webClient = new WebClient(browser);
 
         // use a custom CookiePolicy to be more lenient and thereby work with more websites
