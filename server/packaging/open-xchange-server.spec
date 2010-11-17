@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -646,9 +646,44 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 17 2010 - steffen.templin@open-xchange.com
+ - Bugfix #17520: Remove old login and autologin cookies in redirects.
+ - Bugfix #17568: Errors while removing session bound images.
+* Wed Nov 17 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17329: Using a blocking queue to collect addresses
+ - Bugfix #17571: Returning ISO-558-1 charset if detector indicates "nomatch"
+* Tue Nov 16 2010 - thorben.betten@open-xchange.com
+ - Partial fix for bug #17203: Added "; HttpOnly" flag to server cookies and added "cookielifetime" to config tree
+* Tue Nov 16 2010 - karsten.will@open-xchange.com
+ - Bugfix #17081: XING subscription failed (sometimes)
+ - Bugfix #16834: Google calendar crawler failed
+* Mon Nov 15 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #17492: Ignoring the SCHEDULE-AGENT parameter in an ical file now instead of considering the file to be broken.
+* Mon Nov 15 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17551: Fixed NPE if no session is found for mail filter request
+* Fri Nov 12 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17519: NullPointerException during sync fixed..
+* Fri Nov 12 2010 - choeger@open-xchange.com
+ - Bugfix #17518: open-xchange-file-storage-config is missing a dependency
+* Fri Nov 12 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17527: No END_REPONSE package after a CPong response
+* Thu Nov 11 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17471: SocketTimeoutException's message is no longer part of the condition to check a failed IMAP connect
+ - Bugfix #17498: Proper cache invalidation when switching unseen flag
+* Thu Nov 11 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17449: Made code a bit more robust against null values.
+ - Bugfix #17501: com.openexchange.subscribe.subscriptionFlag honors both fullname and id
+* Thu Nov 11 2010 - choeger@open-xchange.com
+ - Bugfix #13480: DNS is not rediscovered for E-Mail servers
+* Thu Nov 11 2010 - karsten.will@open-xchange.com
+ - Bugfix #17441: GMX.com URL changed again
 * Wed Nov 10 2010 - thorben.betten@open-xchange.com
  - Bugfix #17223: Replacing "ISO-2022-JP" charset with "CP50220" on charset encoding
  - Bugfix #17316: Setting proper HTTP headers on .docx attachment download
+* Wed Nov 10 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17459: Delegate to correct method when saving a new infoitem.
+* Wed Nov 10 2010
+ - Bugfix #17227: Wrong end date in confirmation mails.
 * Tue Nov 09 2010 - thorben.betten@open-xchange.com
  - Bugfix #17480: Proper mapping of "infostore" module to not mix up with new file storage folders
 * Mon Nov 08 2010 - thorben.betten@open-xchange.com
