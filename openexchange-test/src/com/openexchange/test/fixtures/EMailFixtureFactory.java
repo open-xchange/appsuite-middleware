@@ -199,7 +199,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
                 in = new FileInputStream(fdir);
                 msg = new MimeMessage(session, in);
             } catch (FileNotFoundException e) {
-                throw new FixtureException(e);
+                throw new FixtureException("File not found: "+fdir.getAbsolutePath(), e);
             } catch (MessagingException e) {
                 throw new FixtureException(e);
             } finally {
