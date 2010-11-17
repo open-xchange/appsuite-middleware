@@ -325,7 +325,10 @@ public final class CharsetDetector {
                         return FALLBACK;
                     }
                 }
-                return null == firstPossibleCharset ? STR_US_ASCII : firstPossibleCharset;
+                /*
+                 * Non-ASCII
+                 */
+                return null == firstPossibleCharset ? FALLBACK : firstPossibleCharset;
             } finally {
                 try {
                     in.close();

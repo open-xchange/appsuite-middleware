@@ -1,14 +1,12 @@
-* 2010-11-17 - steffen.templin@open-xchange.com
-
- - Bugfix #17568: Errors while removing session bound images.
-
 * 2010-11-17 - thorben.betten@open-xchange.com
 
  - Bugfix #17329: Using a blocking queue to collect addresses
+ - Bugfix #17571: Returning ISO-558-1 charset if detector indicates "nomatch"
 
 * 2010-11-17 - steffen.templin@open-xchange.com
 
  - Bugfix #17520: Remove old login and autologin cookies in redirects.
+ - Bugfix #17568: Errors while removing session bound images.
 
 * 2010-11-16 - karsten.will@open-xchange.com
 
