@@ -50,11 +50,19 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
+import gnu.trove.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -68,7 +76,6 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.AbstractIndexCallable;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -85,8 +92,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(VisibleFoldersPerformer.class);
+    private static final Log LOG = LogFactory.getLog(VisibleFoldersPerformer.class);
 
     /**
      * Initializes a new {@link VisibleFoldersPerformer} from given session.
@@ -161,75 +167,110 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             /*
              * Get corresponding user-sensitive folders
              */
-            final CompletionService<Object> completionService;
-            try {
-                completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
-            } catch (final ServiceException e) {
-                throw new FolderException(e);
-            }
+            
+            /*
+             * Collect by folder storage
+             */
+            final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>();
             for (int i = 0; i < size; i++) {
-                completionService.submit(new AbstractIndexCallable<Object>(i, LOG) {
+                final String id = allSubfolderIds.get(i).getId();
+                final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
+                if (null == tmp) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
+                }
+                TIntArrayList list = map.get(tmp);
+                if (null == list) {
+                    list = new TIntArrayList();
+                    map.put(tmp, list);
+                }
+                list.add(i);
+            }
+            /*
+             * Process by folder storage
+             */
+            final CompletionService<Object> completionService;
+            final StorageParametersProvider paramsProvider;
+            if (1 == map.size()) {
+                completionService = new CallerRunsCompletionService<Object>();
+                paramsProvider = new InstanceStorageParametersProvider(storageParameters);
+            } else {
+                try {
+                    completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
+                } catch (final ServiceException e) {
+                    throw new FolderException(e);
+                }
+                paramsProvider = new SessionStorageParametersProvider(session, user, context);
+            }
+            int taskCount = 0;
+            for (final Entry<FolderStorage, TIntArrayList> entry : map.entrySet()) {
+                final FolderStorage tmp = entry.getKey();
+                final int[] indexes = entry.getValue().toNativeArray();
+                final Log log = LOG;
+                completionService.submit(new Callable<Object>() {
 
-                    public Object call() throws FolderException {
-                        final SortableId sortableId = allSubfolderIds.get(index);
-                        final String id = sortableId.getId();
-                        final StorageParameters newParameters = newStorageParameters();
-                        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                    public Object call() throws Exception {
+                        final StorageParameters newParameters = paramsProvider.getStorageParameters();
+                        final boolean started = tmp.startTransaction(newParameters, false);
                         try {
-                            final FolderStorage tmp = getOpenedStorage(id, treeId, newParameters, openedStorages);
-                            /*
-                             * Get subfolder from appropriate storage
-                             */
-                            final Folder subfolder;
-                            try {
-                                subfolder = tmp.getFolder(treeId, id, newParameters);
-                            } catch (final FolderException e) {
-                                log.warn(
-                                    new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
-                                        "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
-                                    e);
-                                addWarning(e);
-                                return null;
-                            }
-                            /*
-                             * Check for subscribed status dependent on parameter "all"
-                             */
-                            if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                final Permission userPermission;
-                                if (null == getSession()) {
-                                    userPermission =
-                                        CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                                } else {
-                                    userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
+                            final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                            openedStorages.add(tmp);
+                            for (final int index : indexes) {
+                                final String id = allSubfolderIds.get(index).getId();
+                                /*
+                                 * Get subfolder from appropriate storage
+                                 */
+                                final Folder subfolder;
+                                try {
+                                    subfolder = tmp.getFolder(treeId, id, newParameters);
+                                } catch (final FolderException e) {
+                                    log.warn(
+                                        new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
+                                            "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
+                                        e);
+                                    addWarning(e);
+                                    return null;
                                 }
-                                if (userPermission.isVisible()) {
-                                    subfolders[index] =
-                                        getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
+                                /*
+                                 * Check for subscribed status dependent on parameter "all"
+                                 */
+                                if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
+                                    final Permission userPermission;
+                                    if (null == getSession()) {
+                                        userPermission =
+                                            CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
+                                    } else {
+                                        userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
+                                    }
+                                    if (userPermission.isVisible()) {
+                                        subfolders[index] =
+                                            getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
+                                    }
                                 }
                             }
-                            for (final FolderStorage openedStorage : openedStorages) {
-                                openedStorage.commitTransaction(newParameters);
+                            if (started) {
+                                tmp.commitTransaction(newParameters);
                             }
                             return null;
                         } catch (final FolderException e) {
-                            for (final FolderStorage openedStorage : openedStorages) {
-                                openedStorage.rollback(newParameters);
+                            if (started) {
+                                tmp.rollback(newParameters);
                             }
                             throw e;
                         } catch (final Exception e) {
-                            for (final FolderStorage openedStorage : openedStorages) {
-                                openedStorage.rollback(newParameters);
+                            if (started) {
+                                tmp.rollback(newParameters);
                             }
                             throw FolderException.newUnexpectedException(e);
                         }
+                        
                     }
-
                 });
+                taskCount++;
             }
             /*
              * Wait for completion
              */
-            ThreadPools.pollCompletionService(completionService, size, getMaxRunningMillis(), FACTORY);
+            ThreadPools.pollCompletionService(completionService, taskCount, getMaxRunningMillis(), FACTORY);
             final UserizedFolder[] ret = trimArray(subfolders);
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
