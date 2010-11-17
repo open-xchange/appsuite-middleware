@@ -5,7 +5,7 @@
 * 2010-11-17 - thorben.betten@open-xchange.com
 
  - Bugfix #17329: Using a blocking queue to collect addresses
- - Bugfix #17571: Returning ISO-558-1 charset if detector indicates "nomatch"
+ - Bugfix #17571: Returning ISO-8859-1 charset if detector indicates "nomatch"
  - Partial fix for bug #17292: Grouping listed folders by their folder storage to get those folders by one
  - Bugfix #17423: Deleting distribution list entries which refer to deleted user
 
