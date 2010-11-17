@@ -2311,6 +2311,9 @@ public final class Contacts {
 
             FolderObject contactFolder = null;
 
+            /*
+             * Get all contacts which were created by specified user. This includes the user's contact as well since the user is always the creator.
+             */
             rs = stmt.executeQuery(cs.iFgetRightsSelectString(uid, so.getContextId()));
 
             int fid = 0;
