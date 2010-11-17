@@ -216,6 +216,8 @@ public class Login extends AJAXServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
+            // Remove old cookies to prevent usage of the old autologin cookie 
+            SessionServlet.removeOXCookies(session.getHash(), req, resp);
             try {
                 final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                 final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
@@ -429,7 +431,7 @@ public class Login extends AJAXServlet {
          * Refresh HTTP session, too
          */
         req.getSession();
-
+        
         final Response response = new Response();
         response.setData("1");
 
