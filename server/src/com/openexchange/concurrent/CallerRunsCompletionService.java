@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.threadpool;
+package com.openexchange.concurrent;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -56,15 +56,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
- * {@link ThreadPoolCompletionService} - A {@link CompletionService} that uses a supplied {@link ThreadPoolService} to execute tasks. This
- * class arranges that submitted tasks are, upon completion, placed on a queue accessible using <tt>take</tt>.
+ * {@link CallerRunsCompletionService} - A {@link CompletionService} that uses submitting thread to perform the task.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ThreadPoolCompletionService<V> implements CompletionService<V> {
+public final class CallerRunsCompletionService<V> implements CompletionService<V> {
 
     /**
      * FutureTask extension to enqueue upon completion
@@ -89,50 +87,14 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
         }
     }
 
-    private final ThreadPoolService threadPoolService;
-
     private final BlockingQueue<Future<V>> completionQueue;
 
-    private final RefusedExecutionBehavior<V> behavior;
-
     /**
-     * Initializes a new {@link ThreadPoolCompletionService} with caller-runs behavior and an unbound {@link BlockingQueue}.
-     * 
-     * @param threadPoolService The thread pool to use
-     * @throws NullPointerException If threadPoolService is <tt>null</tt>
+     * Initializes a new {@link CallerRunsCompletionService} with an unbound {@link BlockingQueue}.
      */
-    public ThreadPoolCompletionService(final ThreadPoolService threadPoolService) {
+    public CallerRunsCompletionService() {
         super();
-        if (threadPoolService == null) {
-            throw new NullPointerException();
-        }
-        this.threadPoolService = threadPoolService;
         this.completionQueue = new LinkedBlockingQueue<Future<V>>();
-        behavior = CallerRunsBehavior.getInstance();
-    }
-
-    /**
-     * Initializes a new {@link ThreadPoolCompletionService}.
-     * 
-     * @param threadPoolService The thread pool to use
-     * @param completionQueue The queue to use as the completion queue normally one dedicated for use by this service
-     * @param behavior The behavior to apply to submitted tasks
-     * @throws NullPointerException If either threadPoolService, completionQueue, or behavior is <tt>null</tt>
-     */
-    public ThreadPoolCompletionService(final ThreadPoolService threadPoolService, final BlockingQueue<Future<V>> completionQueue, final RefusedExecutionBehavior<V> behavior) {
-        super();
-        if (threadPoolService == null) {
-            throw new NullPointerException();
-        }
-        if (completionQueue == null) {
-            throw new NullPointerException();
-        }
-        if (behavior == null) {
-            throw new NullPointerException();
-        }
-        this.threadPoolService = threadPoolService;
-        this.completionQueue = completionQueue;
-        this.behavior = behavior;
     }
 
     public Future<V> submit(final Callable<V> task) {
@@ -140,7 +102,7 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
             throw new NullPointerException();
         }
         final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
-        threadPoolService.submit(ThreadPools.task(f, (V) null), behavior);
+        f.run();
         return f;
     }
 
@@ -149,7 +111,7 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
             throw new NullPointerException();
         }
         final QueueingFuture<V> f = new QueueingFuture<V>(task, result, completionQueue);
-        threadPoolService.submit(ThreadPools.task(f, (V) null), behavior);
+        f.run();
         return f;
     }
 
