@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.session;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -56,6 +59,7 @@ import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.session.actions.RedirectRequest;
 import com.openexchange.ajax.session.actions.RedirectResponse;
+import com.openexchange.ajax.session.actions.StoreRequest;
 import com.openexchange.configuration.AJAXConfig;
 
 /**
@@ -97,6 +101,12 @@ public class RedirectTest extends AbstractAJAXSession {
                 LoginTools.generateAuthId(),
                 RedirectTest.class.getName(),
                 "6.17.0"));
+            // Activate Autologin
+            myClient.execute(new StoreRequest(lResponse.getSessionId(), false));
+            
+            String[] cookies = session.getConversation().getCookieNames();
+            List<String> cookieList = new ArrayList<String>(Arrays.asList(cookies));
+            cookieList.remove("JSESSIONID");
     
             // Remove cookies and that stuff.
             session.getConversation().clearContents();
@@ -105,6 +115,11 @@ public class RedirectTest extends AbstractAJAXSession {
             final RedirectResponse rResponse = myClient.execute(new RedirectRequest(lResponse.getJvmRoute(), lResponse.getRandom()));
             assertNotNull("Redirect location is missing.", rResponse.getLocation());
             session.getConversation().getClientProperties().setAutoRedirect(true);
+            
+            String[] redirectCookies = session.getConversation().getCookieNames();
+            for (String c : redirectCookies) {
+                assertFalse("Cookie " + c + " was not removed after redirect.", cookieList.contains(c));
+            }
             // To get logout with tearDown() working.
             session.setId(lResponse.getSessionId());
         } finally {
