@@ -50,8 +50,6 @@
 package com.openexchange.groupware.contact;
 
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXConcurrentModificationException;
@@ -157,6 +155,16 @@ public interface ContactInterface {
      * @throws OXException If loading the user fails
      */
     public Contact getUserById(int userId, boolean performReadCheck) throws OXException;
+
+    /**
+     * Loads the contacts of the given user identifier.
+     * 
+     * @param userIds The user IDs
+     * @param performReadCheck <code>true</code> to perform read check; otherwise <code>false</code>
+     * @return User's contacts
+     * @throws OXException If loading the user fails
+     */
+    public Contact[] getUsersById(int[] userIds, boolean performReadCheck) throws OXException;
 
     /**
      * Lists all modified objects in a folder

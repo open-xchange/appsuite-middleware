@@ -137,13 +137,8 @@ public final class ListAction extends AbstractUserAction {
             /*
              * Get users/contacts
              */
-            final User[] users = new User[userIdArray.length];
-            final Contact[] contacts = new Contact[userIdArray.length];
-            for (int i = 0; i < users.length; i++) {
-                final int userId = userIdArray[i];
-                users[i] = userService.getUser(userId, session.getContext());
-                contacts[i] = contactInterface.getUserById(userId, false);
-            }
+            final User[] users = userService.getUser(session.getContext(), userIdArray);
+            final Contact[] contacts = contactInterface.getUsersById(userIdArray, false);
             /*
              * Determine max. last-modified time stamp
              */

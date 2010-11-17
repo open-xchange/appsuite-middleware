@@ -1,3 +1,7 @@
+* 2010-11-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #17539: Improved the performance when get all contacts of the global address book.
+
 * 2010-11-16 - thorben.betten@open-xchange.com
 
  - Bugfix #17474/17364: Ensured presence of user's ACL for an IMAP folder

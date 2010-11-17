@@ -214,7 +214,11 @@ public class RdbUserStorage extends UserStorage {
         loadContact(ctx, con, users);
         loadGroups(ctx, con, users);
         loadAttributes(ctx, con, users);
-        return users.values().toArray(new UserImpl[users.size()]);
+        User[] retval = new User[users.size()];
+        for (int i = 0; i < userIds.length; i++) {
+            retval[i] = users.get(I(userIds[i]));
+        }
+        return retval;
     }
 
     @Override

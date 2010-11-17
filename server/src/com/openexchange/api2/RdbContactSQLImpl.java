@@ -668,30 +668,31 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     }
 
     public Contact getUserById(final int userid) throws OXException {
-        return getUserById(userid, true);
+        return getUsersById(new int[] { userid }, true)[0];
     }
 
-    public Contact getUserById(final int userid, final boolean performReadCheck) throws OXException {
+    public Contact getUserById(int userId, boolean performReadCheck) throws OXException {
+        return getUsersById(new int[] { userId }, performReadCheck)[0];
+    }
+
+    public Contact[] getUsersById(int[] userIds, final boolean performReadCheck) throws OXException {
         Connection readCon = null;
-        Contact co = null;
+        final Contact[] contacts;
         final int fid = FolderObject.SYSTEM_LDAP_FOLDER_ID;
         try {
             readCon = DBPool.pickup(ctx);
-            if (userid > 0) {
-                co = Contacts.getUserById(userid, userId, memberInGroups, ctx, userConfiguration, readCon);
-            } else {
-                throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(userId), I(ctx.getContextId())));
-            }
-
-            final int folderId = co.getParentFolderID();
-
-            final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
+            final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(fid);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
                 throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
             }
-
-            if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, session, readCon, ctx)) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
+            contacts = Contacts.getUsersById(userIds, userId, memberInGroups, ctx, userConfiguration, readCon);
+            for (Contact contact : contacts) {
+                if (contact.getParentFolderID() != fid) {
+                    throw new OXConflictException(ContactExceptionCodes.USER_OUTSIDE_GLOBAL.create(I(contact.getParentFolderID()), I(ctx.getContextId())));
+                }
+                if (performReadCheck && !performSecurityReadCheck(fid, contact.getCreatedBy(), userId, session, readCon, ctx)) {
+                    throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
+                }
             }
         } catch (final DBPoolingException e) {
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
@@ -700,7 +701,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 DBPool.closeReaderSilent(ctx, readCon);
             }
         }
-        return co;
+        return contacts;
     }
 
     public Contact getUserById(final int userid, final boolean performReadCheck, final Connection readCon) throws OXException {
