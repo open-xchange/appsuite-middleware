@@ -153,6 +153,7 @@ public final class MyServletRequest  {
 	private static String MAP_ATTR_CLICKED_FEATURE = "_CLICKED_FEATURE_";
 	private static String MAP_ATTR_UPSELL_PLAN = "_UPSELL_PLAN_";
 	private static String MAP_ATTR_LANGUAGE = "_LANG_";
+	private static String MAP_ATTR_PURCHASE_TYPE = "_PURCHASE_TYPE_"; // buy or trial button clicked
 	
 	public MyServletRequest(final Session sessionObj, final Context ctx) throws OXException, ServiceException {		
 		
@@ -487,6 +488,10 @@ public final class MyServletRequest  {
 		bla.put(MAP_ATTR_CID,""+ctx.getContextId()); // context id
 		bla.put(MAP_ATTR_USERID,""+this.sessionObj.getUserId()); // user id 
 		bla.put(MAP_ATTR_LANGUAGE,""+this.user.getPreferredLanguage()); // user id 
+		
+		if(jsondata!=null && jsondata.has("purchase_type")){
+			bla.put(MAP_ATTR_PURCHASE_TYPE,jsondata.getString("purchase_type"));
+		}
 		
 		if(jsondata!=null && jsondata.has("feature_clicked")){
 			bla.put(MAP_ATTR_CLICKED_FEATURE,jsondata.getString("feature_clicked")); // the feature the user clicked on like calender, infostore, mobility etc.
