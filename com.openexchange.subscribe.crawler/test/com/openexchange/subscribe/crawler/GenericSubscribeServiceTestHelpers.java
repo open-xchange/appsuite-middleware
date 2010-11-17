@@ -105,7 +105,10 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         // config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
         activator = new Activator();        
         crawlers = activator.getCrawlersFromFilesystem(config);
-        activator.setICalParser(new com.openexchange.data.conversion.ical.ical4j.ICal4JParser());
+        
+        // insert ical-Parser class (switch for automated tests (Hudson) / local tests)
+        //activator.setICalParser(new com.openexchange.data.conversion.ical.ical4j.ICal4JParser());
+        activator.setICalParser(null);
     }
     
     protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler) {
