@@ -79,12 +79,15 @@ public final class ContactDeleteListener implements DeleteListener {
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
         try {
             if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-                Contacts.trashAllUserContacts(deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
                 /*
                  * Drop affected distribution list entries
                  */
                 dropDListEntries("prg_dlist", "prg_contacts", deleteEvent.getId(), deleteEvent.getContext().getContextId(), writeCon);
                 dropDListEntries("del_dlist", "del_contacts", deleteEvent.getId(), deleteEvent.getContext().getContextId(), writeCon);
+                /*
+                 * Proceed
+                 */
+                Contacts.trashAllUserContacts(deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
             }
         } catch (final OXException ox) {
             throw new DeleteFailedException(ox);
