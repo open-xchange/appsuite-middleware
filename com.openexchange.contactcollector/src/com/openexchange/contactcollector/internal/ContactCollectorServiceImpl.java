@@ -58,14 +58,10 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link ContactCollectorServiceImpl}
@@ -76,6 +72,8 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 public class ContactCollectorServiceImpl implements ContactCollectorService {
 
     private TimeoutConcurrentMap<Integer, Future<Set<InternetAddress>>> aliasesMap;
+
+    private MemorizerWorker worker;
 
     /**
      * Initializes a new {@link ContactCollectorServiceImpl}.
@@ -89,17 +87,13 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
     }
 
     public void memorizeAddresses(final List<InternetAddress> addresses, final Session session, final boolean background) {
-        /*
-         * Delegate to thread pool if available
-         */
-        final ThreadPoolService threadPoolService = CCServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        if (!background || null == threadPoolService) {
-            // Run in calling thread
-            new Memorizer(addresses, session, aliasesMap).run();
+        if (background) {
+            /*
+             * Submit
+             */
+            worker.submit(new MemorizerTask(addresses, session));
         } else {
-            threadPoolService.submit(
-                ThreadPools.task(new Memorizer(addresses, session, aliasesMap), "ContactCollector"),
-                CallerRunsBehavior.getInstance());
+            MemorizerWorker.handleTask(new MemorizerTask(addresses, session));
         }
     }
 
@@ -109,17 +103,16 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
      * @throws ServiceException If a needed service is missing
      */
     public void start() throws ServiceException {
-        aliasesMap = new TimeoutConcurrentMap<Integer, Future<Set<InternetAddress>>>(60, true);
+        AliasesProvider.getInstance().start();
+        worker = new MemorizerWorker();
     }
 
     /**
      * Stops this contact collector service implementation.
      */
     public void stop() {
-        if (null != aliasesMap) {
-            aliasesMap.dispose();
-            aliasesMap = null;
-        }
+        worker.close();
+        AliasesProvider.getInstance().stop();
     }
 
     public void createCollectFolder(final Session session, final Context ctx, final String folderName, final Connection con) throws AbstractOXException, SQLException {
