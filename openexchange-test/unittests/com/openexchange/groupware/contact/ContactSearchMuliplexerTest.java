@@ -215,6 +215,11 @@ public class ContactSearchMuliplexerTest extends TestCase {
                 return null;
             }
 
+            public Contact[] getUsersById(int[] userIds, boolean performReadCheck) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
             public Contact getUserById(final int userId) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
