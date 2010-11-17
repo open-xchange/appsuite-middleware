@@ -73,6 +73,8 @@ public final class CharsetDetector {
 
     private static final String STR_US_ASCII = "US-ASCII";
 
+    private static final String FALLBACK = "ISO-8859-1";
+
     /**
      * Initializes a new {@link CharsetDetector}
      */
@@ -306,15 +308,21 @@ public final class CharsetDetector {
                 final String prob[] = det.getProbableCharsets();
                 String firstPossibleCharset = null;
                 for (int i = 0; i < prob.length; i++) {
-                    if (Charset.isSupported(prob[i])) {
-                        if ("utf-8".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
+                    final String lcs = prob[i].toLowerCase(Locale.US);
+                    if (Charset.isSupported(lcs)) {
+                        if ("utf-8".equals(lcs)) {
                             return prob[i];
-                        } else if ("windows-1252".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
+                        } else if ("windows-1252".equals(lcs)) {
                             return prob[i];
                         }
                         if (null == firstPossibleCharset) {
                             firstPossibleCharset = prob[i];
                         }
+                    } else if ("nomatch".equals(lcs)) {
+                        /*
+                         * Non-ASCII and nomatch
+                         */
+                        return FALLBACK;
                     }
                 }
                 return null == firstPossibleCharset ? STR_US_ASCII : firstPossibleCharset;
