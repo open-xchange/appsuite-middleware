@@ -143,7 +143,7 @@ public final class MemorizerWorker {
         writeLock.lock();
         try {
             flag.set(false);
-            Future<Object> mainFuture = mainFutureRef.get();
+            final Future<Object> mainFuture = mainFutureRef.get();
             if (null != mainFuture && mainFutureRef.compareAndSet(mainFuture, null)) {
                 mainFuture.cancel(true);
             }
