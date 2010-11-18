@@ -52,7 +52,10 @@ package com.openexchange.contactcollector.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.groupware.AbstractOXException;
@@ -67,6 +70,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContactCollectorServiceImpl implements ContactCollectorService {
+
+    private TimeoutConcurrentMap<Integer, Future<Set<InternetAddress>>> aliasesMap;
 
     private MemorizerWorker worker;
 
