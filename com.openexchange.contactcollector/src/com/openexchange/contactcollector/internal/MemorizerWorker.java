@@ -57,7 +57,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.InternetAddress;
@@ -109,40 +114,119 @@ public final class MemorizerWorker {
 
     private final BlockingQueue<MemorizerTask> queue;
 
-    private final Future<Object> mainFuture;
+    private final AtomicReference<Future<Object>> mainFutureRef;
 
     private final AtomicBoolean flag;
+
+    private final ReadWriteLock readWriteLock;
 
     /**
      * Initializes a new {@link MemorizerWorker}.
      * 
-     * @throws ServiceException
+     * @throws ServiceException If thread pool service is missing
      */
     public MemorizerWorker() throws ServiceException {
         super();
+        readWriteLock = new ReentrantReadWriteLock();
         this.flag = new AtomicBoolean(true);
         this.queue = new LinkedBlockingQueue<MemorizerTask>();
         final ThreadPoolService tps = CCServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-        mainFuture =
-            tps.submit(ThreadPools.task(new MemorizerCallable(flag, queue), "ContactCollector"), CallerRunsBehavior.<Object> getInstance());
+        mainFutureRef = new AtomicReference<Future<Object>>();
+        mainFutureRef.set(tps.submit(ThreadPools.task(new MemorizerCallable(flag, queue, readWriteLock.writeLock()), "ContactCollector"), CallerRunsBehavior.<Object> getInstance()));
     }
 
     /**
      * Closes this worker.
      */
     public void close() {
-        flag.set(false);
-        mainFuture.cancel(true);
-        queue.clear();
+        final Lock writeLock = readWriteLock.writeLock();
+        writeLock.lock();
+        try {
+            flag.set(false);
+            Future<Object> mainFuture = mainFutureRef.get();
+            if (null != mainFuture && mainFutureRef.compareAndSet(mainFuture, null)) {
+                mainFuture.cancel(true);
+            }
+            queue.clear();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
      * Submits specified task.
      * 
      * @param memorizerTask The task
+     * @throws ServiceException If thread pool service is missing
      */
-    public void submit(final MemorizerTask memorizerTask) {
-        queue.offer(memorizerTask);
+    public void submit(final MemorizerTask memorizerTask) throws ServiceException {
+        final Lock readLock = readWriteLock.readLock();
+        readLock.lock();
+        try {
+            if (!flag.get()) {
+                /*
+                 * Closed
+                 */
+                return;
+            }
+            Future<Object> f = mainFutureRef.get();
+            if (isDone(f)) {
+                /*-
+                 * Upgrade lock manually
+                 * 
+                 * Must unlock first to obtain write lock
+                 */
+                readLock.unlock();
+                final Lock writeLock = readWriteLock.writeLock();
+                writeLock.lock();
+                try {
+                    if (!flag.get()) {
+                        /*
+                         * Closed
+                         */
+                        return;
+                    }
+                    f = mainFutureRef.get();
+                    if (isDone(f)) {
+                        /*
+                         * Check if needed service is present
+                         */
+                        final ThreadPoolService tps = CCServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+                        /*
+                         * Offer task
+                         */
+                        queue.offer(memorizerTask);
+                        /*
+                         * Start new thread for processing tasks from queue
+                         */
+                        f = tps.submit(ThreadPools.task(new MemorizerCallable(flag, queue, writeLock), "ContactCollector"), CallerRunsBehavior.<Object> getInstance());
+                        mainFutureRef.set(f);
+                    } else {
+                        /*
+                         * Thread is running; offer task
+                         */
+                        queue.offer(memorizerTask);
+                    }
+                } finally {
+                    /*
+                     * Downgrade lock
+                     */
+                    readLock.lock();
+                    writeLock.unlock();
+                }
+            } else {
+                /*
+                 * Thread is running; offer task
+                 */
+                queue.offer(memorizerTask);
+            }
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    private static boolean isDone(final Future<Object> f) {
+        return ((null == f) || f.isDone());
     }
 
     private static final class MemorizerCallable implements Callable<Object> {
@@ -151,23 +235,31 @@ public final class MemorizerWorker {
 
         private final BlockingQueue<MemorizerTask> queue;
 
-        /**
-         * Initializes a new {@link MemorizerCallable}.
-         * 
-         * @param flag
-         * @param queue
-         */
-        public MemorizerCallable(final AtomicBoolean flag, final BlockingQueue<MemorizerTask> queue) {
+        private final Lock writeLock;
+
+        public MemorizerCallable(final AtomicBoolean flag, final BlockingQueue<MemorizerTask> queue, final Lock writeLock) {
             super();
             this.flag = flag;
             this.queue = queue;
+            this.writeLock = writeLock;
         }
 
         private final void waitForTasks(final List<MemorizerTask> tasks) throws InterruptedException {
+            waitForTasks(tasks, 10);
+        }
+
+        private final void pollForTasks(final List<MemorizerTask> tasks) throws InterruptedException {
+            waitForTasks(tasks, 0);
+        }
+
+        private final void waitForTasks(final List<MemorizerTask> tasks, final int timeoutSeconds) throws InterruptedException {
             /*
              * Wait for a task to become available
              */
-            MemorizerTask task = queue.take();
+            MemorizerTask task = timeoutSeconds <= 0 ? queue.poll() : queue.poll(timeoutSeconds, TimeUnit.SECONDS);
+            if (null == task) {
+                return;
+            }
             tasks.add(task);
             /*
              * Gather possibly available tasks but don't wait
@@ -188,8 +280,25 @@ public final class MemorizerWorker {
                  */
                 tasks.clear();
                 waitForTasks(tasks);
+                if (tasks.isEmpty()) {
+                    /*
+                     * Wait time elapsed and no new tasks were offered
+                     */
+                    writeLock.lock();
+                    try {
+                        /*
+                         * Still no new tasks?
+                         */
+                        pollForTasks(tasks);
+                        if (tasks.isEmpty()) {
+                            return null;
+                        }
+                    } finally {
+                        writeLock.unlock();
+                    }
+                }
                 /*
-                 * Fill future(s) from concurrent map
+                 * Process tasks
                  */
                 for (final MemorizerTask task : tasks) {
                     handleTask(task);
