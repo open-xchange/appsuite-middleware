@@ -200,6 +200,11 @@ public final class MemorizerWorker {
 
     }
 
+    /**
+     * Handles specified task
+     * 
+     * @param memorizerTask The task
+     */
     static void handleTask(final MemorizerTask memorizerTask) {
         final Session session = memorizerTask.getSession();
         if (!isEnabled(session) || getFolderId(session) == 0) {
