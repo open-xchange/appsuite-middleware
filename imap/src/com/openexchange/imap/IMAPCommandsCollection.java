@@ -53,6 +53,7 @@ import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfil
 import gnu.trove.TIntLongHashMap;
 import gnu.trove.TLongIntHashMap;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -720,6 +721,65 @@ public final class IMAPCommandsCollection {
                 return -1;
             }
         }))).booleanValue();
+    }
+
+    public static void renameFolder(final IMAPFolder folder, final IMAPFolder renameTo) throws MessagingException {
+        final String renameFullname = renameTo.getFullName();
+        final Boolean ret = (Boolean) folder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                if (renameTo.getStore() != folder.getStore()) {
+                    throw new ProtocolException("Can't rename across Stores");
+                }
+
+                /*
+                 * Encode the mbox as per RFC2060
+                 */
+                final String original = prepareStringArgument(folder.getFullName());
+                final String newName = prepareStringArgument(renameFullname);
+                // Create command
+                final String command = new StringBuilder(32).append("RENAME ").append(original).append(' ').append(newName).toString();
+                // Issue command
+                final Response[] r = protocol.command(command, null);
+                final Response response = r[r.length - 1];
+                if (response.isOK()) {
+                    return Boolean.TRUE;
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString()));
+                } else {
+                    protocol.handleResult(response);
+                }
+                return Boolean.FALSE;
+            }
+        });
+        if (null == ret) {
+            final ProtocolException pex =
+                new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(folder.getFullName()).append(
+                    "\" cannot be renamed.").toString());
+            throw new MessagingException(pex.getMessage(), pex);
+        }
+        // Reset exists and attributes
+        try {
+            Field field = IMAPFolder.class.getDeclaredField("exists");
+            field.setAccessible(true);
+            field.setBoolean(folder, false);
+            field = IMAPFolder.class.getDeclaredField("attributes");
+            field.setAccessible(true);
+            field.set(folder, null);
+        } catch (final NoSuchFieldException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final IllegalAccessException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        new ExtendedIMAPFolder(folder, folder.getSeparator()).triggerNotifyFolderListeners(FolderEvent.RENAMED);
     }
 
     public static void createFolder(final IMAPFolder newFolder, final char separator, final int type) throws MessagingException {

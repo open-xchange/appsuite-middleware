@@ -974,7 +974,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                      */
                     boolean success = false;
                     final long start = System.currentTimeMillis();
-                    success = moveMe.renameTo(renameFolder);
+                    IMAPCommandsCollection.renameFolder(moveMe, renameFolder);
+                    success = true;
+                    //success = moveMe.renameTo(renameFolder);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     /*
                      * Success?
