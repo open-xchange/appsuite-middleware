@@ -98,7 +98,7 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemorizerWorker {
- 
+
     static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MemorizerWorker.class);
 
     private static final boolean ALL_ALIASES = true;
@@ -116,14 +116,15 @@ public final class MemorizerWorker {
     /**
      * Initializes a new {@link MemorizerWorker}.
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     public MemorizerWorker() throws ServiceException {
         super();
         this.flag = new AtomicBoolean(true);
         this.queue = new LinkedBlockingQueue<MemorizerTask>();
         final ThreadPoolService tps = CCServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-        mainFuture = tps.submit(ThreadPools.task(new MemorizerCallable(flag, queue), "ContactCollector"), CallerRunsBehavior.<Object> getInstance());
+        mainFuture =
+            tps.submit(ThreadPools.task(new MemorizerCallable(flag, queue), "ContactCollector"), CallerRunsBehavior.<Object> getInstance());
     }
 
     /**
@@ -145,17 +146,18 @@ public final class MemorizerWorker {
     }
 
     private static final class MemorizerCallable implements Callable<Object> {
-        
+
         private final AtomicBoolean flag;
 
         private final BlockingQueue<MemorizerTask> queue;
 
         /**
          * Initializes a new {@link MemorizerCallable}.
+         * 
          * @param flag
          * @param queue
          */
-        public MemorizerCallable(AtomicBoolean flag, BlockingQueue<MemorizerTask> queue) {
+        public MemorizerCallable(final AtomicBoolean flag, final BlockingQueue<MemorizerTask> queue) {
             super();
             this.flag = flag;
             this.queue = queue;
@@ -266,7 +268,7 @@ public final class MemorizerWorker {
 
     private static final int[] COLUMNS = { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, Contact.USE_COUNT };
 
-    static int memorizeContact(final InternetAddress address, final Session session, final Context ctx, final UserConfiguration userConfig) throws AbstractOXException {
+    private static int memorizeContact(final InternetAddress address, final Session session, final Context ctx, final UserConfiguration userConfig) throws AbstractOXException {
         /*
          * Convert email address to a contact
          */
@@ -339,7 +341,7 @@ public final class MemorizerWorker {
         return retval;
     }
 
-    static boolean isEnabled(final Session session) {
+    private static boolean isEnabled(final Session session) {
         Boolean enabled = null;
         boolean enabledRight = false;
         try {
@@ -353,7 +355,7 @@ public final class MemorizerWorker {
         return enabledRight && enabled != null && enabled.booleanValue();
     }
 
-    static int getFolderId(final Session session) {
+    private static int getFolderId(final Session session) {
         try {
             final Integer folder = ServerUserSetting.getInstance().getContactCollectionFolder(session.getContextId(), session.getUserId());
             return null == folder ? 0 : folder.intValue();
@@ -363,7 +365,7 @@ public final class MemorizerWorker {
         }
     }
 
-    static Contact transformInternetAddress(final InternetAddress address, final Session session) throws ParseException, UnsupportedEncodingException {
+    private static Contact transformInternetAddress(final InternetAddress address, final Session session) throws ParseException, UnsupportedEncodingException {
         final Contact retval = new Contact();
         final String addr = decodeMultiEncodedValue(QuotedInternetAddress.toIDN(address.getAddress()));
         retval.setEmail1(addr);
