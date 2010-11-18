@@ -338,8 +338,7 @@ public final class POP3StoreConnector {
                  * TODO: Re-think if exception's message should be part of condition or just checking if nested exception is an instance of
                  * SocketTimeoutException
                  */
-                if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException()) && ((SocketTimeoutException) e.getNextException()).getMessage().toLowerCase(
-                    Locale.ENGLISH).indexOf("connect timed out") != -1) {
+                if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException())) {
                     /*
                      * Remember a timed-out POP3 server on connect attempt
                      */
