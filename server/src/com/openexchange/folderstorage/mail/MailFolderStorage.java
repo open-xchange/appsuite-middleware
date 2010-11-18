@@ -205,7 +205,7 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
-        throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
+        throw new UnsupportedOperationException("MailFolderStorage.getVisibleSubfolders()");
     }
 
     public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
