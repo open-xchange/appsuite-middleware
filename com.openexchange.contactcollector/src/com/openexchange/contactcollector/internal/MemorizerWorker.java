@@ -268,6 +268,8 @@ public final class MemorizerWorker {
 
     private static final int[] COLUMNS = { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, Contact.USE_COUNT };
 
+    private static final int[] SEARCH_FIELDS = { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3 };
+
     private static int memorizeContact(final InternetAddress address, final Session session, final Context ctx, final UserConfiguration userConfig) throws AbstractOXException {
         /*
          * Convert email address to a contact
@@ -295,7 +297,7 @@ public final class MemorizerWorker {
         {
             final ContactSearchObject searchObject = new ContactSearchObject();
             searchObject.setEmailAutoComplete(true);
-            searchObject.setDynamicSearchField(new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, });
+            searchObject.setDynamicSearchField(SEARCH_FIELDS);
             final String email1 = contact.getEmail1();
             searchObject.setDynamicSearchFieldValue(new String[] { email1, email1, email1 });
             final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, COLUMNS);
