@@ -1,3 +1,7 @@
+* 2010-11-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #17523: Update tasks can now be excluded for administration daemon, too.
+
 * 2010-11-18 - thorben.betten@open-xchange.com
 
  - Bugfix #17563: Ensured calling thread opened mail access before closing it

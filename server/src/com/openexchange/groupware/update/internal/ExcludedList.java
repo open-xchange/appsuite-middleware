@@ -51,12 +51,9 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Map.Entry;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.update.UpdateTask;
 
 /**
  * This class contains the list of excluded update tasks. The configuration can be done by the configuration file
@@ -64,15 +61,13 @@ import com.openexchange.groupware.update.UpdateTask;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ExcludedList implements UpdateTaskList {
+public class ExcludedList implements UpdateTaskList<String> {
 
     private static final ExcludedList SINGLETON = new ExcludedList();
 
-    private static final Log LOG = LogFactory.getLog(ExcludedList.class);
-
     private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
 
-    private List<UpdateTask> taskList = new ArrayList<UpdateTask>();
+    private List<String> taskList = new ArrayList<String>();
 
     private ExcludedList() {
         super();
@@ -87,28 +82,12 @@ public class ExcludedList implements UpdateTaskList {
         Properties props = configService.getFile(CONFIG_FILE_NAME);
         for (Entry<Object, Object> entry : props.entrySet()) {
             String className = entry.getKey().toString().trim();
-            addTask(className);
+            taskList.add(className);
         }
         UpdateTaskCollection.getInstance().dirtyVersion();
     }
 
-    private void addTask(String className) {
-        try {
-            taskList.add(Class.forName(className).asSubclass(UpdateTask.class).newInstance());
-        } catch (ClassNotFoundException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (IllegalArgumentException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (SecurityException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (InstantiationException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (IllegalAccessException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    public List<UpdateTask> getTaskList() {
+    public List<String> getTaskList() {
         return taskList;
     }
 }

@@ -62,7 +62,7 @@ import com.openexchange.groupware.update.UpdateTask;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DynamicList implements UpdateTaskList {
+public final class DynamicList implements UpdateTaskList<UpdateTask> {
 
     private static final Log LOG = LogFactory.getLog(DynamicList.class);
 

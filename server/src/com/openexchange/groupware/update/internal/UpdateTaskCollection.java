@@ -200,12 +200,11 @@ class UpdateTaskCollection {
 
     List<UpdateTask> getListWithoutExcludes() {
         List<UpdateTask> retval = getFullList();
-        for (UpdateTask excluded : ExcludedList.getInstance().getTaskList()) {
+        for (String excluded : ExcludedList.getInstance().getTaskList()) {
             // Matching must be done based on task class name.
-            String toExclude = excluded.getClass().getName();
             Iterator<UpdateTask> iter = retval.iterator();
             while (iter.hasNext()) {
-                if (toExclude.equals(iter.next().getClass().getName())) {
+                if (excluded.equals(iter.next().getClass().getName())) {
                     iter.remove();
                 }
             }
