@@ -1,3 +1,7 @@
+* 2010-11-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #17292: Enabling hard pool limit by default when registering a database
+
 * 2010-11-11 - choeger@open-xchange.com
 
  - Bugfix #13480: DNS is not rediscovered for E-Mail servers

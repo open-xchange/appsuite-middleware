@@ -49,13 +49,13 @@
 
 package com.openexchange.admin.rmi;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -116,7 +116,7 @@ public interface OXUtilInterface extends Remote {
     public static final int DEFAULT_DB_WEIGHT = 100;
     public static final String DEFAULT_DRIVER = "com.mysql.jdbc.Driver";
     public static final int DEFAULT_MAXUNITS = 1000;
-    public static final boolean DEFAULT_POOL_HARD_LIMIT = false;
+    public static final boolean DEFAULT_POOL_HARD_LIMIT = true;
     public static final int DEFAULT_POOL_INITIAL = 0;
     public static final int DEFAULT_POOL_MAX = 100;
     public static final String DEFAULT_USER = "openexchange";
