@@ -1,3 +1,7 @@
+* 2010-11-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #17490: Removed folder permission check and delegating permission check to file storage layer
+
 * 2010-11-19 - francisco.laguna@open-xchange.com
 
  - Bugfix #17517: Get the file size for quota management before deleting a file.
