@@ -157,12 +157,16 @@ public class Partitioner {
             Appointment appointment = appointmentSql.getObjectById(appointmentId.getObjectID(), appointmentId.getParentFolderID());
             if (appointment.isMaster()) {
                 RecurringResultsInterface results = calendarTools.calculateRecurring(appointment, displayStart.getTime(), CalendarTools.getDayEnd(cal, displayEnd).getTime(), 0);
-                for (int i = 0; i < results.size(); i++) {
-                    RecurringResultInterface result = results.getRecurringResult(i);
-                    Appointment occurrence = appointment.clone();
-                    occurrence.setStartDate(new Date(result.getStart()));
-                    occurrence.setEndDate(new Date(result.getEnd()));
-                    addToMap(dayMap, occurrence);
+                if (results == null) {
+                    addToMap(dayMap, appointment);
+                } else {
+                    for (int i = 0; i < results.size(); i++) {
+                        RecurringResultInterface result = results.getRecurringResult(i);
+                        Appointment occurrence = appointment.clone();
+                        occurrence.setStartDate(new Date(result.getStart()));
+                        occurrence.setEndDate(new Date(result.getEnd()));
+                        addToMap(dayMap, occurrence);
+                    }
                 }
             } else {
                 addToMap(dayMap, appointment);

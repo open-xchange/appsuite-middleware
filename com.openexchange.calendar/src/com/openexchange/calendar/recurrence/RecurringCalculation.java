@@ -426,6 +426,8 @@ public class RecurringCalculation {
             return calculateMonthly();
         case CalendarObject.YEARLY:
             return calculateYearly();
+        case CalendarObject.NO_RECURRENCE:
+            return null;
         default:
             throw new RecurringException(RecurringException.UNKNOWN_RECURRENCE_TYPE, recurring_type);
         }
