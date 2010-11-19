@@ -251,8 +251,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         for (final String identifier : identifiers) {
             boolean deleted;
             try {
+                Long size = L(getFileSize(identifier)); // Get size before attempting delete. File is not found afterwards
                 deleted = fileStorage.deleteFile(identifier);
-                fileSizes.put(identifier, L(getFileSize(identifier)));
+                fileSizes.put(identifier, size);
                 if (!deleted) {
                     set.add(identifier);
                 }
