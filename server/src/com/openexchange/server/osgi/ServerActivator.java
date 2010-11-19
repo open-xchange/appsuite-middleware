@@ -67,8 +67,8 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.ajax.Attachment;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
@@ -105,6 +105,7 @@ import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 import com.openexchange.folder.FolderDeleteListenerService;
@@ -140,7 +141,6 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageSessionEventHandler;
 import com.openexchange.login.LoginHandlerService;
-//import com.openexchange.login.internal.PasswordCrypter;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
@@ -252,7 +252,8 @@ public final class ServerActivator extends DeferredActivator {
         {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
-            CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class, CryptoService.class
+            CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
+            FileStorageServiceRegistry.class, CryptoService.class
         };
 
     private final List<ServiceRegistration> registrationList;
