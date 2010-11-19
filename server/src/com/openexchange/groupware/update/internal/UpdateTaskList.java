@@ -50,15 +50,14 @@
 package com.openexchange.groupware.update.internal;
 
 import java.util.List;
-import com.openexchange.groupware.update.UpdateTask;
 
 /**
  * {@link UpdateTaskList}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface UpdateTaskList {
+interface UpdateTaskList<T> {
 
-    List<UpdateTask> getTaskList();
+    List<T> getTaskList();
 
 }

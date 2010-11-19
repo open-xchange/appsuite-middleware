@@ -1,3 +1,7 @@
+* 2010-11-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #17523: Update tasks can now be excluded for administration daemon, too.
+
 * 2010-11-17 - marcus.klein@open-xchange.com
 
  - Bugfix #17539: Improved the performance when get all contacts of the global address book.
