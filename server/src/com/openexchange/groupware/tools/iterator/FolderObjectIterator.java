@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tools.iterator;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,8 +67,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -836,7 +835,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private static final class PermissionLoader {
 
-        private final ConcurrentMap<Integer, SetableFutureTask> permsMap;
+        private final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap;
 
         private final BlockingQueue<Integer> queue;
 
@@ -848,7 +847,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             super();
             try {
                 final AtomicBoolean flag = this.flag = new AtomicBoolean(true);
-                final ConcurrentMap<Integer, SetableFutureTask> permsMap = this.permsMap = new ConcurrentHashMap<Integer, SetableFutureTask>();
+                final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap = this.permsMap = new ConcurrentTIntObjectHashMap<SetableFutureTask>();
                 final BlockingQueue<Integer> queue = this.queue = new LinkedBlockingQueue<Integer>();
                 final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
@@ -886,7 +885,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                                      * Fill future(s) from concurrent map
                                      */
                                     for (final Integer id : ids) {
-                                        permsMap.get(id).set(loadFolderPermissions(id.intValue(), cid, readCon));
+                                        final int fuid = id.intValue();
+                                        permsMap.get(fuid).set(loadFolderPermissions(fuid, cid, readCon));
                                     }
                                 }
                             } finally {
@@ -942,13 +942,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void submitPermissionsFor(final int folderId) {
-            final Integer key = Integer.valueOf(folderId);
-            permsMap.put(key, new SetableFutureTask());
-            queue.offer(key);
+            permsMap.put(folderId, new SetableFutureTask());
+            queue.offer(Integer.valueOf(folderId));
         }
 
         public OCLPermission[] pollPermissionsFor(final int folderId, final int timeoutSec) throws SearchIteratorException {
-            final Future<OCLPermission[]> f = permsMap.get(Integer.valueOf(folderId));
+            final Future<OCLPermission[]> f = permsMap.get(folderId);
             if (null == f) {
                 return null;
             }
