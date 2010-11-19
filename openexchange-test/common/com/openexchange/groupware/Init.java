@@ -579,6 +579,7 @@ public final class Init {
         final CCServiceRegistry reg = CCServiceRegistry.getInstance();
         if (null == reg.getService(TimerService.class)) {
             reg.addService(TimerService.class, services.get(TimerService.class));
+            reg.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
             reg.addService(ContextService.class, services.get(ContextService.class));
             reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             reg.addService(UserService.class, services.get(UserService.class));
