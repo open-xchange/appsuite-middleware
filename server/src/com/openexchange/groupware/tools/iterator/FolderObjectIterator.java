@@ -635,7 +635,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             /*
              * No permissions set, yet
              */
-            final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissionsFor(folderId, 2000L);
+            final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissionsFor(folderId, 2);
             fo.setPermissionsAsArray(null == permissions ? getFolderPermissions(folderId) : permissions);
         }
         /*
@@ -947,13 +947,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             queue.offer(key);
         }
 
-        public OCLPermission[] pollPermissionsFor(final int folderId, final long timeoutMsec) throws SearchIteratorException {
+        public OCLPermission[] pollPermissionsFor(final int folderId, final int timeoutSec) throws SearchIteratorException {
             final Future<OCLPermission[]> f = permsMap.get(Integer.valueOf(folderId));
             if (null == f) {
                 return null;
             }
             try {
-                return f.get(timeoutMsec, TimeUnit.MILLISECONDS);
+                return f.get(timeoutSec, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
                 throw new SearchIteratorException(Code.UNEXPECTED_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } catch (final ExecutionException e) {
