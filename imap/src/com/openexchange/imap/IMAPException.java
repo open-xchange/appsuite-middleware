@@ -181,6 +181,10 @@ public final class IMAPException extends MIMEMailException {
          */
         UPDATE_FAILED(IMAPCode.UPDATE_FAILED),
         /**
+         * Rename of folder "%1$s" to "%2$s" failed.
+         */
+        RENAME_FAILED(IMAPCode.RENAME_FAILED),
+        /**
          * Folder %1$s must not be deleted
          */
         NO_FOLDER_DELETE(IMAPCode.NO_FOLDER_DELETE),

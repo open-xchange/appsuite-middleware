@@ -973,11 +973,19 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                      * Rename
                      */
                     boolean success = false;
-                    final long start = System.currentTimeMillis();
-                    IMAPCommandsCollection.renameFolder(moveMe, renameFolder);
-                    success = true;
-                    //success = moveMe.renameTo(renameFolder);
-                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    try {
+                        final long start = System.currentTimeMillis();
+                        IMAPCommandsCollection.renameFolder(moveMe, renameFolder);
+                        success = true;
+                        //success = moveMe.renameTo(renameFolder);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final MessagingException e) {
+                        /*
+                         * Rename failed
+                         */
+                        throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, e, moveMe.getFullName(), newFullName);
+                        
+                    }
                     /*
                      * Success?
                      */
