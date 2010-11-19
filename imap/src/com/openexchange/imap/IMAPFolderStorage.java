@@ -974,6 +974,12 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                      */
                     boolean success = false;
                     try {
+                        if (moveMe.isOpen()) {
+                            moveMe.close(false);
+                        } else {
+                            // Enforce close
+                            IMAPCommandsCollection.forceCloseCommand(moveMe);
+                        }
                         final long start = System.currentTimeMillis();
                         IMAPCommandsCollection.renameFolder(moveMe, renameFolder);
                         success = true;

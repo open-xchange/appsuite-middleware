@@ -946,6 +946,34 @@ public final class IMAPCommandsCollection {
         }))).booleanValue();
     }
 
+    private static final String COMMAND_CLOSE = "CLOSE";
+
+    /**
+     * Force to send a CLOSE command to IMAP server that is explicitly <b>not</b> handled by JavaMail API. It really does not matter if this
+     * command succeeds or breaks up in a <code>MessagingException</code>. Therefore neither a return value is defined nor any exception is
+     * thrown.
+     */
+    public static void forceCloseCommand(final IMAPFolder f) {
+        try {
+            f.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    final Response[] r = protocol.command(COMMAND_CLOSE, null);
+                    /*
+                     * Grab last response that should indicate an OK
+                     */
+                    final Response response = r[r.length - 1];
+                    return Boolean.valueOf(response.isOK());
+                }
+
+            });
+        } catch (final MessagingException e) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(e.getMessage(), e);
+            }
+        }
+    }
+
     private static final String COMMAND_NOOP = "NOOP";
 
     /**
