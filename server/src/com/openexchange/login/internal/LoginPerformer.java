@@ -363,6 +363,8 @@ public final class LoginPerformer {
         if (null != session) {
             sb.append(" Session:");
             sb.append(session.getSessionID());
+            sb.append(" Random:");
+            sb.append(session.getRandomToken());
         } else {
             sb.append(" Failed.");
         }
