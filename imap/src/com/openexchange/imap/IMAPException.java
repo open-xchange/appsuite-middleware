@@ -744,7 +744,15 @@ public final class IMAPException extends MIMEMailException {
         /**
          * A SQL error occurred: %1$s
          */
-        SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 2052);
+        SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 2052),
+        /**
+         * Rename of folder "%1$s" to "%2$s" failed.
+         */
+        RENAME_FAILED("Rename of folder \"%1$s\" to \"%2$s\" failed.", Category.CODE_ERROR, 2053),
+        /**
+         * Rename of folder "%1$s" to "%2$s" failed on server %3$s with login %4$s (user=%5$s, context=%6$s).
+         */
+        RENAME_FAILED_EXT("Rename of folder \"%1$s\" to \"%2$s\" failed on server %3$s with login %4$s (user=%5$s, context=%6$s).", RENAME_FAILED);
 
         private final String message;
 

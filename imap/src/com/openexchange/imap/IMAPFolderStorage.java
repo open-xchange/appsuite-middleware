@@ -982,7 +982,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                      * Success?
                      */
                     if (!success) {
-                        throw IMAPException.create(IMAPException.Code.UPDATE_FAILED, imapConfig, session, moveMe.getFullName());
+                        throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, moveMe.getFullName(), newFullName);
                     }
                     moveMe = (IMAPFolder) imapStore.getFolder(oldFullName);
                     if (moveMe.exists()) {
