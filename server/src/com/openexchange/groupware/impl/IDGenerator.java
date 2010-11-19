@@ -49,15 +49,13 @@
 
 package com.openexchange.groupware.impl;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
@@ -249,7 +247,7 @@ public final class IDGenerator {
         /**
          * Maps the groupware types to sql functions.
          */
-        private static final Map<Integer, String> TYPES;
+        private static final ConcurrentTIntObjectHashMap<String> TYPES;
 
         /**
          * Returns the appropriate unique identifier sql function for the type.
@@ -258,7 +256,7 @@ public final class IDGenerator {
          * @throws SQLException if no function for the type is defined.
          */
         private String getFunction(final int type) throws SQLException {
-            final String retval = TYPES.get(I(type));
+            final String retval = TYPES.get(type);
             if (null == retval) {
                 throw new SQLException("No function defined for type: " + type);
             }
@@ -298,30 +296,30 @@ public final class IDGenerator {
          * {@inheritDoc}
          */
         public void registerType(final String sql, final int type) throws SQLException {
-            if (TYPES.containsKey(I(type))) {
+            if (TYPES.containsKey(type)) {
                 throw new SQLException("Type " + type + " already in use");
             }
-            TYPES.put(I(type), sql);
+            TYPES.put(type, sql);
         }
 
         static {
-            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
-            tmp.put(I(-1), "{call get_configdb_id()}");
-            tmp.put(I(Types.APPOINTMENT), "{call get_calendar_id(?)}");
-            tmp.put(I(Types.CONTACT), "{call get_contact_id(?)}");
-            tmp.put(I(Types.FOLDER), "{call get_folder_id(?)}");
-            tmp.put(I(Types.TASK), "{call get_task_id(?)}");
-            tmp.put(I(Types.USER_SETTING), "{call get_gui_setting_id(?)}");
-            tmp.put(I(Types.REMINDER), "{call get_reminder_id(?)}");
-            tmp.put(I(Types.ICAL), "{call get_ical_id(?)}");
-            tmp.put(I(Types.PRINCIPAL), "{call get_principal_id(?)}");
-            tmp.put(I(Types.RESOURCE), "{call get_resource_id(?)}");
-            tmp.put(I(Types.INFOSTORE), "{call get_infostore_id(?)}");
-            tmp.put(I(Types.ATTACHMENT), "{call get_attachment_id(?)}");
-            tmp.put(I(Types.WEBDAV), "{call get_webdav_id(?)}");
-            tmp.put(I(Types.UID_NUMBER), "{call get_uid_number_id(?)}");
-            tmp.put(I(Types.GID_NUMBER), "{call get_gid_number_id(?)}");
-            tmp.put(I(Types.MAIL_SERVICE), "{call get_mail_service_id(?)}");
+            final ConcurrentTIntObjectHashMap<String> tmp = new ConcurrentTIntObjectHashMap<String>();
+            tmp.put(-1, "{call get_configdb_id()}");
+            tmp.put(Types.APPOINTMENT, "{call get_calendar_id(?)}");
+            tmp.put(Types.CONTACT, "{call get_contact_id(?)}");
+            tmp.put(Types.FOLDER, "{call get_folder_id(?)}");
+            tmp.put(Types.TASK, "{call get_task_id(?)}");
+            tmp.put(Types.USER_SETTING, "{call get_gui_setting_id(?)}");
+            tmp.put(Types.REMINDER, "{call get_reminder_id(?)}");
+            tmp.put(Types.ICAL, "{call get_ical_id(?)}");
+            tmp.put(Types.PRINCIPAL, "{call get_principal_id(?)}");
+            tmp.put(Types.RESOURCE, "{call get_resource_id(?)}");
+            tmp.put(Types.INFOSTORE, "{call get_infostore_id(?)}");
+            tmp.put(Types.ATTACHMENT, "{call get_attachment_id(?)}");
+            tmp.put(Types.WEBDAV, "{call get_webdav_id(?)}");
+            tmp.put(Types.UID_NUMBER, "{call get_uid_number_id(?)}");
+            tmp.put(Types.GID_NUMBER, "{call get_gid_number_id(?)}");
+            tmp.put(Types.MAIL_SERVICE, "{call get_mail_service_id(?)}");
             TYPES = tmp;
         }
     }
@@ -336,7 +334,7 @@ public final class IDGenerator {
         /**
          * Maps the groupware types to sql functions.
          */
-        private static final Map<Integer, String> TYPES;
+        private static final ConcurrentTIntObjectHashMap<String> TYPES;
 
         /**
          * Returns the appropriate unique identifier sql function for the type.
@@ -345,7 +343,7 @@ public final class IDGenerator {
          * @throws SQLException if no function for the type is defined.
          */
         private String getFunction(final int type) throws SQLException {
-            final String retval = TYPES.get(I(type));
+            final String retval = TYPES.get(type);
             if (null == retval) {
                 throw new SQLException("No function defined for type: " + type);
             }
@@ -378,27 +376,27 @@ public final class IDGenerator {
         }
 
         static {
-            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
-            tmp.put(I(-1), "CALL get_configdb_id()");
-            tmp.put(I(Types.APPOINTMENT), "CALL get_calendar_id(?)");
-            tmp.put(I(Types.CONTACT), "CALL get_contact_id(?)");
-            tmp.put(I(Types.FOLDER), "CALL get_folder_id(?)");
-            tmp.put(I(Types.TASK), "CALL get_task_id(?)");
-            tmp.put(I(Types.USER_SETTING), "CALL get_gui_setting_id(?)");
-            tmp.put(I(Types.REMINDER), "CALL get_reminder_id(?)");
-            tmp.put(I(Types.ICAL), "CALL get_ical_id(?)");
-            tmp.put(I(Types.PRINCIPAL), "CALL get_principal_id(?)");
-            tmp.put(I(Types.RESOURCE), "CALL get_resource_id(?)");
-            tmp.put(I(Types.INFOSTORE), "CALL get_infostore_id(?)");
-            tmp.put(I(Types.ATTACHMENT), "CALL get_attachment_id(?)");
-            tmp.put(I(Types.WEBDAV), "CALL get_webdav_id(?)");
-            tmp.put(I(Types.UID_NUMBER), "CALL get_uid_number_id(?)");
-            tmp.put(I(Types.GID_NUMBER), "CALL get_gid_number_id(?)");
-            tmp.put(I(Types.MAIL_SERVICE), "CALL get_mail_service_id(?)");
-            tmp.put(I(Types.GENERIC_CONFIGURATION), "CALL get_genconf_id(?)");
-            tmp.put(I(Types.SUBSCRIPTION), "CALL get_subscriptions_id(?)");
-            tmp.put(I(Types.PUBLICATION), "CALL get_publications_id(?)");
-            tmp.put(I(Types.EAV_NODE), "CALL get_eav_id(?)");
+            final ConcurrentTIntObjectHashMap<String> tmp = new ConcurrentTIntObjectHashMap<String>();
+            tmp.put(-1, "CALL get_configdb_id()");
+            tmp.put(Types.APPOINTMENT, "CALL get_calendar_id(?)");
+            tmp.put(Types.CONTACT, "CALL get_contact_id(?)");
+            tmp.put(Types.FOLDER, "CALL get_folder_id(?)");
+            tmp.put(Types.TASK, "CALL get_task_id(?)");
+            tmp.put(Types.USER_SETTING, "CALL get_gui_setting_id(?)");
+            tmp.put(Types.REMINDER, "CALL get_reminder_id(?)");
+            tmp.put(Types.ICAL, "CALL get_ical_id(?)");
+            tmp.put(Types.PRINCIPAL, "CALL get_principal_id(?)");
+            tmp.put(Types.RESOURCE, "CALL get_resource_id(?)");
+            tmp.put(Types.INFOSTORE, "CALL get_infostore_id(?)");
+            tmp.put(Types.ATTACHMENT, "CALL get_attachment_id(?)");
+            tmp.put(Types.WEBDAV, "CALL get_webdav_id(?)");
+            tmp.put(Types.UID_NUMBER, "CALL get_uid_number_id(?)");
+            tmp.put(Types.GID_NUMBER, "CALL get_gid_number_id(?)");
+            tmp.put(Types.MAIL_SERVICE, "CALL get_mail_service_id(?)");
+            tmp.put(Types.GENERIC_CONFIGURATION, "CALL get_genconf_id(?)");
+            tmp.put(Types.SUBSCRIPTION, "CALL get_subscriptions_id(?)");
+            tmp.put(Types.PUBLICATION, "CALL get_publications_id(?)");
+            tmp.put(Types.EAV_NODE, "CALL get_eav_id(?)");
             TYPES = tmp;
         }
 
@@ -406,10 +404,10 @@ public final class IDGenerator {
          * {@inheritDoc}
          */
         public void registerType(final String sql, final int type) throws SQLException {
-            if (TYPES.containsKey(I(type))) {
+            if (TYPES.containsKey(type)) {
                 throw new SQLException("Type " + type + " already in use");
             }
-            TYPES.put(I(type), sql);
+            TYPES.put(type, sql);
         }
     }
 
@@ -422,7 +420,7 @@ public final class IDGenerator {
         /**
          * Maps the groupware types to sql functions.
          */
-        private static final Map<Integer, String> TABLES;
+        private static final ConcurrentTIntObjectHashMap<String> TABLES;
 
         /**
          * Returns the appropriate unique identifier sql function for the type.
@@ -431,7 +429,7 @@ public final class IDGenerator {
          * @throws SQLException if no table for the type is defined.
          */
         private String getSequenceTable(final int type) throws SQLException {
-            final String retval = TABLES.get(I(type));
+            final String retval = TABLES.get(type);
             if (null == retval) {
                 throw new SQLException("No table defined for type: " + type);
             }
@@ -510,27 +508,27 @@ public final class IDGenerator {
         }
 
         static {
-            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
-            tmp.put(I(-1), "configdb_sequence");
-            tmp.put(I(Types.APPOINTMENT), "sequence_calendar");
-            tmp.put(I(Types.CONTACT), "sequence_contact");
-            tmp.put(I(Types.FOLDER), "sequence_folder");
-            tmp.put(I(Types.TASK), "sequence_task");
-            tmp.put(I(Types.USER_SETTING), "sequence_gui_setting");
-            tmp.put(I(Types.REMINDER), "sequence_reminder");
-            tmp.put(I(Types.ICAL), "sequence_ical");
-            tmp.put(I(Types.PRINCIPAL), "sequence_principal");
-            tmp.put(I(Types.RESOURCE), "sequence_resource");
-            tmp.put(I(Types.INFOSTORE), "sequence_infostore");
-            tmp.put(I(Types.ATTACHMENT), "sequence_attachment");
-            tmp.put(I(Types.WEBDAV), "sequence_webdav");
-            tmp.put(I(Types.UID_NUMBER), "sequence_uid_number");
-            tmp.put(I(Types.GID_NUMBER), "sequence_gid_number");
-            tmp.put(I(Types.MAIL_SERVICE), "sequence_mail_service");
-            tmp.put(I(Types.GENERIC_CONFIGURATION), "sequence_genconf");
-            tmp.put(I(Types.SUBSCRIPTION), "sequence_subscriptions");
-            tmp.put(I(Types.PUBLICATION), "sequence_publications");
-            tmp.put(I(Types.EAV_NODE), "sequence_uid_eav_node");
+            final ConcurrentTIntObjectHashMap<String> tmp = new ConcurrentTIntObjectHashMap<String>();
+            tmp.put(-1, "configdb_sequence");
+            tmp.put(Types.APPOINTMENT, "sequence_calendar");
+            tmp.put(Types.CONTACT, "sequence_contact");
+            tmp.put(Types.FOLDER, "sequence_folder");
+            tmp.put(Types.TASK, "sequence_task");
+            tmp.put(Types.USER_SETTING, "sequence_gui_setting");
+            tmp.put(Types.REMINDER, "sequence_reminder");
+            tmp.put(Types.ICAL, "sequence_ical");
+            tmp.put(Types.PRINCIPAL, "sequence_principal");
+            tmp.put(Types.RESOURCE, "sequence_resource");
+            tmp.put(Types.INFOSTORE, "sequence_infostore");
+            tmp.put(Types.ATTACHMENT, "sequence_attachment");
+            tmp.put(Types.WEBDAV, "sequence_webdav");
+            tmp.put(Types.UID_NUMBER, "sequence_uid_number");
+            tmp.put(Types.GID_NUMBER, "sequence_gid_number");
+            tmp.put(Types.MAIL_SERVICE, "sequence_mail_service");
+            tmp.put(Types.GENERIC_CONFIGURATION, "sequence_genconf");
+            tmp.put(Types.SUBSCRIPTION, "sequence_subscriptions");
+            tmp.put(Types.PUBLICATION, "sequence_publications");
+            tmp.put(Types.EAV_NODE, "sequence_uid_eav_node");
             TABLES = tmp;
         }
 
@@ -538,10 +536,10 @@ public final class IDGenerator {
          * {@inheritDoc}
          */
         public void registerType(final String sql, final int type) throws SQLException {
-            if (TABLES.containsKey(I(type))) {
+            if (TABLES.containsKey(type)) {
                 throw new SQLException("Type " + type + " already in use.");
             }
-            TABLES.put(I(type), sql);
+            TABLES.put(type, sql);
         }
     }
 }
