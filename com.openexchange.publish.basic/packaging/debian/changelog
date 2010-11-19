@@ -1,3 +1,9 @@
+open-xchange-publish-basic (6.18.1.0-7) unstable; urgency=low
+
+  * Build for Public PTF 2010-11-24
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Fri, 19 Nov 2010 13:17:08 +0100
+
 open-xchange-publish-basic (6.18.1.0-6) unstable; urgency=low
 
   * first build for public ptf 2010-10-22

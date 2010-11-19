@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -582,6 +582,13 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Nov 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17523: Update tasks can now be excluded for administration daemon, too.
+* Wed Nov 17 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17539: Improved the performance when get all contacts of the global address book.
+ - Bugfix #17389: Corrected SQL statement for removing the passcrypt user attribute.
+* Tue Nov 16 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17474/17364: Ensured presence of user's ACL for an IMAP folder
 * Mon Oct 25 2010 - thorben.betten@open-xchange.com
  - Bugfix #17330: Proper folder fullname when renaming a folder on root level
 * Fri Oct 22 2010 - marcus.klein@open-xchange.com
