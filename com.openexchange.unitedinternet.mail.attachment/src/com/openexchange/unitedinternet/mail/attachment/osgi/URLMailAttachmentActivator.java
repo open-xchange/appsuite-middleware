@@ -83,7 +83,7 @@ public final class URLMailAttachmentActivator implements BundleActivator {
              * Register data sources
              */
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>(1);
-            props.put("identifier", "com.openexchange.mail.vcard");
+            props.put("identifier", "com.openexchange.unitedinternet.mail.attachment");
             registration = context.registerService(DataSource.class.getName(), new URLMailAttachmentDataSource(), props);
         } catch (final Exception e) {
             LOG.error("starting bundle failed: com.openexchange.unitedinternet.mail.attachment", e);
