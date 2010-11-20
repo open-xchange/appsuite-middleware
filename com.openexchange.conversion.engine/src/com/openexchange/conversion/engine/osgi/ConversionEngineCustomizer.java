@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
 
 /**
  * {@link ConversionEngineCustomizer} - The service tracker customizer for conversion engine.
@@ -65,7 +66,8 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
 
     private static final String PROP_IDENTIFIER = "identifier";
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConversionEngineCustomizer.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(ConversionEngineCustomizer.class);
 
     private final BundleContext context;
 
@@ -90,26 +92,32 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
                 LOG.error("Missing identifier in data handler: " + addedService.getClass().getName());
                 return addedService;
             }
-            if (getInstance().getDataHandler(identifier.toString()) != null) {
-                LOG.error("A data handler is already registered for identifier: " + identifier.toString());
-                return addedService;
+            final ConversionEngineRegistry registry = getInstance();
+            synchronized (registry) {
+                if (registry.getDataHandler(identifier.toString()) != null) {
+                    LOG.error("A data handler is already registered for identifier: " + identifier.toString());
+                    return addedService;
+                }
+                registry.putDataHandler(identifier.toString(), (DataHandler) addedService);
+                LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString()).append(
+                    "' successfully registered"));
             }
-            getInstance().putDataHandler(identifier.toString(), (DataHandler) addedService);
-            LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString()).append(
-                "' successfully registered"));
         } else if (addedService instanceof DataSource) {
             final Object identifier = reference.getProperty(PROP_IDENTIFIER);
             if (null == identifier) {
                 LOG.error("Missing identifier in data source: " + addedService.getClass().getName());
                 return addedService;
             }
-            if (getInstance().getDataSource(identifier.toString()) != null) {
-                LOG.error("A data source is already registered for identifier: " + identifier.toString());
-                return addedService;
+            final ConversionEngineRegistry registry = getInstance();
+            synchronized (registry) {
+                if (registry.getDataSource(identifier.toString()) != null) {
+                    LOG.error("A data source is already registered for identifier: " + identifier.toString());
+                    return addedService;
+                }
+                registry.putDataSource(identifier.toString(), (DataSource) addedService);
+                LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier.toString()).append(
+                    "' successfully registered"));
             }
-            getInstance().putDataSource(identifier.toString(), (DataSource) addedService);
-            LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier.toString()).append(
-                "' successfully registered"));
         }
         return addedService;
     }
