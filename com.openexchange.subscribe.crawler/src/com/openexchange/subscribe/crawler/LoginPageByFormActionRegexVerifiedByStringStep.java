@@ -65,6 +65,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 
 /**
@@ -72,7 +73,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep<HtmlPage, Object> {
+public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep<HtmlPage, Object>  implements LoginStep {
     private static Log LOG = LogFactory.getLog(LoginPageByFormActionStep.class);
 
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, stringAvailableAfterLogin, baseUrl;
