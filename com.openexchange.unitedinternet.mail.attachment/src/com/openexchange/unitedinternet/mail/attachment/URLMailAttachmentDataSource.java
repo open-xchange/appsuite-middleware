@@ -120,7 +120,8 @@ public final class URLMailAttachmentDataSource implements DataSource {
             final DataProperties properties = new DataProperties();
             final ContentType contentType;
             {
-                final String cts = urlCon.getContentType();
+                final String suggested = dataArguments.get("contentType");
+                final String cts = null == suggested ? urlCon.getContentType() : suggested;
                 if (null == cts) {
                     contentType = new ContentType("application/octet-stream");
                 } else {
