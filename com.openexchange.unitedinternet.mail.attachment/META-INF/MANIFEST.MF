@@ -14,3 +14,4 @@ Import-Package: com.openexchange.conversion,
  com.openexchange.session,
  org.apache.commons.logging,
  org.osgi.framework
+Bundle-Activator: com.openexchange.unitedinternet.mail.attachment.osgi.URLMailAttachmentActivator
