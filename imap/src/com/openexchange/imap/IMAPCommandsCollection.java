@@ -952,6 +952,8 @@ public final class IMAPCommandsCollection {
      * Force to send a CLOSE command to IMAP server that is explicitly <b>not</b> handled by JavaMail API. It really does not matter if this
      * command succeeds or breaks up in a <code>MessagingException</code>. Therefore neither a return value is defined nor any exception is
      * thrown.
+     * 
+     * @param f The IMAP folder providing the connected store
      */
     public static void forceCloseCommand(final IMAPFolder f) {
         try {
@@ -980,6 +982,8 @@ public final class IMAPCommandsCollection {
      * Force to send a NOOP command to IMAP server that is explicitly <b>not</b> handled by JavaMail API. It really does not matter if this
      * command succeeds or breaks up in a <code>MessagingException</code>. Therefore neither a return value is defined nor any exception is
      * thrown.
+     * 
+     * @param f The IMAP folder providing the connected store
      */
     public static void forceNoopCommand(final IMAPFolder f) {
         try {
