@@ -234,7 +234,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Collect by folder storage
                  */
-                final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>();
+                final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>(4);
                 for (int i = 0; i < subfolderIds.length; i++) {
                     final String id = subfolderIds[i];
                     final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
@@ -450,7 +450,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         /*
          * Collect by folder storage
          */
-        final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>();
+        final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>(4);
         for (int i = 0; i < size; i++) {
             final String id = allSubfolderIds.get(i).getId();
             final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
