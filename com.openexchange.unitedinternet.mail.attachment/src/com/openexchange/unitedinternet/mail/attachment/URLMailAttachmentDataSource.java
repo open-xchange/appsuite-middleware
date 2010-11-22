@@ -118,10 +118,13 @@ public final class URLMailAttachmentDataSource implements DataSource {
              * After successful connect, create data properties instance
              */
             final DataProperties properties = new DataProperties();
+            /*
+             * Determine content type
+             */
             final ContentType contentType;
             {
-                final String suggested = dataArguments.get("contentType");
-                final String cts = null == suggested ? urlCon.getContentType() : suggested;
+                final String sCts = dataArguments.get("contentType");
+                final String cts = null == sCts ? urlCon.getContentType() : sCts;
                 if (null == cts) {
                     contentType = new ContentType("application/octet-stream");
                 } else {
@@ -129,23 +132,49 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 }
             }
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, urlCon.getContentType());
-            final String charset = contentType.getCharsetParameter();
-            if (charset == null) {
-                properties.put(DataProperties.PROPERTY_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
-            } else {
-                properties.put(DataProperties.PROPERTY_CHARSET, charset);
-            }
-            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(urlCon.getContentLength()));
-            final ContentDisposition contentDisposition;
+            /*
+             * Determine charset
+             */
+            final String charset;
             {
+                final String sCharset = dataArguments.get("charset");
+                if (null == sCharset) {
+                    final String tmp = contentType.getCharsetParameter();
+                    charset = null == tmp ? MailProperties.getInstance().getDefaultMimeCharset() : tmp;
+                } else {
+                    charset = sCharset;
+                }
+            }
+            properties.put(DataProperties.PROPERTY_CHARSET, charset);
+            /*
+             * Determine size
+             */
+            final String size;
+            {
+                final String sSize = dataArguments.get("size");
+                size = null == sSize ? String.valueOf(urlCon.getContentLength()) : sSize;
+            }
+            properties.put(DataProperties.PROPERTY_SIZE, size);
+            /*
+             * Determine disposition & file name
+             */
+            final String disposition;
+            final String fileName;
+            {
+                final String sDisp = dataArguments.get("disposition");
+                final String sFileName = dataArguments.get("fileName");
                 final String cds = urlCon.getHeaderField("Content-Disposition");
+                final ContentDisposition contentDisposition;
                 if (null == cds) {
                     contentDisposition = new ContentDisposition("attachment");
                 } else {
                     contentDisposition = new ContentDisposition(cds);
                 }
+                disposition = null == sDisp ? contentDisposition.getDisposition() : sDisp;
+                fileName = null == sFileName ? contentDisposition.getFilenameParameter() : sFileName;
             }
-            properties.put(DataProperties.PROPERTY_NAME, contentDisposition.getFilenameParameter());
+            properties.put(DataProperties.PROPERTY_NAME, fileName);
+            properties.put(DataProperties.PROPERTY_DISPOSITION, disposition);
             /*
              * Return data
              */
