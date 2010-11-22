@@ -171,7 +171,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             /*
              * Collect by folder storage
              */
-            final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>();
+            final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>(4);
             for (int i = 0; i < size; i++) {
                 final String id = allSubfolderIds.get(i).getId();
                 final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
@@ -199,7 +199,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                 } catch (final ServiceException e) {
                     throw new FolderException(e);
                 }
-                paramsProvider = new SessionStorageParametersProvider(session, user, context);
+                paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
             }
             int taskCount = 0;
             for (final Entry<FolderStorage, TIntArrayList> entry : map.entrySet()) {

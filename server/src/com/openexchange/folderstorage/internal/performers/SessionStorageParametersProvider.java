@@ -72,9 +72,19 @@ public final class SessionStorageParametersProvider implements StorageParameters
     /**
      * Initializes a new {@link SessionStorageParametersProvider}.
      */
-    public SessionStorageParametersProvider(final ServerSession session, final User user, final Context ctx) {
+    public SessionStorageParametersProvider(final ServerSession session) {
         super();
         this.session = session;
+        this.user = null;
+        this.ctx = null;
+    }
+
+    /**
+     * Initializes a new {@link SessionStorageParametersProvider}.
+     */
+    public SessionStorageParametersProvider(final User user, final Context ctx) {
+        super();
+        this.session = null;
         this.user = user;
         this.ctx = ctx;
     }

@@ -263,7 +263,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     } catch (final ServiceException e) {
                         throw new FolderException(e);
                     }
-                    paramsProvider = new SessionStorageParametersProvider(session, user, context);
+                    paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
                 }
                 int taskCount = 0;
                 for (final Entry<FolderStorage, TIntArrayList> entry : map.entrySet()) {
@@ -478,7 +478,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             } catch (final ServiceException e) {
                 throw new FolderException(e);
             }
-            paramsProvider = new SessionStorageParametersProvider(session, user, context);
+            paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
         }
         int taskCount = 0;
         for (final Entry<FolderStorage, TIntArrayList> entry : map.entrySet()) {
