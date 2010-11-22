@@ -51,6 +51,7 @@ package com.openexchange.conversion.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map.Entry;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -266,17 +267,30 @@ public final class ConversionServlet extends SessionServlet {
         if (!json.has(JSON_ARGS) || json.isNull(JSON_ARGS)) {
             return DataArguments.EMPTY_ARGS;
         }
-        final JSONArray jsonArray = json.getJSONArray(JSON_ARGS);
-        final int len = jsonArray.length();
-        final DataArguments dataArguments = new DataArguments(len);
-        for (int i = 0; i < len; i++) {
-            final JSONObject elem = jsonArray.getJSONObject(i);
-            if (elem.length() == 1) {
-                final String key = elem.keys().next();
-                dataArguments.put(key, elem.getString(key));
-            } else {
-                LOG.warn("Corrupt data argument in JSON object: " + elem.toString());
+        final Object args = json.get(JSON_ARGS);
+        if (args instanceof JSONArray) {
+            final JSONArray jsonArray = (JSONArray) args;
+            final int len = jsonArray.length();
+            final DataArguments dataArguments = new DataArguments(len);
+            for (int i = 0; i < len; i++) {
+                final JSONObject elem = jsonArray.getJSONObject(i);
+                if (elem.length() == 1) {
+                    final String key = elem.keys().next();
+                    dataArguments.put(key, elem.getString(key));
+                } else {
+                    LOG.warn("Corrupt data argument in JSON object: " + elem.toString());
+                }
             }
+            return dataArguments;
+        }
+        /*
+         * Expect JSON object
+         */
+        final JSONObject argsObject = (JSONObject) args;
+        final int len = argsObject.length();
+        final DataArguments dataArguments = new DataArguments(len);
+        for (final Entry<String, Object> entry : argsObject.entrySet()) {
+            dataArguments.put(entry.getKey(), entry.getValue().toString());
         }
         return dataArguments;
     }

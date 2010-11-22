@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
@@ -85,9 +86,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
-import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
@@ -307,17 +308,33 @@ public final class MessageParser {
         if (!json.hasAndNotNull(JSON_ARGS)) {
             return DataArguments.EMPTY_ARGS;
         }
-        final JSONArray jsonArray = json.getJSONArray(JSON_ARGS);
-        final int len = jsonArray.length();
-        final DataArguments dataArguments = new DataArguments(len);
-        for (int i = 0; i < len; i++) {
-            final JSONObject elem = jsonArray.getJSONObject(i);
-            if (elem.length() == 1) {
-                final String key = elem.keys().next();
-                dataArguments.put(key, elem.getString(key));
-            } else {
-                LOG.warn("Corrupt data argument in JSON object: " + elem.toString());
+        final Object args = json.get(JSON_ARGS);
+        if (args instanceof JSONArray) {
+            /*
+             * Handle as JSON array
+             */
+            final JSONArray jsonArray = (JSONArray) args;
+            final int len = jsonArray.length();
+            final DataArguments dataArguments = new DataArguments(len);
+            for (int i = 0; i < len; i++) {
+                final JSONObject elem = jsonArray.getJSONObject(i);
+                if (elem.length() == 1) {
+                    final String key = elem.keys().next();
+                    dataArguments.put(key, elem.getString(key));
+                } else {
+                    LOG.warn("Corrupt data argument in JSON object: " + elem.toString());
+                }
             }
+            return dataArguments;
+        }
+        /*
+         * Expect JSON object
+         */
+        final JSONObject argsObject = (JSONObject) args;
+        final int len = argsObject.length();
+        final DataArguments dataArguments = new DataArguments(len);
+        for (final Entry<String, Object> entry : argsObject.entrySet()) {
+            dataArguments.put(entry.getKey(), entry.getValue().toString());
         }
         return dataArguments;
     }
