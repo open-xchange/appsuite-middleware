@@ -115,19 +115,45 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         super();
         setHeaders(dataProperties);
         if (data instanceof InputStream) {
-            final InputStream inputStream = (InputStream) data;
+            /*
+             * Check data properties
+             */
             long size;
             try {
-                size = Long.parseLong(dataProperties.get(DataProperties.PROPERTY_SIZE));
+                final String sSize = dataProperties.get(DataProperties.PROPERTY_SIZE);
+                size = null == sSize ? 0 : Long.parseLong(sSize.trim());
                 setSize(size);
             } catch (final NumberFormatException e) {
                 size = 0;
             }
-            handleInputStream(inputStream, size);
+            handleInputStream((InputStream) data, size);
+            checkDataProperties(dataProperties);
         } else if (data instanceof byte[]) {
             bytes = (byte[]) data;
+            setSize(bytes.length);
+            checkDataProperties(dataProperties);
         } else {
             throw new MailException(MailException.Code.UNSUPPORTED_DATASOURCE);
+        }
+    }
+
+    private void checkDataProperties(final Map<String, String> dataProperties) throws MailException {
+        String cts = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+        if (null != cts) {
+            setContentType(cts);
+        }
+        final String charset = dataProperties.get(DataProperties.PROPERTY_CHARSET);
+        if (null != charset) {
+            getContentType().setCharsetParameter(charset);
+        }
+        final String disp = dataProperties.get(DataProperties.PROPERTY_DISPOSITION);
+        if (null != disp) {
+            getContentDisposition().setDisposition(disp);
+        }
+        final String fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+        if (null != fileName) {
+            getContentType().setNameParameter(fileName);
+            getContentDisposition().setFilenameParameter(fileName);
         }
     }
 
@@ -168,6 +194,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         }
         out.flush();
         bytes = out.toByteArray();
+        setSize(bytes.length);
     }
 
     private void copy2File(final InputStream in) throws IOException {
