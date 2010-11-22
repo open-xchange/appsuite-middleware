@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange 1&1 Mail Attachment Bundle
-Bundle-SymbolicName: com.openexchange.unitedinternet.mail.attachment
+Bundle-SymbolicName: com.openexchange.url.mail.attachment
 Bundle-Version: 6.18.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
@@ -14,4 +14,4 @@ Import-Package: com.openexchange.conversion,
  com.openexchange.session,
  org.apache.commons.logging,
  org.osgi.framework
-Bundle-Activator: com.openexchange.unitedinternet.mail.attachment.osgi.URLMailAttachmentActivator
+Bundle-Activator: com.openexchange.url.mail.attachment.osgi.URLMailAttachmentActivator
