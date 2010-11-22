@@ -51,13 +51,14 @@ package com.openexchange.conversion;
 
 import static com.openexchange.conversion.DataExceptionMessages.ERROR_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.INVALID_ARGUMENT_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.IO_ERROR_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.MISSING_ARGUMENT_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.NO_MATCHING_TYPE_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.TRUNCATED_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.TYPE_NOT_SUPPORTED_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.UNABLE_TO_CHANGE_DATA_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.UNKNOWN_DATA_HANDLER_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.UNKNOWN_DATA_SOURCE_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.UNABLE_TO_CHANGE_DATA_MSG;
 import com.openexchange.conversion.exception.DataExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -101,11 +102,16 @@ public enum DataExceptionCodes implements OXErrorMessage {
      * The following field(s) are too long: %1$s
      */
     TRUNCATED(TRUNCATED_MSG, Category.TRUNCATED, 8),
-    
     /**
      * Unable to change data. (%1$s)
      */
-    UNABLE_TO_CHANGE_DATA(UNABLE_TO_CHANGE_DATA_MSG, Category.USER_INPUT, 9);
+    UNABLE_TO_CHANGE_DATA(UNABLE_TO_CHANGE_DATA_MSG, Category.USER_INPUT, 9),
+    /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR(IO_ERROR_MSG, Category.CODE_ERROR, 10),
+    
+    ;
     
     private final Category category;
 
