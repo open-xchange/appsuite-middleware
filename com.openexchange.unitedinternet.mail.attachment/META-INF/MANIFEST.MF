@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange 1&1 Mail Attachment Bundle
+Bundle-Name: Open-Xchange URL Mail Attachment Bundle
 Bundle-SymbolicName: com.openexchange.url.mail.attachment
 Bundle-Version: 6.18.2.0
 Bundle-Vendor: Open-Xchange Inc.
