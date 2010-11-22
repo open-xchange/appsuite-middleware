@@ -55,6 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import gnu.trove.TIntArrayList;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -69,8 +70,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
@@ -79,8 +80,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.Collections.SmartIntArray;
+import com.openexchange.tools.StringCollection;
 
 /**
  * This class implements the user storage using a relational database instead
@@ -632,14 +633,11 @@ public class RdbUserStorage extends UserStorage {
             stmt = con.prepareStatement("SELECT id FROM user WHERE user.cid=?");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
-            final List<Integer> tmp = new ArrayList<Integer>();
+            final TIntArrayList tmp = new TIntArrayList();
             while (result.next()) {
-                tmp.add(I(result.getInt(1)));
+                tmp.add(result.getInt(1));
             }
-            users = new int[tmp.size()];
-            for (int i = 0; i < users.length; i++) {
-                users[i] = tmp.get(i).intValue();
-            }
+            users = tmp.toNativeArray();
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
