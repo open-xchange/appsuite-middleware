@@ -272,6 +272,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                         contentType.setCharsetParameter(System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
                     }
                     final ManagedFile managedFile = file;
+                    final String fileName = getFileName();
                     final InputStreamProvider isp = new InputStreamProvider() {
 
                         public InputStream getInputStream() throws IOException {
@@ -285,7 +286,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                         }
 
                         public String getName() {
-                            return null;
+                            return fileName;
                         }
                     };
                     return (dataSource = new StreamDataSource(isp, contentType.toString()));
