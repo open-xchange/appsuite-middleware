@@ -87,38 +87,37 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
             LOG.warn("Added service is null!", new Throwable());
         }
         if (addedService instanceof DataHandler) {
-            final Object identifier = reference.getProperty(PROP_IDENTIFIER);
+            final String identifier = (String) reference.getProperty(PROP_IDENTIFIER);
             if (null == identifier) {
                 LOG.error("Missing identifier in data handler: " + addedService.getClass().getName());
                 return addedService;
             }
             final ConversionEngineRegistry registry = getInstance();
             synchronized (registry) {
-                if (registry.getDataHandler(identifier.toString()) != null) {
-                    LOG.error("A data handler is already registered for identifier: " + identifier.toString());
+                if (registry.getDataHandler(identifier) != null) {
+                    LOG.error("A data handler is already registered for identifier: " + identifier);
                     return addedService;
                 }
-                registry.putDataHandler(identifier.toString(), (DataHandler) addedService);
-                LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString()).append(
+                registry.putDataHandler(identifier, (DataHandler) addedService);
+                LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier).append(
                     "' successfully registered"));
             }
             return addedService;
         }
         if (addedService instanceof DataSource) {
-            final Object identifier = reference.getProperty(PROP_IDENTIFIER);
+            final String identifier = (String) reference.getProperty(PROP_IDENTIFIER);
             if (null == identifier) {
                 LOG.error("Missing identifier in data source: " + addedService.getClass().getName());
                 return addedService;
             }
             final ConversionEngineRegistry registry = getInstance();
             synchronized (registry) {
-                if (registry.getDataSource(identifier.toString()) != null) {
-                    LOG.error("A data source is already registered for identifier: " + identifier.toString());
+                if (registry.getDataSource(identifier) != null) {
+                    LOG.error("A data source is already registered for identifier: " + identifier);
                     return addedService;
                 }
-                registry.putDataSource(identifier.toString(), (DataSource) addedService);
-                LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier.toString()).append(
-                    "' successfully registered"));
+                registry.putDataSource(identifier, (DataSource) addedService);
+                LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier).append("' successfully registered"));
             }
             return addedService;
         }
@@ -136,22 +135,22 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
     public void removedService(final ServiceReference reference, final Object service) {
         try {
             if (service instanceof DataHandler) {
-                final Object identifier = reference.getProperty(PROP_IDENTIFIER);
+                final String identifier = (String) reference.getProperty(PROP_IDENTIFIER);
                 if (null == identifier) {
                     LOG.error("Missing identifier in data handler: " + service.getClass().getName());
                     return;
                 }
-                getInstance().removeDataHandler(identifier.toString());
-                LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString()).append(
+                getInstance().removeDataHandler(identifier);
+                LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier).append(
                     "' successfully unregistered"));
             } else if (service instanceof DataSource) {
-                final Object identifier = reference.getProperty(PROP_IDENTIFIER);
+                final String identifier = (String) reference.getProperty(PROP_IDENTIFIER);
                 if (null == identifier) {
                     LOG.error("Missing identifier in data source: " + service.getClass().getName());
                     return;
                 }
-                getInstance().removeDataSource(identifier.toString());
-                LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier.toString()).append(
+                getInstance().removeDataSource(identifier);
+                LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier).append(
                     "' successfully unregistered"));
             }
         } finally {

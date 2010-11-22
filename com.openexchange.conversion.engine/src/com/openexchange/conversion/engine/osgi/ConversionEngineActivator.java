@@ -73,14 +73,13 @@ public final class ConversionEngineActivator implements BundleActivator {
 
     private ServiceRegistration serviceRegistration;
 
-    private final List<ServiceTracker> trackers;
+    private List<ServiceTracker> trackers;
 
     /**
      * Initializes a new {@link ConversionEngineActivator}
      */
     public ConversionEngineActivator() {
         super();
-        trackers = new ArrayList<ServiceTracker>(4);
     }
 
     public void start(final BundleContext context) throws Exception {
@@ -93,6 +92,7 @@ public final class ConversionEngineActivator implements BundleActivator {
              * Start-up service trackers
              */
             final ServiceTrackerCustomizer customizer = new ConversionEngineCustomizer(context);
+            trackers = new ArrayList<ServiceTracker>(2);
             trackers.add(new ServiceTracker(context, DataHandler.class.getName(), customizer));
             trackers.add(new ServiceTracker(context, DataSource.class.getName(), customizer));
             for (final ServiceTracker tracker : trackers) {
@@ -114,13 +114,15 @@ public final class ConversionEngineActivator implements BundleActivator {
     public void stop(final BundleContext context) throws Exception {
 
         try {
-            /*
-             * Close service trackers
-             */
-            for (final ServiceTracker tracker : trackers) {
-                tracker.close();
+            if (null != trackers) {
+                /*
+                 * Close service trackers
+                 */
+                while (!trackers.isEmpty()) {
+                    trackers.remove(0).close();
+                }
+                trackers = null;
             }
-            trackers.clear();
             /*
              * Clear registry
              */
