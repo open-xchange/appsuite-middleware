@@ -61,14 +61,14 @@ public abstract class PermissionServlet extends SessionServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // FIXME this needs a major rewrite. Executing everything before checking permissions isn't useful. Simply moving the super call to
-        // behind permission check does not work because we would not have the session.
-        super.service(req, resp);
+        initializeSession(req, resp);
         final ServerSession session = getSessionObject(req);
         if (null != session && !hasModulePermission(session)) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
             return;
         }
+        super.service(req, resp);
+        
     }
 
     /**

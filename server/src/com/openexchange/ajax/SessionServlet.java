@@ -108,7 +108,7 @@ public abstract class SessionServlet extends AJAXServlet {
     private boolean checkIP = true;
 
     private static List<IPRange> ranges = new ArrayList<IPRange>(5);
-    
+
     protected SessionServlet() {
         super();
     }
@@ -117,39 +117,38 @@ public abstract class SessionServlet extends AJAXServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-        
-        if(checkIP) {
+
+        if (checkIP) {
             ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            if(configurationService == null) {
+            if (configurationService == null) {
                 LOG.fatal("No configuration service available, can not read whitelist");
             } else {
                 String text = configurationService.getText(SESSION_WHITELIST_FILE);
-                if(text == null) {
+                if (text == null) {
                     LOG.info("No exceptions from IP Check have been defined.");
                 } else {
                     String[] lines = text.split("\n");
                     for (String line : lines) {
                         line = line.replaceAll("\\s", "");
-                        if(!line.equals("") && ! line.startsWith("#")) {
+                        if (!line.equals("") && !line.startsWith("#")) {
                             ranges.add(IPRange.parseRange(line));
                         }
                     }
                 }
             }
         }
-    
+
     }
 
-    /**
-     * Checks the session ID supplied as a query parameter in the request URI.
-     */
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        Tools.disableCaching(resp);
+    protected void initializeSession(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if(null != getSessionObject(req)) {
+            return ;
+        }
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (sessiondService == null) {
-                throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+                throw new SessiondException(
+                    new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
             }
             String sessionId = getSessionId(req);
             final ServerSession session = getSession(req, sessionId, sessiondService);
@@ -163,7 +162,6 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             checkIP(session, req.getRemoteAddr());
             rememberSession(req, session);
-            super.service(req, resp);
         } catch (final SessiondException e) {
             LOG.debug(e.getMessage(), e);
             final Response response = new Response();
@@ -193,12 +191,24 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    /**
+     * Checks the session ID supplied as a query parameter in the request URI.
+     */
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        Tools.disableCaching(resp);
+
+        initializeSession(req, resp);
+        super.service(req, resp);
+    }
+
     private void checkIP(final Session session, final String actual) throws SessiondException {
         checkIP(checkIP, session, actual);
     }
 
     /**
      * Checks if the client IP address of the current request matches the one through that the session has been created.
+     * 
      * @param checkIP <code>true</code> to deny request with an exception.
      * @param session session object
      * @param actual IP address of the current request.
@@ -225,7 +235,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static boolean isWhitelistedFromIPCheck(String actual) {
         for (IPRange range : ranges) {
-            if(range.contains(actual)) {
+            if (range.contains(actual)) {
                 return true;
             }
         }
@@ -274,7 +284,7 @@ public abstract class SessionServlet extends AJAXServlet {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
         String secret = extractSecret(session.getHash(), req.getCookies());
-        
+
         if (secret == null || !session.getSecret().equals(secret)) {
             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
         }
@@ -313,7 +323,7 @@ public abstract class SessionServlet extends AJAXServlet {
     public static void rememberSession(final ServletRequest req, final ServerSession session) {
         req.setAttribute(SESSION_KEY, session);
     }
-    
+
     public static void removeOXCookies(String hash, HttpServletRequest req, HttpServletResponse resp) {
         Cookie[] cookies = req.getCookies();
         if (cookies == null) {
@@ -331,7 +341,6 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
     }
-
 
     /**
      * Returns the remembered session.
