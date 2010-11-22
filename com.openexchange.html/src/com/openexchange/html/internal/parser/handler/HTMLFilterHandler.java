@@ -58,7 +58,6 @@ import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -446,25 +445,20 @@ public final class HTMLFilterHandler implements HTMLHandler {
             /*
              * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
              */
-            final int size = a.size();
-            final Iterator<Entry<String, String>> iter = a.entrySet().iterator();
-            for (int i = 0; i < size; i++) {
-                final Entry<String, String> e = iter.next();
+            for (final Entry<String, String> e : a.entrySet()) {
                 attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(e.getValue()).append('"');
             }
             htmlBuilder.append('<').append(tag).append(attrBuilder.toString()).append('/').append('>');
             return;
         }
-        final int size = a.size();
-        final Iterator<Entry<String, String>> iter = a.entrySet().iterator();
-        for (int i = 0; i < size; i++) {
-            final Entry<String, String> e = iter.next();
+        for (final Entry<String, String> e : a.entrySet()) {
             final String attr = e.getKey().toLowerCase(Locale.ENGLISH);
+            final String val = e.getValue();
             if (STYLE.equals(attr)) {
                 /*
                  * Handle style attribute
                  */
-                checkCSSElements(cssBuffer.append(e.getValue()), styleMap, true);
+                checkCSSElements(cssBuffer.append(val), styleMap, true);
                 final String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (containsCSSElement(checkedCSS)) {
@@ -478,21 +472,25 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 /*
                  * TODO: Is it safe to allow "class"/"id" attribute in any case
                  */
-                attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlService.htmlFormat(e.getValue(), false)).append('"');
+                attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlService.htmlFormat(val, false)).append('"');
             } else {
                 if (null == attribs) {
-                    attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlService.htmlFormat(e.getValue(), false)).append('"');
+                    if (isNonJavaScriptURL(val)) {
+                        attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlService.htmlFormat(val, false)).append('"');
+                    }
                 } else {
                     if (attribs.containsKey(attr)) {
                         final Set<String> allowedValues = attribs.get(attr);
-                        if (null == allowedValues || allowedValues.contains(e.getValue().toLowerCase(Locale.ENGLISH))) {
-                            attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlService.htmlFormat(e.getValue(), false)).append('"');
+                        if (null == allowedValues || allowedValues.contains(val.toLowerCase(Locale.ENGLISH))) {
+                            if (isNonJavaScriptURL(val)) {
+                                attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlService.htmlFormat(val, false)).append('"');
+                            }
                         } else if (NUM_ATTRIBS == allowedValues) {
                             /*
                              * Only numeric attribute value allowed
                              */
-                            if (PAT_NUMERIC.matcher(e.getValue().trim()).matches()) {
-                                attrBuilder.append(' ').append(attr).append(VAL_START).append(e.getValue()).append('"');
+                            if (PAT_NUMERIC.matcher(val.trim()).matches()) {
+                                attrBuilder.append(' ').append(attr).append(VAL_START).append(val).append('"');
                             }
                         }
                     }
@@ -504,6 +502,10 @@ public final class HTMLFilterHandler implements HTMLHandler {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
+    }
+
+    private static boolean isNonJavaScriptURL(final String val) {
+        return (null != val && !val.trim().toLowerCase(Locale.US).startsWith("javascript:"));
     }
 
     /**
