@@ -159,26 +159,16 @@ public final class AllAction extends AbstractUserAction {
                      * Order by contact field
                      */
                     final int lhl = leftHandLimit < 0 ? 0 : leftHandLimit;
+                    final int rhl = rightHandLimit <= 0 ? 50000 : rightHandLimit;
                     final SearchIterator<Contact> it;
-                    if (rightHandLimit <= 0) {
-                        it =
-                            contactInterface.getContactsInFolder(
-                                Constants.USER_ADDRESS_BOOK_FOLDER_ID,
-                                lhl,
-                                50000,
-                                orderBy,
-                                orderDirection,
-                                checkedCols);
-                    } else {
-                        it =
-                            contactInterface.getContactsInFolder(
-                                Constants.USER_ADDRESS_BOOK_FOLDER_ID,
-                                lhl,
-                                rightHandLimit,
-                                orderBy,
-                                orderDirection,
-                                checkedCols);
-                    }
+                    it =
+                        contactInterface.getContactsInFolder(
+                            Constants.USER_ADDRESS_BOOK_FOLDER_ID,
+                            lhl,
+                            rhl,
+                            orderBy,
+                            orderDirection,
+                            checkedCols);
                     try {
                         final List<Contact> contactList = new ArrayList<Contact>(128);
                         while (it.hasNext()) {
