@@ -52,6 +52,7 @@ package com.openexchange.imap.acl;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link ACLExtensionFactory} - Factory for ACL extension.
@@ -98,10 +99,10 @@ public final class ACLExtensionFactory {
      * @return The appropriate ACL extension
      */
     public ACLExtension getACLExtension(final IMAPConfig imapConfig) {
-        if (!instantiated.get()) {
-            return ACLExtensionAutoDetector.getACLExtension(imapConfig);
+        if (instantiated.get() && MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
+            return configured;
         }
-        return configured;
+        return ACLExtensionAutoDetector.getACLExtension(imapConfig);
     }
 
     /**

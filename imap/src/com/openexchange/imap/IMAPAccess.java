@@ -247,7 +247,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected MailConfig createNewMailConfig() {
-        return new IMAPConfig();
+        return new IMAPConfig(accountId);
     }
 
     /**

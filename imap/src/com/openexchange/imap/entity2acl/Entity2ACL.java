@@ -53,6 +53,7 @@ import java.io.IOException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -82,7 +83,7 @@ public abstract class Entity2ACL {
      * @throws Entity2ACLException if the instance can't be created.
      */
     public static final Entity2ACL getInstance(final IMAPConfig imapConfig) throws Entity2ACLException {
-        if (instantiated) {
+        if (instantiated && MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
             /*
              * Auto-detection is turned off, return configured implementation
              */

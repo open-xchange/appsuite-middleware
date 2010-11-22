@@ -78,6 +78,8 @@ public final class IMAPConfig extends MailConfig {
 
     private static final String PROTOCOL_IMAP_SECURE = "imaps";
 
+    // private final int accountId;
+
     private volatile IMAPCapabilities imapCapabilities;
 
     private volatile Map<String, String> capabilities;
@@ -98,9 +100,12 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Default constructor
+     * 
+     * @param accountId The account identifier
      */
-    public IMAPConfig() {
+    public IMAPConfig(final int accountId) {
         super();
+        this.accountId = accountId;
     }
 
     @Override
