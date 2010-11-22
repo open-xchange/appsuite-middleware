@@ -68,10 +68,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
@@ -1120,7 +1120,16 @@ public final class Contacts {
         sb = contactSQL.iFgetContactById(sb.toString());
         contactSQL.setSelect(sb.toString());
         contactSQL.setInternalUsers(userIds);
-        return fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon);
+        Map<Integer, Contact> contacts = fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon);
+        Contact[] retval = new Contact[userIds.length];
+        for (int i = 0; i < userIds.length; i++) {
+            Contact contact = contacts.get(I(userIds[i]));
+            if (null == contact) {
+                throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(userIds[i]), I(ctx.getContextId())));
+            }
+            retval[i] = contact;
+        }
+        return retval;
     }
 
     public static Contact getContactById(final int objectId, final Session session) throws ContactException, ContextException, DBPoolingException, OXObjectNotFoundException {
@@ -1185,8 +1194,8 @@ public final class Contacts {
         return co;
     }
 
-    private static Contact[] fillContactObject(ContactSql contactSQL, int user, int[] group, Context ctx, UserConfiguration uc, Connection con) throws ContactException, OXObjectNotFoundException {
-        List<Contact> contacts = new ArrayList<Contact>();
+    private static Map<Integer, Contact> fillContactObject(ContactSql contactSQL, int user, int[] group, Context ctx, UserConfiguration uc, Connection con) throws ContactException {
+        Map<Integer, Contact> contacts = new HashMap<Integer, Contact>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -1201,14 +1210,14 @@ public final class Contacts {
                         cnt++;
                     }
                 }
-                contacts.add(contact);
+                contacts.put(I(contact.getInternalUserId()), contact);
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return contacts.toArray(new Contact[contacts.size()]);
+        return contacts;
     }
 
     public static void deleteContact(final int id, final int cid, final Connection writecon) throws ContactException {

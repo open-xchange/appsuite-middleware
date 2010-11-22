@@ -1,3 +1,7 @@
+* 2010-11-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #17608: User contacts are not mixed up anymore when loading them through an all request on the users interface.
+
 * 2010-11-19 - marcus.klein@open-xchange.com
 
  - Bugfix #17523: Update tasks can now be excluded for administration daemon, too.
