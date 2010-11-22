@@ -51,6 +51,7 @@ package com.openexchange.unitedinternet.mail.attachment;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import com.openexchange.conversion.Data;
@@ -113,7 +114,14 @@ public final class URLMailAttachmentDataSource implements DataSource {
             urlCon = url.openConnection();
             urlCon.setConnectTimeout(timeoutMillis);
             urlCon.setReadTimeout(timeoutMillis);
-            urlCon.connect();
+            try {
+                urlCon.connect();
+            } catch (final SocketTimeoutException e) {
+                /*
+                 * Time-out elapsed
+                 */
+                throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+            }
             /*
              * After successful connect, create data properties instance
              */
@@ -179,6 +187,11 @@ public final class URLMailAttachmentDataSource implements DataSource {
              * Return data
              */
             return new SimpleData<D>((D) urlCon.getInputStream(), properties);
+        } catch (final DataException e) {
+            /*
+             * No closure of URL connection here
+             */
+            throw e;
         } catch (final AbstractOXException e) {
             closeURLConnection(urlCon);
             throw new DataException(e);
