@@ -102,7 +102,9 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
                 LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString()).append(
                     "' successfully registered"));
             }
-        } else if (addedService instanceof DataSource) {
+            return addedService;
+        }
+        if (addedService instanceof DataSource) {
             final Object identifier = reference.getProperty(PROP_IDENTIFIER);
             if (null == identifier) {
                 LOG.error("Missing identifier in data source: " + addedService.getClass().getName());
@@ -118,8 +120,13 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
                 LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier.toString()).append(
                     "' successfully registered"));
             }
+            return addedService;
         }
-        return addedService;
+        /*
+         * An untracked service?
+         */
+        context.ungetService(reference);
+        return null;
     }
 
     public void modifiedService(final ServiceReference reference, final Object service) {
