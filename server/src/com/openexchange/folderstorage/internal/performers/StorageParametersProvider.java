@@ -53,12 +53,17 @@ import com.openexchange.folderstorage.StorageParameters;
 
 
 /**
- * {@link StorageParametersProvider}
+ * {@link StorageParametersProvider} - A provider interface to obtain storage parameters.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface StorageParametersProvider {
 
-    public StorageParameters getStorageParameters();
+    /**
+     * Gets the storage parameters.
+     * 
+     * @return The storage parameters
+     */
+    StorageParameters getStorageParameters();
     
 }
