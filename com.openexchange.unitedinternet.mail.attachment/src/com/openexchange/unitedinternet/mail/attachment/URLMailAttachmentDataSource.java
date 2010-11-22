@@ -184,7 +184,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
             throw new DataException(e);
         } catch (final IOException e) {
             closeURLConnection(urlCon);
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+            throw DataExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             closeURLConnection(urlCon);
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
