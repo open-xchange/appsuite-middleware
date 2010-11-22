@@ -162,15 +162,16 @@ public class CachingUserStorage extends UserStorage {
         final Cache cache;
         try {
             cache = cacheService.getCache(REGION_NAME);
-        } catch (CacheException e) {
+        } catch (final CacheException e) {
             throw new UserException(e);
         }
-        List<User> retval = new ArrayList<User>(userIds.length);
-        List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
+        final List<User> retval = new ArrayList<User>(userIds.length);
+        final List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
+        final int contextId = ctx.getContextId();
         for (final int userId : userIds) {
-            OXObjectFactory<User> factory = new OXObjectFactory<User>() {
+            final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
                 public Serializable getKey() {
-                    return cacheService.newCacheKey(ctx.getContextId(), userId);
+                    return cacheService.newCacheKey(contextId, userId);
                 }
                 public User load() throws LdapException {
                     return getDelegate().getUser(userId, ctx);
@@ -179,22 +180,22 @@ public class CachingUserStorage extends UserStorage {
                     return CachingUserStorage.this.getCacheLock();
                 }
             };
-            User user = (User) cache.get(factory.getKey());
+            final User user = (User) cache.get(factory.getKey());
             if (null == user) {
                 toLoad.add(I(userId));
             } else {
                 try {
                     retval.add(new UserReloader(factory, user, REGION_NAME));
-                } catch (CacheException e) {
+                } catch (final CacheException e) {
                     throw new UserException(e);
                 }
             }
         }
-        User[] loaded = delegate.getUser(ctx, I2i(toLoad));
+        final User[] loaded = delegate.getUser(ctx, I2i(toLoad));
         for (final User user : loaded) {
-            OXObjectFactory<User> factory = new OXObjectFactory<User>() {
+            final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
                 public Serializable getKey() {
-                    return cacheService.newCacheKey(ctx.getContextId(), user.getId());
+                    return cacheService.newCacheKey(contextId, user.getId());
                 }
                 public User load() throws LdapException {
                     return getDelegate().getUser(user.getId(), ctx);
@@ -205,7 +206,7 @@ public class CachingUserStorage extends UserStorage {
             };
             try {
                 retval.add(new UserReloader(factory, user, REGION_NAME));
-            } catch (CacheException e) {
+            } catch (final CacheException e) {
                 throw new UserException(e);
             }
         }
