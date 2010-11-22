@@ -82,7 +82,7 @@
  - Bugfix #17471: SocketTimeoutException's message is no longer part of the condition to check a failed IMAP connect
  - Bugfix #17498: Proper cache invalidation when switching unseen flag
 
-* 2010-11-10
+* 2010-11-10 - steffen.templin@open-xchange.com
 
  - Bugfix #17227: Wrong end date in confirmation mails.
  
