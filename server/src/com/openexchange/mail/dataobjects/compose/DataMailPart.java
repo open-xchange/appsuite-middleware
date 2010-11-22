@@ -256,7 +256,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             try {
                 final ContentType contentType = getContentType();
                 if (bytes != null) {
-                    if (!contentType.containsCharsetParameter() && contentType.startsWith(TEXT)) {
+                    if (contentType.startsWith(TEXT) && !contentType.containsCharsetParameter()) {
                         /*
                          * Add default mail charset
                          */
@@ -265,7 +265,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                     return (dataSource = new MessageDataSource(bytes, contentType.toString()));
                 }
                 if (file != null) {
-                    if (!contentType.containsCharsetParameter() && contentType.startsWith(TEXT)) {
+                    if (contentType.startsWith(TEXT) && !contentType.containsCharsetParameter()) {
                         /*
                          * Add system charset
                          */
