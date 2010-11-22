@@ -86,6 +86,11 @@ public final class DataProperties implements Cloneable {
     public static final String PROPERTY_SIZE = "com.openexchange.conversion.size";
 
     /**
+     * Property for disposition
+     */
+    public static final String PROPERTY_DISPOSITION = "com.openexchange.conversion.disposition";
+
+    /**
      * Constant for empty data arguments
      */
     public static final DataProperties EMPTY_PROPS = new DataProperties(true, 0);
