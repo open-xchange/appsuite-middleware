@@ -70,7 +70,10 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.server.impl.Version;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.ServletResponseWrapper;
 
@@ -180,6 +183,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     private final HttpServletRequestWrapper request;
 
+    private final boolean httpOnly;
+
     byte errormessage[];
 
     /**
@@ -192,6 +197,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         cookies = new HashSet<Cookie>();
         status = HttpServletResponse.SC_OK;
         this.request = request;
+        final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        httpOnly = (null != cs && cs.getBoolProperty(ServerConfig.Property.COOKIE_HTTP_ONLY.getPropertyName(), true));
     }
 
     public String encodeRedirectUrl(final String url) {
@@ -331,10 +338,10 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         if (cookiesSize > 0) {
             final Iterator<Cookie> iter = cookies.iterator();
             final StringBuilder composer = new StringBuilder(32);
-            list[0] = getFormattedCookie(iter.next(), composer);
+            list[0] = getFormattedCookie(iter.next(), composer, httpOnly);
             for (int i = 1; i < cookiesSize; i++) {
                 composer.setLength(0);
-                list[i] = getFormattedCookie(iter.next(), composer);
+                list[i] = getFormattedCookie(iter.next(), composer, httpOnly);
             }
         }
         retval[0] = list;
@@ -350,7 +357,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      * @param composer A string builder used for composing
      * @return A string representing the HTTP header format
      */
-    private static final String getFormattedCookie(final Cookie cookie, final StringBuilder composer) {
+    private static final String getFormattedCookie(final Cookie cookie, final StringBuilder composer, final boolean httpOnly) {
         composer.append(cookie.getName()).append('=');
         composer.append(cookie.getValue());
         final int maxAge = cookie.getMaxAge();
@@ -382,7 +389,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
          * 
          * Append HttpOnly flag
          */
-        // composer.append("; HttpOnly");
+        if (httpOnly) {
+            composer.append("; HttpOnly");
+        }
         return composer.toString();
     }
 
