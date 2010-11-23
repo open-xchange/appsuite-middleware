@@ -54,6 +54,7 @@ import java.io.File;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException.Code;
 
@@ -95,6 +96,10 @@ public final class ServerConfig {
     private Boolean checkIP;
 
     private String uiWebPath;
+
+    private int cookieTTL;
+
+    private boolean cookieHttpOnly;
 
     private ServerConfig() {
         super();
@@ -161,6 +166,8 @@ public final class ServerConfig {
         jmxBindAddress = props.getProperty(Property.JMX_BIND_ADDRESS.getPropertyName(), "localhost");
         checkIP = Boolean.valueOf(props.getProperty(Property.IP_CHECK.getPropertyName(), Boolean.TRUE.toString()));
         uiWebPath = props.getProperty(Property.UI_WEB_PATH.getPropertyName(), "/ox6/index.html");
+        cookieTTL = (int) ConfigTools.parseTimespan(props.getProperty(Property.COOKIE_TTL.getPropertyName(), "1W"));
+        cookieHttpOnly = Boolean.parseBoolean(props.getProperty(Property.COOKIE_HTTP_ONLY.getPropertyName(), Boolean.TRUE.toString()));
     }
 
     /**
@@ -208,6 +215,12 @@ public final class ServerConfig {
         case UI_WEB_PATH:
             value = SINGLETON.uiWebPath;
             break;
+        case COOKIE_TTL:
+            value = String.valueOf(SINGLETON.cookieTTL);
+            break;
+        case COOKIE_HTTP_ONLY:
+            value = String.valueOf(SINGLETON.cookieHttpOnly);
+            break;
         default:
             value = getProperty(property.getPropertyName());
         }
@@ -247,6 +260,9 @@ public final class ServerConfig {
             break;
         case JMX_PORT:
             value = I(SINGLETON.jmxPort);
+            break;
+        case COOKIE_TTL:
+            value = I(SINGLETON.cookieTTL);
             break;
         default:
             try {
@@ -350,7 +366,17 @@ public final class ServerConfig {
          * Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The
          * default conforms to the path where the UI is installed by the standard packages on the web server.
          */
-        UI_WEB_PATH("com.openexchange.UIWebPath");
+        UI_WEB_PATH("com.openexchange.UIWebPath"),
+        /**
+         * The cookie time-to-live
+         */
+        COOKIE_TTL("com.openexchange.cookie.ttl"),
+        /**
+         * The cookie HttpOnly flag
+         */
+        COOKIE_HTTP_ONLY("com.openexchange.cookie.httpOnly"),
+        
+        ;
 
         private String propertyName;
 
