@@ -13,8 +13,8 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
+ com.openexchange.smartdrive.client,
  com.openexchange.tools.iterator,
  com.openexchange.tx,
- com.openexchange.unitedinternet.smartdrive.client,
  org.osgi.framework;version="1.4.0"
 Bundle-Activator: com.openexchange.file.storage.smartDrive.osgi.SmartDriveFileStorageActivator

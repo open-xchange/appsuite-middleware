@@ -62,11 +62,11 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveDirectory;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResource;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResponse;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatefulAccess;
+import com.openexchange.smartdrive.client.SmartDriveDirectory;
+import com.openexchange.smartdrive.client.SmartDriveException;
+import com.openexchange.smartdrive.client.SmartDriveResource;
+import com.openexchange.smartdrive.client.SmartDriveResponse;
+import com.openexchange.smartdrive.client.SmartDriveStatefulAccess;
 import static com.openexchange.file.storage.smartDrive.Helpers.*;
 
 /**

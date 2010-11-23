@@ -50,7 +50,7 @@
 package com.openexchange.file.storage.smartDrive;
 
 import com.openexchange.file.storage.FileStorageException;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResponse;
+import com.openexchange.smartdrive.client.SmartDriveResponse;
 
 
 /**

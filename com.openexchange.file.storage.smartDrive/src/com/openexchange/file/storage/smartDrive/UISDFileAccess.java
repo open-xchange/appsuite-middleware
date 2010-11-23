@@ -66,15 +66,15 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.smartdrive.client.SmartDriveException;
+import com.openexchange.smartdrive.client.SmartDriveFile;
+import com.openexchange.smartdrive.client.SmartDriveResource;
+import com.openexchange.smartdrive.client.SmartDriveResponse;
+import com.openexchange.smartdrive.client.SmartDriveStatefulAccess;
+import com.openexchange.smartdrive.client.SmartDriveStatelessAccess;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tx.TransactionException;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveFile;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResource;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveResponse;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatefulAccess;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatelessAccess;
 import static com.openexchange.file.storage.smartDrive.Helpers.*;
 
 /**

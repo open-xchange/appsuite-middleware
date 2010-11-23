@@ -54,7 +54,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveFactoryService;
+import com.openexchange.smartdrive.client.SmartDriveFactoryService;
 
 
 /**

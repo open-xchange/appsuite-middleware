@@ -60,10 +60,10 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.smartDrive.services.Services;
 import com.openexchange.session.Session;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveAccess;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveException;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatefulAccess;
-import com.openexchange.unitedinternet.smartdrive.client.SmartDriveStatelessAccess;
+import com.openexchange.smartdrive.client.SmartDriveAccess;
+import com.openexchange.smartdrive.client.SmartDriveException;
+import com.openexchange.smartdrive.client.SmartDriveStatefulAccess;
+import com.openexchange.smartdrive.client.SmartDriveStatelessAccess;
 
 
 /**
