@@ -243,6 +243,8 @@ public final class ServerConfig {
         final boolean value;
         if (Property.PrefetchEnabled == property) {
             value = SINGLETON.prefetchEnabled;
+        } else if (Property.COOKIE_HTTP_ONLY == property) {
+            value = SINGLETON.cookieHttpOnly;
         } else {
             value = Boolean.parseBoolean(SINGLETON.props.getProperty(property.getPropertyName()));
         }
@@ -260,6 +262,9 @@ public final class ServerConfig {
             break;
         case JMX_PORT:
             value = I(SINGLETON.jmxPort);
+            break;
+        case COOKIE_TTL:
+            value = I(SINGLETON.cookieTTL);
             break;
         default:
             try {
