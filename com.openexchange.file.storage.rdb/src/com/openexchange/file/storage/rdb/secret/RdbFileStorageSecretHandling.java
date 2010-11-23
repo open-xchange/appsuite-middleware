@@ -71,15 +71,15 @@ public abstract class RdbFileStorageSecretHandling implements SecretConsistencyC
         super();
     }
 
-    public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
         final Collection<FileStorageService> messagingServices = getFileStorageServices();
         for (final FileStorageService messagingService : messagingServices) {
             final FileStorageAccountManager accountManager = messagingService.getAccountManager();
             if (!accountManager.checkSecretCanDecryptStrings(session, secret)) {
-                return false;
+                return "";
             }
         }
-        return true;
+        return null;
     }
 
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
