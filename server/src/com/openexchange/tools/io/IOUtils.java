@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.io;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -76,18 +77,27 @@ public final class IOUtils {
     }
 
     /**
+     * Convenience method for closing an I/O resource.
+     * 
+     * @param closeable The I/O resource to close.
+     */
+    public static void closeStuff(final Closeable closeable) {
+        if (null != closeable) {
+            try {
+                closeable.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
      * Convenience method for closing streams.
      * 
      * @param input The stream to close.
      */
     public static void closeStreamStuff(final InputStream input) {
-        if (null != input) {
-            try {
-                input.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
+        closeStuff(input);
     }
 
     /**
@@ -96,18 +106,13 @@ public final class IOUtils {
      * @param reader The reader to close.
      */
     public static void closeReaderStuff(final Reader reader) {
-        if (null != reader) {
-            try {
-                reader.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
+        closeStuff(reader);
     }
 
     /**
      * Convenience method for reading all from input stream and writing that to the output stream until end of file (EOF). This method does
      * not close either of the streams.
+     * 
      * @param in some input stream
      * @param out some output stream
      * @throws IOException if some problem occurs.
