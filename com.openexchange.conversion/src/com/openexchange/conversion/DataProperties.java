@@ -155,6 +155,12 @@ public final class DataProperties implements Cloneable {
      *         return can also indicate that the data properties previously associated <code>null</code> with the specified key.
      */
     public String put(final String key, final String value) {
+        if (null == value) {
+            /*
+             * Consider as a remove
+             */
+            return map.remove(key);
+        }
         return map.put(key, value);
     }
 
