@@ -66,6 +66,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.session.Session;
 
 /**
@@ -132,12 +133,18 @@ public final class URLMailAttachmentDataSource implements DataSource {
             /*
              * Determine content type
              */
+            final String sFileName = dataArguments.get("fileName");
             final ContentType contentType;
             {
                 final String sCts = dataArguments.get("contentType");
                 final String cts = null == sCts ? urlCon.getContentType() : sCts;
                 if (null == cts) {
-                    contentType = new ContentType("application/octet-stream");
+                    if (null == sFileName) {
+                        contentType = new ContentType("application/octet-stream");
+                    } else {
+                        contentType = new ContentType(MIMEType2ExtMap.getContentType(sFileName));
+                        
+                    }
                 } else {
                     contentType = new ContentType(cts);
                 }
@@ -173,7 +180,6 @@ public final class URLMailAttachmentDataSource implements DataSource {
             final String fileName;
             {
                 final String sDisp = dataArguments.get("disposition");
-                final String sFileName = dataArguments.get("fileName");
                 final String cds = urlCon.getHeaderField("Content-Disposition");
                 final ContentDisposition contentDisposition;
                 if (null == cds) {
