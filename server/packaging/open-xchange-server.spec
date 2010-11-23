@@ -153,6 +153,16 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-511 / Bugfix #17523
+   # -----------------------------------------------------------------------
+   if [ -e /opt/open-xchange/etc/groupware/excludedupdatetasks.properties ]; then
+      if ! cmp /opt/open-xchange/etc/groupware/excludedupdatetasks.properties /opt/open-xchange/etc/common/excludedupdatetasks.properties >/dev/null; then
+	  mv /opt/open-xchange/etc/groupware/excludedupdatetasks.properties /opt/open-xchange/etc/common/excludedupdatetasks.properties
+      else
+	  rm -f /opt/open-xchange/etc/groupware/excludedupdatetasks.properties
+      fi
+   fi
+
    # SoftwareChange_Request-378
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/imap.properties
