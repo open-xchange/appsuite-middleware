@@ -116,7 +116,7 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     protected boolean b_shown_as;
 
-    protected boolean bAlarm;
+    protected boolean b_Alarm;
 
     protected boolean b_timezone;
 
@@ -203,7 +203,7 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     public void setAlarm(final int alarm) {
         this.alarm = alarm;
-        bAlarm = true;
+        b_Alarm = true;
     }
 
     public void setIgnoreConflicts(final boolean ignoreConflicts) {
@@ -233,7 +233,7 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     public void removeAlarm() {
         alarm = 0;
-        bAlarm = false;
+        b_Alarm = false;
     }
 
     public void removeTimezone() {
@@ -265,7 +265,7 @@ public class Appointment extends CalendarObject implements Cloneable {
     }
 
     public boolean containsAlarm() {
-        return bAlarm;
+        return b_Alarm;
     }
 
     public boolean containsTimezone() {
@@ -285,7 +285,7 @@ public class Appointment extends CalendarObject implements Cloneable {
         b_location = false;
         b_fulltime = false;
         b_shown_as = false;
-        bAlarm = false;
+        b_Alarm = false;
         b_timezone = false;
     }
 
