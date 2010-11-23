@@ -199,25 +199,21 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     }
 
     private void copy2File(final InputStream in) throws IOException {
-        try {
-            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            if (null == mfm) {
-                throw new IOException("Missing file management");
-            }
-            final ManagedFile mf;
-            try {
-                mf = mfm.createManagedFile(in);
-            } catch (final ManagedFileException e) {
-                final IOException ioerr = new IOException();
-                ioerr.initCause(e);
-                throw ioerr;
-            }
-            setSize(mf.getSize());
-            file = mf;
-            fileId = mf.getID();
-        } finally {
-            IOUtils.closeStreamStuff(in);
+        final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+        if (null == mfm) {
+            throw new IOException("Missing file management");
         }
+        final ManagedFile mf;
+        try {
+            mf = mfm.createManagedFile(in);
+        } catch (final ManagedFileException e) {
+            final IOException ioerr = new IOException();
+            ioerr.initCause(e);
+            throw ioerr;
+        }
+        setSize(mf.getSize());
+        file = mf;
+        fileId = mf.getID();
     }
 
     private void copy2ByteArr(final InputStream in) throws IOException {
