@@ -144,7 +144,13 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         }
         final String charset = dataProperties.get(DataProperties.PROPERTY_CHARSET);
         if (null != charset) {
-            getContentType().setCharsetParameter(charset);
+            final ContentType contentType = getContentType();
+            if (contentType.startsWith(TEXT)) {
+                /*
+                 * Charset only relevant for textual content
+                 */
+                contentType.setCharsetParameter(charset);
+            }
         }
         final String disp = dataProperties.get(DataProperties.PROPERTY_DISPOSITION);
         if (null != disp) {
