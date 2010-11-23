@@ -74,6 +74,7 @@ import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvide
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -163,33 +164,41 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     private void copy2ByteArr(final InputStream in) throws IOException {
-        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-        final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-        int len;
-        while ((len = in.read(bbuf)) != -1) {
-            out.write(bbuf, 0, len);
+        try {
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
+            final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
+            int len;
+            while ((len = in.read(bbuf)) != -1) {
+                out.write(bbuf, 0, len);
+            }
+            out.flush();
+            bytes = out.toByteArray();
+            setSize(bytes.length);
+        } finally {
+            IOUtils.closeStreamStuff(in);
         }
-        out.flush();
-        bytes = out.toByteArray();
-        setSize(bytes.length);
     }
 
     private void copy2File(final InputStream in) throws IOException {
-        final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-        if (null == mfm) {
-            throw new IOException("Missing file management");
-        }
-        final ManagedFile mf;
         try {
-            mf = mfm.createManagedFile(in);
-        } catch (final ManagedFileException e) {
-            final IOException ioerr = new IOException();
-            ioerr.initCause(e);
-            throw ioerr;
+            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            if (null == mfm) {
+                throw new IOException("Missing file management");
+            }
+            final ManagedFile mf;
+            try {
+                mf = mfm.createManagedFile(in);
+            } catch (final ManagedFileException e) {
+                final IOException ioerr = new IOException();
+                ioerr.initCause(e);
+                throw ioerr;
+            }
+            setSize(mf.getSize());
+            file = mf;
+            fileId = mf.getID();
+        } finally {
+            IOUtils.closeStreamStuff(in);
         }
-        setSize(mf.getSize());
-        file = mf;
-        fileId = mf.getID();
     }
 
     @Override
