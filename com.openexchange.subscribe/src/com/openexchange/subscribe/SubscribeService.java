@@ -79,7 +79,7 @@ public interface SubscribeService {
 
     public boolean knows(Context context, int subscriptionId) throws AbstractOXException;
 
-    public boolean checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException;
+    public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException;
 
     public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws SubscriptionException;
     

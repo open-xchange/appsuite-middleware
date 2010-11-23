@@ -1354,10 +1354,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         return account;
     }
 
-    public boolean checkCanDecryptPasswords(final int user, final int cid, final String secret) throws MailAccountException {
+    public String checkCanDecryptPasswords(final int user, final int cid, final String secret) throws MailAccountException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        int id = -1;
         try {
             con = Database.get(cid, false);
             stmt = con.prepareStatement(SELECT_PASSWORD1);
@@ -1367,9 +1368,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = stmt.executeQuery();
 
             while (rs.next()) {
-                final String password = rs.getString(2);
-                if (password != null) {
-                    MailPasswordUtil.decrypt(password, secret);
+                id = rs.getInt(1);
+                if(id != MailAccount.DEFAULT_ID) {
+                    final String password = rs.getString(2);
+                    if (password != null) {
+                        MailPasswordUtil.decrypt(password, secret);
+                    }
                 }
             }
 
@@ -1383,7 +1387,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int id = rs.getInt(1);
+                id = rs.getInt(1);
                 if (id != MailAccount.DEFAULT_ID) {
                     final String password = rs.getString(2);
                     if (password != null) {
@@ -1397,14 +1401,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } catch (final GeneralSecurityException e) {
-            return false;
+            return "Failed on decrypting mail account password for account "+id+" user: "+user+", cid: "+cid;
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             if (con != null) {
                 Database.back(cid, false, con);
             }
         }
-        return true;
+        return null;
     }
 
     public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws MailAccountException {

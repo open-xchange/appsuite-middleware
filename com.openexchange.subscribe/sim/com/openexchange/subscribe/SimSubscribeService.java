@@ -157,9 +157,9 @@ public class SimSubscribeService implements SubscribeService {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#checkSecretCanDecryptPasswords(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, java.lang.String)
      */
-    public boolean checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException {
+    public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException {
         // TODO Auto-generated method stub
-        return false;
+        return null;
     }
 
     /* (non-Javadoc)

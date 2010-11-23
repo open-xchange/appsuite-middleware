@@ -108,7 +108,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         CACHE.updateAccount(serviceId, account, session);
     }
 
-    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws MessagingException {
+    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws MessagingException {
         return CACHE.checkSecretCanDecryptStrings(service, session, secret);
     }
 

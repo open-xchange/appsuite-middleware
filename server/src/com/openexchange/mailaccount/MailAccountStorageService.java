@@ -261,10 +261,10 @@ public interface MailAccountStorageService {
      * @param user The user ID
      * @param cid The context ID
      * @param secret The secret to test
-     * @return false if the encrypted strings could not be decrypted, true otherwise
+     * @return A pointer at what could not be decrypted if the encrypted strings could not be decrypted, null otherwise
      * @throws MailAccountException
      */
-    public boolean checkCanDecryptPasswords(int user, int cid, String secret) throws MailAccountException;
+    public String checkCanDecryptPasswords(int user, int cid, String secret) throws MailAccountException;
  
     /**
      * Decodes stored encrypted strings using the old secret and encode them again using the new secret.

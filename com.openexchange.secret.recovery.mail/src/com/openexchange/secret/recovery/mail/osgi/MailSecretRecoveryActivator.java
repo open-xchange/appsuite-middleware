@@ -88,7 +88,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
 
         consistencyReg = context.registerService(SecretConsistencyCheck.class.getName(), new SecretConsistencyCheck() {
 
-            public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+            public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
                 return mailAccountStorage.checkCanDecryptPasswords(session.getUserId(), session.getContextId(), secret);
             }
 

@@ -68,14 +68,15 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
     private final List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>();
     private SecretService secretService;
     
-    public boolean isSecretWorking(final ServerSession session) throws AbstractOXException {
+    public String isSecretWorking(final ServerSession session) throws AbstractOXException {
         final List<SecretConsistencyCheck> theChecks = getChecks();
         for (final SecretConsistencyCheck secretConsistencyCheck : theChecks) {
-            if(!secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session))) {
-                return false;
+            String reason = secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session));
+            if(reason != null) {
+                return reason;
             }
         }
-        return true;
+        return null;
     }
 
     public void addCheck(final SecretConsistencyCheck check) {

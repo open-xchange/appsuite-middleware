@@ -60,6 +60,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface SecretInconsistencyDetector {
 
-    boolean isSecretWorking(ServerSession session) throws AbstractOXException;
+    String isSecretWorking(ServerSession session) throws AbstractOXException;
 
 }

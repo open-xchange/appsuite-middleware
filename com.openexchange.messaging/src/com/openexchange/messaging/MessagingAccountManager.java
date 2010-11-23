@@ -116,7 +116,7 @@ public interface MessagingAccountManager {
      * @return true when all accounts could be decrypted, false otherwise
      * @throws MessagingException 
      */
-    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws MessagingException;
+    public String checkSecretCanDecryptStrings(Session session, String secret) throws MessagingException;
 
     /**
      * Migrates all encrypted strings from an old secret to a new one.

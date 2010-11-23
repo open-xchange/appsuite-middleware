@@ -75,7 +75,7 @@ public class SubscriptionSecretHandling implements SecretConsistencyCheck, Secre
         this.discovery = discovery;
     }
 
-    public boolean checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException {
+    public String checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException {
         List<SubscriptionSource> sources = discovery.getSources();
         for (SubscriptionSource subscriptionSource : sources) {
             Set<String> passwordFields = subscriptionSource.getPasswordFields();
@@ -85,12 +85,13 @@ public class SubscriptionSecretHandling implements SecretConsistencyCheck, Secre
             
             SubscribeService subscribeService = subscriptionSource.getSubscribeService();
             
-            if(!subscribeService.checkSecretCanDecryptPasswords(session.getContext(), session.getUser(), secret)) {
-                return false;
+            String diagnosis = subscribeService.checkSecretCanDecryptPasswords(session.getContext(), session.getUser(), secret);
+            if(diagnosis != null) {
+                return diagnosis;
             }
             
         }
-        return true;
+        return null;
     }
 
     public void migrate(String oldSecret, String newSecret, ServerSession session) throws AbstractOXException {

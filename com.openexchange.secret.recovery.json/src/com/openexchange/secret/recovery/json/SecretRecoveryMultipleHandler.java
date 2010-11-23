@@ -105,9 +105,12 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
     }
 
     private Object check(final JSONObject request, final ServerSession session) throws AbstractOXException, JSONException {
-        final boolean secretWorking = detector.isSecretWorking(session);
+        final String diagnosis = detector.isSecretWorking(session);
         final JSONObject object = new JSONObject();
-        object.put("secretWorks", secretWorking);
+        object.put("secretWorks", diagnosis == null);
+        if(diagnosis != null) {
+            object.put("diagnosis", diagnosis);
+        }
         return object;
     }
 

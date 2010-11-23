@@ -52,12 +52,21 @@ package com.openexchange.secret.recovery;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link SecretConsistencyCheck}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SecretConsistencyCheck {
-    public boolean checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException;
+
+    /**
+     * Find out if a secret is valid for decrypting all data
+     * 
+     * @param session The session
+     * @param secret The secret
+     * @return <code>null</code> if everything could be decrypted, if not return a pointer to something that could not be decrypted (for
+     *         debugging)
+     * @throws AbstractOXException
+     */
+    public String checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException;
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.secret.recovery;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -86,8 +87,8 @@ public class SecretInconsistencyDetectorTest {
         detector.addCheck(new FailingSecretConsistencyCheck());
         
         session = new SimServerSession(ctx, user, null);
-        final boolean diagnosis = detector.isSecretWorking(session);
-        assertFalse(diagnosis);
+        final String diagnosis = detector.isSecretWorking(session);
+        assertTrue(diagnosis, diagnosis != null);
     }
     
     @Test
@@ -96,23 +97,23 @@ public class SecretInconsistencyDetectorTest {
         detector.addCheck(new PassingSecretConsistencyCheck());
         
         session = new SimServerSession(ctx, user, null);
-        final boolean diagnosis = detector.isSecretWorking(session);
-        assertTrue(diagnosis);
+        final String diagnosis = detector.isSecretWorking(session);
+        assertTrue(diagnosis, diagnosis == null);
     }   
     
     
     private static final class FailingSecretConsistencyCheck implements SecretConsistencyCheck {
 
-        public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
-            return false;
+        public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+            return "Kabooom, Baby!";
         }
         
     }
     
     private static final class PassingSecretConsistencyCheck implements SecretConsistencyCheck {
 
-        public boolean checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
-            return true;
+        public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+            return null;
         }
         
     }

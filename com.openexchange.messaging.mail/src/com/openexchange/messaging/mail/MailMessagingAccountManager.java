@@ -620,8 +620,8 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
 
     }
 
-    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws MessagingException {
-        return true; // Mail Accounts are handled elsewhere, this is just an adapter class between the mail system and the messaging system
+    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws MessagingException {
+        return null; // Mail Accounts are handled elsewhere, this is just an adapter class between the mail system and the messaging system
     }
 
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws MessagingException {

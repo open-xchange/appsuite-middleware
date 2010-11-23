@@ -198,12 +198,13 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         map.remove("com.openexchange.crypto.secret");
     }
 
-    public boolean checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException {
+    public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException {
         Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
         if (passwordFields.isEmpty()) {
-            return true;
+            return null;
         }
         List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, user.getId());
+        
         for (Subscription subscription : allSubscriptions) {
             try {
                 Map<String, Object> configuration = subscription.getConfiguration();
@@ -214,10 +215,10 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                     }
                 }
             } catch (CryptoException x) {
-                return false;
+                return "Could not decode subscription passwords for subscription: "+subscription.getId()+" : "+subscription.getDisplayName();
             }
         }
-        return true;
+        return null;
     }
 
     public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws SubscriptionException {

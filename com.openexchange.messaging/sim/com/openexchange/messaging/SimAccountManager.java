@@ -153,9 +153,8 @@ public class SimAccountManager implements MessagingAccountManager {
     /* (non-Javadoc)
      * @see com.openexchange.messaging.MessagingAccountManager#checkSecretCanDecryptStrings(com.openexchange.session.Session, java.lang.String)
      */
-    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) {
-        // TODO Auto-generated method stub
-        return false;
+    public String checkSecretCanDecryptStrings(final Session session, final String secret) {
+        return null;
     }
 
     /* (non-Javadoc)

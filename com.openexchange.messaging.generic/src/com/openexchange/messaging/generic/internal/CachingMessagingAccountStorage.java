@@ -217,7 +217,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         invalidateMessagingAccount(serviceId, account.getId(), session.getUserId(), session.getContextId());
     }
 
-    public boolean checkSecretCanDecryptStrings(final MessagingService parentService, final Session session, final String secret) throws MessagingException {
+    public String checkSecretCanDecryptStrings(final MessagingService parentService, final Session session, final String secret) throws MessagingException {
         return delegatee.checkSecretCanDecryptStrings(parentService, session, secret);
     }
 

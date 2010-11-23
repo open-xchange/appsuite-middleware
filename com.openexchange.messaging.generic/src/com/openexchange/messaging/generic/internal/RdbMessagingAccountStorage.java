@@ -553,10 +553,10 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
     }
 
-    public boolean checkSecretCanDecryptStrings(final MessagingService parentService, final Session session, final String secret) throws MessagingException {
+    public String checkSecretCanDecryptStrings(final MessagingService parentService, final Session session, final String secret) throws MessagingException {
         final Set<String> secretProperties = parentService.getSecretProperties();
         if (secretProperties.isEmpty()) {
-            return true;
+            return null;
         }
         final TIntArrayList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
         final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
@@ -564,9 +564,10 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
         final Context ctx = getContext(session);
         final HashMap<String, Object> content = new HashMap<String, Object>();
+        int confId = -1;
         try {
             for (int i = 0, size = confIds.size(); i < size; i++) {
-                final int confId = confIds.get(i);
+                confId = confIds.get(i);
                 content.clear();
                 genericConfStorageService.fill(ctx, confId, content);
 
@@ -580,9 +581,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         } catch (final GenericConfigStorageException e) {
             throw new MessagingException(e);
         } catch (final CryptoException e) {
-            return false;
+            return "Messaging dynamic configuration with id "+confId+" could not be decrypted";
         }
-        return true;
+        return null;
     }
 
     private TIntArrayList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws MessagingException {
