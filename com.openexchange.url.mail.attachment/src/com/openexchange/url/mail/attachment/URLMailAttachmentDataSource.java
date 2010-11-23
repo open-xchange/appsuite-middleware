@@ -89,16 +89,14 @@ public final class URLMailAttachmentDataSource implements DataSource {
         URLConnection urlCon = null;
         try {
             final URL url;
-            {
+            try {
                 final String sUrl = dataArguments.get("url");
                 if (null == sUrl) {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
                 }
-                try {
-                    url = new URL(sUrl.trim());
-                } catch (final MalformedURLException e) {
-                    throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-                }
+                url = new URL(sUrl.trim());
+            } catch (final MalformedURLException e) {
+                throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
             final int timeoutMillis;
             {
