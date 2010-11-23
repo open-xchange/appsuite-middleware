@@ -807,10 +807,10 @@ public abstract class MailPart implements Serializable, Cloneable {
      */
     public void writeTo(final OutputStream out) throws MailException {
         final InputStream in = getInputStream();
+        if (null == in) {
+            throw new MailException(MailException.Code.NO_CONTENT);
+        }
         try {
-            if (null == in) {
-                throw new MailException(MailException.Code.NO_CONTENT);
-            }
             final byte[] buf = new byte[8192];
             int count = -1;
             while ((count = in.read(buf, 0, buf.length)) != -1) {
