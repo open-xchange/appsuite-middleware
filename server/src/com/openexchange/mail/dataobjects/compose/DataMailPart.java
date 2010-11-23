@@ -66,7 +66,6 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -127,39 +126,11 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                 size = 0;
             }
             handleInputStream((InputStream) data, size);
-            checkDataProperties(dataProperties);
         } else if (data instanceof byte[]) {
             bytes = (byte[]) data;
             setSize(bytes.length);
-            checkDataProperties(dataProperties);
         } else {
             throw new MailException(MailException.Code.UNSUPPORTED_DATASOURCE);
-        }
-    }
-
-    private void checkDataProperties(final Map<String, String> dataProperties) throws MailException {
-        String cts = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
-        if (null != cts) {
-            setContentType(cts);
-        }
-        final String charset = dataProperties.get(DataProperties.PROPERTY_CHARSET);
-        if (null != charset) {
-            final ContentType contentType = getContentType();
-            if (contentType.startsWith(TEXT)) {
-                /*
-                 * Charset only relevant for textual content
-                 */
-                contentType.setCharsetParameter(charset);
-            }
-        }
-        final String disp = dataProperties.get(DataProperties.PROPERTY_DISPOSITION);
-        if (null != disp) {
-            getContentDisposition().setDisposition(disp);
-        }
-        final String fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
-        if (null != fileName) {
-            getContentType().setNameParameter(fileName);
-            getContentDisposition().setFilenameParameter(fileName);
         }
     }
 
@@ -376,22 +347,31 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     private void setHeaders(final Map<String, String> dataProperties) throws MailException {
-        if (!dataProperties.containsKey(DataProperties.PROPERTY_CONTENT_TYPE)) {
-            throw new MailException(MailException.Code.MISSING_PARAMETER, DataProperties.PROPERTY_CONTENT_TYPE);
+        String cts = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+        if (null != cts) {
+            setContentType(cts);
         }
-        final ContentType contentType = new ContentType(dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE));
-        if (dataProperties.containsKey(DataProperties.PROPERTY_CHARSET)) {
-            contentType.setCharsetParameter(dataProperties.get(DataProperties.PROPERTY_CHARSET));
+        final String charset = dataProperties.get(DataProperties.PROPERTY_CHARSET);
+        if (null != charset) {
+            final ContentType contentType = getContentType();
+            if (contentType.startsWith(TEXT)) {
+                /*
+                 * Charset only relevant for textual content
+                 */
+                contentType.setCharsetParameter(charset);
+            }
         }
-        setContentType(contentType);
-        final ContentDisposition contentDisposition = new ContentDisposition();
-        contentDisposition.setContentDisposition(Part.ATTACHMENT);
-        if (dataProperties.containsKey(DataProperties.PROPERTY_NAME)) {
-            final String filename = dataProperties.get(DataProperties.PROPERTY_NAME);
-            setFileName(filename);
-            contentDisposition.setFilenameParameter(filename);
+        final String disp = dataProperties.get(DataProperties.PROPERTY_DISPOSITION);
+        if (null == disp) {
+            getContentDisposition().setDisposition(Part.ATTACHMENT);
+        } else {
+            getContentDisposition().setDisposition(disp);
         }
-        setContentDisposition(contentDisposition);
+        final String fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+        if (null != fileName) {
+            getContentType().setNameParameter(fileName);
+            getContentDisposition().setFilenameParameter(fileName);
+        }
     }
 
 }
