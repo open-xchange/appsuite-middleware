@@ -190,7 +190,8 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 try {
                     decrypted = CRYPTO.decrypt(toDecrypt, secret);
                 } catch (CryptoException e) {
-                    throw new SubscriptionException(e);
+                    // Fail silently
+                    decrypted = null;
                 }
                 map.put(key, decrypted);
             }
