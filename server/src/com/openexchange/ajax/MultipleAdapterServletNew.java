@@ -254,6 +254,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 String name = names.next();
                 retval.putParameter(name, upload.getFormField(name));
             }
+            retval.setUploadEvent(upload);
         } else if (preferStream) {
             /*
              * Pass request's stream

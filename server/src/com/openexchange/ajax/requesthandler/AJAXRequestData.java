@@ -64,6 +64,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -98,6 +99,8 @@ public class AJAXRequestData {
     private String hostname;
 
     private String route;
+
+    private UploadEvent uploadEvent;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -349,6 +352,14 @@ public class AJAXRequestData {
     
     public void setRoute(String route) {
         this.route = route;
+    }
+
+    public void setUploadEvent(UploadEvent upload) {
+        this.uploadEvent = upload;
+    }
+    
+    public UploadEvent getUploadEvent() {
+        return uploadEvent;
     }
 
 }

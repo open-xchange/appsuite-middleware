@@ -369,6 +369,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             uploadFile = data.getFiles().get(0);
         }    
         
+        if(data.getUploadEvent() != null && data.getUploadEvent().getUploadFileByFieldName("file") != null) {
+            uploadFile = data.getUploadEvent().getUploadFileByFieldName("file");
+        }
+        
         file = parser.parse(object); 
         fields = parser.getFields(object);
         if(uploadFile != null) {
@@ -382,7 +386,12 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 fields.add(File.Field.FILE_MIMETYPE);
             }
             // TODO: Guess Content-Type
-            
+        }
+        
+        String fileDisplay = data.getParameter("filedisplay");
+        if(fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
+            file.setFileName(fileDisplay);
+            fields.add(File.Field.FILENAME);
         }
         
         if(has("id") && ! fields.contains(File.Field.ID)) {
