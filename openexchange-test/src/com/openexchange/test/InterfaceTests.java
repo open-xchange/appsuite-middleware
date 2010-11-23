@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -109,6 +110,7 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
         tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class);
         tests.addTestSuite(com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class);
+        tests.addTestSuite(com.openexchange.ajax.contact.AggregatingContactTest.class);
         return tests;
     }
 }
