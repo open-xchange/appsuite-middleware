@@ -1,3 +1,7 @@
+* 2010-11-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #17561: Fixed folder creation on a Courier IMAP server
+
 * 2010-11-22 - marcus.klein@open-xchange.com
 
  - Bugfix #17608: User contacts are not mixed up anymore when loading them through an all request on the users interface.
