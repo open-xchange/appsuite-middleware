@@ -156,6 +156,23 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-505
+   # -----------------------------------------------------------------------
+   sessionc=/opt/open-xchange/etc/groupware/sessiond.properties
+   serverc=/opt/open-xchange/etc/groupware/server.properties
+   ajpc=/opt/open-xchange/etc/groupware/ajp.properties
+   oval=1W
+   if ox_exists_property com.openexchange.sessiond.cookie.ttl $sessionc; then
+      oval=$(ox_read_property com.openexchange.sessiond.cookie.ttl $sessionc)
+      ox_remove_property com.openexchange.sessiond.cookie.ttl $sessionc
+   fi
+   if ! ox_exists_property com.openexchange.cookie.ttl $serverc; then
+      ox_set_property com.openexchange.cookie.ttl $oval $serverc
+   fi
+   if ox_exists_property AJP_JSESSIONID_TTL $ajpc; then
+      ox_remove_property AJP_JSESSIONID_TTL $ajpc
+   fi
+
    # SoftwareChange_Request-490
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/servletmappings/servletmapping.properties
@@ -246,9 +263,10 @@ if [ ${1:-0} -eq 2 ]; then
    if ! ox_exists_property com.openexchange.sessiond.autologin $pfile; then
       ox_set_property com.openexchange.sessiond.autologin false $pfile
    fi
-   if ! ox_exists_property com.openexchange.sessiond.cookie.ttl $pfile; then
-      ox_set_property com.openexchange.sessiond.cookie.ttl 1W $pfile
-   fi
+   # obsoleted by SoftwareChange_Request-505
+   # if ! ox_exists_property com.openexchange.sessiond.cookie.ttl $pfile; then
+   #   ox_set_property com.openexchange.sessiond.cookie.ttl 1W $pfile
+   # fi
 
    # SoftwareChange_Request-341
    # -----------------------------------------------------------------------
@@ -531,12 +549,13 @@ EOF
      ox_remove_property CACHECCF $pfile
    fi
 
+   # obsoleted by SoftwareChange_Request-505
    # we're updating from pre sp5
    # -----------------------------------------------------------------------
-   pfile=/opt/open-xchange/etc/groupware/ajp.properties
-   if ! ox_exists_property AJP_JSESSIONID_TTL $pfile; then
-      ox_set_property AJP_JSESSIONID_TTL 86400000 $pfile
-   fi
+   # pfile=/opt/open-xchange/etc/groupware/ajp.properties
+   # if ! ox_exists_property AJP_JSESSIONID_TTL $pfile; then
+   #    ox_set_property AJP_JSESSIONID_TTL 86400000 $pfile
+   # fi
 
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/participant.properties
