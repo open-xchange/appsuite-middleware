@@ -261,9 +261,6 @@ public final class ServerConfig {
         case JMX_PORT:
             value = I(SINGLETON.jmxPort);
             break;
-        case COOKIE_TTL:
-            value = I(SINGLETON.cookieTTL);
-            break;
         default:
             try {
                 String prop = getProperty(property.getPropertyName());
