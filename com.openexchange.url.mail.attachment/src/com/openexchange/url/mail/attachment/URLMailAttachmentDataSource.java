@@ -143,7 +143,6 @@ public final class URLMailAttachmentDataSource implements DataSource {
                         contentType = new ContentType("application/octet-stream");
                     } else {
                         contentType = new ContentType(MIMEType2ExtMap.getContentType(sFileName));
-                        
                     }
                 } else {
                     contentType = new ContentType(cts);
