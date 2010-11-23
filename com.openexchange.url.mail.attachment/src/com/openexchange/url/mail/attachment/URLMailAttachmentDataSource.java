@@ -51,6 +51,7 @@ package com.openexchange.url.mail.attachment;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -87,13 +88,17 @@ public final class URLMailAttachmentDataSource implements DataSource {
         }
         URLConnection urlCon = null;
         try {
-            URL url;
+            final URL url;
             {
                 final String sUrl = dataArguments.get("url");
                 if (null == sUrl) {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
                 }
-                url = new URL(sUrl.trim());
+                try {
+                    url = new URL(sUrl.trim());
+                } catch (final MalformedURLException e) {
+                    throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+                }
             }
             final int timeoutMillis;
             {
