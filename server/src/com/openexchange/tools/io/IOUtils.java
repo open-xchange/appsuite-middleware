@@ -123,5 +123,6 @@ public final class IOUtils {
         while ((length = in.read(buffer)) != -1) {
             out.write(buffer, 0, length);
         }
+        out.flush();
     }
 }
