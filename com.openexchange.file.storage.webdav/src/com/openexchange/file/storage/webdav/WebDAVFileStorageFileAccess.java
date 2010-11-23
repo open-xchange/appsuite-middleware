@@ -1005,8 +1005,8 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
-    public TimedResult<File> getVersions(final String folder, final String id, final List<Field> fields) throws FileStorageException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folder, id, CURRENT_VERSION)));
+    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws FileStorageException {
+        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
     public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws FileStorageException {
