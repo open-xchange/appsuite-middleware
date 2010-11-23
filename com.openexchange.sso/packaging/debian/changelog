@@ -1,3 +1,9 @@
+open-xchange-sso (6.18.1.0-8) unstable; urgency=low
+
+  * second build for public ptf 2010-11-24
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 23 Nov 2010 10:10:36 +0100
+
 open-xchange-sso (6.18.1.0-7) unstable; urgency=low
 
   * Build for Public PTF 2010-11-24

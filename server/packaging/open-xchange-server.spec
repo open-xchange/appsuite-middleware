@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -592,6 +592,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Nov 23 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17561: Fixed folder creation on a Courier IMAP server
+* Mon Nov 22 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17608: User contacts are not mixed up anymore when loading them through an all request on the users interface.
 * Fri Nov 19 2010 - marcus.klein@open-xchange.com
  - Bugfix #17523: Update tasks can now be excluded for administration daemon, too.
 * Wed Nov 17 2010 - marcus.klein@open-xchange.com
