@@ -89,7 +89,6 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
-import com.openexchange.folderstorage.mail.MailParameterConstants;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -631,7 +630,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     access.close();
                 }
             } finally {
-                params.putParameter(FileStorageFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, null);
+                params.putParameter(FileStorageFolderType.getInstance(), FileStorageParameterConstants.PARAM_FILE_STORAGE_ACCESS, null);
             }
         }
     }

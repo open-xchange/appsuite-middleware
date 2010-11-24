@@ -77,7 +77,6 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.mail.MailParameterConstants;
 import com.openexchange.folderstorage.messaging.contentType.DraftsContentType;
 import com.openexchange.folderstorage.messaging.contentType.MessagingContentType;
 import com.openexchange.folderstorage.messaging.contentType.SentContentType;
@@ -799,7 +798,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                     access.close();
                 }
             } finally {
-                params.putParameter(MessagingFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, null);
+                params.putParameter(MessagingFolderType.getInstance(), MessagingParameterConstants.PARAM_MESSAGING_ACCESS, null);
             }
         }
     }
