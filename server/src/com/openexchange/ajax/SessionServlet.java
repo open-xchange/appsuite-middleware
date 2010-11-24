@@ -140,28 +140,41 @@ public abstract class SessionServlet extends AJAXServlet {
 
     }
 
-    protected void initializeSession(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void initializeSession(HttpServletRequest req) throws SessiondException, AbstractOXException {
         if(null != getSessionObject(req)) {
             return ;
         }
+        /*
+         * Remember session
+         */
+        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (sessiondService == null) {
+            throw new SessiondException(
+                new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+        }
+        String sessionId = getSessionId(req);
+        final ServerSession session = getSession(req, sessionId, sessiondService);
+        if (!sessionId.equals(session.getSessionID())) {
+            throw SessionExceptionCodes.WRONG_SESSION.create();
+        }
+        final Context ctx = session.getContext();
+        if (!ctx.isEnabled()) {
+            sessiondService.removeSession(sessionId);
+            throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+        }
+        checkIP(session, req.getRemoteAddr());
+        rememberSession(req, session);
+    }
+
+    /**
+     * Checks the session ID supplied as a query parameter in the request URI.
+     */
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         try {
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (sessiondService == null) {
-                throw new SessiondException(
-                    new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
-            }
-            String sessionId = getSessionId(req);
-            final ServerSession session = getSession(req, sessionId, sessiondService);
-            if (!sessionId.equals(session.getSessionID())) {
-                throw SessionExceptionCodes.WRONG_SESSION.create();
-            }
-            final Context ctx = session.getContext();
-            if (!ctx.isEnabled()) {
-                sessiondService.removeSession(sessionId);
-                throw SessionExceptionCodes.CONTEXT_LOCKED.create();
-            }
-            checkIP(session, req.getRemoteAddr());
-            rememberSession(req, session);
+            Tools.disableCaching(resp);
+            initializeSession(req);
+            super.service(req, resp);
         } catch (final SessiondException e) {
             LOG.debug(e.getMessage(), e);
             final Response response = new Response();
@@ -189,17 +202,6 @@ public abstract class SessionServlet extends AJAXServlet {
                 sendError(resp);
             }
         }
-    }
-
-    /**
-     * Checks the session ID supplied as a query parameter in the request URI.
-     */
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        Tools.disableCaching(resp);
-
-        initializeSession(req, resp);
-        super.service(req, resp);
     }
 
     private void checkIP(final Session session, final String actual) throws SessiondException {

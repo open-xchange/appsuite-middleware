@@ -50,25 +50,60 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.tools.session.ServerSession;
 
 public abstract class PermissionServlet extends SessionServlet {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PermissionServlet.class);
 
     private static final long serialVersionUID = -1496492688713194989L;
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        initializeSession(req, resp);
-        final ServerSession session = getSessionObject(req);
-        if (null != session && !hasModulePermission(session)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
-            return;
+        try {
+            initializeSession(req);
+            final ServerSession session = getSessionObject(req);
+            if (null != session && !hasModulePermission(session)) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
+                return;
+            }
+            super.service(req, resp);
+        } catch (final SessiondException e) {
+            LOG.debug(e.getMessage(), e);
+            final Response response = new Response();
+            response.setException(e);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            final PrintWriter writer = resp.getWriter();
+            try {
+                ResponseWriter.write(response, writer);
+                writer.flush();
+            } catch (final JSONException e1) {
+                log(RESPONSE_ERROR, e1);
+                sendError(resp);
+            }
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            final Response response = new Response();
+            response.setException(e);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            final PrintWriter writer = resp.getWriter();
+            try {
+                ResponseWriter.write(response, writer);
+                writer.flush();
+            } catch (final JSONException e1) {
+                log(RESPONSE_ERROR, e1);
+                sendError(resp);
+            }
         }
-        super.service(req, resp);
-        
     }
 
     /**
