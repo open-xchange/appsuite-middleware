@@ -2,6 +2,7 @@
 
  - Bugfix #17627: Changed connection handling in mail folder storage
  - Bugfix #17596: Enhanced error message
+ - Bugfix #17623: Showing all subfolders
 
 * 2010-11-22 - marcus.klein@open-xchange.com
 

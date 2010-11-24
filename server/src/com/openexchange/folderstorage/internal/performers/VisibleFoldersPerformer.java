@@ -214,7 +214,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                         try {
                             final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
                             openedStorages.add(tmp);
-                            for (final int index : indexes) {
+                            NextIndex: for (final int index : indexes) {
                                 final String id = allSubfolderIds.get(index).getId();
                                 /*
                                  * Get subfolder from appropriate storage
@@ -228,7 +228,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                             "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
                                         e);
                                     addWarning(e);
-                                    return null;
+                                    continue NextIndex;
                                 }
                                 /*
                                  * Check for subscribed status dependent on parameter "all"

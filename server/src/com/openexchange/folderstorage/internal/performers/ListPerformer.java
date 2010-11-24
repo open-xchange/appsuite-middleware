@@ -278,7 +278,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             try {
                                 final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
                                 openedStorages.add(tmp);
-                                for (final int index : indexes) {
+                                NextIndex: for (final int index : indexes) {
                                     final String id = subfolderIds[index];
                                     /*
                                      * Get subfolder from appropriate storage
@@ -292,7 +292,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                                 "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
                                             e);
                                         addWarning(e);
-                                        return null;
+                                        continue NextIndex;
                                     }
                                     /*
                                      * Check for subscribed status dependent on parameter "all"
@@ -493,7 +493,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     try {
                         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
                         openedStorages.add(tmp);
-                        for (final int index : indexes) {
+                        NextIndex: for (final int index : indexes) {
                             final String id = allSubfolderIds.get(index).getId();
                             /*
                              * Get subfolder from appropriate storage
@@ -507,7 +507,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
                                     e);
                                 addWarning(e);
-                                return null;
+                                continue NextIndex;
                             }
                             /*
                              * Check for subscribed status dependent on parameter "all"
