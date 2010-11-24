@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,8 +65,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
@@ -466,11 +466,12 @@ public final class HTMLFilterHandler implements HTMLHandler {
         for (int i = 0; i < size; i++) {
             final Entry<String, String> e = iter.next();
             final String attr = e.getKey().toLowerCase(Locale.ENGLISH);
+            final String val = e.getValue();
             if (STYLE.equals(attr)) {
                 /*
                  * Handle style attribute
                  */
-                checkCSSElements(cssBuffer.append(e.getValue()), styleMap, true);
+                checkCSSElements(cssBuffer.append(val), styleMap, true);
                 final String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (containsCSSElement(checkedCSS)) {
@@ -484,34 +485,40 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 /*
                  * TODO: Is it safe to allow "class"/"id" attribute in any case
                  */
-                attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlFormat(e.getValue(), false)).append('"');
+                attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlFormat(val, false)).append('"');
             } else {
                 if (null == attribs) {
-                    attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlFormat(e.getValue(), false)).append('"');
+                    if (isNonJavaScriptURL(val)) {
+                        attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlFormat(val, false)).append('"');
+                    }
                 } else {
                     if (attribs.containsKey(attr)) {
                         final Set<String> allowedValues = attribs.get(attr);
-                        if (null == allowedValues || allowedValues.contains(e.getValue().toLowerCase(Locale.ENGLISH))) {
-                            attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlFormat(e.getValue(), false)).append('"');
+                        if (null == allowedValues || allowedValues.contains(val.toLowerCase(Locale.ENGLISH))) {
+                            if (isNonJavaScriptURL(val)) {
+                                attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlFormat(val, false)).append('"');
+                            }
                         } else if (NUM_ATTRIBS == allowedValues) {
                             /*
                              * Only numeric attribute value allowed
                              */
-                            if (PAT_NUMERIC.matcher(e.getValue().trim()).matches()) {
-                                attrBuilder.append(' ').append(attr).append(VAL_START).append(e.getValue()).append('"');
+                            if (PAT_NUMERIC.matcher(val.trim()).matches()) {
+                                attrBuilder.append(' ').append(attr).append(VAL_START).append(val).append('"');
                             }
                         }
                     }
                 }
             }
         }
+        htmlBuilder.append('<').append(tag).append(attrBuilder.toString());
         if (simple) {
-            if (attrBuilder.length() > 0 || size == 0) {
-                htmlBuilder.append('<').append(tag).append(attrBuilder.toString()).append('/').append('>');
-            }
-        } else {
-            htmlBuilder.append('<').append(tag).append(attrBuilder.toString()).append('>');
+            htmlBuilder.append('/');
         }
+        htmlBuilder.append('>');
+    }
+
+    private static boolean isNonJavaScriptURL(final String val) {
+        return (null != val && !val.trim().toLowerCase(Locale.US).startsWith("javascript:"));
     }
 
     /**
