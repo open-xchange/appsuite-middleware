@@ -51,7 +51,6 @@ package com.openexchange.concurrent;
 
 import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.server.ServiceException;
@@ -59,50 +58,50 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link TimeoutConcurrentMap} - A timed concurrent map.
+ * {@link TimeoutConcurrentSet} - A timed concurrent set.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TimeoutConcurrentMap<K, V> {
+public final class TimeoutConcurrentSet<E> {
 
     /*-
      * Members
      */
 
-    private final ConcurrentMap<K, ValueWrapper<V>> map;
+    private final ConcurrentMap<E, ElementWrapper<E>> map;
 
     private final ScheduledTimerTask timeoutTask;
 
     private final boolean forceTimeout;
 
-    private TimeoutListener<V> defaultTimeoutListener;
+    private TimeoutListener<E> defaultTimeoutListener;
 
     private volatile boolean disposed;
 
     /**
-     * Initializes a new {@link TimeoutConcurrentMap}.
+     * Initializes a new {@link TimeoutConcurrentSet}.
      * 
      * @param shrinkerIntervalSeconds The shrinker interval in seconds
      * @throws ServiceException If initialization fails due to missing {@link TimerService timer service}
      */
-    public TimeoutConcurrentMap(final int shrinkerIntervalSeconds) throws ServiceException {
+    public TimeoutConcurrentSet(final int shrinkerIntervalSeconds) throws ServiceException {
         this(shrinkerIntervalSeconds, false);
     }
 
     /**
-     * Initializes a new {@link TimeoutConcurrentMap}.
+     * Initializes a new {@link TimeoutConcurrentSet}.
      * 
      * @param shrinkerIntervalSeconds The shrinker interval in seconds
      * @param forceTimeout <code>true</code> to force initial time-out of contained elements even if they were "touched"; otherwise
      *            <code>false</code> to keep them alive as long as not timed-out
      * @throws ServiceException If initialization fails due to missing {@link TimerService timer service}
      */
-    public TimeoutConcurrentMap(final int shrinkerIntervalSeconds, final boolean forceTimeout) throws ServiceException {
+    public TimeoutConcurrentSet(final int shrinkerIntervalSeconds, final boolean forceTimeout) throws ServiceException {
         super();
         this.forceTimeout = forceTimeout;
-        map = new ConcurrentHashMap<K, ValueWrapper<V>>();
+        map = new ConcurrentHashMap<E, ElementWrapper<E>>();
         final TimerService timer = getInstance().getService(TimerService.class, true);
-        timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), 1000, shrinkerIntervalSeconds * 1000);
+        timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<E>(map), 1000, shrinkerIntervalSeconds * 1000);
     }
 
     /**
@@ -112,16 +111,6 @@ public final class TimeoutConcurrentMap<K, V> {
      */
     public boolean isEmpty() {
         return map.isEmpty();
-    }
-
-    /**
-     * Returns a set view of the keys contained in this map. The set is backed by the map, so changes to the map are reflected in the set,
-     * and vice-versa.
-     * 
-     * @return A set view of the keys contained in this map.
-     */
-    public Set<K> keySet() {
-        return map.keySet();
     }
 
     /**
@@ -153,7 +142,7 @@ public final class TimeoutConcurrentMap<K, V> {
     }
 
     /**
-     * Acts like all values kept in this time-out map receive their time-out event. <br>
+     * Acts like all elements kept in this time-out map receive their time-out event. <br>
      * Furthermore the map is cleared.
      * 
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
@@ -162,8 +151,8 @@ public final class TimeoutConcurrentMap<K, V> {
         if (disposed) {
             throw new IllegalStateException("time-out map was disposed.");
         }
-        for (final Iterator<ValueWrapper<V>> it = map.values().iterator(); it.hasNext();) {
-            final ValueWrapper<V> vw = it.next();
+        for (final Iterator<ElementWrapper<E>> it = map.values().iterator(); it.hasNext();) {
+            final ElementWrapper<E> vw = it.next();
             it.remove();
             if (vw.timeoutListener != null) {
                 vw.timeoutListener.onTimeout(vw.value);
@@ -172,136 +161,110 @@ public final class TimeoutConcurrentMap<K, V> {
     }
 
     /**
-     * Acts like the value associated with specified key receives its time-out event. <br>
-     * Furthermore the value is removed from map.
+     * Acts like the element receives its time-out event. <br>
+     * Furthermore the element is removed from map.
      * 
-     * @param key The value's key
+     * @param element The element
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
-    public void timeout(final K key) {
+    public void timeout(final E element) {
         if (disposed) {
             throw new IllegalStateException("time-out map was disposed.");
         }
-        final ValueWrapper<V> vw = map.remove(key);
+        final ElementWrapper<E> vw = map.remove(element);
         if (vw != null && vw.timeoutListener != null) {
             vw.timeoutListener.onTimeout(vw.value);
         }
     }
 
     /**
-     * Puts specified key-value-pair into this time-out map with default time-out listener.
+     * Puts specified element into this time-out map with default time-out listener.
      * 
-     * @param key The value's key
-     * @param value The value to put
+     * @param element The element to put
      * @param timeToLiveSeconds The value's time-to-live seconds
-     * @return The value previously associated with given key or <code>null</code>
+     * @return <code>true</code> if this set did not already contain the specified element
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
-    public V put(final K key, final V value, final int timeToLiveSeconds) {
-        return put(key, value, timeToLiveSeconds, defaultTimeoutListener);
+    public boolean add(final E element, final int timeToLiveSeconds) {
+        return add(element, timeToLiveSeconds, defaultTimeoutListener);
     }
 
     /**
-     * Puts specified key-value-pair into this time-out map.
+     * Adds specified key-value-pair into this time-out map.
      * 
-     * @param key The value's key
-     * @param value The value to put
+     * @param element The element to put
      * @param timeToLiveSeconds The value's time-to-live seconds
      * @param timeoutListener The value's time-out listener triggered on its time-out event
-     * @return The value previously associated with given key or <code>null</code>
+     * @return <code>true</code> if this set did not already contain the specified element
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
-    public V put(final K key, final V value, final int timeToLiveSeconds, final TimeoutListener<V> timeoutListener) {
+    public boolean add(final E element, final int timeToLiveSeconds, final TimeoutListener<E> timeoutListener) {
         if (disposed) {
             throw new IllegalStateException("time-out map was disposed.");
         }
-        final ValueWrapper<V> vw = map.put(key, new ValueWrapper<V>(value, timeToLiveSeconds * 1000, forceTimeout, timeoutListener));
+        final ElementWrapper<E> vw =
+            map.putIfAbsent(element, new ElementWrapper<E>(element, timeToLiveSeconds * 1000, forceTimeout, timeoutListener));
         if (null == vw) {
-            return null;
+            return true;
         }
-        return vw.value;
+        vw.touch();
+        return false;
     }
 
     /**
-     * Puts specified key-value-pair into this time-out map with default time-out listener only if the specified key is not already
-     * associated with a value.
+     * Checks if this time-out map contains specified element.
      * 
-     * @param key The value's key
-     * @param value The value to put
-     * @param timeToLiveSeconds The value's time-to-live seconds
-     * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
-     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
-     */
-    public V putIfAbsent(final K key, final V value, final int timeToLiveSeconds) {
-        return putIfAbsent(key, value, timeToLiveSeconds, defaultTimeoutListener);
-    }
-
-    /**
-     * Puts specified key-value-pair into this time-out map only if the specified key is not already associated with a value.
-     * 
-     * @param key The value's key
-     * @param value The value to put
-     * @param timeToLiveSeconds The value's time-to-live seconds
-     * @param timeoutListener The value's time-out listener triggered on its time-out event
-     * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
-     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
-     */
-    public V putIfAbsent(final K key, final V value, final int timeToLiveSeconds, final TimeoutListener<V> timeoutListener) {
-        if (disposed) {
-            throw new IllegalStateException("time-out map was disposed.");
-        }
-        final ValueWrapper<V> vw =
-            map.putIfAbsent(key, new ValueWrapper<V>(value, timeToLiveSeconds * 1000, forceTimeout, timeoutListener));
-        if (null == vw) {
-            return null;
-        }
-        return vw.value;
-    }
-
-    /**
-     * Checks if this time-out map contains a mapping for specified key.
-     * 
-     * @param key The key
+     * @param element The element
      * @return <code>true</code> if this time-out map contains a mapping for specified key; otherwise <code>false</code>
      */
-    public boolean containsKey(final K key) {
-        return map.containsKey(key);
-    }
-
-    /**
-     * Gets the value associated with given key.
-     * 
-     * @param key The key
-     * @return The value associated with given key or <code>null</code>
-     */
-    public V get(final K key) {
-        /*
-         * It is possible that a get() is performed while a running timer attempts to remove this value. In this case the caller receives
-         * associated value although it is actually timed-out. A little misbehavior that is acceptable.
-         */
-        final ValueWrapper<V> vw = map.get(key);
-        if (null == vw) {
-            return null;
-        }
-        return vw.touch();
-    }
-
-    /**
-     * Removes the value associated with given key.
-     * 
-     * @param key The key
-     * @return The value associated with given key or <code>null</code>
-     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
-     */
-    public V remove(final K key) {
+    public boolean contains(final E element) {
         if (disposed) {
             throw new IllegalStateException("time-out map was disposed.");
         }
-        final ValueWrapper<V> vw = map.remove(key);
-        if (null == vw) {
+        return map.containsKey(element);
+    }
+
+    /**
+     * Returns an iterator over the elements in this set. The elements are returned in no particular order (unless this set is an instance
+     * of some class that provides a guarantee).
+     * 
+     * @return an iterator over the elements in this set.
+     */
+    public Iterator<E> iterator() {
+        if (disposed) {
+            throw new IllegalStateException("time-out map was disposed.");
+        }
+        return new ElementIterator<E>(map.values().iterator());
+    }
+
+    /**
+     * Returns any of the elements in this set.
+     * 
+     * @return Any element or <code>null</code> if this set is empty
+     */
+    public E getAny() {
+        if (disposed) {
+            throw new IllegalStateException("time-out map was disposed.");
+        }
+        if (map.isEmpty()) {
             return null;
         }
-        return vw.value;
+        final Iterator<ElementWrapper<E>> iterator = map.values().iterator();
+        return iterator.hasNext() ? iterator.next().touch() : null;
+    }
+
+    /**
+     * Removes the element.
+     * 
+     * @param element The element
+     * @return <code>true</code> if the set contained the specified element.
+     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
+     */
+    public boolean remove(final E element) {
+        if (disposed) {
+            throw new IllegalStateException("time-out map was disposed.");
+        }
+        return (null != map.remove(element));
     }
 
     /**
@@ -309,7 +272,7 @@ public final class TimeoutConcurrentMap<K, V> {
      * 
      * @return The default listener triggered on element timeout
      */
-    public TimeoutListener<V> getDefaultTimeoutListener() {
+    public TimeoutListener<E> getDefaultTimeoutListener() {
         return defaultTimeoutListener;
     }
 
@@ -318,23 +281,23 @@ public final class TimeoutConcurrentMap<K, V> {
      * 
      * @param defaultTimeoutListener The default listener triggered on element timeout
      */
-    public void setDefaultTimeoutListener(final TimeoutListener<V> defaultTimeoutListener) {
+    public void setDefaultTimeoutListener(final TimeoutListener<E> defaultTimeoutListener) {
         this.defaultTimeoutListener = defaultTimeoutListener;
     }
 
-    private static final class ValueWrapper<V> {
+    private static final class ElementWrapper<E> {
 
-        public final V value;
+        public final E value;
 
         public final long ttl;
 
-        public final TimeoutListener<V> timeoutListener;
+        public final TimeoutListener<E> timeoutListener;
 
         public final boolean forceTimeout;
 
         public volatile long lastAccessed;
 
-        public ValueWrapper(final V value, final long ttl, final boolean forceTimeout, final TimeoutListener<V> timeoutListener) {
+        public ElementWrapper(final E value, final long ttl, final boolean forceTimeout, final TimeoutListener<E> timeoutListener) {
             super();
             this.value = value;
             this.ttl = ttl;
@@ -343,7 +306,7 @@ public final class TimeoutConcurrentMap<K, V> {
             this.forceTimeout = forceTimeout;
         }
 
-        public V touch() {
+        public E touch() {
             if (forceTimeout) {
                 // Force time out; don't touch last-accessed time stamp.
                 return value;
@@ -352,21 +315,48 @@ public final class TimeoutConcurrentMap<K, V> {
             return value;
         }
 
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((value == null) ? 0 : value.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof ElementWrapper)) {
+                return false;
+            }
+            @SuppressWarnings("unchecked") final ElementWrapper<E> other = (ElementWrapper<E>) obj;
+            if (value == null) {
+                if (other.value != null) {
+                    return false;
+                }
+            } else if (!value.equals(other.value)) {
+                return false;
+            }
+            return true;
+        }
+
     }
 
-    private static final class TimedRunnable<K, V> implements Runnable {
+    private static final class TimedRunnable<E> implements Runnable {
 
-        private final ConcurrentMap<K, ValueWrapper<V>> tmap;
+        private final ConcurrentMap<E, ElementWrapper<E>> tmap;
 
-        TimedRunnable(final ConcurrentMap<K, ValueWrapper<V>> tmap) {
+        TimedRunnable(final ConcurrentMap<E, ElementWrapper<E>> tmap) {
             super();
             this.tmap = tmap;
         }
 
         public void run() {
             final long now = System.currentTimeMillis();
-            for (final Iterator<ValueWrapper<V>> it = tmap.values().iterator(); it.hasNext();) {
-                final ValueWrapper<V> vw = it.next();
+            for (final Iterator<ElementWrapper<E>> it = tmap.values().iterator(); it.hasNext();) {
+                final ElementWrapper<E> vw = it.next();
                 if ((now - vw.lastAccessed) > vw.ttl) {
                     it.remove();
                     if (vw.timeoutListener != null) {
@@ -374,6 +364,28 @@ public final class TimeoutConcurrentMap<K, V> {
                     }
                 }
             }
+        }
+    }
+
+    private static final class ElementIterator<E> implements Iterator<E> {
+
+        private final Iterator<ElementWrapper<E>> delegatee;
+
+        public ElementIterator(final Iterator<ElementWrapper<E>> delegatee) {
+            super();
+            this.delegatee = delegatee;
+        }
+
+        public boolean hasNext() {
+            return delegatee.hasNext();
+        }
+
+        public E next() {
+            return delegatee.next().touch();
+        }
+
+        public void remove() {
+            delegatee.remove();
         }
 
     }

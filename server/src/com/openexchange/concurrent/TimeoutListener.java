@@ -47,27 +47,18 @@
  *
  */
 
-package com.openexchange.mail.cache;
-
-import com.openexchange.concurrent.TimeoutListener;
-import com.openexchange.mail.api.MailAccess;
+package com.openexchange.concurrent;
 
 /**
- * {@link MailAccessTimeoutListener} - The mail access event handler which preludes mail access closure if an instance of {@link MailAccess}
- * is removed from mail access cache.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * The time-out listener triggered on element time-out.
  */
-public final class MailAccessTimeoutListener implements TimeoutListener<MailAccess<?, ?>> {
+public interface TimeoutListener<V> {
 
     /**
-     * Default constructor
+     * Performs the actions on timed-out element.
+     * 
+     * @param element The timed-out element
      */
-    public MailAccessTimeoutListener() {
-        super();
-    }
+    public void onTimeout(V element);
 
-    public void onTimeout(final MailAccess<?, ?> mailAccess) {
-        mailAccess.close(false);
-    }
 }
