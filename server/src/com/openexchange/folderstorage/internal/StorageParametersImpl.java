@@ -151,6 +151,22 @@ public final class StorageParametersImpl implements StorageParameters {
         }
     }
 
+    public <P> P removeParameter(final FolderType folderType, final String name) {
+        final Map<String, Object> m = getFolderTypeMap(folderType, false);
+        if (null == m) {
+            return null;
+        }
+        try {
+            @SuppressWarnings("unchecked") final P retval = (P) m.remove(name);
+            return retval;
+        } catch (final ClassCastException e) {
+            /*
+             * Wrong type
+             */
+            return null;
+        }
+    }
+
     public Session getSession() {
         return session;
     }
