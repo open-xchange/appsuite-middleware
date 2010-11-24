@@ -483,7 +483,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     private boolean contentTheSameForAll() {
-        return FolderProperties.AuthType.AdminDN.equals(folderprop.getAuthtype());
+        return FolderProperties.AuthType.AdminDN.equals(folderprop.getAuthtype()) || FolderProperties.AuthType.anonymous.equals(folderprop.getAuthtype());
     }
 
 
