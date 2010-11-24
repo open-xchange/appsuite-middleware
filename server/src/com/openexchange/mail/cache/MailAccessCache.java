@@ -152,6 +152,7 @@ public final class MailAccessCache {
             return;
         }
         timeoutMap.timeoutAll();
+        timeoutMap.dispose();
         timeoutMap = null;
         defaultIdleSeconds = 0;
     }
