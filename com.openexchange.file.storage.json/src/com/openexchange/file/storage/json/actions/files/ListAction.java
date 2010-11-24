@@ -109,7 +109,6 @@ public class ListAction extends AbstractFileAction {
                     i++;
                 }
                 String folderForID = request.getFolderAt(i);
-                System.out.println(thing.getId()+": "+folderForID+" was: "+thing.getFolderId());
                 return folderForID.equals(thing.getFolderId());
             }
             
