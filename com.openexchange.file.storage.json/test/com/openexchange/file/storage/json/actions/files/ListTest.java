@@ -82,7 +82,7 @@ public class ListTest extends FileActionTest {
             .param("columns", "1,700,702") // id, title and filename
             .param("timezone", "Europe/Berlin").body(new JSONArray("[{ folder: 'folder', id: 'id1'}, {folder: 'folder', id: 'id2'}]"));
         
-        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
+        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.FOLDER_ID);
         fileAccess().expectCall("getDocuments", Arrays.asList("id1", "id2"), columns).andReturn(Results.emptyTimedResult()); 
         
         perform();

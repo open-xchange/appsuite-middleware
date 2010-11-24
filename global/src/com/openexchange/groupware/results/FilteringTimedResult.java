@@ -47,92 +47,41 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.files;
+package com.openexchange.groupware.results;
 
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.iterator.FilteringSearchIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
- * {@link InfostoreRequest}
+ * {@link FilteringTimedResult}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface InfostoreRequest {
+public abstract class FilteringTimedResult<T> implements TimedResult<T> {
 
-    InfostoreRequest require(Param...params) throws AjaxException ;
+    private TimedResult<T> delegate;
     
-    InfostoreRequest requireBody() throws AjaxException;
-
-    InfostoreRequest requireFileMetadata() throws AjaxException;
-
-    public IDBasedFileAccess getFileAccess() throws AbstractOXException;
-
-    String getId() throws AbstractOXException;
-
-    int getVersion() throws AbstractOXException;
+    public FilteringTimedResult(TimedResult<T> delegate) {
+        this.delegate = delegate;
+    }
     
-    String getFolderId() throws AbstractOXException;
+    public SearchIterator<T> results() throws AbstractOXException {
+        return new FilteringSearchIterator<T>(delegate.results()){
 
-    List<Field> getColumns() throws AbstractOXException;
+            @Override
+            public boolean accept(T thing) throws AbstractOXException {
+                return FilteringTimedResult.this.accept(thing);
+            }
+            
+        };
+    }
 
-    Field getSortingField() throws AbstractOXException;
+    protected abstract boolean accept(T thing) throws AbstractOXException;
 
-    SortDirection getSortingOrder() throws AbstractOXException;
- 
-    TimeZone getTimezone() throws AbstractOXException;
-    
-    ServerSession getSession() throws AjaxException;
+    public long sequenceNumber() throws AbstractOXException {
+        return delegate.sequenceNumber();
+    }
 
-    long getTimestamp() throws AjaxException;
-
-    Set<String> getIgnore() throws AjaxException;
-
-    List<String> getIds() throws AjaxException;
-
-    String getFolderForID(String id) throws AjaxException;
-
-    int[] getVersions() throws AjaxException;
-
-    long getDiff() throws AbstractOXException;
-
-    String getSearchQuery() throws AbstractOXException;
-
-    String getSearchFolderId() throws AbstractOXException;
-
-    int getStart() throws AbstractOXException;
-
-    int getEnd() throws AbstractOXException;
-
-    File getFile() throws AbstractOXException;
-
-    List<File.Field> getSentColumns() throws AbstractOXException;
-    
-    public boolean hasUploads() throws AbstractOXException;
-    
-    public InputStream getUploadedFileData() throws AbstractOXException;
-
-    int getAttachedId();
-
-    int getModule();
-
-    int getAttachment();
-
-    AttachmentBase getAttachmentBase();
-
-    String getFolderAt(int i);
-
-    List<String> getFolders();
 }

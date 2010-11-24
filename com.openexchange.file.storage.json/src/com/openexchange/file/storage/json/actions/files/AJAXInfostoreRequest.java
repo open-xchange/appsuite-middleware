@@ -111,6 +111,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private List<File.Field> fields;
 
     private IDBasedFileAccess files;
+
+    private List<String> folders = null;
     
     public AJAXInfostoreRequest(AJAXRequestData requestData, ServerSession session) {
         this.data = requestData;
@@ -270,17 +272,26 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
             JSONArray array = (JSONArray) data.getData();
             ids = new ArrayList<String>(array.length());
+            folders = new ArrayList<String>(array.length());
             for (int i = 0, size = array.length(); i < size; i++) {
                 JSONObject tuple = array.getJSONObject(i);
                 String id = tuple.getString(Param.ID.getName());
                 ids.add(id);
-
+                folders.add(tuple.optString(Param.FOLDER_ID.getName()));
                 folderMapping.put(id, tuple.optString(Param.FOLDER_ID.getName()));
             }
         } catch (JSONException x) {
             throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
         }
 
+    }
+    
+    public String getFolderAt(int index) {
+        return folders.get(index);
+    }
+    
+    public List<String> getFolders() {
+        return folders;
     }
 
     public int[] getVersions() throws AjaxException {

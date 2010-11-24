@@ -49,12 +49,17 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.results.FilteringTimedResult;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -65,12 +70,50 @@ import com.openexchange.groupware.results.TimedResult;
 public class ListAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws AbstractOXException {
         request.requireBody();
         
         IDBasedFileAccess fileAccess = request.getFileAccess();
         
-        TimedResult<File> documents = fileAccess.getDocuments(request.getIds(), request.getColumns());
+        List<Field> columns = request.getColumns();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
+        
+        final List<String> ids = request.getIds();
+        
+        // This is too complicated. We'd rather have layers below here aggressively check folders.
+        
+        TimedResult<File> documents = new FilteringTimedResult<File>(fileAccess.getDocuments(request.getIds(), columns)) {
+            private int threshhold = 0;
+            
+            @Override
+            protected boolean accept(File thing) throws AbstractOXException {
+                int i = threshhold;
+                while(i < ids.size()) {
+                    if(ids.get(i).equals(thing.getId())) {
+                        threshhold = i+1;
+                        break;
+                    }
+                    i++;
+                }
+                String folderForID = request.getFolderAt(i);
+                System.out.println(thing.getId()+": "+folderForID+" was: "+thing.getFolderId());
+                return folderForID.equals(thing.getFolderId());
+            }
+            
+        };
         
         return result(documents, request);
     }
