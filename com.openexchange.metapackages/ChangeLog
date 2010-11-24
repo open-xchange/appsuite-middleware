@@ -1,3 +1,8 @@
+* 2010-11-24 - choeger@open-xchange.com
+
+ - Bugfix #17556 - Installation on RHEL5 fails, no java installed
+   only provide sun-java on centos
+ 
 * 2010-10-29 - choeger@open-xchange.com
 
  - Bugfix #17347 - Outlook OXtender repository not configured correctly

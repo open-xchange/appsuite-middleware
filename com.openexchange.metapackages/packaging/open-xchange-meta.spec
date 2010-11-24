@@ -197,7 +197,9 @@ Authors:
 %package -n	open-xchange-meta-centos
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package to install OX on CentOS
+%if 0%{?centos_version}
 Provides:	java-sun
+%endif
 
 %description -n open-xchange-meta-centos
 The Open-Xchange Meta package to install OX on CentOS
