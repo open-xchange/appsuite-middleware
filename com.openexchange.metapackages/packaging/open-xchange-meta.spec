@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -280,6 +280,9 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Wed Nov 24 2010 - choeger@open-xchange.com
+ - Bugfix #17556 - Installation on RHEL5 fails, no java installed
+   only provide sun-java on centos
 * Fri Oct 29 2010 - choeger@open-xchange.com
  - Bugfix #17347 - Outlook OXtender repository not configured correctly
  - Bugfix #17348 - Wrong defaultpackage for component "oxmobility"
