@@ -56,6 +56,9 @@ import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
@@ -64,6 +67,7 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -140,9 +144,22 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
             // DeleteListener was added statically
             //serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new OutlookFolderDeleteListener(), null));
 
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("tree", OutlookFolderStorage.OUTLOOK_TREE_ID);
             serviceRegistrations.add(context.registerService(FolderStorage.class.getName(), new OutlookFolderStorage(), dictionary));
+
+            final EventHandler eventHandler = new EventHandler() {
+                
+                public void handleEvent(final Event event) {
+                    // final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
+                    // final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                    // final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                    OutlookFolderStorage.clearTCM();
+                }
+            };
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+            dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
+            serviceRegistrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

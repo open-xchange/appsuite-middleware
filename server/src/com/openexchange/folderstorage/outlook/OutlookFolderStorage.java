@@ -254,6 +254,25 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     /**
+     * Removes specified folder from TCM map.
+     * 
+     * @param fullname The folder full name
+     * @param user The user identifier
+     * @param contextId The context identifier
+     */
+    public static void removeFromTCM(final String fullname, final int user, final int contextId) {
+        final Key key = new Key(fullname, Integer.parseInt(OutlookFolderStorage.OUTLOOK_TREE_ID), user, contextId);
+        TCM.remove(key);
+    }
+
+    /**
+     * Clears TCM map.
+     */
+    public static void clearTCM() {
+        TCM.clear();
+    }
+
+    /**
      * The real tree identifier.
      */
     final String realTreeId;
@@ -1460,7 +1479,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                     for (final SortableId subfolder : subfolders) {
                         final String id = subfolder.getId();
                         if (!FolderStorage.PRIVATE_ID.equals(id)) { // Exclude private folder
-                            put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                            final String name = subfolder.getName();
+                            if (null == name) {
+                                put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                            } else {
+                                put2TreeMap(name, id, treeMap);
+                            }
                         }
 
                         // if (FolderStorage.PUBLIC_ID.equals(id)) {

@@ -53,6 +53,7 @@ import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
@@ -152,7 +153,7 @@ public final class MailFolderImpl extends AbstractFolder {
         name = "INBOX".equals(fullname) ? "Inbox" : mailFolder.getName();
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
         parent =
-            mailFolder.isRootFolder() ? String.valueOf(1) : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
+            mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
         final MailPermission[] mailPermissions = mailFolder.getPermissions();
         permissions = new Permission[mailPermissions.length];
         for (int i = 0; i < mailPermissions.length; i++) {

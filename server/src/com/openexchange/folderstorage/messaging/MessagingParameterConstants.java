@@ -71,6 +71,6 @@ public final class MessagingParameterConstants {
     /**
      * The parameter name for messaging transport.
      */
-    public static final String PARAM_MAIL_TRANSPORT = "mssgng.Transp";
+    public static final String PARAM_MESSAGING_TRANSPORT = "mssgng.Transp";
 
 }

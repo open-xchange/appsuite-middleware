@@ -138,6 +138,15 @@ public interface StorageParameters {
     <P> P getParameter(FolderType folderType, String name);
 
     /**
+     * Removes the parameter bound to given name.
+     * 
+     * @param folderType The folder type
+     * @param name The parameter name
+     * @return The parameter previously bound to given name
+     */
+    <P> P removeParameter(FolderType folderType, String name);
+
+    /**
      * Puts given parameter. Any existing parameters bound to given name are replaced. A <code>null</code> value means to remove the
      * parameter.
      * <p>
