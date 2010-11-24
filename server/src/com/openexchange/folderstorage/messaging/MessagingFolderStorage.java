@@ -798,7 +798,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                     access.close();
                 }
             } finally {
-                params.putParameter(MessagingFolderType.getInstance(), MessagingParameterConstants.PARAM_MESSAGING_ACCESS, null);
+                params.putParameter(MessagingFolderType.getInstance(), PARAM, null);
             }
         }
     }

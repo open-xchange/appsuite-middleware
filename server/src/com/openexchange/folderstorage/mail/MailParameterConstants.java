@@ -66,11 +66,11 @@ public final class MailParameterConstants {
     /**
      * The parameter name for mail access.
      */
-    public static final String PARAM_MAIL_ACCESS = "c~.o~.m~.Access";
+    public static final String PARAM_MAIL_ACCESS = "mail.Access";
 
     /**
      * The parameter name for mail transport.
      */
-    public static final String PARAM_MAIL_TRANSPORT = "c~.o~.m~.Transp";
+    public static final String PARAM_MAIL_TRANSPORT = "mail.Transp";
 
 }

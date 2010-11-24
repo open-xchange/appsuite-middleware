@@ -630,7 +630,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     access.close();
                 }
             } finally {
-                params.putParameter(FileStorageFolderType.getInstance(), FileStorageParameterConstants.PARAM_FILE_STORAGE_ACCESS, null);
+                params.putParameter(FileStorageFolderType.getInstance(), PARAM, null);
             }
         }
     }
