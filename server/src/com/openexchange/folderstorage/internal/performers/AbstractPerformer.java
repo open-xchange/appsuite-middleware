@@ -146,6 +146,23 @@ public abstract class AbstractPerformer {
     }
 
     /**
+     * Gets the context information for an error message.
+     * 
+     * @return The context information for an error message.
+     */
+    protected String getContextInfo4Error() {
+        final Context context = this.context == null ? session.getContext() : this.context;
+        if (null == context) {
+            return "";
+        }
+        final String name = context.getName();
+        if (null == name || 0 == name.length()) {
+            return String.valueOf(context.getContextId());
+        }
+        return new StringBuilder(16).append(name).append(" (").append(context.getContextId()).append(')').toString();
+    }
+
+    /**
      * Adds a warning to this performer. <br>
      * <b><small>NOTE</small></b>: Category is set to {@link Category#WARNING} if not done, yet.
      * 

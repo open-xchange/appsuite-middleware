@@ -196,7 +196,7 @@ public final class DeletePerformer extends AbstractPerformer {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     folder.getLocalizedName(session.getUser().getLocale()),
                     getUser().getDisplayName(),
-                    Integer.valueOf(getContextId()));
+                    getContextInfo4Error());
             }
             if (!permission.isAdmin()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(

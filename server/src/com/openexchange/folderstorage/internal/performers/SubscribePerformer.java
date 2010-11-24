@@ -144,9 +144,9 @@ public final class SubscribePerformer extends AbstractPerformer {
                 }
                 if (!parentPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        folderId,
+                        sourceFolder.getLocalizedName(session.getUser().getLocale()),
                         getUser().getDisplayName(),
-                        Integer.valueOf(getContextId()));
+                        getContextInfo4Error());
                 }
             }
             final FolderStorage targetStorage = getOpenedStorage(targetParentId, targetTreeId, storageParameters, openedStorages);

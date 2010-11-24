@@ -212,9 +212,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 }
                 if (!parentPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        parentId,
+                        parent.getLocalizedName(session.getUser().getLocale()),
                         getUser().getDisplayName(),
-                        Integer.valueOf(getContextId()));
+                        getContextInfo4Error());
                 }
             }
             /*

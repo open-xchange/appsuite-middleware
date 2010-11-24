@@ -152,9 +152,9 @@ public final class CreatePerformer extends AbstractPerformer {
             }
             if (!parentPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    parentId,
+                    parent.getLocalizedName(session.getUser().getLocale()),
                     getUser().getDisplayName(),
-                    Integer.valueOf(getContextId()));
+                    getContextInfo4Error());
             }
             if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && MailContentType.getInstance().toString().equals(
                 toCreate.getContentType().toString())) {
