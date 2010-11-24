@@ -675,12 +675,34 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 24 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17627: Changed connection handling in mail folder storage
+ - Bugfix #17596: Enhanced error message
+* Mon Nov 22 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17605: Stripping JavaScript contained in href attribute from HTML tag
+* Mon Nov 22 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17608: User contacts are not mixed up anymore when loading them through an all request on the users interface.
+* Fri Nov 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17523: Update tasks can now be excluded for administration daemon, too.
+* Fri Nov 19 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17526: Fixed Calendar Printing.
+* Fri Nov 19 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17517: Get the file size for quota management before deleting a file.
+* Fri Nov 19 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17490: Removed folder permission check and delegating permission check to file storage layer
+ - Bugfix #17561: Fixed folder creation on a Courier IMAP server
+* Thu Nov 18 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17563: Ensured calling thread opened mail access before closing it
 * Wed Nov 17 2010 - steffen.templin@open-xchange.com
  - Bugfix #17520: Remove old login and autologin cookies in redirects.
  - Bugfix #17568: Errors while removing session bound images.
 * Wed Nov 17 2010 - thorben.betten@open-xchange.com
  - Bugfix #17329: Using a blocking queue to collect addresses
- - Bugfix #17571: Returning ISO-558-1 charset if detector indicates "nomatch"
+ - Bugfix #17571: Returning ISO-8859-1 charset if detector indicates "nomatch"
+ - Partial fix for bug #17292: Grouping listed folders by their folder storage to get those folders by one
+ - Bugfix #17423: Deleting distribution list entries which refer to deleted user
+* Wed Nov 17 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17539: Improved the performance when get all contacts of the global address book.
 * Tue Nov 16 2010 - thorben.betten@open-xchange.com
  - Partial fix for bug #17203: Added "; HttpOnly" flag to server cookies and added "cookielifetime" to config tree
 * Tue Nov 16 2010 - karsten.will@open-xchange.com
@@ -711,7 +733,7 @@ fi
  - Bugfix #17316: Setting proper HTTP headers on .docx attachment download
 * Wed Nov 10 2010 - francisco.laguna@open-xchange.com
  - Bugfix #17459: Delegate to correct method when saving a new infoitem.
-* Wed Nov 10 2010
+* Wed Nov 10 2010 - steffen.templin@open-xchange.com
  - Bugfix #17227: Wrong end date in confirmation mails.
 * Tue Nov 09 2010 - thorben.betten@open-xchange.com
  - Bugfix #17480: Proper mapping of "infostore" module to not mix up with new file storage folders
