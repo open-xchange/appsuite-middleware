@@ -156,6 +156,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-515
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/server.properties
+   if ! ox_exists_property com.openexchange.cookie.httpOnly $pfile; then
+      ox_set_property com.openexchange.cookie.httpOnly true $pfile
+   fi
+
    # SoftwareChange_Request-511 / Bugfix #17523
    # -----------------------------------------------------------------------
    if [ -e /opt/open-xchange/etc/groupware/excludedupdatetasks.properties ]; then
