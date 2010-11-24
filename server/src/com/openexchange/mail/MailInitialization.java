@@ -57,6 +57,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.cache.JSONMessageCache;
 import com.openexchange.mail.cache.JSONMessageCacheConfiguration;
 import com.openexchange.mail.cache.MailAccessCache;
+import com.openexchange.mail.cache.MailAccessCache2;
 import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailPropertiesInit;
@@ -200,6 +201,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         JSONMessageCacheConfiguration.releaseInstance();
         MIMEType2ExtMap.reset();
         MailAccessCache.releaseInstance();
+        MailAccessCache2.releaseInstance();
         MailMessageCache.releaseInstance();
         UserSettingMailStorage.releaseInstance();
         MailAccessWatcher.stop();
