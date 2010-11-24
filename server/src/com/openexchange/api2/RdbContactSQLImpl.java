@@ -49,6 +49,7 @@
 
 package com.openexchange.api2;
 
+import static com.openexchange.groupware.contact.Contacts.performContactReadCheck;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.StringCollection.prepareForSearch;
@@ -653,7 +654,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final Contact co;
         try {
             co = Contacts.getContactById(objectId, userId, memberInGroups, ctx, userConfiguration, con);
-            if (!performSecurityReadCheck(fid, co.getCreatedBy(), userId, session, con, ctx)) {
+            if (!performContactReadCheck(contactFolder, userId, co.getCreatedBy(), userConfiguration, con)) {
                 throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
             }
             final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(

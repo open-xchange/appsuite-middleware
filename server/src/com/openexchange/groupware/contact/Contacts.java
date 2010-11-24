@@ -2004,6 +2004,34 @@ public final class Contacts {
         }
     }
 
+    public static boolean performContactReadCheck(FolderObject folder, int user, int createdFrom, UserConfiguration uc, Connection readCon) {
+        try {
+            if (folder.getModule() != FolderObject.CONTACT) {
+                return false;
+            }
+            final EffectivePermission oclPerm = folder.getEffectiveUserPermission(user, uc, readCon);
+
+            if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
+                return false;
+            }
+            if (!oclPerm.canReadAllObjects()) {
+                if (oclPerm.canReadOwnObjects() && (createdFrom == user)) {
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        } catch (DBPoolingException e) {
+            ContactException e1 = ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
+            LOG.error(e1.getMessage(), e1);
+            return false;
+        } catch (SQLException e) {
+            ContactException e1 = ContactExceptionCodes.SQL_PROBLEM.create(e, "");
+            LOG.error(e1.getMessage(), e1);
+            return false;
+        }
+    }
+
     public static boolean performContactWriteCheckByID(final int folderId, final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws ContactException {
 
         Connection readCon = null;
