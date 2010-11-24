@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -385,6 +385,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Sat Oct 23 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #16844: Only update module access permissions on change call if they have been changed.
 * Wed Sep 22 2010 - marcus.klein@open-xchange.com
  - Bugfix #16981: When listing context misses some filestore usage entry a hint is returned to update the corresponding schema.
 * Mon Sep 06 2010 - choeger@open-xchange.com
