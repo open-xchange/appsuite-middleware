@@ -50,9 +50,10 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -74,6 +75,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractPerformer {
 
+    private static final Object PRESENT = new Object();
+
     /**
      * The constant indicating all content types are allowed.
      */
@@ -89,7 +92,7 @@ public abstract class AbstractPerformer {
 
     protected StorageParameters storageParameters;
 
-    private final Set<AbstractOXException> warnings;
+    private final Map<AbstractOXException, Object> warnings;
 
     /**
      * Initializes a new {@link AbstractPerformer} from given session.
@@ -115,7 +118,7 @@ public abstract class AbstractPerformer {
         user = session.getUser();
         context = session.getContext();
         storageParameters = new StorageParametersImpl(session);
-        warnings = new HashSet<AbstractOXException>(2);
+        warnings = new ConcurrentHashMap<AbstractOXException, Object>(2);
     }
 
     /**
@@ -142,7 +145,7 @@ public abstract class AbstractPerformer {
         this.user = user;
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
-        warnings = new HashSet<AbstractOXException>(2);
+        warnings = new ConcurrentHashMap<AbstractOXException, Object>(2);
     }
 
     /**
@@ -170,7 +173,7 @@ public abstract class AbstractPerformer {
      */
     protected void addWarning(final AbstractOXException warning) {
         warning.setCategory(Category.WARNING);
-        warnings.add(warning);
+        warnings.put(warning, PRESENT);
     }
 
     /**
@@ -188,7 +191,7 @@ public abstract class AbstractPerformer {
      * @return The warnings as an unmodifiable set
      */
     public Set<AbstractOXException> getWarnings() {
-        return Collections.unmodifiableSet(warnings);
+        return Collections.unmodifiableSet(warnings.keySet());
     }
 
     /**
