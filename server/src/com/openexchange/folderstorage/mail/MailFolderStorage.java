@@ -460,29 +460,26 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             mailAccess = MailAccess.getInstance(session, accountId);
-            final MailFolderImpl retval;
+            final Folder retval;
             final boolean hasSubfolders;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-                final MailFolder rootFolder = mailAccess.getRootFolder();
-                retval =
-                    new MailFolderImpl(
-                        rootFolder,
-                        accountId,
-                        mailAccess.getMailConfig(),
-                        session.getUser().getLocale(),
-                        null);
-                /*
-                 * Set proper name for non-primary account
-                 */
-                if (MailAccount.DEFAULT_ID != accountId) {
+                if (MailAccount.DEFAULT_ID == accountId) {
+                    final MailFolder rootFolder = mailAccess.getRootFolder();
+                    retval =
+                        new MailFolderImpl(
+                            rootFolder,
+                            accountId,
+                            mailAccess.getMailConfig(),
+                            session.getUser().getLocale(),
+                            null);
+                    hasSubfolders = rootFolder.hasSubfolders();
+                } else {
                     /*
-                     * Set proper name
+                     * An external account folder
                      */
-                    if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                        retval.setName(mailAccount.getName());
-                    }
+                    retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                    hasSubfolders = true;
                 }
-                hasSubfolders = rootFolder.hasSubfolders();
             } else {
                 mailAccess.connect();
                 final MailFolder mailFolder = getMailFolder(treeId, accountId, fullname, true, session, mailAccess);
