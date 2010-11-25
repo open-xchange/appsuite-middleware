@@ -9,6 +9,11 @@ java.util.logging.FileHandler.count=99
 java.util.logging.FileHandler.formatter=java.util.logging.SimpleFormatter
 java.util.logging.FileHandler.append=true
 
+# This option ensures, that all login relevant information is logged correctly. NEVER touch this configuration. If these values are changed
+# Open-Xchange cannot take any responsibility for analysis of potential security breaches.
+com.openexchange.login.internal.LoginPerformer.level=INFO
+com.openexchange.sessiond.impl.SessionHandler.level=INFO
+
 sun.rmi.level=INFO
 org.apache.level=WARNING
 com.sun.level=INFO

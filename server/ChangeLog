@@ -1,3 +1,7 @@
+* 2010-11-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #17349: Log levels of classes LoginPerformer and SessionHandler should now always be INFO to be able to follow session life times.
+
 * 2010-11-25 - tobias.prinz@open-xchange.com
 
  - Bugfix #17562: Internal users are now properly recognized even if they are are referred to by e-mails with strange capitalization.

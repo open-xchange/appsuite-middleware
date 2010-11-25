@@ -11,6 +11,8 @@
     <logger name="org.apache.jcs">
         <level value="WARN"/>
     </logger>
+    <!-- This option ensures, that all login relevant information is logged correctly. NEVER touch this configuration. If these values -->
+    <!-- are changed Open-Xchange cannot take any responsibility for analysis of potential security breaches. -->
     <logger name="com.openexchange.login.internal.LoginPerformer">
         <level value="INFO"/> 
     </logger>
