@@ -53,10 +53,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
@@ -264,12 +266,17 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             final UserParticipant up = new UserParticipant(user.getId());
             ICalParticipant icalP = null;
             for (final String alias: user.getAliases()) {
-                icalP = mails.get(alias);
-                if (icalP != null) {
-                    mails.remove(alias);
+            	String toRemove = null;
+            	for(String mail: mails.keySet()){
+            		if(mail.equalsIgnoreCase(alias)){
+            			icalP = mails.get(mail);
+            			toRemove = mail;
+            			break;
+            		}
+            	}
+                if (toRemove != null) {
+                    mails.remove(toRemove);
                     break;
-                } else {
-                	
                 }
             }
             if (icalP == null)
