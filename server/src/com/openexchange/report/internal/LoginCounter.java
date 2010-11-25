@@ -83,7 +83,7 @@ public class LoginCounter implements LoginCounterMBean {
         Pattern pattern = null;            
         if (regex != null)  {
             try {
-                pattern = Pattern.compile(regex);
+                pattern = Pattern.compile("client:" + regex);
             } catch (PatternSyntaxException e) {
                 LOG.error(e.getMessage(), e);
                 throw new MBeanException(e, "Couldn't compile regex pattern.");

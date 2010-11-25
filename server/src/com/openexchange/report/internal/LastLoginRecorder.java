@@ -78,7 +78,7 @@ public class LastLoginRecorder implements LoginHandlerService {
 
     public void handleLogin(LoginResult login) throws LoginException {
         LoginRequest request = login.getRequest();
-        final String key;
+        String key;
         if (null != request.getClient()) {
             key = request.getClient();
         } else if (null != request.getInterface()) {
@@ -86,6 +86,8 @@ public class LastLoginRecorder implements LoginHandlerService {
         } else {
             return;
         }
+        
+        key = "client:" + key;
         Context ctx = login.getContext();
         if (ctx.isReadOnly()) {
             return;
