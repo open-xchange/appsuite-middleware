@@ -612,6 +612,16 @@ public final class FolderCacheManager {
         } catch (final CacheException e) {
             throw new OXException(e);
         }
+        // Dirty hack
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                final Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                globalCache.clear();
+            } catch (final CacheException e) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
     }
 
     /**
