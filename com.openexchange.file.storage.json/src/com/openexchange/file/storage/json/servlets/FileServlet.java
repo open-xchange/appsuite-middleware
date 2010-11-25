@@ -77,6 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 public class FileServlet extends MultipleAdapterServletNew {
 
     private static final String DOCUMENT = "document";
+    private static final String PARAMETER_CONTENT_DISPOSITION = "contentDisposition";
 
     /**
      * Initializes a new {@link FileServlet}.
@@ -100,6 +101,8 @@ public class FileServlet extends MultipleAdapterServletNew {
 
             String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
             String userAgent = req.getHeader("user-agent");
+            String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
+            
             IDBasedFileAccess fileAccess = request.getFileAccess();
             File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
 
@@ -110,14 +113,26 @@ public class FileServlet extends MultipleAdapterServletNew {
                 if (SAVE_AS_TYPE.equals(contentType)) {
                     Tools.setHeaderForFileDownload(userAgent, res, fileMetadata.getFileName());
                     res.setContentType(contentType);
+                    if(contentDisposition != null) {
+                        res.setHeader("Content-Disposition", contentDisposition);
+                    }
                 } else {
                     final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
                         documentData,
                         fileMetadata.getFileName(),
                         fileMetadata.getFileMIMEType(),
+                        contentDisposition,
                         userAgent);
-                    res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
-                    res.setContentType(checkedDownload.getContentType());
+                    if(contentDisposition != null) {
+                        res.setHeader("Content-Disposition", contentDisposition);
+                    } else {
+                        res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
+                    }
+                    if(contentType != null) {
+                        res.setContentType(contentType);
+                    } else {
+                        res.setContentType(checkedDownload.getContentType());
+                    }
                     documentData = checkedDownload.getInputStream();
                 }
                 // Browsers doesn't like the Pragma header the way we usually set
