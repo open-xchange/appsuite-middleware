@@ -89,9 +89,9 @@ public final class ExternalMessagingAccountRootFolder extends AbstractFolder {
          * Set proper name
          */
         name = msgAccount.getDisplayName();
-        MessagingPermissionImpl mp = new MessagingPermissionImpl();
+        final MessagingPermissionImpl mp = new MessagingPermissionImpl();
         mp.setEntity(session.getUserId());
-        mp.setAllPermissions(Permission.CREATE_SUB_FOLDERS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        mp.setAllPermissions(Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
         mp.setAdmin(false);
         permissions = new Permission[] { mp };
         type = SystemType.getInstance();
