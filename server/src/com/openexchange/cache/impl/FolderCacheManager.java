@@ -482,6 +482,17 @@ public final class FolderCacheManager {
                 if (tmp instanceof FolderObject) {
                     // Remove to distribute PUT as REMOVE
                     folderCache.remove(key);
+                    // Dirty hack
+                    final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
+                        try {
+                            final Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                            final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
+                            globalCache.remove(cacheKey);
+                        } catch (final CacheException e) {
+                            LOG.warn(e.getMessage(), e);
+                        }
+                    }
                 } else if (tmp instanceof Condition) {
                     cond = (Condition) tmp;
                 }
