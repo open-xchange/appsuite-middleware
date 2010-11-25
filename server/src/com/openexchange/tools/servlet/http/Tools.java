@@ -256,19 +256,30 @@ public final class Tools {
             }
         }
     }
-
     public static void setHeaderForFileDownload(String userAgent, HttpServletResponse resp, String fileName) throws UnsupportedEncodingException {
+        setHeaderForFileDownload(userAgent, resp, fileName, null);
+    }
+
+    public static void setHeaderForFileDownload(String userAgent, HttpServletResponse resp, String fileName, String contentDisposition) throws UnsupportedEncodingException {
         BrowserDetector detector = new BrowserDetector(userAgent);
-        if (detector.isMSIE()) {
-            resp.setHeader("Content-Disposition", "attachment; filename=\"" + Helper.encodeFilenameForIE(fileName, Charsets.UTF_8) + "\"");
-        } else if (detector.isSafari5()) {
-            // URL encoded name in link is sufficient.
-            resp.setHeader("Content-Disposition", "attachment");
-        } else {
-            resp.setHeader(
-                "Content-Disposition",
-                "attachment; filename=\"" + Helper.escape(Helper.encodeFilename(fileName, "UTF-8")) + "\"");
+        if(contentDisposition == null) {
+            contentDisposition = "attachment";
         }
+        String filename = null;
+        
+        if (detector.isMSIE()) {
+            filename = Helper.encodeFilenameForIE(fileName, Charsets.UTF_8);
+        } else if (detector.isSafari5()) {
+            // Leave empty
+        } else {
+            filename = Helper.escape(Helper.encodeFilename(fileName, "UTF-8"));
+        }
+        
+        if(!contentDisposition.contains(";") && filename != null) {
+            contentDisposition = new StringBuilder(64).append(contentDisposition).append("; filename=\"").append(filename).append("\"").toString();
+        }
+        
+        resp.setHeader("Content-Disposition", contentDisposition);
     }
 
     static {
