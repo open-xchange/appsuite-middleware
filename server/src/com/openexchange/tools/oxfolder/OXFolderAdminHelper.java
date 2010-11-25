@@ -1080,10 +1080,10 @@ public final class OXFolderAdminHelper {
     }
 
     private final static String SQL_INSERT_SYSTEM_FOLDER =
-        "INSERT INTO oxfolder_tree " + "(fuid, cid, parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+        "INSERT INTO oxfolder_tree (fuid, cid, parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String SQL_INSERT_SYSTEM_PERMISSION =
-        "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) VALUES (?,?,?,?,?,?,?,?,?)";
+        "INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) VALUES (?,?,?,?,?,?,?,?,?)";
 
     private static final String SQL_INSERT_SPECIAL_FOLDER = "INSERT INTO oxfolder_specialfolders " + "(tag, cid, fuid) VALUES (?,?,?)";
 
