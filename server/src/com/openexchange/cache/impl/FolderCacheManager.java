@@ -583,6 +583,19 @@ public final class FolderCacheManager {
         } finally {
             cacheLock.unlock();
         }
+        // Dirty hack
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                final Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                for (final int key : keys) {
+                    final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
+                    globalCache.remove(cacheKey);
+                }
+            } catch (final CacheException e) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
     }
 
     /**
