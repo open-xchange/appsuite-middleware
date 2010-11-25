@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -67,6 +68,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -258,6 +260,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                 if (FolderCacheManager.isEnabled()) {
                     FolderCacheManager.getInstance().removeFolderObject(fid, ctx);
                 }
+                broadcastEvent(fid, true, ServerServiceRegistry.getInstance().getService(EventAdmin.class));
                 if (FolderQueryCacheManager.isInitialized()) {
                     FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
                 }

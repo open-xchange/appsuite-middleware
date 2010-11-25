@@ -60,19 +60,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
@@ -86,6 +91,7 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -514,6 +520,8 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
                 FolderCacheManager.getInstance().removeFolderObject(id, ctx);
                 FolderCacheManager.getInstance().removeFolderObject(parent, ctx);
             }
+            broadcastEvent(id, true, userId, ctx.getContextId(), ServerServiceRegistry.getInstance().getService(EventAdmin.class));
+            broadcastEvent(parent, true, userId, ctx.getContextId(), ServerServiceRegistry.getInstance().getService(EventAdmin.class));
             if (CalendarCache.isInitialized()) {
                 CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
             }
@@ -521,4 +529,24 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
             log.error(e.getMessage(), e);
         }
     }
+
+    private static void broadcastEvent(final int fuid, final boolean deleted, final int entity, final int contextId, final EventAdmin eventAdmin) {
+        if (null == eventAdmin) {
+            return;
+        }
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
+        properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
+        properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(entity));
+        properties.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(fuid));
+        properties.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(!deleted));
+        /*
+         * Create event with push topic
+         */
+        final Event event = new Event(FolderEventConstants.TOPIC, properties);
+        /*
+         * Finally deliver it
+         */
+        eventAdmin.sendEvent(event);
+    }
+
 }

@@ -221,24 +221,26 @@ abstract class CheckPermission {
      * @param eventAdmin The event admin service reference
      */
     protected void broadcastEvent(final int folderId, final boolean deleted, final EventAdmin eventAdmin) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
-        properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
-        properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
-        properties.put(FolderEventConstants.PROPERTY_SESSION, session);
-        properties.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(folderId));
-        properties.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(!deleted));
-        /*
-         * Create event with push topic
-         */
-        final Event event = new Event(FolderEventConstants.TOPIC, properties);
-        /*
-         * Finally deliver it
-         */
-        eventAdmin.sendEvent(event);
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(CheckPermission.class);
-        if (logger.isDebugEnabled()) {
-            logger.debug(new StringBuilder(64).append("Notified ").append("content-related").append(
-                "-wise changed folder \"").append(folderId).append(" in context ").append(session.getContextId()).toString());
+        if (null != eventAdmin) {
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
+            properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
+            properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
+            properties.put(FolderEventConstants.PROPERTY_SESSION, session);
+            properties.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(folderId));
+            properties.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(!deleted));
+            /*
+             * Create event with push topic
+             */
+            final Event event = new Event(FolderEventConstants.TOPIC, properties);
+            /*
+             * Finally deliver it
+             */
+            eventAdmin.sendEvent(event);
+            final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(CheckPermission.class);
+            if (logger.isDebugEnabled()) {
+                logger.debug(new StringBuilder(64).append("Notified ").append("content-related").append("-wise changed folder \"").append(
+                    folderId).append(" in context ").append(session.getContextId()).toString());
+            }
         }
     }
 
