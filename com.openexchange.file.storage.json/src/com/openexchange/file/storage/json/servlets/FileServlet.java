@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 public class FileServlet extends MultipleAdapterServletNew {
 
     private static final String DOCUMENT = "document";
-    private static final String PARAMETER_CONTENT_DISPOSITION = "contentDisposition";
+    private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
 
     /**
      * Initializes a new {@link FileServlet}.
