@@ -228,11 +228,11 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             final EventHandler eventHandler = new EventHandler() {
                 
                 public void handleEvent(final Event event) {
-                    final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
+                    final Integer contextId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_CONTEXT));
+                    final Integer userId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_USER));
                     final String folderId = (String) event.getProperty(FolderEventConstants.PROPERTY_FOLDER);
-                    final Boolean contentRelated = (Boolean) event.getProperty(FolderEventConstants.PROPERTY_CONTENT_RELATED);
                     try {
-                        tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                        tmp.removeSingleFromCache(folderId, FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue());
                     } catch (final FolderException e) {
                         LOG.error(e.getMessage(), e);
                     }

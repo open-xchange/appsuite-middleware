@@ -115,7 +115,7 @@ public final class FolderEventConstants {
     public static final String PROPERTY_FOLDER = "com.openexchange.folderstorage.folder";
 
     /**
-     * The session property of a push event. Property value is of type <code>com.openexchange.session.Session</code>.
+     * The <b>optional</b> session property of a push event. Property value is of type <code>com.openexchange.session.Session</code>.
      */
     public static final String PROPERTY_SESSION = "com.openexchange.folderstorage.session";
 
