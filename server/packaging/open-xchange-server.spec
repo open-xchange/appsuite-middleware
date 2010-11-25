@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 17
+%define		ox_release 18
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 24 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17605: Stripping JavaScript contained in href attribute from HTML tag
+* Fri Nov 19 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17517: Get the file size for quota management before deleting a file.
 * Fri Oct 08 2010 - thorben.betten@open-xchange.com
  - Bugfix #17198: Proper respect to property "com.openexchange.mail.ignoreSubscription"
 * Fri Oct 01 2010 - marcus.klein@open-xchange.com
