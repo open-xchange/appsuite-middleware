@@ -68,6 +68,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -532,6 +533,17 @@ public final class FolderCacheManager {
                 throw new OXException(e);
             } finally {
                 cacheLock.unlock();
+            }
+        }
+        // Dirty hack
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                final Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
+                globalCache.remove(cacheKey);
+            } catch (final CacheException e) {
+                LOG.warn(e.getMessage(), e);
             }
         }
     }
