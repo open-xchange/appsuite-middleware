@@ -54,11 +54,14 @@ public class ContextModuleAccessCombination {
 	private String userAccessCombination;
 	
 	private String userCount;
+	
+	private String inactiveCount;
 
 	public ContextModuleAccessCombination(String userAccessCombination,
-			String userCount) {
+			String userCount, String inactiveCount) {
 		this.userAccessCombination = userAccessCombination;
 		this.userCount = userCount;
+		this.inactiveCount = inactiveCount;
 	}
 
 	public String getUserAccessCombination() {
@@ -75,6 +78,14 @@ public class ContextModuleAccessCombination {
 
 	public void setUserCount(String userCount) {
 		this.userCount = userCount;
+	}
+
+	public String getInactiveCount() {
+		return inactiveCount;
+	}
+
+	public void setInactiveCount(String inactiveCount) {
+		this.inactiveCount = inactiveCount;
 	}
 
 	@Override

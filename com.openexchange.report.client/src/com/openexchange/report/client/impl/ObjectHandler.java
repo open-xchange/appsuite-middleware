@@ -103,13 +103,15 @@ public class ObjectHandler {
     		contextDetail.setId(context.get("identifier").toString());
     		contextDetail.setAge(context.get("age").toString());
     		contextDetail.setCreated(context.get("created").toString());
+    		contextDetail.setAdminmac(context.get("admin permission").toString());
     		for (Object tmp2 : moduleAccessCombinations.values()) {
     			CompositeDataSupport moduleAccessCombination = (CompositeDataSupport) tmp2;
 
     			contextDetail.addModuleAccessCombination(
     					new ContextModuleAccessCombination(
     							moduleAccessCombination.get("module access combination").toString(),
-    							moduleAccessCombination.get("users").toString()
+    							moduleAccessCombination.get("users").toString(),
+    							moduleAccessCombination.get("inactive").toString()
     					));
     		}
     		retval.add(contextDetail);
@@ -134,7 +136,7 @@ public class ObjectHandler {
 
     protected static List<List<Object>> createDetailList(List<ContextDetail> contextDetails) {
     	List<List<Object>> retval = new ArrayList<List<Object>>();
-    	retval.add(Arrays.asList((Object) "id", "age", "created", "module access combination", "users" ));
+    	retval.add(Arrays.asList((Object) "id", "age", "created", "admin permission", "module access combination", "users", "inactive" ));
 
     	TreeSet<Integer> sorted = new TreeSet<Integer>(new Comparator<Integer>() {
 			public int compare(Integer o1, Integer o2) {
@@ -159,8 +161,10 @@ public class ObjectHandler {
     					new Integer(tmp.getId()),
     					tmp.getAge(),
     					tmp.getCreated(),
+    					tmp.getAdminmac(),
     					moduleAccessCombination.getUserAccessCombination(),
-    					moduleAccessCombination.getUserCount()
+    					moduleAccessCombination.getUserCount(),
+    					moduleAccessCombination.getInactiveCount()
     				));
 				sortDetails.put(tmp.getId(), tmpList);
     		}

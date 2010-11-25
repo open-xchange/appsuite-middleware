@@ -162,12 +162,14 @@ public class TransportHandler {
     		contextDetailObjectJSON.put("id", tmp.getId());
     		contextDetailObjectJSON.put("age", tmp.getAge());
     		contextDetailObjectJSON.put("created", tmp.getCreated());
+    		contextDetailObjectJSON.put("adminmac", tmp.getAdminmac());
     		
     		JSONObject moduleAccessCombinations = new JSONObject();
     		for (ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {
     			JSONObject moduleAccessCombinationJSON = new JSONObject();
     			moduleAccessCombinationJSON.put("mac", moduleAccessCombination.getUserAccessCombination());
     			moduleAccessCombinationJSON.put("users", moduleAccessCombination.getUserCount());
+    			moduleAccessCombinationJSON.put("inactive", moduleAccessCombination.getInactiveCount());
     			moduleAccessCombinations.put(moduleAccessCombination.getUserAccessCombination(), moduleAccessCombinationJSON);
     		}
     		contextDetailObjectJSON.put("macs", moduleAccessCombinations);

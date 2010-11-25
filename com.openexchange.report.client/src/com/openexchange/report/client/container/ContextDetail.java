@@ -63,6 +63,8 @@ public class ContextDetail {
 	private String created;
 
 	private String mappings;
+	
+	private String adminmac;
 
 	private List<ContextModuleAccessCombination> moduleAccessCombinations;
 
@@ -71,23 +73,25 @@ public class ContextDetail {
 	}
 
 	public ContextDetail(String id, String users, String age,
-			String created, String mappings) {
+			String created, String mappings, String adminmac) {
 		this.id = id;
 		this.users = users;
 		this.age = age;
 		this.created = created;
 		this.mappings = mappings;
+		this.adminmac = adminmac;
 		this.moduleAccessCombinations =  new ArrayList<ContextModuleAccessCombination>();
 	}	
 	
 	public ContextDetail(String id, String users, String age,
-			String created, String mappings,
+			String created, String mappings, String adminmac, 
 			List<ContextModuleAccessCombination> moduleAccessCombinations) {
 		this.id = id;
 		this.users = users;
 		this.age = age;
 		this.created = created;
 		this.mappings = mappings;
+		this.adminmac = adminmac;
 		this.moduleAccessCombinations = moduleAccessCombinations;
 	}
 
@@ -129,6 +133,14 @@ public class ContextDetail {
 
 	public void setMappings(String mappings) {
 		this.mappings = mappings;
+	}
+
+	public String getAdminmac() {
+		return adminmac;
+	}
+
+	public void setAdminmac(String adminmac) {
+		this.adminmac = adminmac;
 	}
 
 	public List<ContextModuleAccessCombination> getModuleAccessCombinations() {
