@@ -197,7 +197,7 @@ public final class DownloadUtility {
         }
         
         if(!overridingDisposition.contains(";")) {
-            overridingDisposition = new StringBuilder(64).append(overridingDisposition).append("attachment; filename=\"").append(preparedFileName).append('"').toString();
+            overridingDisposition = new StringBuilder(64).append(overridingDisposition).append("; filename=\"").append(preparedFileName).append('"').toString();
         }
         
         return new CheckedDownload(
