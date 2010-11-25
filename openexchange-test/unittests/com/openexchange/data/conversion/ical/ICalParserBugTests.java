@@ -50,6 +50,10 @@
 package com.openexchange.data.conversion.ical;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,6 +61,7 @@ import java.util.TimeZone;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.ldap.User;
 
 
 /**
@@ -446,6 +451,45 @@ public class ICalParserBugTests extends AbstractICalParserTest {
 			+ "END:VEVENT\n"
 			+ "END:VCALENDAR";
         parseAppointment(ical);
-        assertTrue("Should not fail ith parsing error before this", true);
+        assertTrue("Should not fail with parsing error before this", true);
     }
+    
+    //bug 17562
+    public void testShouldNotGetConfusedByDifferentlyCapitalizedAddresses() throws Exception{
+    	User user = users.getUser(1);
+    	String[] parts = user.getMail().split("@");
+    	String localPart = parts[0];
+    	String capitalizedLocalPart = localPart.toUpperCase();
+    	String differentMail = capitalizedLocalPart + "@" + parts[1];
+    	
+    	assertFalse("Precondition: New address should not match old address", differentMail.equals(user.getMail()));
+    	assertTrue("Precondition: New address should match old address if ignoring capitalization", differentMail.equalsIgnoreCase(user.getMail()));
+    	
+    	String ical = "BEGIN:VCALENDAR\n"
+		+"PRODID:Open-Xchange\n"
+		+"VERSION:2.0\n"
+		+"CALSCALE:GREGORIAN\n"
+		+"METHOD:REQUEST\n"
+		+"BEGIN:VEVENT\n"
+		+"DTSTAMP:20101116T074248Z\n"
+		+"SUMMARY:Launch-Strategie\n"
+		+"DESCRIPTION:ACHTUNG!\n"
+		+"DTSTART:20101116T100000Z\n"
+		+"DTEND:20101116T110000Z\n"
+		+"CLASS:PUBLIC\n"
+		+"LOCATION:TelCo Europe\n"
+		+"TRANSP:OPAQUE\n"
+		+"UID:1a756b4b-b685-48f8-a5ea-8146dd1805c7\n"
+		+"CREATED:20101116T074246Z\n"
+		+"LAST-MODIFIED:20101116T074246Z\n"
+		+"ATTENDEE;ROLE=REQ-PARTICIPANT;CUTYPE=INDIVIDUAL:mailto:"+differentMail+"\n"
+		+"END:VEVENT\n"
+		+"END:VCALENDAR\n";
+    	CalendarDataObject appointment = parseAppointment(ical);
+    	Participant[] participants = appointment.getParticipants();
+    	assertEquals("Should find one participant", 1, participants.length);
+    	Participant participant = participants[0];
+    	assertEquals("Should find a user, not an external participant" , Participant.USER, participant.getType()); 
+    }
+
 }
