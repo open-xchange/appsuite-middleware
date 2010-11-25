@@ -330,6 +330,17 @@ public final class FolderCacheManager {
             final Object tmp = folderCache.get(key);
             if (tmp instanceof FolderObject) {
                 folderCache.remove(key);
+                // Dirty hack
+                final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        final Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                        final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
+                        globalCache.remove(cacheKey);
+                    } catch (final CacheException e) {
+                        LOG.warn(e.getMessage(), e);
+                    }
+                }
             }
         } catch (final CacheException e) {
             throw new OXException(e);
@@ -404,6 +415,17 @@ public final class FolderCacheManager {
                 } else {
                     // Remove to distribute PUT as REMOVE
                     folderCache.remove(key);
+                    // Dirty hack
+                    final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
+                        try {
+                            final Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                            final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
+                            globalCache.remove(cacheKey);
+                        } catch (final CacheException e) {
+                            LOG.warn(e.getMessage(), e);
+                        }
+                    }
                 }
                 if (elemAttribs == null) {
                     // Put with default attributes
