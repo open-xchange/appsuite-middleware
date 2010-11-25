@@ -1,3 +1,7 @@
+* 2010-11-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #17213: Added "text/directory" as accepted VCard content type
+
 * 2010-11-24 - marcus.klein@open-xchange.com
 
  - Bugfix #17632: Fixed a typo in an exception message.

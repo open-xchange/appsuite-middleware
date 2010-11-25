@@ -94,7 +94,7 @@ public final class VCardMailPartDataSource extends MailPartDataSource {
             if (contentType == null) {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
             }
-            if (!contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CARD)) {
+            if (!contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CARD) && !contentType.startsWith("text/directory")) {
                 throw DataExceptionCodes.ERROR.create("Requested mail part is not a VCard: " + contentType.getBaseType());
             }
             final DataProperties properties = new DataProperties();
