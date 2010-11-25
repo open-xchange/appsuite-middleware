@@ -111,11 +111,8 @@ public class FileServlet extends MultipleAdapterServletNew {
             try {
 
                 if (SAVE_AS_TYPE.equals(contentType)) {
-                    Tools.setHeaderForFileDownload(userAgent, res, fileMetadata.getFileName());
+                    Tools.setHeaderForFileDownload(userAgent, res, fileMetadata.getFileName(), contentDisposition);
                     res.setContentType(contentType);
-                    if(contentDisposition != null) {
-                        res.setHeader("Content-Disposition", contentDisposition);
-                    }
                 } else {
                     final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
                         documentData,
