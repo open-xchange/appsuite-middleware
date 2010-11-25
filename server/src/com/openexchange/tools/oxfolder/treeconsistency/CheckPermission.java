@@ -51,9 +51,14 @@ package com.openexchange.tools.oxfolder.treeconsistency;
 
 import java.sql.Connection;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -62,8 +67,8 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
 /**
  * {@link CheckPermission}
@@ -207,4 +212,34 @@ abstract class CheckPermission {
         }
         return false;
     }
+
+    /**
+     * Broadcast folder event.
+     * 
+     * @param folderId The folder identifier
+     * @param deleted <code>true</code> if deleted; otherwise changed
+     * @param eventAdmin The event admin service reference
+     */
+    protected void broadcastEvent(final int folderId, final boolean deleted, final EventAdmin eventAdmin) {
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
+        properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
+        properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
+        properties.put(FolderEventConstants.PROPERTY_SESSION, session);
+        properties.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(folderId));
+        properties.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(!deleted));
+        /*
+         * Create event with push topic
+         */
+        final Event event = new Event(FolderEventConstants.TOPIC, properties);
+        /*
+         * Finally deliver it
+         */
+        eventAdmin.sendEvent(event);
+        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(CheckPermission.class);
+        if (logger.isDebugEnabled()) {
+            logger.debug(new StringBuilder(64).append("Notified ").append("content-related").append(
+                "-wise changed folder \"").append(folderId).append(" in context ").append(session.getContextId()).toString());
+        }
+    }
+
 }
