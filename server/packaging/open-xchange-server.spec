@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -592,6 +592,9 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 24 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17605: Stripping JavaScript contained in href attribute from HTML tag
+ - Bugfix #17627: Changed connection handling in mail folder storage
 * Tue Nov 23 2010 - thorben.betten@open-xchange.com
  - Bugfix #17561: Fixed folder creation on a Courier IMAP server
 * Mon Nov 22 2010 - marcus.klein@open-xchange.com
