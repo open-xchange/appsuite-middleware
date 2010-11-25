@@ -262,10 +262,14 @@ public final class SessionHandler {
     }
 
     protected static Session getSessionByRandomToken(final String randomToken, final String localIp) {
-        final SessionControl sessionControl = sessionData.getSessionByRandomToken(randomToken, localIp);
+        final SessionControl sessionControl = sessionData.getSessionByRandomToken(randomToken);
         if (null == sessionControl) {
             return null;
         }
+        // Set local IP
+        Session session = sessionControl.getSession();
+        LOG.info("Changing IP of session " + session.getSessionID() + " from " + session.getLocalIp() + " to " + localIp + '.');
+        session.setLocalIp(localIp);
         return sessionControl.getSession();
     }
 

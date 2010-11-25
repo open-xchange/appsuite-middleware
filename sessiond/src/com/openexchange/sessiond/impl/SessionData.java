@@ -394,7 +394,7 @@ final class SessionData {
         return control;
     }
 
-    SessionControl getSessionByRandomToken(final String randomToken, final String localIp) {
+    SessionControl getSessionByRandomToken(final String randomToken) {
         // A read-only access to session and a write access to random list
         final String sessionId;
         wlock.lock();
@@ -417,9 +417,6 @@ final class SessionData {
         if (sessionControl.getCreationTime() + randomTokenTimeout < System.currentTimeMillis()) {
             return null;
         }
-        // Set local IP
-        LOG.info("Changing IP of session " + session.getSessionID() + " from " + session.getLocalIp() + " to " + localIp + '.');
-        session.setLocalIp(localIp);
         return sessionControl;
     }
 

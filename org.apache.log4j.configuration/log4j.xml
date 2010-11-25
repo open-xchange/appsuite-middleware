@@ -8,10 +8,15 @@
             <param name="ConversionPattern" value="%d open-xchange-groupware %-5p [%c][%t]: %C,%M %m%n"/>
         </layout>
     </appender>
-    <category name="org.apache.jcs">
+    <logger name="org.apache.jcs">
         <level value="WARN"/>
-        <appender-ref ref="SERVER_LOG"/>
-    </category>
+    </logger>
+    <logger name="com.openexchange.login.internal.LoginPerformer">
+        <level value="INFO"/> 
+    </logger>
+    <logger name="com.openexchange.sessiond.impl.SessionHandler">
+        <level value="INFO"/> 
+    </logger>
     <root>
         <level value="INFO"/>
         <appender-ref ref="SERVER_LOG"/>
