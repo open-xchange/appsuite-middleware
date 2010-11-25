@@ -74,6 +74,26 @@ public final class PushEventConstants {
     public static final String TOPIC_ATTR = "com/openexchange/push/attributes";
 
     /**
+     * An array of {@link String string} including all known topics.
+     * <p>
+     * Needed on event handler registration to a bundle context.
+     */
+    private static final String[] TOPICS = { TOPIC, TOPIC_ATTR };
+
+    /**
+     * Gets an array of {@link String string} including all known topics.
+     * <p>
+     * Needed on event handler registration to a bundle context.
+     * 
+     * @return An array of {@link String string} including all known topics.
+     */
+    public static String[] getAllTopics() {
+        final String[] retval = new String[TOPICS.length];
+        System.arraycopy(TOPICS, 0, retval, 0, TOPICS.length);
+        return retval;
+    }
+
+    /**
      * Whether the content or the folder itself has changed. Default is <code>true</code>; meaning if not present the folder content has
      * changed, but not the folder itself. Property value is of type <code>java.lang.Boolean</code>.
      */
