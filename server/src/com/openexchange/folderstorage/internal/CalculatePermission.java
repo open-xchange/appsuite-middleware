@@ -52,6 +52,8 @@ package com.openexchange.folderstorage.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -83,44 +85,41 @@ public final class CalculatePermission {
      * 
      * @param folder The folder whose effective user permissions shall be calculated
      * @param context The context
-     * @throws FolderException If calculating effective user permissions fails
      */
-    public static void calculateUserPermissions(final Folder folder, final Context context) throws FolderException {
+    public static void calculateUserPermissions(final Folder folder, final Context context) {
         final Permission[] staticPermissions = folder.getPermissions();
         if (null == staticPermissions || 0 == staticPermissions.length) {
             return;
         }
-        try {
-            final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
-            final String id = folder.getID();
-            final Type type = folder.getType();
-            final ContentType contentType = folder.getContentType();
+        final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
+        final String id = folder.getID();
+        final Type type = folder.getType();
+        final ContentType contentType = folder.getContentType();
 
-            final java.util.List<Permission> userizedPermissions = new ArrayList<Permission>(staticPermissions.length);
-            for (final Permission staticPermission : staticPermissions) {
-                if (0 == staticPermission.getSystem()) {
-                    // A non-system permission
-                    final Permission userizedPermission;
-                    if (staticPermission.isGroup()) {
-                        userizedPermission = staticPermission;
-                    } else {
+        final java.util.List<Permission> userizedPermissions = new ArrayList<Permission>(staticPermissions.length);
+        for (final Permission staticPermission : staticPermissions) {
+            if (0 == staticPermission.getSystem()) {
+                // A non-system permission
+                if (staticPermission.isGroup()) {
+                    userizedPermissions.add(staticPermission);
+                } else {
+                    try {
                         final UserConfiguration userConfig = userConfStorage.getUserConfiguration(staticPermission.getEntity(), context);
-                        userizedPermission =
-                            new EffectivePermission(
-                                staticPermission,
-                                id,
-                                type,
-                                contentType,
-                                userConfig,
-                                Collections.<ContentType> emptyList());
+                        userizedPermissions.add(new EffectivePermission(
+                            staticPermission,
+                            id,
+                            type,
+                            contentType,
+                            userConfig,
+                            Collections.<ContentType> emptyList()));
+                    } catch (final UserConfigurationException e) {
+                        final Log logger = LogFactory.getLog(CalculatePermission.class);
+                        logger.warn("User configuration could not be loaded. Ignoring user permission.", e);
                     }
-                    userizedPermissions.add(userizedPermission);
                 }
             }
-            folder.setPermissions(userizedPermissions.toArray(new Permission[userizedPermissions.size()]));
-        } catch (final UserConfigurationException e) {
-            throw new FolderException(e);
         }
+        folder.setPermissions(userizedPermissions.toArray(new Permission[userizedPermissions.size()]));
     }
 
     /**
