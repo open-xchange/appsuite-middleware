@@ -131,11 +131,12 @@ public final class ContactDeleteListener implements DeleteListener {
              * Check if any distribution list has no entry after deleting user's entries
              */
             final TIntArrayList toDelete = new TIntArrayList();
+            sql = "SELECT COUNT(intfield02) FROM " + dlistTable + " WHERE cid = ? AND intfield01 = ?";
             for (final int[] arr : l) {
-                sql = "SELECT COUNT(intfield02) FROM " + dlistTable + " WHERE cid = ? AND intfield01 = ?";
+                final int dlistId = arr[0];
                 stmt = writeCon.prepareStatement(sql);
                 stmt.setInt(1, contextId);
-                stmt.setInt(2, arr[0]);
+                stmt.setInt(2, dlistId);
                 rs = stmt.executeQuery();
                 if (rs.next()) {
                     final int count = rs.getInt(1);
@@ -143,7 +144,7 @@ public final class ContactDeleteListener implements DeleteListener {
                         /*
                          * The distribution list is now empty
                          */
-                        toDelete.add(arr[0]);
+                        toDelete.add(dlistId);
                     }
                 }
                 DBUtils.closeSQLStuff(rs, stmt);
