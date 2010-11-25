@@ -77,6 +77,10 @@ public final class DownloadUtility {
     private DownloadUtility() {
         super();
     }
+    
+    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String userAgent) throws AbstractOXException {
+        return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
+    }
 
     /**
      * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
@@ -84,11 +88,12 @@ public final class DownloadUtility {
      * @param inputStream The input stream
      * @param fileName The file name
      * @param contentTypeStr The content-type string
+     * @param overridingDisposition Overrides the content disposition header, optional.
      * @param userAgent The user agent
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws AbstractOXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String userAgent) throws AbstractOXException {
+    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, String overridingDisposition, final String userAgent) throws AbstractOXException {
         final BrowserDetector browserDetector = new BrowserDetector(userAgent);
         final boolean msieOnWindows = (browserDetector.isMSIE() && browserDetector.isWindows());
         /*
@@ -186,9 +191,18 @@ public final class DownloadUtility {
              */
             in = new CombinedInputStream(sequence, in);
         }
+        
+        if(overridingDisposition == null) {
+            overridingDisposition = "attachment";
+        }
+        
+        if(!overridingDisposition.contains(";")) {
+            overridingDisposition = new StringBuilder(64).append(overridingDisposition).append("attachment; filename=\"").append(preparedFileName).append('"').toString();
+        }
+        
         return new CheckedDownload(
             contentType.getBaseType(),
-            new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(),
+            overridingDisposition,
             in);
     }
 
