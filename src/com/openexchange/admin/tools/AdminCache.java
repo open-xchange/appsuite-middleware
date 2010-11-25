@@ -349,6 +349,9 @@ public class AdminCache {
     }
 
     public boolean pushConnectionForContext(final int context_id, final Connection con) throws PoolException {
+        if(con == null) {
+            return true;
+        }
         return this.pool.pushConnectionForContext(context_id, con);
     }
 
