@@ -1,3 +1,7 @@
+* 2010-11-25 - tobias.prinz@open-xchange.com
+
+ - Bugfix #17562: Internal users are now properly recognized even if they are are referred to by e-mails with strange capitalization.
+
 * 2010-11-25 - thorben.betten@open-xchange.com
 
  - Bugfix #17213: Added "text/directory" as accepted VCard content type
