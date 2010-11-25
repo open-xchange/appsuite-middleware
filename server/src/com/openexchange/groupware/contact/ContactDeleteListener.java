@@ -100,7 +100,7 @@ public final class ContactDeleteListener implements DeleteListener {
         ResultSet rs = null;
         try {
             /*
-             * Get those distribution lists which carry an internal user as an entry
+             * Get those distribution lists which carry the user as an entry
              */
             sql =
                 "SELECT d.intfield01, d.intfield02 FROM " + dlistTable + " AS d JOIN " + contactTable + " AS c ON d.cid = ? AND c.cid = ? AND d.intfield02 = c.intfield01 WHERE c.userId IS NOT NULL AND c.userId = ?";
