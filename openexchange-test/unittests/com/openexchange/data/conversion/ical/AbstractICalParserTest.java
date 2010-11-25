@@ -165,11 +165,11 @@ public abstract class AbstractICalParserTest extends TestCase {
         super.tearDown();
     }
 
-    protected Appointment parseAppointment(final String icalText, final TimeZone defaultTZ) throws ConversionError {
+    protected CalendarDataObject parseAppointment(final String icalText, final TimeZone defaultTZ) throws ConversionError {
         return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>() ).get(0);
     }
 
-    protected Appointment parseAppointment(final String icalText) throws ConversionError {
+    protected CalendarDataObject parseAppointment(final String icalText) throws ConversionError {
         return parseAppointment(icalText, TimeZone.getDefault());
     }
 
