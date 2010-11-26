@@ -62,6 +62,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGenericConfigurationStorageService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -115,6 +116,7 @@ public class DiscoveryActivator implements BundleActivator {
         final UserService users = whiteboard.getService(UserService.class);
         final UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
         final InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);
+        final FolderService folders = whiteboard.getService(FolderService.class);
 
         final Hashtable<Object, Object> discoveryDict = new Hashtable<Object, Object>();
         discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
@@ -150,6 +152,7 @@ public class DiscoveryActivator implements BundleActivator {
         AbstractSubscribeService.STORAGE = storage;
 
         AbstractSubscribeService.CRYPTO = whiteboard.getService(CryptoService.class);
+        AbstractSubscribeService.FOLDERS = folders;
         
         SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
         listener.setStorageService(genconfStorage);

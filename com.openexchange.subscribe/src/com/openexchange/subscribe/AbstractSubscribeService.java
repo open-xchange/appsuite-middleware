@@ -88,7 +88,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     private Collection<Subscription> prepareSubscriptions(List<Subscription> allSubscriptions, String secret, Context context, int userId) throws AbstractOXException {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
-        Map<String, Boolean> canRead = new HashMap<String, Boolean>();
+        Map<String, Boolean> canSee = new HashMap<String, Boolean>();
         
         for (Subscription subscription : allSubscriptions) {
             if (subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(
@@ -96,13 +96,13 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 
                 if(userId == -1) {
                     subscriptions.add(subscription);
-                } else if (canRead.containsKey(subscription.getFolderId()) && canRead.get(subscription.getFolderId())) {
+                } else if (canSee.containsKey(subscription.getFolderId()) && canSee.get(subscription.getFolderId())) {
                     subscriptions.add(subscription);
                 } else {
                     EffectivePermission folderPermission = FOLDERS.getFolderPermission(Integer.parseInt(subscription.getFolderId()), userId, context.getContextId());
-                    boolean readable = folderPermission.canReadAllObjects() && folderPermission.isFolderVisible();
-                    canRead.put(subscription.getFolderId(), readable);
-                    if(readable) {
+                    boolean visible = folderPermission.isFolderVisible() ;
+                    canSee.put(subscription.getFolderId(), visible);
+                    if(visible) {
                         subscriptions.add(subscription);
                     }
                     
