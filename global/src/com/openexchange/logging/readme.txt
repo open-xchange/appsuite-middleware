@@ -1,2 +1,0 @@
-This complete sub package can be easily moved to another new bundle. I only integrated it to avoid an additional bundle and package that
-must always be installed. In that new bundle the import for Log4J must be optional.
