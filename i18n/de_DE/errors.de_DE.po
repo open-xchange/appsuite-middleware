@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-11-24 13:25+0100\n"
+"PO-Revision-Date: 2010-11-26 15:38+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -2674,7 +2674,8 @@ msgid "Invalid URL \"%1$s\". Error: %2$s."
 msgstr "Ungültige URL \"%1$s\": Fehler: %2$s."
 
 #. Could not find data provider for id: %1$s
-msgid "Could not fine data provider for id: %1$s"
+
+msgid "Could not find data provider for id: %1$s"
 msgstr "Daten-Provider für ID: %1$s nicht gefunden"
 
 #. Missing parameter: %1$2
@@ -3513,7 +3514,9 @@ msgstr "Dienste-Konflikt für Kontext %1$i und Ordner %2$i gemeldet"
 msgid ""
 "Found a user contact outside global address book in folder %1$d in context %2"
 "$d."
-msgstr "Benutzerkontakt außerhalb des globalen Adressbuchs im Ordner %1$d im Kontext %2$d gefunden."
+msgstr ""
+"Benutzerkontakt außerhalb des globalen Adressbuchs im Ordner %1$d im Kontext "
+"%2$d gefunden."
 
 msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
 msgstr "Ungültige E-Mail-Adresse: '%s'. Bitte korrigieren Sie die E-Mail-Adresse."
