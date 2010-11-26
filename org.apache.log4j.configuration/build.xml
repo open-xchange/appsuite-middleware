@@ -16,6 +16,11 @@
     <property name="bundle.name.ad" value="${Bundle-SymbolicName}-admindaemon"/>
     <property name="composite.name" value="open-xchange-log4j-${version}" />
 
+    <!-- Install Constants -->
+    <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
+
     <fileset dir="." id="metainf">
         <include name="META-INF/**"/>
         <exclude name="CVS"/>
@@ -24,11 +29,6 @@
     <fileset dir="jars" id="log4jFiles">
         <include name="org.apache.log4j*.jar"/>
     </fileset>
-
-    <!-- Install Constants -->
-    <property name="bundlesdir" value="${prefix}/bundles"/>
-    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
     <!-- Install -->
     <target name="install">
