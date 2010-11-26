@@ -68,14 +68,15 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -169,7 +170,14 @@ public abstract class SessionServlet extends AJAXServlet {
                 sessiondCon.removeSession(sessionId);
                 throw EXCEPTION.create(4);
             }
-            checkIP(session, req.getRemoteAddr());
+            final SessiondException ipCheckExc = checkIP(session, req.getRemoteAddr());
+            if (null != ipCheckExc) {
+                final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                sessiondCon.removeSession(sessionId);
+                // Drop relevant cookies
+                SessionServlet.removeOXCookies(session.getHash(), req, resp);
+                throw ipCheckExc;
+            }
             rememberSession(req, new ServerSessionAdapter(session, ctx));
             super.service(req, resp);
         } catch (final SessiondException e) {
@@ -201,8 +209,8 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private void checkIP(final Session session, final String actual) throws SessiondException {
-        checkIP(checkIP, session, actual);
+    private SessiondException checkIP(final Session session, final String actual) {
+        return checkIP(checkIP, session, actual);
     }
 
     /**
@@ -210,7 +218,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param checkIP <code>true</code> to deny request with an exception.
      * @param session session object
      * @param actual IP address of the current request.
-     * @throws SessionException if the IP addresses don't match.
+     * @return The error on wrong IP
      */
     @OXThrows(
         category = Category.PERMISSION,
@@ -218,11 +226,11 @@ public abstract class SessionServlet extends AJAXServlet {
         exceptionId = 5,
         msg = "Request to server was refused. Original client IP address changed. Please try again."
     )
-    public static void checkIP(final boolean checkIP, final Session session, final String actual) throws SessiondException {
+    public static SessiondException checkIP(final boolean checkIP, final Session session, final String actual) {
         if (null == actual || (!isWhitelistedFromIPCheck(actual) && !actual.equals(session.getLocalIp()))) {
             if (checkIP) {
                 LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
-                throw EXCEPTION.create(5);
+                return EXCEPTION.create(5);
             }
             if (LOG.isDebugEnabled()) {
                 final StringBuilder sb = new StringBuilder(64);
@@ -235,6 +243,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 LOG.debug(sb.toString());
             }
         }
+        return null;
     }
 
     private static boolean isWhitelistedFromIPCheck(String actual) {
@@ -346,12 +355,20 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
         for (Cookie cookie : cookies) {
-            for (String string : cookieNames) {
-                if (cookie.getName().startsWith(string)) {
-                    final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
-                    respCookie.setPath("/");
-                    respCookie.setMaxAge(0); // delete
-                    resp.addCookie(respCookie);
+            final String name = cookie.getName();
+            if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(name)) {
+                final Cookie respCookie = new Cookie(name, cookie.getValue());
+                respCookie.setPath("/");
+                respCookie.setMaxAge(0); // delete
+                resp.addCookie(respCookie);
+            } else {
+                for (String string : cookieNames) {
+                    if (name.startsWith(string)) {
+                        final Cookie respCookie = new Cookie(name, cookie.getValue());
+                        respCookie.setPath("/");
+                        respCookie.setMaxAge(0); // delete
+                        resp.addCookie(respCookie);
+                    }
                 }
             }
         }
