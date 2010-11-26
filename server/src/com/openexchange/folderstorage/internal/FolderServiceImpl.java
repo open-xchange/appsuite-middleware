@@ -115,13 +115,15 @@ public final class FolderServiceImpl implements FolderService {
         }
     }
 
-    public String createFolder(final Folder folder, final User user, final Context context) throws FolderException {
-        return new CreatePerformer(user, context).doCreate(folder);
+    public FolderResponse<String> createFolder(final Folder folder, final User user, final Context context) throws FolderException {
+        final CreatePerformer createPerformer = new CreatePerformer(user, context);
+        return FolderResponseImpl.newFolderResponse(createPerformer.doCreate(folder), createPerformer.getStorageParameters().getWarnings());
     }
 
-    public String createFolder(final Folder folder, final Session session) throws FolderException {
+    public FolderResponse<String> createFolder(final Folder folder, final Session session) throws FolderException {
         try {
-            return new CreatePerformer(new ServerSessionAdapter(session)).doCreate(folder);
+            final CreatePerformer createPerformer = new CreatePerformer(new ServerSessionAdapter(session));
+            return FolderResponseImpl.newFolderResponse(createPerformer.doCreate(folder), createPerformer.getStorageParameters().getWarnings());
         } catch (final ContextException e) {
             throw new FolderException(e);
         }
