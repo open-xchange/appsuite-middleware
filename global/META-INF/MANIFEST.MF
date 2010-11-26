@@ -26,12 +26,13 @@ Export-Package: com.openexchange.authentication,
  com.openexchange.tools.id,
  com.openexchange.tools.iterator,
  com.openexchange.tools.stream
-Import-Package:  com.openexchange.java,
+Import-Package: com.openexchange.java,
  gnu.trove,
  javax.mail.internet,
  org.apache.commons.logging,
  org.apache.commons.logging.impl,
+ org.apache.log4j;resolution:=optional,
  org.osgi.framework;version="1.3.0",
  org.osgi.service.event,
  org.osgi.util.tracker;version="1.3.2"
-Bundle-Activator: com.openexchange.server.GlobalActivator
+Bundle-Activator: com.openexchange.global.osgi.Activator

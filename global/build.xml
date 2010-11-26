@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.global" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -10,9 +11,9 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-	<property name="version" value="${Bundle-Version}"/>
-	<property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-	<property name="composite.name" value="open-xchange-global-${version}" />
+    <property name="version" value="${Bundle-Version}"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+    <property name="composite.name" value="open-xchange-global-${version}" />
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -23,24 +24,24 @@
     <property name="commonBundle" value="com.openexchange.common"/>
 
     <!-- JAR names for classpath -->
-	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
+    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
-    <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
-	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+    <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar"/>
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
+    <property name="log4jjar" value="org.apache.log4j_1.2.13.v200806030600.jar"/>
 
     <property name="mailjar" value="mail-1.4.2.jar" />
-	<property name="trovejar" value="trove-2.1.0.jar" />
-	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
+    <property name="trovejar" value="trove-2.1.0.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${osgiservicesjar}"/>
         <pathelement location="${bundlesdir}/${servletjar}"/>
-		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+        <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+        <pathelement location="${bundlesdir}/${log4jjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
-    	<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}"/> -->
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
     </path>
 
     <!-- Compile -->
@@ -51,13 +52,11 @@
 
     <target name="compile" depends="prepare">
         <!-- This compile hack is necessary to prevent compile errors. -->
-        <javac srcdir="${source..}" destdir="${output..}" debug="true"
-            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
             <include name="com/openexchange/exceptions/**"/>
         </javac>
-        <javac memoryMaximumSize="192M" srcdir="${source..}"
-            destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5"
+        <javac memoryMaximumSize="192M" srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5"
             compiler="javac1.5" target="1.5" fork="true">
             <classpath>
                 <path refid="project.classpath"/>
@@ -67,8 +66,7 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
     </target>
@@ -78,11 +76,9 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${gwbundle.d}"/>
-        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
@@ -94,10 +90,10 @@
         </copy>
     </target>
 
-	<!-- Dist -->
-	<target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${composite.name}"/>
         <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
@@ -107,11 +103,9 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${composite.name}.tar.gz"
-	        basedir="${dist-package}"
-    	    includes="${composite.name}/"
-         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
-    	<delete dir="${dist-package}"/>
+        <!-- dpkg-source does not like anything else -->
+        <tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip"/>
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">

@@ -47,34 +47,27 @@
  *
  */
 
-package com.openexchange.logging.osgi;
+package com.openexchange.global.osgi;
 
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import com.openexchange.logging.internal.JdkCorrector;
-import com.openexchange.logging.internal.LoggingCorrector;
+import com.openexchange.logging.osgi.LoggingActivator;
+import com.openexchange.server.GlobalActivator;
+import com.openexchange.server.osgiservice.CompositeBundleActivator;
 
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends CompositeBundleActivator {
 
-	public void start(BundleContext context) throws Exception {
-	    new JdkCorrector().correct();
-	    try {
-	        Class<?> clazz = Class.forName("org.apache.log4j.Logger");
-    	    if (null != clazz) {
-                LoggingCorrector corrector = (LoggingCorrector) Class.forName("com.openexchange.logging.internal.Log4JCorrector").newInstance();
-    	        corrector.correct();
-    	    }
-	    } catch (Throwable t) {
-	        // Log4J is not installed.
-	    }
-	}
+    private final BundleActivator[] activators = {
+        new LoggingActivator(),
+        new GlobalActivator()
+    };
 
-	public void stop(BundleContext context) throws Exception {
-	    // Nothing to do.
-	}
+    @Override
+    protected BundleActivator[] getActivators() {
+        return activators;
+    }
 }
