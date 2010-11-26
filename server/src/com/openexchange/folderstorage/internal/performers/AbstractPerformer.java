@@ -317,6 +317,15 @@ public abstract class AbstractPerformer {
     }
 
     /**
+     * Gets the storage parameters.
+     * 
+     * @return The storage parameters
+     */
+    public StorageParameters getStorageParameters() {
+        return storageParameters;
+    }
+
+    /**
      * Gets the user.
      * 
      * @return The user

@@ -55,6 +55,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import static java.util.regex.Matcher.quoteReplacement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -672,15 +673,14 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                         }
                                     }
                                 } else {
-                                    if (LOG.isWarnEnabled()) {
-                                        final IMAPException warning =
-                                            IMAPException.create(
+                                    /*
+                                     * Add a warning
+                                     */
+                                    imapAccess.addWarnings(Collections.<MailException> singletonList(IMAPException.create(
                                                 IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL,
                                                 imapConfig,
                                                 session,
-                                                createMe.getFullName());
-                                        LOG.warn(warning.getMessage(), warning);
-                                    }
+                                                createMe.getFullName())));
                                 }
                             }
                         }
