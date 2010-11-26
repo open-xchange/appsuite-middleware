@@ -57,9 +57,11 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.impl.EffectivePermission;
 
 /**
  * {@link AbstractSubscribeService}
@@ -72,24 +74,40 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public static CryptoService CRYPTO;
 
+    public static FolderService FOLDERS;
+
     public Collection<Subscription> loadSubscriptions(Context ctx, String folderId, String secret) throws AbstractOXException {
         List<Subscription> allSubscriptions = STORAGE.getSubscriptions(ctx, folderId);
-
-        return prepareSubscriptions(allSubscriptions, secret);
+        return prepareSubscriptions(allSubscriptions, secret, ctx, -1);
     }
 
     public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException {
         List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, userId);
-
-        return prepareSubscriptions(allSubscriptions, secret);
+        return prepareSubscriptions(allSubscriptions, secret, context, userId);
     }
 
-    private Collection<Subscription> prepareSubscriptions(List<Subscription> allSubscriptions, String secret) throws AbstractOXException {
+    private Collection<Subscription> prepareSubscriptions(List<Subscription> allSubscriptions, String secret, Context context, int userId) throws AbstractOXException {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
+        Map<String, Boolean> canRead = new HashMap<String, Boolean>();
+        
         for (Subscription subscription : allSubscriptions) {
             if (subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(
                 getSubscriptionSource().getId())) {
-                subscriptions.add(subscription);
+                
+                if(userId == -1) {
+                    subscriptions.add(subscription);
+                } else if (canRead.containsKey(subscription.getFolderId()) && canRead.get(subscription.getFolderId())) {
+                    subscriptions.add(subscription);
+                } else {
+                    EffectivePermission folderPermission = FOLDERS.getFolderPermission(Integer.parseInt(subscription.getFolderId()), userId, context.getContextId());
+                    boolean readable = folderPermission.canReadAllObjects() && folderPermission.isFolderVisible();
+                    canRead.put(subscription.getFolderId(), readable);
+                    if(readable) {
+                        subscriptions.add(subscription);
+                    }
+                    
+                }
+                
             }
         }
         for (Subscription subscription : subscriptions) {
@@ -100,6 +118,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
         return subscriptions;
     }
+
 
     public Subscription loadSubscription(Context ctx, int subscriptionId, String secret) throws AbstractOXException {
         Subscription subscription = STORAGE.getSubscription(ctx, subscriptionId);
