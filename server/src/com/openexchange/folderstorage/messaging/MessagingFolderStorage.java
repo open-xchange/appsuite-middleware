@@ -512,6 +512,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             final int accountId = mfi.getAccountId();
 
             final String fullname = mfi.getFullname();
+            final Session session = storageParameters.getSession();
 
             final Folder retval;
             final boolean hasSubfolders;
@@ -520,17 +521,17 @@ public final class MessagingFolderStorage implements FolderStorage {
                     MessagingFolderStorageServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class, true);
                 final MessagingService messagingService = msr.getMessagingService(serviceId);
                 final MessagingAccount messagingAccount =
-                    messagingService.getAccountManager().getAccount(accountId, storageParameters.getSession());
+                    messagingService.getAccountManager().getAccount(accountId, session);
 
                 if ("com.openexchange.messaging.rss".equals(serviceId)) {
-                    retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, storageParameters.getSession());
+                    retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session);
                     hasSubfolders = false;
                 } else if ("com.openexchange.messaging.facebook".equals(serviceId)) {
-                    retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, storageParameters.getSession());
+                    retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session);
                     hasSubfolders = true;
                 } else {
                     final MessagingAccountAccess accountAccess =
-                        getMessagingAccessForAccount(serviceId, accountId, storageParameters.getSession(), accesses);
+                        getMessagingAccessForAccount(serviceId, accountId, session, accesses);
                     openMessagingAccess(accountAccess);
 
                     final MessagingFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
@@ -547,7 +548,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                 retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
             } else {
                 final MessagingAccountAccess accountAccess =
-                    getMessagingAccessForAccount(serviceId, accountId, storageParameters.getSession(), accesses);
+                    getMessagingAccessForAccount(serviceId, accountId, session, accesses);
                 openMessagingAccess(accountAccess);
                 final MessagingFolder messagingFolder = accountAccess.getFolderAccess().getFolder(fullname);
                 retval =
