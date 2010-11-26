@@ -68,6 +68,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
@@ -171,12 +172,29 @@ public abstract class SessionServlet extends AJAXServlet {
      */
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        Tools.disableCaching(resp);
         try {
-            Tools.disableCaching(resp);
             initializeSession(req);
             super.service(req, resp);
         } catch (final SessiondException e) {
             LOG.debug(e.getMessage(), e);
+            if (isIpCheckError(e)) {
+                try {
+                    /*
+                     * Drop cookies
+                     */
+                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                    final String sessionId = getSessionId(req);
+                    final ServerSession session = getSession(req, sessionId, sessiondService);
+                    removeOXCookies(session.getHash(), req, resp);
+                    sessiondService.removeSession(sessionId);
+                } catch (final Exception e2) {
+                    LOG.error("Cookies could not be removed.", e2);
+                }
+            }
+            /*
+             * Return JSON response
+             */
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -206,6 +224,11 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private void checkIP(final Session session, final String actual) throws SessiondException {
         checkIP(checkIP, session, actual);
+    }
+
+    protected static boolean isIpCheckError(final SessiondException sessiondException) {
+        final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
+        return code.getCategory().equals(sessiondException.getCategory()) && code.getDetailNumber() == sessiondException.getDetailNumber();
     }
 
     /**
@@ -251,7 +274,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the cookie identifier.
      * @throws SessionException if the cookie identifier can not be found.
      */
-    private static String getSessionId(final ServletRequest req) throws SessiondException {
+    protected static String getSessionId(final ServletRequest req) throws SessiondException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
             if (LOG.isDebugEnabled()) {
@@ -326,19 +349,26 @@ public abstract class SessionServlet extends AJAXServlet {
         req.setAttribute(SESSION_KEY, session);
     }
 
-    public static void removeOXCookies(String hash, HttpServletRequest req, HttpServletResponse resp) {
-        Cookie[] cookies = req.getCookies();
+    public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
+        final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
             return;
         }
-        List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
-        for (Cookie cookie : cookies) {
-            for (String string : cookieNames) {
-                if (cookie.getName().startsWith(string)) {
-                    final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
-                    respCookie.setPath("/");
-                    respCookie.setMaxAge(0); // delete
-                    resp.addCookie(respCookie);
+        final List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
+        for (final Cookie cookie : cookies) {
+            if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookie.getName())) {
+                final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+                respCookie.setPath("/");
+                respCookie.setMaxAge(0); // delete
+                resp.addCookie(respCookie);
+            } else {
+                for (final String string : cookieNames) {
+                    if (cookie.getName().startsWith(string)) {
+                        final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+                        respCookie.setPath("/");
+                        respCookie.setMaxAge(0); // delete
+                        resp.addCookie(respCookie);
+                    }
                 }
             }
         }

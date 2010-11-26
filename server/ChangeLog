@@ -5,6 +5,7 @@
 * 2010-11-26 - thorben.betten@open-xchange.com
 
  - Bugfix #17653: Changed log level to warning
+ - Bugfix #17647: Dropping cookies on failed IP check
 
 * 2010-11-25 - marcus.klein@open-xchange.com
 

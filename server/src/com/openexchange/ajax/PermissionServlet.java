@@ -58,7 +58,10 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondException;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 public abstract class PermissionServlet extends SessionServlet {
@@ -69,6 +72,7 @@ public abstract class PermissionServlet extends SessionServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        Tools.disableCaching(resp);
         try {
             initializeSession(req);
             final ServerSession session = getSessionObject(req);
@@ -79,6 +83,20 @@ public abstract class PermissionServlet extends SessionServlet {
             super.service(req, resp);
         } catch (final SessiondException e) {
             LOG.debug(e.getMessage(), e);
+            if (isIpCheckError(e)) {
+                try {
+                    /*
+                     * Drop cookies
+                     */
+                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                    final String sessionId = getSessionId(req);
+                    final ServerSession session = getSession(req, sessionId, sessiondService);
+                    removeOXCookies(session.getHash(), req, resp);
+                    sessiondService.removeSession(sessionId);
+                } catch (final Exception e2) {
+                    LOG.error("Cookies could not be removed.", e2);
+                }
+            }
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
