@@ -50,24 +50,77 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.sessiond.SessiondException;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 public abstract class PermissionServlet extends SessionServlet {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PermissionServlet.class);
 
     private static final long serialVersionUID = -1496492688713194989L;
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // FIXME this needs a major rewrite. Executing everything before checking permissions isn't useful. Simply moving the super call to
-        // behind permission check does not work because we would not have the session.
-        super.service(req, resp);
-        final ServerSession session = getSessionObject(req);
-        if (null != session && !hasModulePermission(session)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
-            return;
+        Tools.disableCaching(resp);
+        try {
+            initializeSession(req);
+            final ServerSession session = getSessionObject(req);
+            if (null != session && !hasModulePermission(session)) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
+                return;
+            }
+            super.service(req, resp);
+        } catch (final SessiondException e) {
+            LOG.debug(e.getMessage(), e);
+            if (isIpCheckError(e)) {
+                try {
+                    /*
+                     * Drop cookies
+                     */
+                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                    final String sessionId = getSessionId(req);
+                    final ServerSession session = getSession(req, sessionId, sessiondService);
+                    removeOXCookies(session.getHash(), req, resp);
+                    sessiondService.removeSession(sessionId);
+                } catch (final Exception e2) {
+                    LOG.error("Cookies could not be removed.", e2);
+                }
+            }
+            final Response response = new Response();
+            response.setException(e);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            final PrintWriter writer = resp.getWriter();
+            try {
+                ResponseWriter.write(response, writer);
+                writer.flush();
+            } catch (final JSONException e1) {
+                log(RESPONSE_ERROR, e1);
+                sendError(resp);
+            }
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            final Response response = new Response();
+            response.setException(e);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            final PrintWriter writer = resp.getWriter();
+            try {
+                ResponseWriter.write(response, writer);
+                writer.flush();
+            } catch (final JSONException e1) {
+                log(RESPONSE_ERROR, e1);
+                sendError(resp);
+            }
         }
     }
 

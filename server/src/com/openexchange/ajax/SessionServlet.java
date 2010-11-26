@@ -68,6 +68,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
@@ -108,7 +109,7 @@ public abstract class SessionServlet extends AJAXServlet {
     private boolean checkIP = true;
 
     private static List<IPRange> ranges = new ArrayList<IPRange>(5);
-    
+
     protected SessionServlet() {
         super();
     }
@@ -117,27 +118,53 @@ public abstract class SessionServlet extends AJAXServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-        
-        if(checkIP) {
+
+        if (checkIP) {
             ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            if(configurationService == null) {
+            if (configurationService == null) {
                 LOG.fatal("No configuration service available, can not read whitelist");
             } else {
                 String text = configurationService.getText(SESSION_WHITELIST_FILE);
-                if(text == null) {
+                if (text == null) {
                     LOG.info("No exceptions from IP Check have been defined.");
                 } else {
                     String[] lines = text.split("\n");
                     for (String line : lines) {
                         line = line.replaceAll("\\s", "");
-                        if(!line.equals("") && ! line.startsWith("#")) {
+                        if (!line.equals("") && !line.startsWith("#")) {
                             ranges.add(IPRange.parseRange(line));
                         }
                     }
                 }
             }
         }
-    
+
+    }
+
+    protected void initializeSession(HttpServletRequest req) throws SessiondException, AbstractOXException {
+        if(null != getSessionObject(req)) {
+            return ;
+        }
+        /*
+         * Remember session
+         */
+        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (sessiondService == null) {
+            throw new SessiondException(
+                new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+        }
+        String sessionId = getSessionId(req);
+        final ServerSession session = getSession(req, sessionId, sessiondService);
+        if (!sessionId.equals(session.getSessionID())) {
+            throw SessionExceptionCodes.WRONG_SESSION.create();
+        }
+        final Context ctx = session.getContext();
+        if (!ctx.isEnabled()) {
+            sessiondService.removeSession(sessionId);
+            throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+        }
+        checkIP(session, req.getRemoteAddr());
+        rememberSession(req, session);
     }
 
     /**
@@ -147,23 +174,27 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
         try {
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (sessiondService == null) {
-                throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
-            }
-            final ServerSession session = getSession(req, getSessionId(req), sessiondService);
-            final String sessionId = session.getSessionID();
-            final Context ctx = session.getContext();
-            if (!ctx.isEnabled()) {
-                final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                sessiondCon.removeSession(sessionId);
-                throw SessionExceptionCodes.CONTEXT_LOCKED.create();
-            }
-            checkIP(session, req.getRemoteAddr());
-            rememberSession(req, session);
+            initializeSession(req);
             super.service(req, resp);
         } catch (final SessiondException e) {
             LOG.debug(e.getMessage(), e);
+            if (isIpCheckError(e)) {
+                try {
+                    /*
+                     * Drop cookies
+                     */
+                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                    final String sessionId = getSessionId(req);
+                    final ServerSession session = getSession(req, sessionId, sessiondService);
+                    removeOXCookies(session.getHash(), req, resp);
+                    sessiondService.removeSession(sessionId);
+                } catch (final Exception e2) {
+                    LOG.error("Cookies could not be removed.", e2);
+                }
+            }
+            /*
+             * Return JSON response
+             */
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -195,8 +226,14 @@ public abstract class SessionServlet extends AJAXServlet {
         checkIP(checkIP, session, actual);
     }
 
+    protected static boolean isIpCheckError(final SessiondException sessiondException) {
+        final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
+        return code.getCategory().equals(sessiondException.getCategory()) && code.getDetailNumber() == sessiondException.getDetailNumber();
+    }
+
     /**
      * Checks if the client IP address of the current request matches the one through that the session has been created.
+     * 
      * @param checkIP <code>true</code> to deny request with an exception.
      * @param session session object
      * @param actual IP address of the current request.
@@ -223,7 +260,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static boolean isWhitelistedFromIPCheck(String actual) {
         for (IPRange range : ranges) {
-            if(range.contains(actual)) {
+            if (range.contains(actual)) {
                 return true;
             }
         }
@@ -237,7 +274,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the cookie identifier.
      * @throws SessionException if the cookie identifier can not be found.
      */
-    private static String getSessionId(final ServletRequest req) throws SessiondException {
+    protected static String getSessionId(final ServletRequest req) throws SessiondException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
             if (LOG.isDebugEnabled()) {
@@ -272,7 +309,7 @@ public abstract class SessionServlet extends AJAXServlet {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
         String secret = extractSecret(session.getHash(), req.getCookies());
-        
+
         if (secret == null || !session.getSecret().equals(secret)) {
             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
         }
@@ -289,12 +326,14 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         return new ServerSessionAdapter(session, context, user);
     }
-    
+
     public static String extractSecret(String hash, Cookie[] cookies) {
-        String cookieName = Login.SECRET_PREFIX+hash;
-        for (Cookie cookie : cookies) {
-            if(cookie.getName().equals(cookieName)) {
-                return cookie.getValue();
+        if (null != cookies) {
+            String cookieName = Login.SECRET_PREFIX + hash;
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(cookieName)) {
+                    return cookie.getValue();
+                }
             }
         }
         return null;
@@ -309,25 +348,31 @@ public abstract class SessionServlet extends AJAXServlet {
     public static void rememberSession(final ServletRequest req, final ServerSession session) {
         req.setAttribute(SESSION_KEY, session);
     }
-    
-    public static void removeOXCookies(String hash, HttpServletRequest req, HttpServletResponse resp) {
-        Cookie[] cookies = req.getCookies();
+
+    public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
+        final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
             return;
         }
-        List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
-        for (Cookie cookie : cookies) {
-            for (String string : cookieNames) {
-                if (cookie.getName().startsWith(string)) {
-                    final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
-                    respCookie.setPath("/");
-                    respCookie.setMaxAge(0); // delete
-                    resp.addCookie(respCookie);
+        final List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
+        for (final Cookie cookie : cookies) {
+            if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookie.getName())) {
+                final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+                respCookie.setPath("/");
+                respCookie.setMaxAge(0); // delete
+                resp.addCookie(respCookie);
+            } else {
+                for (final String string : cookieNames) {
+                    if (cookie.getName().startsWith(string)) {
+                        final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+                        respCookie.setPath("/");
+                        respCookie.setMaxAge(0); // delete
+                        resp.addCookie(respCookie);
+                    }
                 }
             }
         }
     }
-
 
     /**
      * Returns the remembered session.
