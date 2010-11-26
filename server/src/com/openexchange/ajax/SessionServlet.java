@@ -356,15 +356,16 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         final List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
         for (final Cookie cookie : cookies) {
-            if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookie.getName())) {
-                final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+            final String name = cookie.getName();
+            if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(name)) {
+                final Cookie respCookie = new Cookie(name, cookie.getValue());
                 respCookie.setPath("/");
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
             } else {
                 for (final String string : cookieNames) {
-                    if (cookie.getName().startsWith(string)) {
-                        final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+                    if (name.startsWith(string)) {
+                        final Cookie respCookie = new Cookie(name, cookie.getValue());
                         respCookie.setPath("/");
                         respCookie.setMaxAge(0); // delete
                         resp.addCookie(respCookie);
