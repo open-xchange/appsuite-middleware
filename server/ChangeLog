@@ -1,3 +1,7 @@
+* 2010-11-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #17653: Changed log level to warning
+
 * 2010-11-25 - marcus.klein@open-xchange.com
 
  - Bugfix #17349: Log levels of classes LoginPerformer and SessionHandler should now always be INFO to be able to follow session life times.

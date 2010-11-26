@@ -639,38 +639,47 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             final Map<String, ACL> m = acl2map(newACLs);
                             if (!equals(initialACLs, m, entity2ACL, args)) {
                                 final ACLExtension aclExtension = imapConfig.getACLExtension();
-                                if (!aclExtension.canSetACL(createMe.myRights())) {
-                                    throw IMAPException.create(
-                                        IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL,
-                                        imapConfig,
-                                        session,
-                                        createMe.getFullName());
-                                }
-                                boolean adminFound = false;
-                                for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                                    if (aclExtension.canSetACL(newACLs[i].getRights())) {
-                                        adminFound = true;
-                                    }
-                                }
-                                if (!adminFound) {
-                                    throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, createMe.getFullName());
-                                }
-                                /*
-                                 * Apply new ACLs
-                                 */
-                                final Map<String, ACL> om = acl2map(initialACLs);
-                                for (int i = 0; i < newACLs.length; i++) {
-                                    createMe.addACL(validate(newACLs[i], om));
-                                }
-                                /*
-                                 * Remove other ACLs
-                                 */
-                                final ACL[] removedACLs = getRemovedACLs(m, initialACLs);
-                                if (removedACLs.length > 0) {
-                                    for (int i = 0; i < removedACLs.length; i++) {
-                                        if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
-                                            createMe.removeACL(removedACLs[i].getName());
+                                if (aclExtension.canSetACL(createMe.myRights())) {
+                                    boolean adminFound = false;
+                                    for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
+                                        if (aclExtension.canSetACL(newACLs[i].getRights())) {
+                                            adminFound = true;
                                         }
+                                    }
+                                    if (!adminFound) {
+                                        throw IMAPException.create(
+                                            IMAPException.Code.NO_ADMIN_ACL,
+                                            imapConfig,
+                                            session,
+                                            createMe.getFullName());
+                                    }
+                                    /*
+                                     * Apply new ACLs
+                                     */
+                                    final Map<String, ACL> om = acl2map(initialACLs);
+                                    for (int i = 0; i < newACLs.length; i++) {
+                                        createMe.addACL(validate(newACLs[i], om));
+                                    }
+                                    /*
+                                     * Remove other ACLs
+                                     */
+                                    final ACL[] removedACLs = getRemovedACLs(m, initialACLs);
+                                    if (removedACLs.length > 0) {
+                                        for (int i = 0; i < removedACLs.length; i++) {
+                                            if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
+                                                createMe.removeACL(removedACLs[i].getName());
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    if (LOG.isWarnEnabled()) {
+                                        final IMAPException warning =
+                                            IMAPException.create(
+                                                IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL,
+                                                imapConfig,
+                                                session,
+                                                createMe.getFullName());
+                                        LOG.warn(warning.getMessage(), warning);
                                     }
                                 }
                             }
