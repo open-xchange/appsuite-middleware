@@ -200,8 +200,8 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             Permission ownPermission = permissionProvider.getOwnPermission(folder);
             if (!ownPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    folder.getLocalizedName(session.getUser().getLocale()),
-                    getUser().getDisplayName(),
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
                     getContextInfo4Error());
             }
             final List<UserizedFolder> path = new ArrayList<UserizedFolder>(8);
@@ -213,8 +213,8 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
                 ownPermission = permissionProvider.getOwnPermission(folder);
                 if (!ownPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        folder.getLocalizedName(session.getUser().getLocale()),
-                        getUser().getDisplayName(),
+                        getFolderInfo4Error(folder),
+                        getUserInfo4Error(),
                         getContextInfo4Error());
                 }
                 userizedFolder = getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages);

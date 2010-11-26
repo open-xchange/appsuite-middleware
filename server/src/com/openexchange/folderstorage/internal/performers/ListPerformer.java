@@ -212,8 +212,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 }
                 if (!parentPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        parent.getLocalizedName(session.getUser().getLocale()),
-                        getUser().getDisplayName(),
+                        getFolderInfo4Error(parent),
+                        getUserInfo4Error(),
                         getContextInfo4Error());
                 }
             }

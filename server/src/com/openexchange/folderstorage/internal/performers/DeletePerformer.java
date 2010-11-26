@@ -194,24 +194,24 @@ public final class DeletePerformer extends AbstractPerformer {
             }
             if (!permission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    folder.getLocalizedName(session.getUser().getLocale()),
-                    getUser().getDisplayName(),
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
                     getContextInfo4Error());
             }
             if (!permission.isAdmin()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(
-                    folder.getLocalizedName(session.getUser().getLocale()),
-                    getUser().getDisplayName(),
-                    Integer.valueOf(getContextId()));
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
             /*
              * Delete permissions
              */
             if (!canDeleteAllObjects(permission, folderId, treeId, folderStorage)) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(
-                    folderId,
-                    Integer.valueOf(user.getId()),
-                    Integer.valueOf(context.getContextId()));
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
         }
         final SortableId[] subfolders = folderStorage.getSubfolders(treeId, folderId, storageParameters);

@@ -138,8 +138,8 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
             }
             if (!ownPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    folder.getLocalizedName(session.getUser().getLocale()),
-                    getUser().getDisplayName(),
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
                     getContextInfo4Error());
             }
             // TODO: All or only subscribed subfolders?

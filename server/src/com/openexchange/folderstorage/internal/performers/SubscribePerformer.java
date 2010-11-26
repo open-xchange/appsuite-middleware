@@ -144,8 +144,8 @@ public final class SubscribePerformer extends AbstractPerformer {
                 }
                 if (!parentPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        sourceFolder.getLocalizedName(session.getUser().getLocale()),
-                        getUser().getDisplayName(),
+                        getFolderInfo4Error(sourceFolder),
+                        getUserInfo4Error(),
                         getContextInfo4Error());
                 }
             }

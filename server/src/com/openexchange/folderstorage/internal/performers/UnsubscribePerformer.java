@@ -141,8 +141,8 @@ public final class UnsubscribePerformer extends AbstractPerformer {
                 }
                 if (!parentPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        folder.getLocalizedName(session.getUser().getLocale()),
-                        getUser().getDisplayName(),
+                        getFolderInfo4Error(folder),
+                        getUserInfo4Error(),
                         getContextInfo4Error());
                 }
             }

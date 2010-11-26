@@ -167,6 +167,23 @@ public abstract class AbstractPerformer {
     }
 
     /**
+     * Gets the user information for an error message.
+     * 
+     * @return The user information for an error message.
+     */
+    protected String getUserInfo4Error() {
+        final User user = this.user == null ? session.getUser() : this.user;
+        if (null == user) {
+            return "";
+        }
+        final String name = user.getDisplayName();
+        if (null == name || 0 == name.length()) {
+            return String.valueOf(user.getId());
+        }
+        return new StringBuilder(16).append(name).append(" (").append(user.getId()).append(')').toString();
+    }
+
+    /**
      * Gets the folder information for an error message.
      * 
      * @return The folder information for an error message.
