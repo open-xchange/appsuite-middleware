@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -163,6 +164,22 @@ public abstract class AbstractPerformer {
             return String.valueOf(context.getContextId());
         }
         return new StringBuilder(16).append(name).append(" (").append(context.getContextId()).append(')').toString();
+    }
+
+    /**
+     * Gets the folder information for an error message.
+     * 
+     * @return The folder information for an error message.
+     */
+    protected String getFolderInfo4Error(final Folder folder) {
+        if (null == folder) {
+            return "";
+        }
+        final String name = folder.getLocalizedName(user == null ? session.getUser().getLocale() : user.getLocale());
+        if (null == name || 0 == name.length()) {
+            return folder.getID();
+        }
+        return new StringBuilder(16).append(name).append(" (").append(folder.getID()).append(')').toString();
     }
 
     /**
