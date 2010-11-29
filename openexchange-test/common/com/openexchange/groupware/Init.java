@@ -372,6 +372,7 @@ public final class Init {
                     props.getKeepAliveTime(),
                     props.getWorkQueue(),
                     props.getWorkQueueSize(),
+                    props.isBlocking(),
                     props.getRefusedExecutionBehavior());
             services.put(ThreadPoolService.class, threadPool);
             ServerServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
