@@ -178,20 +178,7 @@ public abstract class SessionServlet extends AJAXServlet {
             super.service(req, resp);
         } catch (final SessiondException e) {
             LOG.debug(e.getMessage(), e);
-            if (isIpCheckError(e)) {
-                try {
-                    /*
-                     * Drop cookies
-                     */
-                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                    final String sessionId = getSessionId(req);
-                    final ServerSession session = getSession(req, sessionId, sessiondService);
-                    removeOXCookies(session.getHash(), req, resp);
-                    sessiondService.removeSession(sessionId);
-                } catch (final Exception e2) {
-                    LOG.error("Cookies could not be removed.", e2);
-                }
-            }
+            handleSessiondException(e, req, resp);
             /*
              * Return JSON response
              */
@@ -226,9 +213,39 @@ public abstract class SessionServlet extends AJAXServlet {
         checkIP(checkIP, session, actual);
     }
 
-    protected static boolean isIpCheckError(final SessiondException sessiondException) {
+    /**
+     * Handle specified SessionD exception.
+     * 
+     * @param e The SessionD exception
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     */
+    protected static void handleSessiondException(final SessiondException e, final HttpServletRequest req, final HttpServletResponse resp) {
+        if (isIpCheckError(e)) {
+            try {
+                /*
+                 * Drop Open-Xchange cookies
+                 */
+                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                final String sessionId = getSessionId(req);
+                final ServerSession session = getSession(req, sessionId, sessiondService);
+                removeOXCookies(session.getHash(), req, resp);
+                sessiondService.removeSession(sessionId);
+            } catch (final Exception e2) {
+                LOG.error("Cookies could not be removed.", e2);
+            }
+        }
+    }
+
+    /**
+     * Checks whether passed exception indicates an IP check error.
+     * 
+     * @param sessiondException The exception to check
+     * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
+     */
+    private static boolean isIpCheckError(final SessiondException sessiondException) {
         final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
-        return code.getCategory().equals(sessiondException.getCategory()) && code.getDetailNumber() == sessiondException.getDetailNumber();
+        return (code.getDetailNumber() == sessiondException.getDetailNumber()) && code.getCategory().equals(sessiondException.getCategory());
     }
 
     /**
@@ -277,6 +294,9 @@ public abstract class SessionServlet extends AJAXServlet {
     protected static String getSessionId(final ServletRequest req) throws SessiondException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
+            /*
+             * Throw an error...
+             */
             if (LOG.isDebugEnabled()) {
                 final StringBuilder debug = new StringBuilder();
                 debug.append("Parameter session not found: ");
