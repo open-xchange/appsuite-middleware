@@ -5,6 +5,7 @@
 * 2010-11-29 - thorben.betten@open-xchange.com
 
  - Bugfix #17658: No poll (take with timeout) on a submitted task
+ - Bugfix #17557: Escaped curly brace in pattern notation
 
 * 2010-11-26 - francisco.laguna@open-xchange.com
 
