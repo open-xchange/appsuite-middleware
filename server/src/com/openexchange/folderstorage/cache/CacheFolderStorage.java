@@ -60,7 +60,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -775,7 +774,7 @@ public final class CacheFolderStorage implements FolderStorage {
                      * Wait for completion
                      */
                     final List<List<SortableId>> results =
-                        ThreadPools.pollCompletionService(completionService, neededStorages.length, getMaxRunningMillis(), FACTORY);
+                        ThreadPools.takeCompletionService(completionService, neededStorages.length, FACTORY);
                     for (final List<SortableId> result : results) {
                         allSubfolderIds.addAll(result);
                     }
@@ -978,18 +977,6 @@ public final class CacheFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
-
-    private int getMaxRunningMillis() {
-        final ConfigurationService confService = CacheServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        if (null == confService) {
-            // Default of 2 minutes
-            return DEFAULT_MAX_RUNNING_MILLIS;
-        }
-        // 2 * AJP_WATCHER_MAX_RUNNING_TIME
-        return confService.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", DEFAULT_MAX_RUNNING_MILLIS) * 2;
     }
 
     /**

@@ -63,7 +63,6 @@ import java.util.concurrent.CompletionService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.concurrent.CallerRunsCompletionService;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -270,7 +269,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             /*
              * Wait for completion
              */
-            ThreadPools.pollCompletionService(completionService, taskCount, getMaxRunningMillis(), FACTORY);
+            ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
             final UserizedFolder[] ret = trimArray(subfolders);
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
@@ -292,18 +291,6 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
-
-    private int getMaxRunningMillis() {
-        final ConfigurationService confService = getInstance().getService(ConfigurationService.class);
-        if (null == confService) {
-            // Default of 2 minutes
-            return DEFAULT_MAX_RUNNING_MILLIS;
-        }
-        // 2 * AJP_WATCHER_MAX_RUNNING_TIME
-        return confService.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", DEFAULT_MAX_RUNNING_MILLIS) * 2;
     }
 
     private static final ThreadPools.ExpectedExceptionFactory<FolderException> FACTORY =
