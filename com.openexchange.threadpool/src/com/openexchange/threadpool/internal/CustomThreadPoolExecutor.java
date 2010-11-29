@@ -1337,7 +1337,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null == command) {
             throw new NullPointerException();
         }
-        for (;;) {
+        if (blocking) {
             if (runState != RUNNING) {
                 rejectCustom(command);
                 return;
@@ -1345,38 +1345,45 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             if (poolSize < corePoolSize && addIfUnderCorePoolSize(command)) {
                 return;
             }
-            if (blocking) {
-                /*
-                 * Wait for space in work queue
-                 */
-                boolean acquired = false;
-                do {
-                    try {
-                        workQueue.put(command);
-                        acquired = true;
-                    } catch (final InterruptedException e) {
-                        /*
-                         * wait forever!
-                         */
-                    }                   
-                } while(!acquired);
-                return;
-            }
             /*
-             * Non-blocking behavior, just offer and accept a possible rejected execution exception
+             * Wait for space in work queue
              */
-            if (workQueue.offer(command)) {
-                return;
+            boolean acquired = false;
+            do {
+                try {
+                    workQueue.put(command);
+                    acquired = true;
+                } catch (final InterruptedException e) {
+                    /*
+                     * wait forever!
+                     */
+                }
+            } while (!acquired);
+        } else {
+            for (;;) {
+                if (runState != RUNNING) {
+                    rejectCustom(command);
+                    return;
+                }
+                if (poolSize < corePoolSize && addIfUnderCorePoolSize(command)) {
+                    return;
+                }
+                /*
+                 * Non-blocking behavior, just offer and accept a possible rejected execution exception
+                 */
+                if (workQueue.offer(command)) {
+                    return;
+                }
+                final Runnable r = addIfUnderMaximumPoolSize(command);
+                if (r == command) {
+                    return;
+                }
+                if (null == r) {
+                    rejectCustom(command);
+                    return;
+                }
+                // else retry
             }
-            final Runnable r = addIfUnderMaximumPoolSize(command);
-            if (r == command) {
-                return;
-            }
-            if (null == r) {
-                rejectCustom(command);
-                return;
-            }
-            // else retry
         }
     }
 
