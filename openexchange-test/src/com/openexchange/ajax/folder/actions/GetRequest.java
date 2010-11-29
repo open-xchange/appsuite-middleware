@@ -111,6 +111,10 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
         this(api, String.valueOf(folderId), FolderObject.ALL_COLUMNS, true);
     }
 
+    public GetRequest(API api, int folderId, boolean failOnError) {
+        this(api, String.valueOf(folderId), FolderObject.ALL_COLUMNS, failOnError);
+    }
+
     public Object getBody() {
         return null;
     }
