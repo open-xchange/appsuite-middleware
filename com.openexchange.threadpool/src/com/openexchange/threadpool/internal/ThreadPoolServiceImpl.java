@@ -94,6 +94,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             properties.getKeepAliveTime(),
             properties.getWorkQueue(),
             properties.getWorkQueueSize(),
+            properties.isBlocking(),
             properties.getRefusedExecutionBehavior());
     }
 
@@ -106,6 +107,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *            threads will wait for new tasks before terminating.
      * @param workQueue The queue to use for holding tasks before they are executed.
      * @param workQueueSize The size of the work queue; zero for unlimited size
+     * @param blocking <code>true</code> for a blocking behavior; otherwise <code>false</code>
      * @param refusedExecutionBehavior The default behavior to obey when execution is blocked because the thread bounds and queue capacities
      *            are reached.
      * @return A new {@link ThreadPoolServiceImpl} instance
@@ -114,7 +116,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *             be resolved.
      * @throws NullPointerException If <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> are <code>null</code>.
      */
-    public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final String refusedExecutionBehavior) {
+    public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
         final RejectedExecutionType ret = RejectedExecutionType.getRejectedExecutionType(refusedExecutionBehavior);
         if (null == ret) {
             throw new IllegalArgumentException("Unknown refused execution behavior: " + refusedExecutionBehavior);
@@ -123,7 +125,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize);
         final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), newInst);
         newInst.threadPoolExecutor.setRejectedExecutionHandler(reh);
-        // TODO: newInst.threadPoolExecutor.setBlocking(blocking);
+        newInst.threadPoolExecutor.setBlocking(blocking);
         return newInst;
     }
 

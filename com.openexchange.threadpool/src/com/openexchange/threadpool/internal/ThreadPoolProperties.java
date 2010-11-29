@@ -56,6 +56,11 @@ import com.openexchange.config.ConfigurationService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+/**
+ * {@link ThreadPoolProperties}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public final class ThreadPoolProperties {
 
     private int corePoolSize;
@@ -71,6 +76,8 @@ public final class ThreadPoolProperties {
     private int workQueueSize;
 
     private String refusedExecutionBehavior;
+
+    private boolean blocking;
 
     /**
      * Initializes a new {@link ThreadPoolProperties}.
@@ -159,6 +166,18 @@ public final class ThreadPoolProperties {
                 workQueue = "linked";
             }
 
+            blocking = false;
+            {
+                final String tmp = configurationService.getProperty("com.openexchange.threadpool.blocking");
+                if (null != tmp) {
+                    try {
+                        blocking = Boolean.parseBoolean(tmp.trim());
+                    } catch (final NumberFormatException e) {
+                        blocking = false;
+                    }
+                }
+            }
+
             refusedExecutionBehavior = "abort";
             {
                 final String tmp = configurationService.getProperty("com.openexchange.threadpool.refusedExecutionBehavior");
@@ -243,6 +262,15 @@ public final class ThreadPoolProperties {
      */
     public int getWorkQueueSize() {
         return workQueueSize;
+    }
+
+    /**
+     * Whether a blocking behavior should be applied.
+     * 
+     * @return <code>true</code> if a blocking behavior should be applied; otherwsie <code>false</code>
+     */
+    public boolean isBlocking() {
+        return blocking;
     }
 
     /**
