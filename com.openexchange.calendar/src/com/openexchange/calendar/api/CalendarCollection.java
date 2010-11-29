@@ -1945,23 +1945,47 @@ public final class CalendarCollection implements CalendarCollectionService {
             if (check == null) {
                 check = new UserParticipant[1];
                 check[0] = up;
-            } else {
-                Arrays.sort(check);
             }
             
-            final int o = Arrays.binarySearch(orig, up);
-            final int f = Arrays.binarySearch(check, up);
-            if (f >= 0 && f < check.length) {
-                check[f].setAlarmMinutes(cdao.getAlarm());
-                check[f].setIsModified(true);
-                if (o >= 0 && o < orig.length) {
-                    if (!check[f].containsConfirm()) {
-                        check[f].setConfirm(orig[o].getConfirm());
+            UserParticipant current = null;
+            for (int i = 0; i < check.length; i++) {
+                if (check[i].getIdentifier() == uid) {
+                    current = check[i];
+                    break;
+                }
+            }
+            UserParticipant old = null;
+            for (int i = 0; i < orig.length; i++) {
+                if (orig[i].getIdentifier() == uid) {
+                    old = orig[i];
+                    break;
+                }
+            }
+            UserParticipant owner = null;
+            if (cdao.getFolderType() == FolderObject.SHARED) {
+                for (int i = 0; i < check.length; i++) {
+                    if (check[i].getIdentifier() == cdao.getSharedFolderOwner()) {
+                        owner = check[i];
                     }
-                    if (!check[f].containsConfirmMessage()) {
-                        check[f].setConfirmMessage(orig[o].getConfirmMessage());
+                }
+            }
+
+            if (current != null) {
+                if (cdao.getFolderType() == FolderObject.SHARED && owner != null) {
+                    owner.setAlarmMinutes(cdao.getAlarm());
+                    owner.setIsModified(true);
+                } else if (cdao.getFolderType() != FolderObject.SHARED) {
+                    current.setAlarmMinutes(cdao.getAlarm());
+                    current.setIsModified(true);
+                }
+                if (old != null) {
+                    if (!current.containsConfirm()) {
+                        current.setConfirm(old.getConfirm());
                     }
-                    check[f].setPersonalFolderId(orig[o].getPersonalFolderId());
+                    if (!current.containsConfirmMessage()) {
+                        current.setConfirmMessage(old.getConfirmMessage());
+                    }
+                    current.setPersonalFolderId(old.getPersonalFolderId());
                 }
                 
                 return check;

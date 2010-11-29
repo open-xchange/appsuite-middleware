@@ -2074,12 +2074,19 @@ public class CalendarMySQL implements CalendarSqlImp {
                     if (pfid < 1) {
                         LOG.error(StringCollection.convertArraytoString(new Object[] { "ERROR: getUserParticipants oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(cdao.getObjectID()) }));
                     }
+                    
+                    final int alarm = rs.getInt(5);
+                    up.setAlarmMinutes(alarm);
+                    
                     if (cdao.getFolderType() == FolderObject.PRIVATE) {
                         if (uid == tuid) {
                             cdao.setGlobalFolderID(pfid);
                             cdao.setPrivateFolderID(pfid);
                         }
                         up.setPersonalFolderId(pfid);
+                        if (tuid == uid) {
+                            cdao.setAlarm(up.getAlarmMinutes());
+                        }
                     } else if (cdao.getFolderType() == FolderObject.SHARED) {
                         if (cdao.getSharedFolderOwner() == 0) {
                             throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
@@ -2100,18 +2107,15 @@ public class CalendarMySQL implements CalendarSqlImp {
                             }
                         }
                         up.setPersonalFolderId(pfid);
+                        
+                        if (tuid == cdao.getSharedFolderOwner()) {
+                            cdao.setAlarm(up.getAlarmMinutes());
+                        }
                     } else if (uid == tuid) {
                         cdao.setGlobalFolderID(pfid);
                         cdao.setPrivateFolderID(pfid);
                     } else {
                         cdao.setActionFolder(pfid);
-                    }
-                }
-                final int alarm = rs.getInt(5);
-                if (!rs.wasNull()) {
-                    up.setAlarmMinutes(alarm);
-                    if (up.containsAlarm() && up.getAlarmMinutes() >= 0 && up.getIdentifier() == uid) {
-                        cdao.setAlarm(up.getAlarmMinutes());
                     }
                 }
                 participants.add(up);
