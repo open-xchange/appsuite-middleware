@@ -56,6 +56,6 @@ package com.openexchange.groupware.dataRetrieval.servlets;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Paths {
-    public static final String FILE_DELIVERY_PATH = "/ajax/file/retrieval/deliver";
-    public static final String MODULE = "file/retrieval";
+    public static final String FILE_DELIVERY_PATH = "/ajax/binaries/retrieval/deliver";
+    public static final String MODULE = "binaries/retrieval";
 }
