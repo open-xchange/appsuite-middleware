@@ -67,6 +67,8 @@ public final class URLMailAttachmentActivator implements BundleActivator {
     private static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(URLMailAttachmentActivator.class);
 
+    private final String name;
+
     private ServiceRegistration registration;
 
     /**
@@ -74,32 +76,33 @@ public final class URLMailAttachmentActivator implements BundleActivator {
      */
     public URLMailAttachmentActivator() {
         super();
+        name = "com.openexchange.url.mail.attachment";
     }
 
     public void start(final BundleContext context) throws Exception {
-        LOG.info("starting bundle: com.openexchange.url.mail.attachment");
+        LOG.info("starting bundle: " + name);
         try {
             /*
              * Register data sources
              */
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>(1);
-            props.put("identifier", "com.openexchange.url.mail.attachment");
+            props.put("identifier", name);
             registration = context.registerService(DataSource.class.getName(), new URLMailAttachmentDataSource(), props);
         } catch (final Exception e) {
-            LOG.error("starting bundle failed: com.openexchange.url.mail.attachment", e);
+            LOG.error("starting bundle failed: " + name, e);
             throw e;
         }
     }
 
     public void stop(final BundleContext context) throws Exception {
-        LOG.info("stopping bundle: com.openexchange.url.mail.attachment");
+        LOG.info("stopping bundle: " + name);
         try {
             if (null != registration) {
                 registration.unregister();
                 registration = null;
             }
         } catch (final Exception e) {
-            LOG.error("stopping bundle failed: com.openexchange.url.mail.attachment", e);
+            LOG.error("stopping bundle failed: " + name, e);
             throw e;
         }
     }
