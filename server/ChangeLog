@@ -1,3 +1,7 @@
+* 2010-11-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #17658: No poll (take with timeout) on a submitted task
+
 * 2010-11-26 - francisco.laguna@open-xchange.com
 
  - Bugfix #17596: Filter out subscriptions on folders that are not visible

@@ -65,11 +65,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -88,19 +87,18 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.ajax.parser.MessagingFolderParser;
 import com.openexchange.ajax.writer.FolderWriter;
-import com.openexchange.ajax.writer.MessagingFolderWriter;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajax.writer.FolderWriter.FolderFieldWriter;
+import com.openexchange.ajax.writer.MessagingFolderWriter;
 import com.openexchange.ajax.writer.MessagingFolderWriter.MessagingFolderFieldWriter;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -149,9 +147,9 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -738,10 +736,9 @@ public class Folder extends SessionServlet {
                                 /*
                                  * Wait for completion
                                  */
-                                final int maxRunningMillis = getMaxRunningMillis();
                                 try {
                                     for (int i = 0; i < size; i++) {
-                                        final Future<Object> f = completionFuture.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
+                                        final Future<Object> f = completionFuture.take();
                                         if (null != f) {
                                             try {
                                                 f.get();
@@ -1066,16 +1063,6 @@ public class Folder extends SessionServlet {
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
         return response;
-    }
-
-    private int getMaxRunningMillis() {
-        final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (null == confService) {
-            // Default of 2 minutes
-            return DEFAULT_MAX_RUNNING_MILLIS;
-        }
-        // 2 * AJP_WATCHER_MAX_RUNNING_TIME
-        return confService.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", DEFAULT_MAX_RUNNING_MILLIS) * 2;
     }
 
     /**
