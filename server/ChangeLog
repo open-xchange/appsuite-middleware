@@ -1,3 +1,7 @@
+* 2010-11-29 - marcus.klein@open-xchange.com
+
+ - Bugfix #17640: Corrected HTTP status codes of free/busy interface.
+
 * 2010-11-29 - thorben.betten@open-xchange.com
 
  - Bugfix #17658: No poll (take with timeout) on a submitted task

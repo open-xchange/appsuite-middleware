@@ -62,7 +62,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -83,7 +82,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.user.UserService;
 
 /**
@@ -108,7 +106,7 @@ public class freebusy extends HttpServlet {
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         final Context context = getContext(request);
         if (null == context) {
-            response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine context.");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine context.");
             return;
         }
 
@@ -118,12 +116,12 @@ public class freebusy extends HttpServlet {
         if (-1 == period) {
             start = getStart(request);
             if (null == start) {
-                response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine start of free busy time frame.");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unable to determine start of free busy time frame.");
                 return;
             }
             end = getEnd(request);
             if (null == end) {
-                response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine end of free busy time frame.");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unable to determine end of free busy time frame.");
                 return;
             }
         } else {
@@ -137,13 +135,13 @@ public class freebusy extends HttpServlet {
 
         final String mailAddress = getMailAddress(request);
         if (null == mailAddress) {
-            response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine mail address.");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unable to determine mail address.");
             return;
         }
 
         Participant participant = findParticipant(context, mailAddress);
         if (null == participant) {
-            response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to resolve mail address to a user or a resource.");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to resolve mail address to a user or a resource.");
             return;
         }
 
