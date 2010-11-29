@@ -123,6 +123,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize);
         final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), newInst);
         newInst.threadPoolExecutor.setRejectedExecutionHandler(reh);
+        // TODO: newInst.threadPoolExecutor.setBlocking(blocking);
         return newInst;
     }
 

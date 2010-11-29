@@ -339,6 +339,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private volatile RejectedExecutionHandler handler;
 
     /**
+     * Whether this executor has a blocking behavior. Meaning caller is blocked until space becomes available in working queue. Otherwise
+     * {@link RejectedExecutionException} are be thrown in capacity bounds are reached.
+     */
+    private volatile boolean blocking;
+
+    /**
      * Factory for new threads.
      */
     private volatile ThreadFactory threadFactory;
@@ -356,7 +362,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * The default rejected execution handler
      */
-    private static final RejectedExecutionHandler defaultHandler = new AbortPolicy();
+    private static final RejectedExecutionHandler DEFAULT_HANDLER = new AbortPolicy();
 
     /**
      * Invoke the rejected execution handler for the given command.
@@ -968,9 +974,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     }
                 }
             } catch (final Exception e) {
-                LOG.fatal(MessageFormat.format(
-                    "{0} thread aborted execution due to an exception! TimerService is no more active!",
-                    currentThread.getName()), e);
+                LOG.fatal(
+                    MessageFormat.format(
+                        "{0} thread aborted execution due to an exception! TimerService is no more active!",
+                        currentThread.getName()),
+                    e);
             }
         }
     }
@@ -1113,7 +1121,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @throws NullPointerException if <tt>workQueue</tt> is <code>null</code>
      */
     public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, Executors.defaultThreadFactory(), defaultHandler);
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, Executors.defaultThreadFactory(), DEFAULT_HANDLER);
     }
 
     /**
@@ -1132,7 +1140,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are <code>null</code>.
      */
     public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final ThreadFactory threadFactory) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, defaultHandler);
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, threadFactory, DEFAULT_HANDLER);
     }
 
     /**
@@ -1151,7 +1159,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>handler</tt> are <code>null</code>.
      */
     public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final RejectedExecutionHandler handler) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, Executors.defaultThreadFactory(), handler);
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, Executors.defaultThreadFactory(), handler);
     }
 
     /**
@@ -1164,13 +1172,16 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @param unit the time unit for the keepAliveTime argument.
      * @param workQueue the queue to use for holding tasks before they are executed. This queue will hold only the <tt>Runnable</tt> tasks
      *            submitted by the <tt>execute</tt> method.
+     * @param blocking Whether this executor has a blocking behavior. Meaning caller is blocked until space becomes available in working
+     *            queue. Otherwise {@link RejectedExecutionException} are be thrown in capacity bounds are reached. <code>true</code>
+     *            requires the passed work queue to have a boundary restriction.
      * @param threadFactory the factory to use when the executor creates a new thread.
      * @param handler the handler to use when execution is blocked because the thread bounds and queue capacities are reached.
      * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> or <tt>handler</tt> are <code>null</code>.
      */
-    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final ThreadFactory threadFactory, final RejectedExecutionHandler handler) {
+    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final boolean blocking, final ThreadFactory threadFactory, final RejectedExecutionHandler handler) {
         super(0, 1, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1));
         if ((corePoolSize < 0) || (maximumPoolSize <= 0) || (maximumPoolSize < corePoolSize) || (keepAliveTime < 0)) {
             throw new IllegalArgumentException();
@@ -1178,6 +1189,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if ((null == workQueue) || (null == threadFactory) || (null == handler)) {
             throw new NullPointerException();
         }
+        this.blocking = blocking;
         this.corePoolSize = corePoolSize;
         this.maximumPoolSize = maximumPoolSize;
         this.workQueue = workQueue;
@@ -1227,11 +1239,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (period <= 0) {
             throw new IllegalArgumentException();
         }
-        final ScheduledFutureTask<?> t = new ScheduledFutureTask<Object>(
-            command,
-            null,
-            triggerTime(initialDelay, unit),
-            unit.toNanos(period));
+        final ScheduledFutureTask<?> t =
+            new ScheduledFutureTask<Object>(command, null, triggerTime(initialDelay, unit), unit.toNanos(period));
         if (runState != RUNNING) {
             rejectCustom(t);
         } else {
@@ -1247,11 +1256,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (delay <= 0) {
             throw new IllegalArgumentException();
         }
-        final ScheduledFutureTask<?> t = new ScheduledFutureTask<Boolean>(
-            command,
-            null,
-            triggerTime(initialDelay, unit),
-            unit.toNanos(-delay));
+        final ScheduledFutureTask<?> t =
+            new ScheduledFutureTask<Boolean>(command, null, triggerTime(initialDelay, unit), unit.toNanos(-delay));
         if (runState != RUNNING) {
             rejectCustom(t);
         } else {
@@ -1280,6 +1286,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             task = (Task<T>) callable;
         } else {
             task = new AbstractTask<T>() {
+
                 public T call() throws Exception {
                     return callable.call();
                 }
@@ -1338,6 +1345,26 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             if (poolSize < corePoolSize && addIfUnderCorePoolSize(command)) {
                 return;
             }
+            if (blocking) {
+                /*
+                 * Wait for space in work queue
+                 */
+                boolean acquired = false;
+                do {
+                    try {
+                        workQueue.put(command);
+                        acquired = true;
+                    } catch (final InterruptedException e) {
+                        /*
+                         * wait forever!
+                         */
+                    }                   
+                } while(!acquired);
+                return;
+            }
+            /*
+             * Non-blocking behavior, just offer and accept a possible rejected execution exception
+             */
             if (workQueue.offer(command)) {
                 return;
             }
@@ -1554,6 +1581,26 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     public ThreadFactory getThreadFactory() {
         return threadFactory;
+    }
+
+    /**
+     * Sets whether this executor has a blocking behavior. Meaning caller is blocked until space becomes available in working queue.
+     * Otherwise {@link RejectedExecutionException} are be thrown in capacity bounds are reached.
+     * 
+     * @param blocking <code>true</code> if blocking; otherwise <code>false</code>
+     */
+    public void setBlocking(boolean blocking) {
+        this.blocking = blocking;
+    }
+
+    /**
+     * Checks whether this executor has a blocking behavior. Meaning caller is blocked until space becomes available in working queue.
+     * Otherwise {@link RejectedExecutionException} are be thrown in capacity bounds are reached.
+     * 
+     * @return <code>true</code> if blocking; otherwise <code>false</code>
+     */
+    public boolean isBlocking() {
+        return blocking;
     }
 
     /**
