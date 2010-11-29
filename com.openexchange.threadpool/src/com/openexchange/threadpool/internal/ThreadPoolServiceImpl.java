@@ -154,7 +154,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         this.corePoolSize = getCorePoolSize(corePoolSize);
         threadPoolExecutor =
             new CustomThreadPoolExecutor(
-                this.corePoolSize,
+                queueType.isFixedSize() ? maximumPoolSize : this.corePoolSize,
                 maximumPoolSize,
                 keepAliveTime,
                 TimeUnit.MILLISECONDS,
