@@ -263,8 +263,9 @@ public abstract class AbstractPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
         }
         // Open storage and add to list of opened storages
-        tmp.startTransaction(storageParameters, false);
-        openedStorages.add(tmp);
+        if (tmp.startTransaction(storageParameters, false)) {
+            openedStorages.add(tmp);
+        }
         return tmp;
     }
 

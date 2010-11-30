@@ -127,9 +127,10 @@ public final class SubscribePerformer extends AbstractPerformer {
         if (null == sourceStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(sourceTreeId, folderId);
         }
-        sourceStorage.startTransaction(storageParameters, false);
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(sourceStorage);
+        if (sourceStorage.startTransaction(storageParameters, false)) {
+            openedStorages.add(sourceStorage);
+        }
         try {
             final Folder sourceFolder = sourceStorage.getFolder(sourceTreeId, folderId, storageParameters);
             {

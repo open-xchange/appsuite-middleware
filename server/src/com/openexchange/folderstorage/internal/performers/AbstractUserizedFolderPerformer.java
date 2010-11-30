@@ -66,7 +66,6 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -340,8 +339,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                             alreadyOpened = true;
                         }
                     }
-                    if (!alreadyOpened) {
-                        curStorage.startTransaction(storageParameters, false);
+                    if (!alreadyOpened && curStorage.startTransaction(storageParameters, false)) {
                         openedStorages.add(curStorage);
                     }
                     final SortableId[] visibleIds = curStorage.getSubfolders(treeId, folderId, storageParameters);

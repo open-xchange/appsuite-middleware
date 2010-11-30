@@ -181,9 +181,10 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(folderStorage);
+        if (folderStorage.startTransaction(storageParameters, false)) {
+            openedStorages.add(folderStorage);
+        }
         final UserizedFolder[] ret;
         try {
             Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
@@ -264,9 +265,10 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(folderStorage);
+        if (folderStorage.startTransaction(storageParameters, false)) {
+            openedStorages.add(folderStorage);
+        }
         final String[] ret;
         try {
             Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
