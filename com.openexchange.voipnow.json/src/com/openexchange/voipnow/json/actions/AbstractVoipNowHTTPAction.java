@@ -169,6 +169,11 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
              */
             if (uri == null || uri.equals("")) {
                 uri = "/";
+            } else {
+                uri = uri.trim();
+                if (uri.endsWith("/")) {
+                    uri = uri.substring(0, uri.length() - 1);
+                }
             }
             final HttpMethodParams params = httpMethod.getParams();
             httpMethod.setURI(new URI(uri, true, params.getUriCharset()));

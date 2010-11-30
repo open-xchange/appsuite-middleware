@@ -215,7 +215,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
 
     @Override
     protected String getPath() {
-        return "/callapi/204/Calls/MakeCall/";
+        return "/callapi/204/Calls/MakeCall";
     }
 
     @Override
