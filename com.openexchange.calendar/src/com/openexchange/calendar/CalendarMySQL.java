@@ -2084,7 +2084,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             cdao.setPrivateFolderID(pfid);
                         }
                         up.setPersonalFolderId(pfid);
-                        if (tuid == uid) {
+                        if (tuid == uid && up.getAlarmMinutes() > 0) {
                             cdao.setAlarm(up.getAlarmMinutes());
                         }
                     } else if (cdao.getFolderType() == FolderObject.SHARED) {
@@ -2108,7 +2108,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         up.setPersonalFolderId(pfid);
                         
-                        if (tuid == cdao.getSharedFolderOwner()) {
+                        if (tuid == cdao.getSharedFolderOwner() && up.getAlarmMinutes() > 0) {
                             cdao.setAlarm(up.getAlarmMinutes());
                         }
                     } else if (uid == tuid) {
