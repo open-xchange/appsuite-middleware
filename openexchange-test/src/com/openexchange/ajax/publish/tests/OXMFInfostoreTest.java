@@ -96,8 +96,6 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         String pubUrl = (String) publication.getConfiguration().get("url");
         String website = getWebsite(pubUrl);
 
- 
-
         Pattern urlPattern = Pattern.compile("href=\"(.+?/publications/files/.+?/"+data.getId()+"/.+?)\"");
         Matcher matcher = urlPattern.matcher(website);
         boolean found = matcher.find();

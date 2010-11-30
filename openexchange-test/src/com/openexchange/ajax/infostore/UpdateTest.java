@@ -148,7 +148,11 @@ public class UpdateTest extends InfostoreAJAXTest {
 		clean.add(id2);
 		
 		res = update(getWebConversation(),getHostName(),sessionId,id2,Long.MAX_VALUE,m(), upload, "text/plain");
-		assertTrue(res.hasError());
+
+        res = get(getWebConversation(), getHostName(), sessionId, id2);
+
+        JSONObject obj = (JSONObject) res.getData();
+        assertFalse(upload.getName().equals(obj.get("filename")));
 	}
 	
 	//Bug 4120

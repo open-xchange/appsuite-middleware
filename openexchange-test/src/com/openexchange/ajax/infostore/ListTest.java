@@ -39,15 +39,17 @@ public class ListTest extends InfostoreAJAXTest {
     public void testSkipsMissingIds() throws Exception {
         final int fantasyID = getFantasyID();
 
-        final int[][] entries = new int[3][2];
+        final int[][] entries = new int[4][2];
         entries[0][1] = clean.get(0);
         entries[1][1] = fantasyID;
-        entries[1][1] = clean.get(1);
+        entries[2][1] = clean.get(1);
+        entries[3][1] = clean.get(1);
 
         entries[0][0] = folderId;
         entries[1][0] = folderId;
         entries[2][0] = folderId;
-
+        entries[3][0] = fantasyID;
+ 
 
         checkEntries(entries);
 
