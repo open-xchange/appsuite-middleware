@@ -61,7 +61,7 @@ public enum QueueType {
     /**
      * Synchronous queue type.
      */
-    SYNCHRONOUS("synchronous", new IQueueProvider() {
+    SYNCHRONOUS("synchronous", false, new IQueueProvider() {
 
         public BlockingQueue<Runnable> newWorkQueue(final int fixedCapacity) {
             return QueueProvider.getInstance().newSynchronousQueue();
@@ -70,7 +70,7 @@ public enum QueueType {
     /**
      * Linked queue type.
      */
-    LINKED("linked", new IQueueProvider() {
+    LINKED("linked", true, new IQueueProvider() {
 
         public BlockingQueue<Runnable> newWorkQueue(final int fixedCapacity) {
             return QueueProvider.getInstance().newLinkedQueue(fixedCapacity);
@@ -81,9 +81,26 @@ public enum QueueType {
 
     private final IQueueProvider queueProvider;
 
-    private QueueType(final String type, final IQueueProvider queueProvider) {
+    private final boolean fixedSize;
+
+    private QueueType(final String type, final boolean fixedSize, final IQueueProvider queueProvider) {
+        this.fixedSize = fixedSize;
         this.type = type;
         this.queueProvider = queueProvider;
+    }
+
+    
+    /**
+     * Checks whether the queue type enforces the thread pool being at fixed-size.
+     * <ul>
+     * <li>A <b>synchronous</b> queue is appropriate for <code>core-size &lt; max-size</code></li>
+     * <li>A <b>linked</b> queue is appropriate for <code>core-size = max-size</code></li>
+     * </ul>
+     * 
+     * @return <code>true</code> if the queue type enforces the thread pool being at fixed-size; otherwsie <code>false</code>
+     */
+    public boolean isFixedSize() {
+        return fixedSize;
     }
 
     /**

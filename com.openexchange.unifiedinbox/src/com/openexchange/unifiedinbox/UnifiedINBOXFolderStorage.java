@@ -59,9 +59,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -252,31 +249,10 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         // Wait for completion
         final List<int[][]> list = new ArrayList<int[][]>(nAccounts);
         try {
-            final int timeout = getMaxRunningTime();
             int completed = 0;
-            int failed = 0;
             while (completed < nAccounts) {
-                if (timeout <= 0) {
-                    // No timeout
-                    list.add(completionService.take().get());
-                } else {
-                    final Future<int[][]> f = completionService.poll(timeout, TimeUnit.MILLISECONDS);
-                    if (null == f) {
-                        // Waiting time elapsed before a completed task was present.
-                        if (++failed <= 1) {
-                            continue;
-                        }
-                        if (LOG.isWarnEnabled()) {
-                            final UnifiedINBOXException e = new UnifiedINBOXException(
-                                UnifiedINBOXException.Code.TIMEOUT,
-                                Integer.valueOf(timeout * failed),
-                                TimeUnit.MILLISECONDS.toString().toLowerCase());
-                            LOG.warn(e.getMessage(), e);
-                        }
-                    } else {
-                        list.add(f.get());
-                    }
-                }
+                // No timeout
+                list.add(completionService.take().get());
                 completed++;
             }
             if (LOG.isDebugEnabled()) {
@@ -327,33 +303,11 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         }
         // Wait for completion of each submitted task
         try {
-            final int timeout = getMaxRunningTime();
             int completed = 0;
-            int failed = 0;
             while (completed < retval.length) {
                 final Retval r;
-                if (timeout <= 0) {
-                    // No timeout
-                    r = completionService.take().get();
-                } else {
-                    final Future<Retval> f = completionService.poll(timeout, TimeUnit.MILLISECONDS);
-                    if (null == f) {
-                        // Waiting time elapsed before a completed task was present.
-                        if (++failed <= 1) {
-                            continue;
-                        }
-                        if (LOG.isWarnEnabled()) {
-                            final UnifiedINBOXException e = new UnifiedINBOXException(
-                                UnifiedINBOXException.Code.TIMEOUT,
-                                Integer.valueOf(timeout * failed),
-                                TimeUnit.MILLISECONDS.toString().toLowerCase());
-                            LOG.warn(e.getMessage(), e);
-                        }
-                        r = null;
-                    } else {
-                        r = f.get();
-                    }
-                }
+                // No timeout
+                r = completionService.take().get();
                 completed++;
                 if (null != r) {
                     retval[r.index] = r.mailFolder;
@@ -659,13 +613,5 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             this.mailFolder = mailFolder;
         }
     } // End of Retval
-
-    private static int getMaxRunningTime() {
-        final ConfigurationService cs = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        if (null != cs) {
-            return cs.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
-        }
-        return -1;
-    }
 
 }

@@ -94,6 +94,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             properties.getKeepAliveTime(),
             properties.getWorkQueue(),
             properties.getWorkQueueSize(),
+            properties.isBlocking(),
             properties.getRefusedExecutionBehavior());
     }
 
@@ -115,6 +116,28 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      * @throws NullPointerException If <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> are <code>null</code>.
      */
     public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final String refusedExecutionBehavior) {
+        return newInstance(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize, false, refusedExecutionBehavior);
+    }
+
+    /**
+     * Creates a new {@link ThreadPoolServiceImpl} with the given initial parameters.
+     * 
+     * @param corePoolSize The number of threads to keep in the pool, even if they are idle.
+     * @param maximumPoolSize The maximum number of threads to allow in the pool.
+     * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time in milliseconds that excess idle
+     *            threads will wait for new tasks before terminating.
+     * @param workQueue The queue to use for holding tasks before they are executed.
+     * @param workQueueSize The size of the work queue; zero for unlimited size
+     * @param blocking <code>true</code> for a blocking behavior; otherwise <code>false</code>
+     * @param refusedExecutionBehavior The default behavior to obey when execution is blocked because the thread bounds and queue capacities
+     *            are reached.
+     * @return A new {@link ThreadPoolServiceImpl} instance
+     * @throws IllegalArgumentException If corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
+     *             or if corePoolSize greater than maximumPoolSize or either <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> cannot
+     *             be resolved.
+     * @throws NullPointerException If <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> are <code>null</code>.
+     */
+    public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
         final RejectedExecutionType ret = RejectedExecutionType.getRejectedExecutionType(refusedExecutionBehavior);
         if (null == ret) {
             throw new IllegalArgumentException("Unknown refused execution behavior: " + refusedExecutionBehavior);
@@ -123,6 +146,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize);
         final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), newInst);
         newInst.threadPoolExecutor.setRejectedExecutionHandler(reh);
+        newInst.threadPoolExecutor.setBlocking(blocking);
         return newInst;
     }
 
@@ -151,7 +175,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         this.corePoolSize = getCorePoolSize(corePoolSize);
         threadPoolExecutor =
             new CustomThreadPoolExecutor(
-                this.corePoolSize,
+                queueType.isFixedSize() ? maximumPoolSize : this.corePoolSize,
                 maximumPoolSize,
                 keepAliveTime,
                 TimeUnit.MILLISECONDS,

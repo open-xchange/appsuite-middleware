@@ -57,15 +57,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
-import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailException;
@@ -123,8 +120,6 @@ public final class IMAPDefaultFolderChecker {
 
     private final IMAPConfig imapConfig;
 
-    private final int maxRunningMillis;
-
     /**
      * Initializes a new {@link IMAPDefaultFolderChecker}.
      * 
@@ -141,19 +136,6 @@ public final class IMAPDefaultFolderChecker {
         this.imapStore = imapStore;
         this.ctx = ctx;
         this.imapConfig = imapConfig;
-        final int timeout = ((IIMAPProperties) imapConfig.getMailProperties()).getImapTimeout();
-        if (timeout <= 0) {
-            final ConfigurationService confService = IMAPServiceRegistry.getService(ConfigurationService.class);
-            if (null == confService) {
-                // Default of 2 minutes
-                maxRunningMillis = DEFAULT_MAX_RUNNING_MILLIS;
-            } else {
-                // 2 * AJP_WATCHER_MAX_RUNNING_TIME
-                maxRunningMillis = confService.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", DEFAULT_MAX_RUNNING_MILLIS) * 2;
-            }
-        } else {
-            maxRunningMillis = timeout;
-        }
     }
 
     /**
@@ -370,7 +352,7 @@ public final class IMAPDefaultFolderChecker {
                     final long start = System.currentTimeMillis();
                     try {
                         for (int i = 0; i < count; i++) {
-                            final Future<Object> f = completionFuture.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
+                            final Future<Object> f = completionFuture.take();
                             if (null == f) {
                                 // Waiting time elapsed
                                 throw new MailException(
