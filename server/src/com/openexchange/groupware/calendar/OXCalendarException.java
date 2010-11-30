@@ -95,7 +95,7 @@ public class OXCalendarException extends OXException {
         /**
          * Unexpected exception %d!
          */
-        UNEXPECTED_EXCEPTION("Unexpected exception %d! (id: %d)", 7, AbstractOXException.Category.INTERNAL_ERROR),
+        UNEXPECTED_EXCEPTION("Unexpected exception %d!", 7, AbstractOXException.Category.INTERNAL_ERROR),
         EXTERNAL_PARTICIPANTS_MANDATORY_FIELD("Mandatory field mail address for external participants", 8, AbstractOXException.Category.USER_INPUT),
         UPDATE_WITHOUT_PARTICIPANTS("FATAL: Would create an object without participants", 9, AbstractOXException.Category.CODE_ERROR),
         UPDATE_USER_SHARED_MISMATCH("Folder type \"SHARED\" is not allowed in this situation.", 10, AbstractOXException.Category.USER_INPUT),
