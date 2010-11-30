@@ -156,6 +156,16 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-519
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/file-logging.properties
+   if ! ox_exists_property com.openexchange.login.internal.LoginPerformer.level $pfile; then
+      ox_set_property com.openexchange.login.internal.LoginPerformer.level INFO $pfile
+   fi
+   if ! ox_exists_property com.openexchange.sessiond.impl.SessionHandler.level $pfile; then
+      ox_set_property com.openexchange.sessiond.impl.SessionHandler.level INFO $pfile
+   fi
+
    # SoftwareChange_Request-515
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/server.properties
