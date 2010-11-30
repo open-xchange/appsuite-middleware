@@ -43,10 +43,16 @@ upsell = {
     path: "plugins/com.openexchange.upsell.multiple.gui/",
     //path to files
     invite: false,
+    show_features_initial: 2,
     files: {
       jss: {
-        fancy: "fancybox.js",
-        modal: "modal.js",
+        fancy: {
+          script: "fancybox.js",
+          action: "jQuery('a.light_box').fancybox({'titleShow':false});",
+        },
+        modal: {
+          script: "modal.js",
+        },
       },
       css: {
         main: "upsell.css",
@@ -57,6 +63,32 @@ upsell = {
       infostore: {
         name: ["modules/infostore","modules/contacts/new/add_attachment", "modules/contacts/new/delete_attachment", "modules/mail/save_to_infostore", "modules/infostore/send_as_attachment", "modules/infostore/send_as_link", "modules/infostore/mail/save_to_infostore", "modules/folders/users"],
         title: _("Enhance your system with &#8222;InfoStore&#8220;"),
+        intro: _("Where ever you are your documents are stored securely and<br> can be accessed and worked on, anytime!"),
+        list: {
+          list_item_1:  _("Teamwork on important files & data"),
+          list_item_2:  _("Share or publish docments without sending large email attachments"),
+          list_item_3:  _("Ensure actuality through automatic versioning"),
+          list_item_4:  _("Distinguish between official and private content through &#8220;Personal&#8221; &amp; &#8220;Public&#8221; folders"),
+          list_item_5:  _("Refer to documents via URL-link in projekts and meetings"),
+          list_item_6:  _("Access your files anywhere anytime"),
+          list_item_7:  _("Data-Security by centralized Server-Back-Up"),
+          list_item_8:  _(""),
+          list_item_9:  _(""),
+          list_item_10: _(""),
+        },
+        outro: _("Sign up for 90 Days free trial now !"),
+        videos: {
+          video_1: {
+            thumb: _("_infostore/img/infostore_video.png"),
+            video: _("_infostore/flash/teaser/teaservideo01_pubsub-en-v2_controller.swf"),
+          },
+        },
+        images: {
+          image_1: {
+            thumb: _("_infostore/img/infostore_small.png"),
+            image: _("_infostore/img/infostore_big.png"),
+          },
+        },
         buttons: {
           trial: {
             content: _("Sign-Up for trial"),
@@ -74,11 +106,36 @@ upsell = {
           },
         },
       },
-      
       //feature calender
       calender: {
         name: ["modules/calender", "modules/calendar/freebusy", "modules/calendar/team", "modules/calendar/mini_calender", "modules/calendar/new/add_participants", "modules/calendar/new/remove_participants", "modules/calendar/new/add_attachment", "modules/calendar/new/delete_attachment","modules/tasks/new/add_participants", "modules/tasks/new/remove_participants", "modules/tasks/new/add_attachment", "modules/tasks/new/delete_attachment", "configuration/mail/accounts/new"],
         title: _("Enhance your system with &#8222;Teamwork Capabilities&#8220;"),
+        intro: _("Make your team successful and cooperate with each other <br>on tasks, shared files and your team-calendar!"),
+        list: {
+          list_item_1:  _("Team-Calendar"),
+          list_item_2:  _("Tasks Delegation"),
+          list_item_3:  _("Share Folders"),
+          list_item_4:  _("Share Calendars"),
+          list_item_5:  _(""),
+          list_item_6:  _(""),
+          list_item_7:  _(""),
+          list_item_8:  _(""),
+          list_item_9:  _(""),
+          list_item_10: _(""),
+        },
+        outro: _("Sign up for 90 Days free trial now !"),
+        videos: {
+          video_1: {
+            thumb: _("_global/img/90_sec_small.png"),
+            video: _("_global/flash/90_sec/OX_film_EN_640.swf"),
+          },
+        },
+        images: {
+          image_1: {
+            thumb: _("_calendar/img/calendar_small.png"),
+            image: _("_calendar/img/calendar_big.png"),
+          },
+        },
         buttons: {
           trial: {
             content: _("Sign-Up for trial"),
@@ -96,12 +153,37 @@ upsell = {
           },
         },
       },
-      
       //feature mobility
       mobility: {
         name: ["modules/usm/eas", "modules/mobility"],
         title: _("Enhance your system with &#8222;Business Mobility&#8220;"),
-        product_name: _("Mail Push oder Mail Professional"),
+        product_name: _("Mail Push or Mail Professional"),
+        intro: _("With your &#8220;SmartPhone&#8221; you access all vital data<br>(mail, calendar, contacts, etc.) effortlessly and manageable on the spot."),
+        list: {
+          list_item_1:  _("Read and answer your mails."),
+          list_item_2:  _("Accept appointment proposals."),
+          list_item_3:  _("Organize your meetings."),
+          list_item_4:  _("Add new addresses."),
+          list_item_5:  _("Supported are: Windows Mobile 6.x, the Apple iPhone and Nokia S60 OS phones"),
+          list_item_6:  _("Blackberry & Android phones are supported through additional Software-Clients."),
+          list_item_7:  _(""),
+          list_item_8:  _(""),
+          list_item_9:  _(""),
+          list_item_10: _(""),
+        },
+        outro: _("Sign up for 90 Days free trial now !"),
+        videos: {
+          video_1: {
+            thumb: _("_mobility/img/mobility_video.png"),
+            video: _("_mobility/flash/teaser/teaservideo06-mobility-en-draft03_controller.swf"),
+          },
+        },
+        images: {
+          image_1: {
+            thumb: _("_mobility/img/mobility_small.png"),
+            image: _("_mobility/img/mobility_big.png"),
+          },
+        },
         buttons: {
           trial: {
             content: _("Sign-Up for trial"),
@@ -124,6 +206,32 @@ upsell = {
       outlook: {
         name: ["modules/outlook"],
         title: _("Enhance your system with &#8222;Outlook Oxtender&#8220;"),
+        intro: _("If Outlook&copy; is your preferred choice,<br>use it as your local Groupware Client."),
+        list: {
+          list_item_1:  _("All your Appointments, Contacts, Mails, etc. get synchronized."),
+          list_item_2:  _("Same look & feel locally and access via web-interface if needed."),
+          list_item_3:  _("All your private, public and shared folders are accessable"),
+          list_item_4:  _(""),
+          list_item_5:  _(""),
+          list_item_6:  _(""),
+          list_item_7:  _(""),
+          list_item_8:  _(""),
+          list_item_9:  _(""),
+          list_item_10: _(""),
+        },
+        outro: _("Sign up for 90 Days free trial now !"),
+        videos: {
+          video_1: {
+            thumb: _("_outlook/img/outlook_video.png"),
+            video: _("_outlook/flash/teaser/teaservideo04-oxtender-outlook-en-draft05_controller.swf"),
+          },
+        },
+        images: {
+          image_1: {
+            thumb: _("_outlook/img/outlook_small.png"),
+            image: _("_outlook/img/outlook_big.png"),
+          },
+        },
         buttons: {
           trial: {
             content: _("Sign-Up for trial"),
@@ -146,6 +254,7 @@ upsell = {
       order_confirm: {
         name: ["order_confirm"],
         title: _("Your provider processed your order successfully."),
+        intro: _("After you press 'OK', an automatic Re-Login will be initiated, and the new feature is going to be available immediately"),
         buttons: {
           confirm: {
             content: _("Ok"),
@@ -157,24 +266,30 @@ upsell = {
   },
   
   init: function (feature, win) {
-    
-    //Add feature to config
-    upsell.config.feature = feature;
-    
-    //Find out which feature is selected and configures content
-    upsell._get_feature();
-    
-    //Show upsell
-    upsell._show_upsell();
-    
-
+    if(!upsell.config.init){
+      upsell._get_required_files();
+      jQuery('#upsell_window .detail_show').live('click', function() {
+        if(jQuery("#upsell_window .detail").is(':visible')){
+          jQuery('#upsell_window .detail').hide();
+          jQuery(this).html(_('[more]'));
+        } else {
+          jQuery('#upsell_window .detail').show();
+          jQuery(this).html(_('[close]'));      
+        };
+      });
+      return false;
+    };
+    upsell._get_feature(feature);
   },
   
   _get_required_files: function(){
     jQuery.each(upsell.config.files, function(i, val){
       jQuery.each(val, function(ib, valb){
         if(i == "jss") {
-          jQuery.getScript(upsell.config.path + i + "/" + valb);
+          jQuery.getScript(upsell.config.path + i + "/" + valb.script, function(){
+            upsell.config.init = true;
+            eval(valb.action);
+          });
         } else if (i == "css") {
           jQuery("<link>").appendTo("head").attr({
             rel:  "stylesheet",
@@ -186,37 +301,26 @@ upsell = {
     });
   },
   
-  //gets current feature and configuration
-  _get_feature: function(){
+  _get_feature: function(feature){
     jQuery.each(upsell.config.features, function(i, val){
-      if(jQuery.inArray(upsell.config.feature, val.name) >= 0){
-        upsell.config.title = val.title;
-        upsell.config.template = upsell.config.path + 'templates/_' + i + "/html/" + upsell.config.language + '.html';
-        upsell.config.js = upsell.config.path + 'templates/_' + i + "/jss/_init.js";
-        eval(val.init_action);
+      if(jQuery.inArray(feature, val.name) >= 0){
+        upsell.config.feature = i;
+        upsell._build_window();
+        return false;
+      } else {
+        alert('Please add feature to upsell configuration !');
       }
     });
   },
   
-  //shows upsell layer
-  _show_upsell: function(){
-    jQuery.ajax({
-      url: upsell.config.template,
-      dataType: "text", 
-      success: function(data) {
-        upsell._build_window(data);
-      }
-    });
-
-  },
   
   //builds window and content
-  _build_window: function(data){
+  _build_window: function(){
     var data =
       '<div id="upsell_window">' +
         '<div id="headerSection">' +
            '<h2>' +
-             upsell.config.title +
+             upsell._get_title() +
              '<span>' +
                oxProductInfo.product_name +
              '</span>' +
@@ -225,16 +329,15 @@ upsell = {
          '</div>' +
          '<div id="contentSection">' +
            '<div class="contentSection">' +
-               data +
+               upsell._get_content() +
            '</div>' +
          '</div>' +
          '<div id="footerSection">' +
-           upsell._build_inputs();
+           upsell._get_inputs() +
          '</div>' +
        '</div>';
        
     jQuery.modal(data);
-    jQuery.getScript(upsell.config.js);
   },
   
   //close current window
@@ -243,11 +346,12 @@ upsell = {
   },
   
   //builds required buttons from configuration
-  _build_inputs: function(data){
+  _get_inputs: function(){
+    var feature = upsell.config.features[upsell.config.feature];
     var button = "";
-    jQuery.each(upsell.config.features, function(i, val){
-      if(jQuery.inArray(upsell.config.feature, val.name) >= 0 && val.buttons){
-        jQuery.each(val.buttons, function(ib, valb){
+
+      if(feature.buttons){
+        jQuery.each(feature.buttons, function(ib, valb){
           if(valb.content != "undefined"){
             button += '<a href="#" id="' + ib + '" class="btn"';
             button += 'onClick="' + valb.action + '"';
@@ -257,8 +361,8 @@ upsell = {
           }
         });
       };
-      if(jQuery.inArray(upsell.config.feature, val.name) >= 0 && val.checkboxes){
-        jQuery.each(val.checkboxes, function(ib, valb){
+      if(feature.checkboxes){
+        jQuery.each(feature.checkboxes, function(ib, valb){
           if(valb.content != "undefined"){
             button += '<span style="float: left; margin: 10px"><input type="checkbox" name="';
             button += ib;
@@ -267,18 +371,77 @@ upsell = {
           }
         });
       }
-    });
+
     return button;
   },
-
-  _set_pause:function(e, message){
-    upsell.config.pause = true;
-    upsell.config.pause_message = message;
+  
+  _get_content: function(){
+    var feature = upsell.config.features[upsell.config.feature];
     
-    if(e.checked) {
-      upsell.config.pause = false;
-      upsell.config.pause_message = "";
-    }
+    if(feature.list) {
+      var list = "";
+      var list_count = 0;
+      jQuery.each(
+        feature.list, function(i, val){
+          if( val == "" ) { return false; };
+          list_count += 1;
+          if (list_count > upsell.config.show_features_initial) {
+            list += '<li class="detail" style="display: none">' + val + '</li>';
+          } else {
+            list += '<li>' + val + '</li>';
+          }
+		      
+  		  }
+	  	);
+	  };
+		
+		if(feature.videos) {
+	  	var videos = "";
+  		jQuery.each(
+        feature.videos, function(i, val){
+  		    videos +=
+		        '<a href="' + upsell.config.path + 'templates/' + val.video + '" class="light_box swf">' +
+		          '<img src="' + upsell.config.path + 'templates/' + val.thumb + '" />' +
+		        '</a>';
+	  	  }
+  		);
+		};
+		
+		if(feature.images) {
+	  	var images = "";
+  		jQuery.each(
+        feature.images, function(i, val){
+  		    images +=
+		        '<a href="' + upsell.config.path + 'templates/' + val.image + '" class="light_box image">' +
+		          '<img src="' + upsell.config.path + 'templates/' + val.thumb + '" />' +
+		        '</a>';
+	  	  }
+  		);
+		};
+
+    var content =
+      '<div class="section_left">' +
+	      '<b style="font-size: 14px">'+
+	        feature.intro +
+	      '</b><br>' +
+	      '<ul>' +
+	        list +
+        '</ul>' +
+        '<a style="display: block" href="#" class="detail_show">[more]</a>' +
+        '<b style="font-size: 14px; display: block; padding-top: 20px">' +
+          feature.outro +
+        '</b>' +
+      '</div>' +
+      '<div class="section_right">' +
+        videos +
+        images +
+      '</div>';
+      
+    return content;
+  },
+  
+  _get_title: function(){
+    return upsell.config.features[upsell.config.feature].title;
   },
   
   _set_invite: function(e){
@@ -352,7 +515,7 @@ upsell = {
 };
 
 // loads required files
-upsell._get_required_files();
+upsell.init();
 
 //registration
 register("Feature_Not_Available", upsell.init);

@@ -768,7 +768,7 @@
 	$.fn.fancybox = function(options) {
 		$(this)
 			.data('fancybox', $.extend({}, options, ($.metadata ? $(this).metadata() : {})))
-			.unbind('click.fb').bind('click.fb', function(e) {
+			.die('click.fb').live('click.fb', function(e) {
 				e.preventDefault();
 
 				if (busy) {

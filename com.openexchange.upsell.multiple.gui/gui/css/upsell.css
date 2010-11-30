@@ -3,7 +3,7 @@
 }
 
 #upsell_window a.btn {
-	background:url(/plugins/com.openexchange.upsell.multiple.gui/img/btn/right.png) no-repeat right 0;
+	background:url(../img/btn/right.png) no-repeat right 0;
 	width:auto;
 	display:inline;
 	float:left;
@@ -19,7 +19,7 @@
 }
 
 #upsell_window a.btn span {
-	background:url(/plugins/com.openexchange.upsell.multiple.gui/img/btn/bg.png) no-repeat;
+	background:url(../img/btn/bg.png) no-repeat;
 	padding:4px 30px 0 36px;
 	height:28px;
 	float:left;
@@ -27,7 +27,7 @@
 }
 
 #upsell_window a.btn:hover {
-	background:url(/plugins/com.openexchange.upsell.multiple.gui/img/btn/right.png) no-repeat right 0;
+	background:url(../img/btn/right.png) no-repeat right 0;
 	opacity: .9;
 	text-shadow: none;
 }
@@ -37,7 +37,7 @@
 }
 
 #upsell_window #headerSection {
-	background:url(/plugins/com.openexchange.upsell.multiple.gui/img/bg/hederSection.png);
+	background:url(../img/bg/hederSection.png);
 	height:27px;
 	position:relative;
 }
@@ -70,7 +70,7 @@
 
 #upsell_window #footerSection {
 	clear:both;
-	background:url(/plugins/com.openexchange.upsell.multiple.gui/img/bg/footerSection.png);
+	background:url(../img/bg/footerSection.png);
 	height:40px;
 }
 
@@ -147,7 +147,7 @@
 	left: 0;
 	width: 40px;
 	height: 480px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 }
 
 #fancybox-overlay {
@@ -218,7 +218,7 @@
 	right: -15px;
 	width: 30px;
 	height: 30px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 	background-position: -40px 0px;
 	cursor: pointer;
 	z-index: 1103;
@@ -288,7 +288,7 @@
 
 #fancybox-title-over {
 	padding: 10px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancy_title_over.png');
+	background-image: url('../img/fancy_box/fancy_title_over.png');
 	display: block;
 }
 
@@ -303,7 +303,7 @@
 
 #fancybox-title-left {
 	padding-left: 15px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 	background-position: -40px -90px;
 	background-repeat: no-repeat;
 }
@@ -311,14 +311,14 @@
 #fancybox-title-main {
 	font-weight: bold;
 	line-height: 29px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox-x.png');
+	background-image: url('../img/fancy_box/fancybox-x.png');
 	background-position: 0px -40px;
 	color: #FFF;
 }
 
 #fancybox-title-right {
 	padding-left: 15px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 	background-position: -55px -90px;
 	background-repeat: no-repeat;
 }
@@ -330,7 +330,7 @@
 	width: 35%;
 	cursor: pointer;
 	outline: none;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/blank.gif');
+	background-image: url('../img/fancy_box/blank.gif');
 	z-index: 1102;
 	display: none;
 }
@@ -356,12 +356,12 @@
 }
 
 #fancybox-left-ico {
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 	background-position: -40px -30px;
 }
 
 #fancybox-right-ico {
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 	background-position: -40px -60px;
 }
 
@@ -392,13 +392,13 @@
 	top: -20px;
 	left: 0;
 	width: 100%;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox-x.png');
+	background-image: url('../img/fancy_box/fancybox-x.png');
 }
 
 #fancy-bg-ne {
 	top: -20px;
 	right: -20px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 	background-position: -40px -162px;
 }
 
@@ -406,14 +406,14 @@
 	top: 0;
 	right: -20px;
 	height: 100%;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox-y.png');
+	background-image: url('../img/fancy_box/fancybox-y.png');
 	background-position: -20px 0px;
 }
 
 #fancy-bg-se {
 	bottom: -20px;
 	right: -20px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 	background-position: -40px -182px; 
 }
 
@@ -421,14 +421,14 @@
 	bottom: -20px;
 	left: 0;
 	width: 100%;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox-x.png');
+	background-image: url('../img/fancy_box/fancybox-x.png');
 	background-position: 0px -20px;
 }
 
 #fancy-bg-sw {
 	bottom: -20px;
 	left: -20px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 	background-position: -40px -142px;
 }
 
@@ -436,13 +436,13 @@
 	top: 0;
 	left: -20px;
 	height: 100%;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox-y.png');
+	background-image: url('../img/fancy_box/fancybox-y.png');
 }
 
 #fancy-bg-nw {
 	top: -20px;
 	left: -20px;
-	background-image: url('/plugins/com.openexchange.upsell.multiple.gui/img/fancy_box/fancybox.png');
+	background-image: url('../img/fancy_box/fancybox.png');
 	background-position: -40px -122px;
 }
 
