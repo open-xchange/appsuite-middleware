@@ -150,7 +150,20 @@ public final class Bug16724Test extends AbstractAJAXSession {
                 found = true;
             }
         }
-        assertFalse("Parent user folder in shared folder should not be there.", found);
+        if (found) {
+            /*
+             * Found a shared folder, check if it is not the unshared one
+             */
+            listResponse2 = client2.execute(new ListRequest(API.OUTLOOK, FolderObject.SHARED_PREFIX + userId1));
+            iter = listResponse2.getFolder();
+            found = false;
+            while (iter.hasNext()) {
+                if (iter.next().getObjectID() == folder.getObjectID()) {
+                    found = true;
+                }
+            }
+            assertFalse("Parent user folder in shared folder should not be there.", found);
+        }
         ListResponse listResponse3 = client2.execute(new ListRequest(API.OUTLOOK, FolderObject.SHARED_PREFIX + userId1));
         iter = listResponse3.getFolder();
         found = false;
