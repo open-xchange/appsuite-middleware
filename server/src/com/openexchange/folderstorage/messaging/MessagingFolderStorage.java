@@ -510,32 +510,46 @@ public final class MessagingFolderStorage implements FolderStorage {
             final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folderId);
             final String serviceId = mfi.getServiceId();
             final int accountId = mfi.getAccountId();
-            final MessagingAccountAccess accountAccess =
-                getMessagingAccessForAccount(serviceId, accountId, storageParameters.getSession(), accesses);
-            openMessagingAccess(accountAccess);
 
             final String fullname = mfi.getFullname();
+            final Session session = storageParameters.getSession();
 
-            final MessagingFolderImpl retval;
+            final Folder retval;
             final boolean hasSubfolders;
             if ("".equals(fullname)) {
-                final MessagingFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
-                retval = new MessagingFolderImpl(rootFolder, accountId, serviceId, null);
-                /*
-                 * Set proper name
-                 */
-                try {
-                    final MessagingServiceRegistry msr =
-                        MessagingFolderStorageServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class, true);
-                    final MessagingService messagingService = msr.getMessagingService(serviceId);
-                    final MessagingAccount messagingAccount =
-                        messagingService.getAccountManager().getAccount(accountId, storageParameters.getSession());
+                final MessagingServiceRegistry msr =
+                    MessagingFolderStorageServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class, true);
+                final MessagingService messagingService = msr.getMessagingService(serviceId);
+                final MessagingAccount messagingAccount =
+                    messagingService.getAccountManager().getAccount(accountId, session);
+
+                if ("com.openexchange.messaging.rss".equals(serviceId)) {
+                    retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session);
+                    hasSubfolders = false;
+                } else if ("com.openexchange.messaging.facebook".equals(serviceId)) {
+                    retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session);
+                    hasSubfolders = true;
+                } else {
+                    final MessagingAccountAccess accountAccess =
+                        getMessagingAccessForAccount(serviceId, accountId, session, accesses);
+                    openMessagingAccess(accountAccess);
+
+                    final MessagingFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
+                    retval = new MessagingFolderImpl(rootFolder, accountId, serviceId, null);
+                    /*
+                     * Set proper name
+                     */
                     retval.setName(messagingAccount.getDisplayName());
-                } catch (final ServiceException e) {
-                    throw new FolderException(e);
+                    hasSubfolders = rootFolder.hasSubfolders();
                 }
-                hasSubfolders = rootFolder.hasSubfolders();
+                /*
+                 * This one needs sorting. Just pass null or an empty array.
+                 */
+                retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
             } else {
+                final MessagingAccountAccess accountAccess =
+                    getMessagingAccessForAccount(serviceId, accountId, session, accesses);
+                openMessagingAccess(accountAccess);
                 final MessagingFolder messagingFolder = accountAccess.getFolderAccess().getFolder(fullname);
                 retval =
                     new MessagingFolderImpl(
@@ -544,68 +558,20 @@ public final class MessagingFolderStorage implements FolderStorage {
                         serviceId,
                         new MessagingAccountAccessFullnameProvider(accountAccess));
                 hasSubfolders = messagingFolder.hasSubfolders();
-            }
-            retval.setTreeID(treeId);
-            /*
-             * Check if denoted parent can hold default folders like Trash, Sent, etc.
-             */
-            if (!"".equals(fullname) && !"INBOX".equals(fullname)) {
                 /*
-                 * Denoted parent is not capable to hold default folders. Therefore output as it is.
+                 * Check if denoted parent can hold default folders like Trash, Sent, etc.
                  */
-                final List<MessagingFolder> children = Arrays.asList(accountAccess.getFolderAccess().getSubfolders(fullname, true));
-                Collections.sort(children, new SimpleMessagingFolderComparator(storageParameters.getUser().getLocale()));
-                final String[] subfolderIds = new String[children.size()];
-                int i = 0;
-                for (final MessagingFolder child : children) {
-                    subfolderIds[i++] = MessagingFolderIdentifier.getFQN(serviceId, accountId, child.getId());
-                }
-                retval.setSubfolderIDs(subfolderIds);
-            } else {
-                /*
-                 * This one needs sorting. Just pass null or an empty array.
-                 */
-                retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
-
-                if (false) {
+                if ("INBOX".equals(fullname)) {
                     /*
-                     * Ensure default folders are at first positions
+                     * This one needs sorting. Just pass null or an empty array.
+                     */
+                    retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
+                } else {
+                    /*
+                     * Denoted parent is not capable to hold default folders. Therefore output as it is.
                      */
                     final List<MessagingFolder> children = Arrays.asList(accountAccess.getFolderAccess().getSubfolders(fullname, true));
-                    final String[] names;
-                    if (isDefaultFoldersChecked(accountId, storageParameters.getSession())) {
-                        names = getSortedDefaultMessagingFolders(accountId, storageParameters.getSession());
-                    } else {
-                        final List<String> tmp = new ArrayList<String>();
-                        tmp.add("INBOX");
-
-                        final MessagingFolderAccess folderStorage = accountAccess.getFolderAccess();
-                        String fn = folderStorage.getDraftsFolder();
-                        if (null != fn) {
-                            tmp.add(fn);
-                        }
-
-                        fn = folderStorage.getSentFolder();
-                        if (null != fn) {
-                            tmp.add(fn);
-                        }
-
-                        fn = folderStorage.getSpamFolder();
-                        if (null != fn) {
-                            tmp.add(fn);
-                        }
-
-                        fn = folderStorage.getTrashFolder();
-                        if (null != fn) {
-                            tmp.add(fn);
-                        }
-
-                        names = tmp.toArray(new String[tmp.size()]);
-                    }
-                    /*
-                     * Sort them
-                     */
-                    Collections.sort(children, new MessagingFolderComparator(names, storageParameters.getUser().getLocale()));
+                    Collections.sort(children, new SimpleMessagingFolderComparator(storageParameters.getUser().getLocale()));
                     final String[] subfolderIds = new String[children.size()];
                     int i = 0;
                     for (final MessagingFolder child : children) {
@@ -614,9 +580,12 @@ public final class MessagingFolderStorage implements FolderStorage {
                     retval.setSubfolderIDs(subfolderIds);
                 }
             }
+            retval.setTreeID(treeId);
 
             return retval;
         } catch (final MessagingException e) {
+            throw new FolderException(e);
+        } catch (final ServiceException e) {
             throw new FolderException(e);
         }
     }

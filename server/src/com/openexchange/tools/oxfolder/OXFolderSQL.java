@@ -59,22 +59,29 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -359,7 +366,50 @@ public final class OXFolderSQL {
     }
 
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
-
+    
+    /**
+     * Returns an {@link ArrayList} of folders whose name and module matches the given parameters in the given parent folder.
+     * @param folderId
+     * @param parent The parent folder whose subfolders shall be looked up
+     * @param folderName The folder name to look for
+     * @param module The folder module
+     * @param readConArg A readable connection (may be <code>null</code>)
+     * @param ctx The context
+     * @return A list of folders with the same name and module.
+     * @throws DBPoolingException
+     * @throws SQLException
+     */
+    public static ArrayList<Integer> lookUpFolders(final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
+        Connection readCon = readConArg;
+        boolean closeReadCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        ArrayList<Integer> folderList = new ArrayList<Integer>();
+        try {
+            if (readCon == null) {
+                readCon = DBPool.pickup(ctx);
+                closeReadCon = true;
+            }
+            stmt = readCon.prepareStatement(SQL_LOOKUPFOLDER);
+            stmt.setInt(1, ctx.getContextId()); // cid
+            stmt.setInt(2, parent); // parent
+            stmt.setString(3, folderName); // fname
+            stmt.setInt(4, module); // module
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                final int fuid = rs.getInt(1);
+                final String fname = rs.getString(2);
+                if (folderName.equals(fname)) {
+                    folderList.add(fuid);
+                }
+            }
+        } finally {
+            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+        }
+        
+        return folderList;
+    }
+    
     /**
      * Checks for a duplicate folder in parental folder. A folder is treated as a duplicate if name and module are equal.
      * 
@@ -1658,8 +1708,40 @@ public final class OXFolderSQL {
                     LOG.error(e.getMessage(), e);
                 }
             }
+            /*
+             * Post events
+             */
+            final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+            if (null != eventAdmin) {
+                for (final Integer fuid : deletePerms) {
+                    broadcastEvent(fuid, false, entity, ctx.getContextId(), eventAdmin);
+                }
+                for (final Integer fuid : reassignPerms) {
+                    broadcastEvent(fuid, false, entity, ctx.getContextId(), eventAdmin);
+                }
+            }
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+        }
+    }
+
+    private static void broadcastEvent(final Integer fuid, final boolean deleted, final int entity, final int contextId, final EventAdmin eventAdmin) {
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
+        properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
+        properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(entity));
+        properties.put(FolderEventConstants.PROPERTY_FOLDER, fuid.toString());
+        properties.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(!deleted));
+        /*
+         * Create event with push topic
+         */
+        final Event event = new Event(FolderEventConstants.TOPIC, properties);
+        /*
+         * Finally deliver it
+         */
+        eventAdmin.sendEvent(event);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(new StringBuilder(64).append("Notified ").append("content-related").append(
+                "-wise changed folder \"").append(fuid).append(" in context ").append(contextId).toString());
         }
     }
 
@@ -2025,6 +2107,18 @@ public final class OXFolderSQL {
                     LOG.error(e.getMessage(), e);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
+                }
+            }
+            /*
+             * Post events
+             */
+            final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+            if (null != eventAdmin) {
+                for (final Integer fuid : deleteFolders) {
+                    broadcastEvent(fuid, true, entity, ctx.getContextId(), eventAdmin);
+                }
+                for (final Integer fuid : reassignFolders) {
+                    broadcastEvent(fuid, false, entity, ctx.getContextId(), eventAdmin);
                 }
             }
         } finally {

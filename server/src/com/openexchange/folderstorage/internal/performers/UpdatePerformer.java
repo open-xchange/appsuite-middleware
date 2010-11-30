@@ -135,12 +135,11 @@ public final class UpdatePerformer extends AbstractPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        storage.startTransaction(storageParameters, true);
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(storage);
+        checkOpenedStorage(storage, openedStorages);
 
         try {
             /*
@@ -224,22 +223,22 @@ public final class UpdatePerformer extends AbstractPerformer {
                  * Check for forbidden public mail folder
                  */
                 {
-                    final boolean started = newRealParentStorage.startTransaction(storageParameters, false);
+                    final boolean started2 = newRealParentStorage.startTransaction(storageParameters, false);
                     try {
                         final Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
                         if ((FolderStorage.PUBLIC_ID.equals(newParent.getID()) || PublicType.getInstance().equals(newParent.getType())) && "mail".equals(storageFolder.getContentType().toString())) {
                             throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
                         }
-                        if (started) {
+                        if (started2) {
                             newRealParentStorage.commitTransaction(storageParameters);
                         }
                     } catch (final FolderException e) {
-                        if (started) {
+                        if (started2) {
                             newRealParentStorage.rollback(storageParameters);
                         }
                         throw e;
                     } catch (final Exception e) {
-                        if (started) {
+                        if (started2) {
                             newRealParentStorage.rollback(storageParameters);
                         }
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -318,7 +317,7 @@ public final class UpdatePerformer extends AbstractPerformer {
 
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Update.doUpdate() took ").append(duration).append("msec for folder: ").append(
+                LOG.debug(new StringBuilder().append("UpdatePerformer.doUpdate() took ").append(duration).append("msec for folder: ").append(
                     folderId).toString());
             }
         } catch (final FolderException e) {
@@ -374,8 +373,9 @@ public final class UpdatePerformer extends AbstractPerformer {
                 return;
             }
         }
-        storage.startTransaction(storageParameters, true);
-        openedStorages.add(storage);
+        if (storage.startTransaction(storageParameters, true)) {
+            openedStorages.add(storage);
+        }
     }
 
     private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {

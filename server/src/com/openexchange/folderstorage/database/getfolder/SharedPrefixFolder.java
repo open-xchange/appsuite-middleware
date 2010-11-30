@@ -58,6 +58,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
@@ -120,7 +121,7 @@ public final class SharedPrefixFolder {
                     con);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final SearchIteratorException e) {
+        } catch (final AbstractOXException e) {
             throw new FolderException(e);
         }
         try {
@@ -128,7 +129,7 @@ public final class SharedPrefixFolder {
         } finally {
             try {
                 searchIterator.close();
-            } catch (final SearchIteratorException e) {
+            } catch (final AbstractOXException e) {
                 LOG.error("Failed closing search iterator.", e);
             }
         }

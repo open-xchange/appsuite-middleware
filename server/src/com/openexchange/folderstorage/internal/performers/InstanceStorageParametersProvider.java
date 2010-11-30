@@ -47,66 +47,29 @@
  *
  */
 
-package com.openexchange.folder.json.actions;
+package com.openexchange.folderstorage.internal.performers;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.folder.json.parser.FolderParser;
-import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.folderstorage.StorageParameters;
 
 /**
- * {@link CreateAction} - Maps the action to a NEW action.
+ * {@link InstanceStorageParametersProvider}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CreateAction extends AbstractFolderAction {
+public final class InstanceStorageParametersProvider implements StorageParametersProvider {
 
-    public static final String ACTION = AJAXServlet.ACTION_NEW;
+    private final StorageParameters storageParameters;
 
     /**
-     * Initializes a new {@link CreateAction}.
+     * Initializes a new {@link InstanceStorageParametersProvider}.
      */
-    public CreateAction() {
+    public InstanceStorageParametersProvider(final StorageParameters storageParameters) {
         super();
+        this.storageParameters = storageParameters;
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        /*
-         * Parse parameters
-         */
-        String treeId = request.getParameter("tree");
-        if (null == treeId) {
-            /*
-             * Fallback to default tree identifier
-             */
-            treeId = getDefaultTreeIdentifier();
-        }
-        final String parentId = request.getParameter("folder_id");
-        if (null == parentId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "folder_id");
-        }
-        /*
-         * Parse folder object
-         */
-        final JSONObject folderObject = (JSONObject) request.getData();
-        final Folder folder = FolderParser.parseFolder(folderObject);
-        folder.setParentID(parentId);
-        folder.setTreeID(treeId);
-        /*
-         * Create
-         */
-        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session);
-        final String newId = newIdResponse.getResponse();
-        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(newIdResponse.getWarnings());
+    public StorageParameters getStorageParameters() {
+        return storageParameters;
     }
 
 }

@@ -1486,7 +1486,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                                 put2TreeMap(name, id, treeMap);
                             }
                         }
-
                         // if (FolderStorage.PUBLIC_ID.equals(id)) {
                         // final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
                         // List<String> list = treeMap.get(localizedName);
@@ -1582,28 +1581,30 @@ public final class OutlookFolderStorage implements FolderStorage {
              * Messaging accounts; except mail
              */
             final List<MessagingAccount> messagingAccounts = new ArrayList<MessagingAccount>();
-            {
-                final MessagingServiceRegistry msr = OutlookServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class);
-                if (null != msr) {
-                    try {
-                        final List<MessagingService> allServices = msr.getAllServices();
-                        for (final MessagingService messagingService : allServices) {
-                            if (!messagingService.getId().equals(MailMessagingService.ID)) {
-                                /*
-                                 * Only non-mail services
-                                 */
-                                try {
-                                    messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(parameters.getSession()));
-                                } catch (final MessagingException e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
+            final MessagingServiceRegistry msr = OutlookServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class);
+            if (null == msr) {
+                messagingSubfolderIDs = Collections.emptyList();
+            } else {
+                try {
+                    final List<MessagingService> allServices = msr.getAllServices();
+                    for (final MessagingService messagingService : allServices) {
+                        if (!messagingService.getId().equals(MailMessagingService.ID)) {
+                            /*
+                             * Only non-mail services
+                             */
+                            try {
+                                messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(parameters.getSession()));
+                            } catch (final MessagingException e) {
+                                LOG.error(e.getMessage(), e);
                             }
                         }
-                    } catch (final MessagingException e) {
-                        LOG.error(e.getMessage(), e);
                     }
+                } catch (final MessagingException e) {
+                    LOG.error(e.getMessage(), e);
                 }
-                if (!messagingAccounts.isEmpty()) {
+                if (messagingAccounts.isEmpty()) {
+                    messagingSubfolderIDs = Collections.emptyList();
+                } else {
                     Collections.sort(messagingAccounts, new MessagingAccountComparator(locale));
                     final int sz = messagingAccounts.size();
                     messagingSubfolderIDs = new ArrayList<String>(sz);
@@ -1613,8 +1614,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                             new MessagingFolderIdentifier(ma.getMessagingService().getId(), ma.getId(), MessagingFolder.ROOT_FULLNAME);
                         messagingSubfolderIDs.add(mfi.toString());
                     }
-                } else {
-                    messagingSubfolderIDs = Collections.emptyList();
                 }
             }
         }
@@ -1652,7 +1651,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         sortedIDs.addAll(accountSubfolderIDs);
         /*
-         * Add external messaging accounts
+         * Add external messaging accounts/file storage accounts
          */
         sortedIDs.addAll(messagingSubfolderIDs);
         final int size = sortedIDs.size();

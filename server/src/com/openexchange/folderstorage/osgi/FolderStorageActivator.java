@@ -149,7 +149,7 @@ public final class FolderStorageActivator implements BundleActivator {
             if (LOG.isInfoEnabled()) {
                 final StringBuilder sb = new StringBuilder(32);
                 sb.append("Bundle \"");
-                sb.append(FolderStorageActivator.class.getName());
+                sb.append("com.openexchange.folderstorage");
                 sb.append("\" successfully started!");
                 LOG.info(sb.toString());
             }
@@ -206,7 +206,7 @@ public final class FolderStorageActivator implements BundleActivator {
             if (LOG.isInfoEnabled()) {
                 final StringBuilder sb = new StringBuilder(32);
                 sb.append("Bundle \"");
-                sb.append(FolderStorageActivator.class.getName());
+                sb.append("com.openexchange.folderstorage");
                 sb.append("\" successfully stopped!");
                 LOG.info(sb.toString());
             }

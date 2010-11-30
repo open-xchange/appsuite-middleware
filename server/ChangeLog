@@ -1,3 +1,7 @@
+* 2010-11-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #17292: Grouping listed folders by their folder storage to get those folders by one
+
 * 2010-11-26 - thorben.betten@open-xchange.com
 
  - Bugfix #17647: Dropping cookies on failed IP check

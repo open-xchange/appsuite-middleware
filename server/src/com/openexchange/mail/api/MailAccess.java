@@ -143,7 +143,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * 
      * @param warnings The warnings to add
      */
-    protected void addWarnings(final Collection<MailException> warnings) {
+    public void addWarnings(final Collection<MailException> warnings) {
         this.warnings.addAll(warnings);
     }
 

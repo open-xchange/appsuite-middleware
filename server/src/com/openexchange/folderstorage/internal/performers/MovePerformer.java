@@ -186,9 +186,9 @@ final class MovePerformer extends AbstractPerformer {
             final Permission permission = effectivePermission(storageFolder);
             if (!permission.isAdmin()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
-                    storageFolder.getLocalizedName(session.getUser().getLocale()),
-                    getUser().getDisplayName(),
-                    Integer.valueOf(getContextId()));
+                    getFolderInfo4Error(storageFolder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
         }
         /*
@@ -199,9 +199,9 @@ final class MovePerformer extends AbstractPerformer {
             final Permission permission = effectivePermission(destFolder);
             if (permission.getFolderPermission() < Permission.CREATE_SUB_FOLDERS) {
                 throw FolderExceptionErrorMessage.NO_CREATE_SUBFOLDERS.create(
-                    getUser().getDisplayName(),
-                    destFolder.getLocalizedName(session.getUser().getLocale()),
-                    Integer.valueOf(getContextId()));
+                    getUserInfo4Error(),
+                    getFolderInfo4Error(destFolder),
+                    getContextInfo4Error());
             }
         }
         /*
@@ -357,9 +357,9 @@ final class MovePerformer extends AbstractPerformer {
                 final Permission permission = effectivePermission(f);
                 if (!permission.isAdmin()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
-                        f.getLocalizedName(session.getUser().getLocale()),
-                        getUser().getDisplayName(),
-                        Integer.valueOf(getContextId()));
+                        getFolderInfo4Error(f),
+                        getUserInfo4Error(),
+                        getContextInfo4Error());
                 }
                 subfolder = new FolderInfo(subfolderId, f.getName());
             } else {
@@ -418,8 +418,9 @@ final class MovePerformer extends AbstractPerformer {
                 return;
             }
         }
-        storage.startTransaction(storageParameters, true);
-        openedStorages.add(storage);
+        if (storage.startTransaction(storageParameters, true)) {
+            openedStorages.add(storage);
+        }
     }
 
     private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {

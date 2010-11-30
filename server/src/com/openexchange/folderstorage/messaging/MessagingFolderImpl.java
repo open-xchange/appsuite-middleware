@@ -59,7 +59,6 @@ import java.util.Set;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.messaging.contentType.DraftsContentType;
 import com.openexchange.folderstorage.messaging.contentType.MessagingContentType;
@@ -88,7 +87,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
      */
     public static enum MessagingFolderType {
         NONE(MessagingContentType.getInstance(), 0),
-        ROOT(SystemContentType.getInstance(), 0),
+        ROOT(MessagingContentType.getInstance(), 0),
         INBOX(MessagingContentType.getInstance(), 13), // FolderObject.MESSAGING
         DRAFTS(DraftsContentType.getInstance(), 14),
         SENT(SentContentType.getInstance(), 15),

@@ -47,66 +47,53 @@
  *
  */
 
-package com.openexchange.folder.json.actions;
+package com.openexchange.folderstorage.internal.performers;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.folder.json.parser.FolderParser;
-import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.internal.StorageParametersImpl;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link CreateAction} - Maps the action to a NEW action.
- * 
+ * {@link SessionStorageParametersProvider}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CreateAction extends AbstractFolderAction {
+public final class SessionStorageParametersProvider implements StorageParametersProvider {
 
-    public static final String ACTION = AJAXServlet.ACTION_NEW;
+    private final ServerSession session;
+
+    private final User user;
+    
+    private final Context ctx;
 
     /**
-     * Initializes a new {@link CreateAction}.
+     * Initializes a new {@link SessionStorageParametersProvider}.
      */
-    public CreateAction() {
+    public SessionStorageParametersProvider(final ServerSession session) {
         super();
+        this.session = session;
+        this.user = null;
+        this.ctx = null;
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        /*
-         * Parse parameters
-         */
-        String treeId = request.getParameter("tree");
-        if (null == treeId) {
-            /*
-             * Fallback to default tree identifier
-             */
-            treeId = getDefaultTreeIdentifier();
+    /**
+     * Initializes a new {@link SessionStorageParametersProvider}.
+     */
+    public SessionStorageParametersProvider(final User user, final Context ctx) {
+        super();
+        this.session = null;
+        this.user = user;
+        this.ctx = ctx;
+    }
+
+    public StorageParameters getStorageParameters() {
+        if (null == session) {
+            return new StorageParametersImpl(user, ctx);
         }
-        final String parentId = request.getParameter("folder_id");
-        if (null == parentId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "folder_id");
-        }
-        /*
-         * Parse folder object
-         */
-        final JSONObject folderObject = (JSONObject) request.getData();
-        final Folder folder = FolderParser.parseFolder(folderObject);
-        folder.setParentID(parentId);
-        folder.setTreeID(treeId);
-        /*
-         * Create
-         */
-        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session);
-        final String newId = newIdResponse.getResponse();
-        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(newIdResponse.getWarnings());
+        return new StorageParametersImpl(session);
     }
 
 }

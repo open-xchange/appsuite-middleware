@@ -150,7 +150,7 @@ public final class MailFolderImpl extends AbstractFolder {
         super();
         final String fullname = mailFolder.getFullname();
         id = MailFolderUtility.prepareFullname(accountId, fullname);
-        name = "INBOX".equals(fullname) ? "Inbox" : mailFolder.getName();
+        name = mailFolder.getName();
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
         parent =
             mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());

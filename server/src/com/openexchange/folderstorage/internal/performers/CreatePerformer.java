@@ -136,9 +136,8 @@ public final class CreatePerformer extends AbstractPerformer {
         if (null == parentStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
-        parentStorage.startTransaction(storageParameters, true);
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(parentStorage);
+        checkOpenedStorage(parentStorage, openedStorages);
         try {
             final Folder parent = parentStorage.getFolder(treeId, parentId, storageParameters);
             /*
@@ -152,9 +151,9 @@ public final class CreatePerformer extends AbstractPerformer {
             }
             if (!parentPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    parentId,
-                    getUser().getDisplayName(),
-                    Integer.valueOf(getContextId()));
+                    getFolderInfo4Error(parent),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
             if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && MailContentType.getInstance().toString().equals(
                 toCreate.getContentType().toString())) {
@@ -195,8 +194,9 @@ public final class CreatePerformer extends AbstractPerformer {
         boolean supported = false;
         final ContentType folderContentType = toCreate.getContentType();
         if (0 < contentTypes.length) {
+            final String cts = folderContentType.toString();
             for (final ContentType contentType : contentTypes) {
-                if (contentType.equals(folderContentType)) {
+                if (contentType.toString().equals(cts)) {
                     supported = true;
                     break;
                 }
@@ -354,8 +354,9 @@ public final class CreatePerformer extends AbstractPerformer {
                 return;
             }
         }
-        storage.startTransaction(storageParameters, true);
-        openedStorages.add(storage);
+        if (storage.startTransaction(storageParameters, true)) {
+            openedStorages.add(storage);
+        }
     }
 
     private static boolean supportsContentType(final ContentType folderContentType, final FolderStorage folderStorage) {
@@ -366,8 +367,9 @@ public final class CreatePerformer extends AbstractPerformer {
         if (0 == supportedContentTypes.length) {
             return true;
         }
+        final String cts = folderContentType.toString();
         for (final ContentType supportedContentType : supportedContentTypes) {
-            if (supportedContentType.equals(folderContentType)) {
+            if (supportedContentType.toString().equals(cts)) {
                 return true;
             }
         }

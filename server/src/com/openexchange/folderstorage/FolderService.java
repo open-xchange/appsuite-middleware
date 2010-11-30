@@ -412,7 +412,7 @@ public interface FolderService {
      * @return The identifier of the newly created folder
      * @throws FolderException If creation fails
      */
-    String createFolder(Folder folder, User user, Context context) throws FolderException;
+    FolderResponse<String> createFolder(Folder folder, User user, Context context) throws FolderException;
 
     /**
      * Creates a new folder described by given folder object.
@@ -422,7 +422,7 @@ public interface FolderService {
      * @return The identifier of the newly created folder
      * @throws FolderException If creation fails
      */
-    String createFolder(Folder folder, Session session) throws FolderException;
+    FolderResponse<String> createFolder(Folder folder, Session session) throws FolderException;
 
     // TODO: default folder? all visible folders
 

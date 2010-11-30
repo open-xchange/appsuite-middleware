@@ -54,6 +54,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -181,6 +182,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (!mailAccess.getFolderStorage().exists(fullname)) {
                 recreateMailFolder(accountId, fullname, session, mailAccess);
             }
+            addWarnings(mailAccess, storageParameters);
         } catch (final MailException e) {
             throw new FolderException(e);
         } finally {
@@ -229,6 +231,7 @@ public final class MailFolderStorage implements FolderStorage {
                 mfd.addPermissions(mailPermissions);
             }
             final String fullname = mailAccess.getFolderStorage().createFolder(mfd);
+            addWarnings(mailAccess, storageParameters);
             folder.setID(prepareFullname(accountId, fullname));
             postEvent(accountId, mfd.getParentFullname(), false, storageParameters);
         } catch (final MailException e) {
@@ -256,6 +259,7 @@ public final class MailFolderStorage implements FolderStorage {
             final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
             final boolean hardDelete = fullname.startsWith(trashFullname);
             mailAccess.getFolderStorage().clearFolder(fullname, hardDelete);
+            addWarnings(mailAccess, storageParameters);
             postEvent(accountId, fullname, true, storageParameters);
             if (!hardDelete) {
                 postEvent(accountId, trashFullname, true, storageParameters);
@@ -307,6 +311,7 @@ public final class MailFolderStorage implements FolderStorage {
             final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
             final boolean hardDelete = fullname.startsWith(trashFullname);
             mailAccess.getFolderStorage().deleteFolder(fullname, hardDelete);
+            addWarnings(mailAccess, storageParameters);
             postEvent(accountId, fullname, false, true, false, storageParameters);
             try {
                 /*
@@ -391,6 +396,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !mailAccess.getFolderStorage().exists(fullname)) {
                 throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
             }
+            addWarnings(mailAccess, storageParameters);
             return false;
         } catch (final MailException e) {
             throw new FolderException(e);
@@ -460,28 +466,30 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             mailAccess = MailAccess.getInstance(session, accountId);
-            final MailFolderImpl retval;
+            final Folder retval;
             final boolean hasSubfolders;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-                final MailFolder rootFolder = mailAccess.getRootFolder();
-                retval =
-                    new MailFolderImpl(
-                        rootFolder,
-                        accountId,
-                        mailAccess.getMailConfig(),
-                        null);
-                /*
-                 * Set proper name for non-primary account
-                 */
-                if (MailAccount.DEFAULT_ID != accountId) {
+                if (MailAccount.DEFAULT_ID == accountId) {
+                    final MailFolder rootFolder = mailAccess.getRootFolder();
+                    retval =
+                        new MailFolderImpl(
+                            rootFolder,
+                            accountId,
+                            mailAccess.getMailConfig(),
+                            null);
+                    addWarnings(mailAccess, storageParameters);
+                    hasSubfolders = rootFolder.hasSubfolders();
+                } else {
                     /*
-                     * Set proper name
+                     * An external account folder
                      */
-                    if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                        retval.setName(mailAccount.getName());
-                    }
+                    retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                    hasSubfolders = true;
                 }
-                hasSubfolders = rootFolder.hasSubfolders();
+                /*
+                 * This one needs sorting. Just pass null or an empty array.
+                 */
+                retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
             } else {
                 mailAccess.connect();
                 final MailFolder mailFolder = getMailFolder(treeId, accountId, fullname, true, session, mailAccess);
@@ -495,76 +503,30 @@ public final class MailFolderStorage implements FolderStorage {
                         mailAccess.getMailConfig(),
                         new MailAccessFullnameProvider(mailAccess));
                 hasSubfolders = mailFolder.hasSubfolders();
-            }
-            retval.setTreeID(treeId);
-            /*
-             * Check if denoted parent can hold default folders like Trash, Sent, etc.
-             */
-            if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !"INBOX".equals(fullname)) {
                 /*
-                 * Denoted parent is not capable to hold default folders. Therefore output as it is.
+                 * Check if denoted parent can hold default folders like Trash, Sent, etc.
                  */
-                final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true));
-                Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
-                final String[] subfolderIds = new String[children.size()];
-                int i = 0;
-                for (final MailFolder child : children) {
-                    subfolderIds[i++] = prepareFullname(accountId, child.getFullname());
-                }
-                retval.setSubfolderIDs(subfolderIds);
-            } else {
-                /*
-                 * This one needs sorting. Just pass null or an empty array.
-                 */
-                retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
-
-                if (false) {
+                if (!"INBOX".equals(fullname)) {
                     /*
-                     * Ensure default folders are at first positions
+                     * Denoted parent is not capable to hold default folders. Therefore output as it is.
                      */
                     final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true));
-                    final String[] names;
-                    if (isDefaultFoldersChecked(accountId, session)) {
-                        names = getSortedDefaultMailFolders(accountId, session);
-                    } else {
-                        final List<String> tmp = new ArrayList<String>();
-                        tmp.add("INBOX");
-
-                        final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-                        String fn = folderStorage.getDraftsFolder();
-                        if (null != fn) {
-                            tmp.add(fn);
-                        }
-
-                        fn = folderStorage.getSentFolder();
-                        if (null != fn) {
-                            tmp.add(fn);
-                        }
-
-                        fn = folderStorage.getSpamFolder();
-                        if (null != fn) {
-                            tmp.add(fn);
-                        }
-
-                        fn = folderStorage.getTrashFolder();
-                        if (null != fn) {
-                            tmp.add(fn);
-                        }
-
-                        names = tmp.toArray(new String[tmp.size()]);
-                    }
-                    /*
-                     * Sort them
-                     */
-                    Collections.sort(children, new MailFolderComparator(names, storageParameters.getUser().getLocale()));
+                    Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
                     final String[] subfolderIds = new String[children.size()];
                     int i = 0;
                     for (final MailFolder child : children) {
                         subfolderIds[i++] = prepareFullname(accountId, child.getFullname());
                     }
                     retval.setSubfolderIDs(subfolderIds);
+                } else {
+                    /*
+                     * This one needs sorting. Just pass null or an empty array.
+                     */
+                    retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
                 }
+                addWarnings(mailAccess, storageParameters);
             }
+            retval.setTreeID(treeId);
 
             return retval;
         } catch (final MailException e) {
@@ -713,6 +675,7 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess.connect(true);
 
             final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true));
+            addWarnings(mailAccess, storageParameters);
             /*
              * Check if denoted parent can hold default folders like Trash, Sent, etc.
              */
@@ -822,7 +785,9 @@ public final class MailFolderStorage implements FolderStorage {
             }
             mailAccess = MailAccess.getInstance(session, argument.getAccountId());
             mailAccess.connect(true);
-            return mailAccess.getFolderStorage().exists(fullname);
+            final boolean exists = mailAccess.getFolderStorage().exists(fullname);
+            addWarnings(mailAccess, storageParameters);
+            return exists;
         } catch (final MailException e) {
             throw new FolderException(e);
         } finally {
@@ -1003,6 +968,7 @@ public final class MailFolderStorage implements FolderStorage {
              * Handle update of permission or subscription
              */
             mailAccess.getFolderStorage().updateFolder(fullname, mfd);
+            addWarnings(mailAccess, storageParameters);
             postEvent(accountId, fullname, false, storageParameters);
         } catch (final MailException e) {
             throw new FolderException(e);
@@ -1230,6 +1196,15 @@ public final class MailFolderStorage implements FolderStorage {
     private static void closeMailAccess(final MailAccess<?, ?> mailAccess) {
         if (null != mailAccess) {
             mailAccess.close(true);
+        }
+    }
+
+    private static void addWarnings(final MailAccess<?, ?> mailAccess, final StorageParameters storageParameters) {
+        final Collection<MailException> warnings = mailAccess.getWarnings();
+        if (!warnings.isEmpty()) {
+            for (final MailException mailException : warnings) {
+                storageParameters.addWarning(mailException);
+            }
         }
     }
 

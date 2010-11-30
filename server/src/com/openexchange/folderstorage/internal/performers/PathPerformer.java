@@ -181,9 +181,10 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(folderStorage);
+        if (folderStorage.startTransaction(storageParameters, false)) {
+            openedStorages.add(folderStorage);
+        }
         final UserizedFolder[] ret;
         try {
             Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
@@ -200,9 +201,9 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             Permission ownPermission = permissionProvider.getOwnPermission(folder);
             if (!ownPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    folderId,
-                    getUser().getDisplayName(),
-                    Integer.valueOf(getContextId()));
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
             final List<UserizedFolder> path = new ArrayList<UserizedFolder>(8);
             UserizedFolder userizedFolder = getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages);
@@ -213,9 +214,9 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
                 ownPermission = permissionProvider.getOwnPermission(folder);
                 if (!ownPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        folderId,
-                        getUser().getDisplayName(),
-                        Integer.valueOf(getContextId()));
+                        getFolderInfo4Error(folder),
+                        getUserInfo4Error(),
+                        getContextInfo4Error());
                 }
                 userizedFolder = getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages);
                 path.add(userizedFolder);
@@ -264,9 +265,10 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(folderStorage);
+        if (folderStorage.startTransaction(storageParameters, false)) {
+            openedStorages.add(folderStorage);
+        }
         final String[] ret;
         try {
             Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);

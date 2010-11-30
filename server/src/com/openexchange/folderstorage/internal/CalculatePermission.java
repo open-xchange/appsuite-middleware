@@ -52,6 +52,8 @@ package com.openexchange.folderstorage.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -83,44 +85,41 @@ public final class CalculatePermission {
      * 
      * @param folder The folder whose effective user permissions shall be calculated
      * @param context The context
-     * @throws FolderException If calculating effective user permissions fails
      */
-    public static void calculateUserPermissions(final Folder folder, final Context context) throws FolderException {
+    public static void calculateUserPermissions(final Folder folder, final Context context) {
         final Permission[] staticPermissions = folder.getPermissions();
         if (null == staticPermissions || 0 == staticPermissions.length) {
             return;
         }
-        try {
-            final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
-            final String id = folder.getID();
-            final Type type = folder.getType();
-            final ContentType contentType = folder.getContentType();
+        final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
+        final String id = folder.getID();
+        final Type type = folder.getType();
+        final ContentType contentType = folder.getContentType();
 
-            final java.util.List<Permission> userizedPermissions = new ArrayList<Permission>(staticPermissions.length);
-            for (final Permission staticPermission : staticPermissions) {
-                if (0 == staticPermission.getSystem()) {
-                    // A non-system permission
-                    final Permission userizedPermission;
-                    if (staticPermission.isGroup()) {
-                        userizedPermission = staticPermission;
-                    } else {
+        final java.util.List<Permission> userizedPermissions = new ArrayList<Permission>(staticPermissions.length);
+        for (final Permission staticPermission : staticPermissions) {
+            if (0 == staticPermission.getSystem()) {
+                // A non-system permission
+                if (staticPermission.isGroup()) {
+                    userizedPermissions.add(staticPermission);
+                } else {
+                    try {
                         final UserConfiguration userConfig = userConfStorage.getUserConfiguration(staticPermission.getEntity(), context);
-                        userizedPermission =
-                            new EffectivePermission(
-                                staticPermission,
-                                id,
-                                type,
-                                contentType,
-                                userConfig,
-                                Collections.<ContentType> emptyList());
+                        userizedPermissions.add(new EffectivePermission(
+                            staticPermission,
+                            id,
+                            type,
+                            contentType,
+                            userConfig,
+                            Collections.<ContentType> emptyList()));
+                    } catch (final UserConfigurationException e) {
+                        final Log logger = LogFactory.getLog(CalculatePermission.class);
+                        logger.warn("User configuration could not be loaded. Ignoring user permission.", e);
                     }
-                    userizedPermissions.add(userizedPermission);
                 }
             }
-            folder.setPermissions(userizedPermissions.toArray(new Permission[userizedPermissions.size()]));
-        } catch (final UserConfigurationException e) {
-            throw new FolderException(e);
         }
+        folder.setPermissions(userizedPermissions.toArray(new Permission[userizedPermissions.size()]));
     }
 
     /**
@@ -140,13 +139,61 @@ public final class CalculatePermission {
         } catch (final UserConfigurationException e) {
             throw new FolderException(e);
         }
+        final Permission underlyingPermission;
+        {
+            final int bits = -1; //folder.getBits();
+            if (bits >= 0) {
+                /*
+                 * Get permission from bits
+                 */
+                final DummyPermission p = new DummyPermission();
+                p.setNoPermissions();
+                final int[] permissionBits = parsePermissionBits(bits);
+                p.setFolderPermission(permissionBits[0]);
+                p.setReadPermission(permissionBits[1]);
+                p.setWritePermission(permissionBits[2]);
+                p.setDeletePermission(permissionBits[3]);
+                p.setAdmin(permissionBits[4] > 0 ? true : false);
+                underlyingPermission = p;
+            } else {
+                /*
+                 * Compute permission from all folder permissions
+                 */
+                underlyingPermission = getMaxPermission(folder.getPermissions(), userConfiguration);
+            }
+        }
         return new EffectivePermission(
-            getMaxPermission(folder.getPermissions(), userConfiguration),
+            underlyingPermission,
             folder.getID(),
             folder.getType(),
             folder.getContentType(),
             userConfiguration,
             allowedContentTypes);
+    }
+
+    private static final int[] mapping = { 0, 2, 4, -1, 8 };
+
+    /**
+     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
+     */
+    private static final int MAX_PERMISSION = 64;
+
+    private static final int[] parsePermissionBits(final int bitsArg) {
+        int bits = bitsArg;
+        final int[] retval = new int[5];
+        for (int i = retval.length - 1; i >= 0; i--) {
+            final int shiftVal = (i * 7); // Number of bits to be shifted
+            retval[i] = bits >> shiftVal;
+            bits -= (retval[i] << shiftVal);
+            if (retval[i] == MAX_PERMISSION) {
+                retval[i] = Permission.MAX_PERMISSION;
+            } else if (i < (retval.length - 1)) {
+                retval[i] = mapping[retval[i]];
+            } else {
+                retval[i] = retval[i];
+            }
+        }
+        return retval;
     }
 
     /**
@@ -159,8 +206,31 @@ public final class CalculatePermission {
      */
     public static Permission calculate(final Folder folder, final ServerSession session, final java.util.List<ContentType> allowedContentTypes) {
         final UserConfiguration userConfiguration = session.getUserConfiguration();
+        final Permission underlyingPermission;
+        {
+            final int bits = -1;//folder.getBits();
+            if (bits >= 0) {
+                /*
+                 * Get permission from bits
+                 */
+                final DummyPermission p = new DummyPermission();
+                p.setNoPermissions();
+                final int[] permissionBits = parsePermissionBits(bits);
+                p.setFolderPermission(permissionBits[0]);
+                p.setReadPermission(permissionBits[1]);
+                p.setWritePermission(permissionBits[2]);
+                p.setDeletePermission(permissionBits[3]);
+                p.setAdmin(permissionBits[4] > 0 ? true : false);
+                underlyingPermission = p;
+            } else {
+                /*
+                 * Compute permission from all folder permissions
+                 */
+                underlyingPermission = getMaxPermission(folder.getPermissions(), userConfiguration);
+            }
+        }
         return new EffectivePermission(
-            getMaxPermission(folder.getPermissions(), userConfiguration),
+            underlyingPermission,
             folder.getID(),
             folder.getType(),
             folder.getContentType(),

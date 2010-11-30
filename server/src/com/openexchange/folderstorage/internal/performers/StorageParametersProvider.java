@@ -47,46 +47,23 @@
  *
  */
 
-package com.openexchange.folder.json.osgi;
+package com.openexchange.folderstorage.internal.performers;
 
-import com.openexchange.authentication.LoginException;
-import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.FolderException;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.login.LoginResult;
-import com.openexchange.server.ServiceException;
+import com.openexchange.folderstorage.StorageParameters;
 
 
 /**
- * {@link FolderConsistenceLoginHandler}
+ * {@link StorageParametersProvider} - A provider interface to obtain storage parameters.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderConsistenceLoginHandler implements LoginHandlerService {
+public interface StorageParametersProvider {
 
     /**
-     * Initializes a new {@link FolderConsistenceLoginHandler}.
+     * Gets the storage parameters.
+     * 
+     * @return The storage parameters
      */
-    public FolderConsistenceLoginHandler() {
-        super();
-    }
-
-    public void handleLogin(final LoginResult login) throws LoginException {
-        try {
-            final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-            if (null != folderService) {
-                folderService.checkConsistency("1", login.getSession());
-            }
-        } catch (final ServiceException e) {
-            throw new LoginException(e);
-        } catch (final FolderException e) {
-            throw new LoginException(e);
-        }
-    }
-
-    public void handleLogout(final LoginResult logout) throws LoginException {
-        // Nothing to do
-    }
-
+    StorageParameters getStorageParameters();
+    
 }

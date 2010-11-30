@@ -62,6 +62,7 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
@@ -205,22 +206,48 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         folderStorageRegistration = context.registerService(FolderStorage.class.getName(), cacheFolderStorage, dictionary);
         // Register event handler for content-related changes on a mail folder
         final CacheFolderStorage tmp = cacheFolderStorage;
-        final EventHandler eventHandler = new EventHandler() {
-            
-            public void handleEvent(final Event event) {
-                final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
-                final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
-                final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
-                try {
-                    tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
-                } catch (final FolderException e) {
-                    LOG.error(e.getMessage(), e);
+        {
+            final EventHandler eventHandler = new EventHandler() {
+                
+                public void handleEvent(final Event event) {
+                    final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
+                    final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                    final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                    try {
+                        tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                    } catch (final FolderException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
-            }
-        };
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>();
-        dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
-        eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
+            };
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+            dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
+            eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
+        }
+        {
+            final EventHandler eventHandler = new EventHandler() {
+                
+                public void handleEvent(final Event event) {
+                    final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
+                    final Integer contextId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_CONTEXT));
+                    final Integer userId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_USER));
+                    final String folderId = (String) event.getProperty(FolderEventConstants.PROPERTY_FOLDER);
+                    final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                    try {
+                        if (null == session) {
+                            tmp.removeSingleFromCache(folderId, FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue());
+                        } else {
+                            tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                        }
+                    } catch (final FolderException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            };
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+            dict.put(EventConstants.EVENT_TOPIC, FolderEventConstants.getAllTopics());
+            eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
+        }
     }
 
     private void unregisterCacheFolderStorage() {

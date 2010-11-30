@@ -50,6 +50,9 @@
 package com.openexchange.folderstorage;
 
 import java.util.Date;
+import java.util.Set;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -60,6 +63,28 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface StorageParameters {
+
+    /**
+     * Adds a warning to this storage parameters.<br>
+     * <b><small>NOTE</small></b>: Category is set to {@link Category#WARNING} if not done, yet.
+     * 
+     * @param warning The warning to add
+     */
+    void addWarning(AbstractOXException warning);
+
+    /**
+     * Checks if this storage parameters contain warnings.
+     * 
+     * @return <code>true</code> if this storage parameters contain warnings; otherwise <code>false</code>
+     */
+    boolean hasWarnings();
+
+    /**
+     * Gets the warnings of this storage parameters as an unmodifiable {@link Set set}.
+     * 
+     * @return The warnings as an unmodifiable set
+     */
+    Set<AbstractOXException> getWarnings();
 
     /**
      * Gets the context.

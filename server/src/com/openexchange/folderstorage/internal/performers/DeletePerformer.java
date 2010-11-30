@@ -127,9 +127,8 @@ public final class DeletePerformer extends AbstractPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, true);
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(folderStorage);
+        checkOpenedStorage(folderStorage, openedStorages);
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }
@@ -194,24 +193,24 @@ public final class DeletePerformer extends AbstractPerformer {
             }
             if (!permission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    folder.getLocalizedName(session.getUser().getLocale()),
-                    getUser().getDisplayName(),
-                    Integer.valueOf(getContextId()));
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
             if (!permission.isAdmin()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(
-                    folder.getLocalizedName(session.getUser().getLocale()),
-                    getUser().getDisplayName(),
-                    Integer.valueOf(getContextId()));
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
             /*
              * Delete permissions
              */
             if (!canDeleteAllObjects(permission, folderId, treeId, folderStorage)) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(
-                    folderId,
-                    Integer.valueOf(user.getId()),
-                    Integer.valueOf(context.getContextId()));
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
         }
         final SortableId[] subfolders = folderStorage.getSubfolders(treeId, folderId, storageParameters);
@@ -273,8 +272,9 @@ public final class DeletePerformer extends AbstractPerformer {
                 return;
             }
         }
-        storage.startTransaction(storageParameters, true);
-        openedStorages.add(storage);
+        if (storage.startTransaction(storageParameters, true)) {
+            openedStorages.add(storage);
+        }
     }
 
 }

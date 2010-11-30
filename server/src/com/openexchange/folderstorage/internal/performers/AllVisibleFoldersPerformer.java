@@ -130,10 +130,11 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
         if (null == rootStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, FolderStorage.ROOT_ID);
         }
-        rootStorage.startTransaction(storageParameters, false);
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(rootStorage);
+        if (rootStorage.startTransaction(storageParameters, false)) {
+            openedStorages.add(rootStorage);
+        }
         try {
             final List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
             final ListPerformer listAction =

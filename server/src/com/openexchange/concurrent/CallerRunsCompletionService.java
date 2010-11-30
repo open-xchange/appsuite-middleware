@@ -47,66 +47,84 @@
  *
  */
 
-package com.openexchange.folder.json.actions;
+package com.openexchange.concurrent;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.folder.json.parser.FolderParser;
-import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
- * {@link CreateAction} - Maps the action to a NEW action.
+ * {@link CallerRunsCompletionService} - A {@link CompletionService} that uses submitting thread to perform the task.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CreateAction extends AbstractFolderAction {
-
-    public static final String ACTION = AJAXServlet.ACTION_NEW;
+public final class CallerRunsCompletionService<V> implements CompletionService<V> {
 
     /**
-     * Initializes a new {@link CreateAction}.
+     * FutureTask extension to enqueue upon completion
      */
-    public CreateAction() {
-        super();
+    private static final class QueueingFuture<V> extends FutureTask<V> {
+
+        private final BlockingQueue<Future<V>> queue;
+
+        QueueingFuture(final Callable<V> c, final BlockingQueue<Future<V>> queue) {
+            super(c);
+            this.queue = queue;
+        }
+
+        QueueingFuture(final Runnable t, final V r, final BlockingQueue<Future<V>> queue) {
+            super(t, r);
+            this.queue = queue;
+        }
+
+        @Override
+        protected void done() {
+            queue.add(this);
+        }
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        /*
-         * Parse parameters
-         */
-        String treeId = request.getParameter("tree");
-        if (null == treeId) {
-            /*
-             * Fallback to default tree identifier
-             */
-            treeId = getDefaultTreeIdentifier();
+    private final BlockingQueue<Future<V>> completionQueue;
+
+    /**
+     * Initializes a new {@link CallerRunsCompletionService} with an unbound {@link BlockingQueue}.
+     */
+    public CallerRunsCompletionService() {
+        super();
+        this.completionQueue = new LinkedBlockingQueue<Future<V>>();
+    }
+
+    public Future<V> submit(final Callable<V> task) {
+        if (task == null) {
+            throw new NullPointerException();
         }
-        final String parentId = request.getParameter("folder_id");
-        if (null == parentId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "folder_id");
+        final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
+        f.run();
+        return f;
+    }
+
+    public Future<V> submit(final Runnable task, final V result) {
+        if (task == null) {
+            throw new NullPointerException();
         }
-        /*
-         * Parse folder object
-         */
-        final JSONObject folderObject = (JSONObject) request.getData();
-        final Folder folder = FolderParser.parseFolder(folderObject);
-        folder.setParentID(parentId);
-        folder.setTreeID(treeId);
-        /*
-         * Create
-         */
-        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session);
-        final String newId = newIdResponse.getResponse();
-        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(newIdResponse.getWarnings());
+        final QueueingFuture<V> f = new QueueingFuture<V>(task, result, completionQueue);
+        f.run();
+        return f;
+    }
+
+    public Future<V> take() throws InterruptedException {
+        return completionQueue.take();
+    }
+
+    public Future<V> poll() {
+        return completionQueue.poll();
+    }
+
+    public Future<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+        return completionQueue.poll(timeout, unit);
     }
 
 }

@@ -50,10 +50,12 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -74,6 +76,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractPerformer {
 
+    private static final Object PRESENT = new Object();
+
     /**
      * The constant indicating all content types are allowed.
      */
@@ -89,7 +93,7 @@ public abstract class AbstractPerformer {
 
     protected StorageParameters storageParameters;
 
-    private final Set<AbstractOXException> warnings;
+    private final Map<AbstractOXException, Object> warnings;
 
     /**
      * Initializes a new {@link AbstractPerformer} from given session.
@@ -115,7 +119,7 @@ public abstract class AbstractPerformer {
         user = session.getUser();
         context = session.getContext();
         storageParameters = new StorageParametersImpl(session);
-        warnings = new HashSet<AbstractOXException>(2);
+        warnings = new ConcurrentHashMap<AbstractOXException, Object>(2);
     }
 
     /**
@@ -142,7 +146,57 @@ public abstract class AbstractPerformer {
         this.user = user;
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
-        warnings = new HashSet<AbstractOXException>(2);
+        warnings = new ConcurrentHashMap<AbstractOXException, Object>(2);
+    }
+
+    /**
+     * Gets the context information for an error message.
+     * 
+     * @return The context information for an error message.
+     */
+    protected String getContextInfo4Error() {
+        final Context context = this.context == null ? session.getContext() : this.context;
+        if (null == context) {
+            return "";
+        }
+        final String name = context.getName();
+        if (null == name || 0 == name.length()) {
+            return String.valueOf(context.getContextId());
+        }
+        return new StringBuilder(16).append(name).append(" (").append(context.getContextId()).append(')').toString();
+    }
+
+    /**
+     * Gets the user information for an error message.
+     * 
+     * @return The user information for an error message.
+     */
+    protected String getUserInfo4Error() {
+        final User user = this.user == null ? session.getUser() : this.user;
+        if (null == user) {
+            return "";
+        }
+        final String name = user.getDisplayName();
+        if (null == name || 0 == name.length()) {
+            return String.valueOf(user.getId());
+        }
+        return new StringBuilder(16).append(name).append(" (").append(user.getId()).append(')').toString();
+    }
+
+    /**
+     * Gets the folder information for an error message.
+     * 
+     * @return The folder information for an error message.
+     */
+    protected String getFolderInfo4Error(final Folder folder) {
+        if (null == folder) {
+            return "";
+        }
+        final String name = folder.getLocalizedName(user == null ? session.getUser().getLocale() : user.getLocale());
+        if (null == name || 0 == name.length()) {
+            return folder.getID();
+        }
+        return new StringBuilder(16).append(name).append(" (").append(folder.getID()).append(')').toString();
     }
 
     /**
@@ -153,7 +207,7 @@ public abstract class AbstractPerformer {
      */
     protected void addWarning(final AbstractOXException warning) {
         warning.setCategory(Category.WARNING);
-        warnings.add(warning);
+        warnings.put(warning, PRESENT);
     }
 
     /**
@@ -171,7 +225,7 @@ public abstract class AbstractPerformer {
      * @return The warnings as an unmodifiable set
      */
     public Set<AbstractOXException> getWarnings() {
-        return Collections.unmodifiableSet(warnings);
+        return Collections.unmodifiableSet(warnings.keySet());
     }
 
     /**
@@ -209,8 +263,9 @@ public abstract class AbstractPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
         }
         // Open storage and add to list of opened storages
-        tmp.startTransaction(storageParameters, false);
-        openedStorages.add(tmp);
+        if (tmp.startTransaction(storageParameters, false)) {
+            openedStorages.add(tmp);
+        }
         return tmp;
     }
 
@@ -231,8 +286,9 @@ public abstract class AbstractPerformer {
             }
         }
         // Passed storage has not been opened before. Open now and add to collection
-        checkMe.startTransaction(storageParameters, modify);
-        openedStorages.add(checkMe);
+        if (checkMe.startTransaction(storageParameters, modify)) {
+            openedStorages.add(checkMe);
+        }
     }
 
     /**
@@ -260,6 +316,15 @@ public abstract class AbstractPerformer {
      */
     public void setStorageParameters(final StorageParameters storageParameters) {
         this.storageParameters = storageParameters;
+    }
+
+    /**
+     * Gets the storage parameters.
+     * 
+     * @return The storage parameters
+     */
+    public StorageParameters getStorageParameters() {
+        return storageParameters;
     }
 
     /**

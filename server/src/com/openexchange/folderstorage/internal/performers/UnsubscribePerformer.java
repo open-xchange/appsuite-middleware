@@ -124,9 +124,10 @@ public final class UnsubscribePerformer extends AbstractPerformer {
         if (null == virtualStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        virtualStorage.startTransaction(storageParameters, false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(virtualStorage);
+        if (virtualStorage.startTransaction(storageParameters, false)) {
+            openedStorages.add(virtualStorage);
+        }
         try {
             final Folder folder = virtualStorage.getFolder(treeId, folderId, storageParameters);
             {
@@ -141,9 +142,9 @@ public final class UnsubscribePerformer extends AbstractPerformer {
                 }
                 if (!parentPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        folderId,
-                        getUser().getDisplayName(),
-                        Integer.valueOf(getContextId()));
+                        getFolderInfo4Error(folder),
+                        getUserInfo4Error(),
+                        getContextInfo4Error());
                 }
             }
             {
