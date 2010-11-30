@@ -70,6 +70,19 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   ox_update_permissions "/opt/open-xchange/etc/groupware/filestorage.properties" root:open-xchange 640
+
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 

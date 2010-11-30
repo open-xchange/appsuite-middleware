@@ -24,17 +24,6 @@ postFix() {
   version=${version//[-.]/}
 
   GLOBIGNORE='*'
-
-  # SoftwareChange_Request-398
-  # -----------------------------------------------------------------------
-  local pfile=/opt/open-xchange/etc/groupware/twitter.properties
-  if ! ox_exists_property com.openexchange.twitter.consumerKey $pfile; then
-      ox_set_property com.openexchange.twitter.consumerKey consumerKey $pfile
-  fi
-  if ! ox_exists_property com.openexchange.twitter.consumerSecret $pfile; then
-      ox_set_property com.openexchange.twitter.consumerSecret consumerSecret $pfile
-  fi
-
 }
 
 case "$1" in

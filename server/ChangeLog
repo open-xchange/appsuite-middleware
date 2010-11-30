@@ -1,3 +1,8 @@
+* 2010-11-30 - choeger@open-xchange.com
+
+ - Bugfix #17679: Can't update system because open-xchange-file-storage-config
+   searches for twitter.properties
+
 * 2010-11-30 - thorben.betten@open-xchange.com
 
  - Bugfix #17641: Proper commit of used connection
