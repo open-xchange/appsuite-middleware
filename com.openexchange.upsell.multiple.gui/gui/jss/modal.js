@@ -3,7 +3,7 @@
  * http://www.ericmmartin.com/projects/simplemodal/
  * Copyright (c) 2010 Eric Martin (http://twitter.com/ericmmartin)
  * Dual licensed under the MIT and GPL licenses
- * Revision: $Id: modal.js,v 1.1 2010-10-05 14:45:24 cutmasta Exp $
+ * Revision: $Id: modal.js,v 1.2 2010-11-30 23:43:23 flo Exp $
  */
 
 /**
@@ -359,14 +359,14 @@
 			var s = this;
 
 			// bind the close event to any element with the closeClass class
-			$('.' + s.o.closeClass).bind('click.simplemodal', function (e) {
+			$('.' + s.o.closeClass).live('click.simplemodal', function (e) {
 				e.preventDefault();
 				s.close();
 			});
 
 			// bind the overlay click to the close function, if enabled
 			if (s.o.modal && s.o.close && s.o.overlayClose) {
-				s.d.overlay.bind('click.simplemodal', function (e) {
+				s.d.overlay.live('click.simplemodal', function (e) {
 					e.preventDefault();
 					s.close();
 				});

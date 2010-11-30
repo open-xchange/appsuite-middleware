@@ -38,7 +38,6 @@ modules/mobility (set in this plugin)
 upsell = {
   //global configuration
   config: {
-    language: config.language,
     //path to plugin
     path: "plugins/com.openexchange.upsell.multiple.gui/",
     //path to files
@@ -100,7 +99,7 @@ upsell = {
           },
         },
         checkboxes: {
-          invite:{
+          invite: {
             content: _("Invite all my colleagues"),
             action: "upsell._set_invite(this)",
           },
@@ -267,7 +266,31 @@ upsell = {
   
   init: function (feature, win) {
     if(!upsell.config.init){
+      
+      //registration
+      register("Feature_Not_Available", upsell.init);
+
+      /**
+      * upsell function in the portal pannel: syncronization for outlook and mobility
+      */
+      var syncupsell = MenuNodes.createSmallButtonContext("syncronisation", "NEU! Synchronisierung");
+      MenuNodes.createSmallButton(syncupsell,"buttonol", "Windows Outlook", getFullImgSrc("img/mail/email_priolow.gif"), "", function(){
+        upsell.init("modules/outlook");
+      });
+      
+      /* The pannel object gets the id 42 and gets displayed in the fixed area
+       * possible areas are FIXED and DYNAMIC the id controls the order in the areas
+       */
+      addMenuNode(syncupsell.node, MenuNodes.FIXED, 42);
+      
+      //Following makes the new pannel options dynamic active/inactive
+      changeDisplay("portal", "syncronisation");
+      
+      //show the upsell area in the pannel on the first login
+      showNode("syncronisation");
+      
       upsell._get_required_files();
+      
       jQuery('#upsell_window .detail_show').live('click', function() {
         if(jQuery("#upsell_window .detail").is(':visible')){
           jQuery('#upsell_window .detail').hide();
@@ -279,6 +302,7 @@ upsell = {
       });
       return false;
     };
+    
     upsell._get_feature(feature);
   },
   
@@ -307,8 +331,6 @@ upsell = {
         upsell.config.feature = i;
         upsell._build_window();
         return false;
-      } else {
-        alert('Please add feature to upsell configuration !');
       }
     });
   },
@@ -337,12 +359,26 @@ upsell = {
          '</div>' +
        '</div>';
        
-    jQuery.modal(data);
+    if(jQuery('#upsell_window').length > 0){
+      jQuery('#upsell_window').animate({
+        opacity: 0,
+      }, 500, function(){
+        jQuery('#upsell_window').html(jQuery(data).html()).animate({
+          opacity: 1,
+        }, 500);
+      });
+    } else {
+      jQuery.modal(data);
+      jQuery('#upsell_window').css('opacity','0').animate({opacity: 1,}, 500);
+      jQuery('.simplemodal-overlay').css('opacity','0').animate({opacity: .8,}, 500);
+    }
+    
   },
   
   //close current window
   _close_dialouge: function(){
     jQuery.modal.close();
+    return true;
   },
   
   //builds required buttons from configuration
@@ -378,9 +414,19 @@ upsell = {
   _get_content: function(){
     var feature = upsell.config.features[upsell.config.feature];
     
+    var intro = "";
+    var list = "";
+    var outro = "";
+    var videos = "";
+    var images = "";
+        
+    if(feature.intro) {
+      intro = '<b style="font-size: 14px">' + feature.intro + '</b><br>';
+    };
+    
     if(feature.list) {
-      var list = "";
       var list_count = 0;
+      list += '<ul>';
       jQuery.each(
         feature.list, function(i, val){
           if( val == "" ) { return false; };
@@ -393,10 +439,19 @@ upsell = {
 		      
   		  }
 	  	);
+
+	  	list += '</ul>';
+
+	  	if (list_count > upsell.config.show_features_initial) {
+  	  	list += '<a style="display: block" href="#" class="detail_show">[more]</a>';
+  	  }
 	  };
 		
+		if(feature.outro) {
+      outro = '<b style="font-size: 14px; display: block; padding-top: 20px">' + feature.outro + '</b>';;
+    };
+		
 		if(feature.videos) {
-	  	var videos = "";
   		jQuery.each(
         feature.videos, function(i, val){
   		    videos +=
@@ -408,7 +463,6 @@ upsell = {
 		};
 		
 		if(feature.images) {
-	  	var images = "";
   		jQuery.each(
         feature.images, function(i, val){
   		    images +=
@@ -421,16 +475,9 @@ upsell = {
 
     var content =
       '<div class="section_left">' +
-	      '<b style="font-size: 14px">'+
-	        feature.intro +
-	      '</b><br>' +
-	      '<ul>' +
-	        list +
-        '</ul>' +
-        '<a style="display: block" href="#" class="detail_show">[more]</a>' +
-        '<b style="font-size: 14px; display: block; padding-top: 20px">' +
-          feature.outro +
-        '</b>' +
+	      intro +
+	      list +
+        outro +
       '</div>' +
       '<div class="section_right">' +
         videos +
@@ -502,8 +549,7 @@ upsell = {
 	  jQuery.getJSON(
       "/ajax/upsell/multiple?session="+parent.session+"&action=change_context_permissions&upsell_plan=groupware_premium&feature_clicked=" + upsell.config.feature + "&purchase_type=" + upsell.config.purchase_type,
       function(data){
-        upsell._close_dialouge();
-        upsell.init("order_confirm");
+        upsell.init('order_confirm');
       }
     );
   },
@@ -516,26 +562,3 @@ upsell = {
 
 // loads required files
 upsell.init();
-
-//registration
-register("Feature_Not_Available", upsell.init);
-
-
-/**
-* upsell function in the portal pannel: syncronization for outlook and mobility
-*/
-
-var syncupsell = MenuNodes.createSmallButtonContext("syncronisation", "NEU! Synchronisierung");
-MenuNodes.createSmallButton(syncupsell,"buttonol", "Windows Outlook", getFullImgSrc("img/mail/email_priolow.gif"), "", function(){
-        upsell.init("modules/outlook");
-});
-
-/* The pannel object gets the id 42 and gets displayed in the fixed area
- * possible areas are FIXED and DYNAMIC the id controls the order in the areas
- */
-addMenuNode(syncupsell.node, MenuNodes.FIXED, 42);
-
-//Following makes the new pannel options dynamic active/inactive
-changeDisplay("portal", "syncronisation");
-//show the upsell area in the pannel on the first login
-showNode("syncronisation");
