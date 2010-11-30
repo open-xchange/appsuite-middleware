@@ -285,8 +285,9 @@ public abstract class AbstractPerformer {
             }
         }
         // Passed storage has not been opened before. Open now and add to collection
-        checkMe.startTransaction(storageParameters, modify);
-        openedStorages.add(checkMe);
+        if (checkMe.startTransaction(storageParameters, modify)) {
+            openedStorages.add(checkMe);
+        }
     }
 
     /**

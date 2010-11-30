@@ -418,8 +418,9 @@ final class MovePerformer extends AbstractPerformer {
                 return;
             }
         }
-        storage.startTransaction(storageParameters, true);
-        openedStorages.add(storage);
+        if (storage.startTransaction(storageParameters, true)) {
+            openedStorages.add(storage);
+        }
     }
 
     private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {

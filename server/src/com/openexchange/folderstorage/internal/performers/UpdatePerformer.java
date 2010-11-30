@@ -135,12 +135,11 @@ public final class UpdatePerformer extends AbstractPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        final boolean started = storage.startTransaction(storageParameters, true);
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(storage);
+        checkOpenedStorage(storage, openedStorages);
 
         try {
             /*
@@ -312,29 +311,23 @@ public final class UpdatePerformer extends AbstractPerformer {
             /*
              * Commit
              */
-            if (started) {
-                for (final FolderStorage fs : openedStorages) {
-                    fs.commitTransaction(storageParameters);
-                }
+            for (final FolderStorage fs : openedStorages) {
+                fs.commitTransaction(storageParameters);
             }
 
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Update.doUpdate() took ").append(duration).append("msec for folder: ").append(
+                LOG.debug(new StringBuilder().append("UpdatePerformer.doUpdate() took ").append(duration).append("msec for folder: ").append(
                     folderId).toString());
             }
         } catch (final FolderException e) {
-            if (started) {
-                for (final FolderStorage fs : openedStorages) {
-                    fs.rollback(storageParameters);
-                }
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
             }
             throw e;
         } catch (final Exception e) {
-            if (started) {
-                for (final FolderStorage fs : openedStorages) {
-                    fs.rollback(storageParameters);
-                }
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -380,8 +373,9 @@ public final class UpdatePerformer extends AbstractPerformer {
                 return;
             }
         }
-        storage.startTransaction(storageParameters, true);
-        openedStorages.add(storage);
+        if (storage.startTransaction(storageParameters, true)) {
+            openedStorages.add(storage);
+        }
     }
 
     private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {

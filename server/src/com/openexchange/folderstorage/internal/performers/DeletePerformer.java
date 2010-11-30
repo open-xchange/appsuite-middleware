@@ -127,9 +127,8 @@ public final class DeletePerformer extends AbstractPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, true);
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(folderStorage);
+        checkOpenedStorage(folderStorage, openedStorages);
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }
@@ -273,8 +272,9 @@ public final class DeletePerformer extends AbstractPerformer {
                 return;
             }
         }
-        storage.startTransaction(storageParameters, true);
-        openedStorages.add(storage);
+        if (storage.startTransaction(storageParameters, true)) {
+            openedStorages.add(storage);
+        }
     }
 
 }

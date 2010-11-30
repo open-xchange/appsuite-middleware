@@ -136,9 +136,8 @@ public final class CreatePerformer extends AbstractPerformer {
         if (null == parentStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
-        parentStorage.startTransaction(storageParameters, true);
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(parentStorage);
+        checkOpenedStorage(parentStorage, openedStorages);
         try {
             final Folder parent = parentStorage.getFolder(treeId, parentId, storageParameters);
             /*
@@ -355,8 +354,9 @@ public final class CreatePerformer extends AbstractPerformer {
                 return;
             }
         }
-        storage.startTransaction(storageParameters, true);
-        openedStorages.add(storage);
+        if (storage.startTransaction(storageParameters, true)) {
+            openedStorages.add(storage);
+        }
     }
 
     private static boolean supportsContentType(final ContentType folderContentType, final FolderStorage folderStorage) {

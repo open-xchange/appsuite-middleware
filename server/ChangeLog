@@ -1,3 +1,7 @@
+* 2010-11-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #17641: Proper commit of used connection
+
 * 2010-11-29 - marcus.klein@open-xchange.com
 
  - Bugfix #17640: Corrected HTTP status codes of free/busy interface.

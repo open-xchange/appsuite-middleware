@@ -150,11 +150,10 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
     public UserizedFolder[][] doUpdates(final String treeId, final Date since, final boolean ignoreDeleted, final ContentType[] includeContentTypes) throws FolderException {
         final List<FolderStorage> realFolderStorages =
             new ArrayList<FolderStorage>(Arrays.asList(folderStorageDiscoverer.getTreeFolderStorages(FolderStorage.REAL_TREE_ID)));
-        for (final FolderStorage folderStorage : realFolderStorages) {
-            folderStorage.startTransaction(storageParameters, false);
-        }
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(realFolderStorages.size() + 1);
-        openedStorages.addAll(realFolderStorages);
+        for (final FolderStorage folderStorage : realFolderStorages) {
+            checkOpenedStorage(folderStorage, false, openedStorages);
+        }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         try {
             final UserConfiguration userConfiguration;
