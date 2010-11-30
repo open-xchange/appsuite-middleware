@@ -58,5 +58,7 @@ package com.openexchange.groupware.infostore.database;
 public interface InfostoreFilenameReservation {
 
     public void destroySilently();
+    
+    public String getFilename();
 
 }

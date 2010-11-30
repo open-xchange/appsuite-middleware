@@ -257,5 +257,10 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
         openConnection();
         con.setAutoCommit(false);
     }
+    
+    
+    public String getFilename() {
+        return fileName;
+    }
 
 }

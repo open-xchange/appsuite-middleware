@@ -65,6 +65,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
@@ -417,7 +419,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 max = l.getTimeout();
             }
         }
-        if(max > 0) {
+        if (max > 0) {
             document.setLockedUntil(new Date(System.currentTimeMillis() + max));
         }
         return document;
@@ -497,9 +499,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             VALIDATION.validate(document);
             CheckSizeSwitch.checkSizes(document, getProvider(), sessionObj.getContext());
+            
+            boolean titleAlso = document.getFileName() != null && document.getTitle() != null && document.getFileName().equals(document.getTitle());
+            
+            InfostoreFilenameReservation reservation = reserve(
+                document.getFileName(),
+                document.getFolderId(),
+                document.getId(),
+                sessionObj.getContext(), true);
 
-            InfostoreFilenameReservation reservation = reserve(document.getFileName(), document.getFolderId(), document.getId(), sessionObj.getContext());
-
+            document.setFileName(reservation.getFilename());
+            if(titleAlso) {
+                document.setTitle(reservation.getFilename());
+            }
+            
             try {
                 Connection writeCon = null;
                 try {
@@ -683,18 +696,57 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return retval + 1;
     }
 
-    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx) throws OXException {
+    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx, boolean adjust) throws OXException {
+        return reserve(filename, folderId, id, ctx, adjust ? 0 : -1);
+    }
 
+    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx, int count) throws OXException {
         InfostoreFilenameReservation reservation = null;
         try {
             reservation = filenameReserver.reserveFilename(filename, folderId, id, ctx, this);
             if (reservation == null) {
-                throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(filename, "Unknown");
+                if (count == -1) {
+                    throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(filename, "");
+                }
+                return reserve(enhance(filename, ++count), folderId, id, ctx, count);
             }
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         }
         return reservation;
+    }
+
+    private static final Pattern IS_NUMBERED_WITH_EXTENSION = Pattern.compile("\\(\\d\\)\\.");
+
+    private static final Pattern IS_NUMBERED = Pattern.compile("\\(\\d\\)$");
+
+    private String enhance(String filename, int c) {
+        StringBuilder stringBuilder = new StringBuilder(filename);
+
+        Matcher matcher = IS_NUMBERED_WITH_EXTENSION.matcher(filename);
+        if (matcher.find()) {
+            int start = matcher.start();
+            int end = matcher.end();
+            stringBuilder.replace(start, end - 1, "(" + c + ")");
+            return stringBuilder.toString();
+        }
+
+        matcher = IS_NUMBERED.matcher(filename);
+        if (matcher.find()) {
+            int start = matcher.start();
+            int end = matcher.end();
+            stringBuilder.replace(start, end, "(" + c + ")");
+            return stringBuilder.toString();
+        }
+
+        int index = filename.lastIndexOf('.');
+        if (index == -1) {
+            index = filename.length();
+        }
+
+        stringBuilder.insert(index, "(" + c + ")");
+
+        return stringBuilder.toString();
     }
 
     protected QuotaFileStorage getFileStorage(final Context ctx) throws FilestoreException, FileStorageException {
@@ -713,7 +765,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
-        if(document.getId() == NEW) {
+        if (document.getId() == NEW) {
             saveDocument(document, data, sequenceNumber, sessionObj);
             return;
         }
@@ -767,7 +819,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     final String fname = load(document.getId(), document.getVersion(), sessionObj.getContext()).getFileName();
                     if (fname != null && !fname.equals(oldDocument.getFileName())) {
 
-                        reservations.add(reserve(fname, oldDocument.getFolderId(), oldDocument.getId(), sessionObj.getContext()));
+                        reservations.add(reserve(fname, oldDocument.getFolderId(), oldDocument.getId(), sessionObj.getContext(), false));
 
                     }
                 }
@@ -775,11 +827,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 modifiedColumns = updatedCols.toArray(new Metadata[updatedCols.size()]);
 
                 if (document.getFileName() != null && !document.getFileName().equals(oldDocument.getFileName())) {
-                    reservations.add(reserve(
+                    InfostoreFilenameReservation reservation = reserve(
                         document.getFileName(),
                         oldDocument.getFolderId(),
                         oldDocument.getId(),
-                        sessionObj.getContext()));
+                        sessionObj.getContext(), true);
+                    reservations.add(reservation);
+                    document.setFileName(reservation.getFilename());
                 }
 
                 if (data != null) {
@@ -1229,7 +1283,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         if (removeCurrent) {
             metadata = load(metadata.getId(), update.getVersion(), sessionObj.getContext());
-            reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext());
+            reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext(), false);
         }
 
         try {
