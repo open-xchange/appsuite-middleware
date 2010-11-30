@@ -274,10 +274,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
                         public Object call() throws Exception {
                             final StorageParameters newParameters = paramsProvider.getStorageParameters();
-                            final boolean started = tmp.startTransaction(newParameters, false);
-                            try {
-                                final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                            final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                            if (tmp.startTransaction(newParameters, false)) {
                                 openedStorages.add(tmp);
+                            }
+                            try {
                                 NextIndex: for (final int index : indexes) {
                                     final String id = subfolderIds[index];
                                     /*
@@ -311,18 +312,18 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         }
                                     }
                                 }
-                                if (started) {
-                                    tmp.commitTransaction(newParameters);
+                                for (final FolderStorage fs : openedStorages) {
+                                    fs.commitTransaction(newParameters);
                                 }
                                 return null;
                             } catch (final FolderException e) {
-                                if (started) {
-                                    tmp.rollback(newParameters);
+                                for (final FolderStorage fs : openedStorages) {
+                                    fs.rollback(newParameters);
                                 }
                                 throw e;
                             } catch (final Exception e) {
-                                if (started) {
-                                    tmp.rollback(newParameters);
+                                for (final FolderStorage fs : openedStorages) {
+                                    fs.rollback(newParameters);
                                 }
                                 throw FolderException.newUnexpectedException(e);
                             }
