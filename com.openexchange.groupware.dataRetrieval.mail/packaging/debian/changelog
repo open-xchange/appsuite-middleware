@@ -1,3 +1,9 @@
+open-xchange-data-retrieval-mail (6.18.2.0-6) unstable; urgency=low
+
+  * first build for 6.18.2-rev7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 30 Nov 2010 15:46:15 +0100
+
 open-xchange-data-retrieval-mail (6.18.2.0-5) unstable; urgency=low
 
   * first build for 6.18.2-rev6

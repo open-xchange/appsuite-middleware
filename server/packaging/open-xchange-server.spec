@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -692,9 +692,33 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Nov 30 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17641: Proper commit of used connection
+* Tue Nov 30 2010 - choeger@open-xchange.com
+ - Bugfix #17679: Can't update system because open-xchange-file-storage-config
+   searches for twitter.properties
+* Mon Nov 29 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17658: No poll (take with timeout) on a submitted task
+ - Bugfix #17557: Escaped curly brace in pattern notation
+* Mon Nov 29 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17640: Corrected HTTP status codes of free/busy interface.
+* Fri Nov 26 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17653: Changed log level to warning
+ - Bugfix #17647: Dropping cookies on failed IP check
+* Fri Nov 26 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #17596: Filter out subscriptions on folders that are not visible
+* Thu Nov 25 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17213: Added "text/directory" as accepted VCard content type
+* Thu Nov 25 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #17562: Internal users are now properly recognized even if they are are referred to by e-mails with strange capitalization.
+* Thu Nov 25 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17349: Log levels of classes LoginPerformer and SessionHandler should now always be INFO to be able to follow session life times.
 * Wed Nov 24 2010 - thorben.betten@open-xchange.com
  - Bugfix #17627: Changed connection handling in mail folder storage
  - Bugfix #17596: Enhanced error message
+ - Bugfix #17623: Showing all subfolders
+* Wed Nov 24 2010 - marcus.klein@open-xchange.com
+ - Bugfix #17632: Fixed a typo in an exception message.
 * Mon Nov 22 2010 - thorben.betten@open-xchange.com
  - Bugfix #17605: Stripping JavaScript contained in href attribute from HTML tag
 * Mon Nov 22 2010 - marcus.klein@open-xchange.com
