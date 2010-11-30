@@ -60,8 +60,8 @@ import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.SearchRequest;
 import com.openexchange.ajax.task.actions.SearchResponse;
 import com.openexchange.groupware.container.FolderObject;
@@ -90,7 +90,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         userId1 = client.getValues().getUserId();
-        folder = Create.createPrivateFolder("test for bug 16724", FolderObject.TASK, client.getValues().getUserId());
+        folder = Create.createPrivateFolder("test for bug 16724_" + System.currentTimeMillis(), FolderObject.TASK, client.getValues().getUserId());
         folder.setParentFolderID(client.getValues().getPrivateTaskFolder());
         client2 = new AJAXClient(User.User2);
         folder.addPermission(Create.ocl(
