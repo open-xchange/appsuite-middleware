@@ -287,25 +287,6 @@ upsell = {
       
       //registration
       register("Feature_Not_Available", upsell.init);
-
-      /**
-      * upsell function in the portal pannel: syncronization for outlook and mobility
-      */
-      var syncupsell = MenuNodes.createSmallButtonContext("syncronisation", "NEU! Synchronisierung");
-      MenuNodes.createSmallButton(syncupsell,"buttonol", "Windows Outlook", getFullImgSrc("img/mail/email_priolow.gif"), "", function(){
-        upsell.init("modules/outlook");
-      });
-      
-      /* The pannel object gets the id 42 and gets displayed in the fixed area
-       * possible areas are FIXED and DYNAMIC the id controls the order in the areas
-       */
-      addMenuNode(syncupsell.node, MenuNodes.FIXED, 42);
-      
-      //Following makes the new pannel options dynamic active/inactive
-      changeDisplay("portal", "syncronisation");
-      
-      //show the upsell area in the pannel on the first login
-      showNode("syncronisation");
       
       upsell._get_required_files();
       
