@@ -263,22 +263,6 @@ upsell = {
         },
       },
       
-      //iframe window
-      iframe_order: {
-        name: ["iframe"],
-        title: _("Iframe Order."),
-        buttons: {
-          next: {
-            content: _("next >>"),
-            action: "alert('put iframe actions here')",
-          },
-          back: {
-            content: _("<< back"),
-            action: "upsell._back(1)",
-          },
-        },
-      },
-      
       //order confirmation window
       error: {
         name: ["error"],
@@ -369,10 +353,33 @@ upsell = {
     jQuery.each(upsell.config.features, function(i, val){
       if(jQuery.inArray(feature, val.name) >= 0){
         upsell.config.feature = i;
-        upsell._build_window();
+        upsell._get_display_type();
         return false;
       }
     });
+  },
+  
+  _get_display_type: function(){
+    jQuery.getJSON(
+      "/ajax/upsell/multiple?session="+parent.session+"&action=get_method",
+      function(data){
+        if(data.data.upsell_method === "direct"){
+          jQuery.getJSON(
+            "/ajax/upsell/multiple?session="+parent.session+"&action=get_static_redirect_url&feature_clicked=" + upsell.config.feature,
+            function(data){
+              upsell.config.hide_buttons = true;
+              upsell.config.iframe_url = data.data.upsell_static_redirect_url;
+              upsell._build_window();
+            }
+          )
+        } else {
+          upsell.config.hide_buttons = false;
+          upsell.config.iframe_url = "";
+          upsell._build_window();
+        }
+        
+      }
+    );
   },
   
   
@@ -429,8 +436,11 @@ upsell = {
   
   //builds required buttons from configuration
   _get_inputs: function(){
-    var feature = upsell.config.features[upsell.config.feature];
+    
     var button = "";
+    
+    if(!upsell.config.hide_buttons){
+      var feature = upsell.config.features[upsell.config.feature];
 
       if(feature.buttons){
         jQuery.each(feature.buttons, function(ib, valb){
@@ -453,7 +463,7 @@ upsell = {
           }
         });
       }
-
+    }
     return button;
   },
   
@@ -519,7 +529,7 @@ upsell = {
   		);
 		};
     
-    if(upsell.config.feature_internal === "iframe") {
+    if(upsell.config.iframe_url != "") {
       var content = '<iframe src="'+ upsell.config.iframe_url +'" width="100%" height="100%" style="border: none; margin: 0 0 -5px 0; clear: both;"></iframe>';
     } else {
       var content =
