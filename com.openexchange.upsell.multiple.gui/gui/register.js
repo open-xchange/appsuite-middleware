@@ -126,8 +126,8 @@ upsell = {
         outro: _("Sign up for 90 Days free trial now !"),
         videos: {
           video_1: {
-            thumb: _("_global/img/90_sec_small.png"),
-            video: _("_global/flash/90_sec/OX_film_EN_640.swf"),
+            thumb: _("_calendar/img/calendar_video.png"),
+            video: _("_calendar/flash/teaser/teaservideo09-teamcalendar-tasks-en-draft07_controller.swf"),
           },
         },
         images: {
@@ -262,6 +262,23 @@ upsell = {
           },
         },
       },
+      
+      //iframe window
+      iframe_order: {
+        name: ["iframe"],
+        title: _("Iframe Order."),
+        buttons: {
+          next: {
+            content: _("next >>"),
+            action: "alert('put iframe actions here')",
+          },
+          back: {
+            content: _("<< back"),
+            action: "upsell._back(1)",
+          },
+        },
+      },
+      
       //order confirmation window
       error: {
         name: ["error"],
@@ -273,7 +290,7 @@ upsell = {
             action: "upsell._close_dialouge()",
           },
           back: {
-            content: _("back"),
+            content: _("<< back"),
             action: "upsell._back(1)",
           },
         },
@@ -348,6 +365,7 @@ upsell = {
   
   _get_feature: function(feature){
     upsell.config.history.push(feature);
+    upsell.config.feature_internal = feature;
     jQuery.each(upsell.config.features, function(i, val){
       if(jQuery.inArray(feature, val.name) >= 0){
         upsell.config.feature = i;
@@ -371,10 +389,8 @@ upsell = {
            '</h2>' +
           '<a href="#" class="upsell-close"></a>' +
          '</div>' +
-         '<div id="contentSection">' +
-           '<div class="contentSection">' +
-               upsell._get_content() +
-           '</div>' +
+         '<div id="contentSection" class="contentSection">' +
+           upsell._get_content() +
          '</div>' +
          '<div id="footerSection">' +
            upsell._get_inputs() +
@@ -502,19 +518,24 @@ upsell = {
 	  	  }
   		);
 		};
-
-    var content =
-      '<div class="section_left">' +
-	      intro +
-	      list +
-        outro +
-      '</div>' +
-      '<div class="section_right">' +
-        videos +
-        images +
-      '</div>';
-      
+    
+    if(upsell.config.feature_internal === "iframe") {
+      var content = '<iframe src="'+ upsell.config.iframe_url +'" width="100%" height="100%" style="border: none; margin: 0 0 -5px 0; clear: both;"></iframe>';
+    } else {
+      var content =
+        '<div class="section_left">' +
+	        intro +
+	        list +
+          outro +
+        '</div>' +
+        '<div class="section_right">' +
+          videos +
+          images +
+        '</div>';
+    }
+    
     return content;
+    
   },
   
   _get_title: function(){
@@ -531,17 +552,13 @@ upsell = {
   
   //gets selected purchase method
   _get_purchase_method: function(type){
-    if(!upsell.config.pause){
-      jQuery.getJSON(
-        "/ajax/upsell/multiple?session="+parent.session+"&action=get_method",
-        function(data){
-          upsell.config.purchase_type = type;
-          upsell._procces_purchase(data.data.upsell_method);
-        }
-      );
-    } else {
-      alert(upsell.config.pause_message);
-    }
+    jQuery.getJSON(
+      "/ajax/upsell/multiple?session="+parent.session+"&action=get_method",
+      function(data){
+        upsell.config.purchase_type = type;
+        upsell._procces_purchase(data.data.upsell_method);
+      }
+    );
   },
   
   //initialize purchase
@@ -557,6 +574,15 @@ upsell = {
         break;
       case "static":
         upsell._do_purchase_redirect();
+        break;
+      case "direct":
+        jQuery.getJSON(
+          "/ajax/upsell/multiple?session="+parent.session+"&action=get_static_redirect_url&feature_clicked=" + upsell.config.feature,
+          function(data){
+            upsell.config.iframe_url = data.data.upsell_static_redirect_url;
+            upsell.init("iframe");
+          }
+        );
         break;
       default:
         upsell.init("error");
@@ -590,5 +616,5 @@ upsell = {
   },
 };
 
-// loads required files
+
 upsell.init();

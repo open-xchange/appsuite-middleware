@@ -61,6 +61,7 @@
 	border-right:1px solid #cbcbcb;
 	background:#fbfcfc;
 	overflow:hidden;
+	height: 300px;
 }
 
 #upsell_window .contentSection {
