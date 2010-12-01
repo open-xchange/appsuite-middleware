@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: NAME\n"
-"POT-Creation-Date: 2010-11-16 15:09+0100\n"
+"POT-Creation-Date: 2010-12-01 17:13+0100\n"
 "PO-Revision-Date: DATE\n"
 "Last-Translator: NAME <EMAIL>\n"
 "Language-Team: NAME <EMAIL>\n"
@@ -13,32 +13,140 @@ msgstr ""
 msgid "Enhance your system with &#8222;InfoStore&#8220;"
 msgstr "Erweitern Sie Ihr System um &#8222;InfoStore&#8220;"
 
+msgid ""
+"Where ever you are your documents are stored securely and<br> can be "
+"accessed and worked on, anytime!"
+msgstr ""
+
+msgid "Teamwork on important files & data"
+msgstr ""
+
+msgid "Share or publish docments without sending large email attachments"
+msgstr ""
+
+msgid "Ensure actuality through automatic versioning"
+msgstr ""
+
+msgid ""
+"Distinguish between official and private content through &#8220;"
+"Personal&#8221; &amp; &#8220;Public&#8221; folders"
+msgstr ""
+
+msgid "Refer to documents via URL-link in projekts and meetings"
+msgstr ""
+
+msgid "Access your files anywhere anytime"
+msgstr ""
+
+msgid "Data-Security by centralized Server-Back-Up"
+msgstr ""
+
+msgid "Sign up for 90 Days free trial now !"
+msgstr "Anmelden zur 90 Tage Testversion"
+
 msgid "Sign-Up for trial"
 msgstr "Anmelden zur Testversion"
 
-msgid "Accept terms"
-msgstr "Bedingungen akzpetieren"
+msgid "Invite all my colleagues"
+msgstr "Freunde benachrichtigen"
 
 msgid "Enhance your system with &#8222;Teamwork Capabilities&#8220;"
 msgstr "Erweitern Sie Ihr System um &#8222;Teamwork Funktionen&#8220;"
 
+msgid ""
+"Make your team successful and cooperate with each other <br>on tasks, shared "
+"files and your team-calendar!"
+msgstr ""
+
+msgid "Team-Calendar"
+msgstr ""
+
+msgid "Tasks Delegation"
+msgstr ""
+
+msgid "Share Folders"
+msgstr ""
+
+msgid "Share Calendars"
+msgstr ""
+
 msgid "Enhance your system with &#8222;Business Mobility&#8220;"
 msgstr "Erweitern Sie Ihr System um &#8222;Mobilen Zugriff via Handy&#8220;"
 
-msgid "Mail Push oder Mail Professional"
+msgid "Mail Push or Mail Professional"
 msgstr "Mail Push oder Mail Professional"
 
+msgid ""
+"With your &#8220;SmartPhone&#8221; you access all vital data<br>(mail, "
+"calendar, contacts, etc.) effortlessly and manageable on the spot."
+msgstr ""
+
+msgid "Read and answer your mails."
+msgstr ""
+
+msgid "Accept appointment proposals."
+msgstr ""
+
+msgid "Organize your meetings."
+msgstr ""
+
+msgid "Add new addresses."
+msgstr ""
+
+msgid ""
+"Supported are: Windows Mobile 6.x, the Apple iPhone and Nokia S60 OS phones"
+msgstr ""
+
+msgid ""
+"Blackberry & Android phones are supported through additional Software-"
+"Clients."
+msgstr ""
+
 msgid "Buy"
-msgstr "Kaufen"
+msgstr ""
 
 msgid "Enhance your system with &#8222;Outlook Oxtender&#8220;"
 msgstr "Erweitern Sie Ihr System um &#8222;Outlook Oxtender&#8220;"
 
+msgid ""
+"If Outlook&copy; is your preferred choice,<br>use it as your local Groupware "
+"Client."
+msgstr ""
+
+msgid "All your Appointments, Contacts, Mails, etc. get synchronized."
+msgstr ""
+
+msgid "Same look & feel locally and access via web-interface if needed."
+msgstr ""
+
+msgid "All your private, public and shared folders are accessable"
+msgstr ""
+
 msgid "Your provider processed your order successfully."
 msgstr "Ihre Bestellung wurde erfolgreiche verarbeitet."
 
-msgid "Ok"
-msgstr "Ok"
+msgid ""
+"After you press 'OK', an automatic Re-Login will be initiated, and the new "
+"feature is going to be available immediately"
+msgstr ""
 
-msgid "Invite all my colleagues"
-msgstr "Freunde benachrichtigen"
+msgid "Ok"
+msgstr ""
+
+msgid "Error."
+msgstr "Fehler"
+
+msgid "No Valid Purchasing method"
+msgstr ""
+
+msgid "cancel"
+msgstr ""
+
+msgid "back"
+msgstr ""
+
+msgid "more"
+msgstr ""
+
+msgid "close"
+msgstr ""
