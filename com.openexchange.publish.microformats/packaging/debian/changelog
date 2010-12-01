@@ -1,3 +1,9 @@
+open-xchange-publish-microformats (6.18.1.0-11) unstable; urgency=low
+
+  * build for public ptf 2010-12-07
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  1 Dec 2010 14:11:42 +0100
+
 open-xchange-publish-microformats (6.18.1.0-10) unstable; urgency=low
 
   * build for public ptf 2010-11-26
