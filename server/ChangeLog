@@ -1,3 +1,7 @@
+* 2010-12-01 - martin.herfurth@open-xchange.com
+
+ - Bugfix #17264: Reminder for shared calender folders.
+
 * 2010-11-30 - choeger@open-xchange.com
 
  - Bugfix #17679: Can't update system because open-xchange-file-storage-config
