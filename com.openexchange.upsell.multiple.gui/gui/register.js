@@ -72,21 +72,18 @@ upsell = {
           list_item_5:  _("Refer to documents via URL-link in projekts and meetings"),
           list_item_6:  _("Access your files anywhere anytime"),
           list_item_7:  _("Data-Security by centralized Server-Back-Up"),
-          list_item_8:  _(""),
-          list_item_9:  _(""),
-          list_item_10: _(""),
         },
         outro: _("Sign up for 90 Days free trial now !"),
         videos: {
           video_1: {
-            thumb: _("_infostore/img/infostore_video.png"),
-            video: _("_infostore/flash/teaser/teaservideo01_pubsub-en-v2_controller.swf"),
+            thumb: "infostore_video.png",
+            video: "teaser.swf",
           },
         },
         images: {
           image_1: {
-            thumb: _("_infostore/img/infostore_small.png"),
-            image: _("_infostore/img/infostore_big.png"),
+            thumb: "infostore_small.png",
+            image: "infostore_big.png",
           },
         },
         buttons: {
@@ -116,24 +113,18 @@ upsell = {
           list_item_2:  _("Tasks Delegation"),
           list_item_3:  _("Share Folders"),
           list_item_4:  _("Share Calendars"),
-          list_item_5:  _(""),
-          list_item_6:  _(""),
-          list_item_7:  _(""),
-          list_item_8:  _(""),
-          list_item_9:  _(""),
-          list_item_10: _(""),
         },
         outro: _("Sign up for 90 Days free trial now !"),
         videos: {
           video_1: {
-            thumb: _("_calendar/img/calendar_video.png"),
-            video: _("_calendar/flash/teaser/teaservideo09-teamcalendar-tasks-en-draft07_controller.swf"),
+            thumb: "calendar_video.png",
+            video: "teaser.swf",
           },
         },
         images: {
           image_1: {
-            thumb: _("_calendar/img/calendar_small.png"),
-            image: _("_calendar/img/calendar_big.png"),
+            thumb: "calendar_small.png",
+            image: "calendar_big.png",
           },
         },
         buttons: {
@@ -166,22 +157,18 @@ upsell = {
           list_item_4:  _("Add new addresses."),
           list_item_5:  _("Supported are: Windows Mobile 6.x, the Apple iPhone and Nokia S60 OS phones"),
           list_item_6:  _("Blackberry & Android phones are supported through additional Software-Clients."),
-          list_item_7:  _(""),
-          list_item_8:  _(""),
-          list_item_9:  _(""),
-          list_item_10: _(""),
         },
         outro: _("Sign up for 90 Days free trial now !"),
         videos: {
           video_1: {
-            thumb: _("_mobility/img/mobility_video.png"),
-            video: _("_mobility/flash/teaser/teaservideo06-mobility-en-draft03_controller.swf"),
+            thumb: "mobility_video.png",
+            video: "teaser.swf",
           },
         },
         images: {
           image_1: {
-            thumb: _("_mobility/img/mobility_small.png"),
-            image: _("_mobility/img/mobility_big.png"),
+            thumb: "mobility_small.png",
+            image: "mobility_big.png",
           },
         },
         buttons: {
@@ -211,25 +198,18 @@ upsell = {
           list_item_1:  _("All your Appointments, Contacts, Mails, etc. get synchronized."),
           list_item_2:  _("Same look & feel locally and access via web-interface if needed."),
           list_item_3:  _("All your private, public and shared folders are accessable"),
-          list_item_4:  _(""),
-          list_item_5:  _(""),
-          list_item_6:  _(""),
-          list_item_7:  _(""),
-          list_item_8:  _(""),
-          list_item_9:  _(""),
-          list_item_10: _(""),
         },
         outro: _("Sign up for 90 Days free trial now !"),
         videos: {
           video_1: {
-            thumb: _("_outlook/img/outlook_video.png"),
-            video: _("_outlook/flash/teaser/teaservideo04-oxtender-outlook-en-draft05_controller.swf"),
+            thumb: "outlook_video.png",
+            video: "teaser.swf",
           },
         },
         images: {
           image_1: {
-            thumb: _("_outlook/img/outlook_small.png"),
-            image: _("_outlook/img/outlook_big.png"),
+            thumb: "outlook_small.png",
+            image: "outlook_big.png",
           },
         },
         buttons: {
@@ -274,7 +254,7 @@ upsell = {
             action: "upsell._close_dialouge()",
           },
           back: {
-            content: _("<< back"),
+            content: _("back"),
             action: "upsell._back(1)",
           },
         },
@@ -492,8 +472,8 @@ upsell = {
   		jQuery.each(
         feature.videos, function(i, val){
   		    videos +=
-		        '<a href="' + upsell.config.path + 'templates/' + val.video + '" class="light_box swf">' +
-		          '<img src="' + upsell.config.path + 'templates/' + val.thumb + '" />' +
+		        '<a href="' + upsell.config.path + 'templates/_' + upsell.config.feature + '/' + config.language + '/flash/' + val.video + '" class="light_box swf">' +
+		          '<img src="' + upsell.config.path + 'templates/_' + upsell.config.feature + '/' + config.language + '/img/' + val.thumb + '" />' +
 		        '</a>';
 	  	  }
   		);
@@ -503,8 +483,8 @@ upsell = {
   		jQuery.each(
         feature.images, function(i, val){
   		    images +=
-		        '<a href="' + upsell.config.path + 'templates/' + val.image + '" class="light_box image">' +
-		          '<img src="' + upsell.config.path + 'templates/' + val.thumb + '" />' +
+		        '<a href="' + upsell.config.path + 'templates/_' + upsell.config.feature + '/' + config.language + '/img/' + val.image + '" class="light_box image">' +
+		          '<img src="' + upsell.config.path + 'templates/_' + upsell.config.feature + '/' + config.language + '/img/' + val.thumb + '" />' +
 		        '</a>';
 	  	  }
   		);
