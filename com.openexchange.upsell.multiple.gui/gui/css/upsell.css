@@ -74,7 +74,8 @@
 	height:40px;
 }
 
-#upsell_window .simplemodal-close {
+#upsell_window .simplemodal-close,
+#upsell_window .upsell-close {
 	display:block;
 	height:15px;
 	width:15px;

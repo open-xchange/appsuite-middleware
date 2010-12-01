@@ -260,7 +260,19 @@ upsell = {
             action: "upsell._do_reload()",
           },
         },
-      }
+      },
+      //order confirmation window
+      error: {
+        name: ["error"],
+        title: _("Error."),
+        intro: _("No Valid Purchasing method"),
+        buttons: {
+          confirm: {
+            content: _("cancel"),
+            action: "upsell._close_dialouge()",
+          },
+        },
+      },
     },
   },
   
@@ -290,6 +302,10 @@ upsell = {
       showNode("syncronisation");
       
       upsell._get_required_files();
+      
+      jQuery('.upsell-close').live('click', function() {
+        upsell._close_dialouge();
+      })
       
       jQuery('#upsell_window .detail_show').live('click', function() {
         if(jQuery("#upsell_window .detail").is(':visible')){
@@ -347,7 +363,7 @@ upsell = {
                oxProductInfo.product_name +
              '</span>' +
            '</h2>' +
-          '<a href="#" class="simplemodal-close"></a>' +
+          '<a href="#" class="upsell-close"></a>' +
          '</div>' +
          '<div id="contentSection">' +
            '<div class="contentSection">' +
@@ -377,8 +393,10 @@ upsell = {
   
   //close current window
   _close_dialouge: function(){
-    jQuery.modal.close();
-    return true;
+    jQuery('#upsell_window').animate({opacity: 0,}, 500);
+    jQuery('.simplemodal-overlay').animate({opacity: 0,}, 500, function(){
+      jQuery.modal.close();
+    });
   },
   
   //builds required buttons from configuration
@@ -529,7 +547,7 @@ upsell = {
         upsell._do_purchase_redirect();
         break;
       default:
-        alert("No Valid Purchasing method");
+        upsell.init("error");
         break;
     }
   },
