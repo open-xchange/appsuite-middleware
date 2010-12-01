@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -692,6 +692,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Dec 01 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17264: Reminder for shared calender folders.
 * Tue Nov 30 2010 - thorben.betten@open-xchange.com
  - Bugfix #17641: Proper commit of used connection
 * Tue Nov 30 2010 - choeger@open-xchange.com

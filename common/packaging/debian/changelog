@@ -1,3 +1,9 @@
+open-xchange-common (6.18.2.0-8) unstable; urgency=low
+
+  * first build for 6.18.2-rev8
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  1 Dec 2010 17:53:01 +0100
+
 open-xchange-common (6.18.2.0-7) unstable; urgency=low
 
   * first build for 6.18.2-rev7

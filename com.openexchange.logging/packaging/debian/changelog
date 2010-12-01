@@ -1,3 +1,9 @@
+open-xchange-logging (6.18.2.0-2) unstable; urgency=low
+
+  * first build for 6.18.2-rev8
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  1 Dec 2010 17:54:55 +0100
+
 open-xchange-logging (6.18.2.0-1) unstable; urgency=low
 
   * first build for 6.18.2-rev7
