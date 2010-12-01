@@ -41,7 +41,7 @@ BuildRequires:  java-devel-icedtea saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -147,6 +147,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Dec 01 2010 - choeger@open-xchange.com
+ - Bugfix #16733: Production JVM settings differ from proposed server settings
 * Fri Nov 19 2010 - thorben.betten@open-xchange.com
  - Bugfix #17292: Enabling hard pool limit by default when registering a database
 * Thu Nov 11 2010 - choeger@open-xchange.com
