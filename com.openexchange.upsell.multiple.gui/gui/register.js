@@ -277,10 +277,10 @@ upsell = {
       jQuery('#upsell_window .detail_show').live('click', function() {
         if(jQuery("#upsell_window .detail").is(':visible')){
           jQuery('#upsell_window .detail').hide();
-          jQuery(this).html(_('[more]'));
+          jQuery(this).html(_('more'));
         } else {
           jQuery('#upsell_window .detail').show();
-          jQuery(this).html(_('[close]'));      
+          jQuery(this).html(_('close'));      
         };
       });
       return false;
@@ -460,7 +460,7 @@ upsell = {
 	  	list += '</ul>';
 
 	  	if (list_count > upsell.config.show_features_initial) {
-  	  	list += '<a style="display: block" href="#" class="detail_show">[more]</a>';
+  	  	list += '<a style="display: block" href="#" class="detail_show">' + _("more") + '</a>';
   	  }
 	  };
 		
