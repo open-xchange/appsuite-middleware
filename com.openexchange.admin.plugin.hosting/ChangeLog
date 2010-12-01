@@ -1,3 +1,7 @@
+* 2010-12-01 - choeger@open-xchange.com
+
+ - Bugfix #16733: Production JVM settings differ from proposed server settings
+
 * 2010-11-19 - thorben.betten@open-xchange.com
 
  - Bugfix #17292: Enabling hard pool limit by default when registering a database
