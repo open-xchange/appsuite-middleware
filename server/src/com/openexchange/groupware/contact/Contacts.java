@@ -56,6 +56,7 @@ import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import gnu.trove.TIntObjectHashMap;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -69,9 +70,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
@@ -1106,6 +1105,8 @@ public final class Contacts {
         return fillContactObject(contactSQL, userId, user, memberInGroups, ctx, uc, readCon);
     }
 
+    private static final int LIMIT = 1000;
+
     public static Contact[] getUsersById(int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
         final ContactSql contactSQL = new ContactMySql(ctx, user);
         StringBuilder sb = new StringBuilder();
@@ -1119,11 +1120,16 @@ public final class Contacts {
         sb.deleteCharAt(0);
         sb = contactSQL.iFgetContactById(sb.toString());
         contactSQL.setSelect(sb.toString());
-        contactSQL.setInternalUsers(userIds);
-        Map<Integer, Contact> contacts = fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon);
-        Contact[] retval = new Contact[userIds.length];
+        if (userIds.length <= LIMIT) {
+            /*
+             * Load only relevant contacts; otherwise filtering is implicitly done by fetching only relevant user IDs from returned map.
+             */
+            contactSQL.setInternalUsers(userIds);
+        }
+        final TIntObjectHashMap<Contact> contacts = fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon);
+        final Contact[] retval = new Contact[userIds.length];
         for (int i = 0; i < userIds.length; i++) {
-            Contact contact = contacts.get(I(userIds[i]));
+            final Contact contact = contacts.get(userIds[i]);
             if (null == contact) {
                 throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(userIds[i]), I(ctx.getContextId())));
             }
@@ -1194,8 +1200,8 @@ public final class Contacts {
         return co;
     }
 
-    private static Map<Integer, Contact> fillContactObject(ContactSql contactSQL, int user, int[] group, Context ctx, UserConfiguration uc, Connection con) throws ContactException {
-        Map<Integer, Contact> contacts = new HashMap<Integer, Contact>();
+    private static TIntObjectHashMap<Contact> fillContactObject(ContactSql contactSQL, int user, int[] group, Context ctx, UserConfiguration uc, Connection con) throws ContactException {
+        final TIntObjectHashMap<Contact> contacts = new TIntObjectHashMap<Contact>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -1210,7 +1216,7 @@ public final class Contacts {
                         cnt++;
                     }
                 }
-                contacts.put(I(contact.getInternalUserId()), contact);
+                contacts.put(contact.getInternalUserId(), contact);
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
@@ -2320,6 +2326,9 @@ public final class Contacts {
 
             FolderObject contactFolder = null;
 
+            /*
+             * Get all contacts which were created by specified user. This includes the user's contact as well since the user is always the creator.
+             */
             rs = stmt.executeQuery(cs.iFgetRightsSelectString(uid, so.getContextId()));
 
             int fid = 0;
