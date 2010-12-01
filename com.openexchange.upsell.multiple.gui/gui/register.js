@@ -43,6 +43,7 @@ upsell = {
     //path to files
     invite: false,
     show_features_initial: 2,
+    history: new Array(),
     files: {
       jss: {
         fancy: {
@@ -267,9 +268,13 @@ upsell = {
         title: _("Error."),
         intro: _("No Valid Purchasing method"),
         buttons: {
-          confirm: {
+          cancel: {
             content: _("cancel"),
             action: "upsell._close_dialouge()",
+          },
+          back: {
+            content: _("back"),
+            action: "upsell._back(1)",
           },
         },
       },
@@ -342,6 +347,7 @@ upsell = {
   },
   
   _get_feature: function(feature){
+    upsell.config.history.push(feature);
     jQuery.each(upsell.config.features, function(i, val){
       if(jQuery.inArray(feature, val.name) >= 0){
         upsell.config.feature = i;
@@ -397,6 +403,12 @@ upsell = {
     jQuery('.simplemodal-overlay').animate({opacity: 0,}, 500, function(){
       jQuery.modal.close();
     });
+  },
+  
+  //back history
+  _back: function(steps){
+    var history = upsell.config.history.reverse();
+    upsell.init(history[steps]);
   },
   
   //builds required buttons from configuration
