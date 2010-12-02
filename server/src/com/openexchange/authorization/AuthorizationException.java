@@ -51,16 +51,54 @@ package com.openexchange.authorization;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 
 public class AuthorizationException extends AbstractOXException {
 
     private static final long serialVersionUID = 3522013540920856005L;
+
+    private static final String STR_COMPONENT = "AUTHORIZATION";
+
+    /**
+     * The {@link Component} for authorization exception.
+     */
+    public static final Component AUTHORIZATION_COMPONENT = new Component() {
+
+        private static final long serialVersionUID = -7217868089213025324L;
+
+        public String getAbbreviation() {
+            return STR_COMPONENT;
+        }
+    };
+
     private StackTraceElement[] elements;
     
+    /**
+     * Initializes a new {@link AuthorizationException}.
+     * 
+     * @param exc The cause
+     */
     public AuthorizationException(final AbstractOXException exc) {
         super(exc);
     }
 
+    /**
+     * Initializes a new {@link WebDAVFileStorageException}.
+     * 
+     * @param message The message
+     * @param cause The cause
+     */
+    public AuthorizationException(final String message, final AbstractOXException cause) {
+        super(AUTHORIZATION_COMPONENT, message, cause);
+    }
+
+    /**
+     * Initializes a new {@link AuthorizationException}.
+     * 
+     * @param message The error message
+     * @param cause The cause
+     * @param args The message arguments
+     */
     public AuthorizationException(ErrorMessage message, Throwable cause, Object... args) {
         super(message, cause);
         setMessageArgs(args);
