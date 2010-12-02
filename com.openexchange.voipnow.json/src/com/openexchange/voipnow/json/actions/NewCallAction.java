@@ -198,7 +198,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
         int voipnowResponseCode = 0;
         if (matcher.find()) {
             voipnowResponseCode = ActionUtility.getUnsignedInteger(matcher.group(1));
-            if (voipnowResponseCode != 0 && (voipnowResponseCode < 200 || voipnowResponseCode >= 400)) {
+            if (voipnowResponseCode != 0 && (voipnowResponseCode < 200 || voipnowResponseCode > 400)) {
                 final Matcher codeMatcher = PATTERN_CODE.matcher(responseBody);
                 if (codeMatcher.find()) {
                     final Matcher m2 = PATTERN_TEXT.matcher(responseBody);
