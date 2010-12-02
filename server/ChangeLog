@@ -1,3 +1,7 @@
+* 2010-12-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #17712: Adapted to HTTP status codes
+
 * 2010-12-01 - martin.herfurth@open-xchange.com
 
  - Bugfix #17264: Reminder for shared calender folders.
