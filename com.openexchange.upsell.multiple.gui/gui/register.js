@@ -48,14 +48,14 @@ upsell = {
       jss: {
         fancy: {
           script: "fancybox.js",
-          action: "jQuery('a.light_box').fancybox({'titleShow':false});",
+          action: "jQuery('a.light_box').fancybox({'titleShow':false});"
         },
         modal: {
-          script: "modal.js",
-        },
+          script: "modal.js"
+        }
       },
       css: {
-        main: "upsell.css",
+        main: "upsell.css"
       }
     },
     features: {
@@ -71,37 +71,37 @@ upsell = {
           list_item_4:  _("Distinguish between official and private content through &#8220;Personal&#8221; &amp; &#8220;Public&#8221; folders"),
           list_item_5:  _("Refer to documents via URL-link in projekts and meetings"),
           list_item_6:  _("Access your files anywhere anytime"),
-          list_item_7:  _("Data-Security by centralized Server-Back-Up"),
+          list_item_7:  _("Data-Security by centralized Server-Back-Up")
         },
         outro: _("Sign up for 90 Days free trial now !"),
         videos: {
           video_1: {
             thumb: "infostore_video.png",
-            video: "teaser.swf",
-          },
+            video: "teaser.swf"
+          }
         },
         images: {
           image_1: {
             thumb: "infostore_small.png",
-            image: "infostore_big.png",
-          },
+            image: "infostore_big.png"
+          }
         },
         buttons: {
           trial: {
             content: _("Sign-Up for trial"),
-            action: "upsell._get_purchase_method('trial')",
+            action: "upsell._get_purchase_method('trial')"
           },
           buy: {
             content: "Buy",
-            action: "upsell._get_purchase_method('buy')",
-          },
+            action: "upsell._get_purchase_method('buy')"
+          }
         },
         checkboxes: {
           invite: {
             content: _("Invite all my colleagues"),
-            action: "upsell._set_invite(this)",
-          },
-        },
+            action: "upsell._set_invite(this)"
+          }
+        }
       },
       //feature calender
       calender: {
@@ -112,37 +112,37 @@ upsell = {
           list_item_1:  _("Team-Calendar"),
           list_item_2:  _("Tasks Delegation"),
           list_item_3:  _("Share Folders"),
-          list_item_4:  _("Share Calendars"),
+          list_item_4:  _("Share Calendars")
         },
         outro: _("Sign up for 90 Days free trial now !"),
         videos: {
           video_1: {
             thumb: "calendar_video.png",
-            video: "teaser.swf",
-          },
+            video: "teaser.swf"
+          }
         },
         images: {
           image_1: {
             thumb: "calendar_small.png",
-            image: "calendar_big.png",
-          },
+            image: "calendar_big.png"
+          }
         },
         buttons: {
           trial: {
             content: _("Sign-Up for trial"),
-            action: "upsell._get_purchase_method('trial')",
+            action: "upsell._get_purchase_method('trial')"
           },
           buy: {
             content: "Buy",
-            action: "upsell._get_purchase_method('buy')",
-          },
+            action: "upsell._get_purchase_method('buy')"
+          }
         },
         checkboxes: {
           invite:{
             content: _("Invite all my colleagues"),
-            action: "upsell._set_invite(this)",
-          },
-        },
+            action: "upsell._set_invite(this)"
+          }
+        }
       },
       //feature mobility
       mobility: {
@@ -156,37 +156,37 @@ upsell = {
           list_item_3:  _("Organize your meetings."),
           list_item_4:  _("Add new addresses."),
           list_item_5:  _("Supported are: Windows Mobile 6.x, the Apple iPhone and Nokia S60 OS phones"),
-          list_item_6:  _("Blackberry & Android phones are supported through additional Software-Clients."),
+          list_item_6:  _("Blackberry & Android phones are supported through additional Software-Clients.")
         },
         outro: _("Sign up for 90 Days free trial now !"),
         videos: {
           video_1: {
             thumb: "mobility_video.png",
-            video: "teaser.swf",
-          },
+            video: "teaser.swf"
+          }
         },
         images: {
           image_1: {
             thumb: "mobility_small.png",
-            image: "mobility_big.png",
-          },
+            image: "mobility_big.png"
+          }
         },
         buttons: {
           trial: {
             content: _("Sign-Up for trial"),
-            action: "upsell._get_purchase_method('trial')",
+            action: "upsell._get_purchase_method('trial')"
           },
           buy: {
             content: _("Buy"),
-            action: "upsell._get_purchase_method('buy')",
-          },
+            action: "upsell._get_purchase_method('buy')"
+          }
         },
         checkboxes: {
           invite:{
             content: _("Invite all my colleagues"),
-            action: "upsell._set_invite(this)",
-          },
-        },
+            action: "upsell._set_invite(this)"
+          }
+        }
       },
       
       //feature outlook
@@ -197,37 +197,37 @@ upsell = {
         list: {
           list_item_1:  _("All your Appointments, Contacts, Mails, etc. get synchronized."),
           list_item_2:  _("Same look & feel locally and access via web-interface if needed."),
-          list_item_3:  _("All your private, public and shared folders are accessable"),
+          list_item_3:  _("All your private, public and shared folders are accessable")
         },
         outro: _("Sign up for 90 Days free trial now !"),
         videos: {
           video_1: {
             thumb: "outlook_video.png",
-            video: "teaser.swf",
-          },
+            video: "teaser.swf"
+          }
         },
         images: {
           image_1: {
             thumb: "outlook_small.png",
-            image: "outlook_big.png",
-          },
+            image: "outlook_big.png"
+          }
         },
         buttons: {
           trial: {
             content: _("Sign-Up for trial"),
-            action: "upsell._get_purchase_method('trial')",
+            action: "upsell._get_purchase_method('trial')"
           },
           buy: {
             content: _("Buy"),
-            action: "upsell._get_purchase_method('buy')",
-          },
+            action: "upsell._get_purchase_method('buy')"
+          }
         },
         checkboxes: {
           invite:{
             content: _("Invite all my colleagues"),
-            action: "upsell._set_invite(this)",
-          },
-        },
+            action: "upsell._set_invite(this)"
+          }
+        }
       },
       
       //order confirmation window
@@ -238,9 +238,9 @@ upsell = {
         buttons: {
           confirm: {
             content: _("Ok"),
-            action: "upsell._do_reload()",
-          },
-        },
+            action: "upsell._do_reload()"
+          }
+        }
       },
       
       //order confirmation window
@@ -251,15 +251,15 @@ upsell = {
         buttons: {
           cancel: {
             content: _("cancel"),
-            action: "upsell._close_dialouge()",
+            action: "upsell._close_dialouge()"
           },
           back: {
             content: _("back"),
-            action: "upsell._back(1)",
-          },
-        },
-      },
-    },
+            action: "upsell._back(1)"
+          }
+        }
+      }
+    }
   },
   
   init: function (feature, win) {
@@ -367,24 +367,24 @@ upsell = {
        
     if(jQuery('#upsell_window').length > 0){
       jQuery('#upsell_window').animate({
-        opacity: 0,
+        opacity: 0
       }, 500, function(){
         jQuery('#upsell_window').html(jQuery(data).html()).animate({
-          opacity: 1,
+          opacity: 1
         }, 500);
       });
     } else {
       jQuery.modal(data);
-      jQuery('#upsell_window').css('opacity','0').animate({opacity: 1,}, 500);
-      jQuery('.simplemodal-overlay').css('opacity','0').animate({opacity: .8,}, 500);
+      jQuery('#upsell_window').css('opacity','0').animate({opacity: 1}, 500);
+      jQuery('.simplemodal-overlay').css('opacity','0').animate({opacity: .8}, 500);
     }
     
   },
   
   //close current window
   _close_dialouge: function(){
-    jQuery('#upsell_window').animate({opacity: 0,}, 500);
-    jQuery('.simplemodal-overlay').animate({opacity: 0,}, 500, function(){
+    jQuery('#upsell_window').animate({opacity: 0}, 500);
+    jQuery('.simplemodal-overlay').animate({opacity: 0}, 500, function(){
       jQuery.modal.close();
     });
   },
@@ -584,7 +584,7 @@ upsell = {
   //reload and activate feature
   _do_reload: function(data){
     location.reload();
-  },
+  }
 };
 
 
