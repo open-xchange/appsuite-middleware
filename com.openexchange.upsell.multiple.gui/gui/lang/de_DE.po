@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NAME\n"
 "POT-Creation-Date: 2010-12-01 17:13+0100\n"
-"PO-Revision-Date: DATE\n"
-"Last-Translator: NAME <EMAIL>\n"
+"PO-Revision-Date: 2010-12-02 14:22+0100\n"
+"Last-Translator: jochen f. schude <jochen.schude@open-xchange.com>\n"
 "Language-Team: NAME <EMAIL>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,10 +32,10 @@ msgid "Refer to documents via URL-link in projekts and meetings"
 msgstr "Verweisen Sie auch Dokumente per URL-Link"
 
 msgid "Access your files anywhere anytime"
-msgstr ""
+msgstr "Greifen Sie von überall auf Ihre Dokumente zu"
 
 msgid "Data-Security by centralized Server-Back-Up"
-msgstr "Greifen Sie von überall auf Ihre Dokumente zu"
+msgstr "Daten-Sicherheit durch ein zentrales Server Back-Up"
 
 msgid "Sign up for 90 Days free trial now !"
 msgstr "Anmelden zur 90 Tage Testversion"
@@ -50,7 +50,7 @@ msgid "Enhance your system with &#8222;Teamwork Capabilities&#8220;"
 msgstr "Erweitern Sie Ihr System mit &#8222;Teamwork Funktionen&#8220;"
 
 msgid "Machen Sie Ihr Team erfolgreicher<br>und kooperieren Sie gemeinsam in Aufgaben mit Dateien und im Team-Kalender!"
-msgstr ""
+msgstr "Make your team more successful<br>and cooperate on mutual tasks and through the team-calendar!"
 
 msgid "Team-Calendar"
 msgstr "Team-Kalender"
@@ -62,13 +62,13 @@ msgid "Share Folders"
 msgstr "In Verzeichnissen gemeinsam arbeiten"
 
 msgid "Share Calendars"
-msgstr "Kalender gemeinsam bearbeiten"
+msgstr "Kalender gemeinsam nutzen"
 
 msgid "Enhance your system with &#8222;Business Mobility&#8220;"
-msgstr "Erweitern Sie Ihr System um den &#8222;Mobilen Zugriff via Handy&#8220;"
+msgstr "Erweitern Sie Ihr System um den &#8222;mobilen Zugriff via Handy&#8220;"
 
 msgid "Mail Push or Mail Professional - ich weiss nicht wo diese strings herkommen"
-msgstr "Mail Push oder Mail Professional - ich weiss nicht wo diese strings herkommen"
+msgstr "Mail Push oder Mail Professional"
 
 msgid "With your &#8220;SmartPhone&#8221; you access all vital data<br>(mail,calendar, contacts, etc.) effortlessly and manageable on the spot."
 msgstr "Mit Ihrem Handy haben jederzeit Zugriff auf alle Ihre Daten, ob die Mail, den Kalender, die Kontakte, etc. und können diese sofort bearbeiten."
@@ -104,7 +104,7 @@ msgid "All your Appointments, Contacts, Mails, etc. get synchronized."
 msgstr "Alle Ihre Termine, Kontakte, Mails, etc. werden synchronisiert."
 
 msgid "Same look & feel locally and access via web-interface if needed."
-msgstr "Das gleiche Look & Feel egal ob Sie lokal oder per Web arbeiten. "
+msgstr "Das gleiche Look & Feel egal ob Sie lokal oder im Web arbeiten. "
 
 msgid "All your private, public and shared folders are accessable"
 msgstr "Alle Ihre privaten, öffentlichen und gemeinsamen Ordner sind zugänglich"
@@ -113,16 +113,16 @@ msgid "Your provider processed your order successfully."
 msgstr "Ihre Bestellung wurde erfolgreiche verarbeitet."
 
 msgid "After you press 'OK', an automatic Re-Login will be initiated, and the new feature is going to be available immediately"
-msgstr ""
+msgstr "Nachdem Sie 'OK' gedrückt haben, kommt es zu einem automatischen Login, womit das neue Feature sofort zur Verfügung steht "
 
 msgid "Ok"
-msgstr ""
+msgstr "Ok"
 
 msgid "Error."
 msgstr "Fehler"
 
 msgid "No Valid Purchasing method"
-msgstr "Keine zugelassene Kauf-Transaktion"
+msgstr "Keine gültige Kauf-Transaktion"
 
 msgid "cancel"
 msgstr "Abbruch"
@@ -135,3 +135,4 @@ msgstr "mehr"
 
 msgid "close"
 msgstr "schliessen"
+
