@@ -102,12 +102,11 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
         } catch (final UndeclaredThrowableException e) {
             throw AuthorizationExceptionCodes.UNKNOWN.create(e);
         }
-        if (user.isMailEnabled()) {
-            if (user.getShadowLastChange() == 0) {
-                throw AuthorizationExceptionCodes.PASSWORD_EXPIRED.create();
-            }
-        } else {
+        if (!user.isMailEnabled()) {
             throw AuthorizationExceptionCodes.USER_DISABLED.create();
+        }
+        if (user.getShadowLastChange() == 0) {
+            throw AuthorizationExceptionCodes.PASSWORD_EXPIRED.create();
         }
     }
 

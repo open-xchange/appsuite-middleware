@@ -54,7 +54,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.server.osgi.AuthorizationCustomizer;
-import com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator;
 
 /**
  * {@link AuthorizationActivator}
@@ -75,5 +74,6 @@ public class AuthorizationActivator implements BundleActivator {
 
     public void stop(BundleContext context) throws Exception {
         tracker.close();
+        tracker = null;
     }
 }
