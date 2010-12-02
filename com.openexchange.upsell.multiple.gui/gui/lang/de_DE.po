@@ -28,9 +28,7 @@ msgstr "Dokumente mittels Publish & Subscribe anderen ohne Mail-Push zugänglich
 msgid "Ensure actuality through automatic versioning"
 msgstr "Aktualität wird durch Versions- und Anderungskontrolle sicher gestellt"
 
-msgid ""
-"Distinguish between official and private content through &#8220;"
-"Personal&#8221; &amp; &#8220;Public&#8221; folders"
+msgid "Distinguish between official and private content through &#8220;Personal&#8221; &amp; &#8220;Public&#8221; folders"
 msgstr "Persönliches und Firmeninhalte unterscheiden Sie durch persönliche & öffentliche Dokumentmappen"
 
 msgid "Refer to documents via URL-link in projekts and meetings"
@@ -54,9 +52,7 @@ msgstr "Freunde benachrichtigen"
 msgid "Enhance your system with &#8222;Teamwork Capabilities&#8220;"
 msgstr "Erweitern Sie Ihr System mit &#8222;Teamwork Funktionen&#8220;"
 
-msgid ""
-"Machen Sie Ihr Team erfolgreicher<br>und kooperieren Sie gemeinsam "
-"in Aufgaben mit Dateien und im Team-Kalender!"
+msgid "Machen Sie Ihr Team erfolgreicher<br>und kooperieren Sie gemeinsam in Aufgaben mit Dateien und im Team-Kalender!"
 msgstr ""
 
 msgid "Team-Calendar"
@@ -77,11 +73,8 @@ msgstr "Erweitern Sie Ihr System um den &#8222;Mobilen Zugriff via Handy&#8220;"
 msgid "Mail Push or Mail Professional - ich weiss nicht wo diese strings herkommen"
 msgstr "Mail Push oder Mail Professional - ich weiss nicht wo diese strings herkommen"
 
-msgid ""
-"With your &#8220;SmartPhone&#8221; you access all vital data<br>(mail, "
-"calendar, contacts, etc.) effortlessly and manageable on the spot."
-msgstr "Mit Ihrem Handy haben jederzeit Zugriff auf alle Ihre Daten,"
-"ob die Mail, den Kalender, die Kontakte, etc. und können diese sofort bearbeiten."
+msgid "With your &#8220;SmartPhone&#8221; you access all vital data<br>(mail,calendar, contacts, etc.) effortlessly and manageable on the spot."
+msgstr "Mit Ihrem Handy haben jederzeit Zugriff auf alle Ihre Daten, ob die Mail, den Kalender, die Kontakte, etc. und können diese sofort bearbeiten."
 
 msgid "Read and answer your mails."
 msgstr "Lesen und beantworten Sie Ihre Mails"
@@ -99,11 +92,8 @@ msgid ""
 "Supported are: Windows Mobile 6.x, the Apple iPhone and Nokia S60 OS phones"
 msgstr "Unterstützt werden: Windows Mobile 6.x, das Apple iPhone und Nokia S60 OS Handys"
 
-msgid ""
-"Blackberry & Android phones are supported through additional Software-"
-"Clients."
-msgstr "Blackberry & Android Handys werden durch zusätzliche Software "
-"angebunden."
+msgid "Blackberry & Android phones are supported through additional Software-Clients."
+msgstr "Blackberry & Android Handys werden durch zusätzliche Software angebunden."
 
 msgid "Buy"
 msgstr "Kaufen"
@@ -111,9 +101,7 @@ msgstr "Kaufen"
 msgid "Enhance your system with &#8222;Outlook Oxtender&#8220;"
 msgstr "Erweitern Sie Ihr System mit dem &#8222;Outlook Oxtender&#8220;"
 
-msgid ""
-"If Outlook&copy; is your preferred choice,<br>use it as your local Groupware "
-"Client."
+msgid "If Outlook&copy; is your preferred choice,<br>use it as your local Groupware Client."
 msgstr "Arbeiten Sie mit <span lang="de"></span>MS Outlook als dem von Ihnen favorisierten Interface."
 
 msgid "All your Appointments, Contacts, Mails, etc. get synchronized."
@@ -128,9 +116,7 @@ msgstr "Alle Ihre privaten, öffentlichen und gemeinsamen Ordner sind zugänglic
 msgid "Your provider processed your order successfully."
 msgstr "Ihre Bestellung wurde erfolgreiche verarbeitet."
 
-msgid ""
-"After you press 'OK', an automatic Re-Login will be initiated, and the new "
-"feature is going to be available immediately"
+msgid "After you press 'OK', an automatic Re-Login will be initiated, and the new feature is going to be available immediately"
 msgstr ""
 
 msgid "Ok"
