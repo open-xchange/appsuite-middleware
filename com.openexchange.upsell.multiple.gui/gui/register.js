@@ -104,7 +104,7 @@ upsell = {
         }
       },
       //feature calender
-      calender: {
+      calendar: {
         name: ["modules/calender", "modules/calendar/freebusy", "modules/calendar/team", "modules/calendar/mini_calender", "modules/calendar/new/add_participants", "modules/calendar/new/remove_participants", "modules/calendar/new/add_attachment", "modules/calendar/new/delete_attachment","modules/tasks/new/add_participants", "modules/tasks/new/remove_participants", "modules/tasks/new/add_attachment", "modules/tasks/new/delete_attachment", "configuration/mail/accounts/new"],
         title: _("Enhance your system with &#8222;Teamwork Capabilities&#8220;"),
         intro: _("Make your team successful and cooperate with each other <br>on tasks, shared files and your team-calendar!"),
