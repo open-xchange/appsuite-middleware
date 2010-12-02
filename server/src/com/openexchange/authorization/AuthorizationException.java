@@ -83,13 +83,25 @@ public class AuthorizationException extends AbstractOXException {
     }
 
     /**
-     * Initializes a new {@link WebDAVFileStorageException}.
+     * Initializes a new {@link AuthorizationException}.
      * 
      * @param message The message
      * @param cause The cause
      */
     public AuthorizationException(final String message, final AbstractOXException cause) {
         super(AUTHORIZATION_COMPONENT, message, cause);
+    }
+
+    /**
+     * Initializes a new {@link AuthorizationException}.
+     * 
+     * @param category The category
+     * @param detailNumber The detail number
+     * @param message The message
+     * @param cause The cause
+     */
+    public AuthorizationException(final Category category, final int detailNumber, final String message, final Throwable cause) {
+        super(AUTHORIZATION_COMPONENT, category, detailNumber, message, cause);
     }
 
     /**
