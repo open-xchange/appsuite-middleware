@@ -254,7 +254,7 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, AuthorizationService.class
+            FileStorageServiceRegistry.class, CryptoService.class
         };
 
     private final List<ServiceRegistration> registrationList;
