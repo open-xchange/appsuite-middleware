@@ -92,7 +92,7 @@ upsell = {
             action: "upsell._get_purchase_method('trial')"
           },
           buy: {
-            content: "Buy",
+            content: _("Buy"),
             action: "upsell._get_purchase_method('buy')"
           }
         },
@@ -133,7 +133,7 @@ upsell = {
             action: "upsell._get_purchase_method('trial')"
           },
           buy: {
-            content: "Buy",
+            content: _("Buy"),
             action: "upsell._get_purchase_method('buy')"
           }
         },
