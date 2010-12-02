@@ -98,7 +98,7 @@ msgid "Enhance your system with &#8222;Outlook Oxtender&#8220;"
 msgstr "Erweitern Sie Ihr System mit dem &#8222;Outlook Oxtender&#8220;"
 
 msgid "If Outlook&copy; is your preferred choice,<br>use it as your local Groupware Client."
-msgstr "Arbeiten Sie mit <span lang="de"></span>MS Outlook als dem von Ihnen favorisierten Interface."
+msgstr "Arbeiten Sie mit MS Outlook als dem von Ihnen favorisierten Interface."
 
 msgid "All your Appointments, Contacts, Mails, etc. get synchronized."
 msgstr "Alle Ihre Termine, Kontakte, Mails, etc. werden synchronisiert."
