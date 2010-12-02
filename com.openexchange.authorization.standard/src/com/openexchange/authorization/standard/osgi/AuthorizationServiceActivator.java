@@ -96,7 +96,7 @@ public class AuthorizationServiceActivator extends DeferredActivator {
              */
             {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("starting bundle: com.openexchange.authorization.BBBBBB");
+                    LOG.info("starting bundle: com.openexchange.authorization.standard");
                 }
                 registration = context.registerService(AuthorizationService.class.getName(), DefaultAuthorizationImpl.getInstance(), null);
             }
