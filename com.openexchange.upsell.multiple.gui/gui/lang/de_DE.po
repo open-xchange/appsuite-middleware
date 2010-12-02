@@ -85,8 +85,7 @@ msgstr "Organisieren Sie Ihre Meetings"
 msgid "Add new addresses."
 msgstr "Fügen Sie neue Adressen hinzu"
 
-msgid ""
-"Supported are: Windows Mobile 6.x, the Apple iPhone and Nokia S60 OS phones"
+msgid "Supported are: Windows Mobile 6.x, the Apple iPhone and Nokia S60 OS phones"
 msgstr "Unterstützt werden: Windows Mobile 6.x, das Apple iPhone und Nokia S60 OS Handys"
 
 msgid "Blackberry & Android phones are supported through additional Software-Clients."
