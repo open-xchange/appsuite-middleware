@@ -10,14 +10,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "" 
-"Enhance your system with &#8222;InfoStore&#8220;"
+msgid "Enhance your system with &#8222;InfoStore&#8220;"
 msgstr "Erweitern Sie Ihr System mit &#8222;InfoStore&#8220;"
 
-msgid "Where ever you are your documents are stored securely and<br> can be "
-"accessed and worked on, anytime!"
-msgstr "Greifen Sie von überall auf Ihre Dokumente zu,<br>"
-"jederzeit, versioniert und sicher!"
+msgid "Where ever you are your documents are stored securely and<br> can be accessed and worked on, anytime!"
+msgstr "Greifen Sie von überall auf Ihre Dokumente zu,<br>jederzeit, versioniert und sicher!"
 
 msgid "Teamwork on important files & data"
 msgstr "Teamwork: Dokumente & Dateien gemeinsam bearbeiten"
