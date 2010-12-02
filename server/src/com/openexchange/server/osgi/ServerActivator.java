@@ -77,6 +77,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.RdbContactInterfaceFactory;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.CustomCharsetProvider;
@@ -253,7 +254,7 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class
+            FileStorageServiceRegistry.class, CryptoService.class, AuthorizationService.class
         };
 
     private final List<ServiceRegistration> registrationList;

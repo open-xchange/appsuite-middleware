@@ -50,7 +50,6 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,7 +57,9 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.service.Authentication;
-import com.openexchange.context.ContextExceptionCodes;
+import com.openexchange.authorization.Authorization;
+import com.openexchange.authorization.AuthorizationException;
+import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -74,6 +75,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceException.Code;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondException;
@@ -121,22 +123,14 @@ public final class LoginPerformer {
             final User user = findUser(ctx, username);
             retval.setUser(user);
             // Checks if something is deactivated.
-            try {
-                if (!ctx.isEnabled()) {
-                    final ContextException e = ContextExceptionCodes.CONTEXT_DISABLED.create();
-                    LOG.debug(e.getMessage(), e);
-                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                }
-            } catch (final UndeclaredThrowableException e) {
-                throw LoginExceptionCodes.UNKNOWN.create(e);
+            AuthorizationService authService = Authorization.getService();
+            if( null == authService ) {
+                // FIXME: what todo??
+                final ServiceException e = new ServiceException(Code.SERVICE_INITIALIZATION_FAILED);
+                LOG.error("unable to find AuthorizationService", e);
+                throw e;
             }
-            if (user.isMailEnabled()) {
-                if (user.getShadowLastChange() == 0) {
-                    throw LoginExceptionCodes.PASSWORD_EXPIRED.create();
-                }
-            } else {
-                throw LoginExceptionCodes.USER_NOT_ACTIVE.create();
-            }
+            authService.authorizeUser(ctx, user);
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
             // Create session
@@ -158,6 +152,9 @@ public final class LoginPerformer {
             logLoginRequest(request, retval);
             throw new LoginException(e);
         } catch (final SessiondException e) {
+            logLoginRequest(request, retval);
+            throw new LoginException(e);
+        } catch (AuthorizationException e) {
             logLoginRequest(request, retval);
             throw new LoginException(e);
         }

@@ -47,46 +47,33 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.authorization.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.authorization.AuthorizationService;
+import com.openexchange.server.osgi.AuthorizationCustomizer;
+import com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link AuthorizationActivator}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class AuthorizationActivator implements BundleActivator {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.filestore.osgi.FilestoreActivator(),
-        new com.openexchange.context.osgi.ContextActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
-        new com.openexchange.groupware.contact.osgi.ContactActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
-        new com.openexchange.groupware.links.osgi.LinkActivator(),
-        new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
-        new com.openexchange.consistency.osgi.ConsistencyActivator(),
-        new com.openexchange.authorization.osgi.AuthorizationActivator()
-    };
+    private ServiceTracker tracker;
 
-    public Activator() {
+    public AuthorizationActivator() {
         super();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public void start(BundleContext context) throws Exception {
+        tracker = new ServiceTracker(context, AuthorizationService.class.getName(), new AuthorizationCustomizer(context));
+        tracker.open();
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        tracker.close();
     }
 }

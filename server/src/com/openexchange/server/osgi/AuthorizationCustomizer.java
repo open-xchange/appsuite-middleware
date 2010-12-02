@@ -49,44 +49,66 @@
 
 package com.openexchange.server.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.authorization.Authorization;
+import com.openexchange.authorization.AuthorizationService;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class AuthorizationCustomizer implements ServiceTrackerCustomizer {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.filestore.osgi.FilestoreActivator(),
-        new com.openexchange.context.osgi.ContextActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
-        new com.openexchange.groupware.contact.osgi.ContactActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
-        new com.openexchange.groupware.links.osgi.LinkActivator(),
-        new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
-        new com.openexchange.consistency.osgi.ConsistencyActivator(),
-        new com.openexchange.authorization.osgi.AuthorizationActivator()
-    };
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(AuthorizationCustomizer.class);
 
-    public Activator() {
+    /**
+     * Reference to the bundle context.
+     */
+    private final BundleContext context;
+
+    /**
+     * Default constructor.
+     * @param context the bundle context.
+     */
+    public AuthorizationCustomizer(final BundleContext context) {
         super();
+        this.context = context;
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    /**
+     * {@inheritDoc}
+     */
+    public Object addingService(final ServiceReference reference) {
+        final AuthorizationService auth = (AuthorizationService) context.getService(reference);
+        if (null == Authorization.getService()) {
+            Authorization.setService(auth);
+            context.ungetService(reference);
+            return auth;
+        }
+        context.ungetService(reference);
+        LOG.error("Several authorization services found. Remove all except one!");
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removedService(final ServiceReference reference, final Object service) {
+        if( Authorization.dropService((AuthorizationService) service) ) {
+            LOG.error("Removed authorization service was not active!");
+        }
+        context.ungetService(reference);
     }
 }
