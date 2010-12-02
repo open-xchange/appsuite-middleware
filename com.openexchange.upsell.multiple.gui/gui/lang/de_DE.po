@@ -10,36 +10,37 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Enhance your system with &#8222;InfoStore&#8220;"
-msgstr "Erweitern Sie Ihr System um &#8222;InfoStore&#8220;"
+msgid "" 
+"Enhance your system with &#8222;InfoStore&#8220;"
+msgstr "Erweitern Sie Ihr System mit &#8222;InfoStore&#8220;"
 
-msgid ""
-"Where ever you are your documents are stored securely and<br> can be "
+msgid "Where ever you are your documents are stored securely and<br> can be "
 "accessed and worked on, anytime!"
-msgstr ""
+msgstr "Greifen Sie von überall auf Ihre Dokumente zu,<br>"
+"jederzeit, versioniert und sicher!"
 
 msgid "Teamwork on important files & data"
-msgstr ""
+msgstr "Teamwork: Dokumente & Dateien gemeinsam bearbeiten"
 
 msgid "Share or publish docments without sending large email attachments"
-msgstr ""
+msgstr "Dokumente mittels Publish & Subscribe anderen ohne Mail-Push zugänglich machen"
 
 msgid "Ensure actuality through automatic versioning"
-msgstr ""
+msgstr "Aktualität wird durch Versions- und Anderungskontrolle sicher gestellt"
 
 msgid ""
 "Distinguish between official and private content through &#8220;"
 "Personal&#8221; &amp; &#8220;Public&#8221; folders"
-msgstr ""
+msgstr "Persönliches und Firmeninhalte unterscheiden Sie durch persönliche & öffentliche Dokumentmappen"
 
 msgid "Refer to documents via URL-link in projekts and meetings"
-msgstr ""
+msgstr "Verweisen Sie auch Dokumente per URL-Link"
 
 msgid "Access your files anywhere anytime"
 msgstr ""
 
 msgid "Data-Security by centralized Server-Back-Up"
-msgstr ""
+msgstr "Greifen Sie von überall auf Ihre Dokumente zu"
 
 msgid "Sign up for 90 Days free trial now !"
 msgstr "Anmelden zur 90 Tage Testversion"
@@ -51,76 +52,78 @@ msgid "Invite all my colleagues"
 msgstr "Freunde benachrichtigen"
 
 msgid "Enhance your system with &#8222;Teamwork Capabilities&#8220;"
-msgstr "Erweitern Sie Ihr System um &#8222;Teamwork Funktionen&#8220;"
+msgstr "Erweitern Sie Ihr System mit &#8222;Teamwork Funktionen&#8220;"
 
 msgid ""
-"Make your team successful and cooperate with each other <br>on tasks, shared "
-"files and your team-calendar!"
+"Machen Sie Ihr Team erfolgreicher<br>und kooperieren Sie gemeinsam "
+"in Aufgaben mit Dateien und im Team-Kalender!"
 msgstr ""
 
 msgid "Team-Calendar"
-msgstr ""
+msgstr "Team-Kalender"
 
 msgid "Tasks Delegation"
-msgstr ""
+msgstr "Delegation von Aufgaben"
 
 msgid "Share Folders"
-msgstr ""
+msgstr "In Verzeichnissen gemeinsam arbeiten"
 
 msgid "Share Calendars"
-msgstr ""
+msgstr "Kalender gemeinsam bearbeiten"
 
 msgid "Enhance your system with &#8222;Business Mobility&#8220;"
-msgstr "Erweitern Sie Ihr System um &#8222;Mobilen Zugriff via Handy&#8220;"
+msgstr "Erweitern Sie Ihr System um den &#8222;Mobilen Zugriff via Handy&#8220;"
 
-msgid "Mail Push or Mail Professional"
-msgstr "Mail Push oder Mail Professional"
+msgid "Mail Push or Mail Professional - ich weiss nicht wo diese strings herkommen"
+msgstr "Mail Push oder Mail Professional - ich weiss nicht wo diese strings herkommen"
 
 msgid ""
 "With your &#8220;SmartPhone&#8221; you access all vital data<br>(mail, "
 "calendar, contacts, etc.) effortlessly and manageable on the spot."
-msgstr ""
+msgstr "Mit Ihrem Handy haben jederzeit Zugriff auf alle Ihre Daten,"
+"ob die Mail, den Kalender, die Kontakte, etc. und können diese sofort bearbeiten."
 
 msgid "Read and answer your mails."
-msgstr ""
+msgstr "Lesen und beantworten Sie Ihre Mails"
 
 msgid "Accept appointment proposals."
-msgstr ""
+msgstr "Nehmen Sie Termineinladungen an"
 
 msgid "Organize your meetings."
-msgstr ""
+msgstr "Organisieren Sie Ihre Meetings"
 
 msgid "Add new addresses."
-msgstr ""
+msgstr "Fügen Sie neue Adressen hinzu"
 
 msgid ""
 "Supported are: Windows Mobile 6.x, the Apple iPhone and Nokia S60 OS phones"
-msgstr ""
+msgstr "Unterstützt werden: Windows Mobile 6.x, das Apple iPhone und Nokia S60 OS Handys"
 
 msgid ""
 "Blackberry & Android phones are supported through additional Software-"
 "Clients."
-msgstr ""
+msgstr "Blackberry & Android Handys werden durch zusätzliche Software "
+"angebunden."
 
 msgid "Buy"
-msgstr ""
+msgstr "Kaufen"
 
 msgid "Enhance your system with &#8222;Outlook Oxtender&#8220;"
-msgstr "Erweitern Sie Ihr System um &#8222;Outlook Oxtender&#8220;"
+msgstr "Erweitern Sie Ihr System mit dem &#8222;Outlook Oxtender&#8220;"
 
 msgid ""
 "If Outlook&copy; is your preferred choice,<br>use it as your local Groupware "
 "Client."
-msgstr ""
+msgstr "Arbeiten Sie mit <span lang="de"></span>MS Outlook als dem von Ihnen favorisierten Interface."
 
 msgid "All your Appointments, Contacts, Mails, etc. get synchronized."
-msgstr ""
+msgstr "Alle Ihre Termine, Kontakte, Mails, etc. werden synchronisiert."
 
 msgid "Same look & feel locally and access via web-interface if needed."
-msgstr ""
+msgstr "Das gleiche Look & Feel egal ob Sie lokal oder per Web arbeiten. "
 
 msgid "All your private, public and shared folders are accessable"
-msgstr ""
+msgstr "Alle Ihre privaten, öffentlichen und gemeinsamen Ordner sind zugänglich"
 
 msgid "Your provider processed your order successfully."
 msgstr "Ihre Bestellung wurde erfolgreiche verarbeitet."
@@ -137,16 +140,16 @@ msgid "Error."
 msgstr "Fehler"
 
 msgid "No Valid Purchasing method"
-msgstr ""
+msgstr "Keine zugelassene Kauf-Transaktion"
 
 msgid "cancel"
-msgstr ""
+msgstr "Abbruch"
 
 msgid "back"
-msgstr ""
+msgstr "zurück"
 
 msgid "more"
-msgstr ""
+msgstr "mehr"
 
 msgid "close"
-msgstr ""
+msgstr "schliessen"
