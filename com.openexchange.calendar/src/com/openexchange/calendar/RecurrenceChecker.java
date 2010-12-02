@@ -194,7 +194,7 @@ public class RecurrenceChecker {
      * @return
      */
     public static boolean containsRecurrenceInformation(CalendarObject cdao, int... exceptions) {
-        Set<Integer> reucrrenceFields = new HashSet<Integer>() {
+        Set<Integer> recurrenceFields = new HashSet<Integer>() {
 
             {
                 add(CalendarObject.INTERVAL);
@@ -209,7 +209,7 @@ public class RecurrenceChecker {
         boolean skipType = false;
         
         for (int exception : exceptions) {
-            reucrrenceFields.remove(exception);
+            recurrenceFields.remove(exception);
             if (exception == CalendarObject.RECURRENCE_TYPE)
                 skipType = true;
         }
@@ -217,7 +217,7 @@ public class RecurrenceChecker {
         if (!skipType && cdao.contains(CalendarObject.RECURRENCE_TYPE) && (Integer)cdao.get(CalendarObject.RECURRENCE_TYPE) != CalendarObject.NO_RECURRENCE)
             return true;
         
-        for (int recurrenceField : reucrrenceFields) {
+        for (int recurrenceField : recurrenceFields) {
             if (cdao.contains(recurrenceField))
                 return true;
         }
