@@ -1328,6 +1328,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
             if (cdao.getRecurrenceType() > 0) {
                 calculateEndDateForNewType(cdao, edao);
+            } else if (cdao.getRecurrenceType() == 0) {
+                calculateEndDateForNoType(cdao, edao);
             }
             
             recColl.changeRecurrenceString(cdao);
@@ -1359,6 +1361,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             return recColl.RECURRING_EXCEPTION_DELETE;
         }
         return recColl.RECURRING_NO_ACTION;
+    }
+
+    private void calculateEndDateForNoType(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
+        RecurringResultInterface recurringResult = recColl.calculateFirstRecurring(edao).getRecurringResult(0);
+        cdao.setEndDate(new Date(recurringResult.getEnd()));
     }
 
     private void calculateEndDateForNewType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
