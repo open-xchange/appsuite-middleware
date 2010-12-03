@@ -10,8 +10,11 @@
     <property name="guiprefix" value="/var/www/ox6" />
 
     <!-- Constants -->
-    <property name="tmp.dir" value="tmp"/>
-    
+	<property name="tmp.dir" value="tmp"/>
+	    
+	<property name="symlink_target_lang" value="${symlink_target_lang}"/>
+	    
+	
    	<property file="META-INF/MANIFEST.MF" />
 	<property file="build.properties" />
     
@@ -47,6 +50,40 @@
 			  		<exclude name="build.xml"/>
 			</fileset>
 		</copy>
+		
+		 <!-- Install symlinks -->
+             <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_calendar/en_US" resource="${symlink_target_lang}" />
+             <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_calendar/es_ES" resource="${symlink_target_lang}" />
+             <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_calendar/fr_FR" resource="${symlink_target_lang}" />
+             <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_calendar/jp_JP" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_calendar/nl_NL" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_calendar/pl_PL" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_calendar/sv_SV" resource="${symlink_target_lang}" />
+
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_infostore/en_US" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_infostore/es_ES" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_infostore/fr_FR" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_infostore/jp_JP" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_infostore/nl_NL" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_infostore/pl_PL" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_infostore/sv_SV" resource="${symlink_target_lang}" />
+
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_mobility/en_US" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_mobility/es_ES" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_mobility/fr_FR" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_mobility/jp_JP" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_mobility/nl_NL" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_mobility/pl_PL" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_mobility/sv_SV" resource="${symlink_target_lang}" />
+
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_outlook/en_US" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_outlook/es_ES" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_outlook/fr_FR" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_outlook/jp_JP" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_outlook/nl_NL" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_outlook/pl_PL" resource="${symlink_target_lang}" />
+		     <symlink link="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}/templates/_outlook/sv_SV" resource="${symlink_target_lang}" />
+
 	</target>
 
     <target name="install" depends="installConfig,installGui"/>
