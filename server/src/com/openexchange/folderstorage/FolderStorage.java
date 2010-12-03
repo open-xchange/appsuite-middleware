@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage;
 
 import java.util.Date;
+import java.util.List;
 import com.openexchange.groupware.ldap.User;
 
 /**
@@ -201,6 +202,17 @@ public interface FolderStorage {
     Folder getFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
 
     /**
+     * Gets the folders denoted by specified folder IDs.
+     * 
+     * @param treeId The tree identifier
+     * @param folderIds The folder identifiers
+     * @param storageParameters The storage parameters
+     * @return The folder
+     * @throws FolderException If the folder cannot be returned
+     */
+    List<Folder> getFolders(String treeId, List<String> folderIds, StorageParameters storageParameters) throws FolderException;
+
+    /**
      * Gets the folder denoted by specified folder ID.
      * 
      * @param treeId The tree identifier
@@ -211,6 +223,18 @@ public interface FolderStorage {
      * @throws FolderException If the folder cannot be returned
      */
     Folder getFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws FolderException;
+
+    /**
+     * Gets the folders denoted by specified folder IDs.
+     * 
+     * @param treeId The tree identifier
+     * @param folderIds The folder identifiers
+     * @param storageType The storage type from which to get the folder
+     * @param storageParameters The storage parameters
+     * @return The folder
+     * @throws FolderException If the folder cannot be returned
+     */
+    List<Folder> getFolders(String treeId, List<String> folderIds, StorageType storageType, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Gets this storage's default folder identifier for specified user for given content type.

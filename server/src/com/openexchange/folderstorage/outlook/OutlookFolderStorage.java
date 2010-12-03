@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.outlook;
 
+import gnu.trove.TObjectIntHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -184,7 +185,7 @@ public final class OutlookFolderStorage implements FolderStorage {
      * The name of Outlook private folder.
      */
     private static final String OUTLOOK_PRIVATE_NAME = "IPM-Root";
-    
+
     private static final class Key {
 
         private final int tree;
@@ -578,7 +579,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                 /*
                  * Special treatment for mail type
                  */
-                retval = (null != publicMailFolderPath && parentId.startsWith(publicMailFolderPath, 0)) ? PublicType.getInstance() : originalType;
+                retval =
+                    (null != publicMailFolderPath && parentId.startsWith(publicMailFolderPath, 0)) ? PublicType.getInstance() : originalType;
             } else {
                 retval = originalType;
             }
@@ -704,6 +706,95 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws FolderException {
+        return getFolders(treeId, folderIds, StorageType.WORKING, storageParameters);
+    }
+
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        final Folder[] ret = new Folder[folderIds.size()];
+        final TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(folderIds.size());
+        for (int i = 0; i < ret.length; i++) {
+            final String folderId = folderIds.get(i);
+            if (PREPARED_FULLNAME_DEFAULT.equals(folderId)) {
+                throw FolderExceptionErrorMessage.NOT_FOUND.create(folderId, treeId);
+            }
+            if (FolderStorage.ROOT_ID.equals(folderId)) {
+                ret[i] = getFolder(treeId, folderId, storageType, storageParameters);
+            } else if (FolderStorage.PRIVATE_ID.equals(folderId)) {
+                ret[i] = getFolder(treeId, folderId, storageType, storageParameters);
+            } else {
+                map.put(folderId, i);
+            }
+        }
+        if (!map.isEmpty()) {
+            /*
+             * Other folders than root or private
+             */
+            final User user = storageParameters.getUser();
+            final int tree = Tools.getUnsignedInteger(treeId);
+            final int contextId = storageParameters.getContextId();
+            
+            final List<Folder> realFolders;
+            {
+                /*
+                 * Get real folder storage
+                 */
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderIds.get(0));
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderIds.get(0));
+                }
+                final boolean started = folderStorage.startTransaction(storageParameters, false);
+                try {
+                    /*
+                     * Get folders
+                     */
+                    realFolders = folderStorage.getFolders(realTreeId, Arrays.asList(map.keys(new String[map.size()])), storageParameters);
+                    if (started) {
+                        folderStorage.commitTransaction(storageParameters);
+                    }
+                } catch (final FolderException e) {
+                    if (started) {
+                        folderStorage.rollback(storageParameters);
+                    }
+                    throw e;
+                } catch (final Exception e) {
+                    if (started) {
+                        folderStorage.rollback(storageParameters);
+                    }
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+            for (final Folder realFolder : realFolders) {
+                final OutlookFolder outlookFolder = new OutlookFolder(realFolder);
+                outlookFolder.setTreeID(treeId);
+                setSubfolders(treeId, realFolder.getID(), storageParameters, user, tree, contextId, outlookFolder, realFolder);
+                /*
+                 * Load folder data from database
+                 */
+                final boolean presentInTable;
+                {
+                    final Connection con = checkReadConnection(storageParameters);
+                    if (null == con) {
+                        presentInTable = Select.fillFolder(contextId, tree, user.getId(), user.getLocale(), outlookFolder, storageType);
+                    } else {
+                        presentInTable = Select.fillFolder(contextId, tree, user.getId(), user.getLocale(), outlookFolder, storageType, con);
+                    }
+                }
+                //
+                if (!presentInTable) {
+                    doModifications(outlookFolder);
+                }
+
+                final int index = map.get(realFolder.getID());
+                ret[index] = outlookFolder;
+            }
+        }
+        /*
+         * Return
+         */
+        return Arrays.asList(ret);
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
@@ -848,81 +939,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             outlookFolder = new OutlookFolder(realFolder);
             outlookFolder.setTreeID(treeId);
-            /*
-             * Set subfolders
-             */
-            if (PREPARED_FULLNAME_INBOX.equals(folderId)) {
-                /*
-                 * Special treatment for INBOX
-                 */
-                final SortableId[] inboxSubfolders =
-                    getINBOXSubfolders(treeId, storageParameters, user, user.getLocale(), contextId, tree);
-                final String[] subs = new String[inboxSubfolders.length];
-                for (int i = 0; i < subs.length; i++) {
-                    subs[i] = inboxSubfolders[i].getId();
-                }
-                outlookFolder.setSubfolderIDs(subs);
-            } else {
-                final String[] realSubfolderIDs = realFolder.getSubfolderIDs();
-                if (null == realSubfolderIDs) {
-                    /*
-                     * Subfolders available; set to null to indicate this condition since AbstractUserizedFolderPerformer#getUserizedFolder()
-                     * interprets null as if subfolders are present.
-                     */
-                    outlookFolder.setSubfolderIDs(null);
-                } else {
-                    if (0 == realSubfolderIDs.length) {
-                        /*
-                         * Folder indicates to hold no subfolders; verify against virtual tree
-                         */
-                        final boolean contains;
-                        {
-                            final Connection con = checkReadConnection(storageParameters);
-                            if (null == con) {
-                                contains = Select.containsParent(contextId, tree, user.getId(), folderId, StorageType.WORKING);
-                            } else {
-                                contains = Select.containsParent(contextId, tree, user.getId(), folderId, StorageType.WORKING, con);
-                            }
-                        }
-                        if (contains) {
-                            outlookFolder.setSubfolderIDs(null);
-                            outlookFolder.setSubscribedSubfolders(true);
-                        } else {
-                            outlookFolder.setSubfolderIDs(realSubfolderIDs); // Zero-length array => No subfolders
-                        }
-                    } else {
-                        if (realFolder.isDefault() || FolderStorage.PUBLIC_ID.equals(realFolder.getID())) {
-                            /*
-                             * Remove the ones kept in virtual table
-                             */
-                            final boolean[] contained;
-                            {
-                                final Connection con = checkReadConnection(storageParameters);
-                                if (null == con) {
-                                    contained =
-                                        Select.containsFolders(contextId, tree, storageParameters.getUserId(), realSubfolderIDs, StorageType.WORKING);
-                                } else {
-                                    contained =
-                                        Select.containsFolders(contextId, tree, storageParameters.getUserId(), realSubfolderIDs, StorageType.WORKING, con);
-                                }
-                            }
-                            boolean found = false;
-                            for (int i = 0; !found && i < realSubfolderIDs.length; i++) {
-                                if (!contained[i]) {
-                                    found = true;
-                                }
-                            }
-                            if (found) {
-                                outlookFolder.setSubfolderIDs(null);
-                                outlookFolder.setSubscribedSubfolders(true);
-                            } else {
-                                outlookFolder.setSubfolderIDs(new String[0]);
-                                outlookFolder.setSubscribedSubfolders(false);
-                            }
-                        }
-                    }
-                }
-            }
+            setSubfolders(treeId, folderId, storageParameters, user, tree, contextId, outlookFolder, realFolder);
         }
         /*
          * Load folder data from database
@@ -941,6 +958,94 @@ public final class OutlookFolderStorage implements FolderStorage {
             doModifications(outlookFolder);
         }
         return outlookFolder;
+    }
+
+    private void setSubfolders(final String treeId, final String folderId, final StorageParameters storageParameters, final User user, final int tree, final int contextId, final OutlookFolder outlookFolder, final Folder realFolder) throws FolderException {
+        /*
+         * Set subfolders
+         */
+        if (PREPARED_FULLNAME_INBOX.equals(folderId)) {
+            /*
+             * Special treatment for INBOX
+             */
+            final SortableId[] inboxSubfolders = getINBOXSubfolders(treeId, storageParameters, user, user.getLocale(), contextId, tree);
+            final String[] subs = new String[inboxSubfolders.length];
+            for (int i = 0; i < subs.length; i++) {
+                subs[i] = inboxSubfolders[i].getId();
+            }
+            outlookFolder.setSubfolderIDs(subs);
+        } else {
+            final String[] realSubfolderIDs = realFolder.getSubfolderIDs();
+            if (null == realSubfolderIDs) {
+                /*
+                 * Subfolders available; set to null to indicate this condition since AbstractUserizedFolderPerformer#getUserizedFolder()
+                 * interprets null as if subfolders are present.
+                 */
+                outlookFolder.setSubfolderIDs(null);
+            } else {
+                if (0 == realSubfolderIDs.length) {
+                    /*
+                     * Folder indicates to hold no subfolders; verify against virtual tree
+                     */
+                    final boolean contains;
+                    {
+                        final Connection con = checkReadConnection(storageParameters);
+                        if (null == con) {
+                            contains = Select.containsParent(contextId, tree, user.getId(), folderId, StorageType.WORKING);
+                        } else {
+                            contains = Select.containsParent(contextId, tree, user.getId(), folderId, StorageType.WORKING, con);
+                        }
+                    }
+                    if (contains) {
+                        outlookFolder.setSubfolderIDs(null);
+                        outlookFolder.setSubscribedSubfolders(true);
+                    } else {
+                        outlookFolder.setSubfolderIDs(realSubfolderIDs); // Zero-length array => No subfolders
+                    }
+                } else {
+                    if (realFolder.isDefault() || FolderStorage.PUBLIC_ID.equals(realFolder.getID())) {
+                        /*
+                         * Remove the ones kept in virtual table
+                         */
+                        final boolean[] contained;
+                        {
+                            final Connection con = checkReadConnection(storageParameters);
+                            if (null == con) {
+                                contained =
+                                    Select.containsFolders(
+                                        contextId,
+                                        tree,
+                                        storageParameters.getUserId(),
+                                        realSubfolderIDs,
+                                        StorageType.WORKING);
+                            } else {
+                                contained =
+                                    Select.containsFolders(
+                                        contextId,
+                                        tree,
+                                        storageParameters.getUserId(),
+                                        realSubfolderIDs,
+                                        StorageType.WORKING,
+                                        con);
+                            }
+                        }
+                        boolean found = false;
+                        for (int i = 0; !found && i < realSubfolderIDs.length; i++) {
+                            if (!contained[i]) {
+                                found = true;
+                            }
+                        }
+                        if (found) {
+                            outlookFolder.setSubfolderIDs(null);
+                            outlookFolder.setSubscribedSubfolders(true);
+                        } else {
+                            outlookFolder.setSubfolderIDs(new String[0]);
+                            outlookFolder.setSubscribedSubfolders(false);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public FolderType getFolderType() {
@@ -1210,12 +1315,33 @@ public final class OutlookFolderStorage implements FolderStorage {
                         {
                             defIds = new HashSet<String>(6);
                             final MailType mailType = MailType.getInstance();
-                            defIds.add(folderStorage.getDefaultFolderID(user, treeId, TrashContentType.getInstance(), mailType, storageParameters));
-                            defIds.add(folderStorage.getDefaultFolderID(user, treeId, DraftsContentType.getInstance(), mailType, storageParameters));
-                            defIds.add(folderStorage.getDefaultFolderID(user, treeId, SentContentType.getInstance(), mailType, storageParameters));
-                            defIds.add(folderStorage.getDefaultFolderID(user, treeId, SpamContentType.getInstance(), mailType, storageParameters));
+                            defIds.add(folderStorage.getDefaultFolderID(
+                                user,
+                                treeId,
+                                TrashContentType.getInstance(),
+                                mailType,
+                                storageParameters));
+                            defIds.add(folderStorage.getDefaultFolderID(
+                                user,
+                                treeId,
+                                DraftsContentType.getInstance(),
+                                mailType,
+                                storageParameters));
+                            defIds.add(folderStorage.getDefaultFolderID(
+                                user,
+                                treeId,
+                                SentContentType.getInstance(),
+                                mailType,
+                                storageParameters));
+                            defIds.add(folderStorage.getDefaultFolderID(
+                                user,
+                                treeId,
+                                SpamContentType.getInstance(),
+                                mailType,
+                                storageParameters));
                         }
-                        final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
+                        final SortableId[] inboxSubfolders =
+                            folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
                         /*
                          * Filter those mail folders which denote a virtual one
                          */
@@ -1224,10 +1350,21 @@ public final class OutlookFolderStorage implements FolderStorage {
                             final Connection con = checkReadConnection(storageParameters);
                             if (null == con) {
                                 contained =
-                                    Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING);
+                                    Select.containsFolders(
+                                        contextId,
+                                        tree,
+                                        storageParameters.getUserId(),
+                                        inboxSubfolders,
+                                        StorageType.WORKING);
                             } else {
                                 contained =
-                                    Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING, con);
+                                    Select.containsFolders(
+                                        contextId,
+                                        tree,
+                                        storageParameters.getUserId(),
+                                        inboxSubfolders,
+                                        StorageType.WORKING,
+                                        con);
                             }
                         }
                         for (int i = 0; i < inboxSubfolders.length; i++) {
@@ -1254,7 +1391,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                             if (null == con) {
                                 ids = Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING);
                             } else {
-                                ids = Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING, con);
+                                ids =
+                                    Select.getSubfolderIds(contextId, tree, user.getId(), PREPARED_FULLNAME_INBOX, StorageType.WORKING, con);
                             }
                         }
                         /*
@@ -1987,7 +2125,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
-        
+
     } // End of MailFolderCallable member class
 
     private static final class MailAccountComparator implements Comparator<MailAccount> {

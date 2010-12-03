@@ -426,6 +426,18 @@ public final class FileStorageFolderStorage implements FolderStorage {
         // Nothing to do
     }
 
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws FolderException {
+        return getFolders(treeId, folderIds, StorageType.WORKING, storageParameters);
+    }
+
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        final List<Folder> ret = new ArrayList<Folder>(folderIds.size());
+        for (final String folderId : folderIds) {
+            ret.add(getFolder(treeId, folderId, storageType, storageParameters));
+        }
+        return ret;
+    }
+
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }

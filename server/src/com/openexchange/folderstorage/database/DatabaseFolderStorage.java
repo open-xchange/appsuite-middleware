@@ -50,7 +50,9 @@
 package com.openexchange.folderstorage.database;
 
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIntHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -111,6 +113,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
@@ -649,6 +652,95 @@ public final class DatabaseFolderStorage implements FolderStorage {
             // TODO: Subscribed?
 
             return retval;
+        } catch (final FolderException e) {
+            throw e;
+        } catch (final AbstractOXException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    public List<Folder> getFolders(final String treeId, final List<String> folderIdentifiers, final StorageParameters storageParameters) throws FolderException {
+        return getFolders(treeId, folderIdentifiers, StorageType.WORKING, storageParameters);
+    }
+
+    public List<Folder> getFolders(final String treeId, final List<String> folderIdentifiers, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getConnection(storageParameters);
+            final User user = storageParameters.getUser();
+            final Context ctx = storageParameters.getContext();
+            final UserConfiguration userConfiguration;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                } else {
+                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                }
+            }
+            
+            if (StorageType.WORKING.equals(storageType)) {
+                final int size = folderIdentifiers.size();
+                final Folder[] ret = new Folder[size]; 
+                final TIntIntHashMap map = new TIntIntHashMap(size);
+                /*
+                 * Check for special folder identifier
+                 */
+                for (int i = 0; i < size; i++) {
+                    final String folderIdentifier = folderIdentifiers.get(i);
+                    if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
+                        ret[i] = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+                        ret[i].setTreeID(treeId);
+                    } else {
+                        /*
+                         * A numeric folder identifier
+                         */
+                        final int folderId = getUnsignedInteger(folderIdentifier);
+                        if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                            ret[i] = SystemRootFolder.getSystemRootFolder();
+                            ret[i].setTreeID(treeId);
+                        } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                            ret[i] = VirtualListFolder.getVirtualListFolder(folderId);
+                            ret[i].setTreeID(treeId);
+                        } else {
+                            map.put(folderId, i);
+                        }
+                    }
+                }
+                /*
+                 * Batch load
+                 */
+                if (!map.isEmpty()) {
+                    /*
+                     * A non-virtual database folder
+                     */
+                    final List<FolderObject> fos = getFolderObjects(map.keys(), ctx, con);
+                    for (final FolderObject folderObject : fos) {
+                        final int index = map.get(folderObject.getObjectID());
+                        ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, con);
+                        ret[index].setTreeID(treeId);
+                    }
+                }
+                /*
+                 * Return
+                 */
+                return Arrays.asList(ret);
+            }
+            /*
+             * Get from backup tables
+             */
+            final TIntArrayList list = new TIntArrayList(folderIdentifiers.size());
+            for (final String folderIdentifier : folderIdentifiers) {
+                list.add(getUnsignedInteger(folderIdentifier));
+            }
+            final List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(list.toNativeArray(), ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            final List<Folder> ret = new ArrayList<Folder>(folders.size());
+            for (final FolderObject fo : folders) {
+                final DatabaseFolder df = new DatabaseFolder(fo);
+                df.setTreeID(treeId);
+                ret.add(df);
+            }
+
+            return ret;
         } catch (final FolderException e) {
             throw e;
         } catch (final AbstractOXException e) {
@@ -1256,6 +1348,32 @@ public final class DatabaseFolderStorage implements FolderStorage {
             cacheManager.putFolderObject(fo, ctx, false, null);
         }
         return fo;
+    }
+
+    private static List<FolderObject> getFolderObjects(final int[] folderIds, final Context ctx, final Connection con) throws OXException {
+        final FolderObject[] ret = new FolderObject[folderIds.length];
+        final TIntIntHashMap toLoad = new TIntIntHashMap(folderIds.length);
+        if (!FolderCacheManager.isEnabled()) {
+            return OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con);
+        }
+        final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+        for (int i = 0; i < folderIds.length; i++) {
+            final int folderId = folderIds[i];
+            final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
+            if (null == fo) {
+                toLoad.put(folderId, i);
+            } else {
+                ret[i] = fo;
+            }
+        }
+        if (!toLoad.isEmpty()) {
+            final List<FolderObject> list = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.keys(), ctx, con);
+            for (final FolderObject folderObject : list) {
+                ret[toLoad.get(folderObject.getObjectID())] = folderObject;
+                cacheManager.putFolderObject(folderObject, ctx, false, null);
+            }
+        }
+        return Arrays.asList(ret);
     }
 
     private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters) throws FolderException {
