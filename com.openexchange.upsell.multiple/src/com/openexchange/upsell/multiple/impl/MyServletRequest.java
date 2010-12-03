@@ -107,6 +107,7 @@ public final class MyServletRequest  {
 
 	private final Session sessionObj;
 	private User user;	
+	private User admin;	
 	private final Context ctx;
 	private ConfigurationService configservice;
 	
@@ -154,6 +155,7 @@ public final class MyServletRequest  {
 	private static String MAP_ATTR_UPSELL_PLAN = "_UPSELL_PLAN_";
 	private static String MAP_ATTR_LANGUAGE = "_LANG_";
 	private static String MAP_ATTR_PURCHASE_TYPE = "_PURCHASE_TYPE_"; // buy or trial button clicked
+	private static String MAP_ATTR_INVITE = "_INVITE_";
 	
 	public MyServletRequest(final Session sessionObj, final Context ctx) throws OXException, ServiceException {		
 		
@@ -162,7 +164,12 @@ public final class MyServletRequest  {
 		this.sessionObj = sessionObj;
 		this.ctx = ctx;
 		try {
+			// load user for data
 			this.user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
+			
+			// load admin for custom data like redirect url
+			this.admin = UserStorage.getInstance().getUser(this.ctx.getMailadmin(), ctx);
+			
 		} catch (final LdapException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXException(e);
@@ -398,7 +405,7 @@ public final class MyServletRequest  {
 	private Object actionGetStaticRedirectURL(JSONObject jsonObject,String request_src_hostname) throws ServiceException, JSONException {
 		JSONObject jsonResponseObject = new JSONObject();
 		
-		String STATIC_URL_RAW = getFromConfig(PROPERTY_METHOD_STATIC_SHOP_REDIR_URL);
+		String STATIC_URL_RAW = getRedirectURL();
 				
 		try {
 			
@@ -410,6 +417,36 @@ public final class MyServletRequest  {
 		}		
 		
 		return jsonResponseObject;
+	}
+	
+	/**
+	 * If context has special login mapping "UPSELL_DIRECT_URL||<URL>" we use this URL instead of configured one.
+	 * @return
+	 * @throws ServiceException 
+	 */
+	private String getRedirectURL() throws ServiceException{
+		
+		String STATIC_URL_RAW = getFromConfig(PROPERTY_METHOD_STATIC_SHOP_REDIR_URL);
+		int contextId = this.ctx.getContextId();
+		
+		if(LOG.isDebugEnabled()){
+			LOG.debug("Admin user attributes for context "+contextId+" : "+this.admin.getAttributes().toString());
+		}
+		
+		if(this.admin.getAttributes().containsKey("com.openexchange.upsell/url")){
+			Set urlset = this.admin.getAttributes().get("com.openexchange.upsell/url");
+			STATIC_URL_RAW = (String) urlset.iterator().next();
+			STATIC_URL_RAW += "src=ox&user=_USER_&invite=_INVITE_&mail=_MAIL_&purchase_type=_PURCHASE_TYPE_&login=_LOGIN_&imaplogin=_IMAPLOGIN_&clicked_feat=_CLICKED_FEATURE_&upsell_plan=_UPSELL_PLAN_&cid=_CID_&lang=_LANG_";
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Parsed UPSELL URL from context "+contextId+" and admin user attributes: "+STATIC_URL_RAW);
+			}
+		}else{
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Parsed UPSELL URL from configuration for context: "+contextId);
+			}
+		}
+		
+		return STATIC_URL_RAW;
 	}
 	
 	private String parseText(String raw_text, JSONObject json,boolean url_encode_it) throws JSONException, URIException, UnsupportedEncodingException{
@@ -491,6 +528,10 @@ public final class MyServletRequest  {
 		
 		if(jsondata!=null && jsondata.has("purchase_type")){
 			bla.put(MAP_ATTR_PURCHASE_TYPE,jsondata.getString("purchase_type"));
+		}
+		
+		if(jsondata!=null && jsondata.has("invite")){
+			bla.put(MAP_ATTR_INVITE,jsondata.getString("invite"));
 		}
 		
 		if(jsondata!=null && jsondata.has("feature_clicked")){
