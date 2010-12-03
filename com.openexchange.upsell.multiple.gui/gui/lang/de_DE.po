@@ -49,8 +49,8 @@ msgstr "Freunde benachrichtigen"
 msgid "Enhance your system with &#8222;Teamwork Capabilities&#8220;"
 msgstr "Erweitern Sie Ihr System mit &#8222;Teamwork Funktionen&#8220;"
 
-msgid "Machen Sie Ihr Team erfolgreicher<br>und kooperieren Sie gemeinsam in Aufgaben mit Dateien und im Team-Kalender!"
-msgstr "Make your team more successful<br>and cooperate on mutual tasks and through the team-calendar!"
+msgid "Make your team more successful<br>and cooperate on mutual tasks and through the team-calendar!"
+msgstr "Machen Sie Ihr Team erfolgreicher<br>und kooperieren Sie gemeinsam in Aufgaben mit Dateien und im Team-Kalender!"
 
 msgid "Team-Calendar"
 msgstr "Team-Kalender"
@@ -67,10 +67,10 @@ msgstr "Kalender gemeinsam nutzen"
 msgid "Enhance your system with &#8222;Business Mobility&#8220;"
 msgstr "Erweitern Sie Ihr System um den &#8222;mobilen Zugriff via Handy&#8220;"
 
-msgid "Mail Push or Mail Professional - ich weiss nicht wo diese strings herkommen"
+msgid "Mail Push or Mail Professional"
 msgstr "Mail Push oder Mail Professional"
 
-msgid "With your &#8220;SmartPhone&#8221; you access all vital data<br>(mail,calendar, contacts, etc.) effortlessly and manageable on the spot."
+msgid "With your &#8220;SmartPhone&#8221; you access all vital data<br>(mail, calendar, contacts, etc.) effortlessly and manageable on the spot."
 msgstr "Mit Ihrem Handy haben jederzeit Zugriff auf alle Ihre Daten, ob die Mail, den Kalender, die Kontakte, etc. und können diese sofort bearbeiten."
 
 msgid "Read and answer your mails."
