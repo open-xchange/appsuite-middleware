@@ -49,21 +49,15 @@
 
 package com.openexchange.groupware.container;
 
-import static com.openexchange.tools.sql.DBUtils.closeResources;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Pattern;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
@@ -72,7 +66,6 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.OXCloneable;
@@ -80,9 +73,9 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
@@ -1478,16 +1471,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     }
 
     public static FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx) throws OXException {
-        return loadFolderObjectFromDB(folderId, ctx, null, true, false);
+        return OXFolderLoader.loadFolderObjectFromDB(folderId, ctx);
     }
 
     public static FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx, final Connection readCon) throws OXException {
-        return loadFolderObjectFromDB(folderId, ctx, readCon, true, false);
+        return OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, readCon);
     }
-
-    private static final String TABLE_OT = "oxfolder_tree";
-
-    private static final String TABLE_OP = "oxfolder_permissions";
 
     /**
      * Loads specified folder from database.
@@ -1501,13 +1490,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @throws OXException If folder cannot be loaded
      */
     public static final FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx, final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList) throws OXException {
-        return loadFolderObjectFromDB(folderId, ctx, readConArg, loadPermissions, loadSubfolderList, TABLE_OT, TABLE_OP);
+        return OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, readConArg, loadPermissions, loadSubfolderList);
     }
-
-    private static final String SQL_LOAD_F =
-        "SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
-
-    private static final Pattern PAT_RPL_TABLE = Pattern.compile("#TABLE#");
 
     /**
      * Loads specified folder from database.
@@ -1523,76 +1507,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @throws OXException If folder cannot be loaded
      */
     public static final FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx, final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable) throws OXException {
-        try {
-            Connection readCon = readConArg;
-            boolean closeCon = false;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                if (readCon == null) {
-                    readCon = DBPool.pickup(ctx);
-                    closeCon = true;
-                }
-                stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(SQL_LOAD_F).replaceFirst(table));
-                stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, folderId);
-                rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    throw new OXFolderNotFoundException(folderId, ctx);
-                }
-                final FolderObject folderObj = new FolderObject(rs.getString(2), folderId, rs.getInt(3), rs.getInt(4), rs.getInt(6));
-                folderObj.setParentFolderID(rs.getInt(1));
-                folderObj.setCreatedBy(parseStringValue(rs.getString(6), ctx));
-                folderObj.setCreationDate(new Date(rs.getLong(5)));
-                folderObj.setSubfolderFlag(rs.getInt(10) > 0 ? true : false);
-                folderObj.setLastModified(new Date(rs.getLong(7)));
-                folderObj.setModifiedBy(parseStringValue(rs.getString(8), ctx));
-                folderObj.setPermissionFlag(rs.getInt(9));
-                final int defaultFolder = rs.getInt(11);
-                if (rs.wasNull()) {
-                    folderObj.setDefaultFolder(false);
-                } else {
-                    folderObj.setDefaultFolder(defaultFolder > 0);
-                }
-                if (loadSubfolderList) {
-                    final ArrayList<Integer> subfolderList = getSubfolderIds(folderId, ctx, readCon, table);
-                    folderObj.setSubfolderIds(subfolderList);
-                }
-
-                if (loadPermissions) {
-                    folderObj.setPermissionsAsArray(getFolderPermissions(folderId, ctx, readCon, permTable));
-                }
-                return folderObj;
-            } finally {
-                closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
-            }
-        } catch (final SQLException e) {
-            throw new OXFolderException(
-                FolderCode.FOLDER_COULD_NOT_BE_LOADED,
-                e,
-                String.valueOf(folderId),
-                String.valueOf(ctx.getContextId()));
-        } catch (final DBPoolingException e) {
-            throw new OXFolderException(
-                FolderCode.FOLDER_COULD_NOT_BE_LOADED,
-                e,
-                String.valueOf(folderId),
-                String.valueOf(ctx.getContextId()));
-        }
-    }
-
-    private static final int parseStringValue(final String str, final Context ctx) {
-        if (null == str) {
-            return -1;
-        }
-        try {
-            return Integer.parseInt(str);
-        } catch (final NumberFormatException e) {
-            if (str.equalsIgnoreCase("system")) {
-                return ctx.getMailadmin();
-            }
-        }
-        return -1;
+        return OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, readConArg, loadPermissions, loadSubfolderList, table, permTable);
     }
 
     /**
@@ -1606,11 +1521,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @throws DBPoolingException If a pooling error occurs
      */
     public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
-        return getFolderPermissions(folderId, ctx, readConArg, TABLE_OP);
+        return OXFolderLoader.getFolderPermissions(folderId, ctx, readConArg);
     }
-
-    private static final String SQL_LOAD_P =
-        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
@@ -1624,39 +1536,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @throws DBPoolingException If a pooling error occurs
      */
     public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
-        Connection readCon = readConArg;
-        boolean closeCon = false;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            if (readCon == null) {
-                readCon = DBPool.pickup(ctx);
-                closeCon = true;
-            }
-            stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(SQL_LOAD_P).replaceFirst(table));
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, folderId);
-            rs = stmt.executeQuery();
-            final ArrayList<OCLPermission> permList = new ArrayList<OCLPermission>();
-            while (rs.next()) {
-                final OCLPermission p = new OCLPermission();
-                p.setEntity(rs.getInt(1)); // Entity
-                p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5)); // fp, orp, owp, and odp
-                p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
-                p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
-                p.setSystem(rs.getInt(8)); // system
-                permList.add(p);
-            }
-            stmt.close();
-            rs = null;
-            stmt = null;
-            return permList.toArray(new OCLPermission[permList.size()]);
-        } finally {
-            closeSQLStuff(rs, stmt);
-            if (closeCon) {
-                DBPool.closeReaderSilent(ctx, readCon);
-            }
-        }
+        return OXFolderLoader.getFolderPermissions(folderId, ctx, readConArg, table);
     }
 
     /**
@@ -1670,10 +1550,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @throws DBPoolingException If a pooling error occurs
      */
     public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
-        return getSubfolderIds(folderId, ctx, readConArg, TABLE_OT);
+        return OXFolderLoader.getSubfolderIds(folderId, ctx, readConArg);
     }
-
-    private static final String SQL_SEL = "SELECT fuid FROM #TABLE# WHERE cid = ? AND parent = ? ORDER BY default_flag DESC, fname";
 
     /**
      * Gets the subfolder IDs of specified folder.
@@ -1687,27 +1565,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @throws DBPoolingException If a pooling error occurs
      */
     public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
-        Connection readCon = readConArg;
-        boolean closeCon = false;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            if (readCon == null) {
-                readCon = DBPool.pickup(ctx);
-                closeCon = true;
-            }
-            stmt = readCon.prepareStatement(SQL_SEL.replaceFirst("#TABLE#", table));
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, folderId);
-            rs = stmt.executeQuery();
-            final ArrayList<Integer> retval = new ArrayList<Integer>();
-            while (rs.next()) {
-                retval.add(Integer.valueOf(rs.getInt(1)));
-            }
-            return retval;
-        } finally {
-            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
-        }
+        return OXFolderLoader.getSubfolderIds(folderId, ctx, readConArg, table);
     }
 
     private static final OCLPermission VIRTUAL_FOLDER_PERMISSION = new OCLPermission();
