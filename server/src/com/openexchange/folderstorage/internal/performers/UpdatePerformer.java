@@ -402,7 +402,7 @@ public final class UpdatePerformer extends AbstractPerformer {
         } else {
             listPerformer = new ListPerformer(session, null);
         }
-        // listPerformer.setStorageParameters(storageParameters);
+        listPerformer.setStorageParameters(storageParameters);
         final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages);
         final StringBuilder sb = new StringBuilder();
         String nonExistingName = name;
