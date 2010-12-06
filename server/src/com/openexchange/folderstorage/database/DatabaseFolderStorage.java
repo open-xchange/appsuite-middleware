@@ -1355,13 +1355,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static List<FolderObject> getFolderObjects(final int[] folderIds, final Context ctx, final Connection con) throws OXException {
-        final FolderObject[] ret = new FolderObject[folderIds.length];
-        final TIntIntHashMap toLoad = new TIntIntHashMap(folderIds.length);
+        final int length = folderIds.length;
+        final FolderObject[] ret = new FolderObject[length];
+        final TIntIntHashMap toLoad = new TIntIntHashMap(length);
         if (!FolderCacheManager.isEnabled()) {
             return OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con);
         }
         final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
-        for (int i = 0; i < folderIds.length; i++) {
+        for (int i = 0; i < length; i++) {
             final int folderId = folderIds[i];
             final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
             if (null == fo) {
