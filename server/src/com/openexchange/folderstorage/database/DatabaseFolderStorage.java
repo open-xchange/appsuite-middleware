@@ -677,7 +677,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                 }
             }
-            
+            /*
+             * Either from working or from backup storage type
+             */
             if (StorageType.WORKING.equals(storageType)) {
                 final int size = folderIdentifiers.size();
                 final Folder[] ret = new Folder[size]; 
