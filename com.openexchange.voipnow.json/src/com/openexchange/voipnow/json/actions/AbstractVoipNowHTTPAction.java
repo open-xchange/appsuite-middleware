@@ -50,6 +50,7 @@
 package com.openexchange.voipnow.json.actions;
 
 import java.io.IOException;
+import java.io.InputStream;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -129,6 +130,7 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
      * @throws VoipNowException If executing HTTP method fails
      */
     protected M configure(final VoipNowServerSetting setting, final String queryString) throws VoipNowException {
+        M httpMethod = null;
         try {
             final HttpClient client = new HttpClient();
             final int httpTimeout = getTimeout();
@@ -162,7 +164,7 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
                 hostConfiguration = new HostConfiguration();
                 hostConfiguration.setHost(host, port, PROTOCOL_HTTP);
             }
-            final M httpMethod = newHttpMethod();
+            httpMethod = newHttpMethod();
             String uri = getPath();
             /*
              * Create a URI and allow for null/empty URI values
@@ -188,18 +190,58 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
              */
             if (200 != responseCode) {
                 // GET request failed
-                httpMethod.releaseConnection();
                 throw VoipNowExceptionCodes.HTTP_REQUEST_FAILED.create(host, httpMethod.getStatusLine().toString());
             }
             return httpMethod;
+        } catch (final VoipNowException e) {
+            if (null != httpMethod) {
+                closeResponse(httpMethod);
+                httpMethod.releaseConnection();
+            }
+            throw e;
         } catch (final URIException e) {
+            if (null != httpMethod) {
+                closeResponse(httpMethod);
+                httpMethod.releaseConnection();
+            }
             throw VoipNowExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final NullPointerException e) {
+            if (null != httpMethod) {
+                closeResponse(httpMethod);
+                httpMethod.releaseConnection();
+            }
             throw VoipNowExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final HttpException e) {
+            if (null != httpMethod) {
+                closeResponse(httpMethod);
+                httpMethod.releaseConnection();
+            }
             throw VoipNowExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if (null != httpMethod) {
+                closeResponse(httpMethod);
+                httpMethod.releaseConnection();
+            }
             throw VoipNowExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            if (null != httpMethod) {
+                closeResponse(httpMethod);
+                httpMethod.releaseConnection();
+            }
+            throw VoipNowExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static <M extends HttpMethod> void closeResponse(final M httpMethod) {
+        if (null != httpMethod) {
+            try {
+                final InputStream stream = httpMethod.getResponseBodyAsStream();
+                if (null != stream) {
+                    stream.close();
+                }
+            } catch (final IOException e) {
+                org.apache.commons.logging.LogFactory.getLog(AbstractVoipNowHTTPAction.class).error(e.getMessage(), e);
+            }
         }
     }
 
