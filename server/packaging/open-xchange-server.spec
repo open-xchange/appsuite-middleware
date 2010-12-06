@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -692,6 +692,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Dec 06 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17684: Fixed checking duplicate name on folder creation/rename
+* Thu Dec 02 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17712: Adapted to HTTP status codes
 * Wed Dec 01 2010 - martin.herfurth@open-xchange.com
  - Bugfix #17264: Reminder for shared calender folders.
 * Tue Nov 30 2010 - thorben.betten@open-xchange.com

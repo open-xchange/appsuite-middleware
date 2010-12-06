@@ -1,3 +1,9 @@
+open-xchange-management (6.18.2.0-9) unstable; urgency=low
+
+  * build for 6.18.2-rev9
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  6 Dec 2010 13:04:13 +0100
+
 open-xchange-management (6.18.2.0-8) unstable; urgency=low
 
   * first build for 6.18.2-rev8
