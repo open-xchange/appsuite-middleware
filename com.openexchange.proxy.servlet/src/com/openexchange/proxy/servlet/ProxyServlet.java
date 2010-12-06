@@ -60,6 +60,7 @@ import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -174,8 +175,9 @@ public class ProxyServlet extends SessionServlet {
             /*
              * GET request failed
              */
-            httpMethod.releaseConnection();
-            resp.sendError(responseCode, httpMethod.getStatusLine().toString());
+            String txt = httpMethod.getStatusLine().toString();
+            closeHttpMethod(httpMethod);
+            resp.sendError(responseCode, txt);
             return;
         }
         try {
@@ -214,7 +216,7 @@ public class ProxyServlet extends SessionServlet {
                 }
             }
         } finally {
-            httpMethod.releaseConnection();
+            closeHttpMethod(httpMethod);
         }
     }
 
@@ -263,6 +265,32 @@ public class ProxyServlet extends SessionServlet {
             }
         }
         */
+    }
+
+    /**
+     * Closes specified HTTP method.
+     * 
+     * @param httpMethod The HTTP method to close
+     */
+    private static void closeHttpMethod(final HttpMethod httpMethod) {
+        if (null != httpMethod) {
+            /*
+             * Ensure closing response
+             */
+            try {
+                final InputStream stream = httpMethod.getResponseBodyAsStream();
+                if (null != stream) {
+                    stream.close();
+                }
+            } catch (final IOException e) {
+                org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class).error(e.getMessage(), e);
+            } finally {
+                /*
+                 * We are done with the connection and that it can now be reused
+                 */
+                httpMethod.releaseConnection();
+            }
+        }
     }
 
 }
