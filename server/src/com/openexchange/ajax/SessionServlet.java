@@ -210,7 +210,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private SessiondException checkIP(final Session session, final String actual) {
-        return checkIP(checkIP, session, actual);
+        return checkIP(checkIP, ranges, session, actual);
     }
 
     /**
@@ -226,8 +226,8 @@ public abstract class SessionServlet extends AJAXServlet {
         exceptionId = 5,
         msg = "Request to server was refused. Original client IP address changed. Please try again."
     )
-    public static SessiondException checkIP(final boolean checkIP, final Session session, final String actual) {
-        if (null == actual || (!isWhitelistedFromIPCheck(actual) && !actual.equals(session.getLocalIp()))) {
+    public static SessiondException checkIP(final boolean checkIP, final List<IPRange> ranges, final Session session, final String actual) {
+        if (null == actual || (!isWhitelistedFromIPCheck(actual, ranges) && !actual.equals(session.getLocalIp()))) {
             if (checkIP) {
                 LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
                 return EXCEPTION.create(5);
@@ -246,7 +246,7 @@ public abstract class SessionServlet extends AJAXServlet {
         return null;
     }
 
-    private static boolean isWhitelistedFromIPCheck(String actual) {
+    private static boolean isWhitelistedFromIPCheck(String actual, List<IPRange> ranges) {
         for (IPRange range : ranges) {
             if(range.contains(actual)) {
                 return true;
