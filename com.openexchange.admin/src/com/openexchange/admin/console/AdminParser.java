@@ -421,21 +421,32 @@ public class AdminParser extends CLIParser {
     }
 
     private void parseDynamicOption(String arg) {
-        // TODO Auto-generated method stub
+        
+        String namespace = null;
+        String name = null;
+        String value = null;
+       
         int slashPos = arg.indexOf('/');
-        int equalPos = arg.indexOf('=');
         
-        if(slashPos == -1) {
-            return;
+        
+        if(arg.startsWith("--remove-")) {
+            namespace = arg.substring(9, slashPos);
+            name = arg.substring(slashPos+1);
+        } else {
+            int equalPos = arg.indexOf('=');
+            
+            if(slashPos == -1) {
+                return;
+            }
+            
+            if(equalPos == -1) {
+                return;
+            }
+            
+            namespace = arg.substring(2,slashPos);
+            name = arg.substring(slashPos+1, equalPos);
+            value = arg.substring(equalPos+1);
         }
-        
-        if(equalPos == -1) {
-            return;
-        }
-        
-        String namespace = arg.substring(2,slashPos);
-        String name = arg.substring(slashPos+1, equalPos);
-        String value = arg.substring(equalPos+1);
         
         getDynamicMap(namespace).put(name, value);
     }
