@@ -210,7 +210,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private void checkIP(final Session session, final String actual) throws SessiondException {
-        checkIP(checkIP, session, actual);
+        checkIP(checkIP, ranges, session, actual);
     }
 
     /**
@@ -243,7 +243,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param sessiondException The exception to check
      * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
      */
-    private static boolean isIpCheckError(final SessiondException sessiondException) {
+    public static boolean isIpCheckError(final SessiondException sessiondException) {
         final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
         return (code.getDetailNumber() == sessiondException.getDetailNumber()) && code.getCategory().equals(sessiondException.getCategory());
     }
@@ -252,12 +252,13 @@ public abstract class SessionServlet extends AJAXServlet {
      * Checks if the client IP address of the current request matches the one through that the session has been created.
      * 
      * @param checkIP <code>true</code> to deny request with an exception.
+     * @param ranges The white-list ranges
      * @param session session object
      * @param actual IP address of the current request.
      * @throws SessionException if the IP addresses don't match.
      */
-    public static void checkIP(final boolean checkIP, final Session session, final String actual) throws SessiondException {
-        if (null == actual || (!isWhitelistedFromIPCheck(actual) && !actual.equals(session.getLocalIp()))) {
+    public static void checkIP(final boolean checkIP, final List<IPRange> ranges, final Session session, final String actual) throws SessiondException {
+        if (null == actual || (!isWhitelistedFromIPCheck(actual, ranges) && !actual.equals(session.getLocalIp()))) {
             if (checkIP) {
                 LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
                 throw SessionExceptionCodes.WRONG_CLIENT_IP.create();
@@ -275,8 +276,8 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private static boolean isWhitelistedFromIPCheck(String actual) {
-        for (IPRange range : ranges) {
+    private static boolean isWhitelistedFromIPCheck(final String actual, final List<IPRange> ranges) {
+        for (final IPRange range : ranges) {
             if (range.contains(actual)) {
                 return true;
             }
