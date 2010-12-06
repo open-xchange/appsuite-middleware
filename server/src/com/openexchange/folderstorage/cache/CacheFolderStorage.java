@@ -50,7 +50,7 @@
 package com.openexchange.folderstorage.cache;
 
 import gnu.trove.TIntArrayList;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
@@ -708,8 +709,8 @@ public final class CacheFolderStorage implements FolderStorage {
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         final int contextId = storageParameters.getContextId();
         final int size = folderIds.size();
-        final TIntObjectHashMap<Folder> fromCache = new TIntObjectHashMap<Folder>();
-        final TIntObjectHashMap<String> toLoad = new TIntObjectHashMap<String>();
+        final Folder[] ret = new Folder[size];
+        final TObjectIntHashMap<String> toLoad = new TObjectIntHashMap<String>(size);
         /*
          * Get the ones from cache
          */
@@ -723,12 +724,12 @@ public final class CacheFolderStorage implements FolderStorage {
                 /*
                  * Cache miss; Load from storage
                  */
-                toLoad.put(i, folderId);
+                toLoad.put(folderId, i);
             } else {
                 /*
                  * Cache hit
                  */
-                fromCache.put(i, folder);
+                ret[i] = folder;
             }
         }
         /*
@@ -738,34 +739,25 @@ public final class CacheFolderStorage implements FolderStorage {
         if (toLoad.isEmpty()) {
             fromStorage = Collections.emptyMap();
         } else {
-            fromStorage = loadFolders(treeId, Arrays.asList(toLoad.getValues(new String[toLoad.size()])), storageType, storageParameters);
+            fromStorage = loadFolders(treeId, Arrays.asList(toLoad.keys(new String[toLoad.size()])), storageType, storageParameters);
         }
         /*
-         * Create return value
+         * Fill return value
          */
-        final Folder[] ret = new Folder[size];
-        for (int i = 0; i < size; i++) {
-            Folder folder = fromCache.get(i);
-            if (null == folder) {
-                folder = fromStorage.get(toLoad.get(i));
-                if (null == folder) {
-                    /*
-                     * Uh?
-                     */
-                    throw FolderExceptionErrorMessage.NOT_FOUND.create(toLoad.get(i), treeId);
-                }
+        for (final Entry<String, Folder> entry : fromStorage.entrySet()) {
+            Folder folder = entry.getValue();
+            final int index = toLoad.get(entry.getKey());
+            /*
+             * Put into cache
+             */
+            if (folder.isCacheable()) {
                 /*
-                 * Put into cache
+                 * Put to cache and create a cloned version
                  */
-                if (folder.isCacheable()) {
-                    /*
-                     * Put to cache and create a cloned version
-                     */
-                    putFolder(folder, treeId, storageParameters);
-                    folder = (Folder) folder.clone();
-                }
+                putFolder(folder, treeId, storageParameters);
+                folder = (Folder) folder.clone();
             }
-            ret[i] = folder;
+            ret[index] = folder;
         }
         /*
          * Return
@@ -1172,17 +1164,6 @@ public final class CacheFolderStorage implements FolderStorage {
          */
         ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
         return ret;
-    }
-
-    private static void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages, final StorageParameters storageParameters) throws FolderException {
-        for (final FolderStorage openedStorage : openedStorages) {
-            if (openedStorage.equals(storage)) {
-                return;
-            }
-        }
-        if (storage.startTransaction(storageParameters, true)) {
-            openedStorages.add(storage);
-        }
     }
 
     /**
