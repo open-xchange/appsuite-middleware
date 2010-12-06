@@ -1719,13 +1719,23 @@ public class CalendarMySQL implements CalendarSqlImp {
                             throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
                         }
                         stmt.setInt(4, user.getConfirm());
-                        if (cdao.containsAlarm() && user.getIdentifier() == uid) {
-                            user.setAlarmMinutes(cdao.getAlarm());
-                        } else {
-                            if (!user.containsAlarm()) {
+                        
+                        if (folderType == FolderObject.SHARED) {
+                            if (cdao.containsAlarm() && user.getIdentifier() == cdao.getSharedFolderOwner()) {
+                                user.setAlarmMinutes(cdao.getAlarm());
+                            } else if (!user.containsAlarm()) {
                                 user.setAlarmMinutes(-1);
                             }
+                        } else {
+                            if (cdao.containsAlarm() && user.getIdentifier() == uid) {
+                                user.setAlarmMinutes(cdao.getAlarm());
+                            } else {
+                                if (!user.containsAlarm()) {
+                                    user.setAlarmMinutes(-1);
+                                }
+                            }
                         }
+                        
                         if (user.containsConfirmMessage() && user.getConfirmMessage() != null) {
                             stmt.setString(5, user.getConfirmMessage());
                         } else {
