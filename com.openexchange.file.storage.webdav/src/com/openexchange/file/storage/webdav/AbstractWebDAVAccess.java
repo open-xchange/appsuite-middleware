@@ -49,7 +49,10 @@
 
 package com.openexchange.file.storage.webdav;
 
+import java.io.IOException;
+import java.io.InputStream;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.session.Session;
 
@@ -88,6 +91,32 @@ public abstract class AbstractWebDAVAccess {
         this.client = client;
         this.account = account;
         this.session = session;
+    }
+
+    /**
+     * Closes specified HTTP method.
+     * 
+     * @param httpMethod The HTTP method to close
+     */
+    protected static <M extends HttpMethod> void closeHttpMethod(final M httpMethod) {
+        if (null != httpMethod) {
+            /*
+             * Ensure closing response
+             */
+            try {
+                final InputStream stream = httpMethod.getResponseBodyAsStream();
+                if (null != stream) {
+                    stream.close();
+                }
+            } catch (final IOException e) {
+                org.apache.commons.logging.LogFactory.getLog(AbstractWebDAVAccess.class).error(e.getMessage(), e);
+            } finally {
+                /*
+                 * We are done with the connection and that it can now be reused
+                 */
+                httpMethod.releaseConnection();
+            }
+        }
     }
 
 }

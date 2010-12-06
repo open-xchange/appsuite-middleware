@@ -143,7 +143,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 }
                 return false;
             } finally {
-                propFindMethod.releaseConnection();
+                closeHttpMethod(propFindMethod);
             }
         } catch (final FileStorageException e) {
             throw e;
@@ -230,7 +230,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 ret.setSubfolders(hasSubdir);
                 ret.setSubscribedSubfolders(hasSubdir);
             } finally {
-                propFindMethod.releaseConnection();
+                closeHttpMethod(propFindMethod);
             }
             /*
              * Perform OPTIONS to retrieve folder capabilities
@@ -242,7 +242,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 final Header header = optionsMethod.getResponseHeader("Allow");
                 ret.parseAllowHeader(null == header ? null : header.getValue());
             } finally {
-                optionsMethod.releaseConnection();
+                closeHttpMethod(optionsMethod);
             }
             /*
              * Return
@@ -321,7 +321,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                     }
                 }
             } finally {
-                propFindMethod.releaseConnection();
+                closeHttpMethod(propFindMethod);
             }
             /*
              * Request folders
@@ -370,7 +370,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 method.checkSuccess();
                 return folderUri;
             } finally {
-                method.releaseConnection();
+                closeHttpMethod(method);
             }
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
@@ -436,7 +436,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 method.checkSuccess();
                 return newUri;
             } finally {
-                method.releaseConnection();
+                closeHttpMethod(method);
             }
         } catch (final FileStorageException e) {
             throw e;
@@ -480,7 +480,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 method.checkSuccess();
                 return newUri;
             } finally {
-                method.releaseConnection();
+                closeHttpMethod(method);
             }
         } catch (final FileStorageException e) {
             throw e;
@@ -514,7 +514,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 method.checkSuccess();
                 return fid;
             } finally {
-                method.releaseConnection();
+                closeHttpMethod(method);
             }
         } catch (final FileStorageException e) {
             throw e;
@@ -607,7 +607,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                     }
                 }
             } finally {
-                propFindMethod.releaseConnection();
+                closeHttpMethod(propFindMethod);
             }
             /*
              * Process
@@ -627,7 +627,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         client.executeMethod(method);
                         method.checkSuccess();
                     } finally {
-                        method.releaseConnection();
+                        closeHttpMethod(method);
                     }
                 }
             }
@@ -641,7 +641,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                         client.executeMethod(method);
                         method.checkSuccess();
                     } finally {
-                        method.releaseConnection();
+                        closeHttpMethod(method);
                     }
                 } catch (final HttpException e) {
                     throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
