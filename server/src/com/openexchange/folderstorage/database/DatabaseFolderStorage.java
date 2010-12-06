@@ -685,21 +685,21 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * Check for special folder identifier
                  */
-                for (int i = 0; i < size; i++) {
-                    final String folderIdentifier = folderIdentifiers.get(i);
+                for (int index = 0; index < size; index++) {
+                    final String folderIdentifier = folderIdentifiers.get(index);
                     if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
-                        ret[i] = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+                        ret[index] = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
                     } else {
                         /*
                          * A numeric folder identifier
                          */
                         final int folderId = getUnsignedInteger(folderIdentifier);
                         if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
-                            ret[i] = SystemRootFolder.getSystemRootFolder();
+                            ret[index] = SystemRootFolder.getSystemRootFolder();
                         } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
-                            ret[i] = VirtualListFolder.getVirtualListFolder(folderId);
+                            ret[index] = VirtualListFolder.getVirtualListFolder(folderId);
                         } else {
-                            map.put(folderId, i);
+                            map.put(folderId, index);
                         }
                     }
                 }
