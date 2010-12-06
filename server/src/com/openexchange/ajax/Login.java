@@ -241,7 +241,7 @@ public class Login extends AJAXServlet {
             final String oldIP = session.getLocalIp();
             final String newIP = req.getRemoteAddr();
             if (!newIP.equals(oldIP)) {
-                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID" + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
                 session.setLocalIp(newIP);
             }
             
@@ -302,7 +302,7 @@ public class Login extends AJAXServlet {
                             final String oldIP = session.getLocalIp();
                             final String newIP = req.getRemoteAddr();
                             if (!newIP.equals(oldIP)) {
-                                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID" + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+                                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
                                 session.setLocalIp(newIP);
                             }
                             try {
