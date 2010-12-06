@@ -689,7 +689,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     final String folderIdentifier = folderIdentifiers.get(i);
                     if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
                         ret[i] = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
-                        ret[i].setTreeID(treeId);
                     } else {
                         /*
                          * A numeric folder identifier
@@ -697,10 +696,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         final int folderId = getUnsignedInteger(folderIdentifier);
                         if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                             ret[i] = SystemRootFolder.getSystemRootFolder();
-                            ret[i].setTreeID(treeId);
                         } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
                             ret[i] = VirtualListFolder.getVirtualListFolder(folderId);
-                            ret[i].setTreeID(treeId);
                         } else {
                             map.put(folderId, i);
                         }
@@ -717,8 +714,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     for (final FolderObject folderObject : fos) {
                         final int index = map.get(folderObject.getObjectID());
                         ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, con);
-                        ret[index].setTreeID(treeId);
                     }
+                }
+                /*
+                 * Set proper tree identifier
+                 */
+                for (final Folder folder : ret) {
+                    folder.setTreeID(treeId);
                 }
                 /*
                  * Return
