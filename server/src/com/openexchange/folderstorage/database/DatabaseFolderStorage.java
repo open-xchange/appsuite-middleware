@@ -709,11 +709,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  * Batch load
                  */
                 if (!map.isEmpty()) {
-                    /*
-                     * A non-virtual database folder
-                     */
-                    final List<FolderObject> fos = getFolderObjects(map.keys(), ctx, con);
-                    for (final FolderObject folderObject : fos) {
+                    for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
                         final int index = map.get(folderObject.getObjectID());
                         ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, con);
                     }
@@ -1368,13 +1364,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
         final FolderObject[] ret = new FolderObject[length];
         final TIntIntHashMap toLoad = new TIntIntHashMap(length);
         final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
-        for (int i = 0; i < length; i++) {
-            final int folderId = folderIds[i];
+        for (int index = 0; index < length; index++) {
+            final int folderId = folderIds[index];
             final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
             if (null == fo) { // Cache miss
-                toLoad.put(folderId, i);
+                toLoad.put(folderId, index);
             } else { // Cache hit
-                ret[i] = fo;
+                ret[index] = fo;
             }
         }
         if (!toLoad.isEmpty()) {
