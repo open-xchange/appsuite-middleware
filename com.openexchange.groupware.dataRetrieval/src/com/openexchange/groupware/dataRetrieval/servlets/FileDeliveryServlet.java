@@ -139,17 +139,6 @@ public class FileDeliveryServlet extends HttpServlet {
             resp.setContentType(metadata.getType());
         }
         
-        if(metadata.getFilename() != null) {
-            final CheckedDownload checkedDownload =
-                DownloadUtility.checkInlineDownload(
-                    stream,
-                    metadata.getFilename(),
-                    metadata.getType() == null ? "application/octet-stream" : metadata.getType(),
-                    req.getHeader("User-Agent"));
-            resp.setContentType(checkedDownload.getContentType());
-            resp.setHeader("Content-disposition", checkedDownload.getContentDisposition());
-            return checkedDownload.getInputStream();
-        }
         return stream;
     }
     
