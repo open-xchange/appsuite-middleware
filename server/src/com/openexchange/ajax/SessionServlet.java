@@ -178,20 +178,7 @@ public abstract class SessionServlet extends AJAXServlet {
             super.service(req, resp);
         } catch (final SessiondException e) {
             LOG.debug(e.getMessage(), e);
-            if (isIpCheckError(e)) {
-                try {
-                    /*
-                     * Drop cookies
-                     */
-                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                    final String sessionId = getSessionId(req);
-                    final ServerSession session = getSession(req, sessionId, sessiondService);
-                    removeOXCookies(session.getHash(), req, resp);
-                    sessiondService.removeSession(sessionId);
-                } catch (final Exception e2) {
-                    LOG.error("Cookies could not be removed.", e2);
-                }
-            }
+            handleSessiondException(e, req, resp);
             /*
              * Return JSON response
              */
@@ -223,24 +210,55 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private void checkIP(final Session session, final String actual) throws SessiondException {
-        checkIP(checkIP, session, actual);
+        checkIP(checkIP, ranges, session, actual);
     }
 
-    protected static boolean isIpCheckError(final SessiondException sessiondException) {
+    /**
+     * Handle specified SessionD exception.
+     * 
+     * @param e The SessionD exception
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     */
+    protected static void handleSessiondException(final SessiondException e, final HttpServletRequest req, final HttpServletResponse resp) {
+        if (isIpCheckError(e)) {
+            try {
+                /*
+                 * Drop Open-Xchange cookies
+                 */
+                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                final String sessionId = getSessionId(req);
+                final ServerSession session = getSession(req, sessionId, sessiondService);
+                removeOXCookies(session.getHash(), req, resp);
+                sessiondService.removeSession(sessionId);
+            } catch (final Exception e2) {
+                LOG.error("Cookies could not be removed.", e2);
+            }
+        }
+    }
+
+    /**
+     * Checks whether passed exception indicates an IP check error.
+     * 
+     * @param sessiondException The exception to check
+     * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
+     */
+    public static boolean isIpCheckError(final SessiondException sessiondException) {
         final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
-        return code.getCategory().equals(sessiondException.getCategory()) && code.getDetailNumber() == sessiondException.getDetailNumber();
+        return (code.getDetailNumber() == sessiondException.getDetailNumber()) && code.getCategory().equals(sessiondException.getCategory());
     }
 
     /**
      * Checks if the client IP address of the current request matches the one through that the session has been created.
      * 
      * @param checkIP <code>true</code> to deny request with an exception.
+     * @param ranges The white-list ranges
      * @param session session object
      * @param actual IP address of the current request.
      * @throws SessionException if the IP addresses don't match.
      */
-    public static void checkIP(final boolean checkIP, final Session session, final String actual) throws SessiondException {
-        if (null == actual || (!isWhitelistedFromIPCheck(actual) && !actual.equals(session.getLocalIp()))) {
+    public static void checkIP(final boolean checkIP, final List<IPRange> ranges, final Session session, final String actual) throws SessiondException {
+        if (null == actual || (!isWhitelistedFromIPCheck(actual, ranges) && !actual.equals(session.getLocalIp()))) {
             if (checkIP) {
                 LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
                 throw SessionExceptionCodes.WRONG_CLIENT_IP.create();
@@ -258,8 +276,8 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private static boolean isWhitelistedFromIPCheck(String actual) {
-        for (IPRange range : ranges) {
+    private static boolean isWhitelistedFromIPCheck(final String actual, final List<IPRange> ranges) {
+        for (final IPRange range : ranges) {
             if (range.contains(actual)) {
                 return true;
             }
@@ -277,6 +295,9 @@ public abstract class SessionServlet extends AJAXServlet {
     protected static String getSessionId(final ServletRequest req) throws SessiondException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
+            /*
+             * Throw an error...
+             */
             if (LOG.isDebugEnabled()) {
                 final StringBuilder debug = new StringBuilder();
                 debug.append("Parameter session not found: ");

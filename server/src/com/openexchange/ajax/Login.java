@@ -53,6 +53,9 @@ import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -94,7 +97,9 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -257,6 +262,7 @@ public class Login extends AJAXServlet {
             }
         } else if (ACTION_AUTOLOGIN.equals(action)) {
             final Response response = new Response();
+            Session session = null;
             try {
                 if (!isAutologinEnabled()) {
                     throw new AjaxException(AjaxException.Code.DisabledAction, "autologin");
@@ -270,7 +276,6 @@ public class Login extends AJAXServlet {
                 }
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
 
-                Session session = null;
                 String secret = null;
 
                 final String sessionCookieName = SESSION_PREFIX + hash;
@@ -284,9 +289,38 @@ public class Login extends AJAXServlet {
                             session = sessiondService.getSession(sessionId);
                             final String oldIP = session.getLocalIp();
                             final String newIP = req.getRemoteAddr();
-                            if (!newIP.equals(oldIP)) {
-                                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID" + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
-                                session.setLocalIp(newIP);
+                            if (!newIP.equals(oldIP)) { // IPs differ
+                                final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                                if (configurationService == null) {
+                                    LOG.fatal("No configuration service available, can not read whitelist");
+                                    LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+                                    session.setLocalIp(newIP);
+                                } else {
+                                    if (configurationService.getBoolProperty("com.openexchange.IPCheck", true)) { //IP-Check
+                                        final List<IPRange> ranges;
+                                        {
+                                            String text = configurationService.getText("noipcheck.cnf");
+                                            if (text == null) {
+                                                ranges = Collections.emptyList();
+                                            } else {
+                                                ranges = new ArrayList<IPRange>(5);
+                                                String[] lines = text.split("\n");
+                                                for (String line : lines) {
+                                                    line = line.replaceAll("\\s", "");
+                                                    if (!line.equals("") && !line.startsWith("#")) {
+                                                        ranges.add(IPRange.parseRange(line));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        SessionServlet.checkIP(true, ranges, session, newIP);
+                                        LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+                                        session.setLocalIp(newIP);
+                                    } else {
+                                        LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+                                        session.setLocalIp(newIP);
+                                    }
+                                }
                             }
                             try {
                                 final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
@@ -323,6 +357,21 @@ public class Login extends AJAXServlet {
                     SessionServlet.removeOXCookies(hash, req, resp);
                     throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
                 }
+            } catch (final SessiondException e) {
+                LOG.debug(e.getMessage(), e);
+                if (SessionServlet.isIpCheckError(e) && null != session) {
+                    try {
+                        /*
+                         * Drop Open-Xchange cookies
+                         */
+                        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                        SessionServlet.removeOXCookies(session.getHash(), req, resp);
+                        sessiondService.removeSession(session.getSessionID());
+                    } catch (final Exception e2) {
+                        LOG.error("Cookies could not be removed.", e2);
+                    }
+                }
+                response.setException(e);
             } catch (final AjaxException e) {
                 LOG.debug(e.getMessage(), e);
                 response.setException(e);
