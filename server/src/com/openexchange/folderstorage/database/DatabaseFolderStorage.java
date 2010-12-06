@@ -1371,9 +1371,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
         for (int i = 0; i < length; i++) {
             final int folderId = folderIds[i];
             final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
-            if (null == fo) {
+            if (null == fo) { // Cache miss
                 toLoad.put(folderId, i);
-            } else {
+            } else { // Cache hit
                 ret[i] = fo;
             }
         }
