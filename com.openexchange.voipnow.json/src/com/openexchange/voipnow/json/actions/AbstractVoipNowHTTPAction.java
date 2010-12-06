@@ -232,7 +232,7 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
         }
     }
 
-    private static <M extends HttpMethod> void closeResponse(final M httpMethod) {
+    protected static <M extends HttpMethod> void closeResponse(final M httpMethod) {
         if (null != httpMethod) {
             try {
                 final InputStream stream = httpMethod.getResponseBodyAsStream();

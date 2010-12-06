@@ -405,7 +405,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
                  */
                 method.checkSuccess();
             } finally {
-                method.releaseConnection();
+                AbstractWebDAVAccess.closeHttpMethod(method);
             }
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());

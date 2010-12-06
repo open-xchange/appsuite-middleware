@@ -49,6 +49,7 @@
 
 package com.openexchange.voipnow.json.actions;
 
+import static com.openexchange.voipnow.json.actions.AbstractVoipNowHTTPAction.closeResponse;
 import static com.openexchange.voipnow.json.actions.ActionUtility.urlEncode;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -161,6 +162,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
             try {
                 return parseXML(getMethod);
             } finally {
+                closeResponse(getMethod);
                 getMethod.releaseConnection();
             }
         } catch (final UnsupportedEncodingException e) {
@@ -198,7 +200,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
         int voipnowResponseCode = 0;
         if (matcher.find()) {
             voipnowResponseCode = ActionUtility.getUnsignedInteger(matcher.group(1));
-            if (voipnowResponseCode != 0 && (voipnowResponseCode < 200 || voipnowResponseCode > 400)) {
+            if (voipnowResponseCode != 0 && (voipnowResponseCode < 200 || voipnowResponseCode >= 400)) {
                 final Matcher codeMatcher = PATTERN_CODE.matcher(responseBody);
                 if (codeMatcher.find()) {
                     final Matcher m2 = PATTERN_TEXT.matcher(responseBody);
