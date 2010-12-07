@@ -390,9 +390,10 @@ public abstract class SessionServlet extends AJAXServlet {
             return;
         }
         final List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
+        final String jsessionidCookie = AJPv13RequestHandler.JSESSIONID_COOKIE;
         for (final Cookie cookie : cookies) {
             final String name = cookie.getName();
-            if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(name)) {
+            if (jsessionidCookie.equals(name)) {
                 final Cookie respCookie = new Cookie(name, cookie.getValue());
                 respCookie.setPath("/");
                 respCookie.setMaxAge(0); // delete
