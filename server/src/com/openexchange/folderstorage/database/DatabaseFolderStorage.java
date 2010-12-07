@@ -783,8 +783,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  * Remove shared ones manually
                  */
                 for (final Iterator<FolderObject> iterator = list.iterator(); iterator.hasNext();) {
-                    final FolderObject folderObject = iterator.next();
-                    if (folderObject.getCreatedBy() != userId) {
+                    if (iterator.next().getCreatedBy() != userId) {
                         iterator.remove();
                     }
                 }
