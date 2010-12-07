@@ -77,6 +77,11 @@ import com.openexchange.session.Session;
 public final class URLMailAttachmentDataSource implements DataSource {
 
     /**
+     * 10sec default time out.
+     */
+    private static final int DEFAULT_TIMEOUT = 10000;
+
+    /**
      * Initializes a new {@link URLMailAttachmentDataSource}.
      */
     public URLMailAttachmentDataSource() {
@@ -103,7 +108,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
             {
                 final String sTimeoutMillis = dataArguments.get("timeout");
                 if (null == sTimeoutMillis) {
-                    timeoutMillis = 2500;
+                    timeoutMillis = DEFAULT_TIMEOUT;
                 } else {
                     try {
                         timeoutMillis = Integer.parseInt(sTimeoutMillis.trim());
