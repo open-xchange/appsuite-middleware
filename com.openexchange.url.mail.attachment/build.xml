@@ -29,6 +29,7 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="conversionjar" value="com.openexchange.conversion.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
+	<property name="commonjar" value="common.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -38,6 +39,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${conversionjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
     </path>
 
     <!-- Compile -->

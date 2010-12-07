@@ -55,6 +55,7 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import javax.net.ssl.HttpsURLConnection;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -68,6 +69,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.session.Session;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link URLMailAttachmentDataSource}
@@ -117,6 +119,22 @@ public final class URLMailAttachmentDataSource implements DataSource {
                     }
                 }
             }
+            /*
+             * Check for HTTPS
+             */
+            final String protocol = url.getProtocol();
+            if ("https".equalsIgnoreCase(protocol)) {
+                /*
+                 * Set trust-all
+                 */
+                HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
+            } else if (!"http".equalsIgnoreCase(protocol)) {
+                /*
+                 * Unsupported protocol
+                 */
+                throw DataExceptionCodes.ERROR.create("Unsupported protocol: " + protocol);
+            }
+            
             /*
              * Open URL connection from parsed URL
              */

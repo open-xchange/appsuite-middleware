@@ -12,6 +12,9 @@ Import-Package: com.openexchange.conversion,
  com.openexchange.mail.config,
  com.openexchange.mail.mime,
  com.openexchange.session,
+ com.openexchange.tools.ssl,
+ javax.net,
+ javax.net.ssl,
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-Activator: com.openexchange.url.mail.attachment.osgi.URLMailAttachmentActivator

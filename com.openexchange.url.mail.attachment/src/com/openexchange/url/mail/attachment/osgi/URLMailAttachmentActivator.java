@@ -51,10 +51,12 @@ package com.openexchange.url.mail.attachment.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import javax.net.ssl.HttpsURLConnection;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.openexchange.url.mail.attachment.URLMailAttachmentDataSource;
 
 /**
@@ -82,6 +84,10 @@ public final class URLMailAttachmentActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: " + name);
         try {
+            /*
+             * Set trust-all
+             */
+            HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
             /*
              * Register data sources
              */
