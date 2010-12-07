@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.dataRetrieval.servlets;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -130,16 +133,29 @@ public class FileDeliveryServlet extends HttpServlet {
         }
     }
 
-    private InputStream setHeaders(InputStream stream, FileMetadata metadata, HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException {
-        if(metadata.getSize() > 0) {
-            resp.setContentLength((int) metadata.getSize());
+    private InputStream setHeaders(InputStream stream, FileMetadata metadata, HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException, IOException {
+        InputStream in = new BufferedInputStream(stream);
+        ByteArrayOutputStream out = new ByteArrayOutputStream((int) metadata.getSize());
+        int count = 0;
+        int value = 0;
+        try {
+            while((value = in.read()) != -1) {
+                out.write(value);
+                count++;
+            }
+        } finally {
+            in.close();
+            out.close();
+            
         }
+        
+        resp.setContentLength(count);
         
         if(metadata.getType() != null) {
             resp.setContentType(metadata.getType());
         }
         
-        return stream;
+        return new ByteArrayInputStream(out.toByteArray());
     }
     
 }
