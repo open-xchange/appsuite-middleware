@@ -153,7 +153,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                     contentType = new ContentType(cts);
                 }
             }
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, urlCon.getContentType());
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
             /*
              * Determine charset
              */
