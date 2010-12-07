@@ -220,7 +220,10 @@ public final class URLMailAttachmentDataSource implements DataSource {
     private static void closeURLConnection(final URLConnection urlCon) {
         if (null != urlCon) {
             try {
-                urlCon.getInputStream().close();
+                final InputStream stream = urlCon.getInputStream();
+                if (null != stream) {
+                    stream.close();
+                }
             } catch (final IOException e) {
                 org.apache.commons.logging.LogFactory.getLog(URLMailAttachmentDataSource.class).error(e.getMessage(), e);
             }
