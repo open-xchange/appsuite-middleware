@@ -120,20 +120,10 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 }
             }
             /*
-             * Check for HTTPS
-             */
-            final String protocol = url.getProtocol();
-            if (!"https".equalsIgnoreCase(protocol) && !"http".equalsIgnoreCase(protocol)) {
-                /*
-                 * Unsupported protocol
-                 */
-                throw DataExceptionCodes.ERROR.create("Unsupported protocol: " + protocol);
-            }
-            /*
              * Open URL connection from parsed URL
              */
             urlCon = url.openConnection();
-            if ("https".equalsIgnoreCase(protocol)) {
+            if ("https".equalsIgnoreCase(url.getProtocol())) {
                 ((HttpsURLConnection) urlCon).setSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
             }
             urlCon.setConnectTimeout(timeoutMillis);
