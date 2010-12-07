@@ -134,7 +134,6 @@ public final class URLMailAttachmentDataSource implements DataSource {
                  */
                 throw DataExceptionCodes.ERROR.create("Unsupported protocol: " + protocol);
             }
-            
             /*
              * Open URL connection from parsed URL
              */
