@@ -304,24 +304,30 @@ public class Login extends AJAXServlet {
                         final String sessionId = cookie.getValue();
                         if (sessiondService.refreshSession(sessionId)) {
                             session = sessiondService.getSession(sessionId);
-                            final String oldIP = session.getLocalIp();
-                            final String newIP = req.getRemoteAddr();
-                            if (!newIP.equals(oldIP)) { // IPs differ
+                            /*
+                             * IP check if enabled; otherwise update session's IP address if different to request's IP address
+                             */
+                            {
                                 final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                                 if (configurationService == null) {
                                     LOG.fatal("No configuration service available, can neither read IP check configuration nor whitelist");
-                                    LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
-                                    session.setLocalIp(newIP);
+                                    /*
+                                     * Update IP address if necessary
+                                     */
+                                    updateIPAddress(req.getRemoteAddr(), session);
                                 } else {
+                                    /*
+                                     * Test if IP check is enabled
+                                     */
                                     if (configurationService.getBoolProperty("com.openexchange.IPCheck", true)) { //IP-Check
                                         final List<IPRange> ranges;
                                         {
-                                            String text = configurationService.getText("noipcheck.cnf");
+                                            final String text = configurationService.getText("noipcheck.cnf");
                                             if (text == null) {
                                                 ranges = Collections.emptyList();
                                             } else {
                                                 ranges = new ArrayList<IPRange>(5);
-                                                String[] lines = text.split("\n");
+                                                final String[] lines = text.split("\n");
                                                 for (String line : lines) {
                                                     line = line.replaceAll("\\s", "");
                                                     if (!line.equals("") && !line.startsWith("#")) {
@@ -330,12 +336,17 @@ public class Login extends AJAXServlet {
                                                 }
                                             }
                                         }
+                                        final String newIP = req.getRemoteAddr();
                                         SessionServlet.checkIP(true, ranges, session, newIP);
-                                        LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
-                                        session.setLocalIp(newIP);
+                                        /*
+                                         * IP check passed: update IP address if necessary
+                                         */
+                                        updateIPAddress(newIP, session);
                                     } else {
-                                        LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
-                                        session.setLocalIp(newIP);
+                                        /*
+                                         * Update IP address if necessary
+                                         */
+                                        updateIPAddress(req.getRemoteAddr(), session);
                                     }
                                 }
                             }
@@ -429,6 +440,20 @@ public class Login extends AJAXServlet {
             }
         } else {
             logAndSendException(resp, new AjaxException(AjaxException.Code.UnknownAction, action));
+        }
+    }
+
+    /**
+     * Updates session's IP address if different to specified IP address.
+     * 
+     * @param newIP The possibly new IP address
+     * @param session The session to update if IP addresses differ
+     */
+    private static void updateIPAddress(final String newIP, final Session session) {
+        final String oldIP = session.getLocalIp();
+        if (null != newIP && !newIP.equals(oldIP)) { // IPs differ
+            LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
+            session.setLocalIp(newIP);
         }
     }
 
