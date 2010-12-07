@@ -638,7 +638,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (startDate == 0) {
             startDate = edao.getStartDate().getTime();
         }
-        final TimeZone tz = Tools.getTimeZone(cdao.getTimezone());
+        TimeZone tz = null;
+        if (cdao.getTimezone() != null) {
+            tz = Tools.getTimeZone(cdao.getTimezone());
+        } else if (edao.getTimezone() != null) {
+            tz = Tools.getTimeZone(edao.getTimezone());
+        } else {
+            tz = Tools.getTimeZone("UTC");
+        }
         final int startDateZoneOffset = tz.getOffset(startDate);
         final long endDate = cdao.containsUntil() && cdao.getUntil() != null ? cdao.getUntil().getTime() : edao.getUntil().getTime();
         long startTime = cdao.getStartDate().getTime();
