@@ -359,7 +359,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (null != cookies) {
             final String cookieName = Login.SECRET_PREFIX + hash;
             for (final Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
+                if (cookie.getName().equals(cookieName)) {
                     return cookie.getValue();
                 }
             }
