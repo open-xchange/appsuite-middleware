@@ -1,3 +1,7 @@
+* 2010-12-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #17689: Introduced batch-loading of folders, users, and user configurations
+
 * 2010-12-07 - martin.herfurth@open-xchange.com
 
  - Bugfix #17191: NullPointer during TimeZone evaluation.

@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal;
 
+import gnu.trove.TIntIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,6 +62,8 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -96,30 +99,56 @@ public final class CalculatePermission {
         final Type type = folder.getType();
         final ContentType contentType = folder.getContentType();
 
-        final java.util.List<Permission> userizedPermissions = new ArrayList<Permission>(staticPermissions.length);
-        for (final Permission staticPermission : staticPermissions) {
+        final Permission[] userizedPermissions = new Permission[staticPermissions.length];
+        final TIntIntHashMap toLoad = new TIntIntHashMap(staticPermissions.length);
+        for (int index = 0; index < staticPermissions.length; index++) {
+            final Permission staticPermission = staticPermissions[index];
             if (0 == staticPermission.getSystem()) {
                 // A non-system permission
                 if (staticPermission.isGroup()) {
-                    userizedPermissions.add(staticPermission);
+                    userizedPermissions[index] = staticPermission;
                 } else {
-                    try {
-                        final UserConfiguration userConfig = userConfStorage.getUserConfiguration(staticPermission.getEntity(), context);
-                        userizedPermissions.add(new EffectivePermission(
-                            staticPermission,
-                            id,
-                            type,
-                            contentType,
-                            userConfig,
-                            Collections.<ContentType> emptyList()));
-                    } catch (final UserConfigurationException e) {
-                        final Log logger = LogFactory.getLog(CalculatePermission.class);
-                        logger.warn("User configuration could not be loaded. Ignoring user permission.", e);
-                    }
+                    // Load appropriate user configuration
+                    toLoad.put(staticPermission.getEntity(), index);
                 }
             }
         }
-        folder.setPermissions(userizedPermissions.toArray(new Permission[userizedPermissions.size()]));
+        /*
+         * Batch-load user configurations
+         */
+        if (!toLoad.isEmpty()) {
+            final int[] userIds = toLoad.keys();
+            try {
+                final UserConfiguration[] configurations = userConfStorage.getUserConfiguration(context, UserStorage.getInstance().getUser(context, userIds));
+                for (int i = 0; i < configurations.length; i++) {
+                    final int index = toLoad.get(userIds[i]);
+                    userizedPermissions[index] = new EffectivePermission(
+                        staticPermissions[index],
+                        id,
+                        type,
+                        contentType,
+                        configurations[i],
+                        Collections.<ContentType> emptyList());
+                }
+            } catch (final UserConfigurationException e) {
+                final Log logger = LogFactory.getLog(CalculatePermission.class);
+                logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
+            } catch (final UserException e) {
+                final Log logger = LogFactory.getLog(CalculatePermission.class);
+                logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
+            }
+        }
+        /*
+         * Remove possible null values & apply to folder
+         */
+        final java.util.List<Permission> tmp = new ArrayList<Permission>(userizedPermissions.length);
+        for (int i = 0; i < userizedPermissions.length; i++) {
+            final Permission p = userizedPermissions[i];
+            if (null != p) {
+                tmp.add(p);
+            }
+        }
+        folder.setPermissions(tmp.toArray(new Permission[tmp.size()]));
     }
 
     /**

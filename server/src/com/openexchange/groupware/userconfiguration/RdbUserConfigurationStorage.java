@@ -50,14 +50,11 @@
 package com.openexchange.groupware.userconfiguration;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import static com.openexchange.tools.sql.DBUtils.getIN;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntIntHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
@@ -435,8 +432,11 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         }
     }
 
+    private static final int LIMIT = 1000;
+
     public static UserConfiguration[] loadUserConfiguration(final Context ctx, final Connection conArg, final User[] users) throws DBPoolingException, SQLException {
-        if (0 == users.length) {
+        final int length = users.length;
+        if (0 == length) {
             return new UserConfiguration[0];
         }
         final Connection con;
@@ -450,25 +450,52 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final List<UserConfiguration> retval = new ArrayList<UserConfiguration>(users.length);
+        final UserConfiguration[] retval = new UserConfiguration[length];
         try {
-            stmt = con.prepareStatement(getIN(LOAD_SOME_USER_CONFIGURATIONS, users.length));
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            final TIntObjectHashMap<User> userMap = new TIntObjectHashMap<User>(users.length, 1);
-            for (final User user : users) {
-                stmt.setInt(pos++, user.getId());
-                userMap.put(user.getId(), user);
+            final TIntIntHashMap userMap;
+            if (length <= LIMIT) {
+                final StringBuilder sb = new StringBuilder(512);
+                sb.append("SELECT u.user, u.permissions FROM user_configuration AS u");
+                if (1 == length) {
+                    sb.append(" WHERE u.user = ? AND u.cid = ?");
+                } else {
+                    sb.append(" INNER JOIN (");
+                    sb.append("SELECT ? AS user");
+                    for (int i = 1; i < length; i++) {
+                        sb.append(" UNION ALL SELECT ?");
+                    }
+                    sb.append(") AS x ON u.user = x.user WHERE u.cid = ?");
+                }
+                stmt = con.prepareStatement(sb.toString());
+                int pos = 1;
+                userMap = new TIntIntHashMap(length, 1);
+                for (int index = 0; index < length; index++) {
+                    final User user = users[index];
+                    stmt.setInt(pos++, user.getId());
+                    userMap.put(user.getId(), index);
+                }
+                stmt.setInt(pos++, ctx.getContextId());
+            } else {
+                stmt = con.prepareStatement("SELECT u.user, u.permissions FROM user_configuration AS u WHERE u.cid = ?");
+                userMap = new TIntIntHashMap(length, 1);
+                for (int index = 0; index < length; index++) {
+                    userMap.put(users[index].getId(), index);
+                }
+                stmt.setInt(1, ctx.getContextId());
             }
             result = stmt.executeQuery();
             while (result.next()) {
-                final User user = userMap.get(result.getInt(1));
-                retval.add(new UserConfiguration(result.getInt(2), user.getId(), user.getGroups(), ctx));
+                final int userId = result.getInt(1);
+                if (userMap.containsKey(userId)) {
+                    final int index = userMap.get(userId);
+                    final User user = users[index];
+                    retval[index] = new UserConfiguration(result.getInt(2), user.getId(), user.getGroups(), ctx);
+                }
             }
         } finally {
             closeResources(result, stmt, closeCon ? con : null, true, ctx);
         }
-        return retval.toArray(new UserConfiguration[retval.size()]);
+        return retval;
     }
 
     /*-
