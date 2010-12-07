@@ -1,6 +1,7 @@
 * 2010-12-07 - thorben.betten@open-xchange.com
 
  - Bugfix #17689: Introduced batch-loading of folders, users, and user configurations
+ - Bugfix #17714: Throwing a more generic error message to not confuse the user with cryptic database problems
 
 * 2010-12-07 - martin.herfurth@open-xchange.com
 

@@ -241,7 +241,7 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+            throw new UserException(UserException.Code.LOAD_FAILED, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
