@@ -53,10 +53,10 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -106,10 +106,17 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
-    private boolean checkIP = true;
+    /*-
+     * Member stuff
+     */
 
-    private static List<IPRange> ranges = new ArrayList<IPRange>(5);
+    private volatile boolean checkIP = true;
 
+    private final List<IPRange> ranges = new CopyOnWriteArrayList<IPRange>();
+
+    /**
+     * Initializes a new {@link SessionServlet}.
+     */
     protected SessionServlet() {
         super();
     }
@@ -118,7 +125,6 @@ public abstract class SessionServlet extends AJAXServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-
         if (checkIP) {
             final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             if (configurationService == null) {
