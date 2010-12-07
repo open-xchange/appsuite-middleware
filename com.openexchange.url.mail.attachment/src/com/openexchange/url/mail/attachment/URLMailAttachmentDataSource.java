@@ -123,12 +123,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
              * Check for HTTPS
              */
             final String protocol = url.getProtocol();
-            if ("https".equalsIgnoreCase(protocol)) {
-                /*
-                 * Set trust-all
-                 */
-                HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
-            } else if (!"http".equalsIgnoreCase(protocol)) {
+            if (!"https".equalsIgnoreCase(protocol) && !"http".equalsIgnoreCase(protocol)) {
                 /*
                  * Unsupported protocol
                  */
@@ -138,6 +133,9 @@ public final class URLMailAttachmentDataSource implements DataSource {
              * Open URL connection from parsed URL
              */
             urlCon = url.openConnection();
+            if ("https".equalsIgnoreCase(protocol)) {
+                ((HttpsURLConnection) urlCon).setSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
+            }
             urlCon.setConnectTimeout(timeoutMillis);
             urlCon.setReadTimeout(timeoutMillis);
             try {
