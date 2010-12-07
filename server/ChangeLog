@@ -1,3 +1,7 @@
+* 2010-12-07 - martin.herfurth@open-xchange.com
+
+ - Bugfix #17191: NullPointer during TimeZone evaluation.
+
 * 2010-11-26 - thorben.betten@open-xchange.com
 
  - Bugfix #17647: Dropping cookies on failed IP check
