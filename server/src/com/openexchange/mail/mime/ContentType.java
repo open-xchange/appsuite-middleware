@@ -442,7 +442,9 @@ public class ContentType extends ParameterizedHeader {
     }
 
     /**
-     * @return base type (e.g. text/plain)
+     * Gets this content type's base type without any parameters appended; e.g. <code>"text/plain"</code>.
+     * 
+     * @return The base type
      */
     public String getBaseType() {
         if (baseType != null) {
