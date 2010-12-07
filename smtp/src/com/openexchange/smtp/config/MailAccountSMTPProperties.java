@@ -106,20 +106,6 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         }
     }
     
-    public int getSmtpRateLimit() {
-        final String smtpRateLimitStr = properties.get("com.openexchange.smtp.smtpRateLimit");
-        if (null == smtpRateLimitStr) {
-            return SMTPProperties.getInstance().getSmtpRateLimit();
-        }
-
-        try {
-            return Integer.parseInt(smtpRateLimitStr);
-        } catch (final NumberFormatException e) {
-            LOG.error("SMTP Rate Limit: Invalid value.", e);
-            return SMTPProperties.getInstance().getSmtpRateLimit();
-        }
-    }
-
     public String getSmtpLocalhost() {
         final String smtpLocalhostStr = properties.get("com.openexchange.smtp.smtpLocalhost");
         if (null == smtpLocalhostStr) {

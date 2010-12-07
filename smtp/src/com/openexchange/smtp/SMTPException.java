@@ -113,11 +113,7 @@ public final class SMTPException extends MIMEMailException {
         /**
          * No storage access because mail connection is not connected
          */
-        NOT_CONNECTED("No storage access because mail connection is not connected", Category.CODE_ERROR, 3012),
-        /**
-         * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
-         */
-        SENT_QUOTA_EXCEEDED("Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.", Category.CODE_ERROR, 3013);
+        NOT_CONNECTED("No storage access because mail connection is not connected", Category.CODE_ERROR, 3012);
 
 
         private final String message;

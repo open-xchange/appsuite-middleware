@@ -57,6 +57,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.Collator;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -112,6 +114,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.JSONMessageCache;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.cache.MailPrefetcherCallable;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -169,6 +172,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final MailField[] FIELDS_ID_INFO = new MailField[] { MailField.ID, MailField.FOLDER_ID };
 
     private static final MailField[] HEADERS = { MailField.ID, MailField.HEADERS };
+
+    private static final String LAST_SEND_TIME = "com.openexchange.mail.lastSendTimestamp";
 
     private static final String[] STR_ARR = new String[0];
 
@@ -1935,7 +1940,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Finally send mail
                  */
-                transport.sendMailMessage(composedMail, ComposeType.NEW);
+                final MailProperties properties = MailProperties.getInstance();
+                if ((properties.getRateLimitPrimaryOnly() && MailAccount.DEFAULT_ID == accountId) || !properties.getRateLimitPrimaryOnly()) {
+                    final int rateLimit = properties.getRateLimit();
+                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
+                    transport.sendMailMessage(composedMail, ComposeType.NEW);
+                    setRateLimitTime(rateLimit);
+                } else {
+                    transport.sendMailMessage(composedMail, ComposeType.NEW);
+                }
             }
         } catch (final LdapException e) {
             throw new MailException(e);
@@ -1959,8 +1972,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Send mail
              */
-            final long startTransport = System.currentTimeMillis();
-            final MailMessage sentMail = transport.sendMailMessage(composedMail, type);
+            
+            final long startTransport;
+            final MailMessage sentMail;
+            startTransport = System.currentTimeMillis();
+            final MailProperties properties = MailProperties.getInstance();
+            if ((properties.getRateLimitPrimaryOnly() && MailAccount.DEFAULT_ID == accountId) || !properties.getRateLimitPrimaryOnly()) {
+                final int rateLimit = properties.getRateLimit();
+                rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
+                sentMail = transport.sendMailMessage(composedMail, type);
+                setRateLimitTime(rateLimit);
+            } else {
+                sentMail = transport.sendMailMessage(composedMail, type);
+            }
             /*
              * Email successfully sent, trigger data retention
              */
@@ -2280,6 +2304,38 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } finally {
             transport.close();
         }
+    }
+
+    private void setRateLimitTime(final int rateLimit) {
+        if (rateLimit > 0) {
+            synchronized (session) {
+                session.setParameter(LAST_SEND_TIME, Long.valueOf(System.currentTimeMillis()));
+            }
+        }
+    }
+
+    private void rateLimitChecks(final ComposedMailMessage composedMail, final int rateLimit, final int maxToCcBcc) throws MailException {
+        if (rateLimit > 0) {
+            synchronized (session) {
+                final Long parameter = (Long) session.getParameter(LAST_SEND_TIME);
+                if (null != parameter && (parameter.longValue() + rateLimit) >= System.currentTimeMillis()) {
+                    final NumberFormat numberInstance = DecimalFormat.getNumberInstance(UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale());
+                    throw new MailException(MailException.Code.SENT_QUOTA_EXCEEDED, numberInstance.format(((double) rateLimit) / 1000));
+                }
+            }
+        }
+        if (maxToCcBcc > 0) {
+            synchronized (session) {
+                int count = (composedMail.getTo() == null ? 0 : composedMail.getTo().length);
+                count += (composedMail.getCc() == null ? 0 : composedMail.getCc().length);
+                count += (composedMail.getBcc() == null ? 0 : composedMail.getBcc().length);
+
+                if (count > maxToCcBcc) {
+                    throw new MailException(MailException.Code.RECIPIENTS_EXCEEDED, maxToCcBcc);
+                }
+            }
+        }
+        
     }
 
     @Override

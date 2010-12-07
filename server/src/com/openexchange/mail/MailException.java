@@ -388,7 +388,18 @@ public class MailException extends AbstractOXException {
         /**
          * Mail could not be found in folder %1$s for Message-Id: %2$s
          */
-        MAIL_NOT_FOUN_BY_MESSAGE_ID("Mail could not be found in folder %1$s for Message-Id: %2$s", Category.CODE_ERROR, 32);
+        MAIL_NOT_FOUN_BY_MESSAGE_ID("Mail could not be found in folder %1$s for Message-Id: %2$s", Category.CODE_ERROR, 32),
+        
+        /**
+         * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
+         */
+        SENT_QUOTA_EXCEEDED("Sent quota exceeded, you are only allowed to send 1 mail in %1$s seconds.", Category.CODE_ERROR, 75),
+
+        /**
+         * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
+         */
+        RECIPIENTS_EXCEEDED("Please limit your recipients to %1$s  (including To/Cc/Bcc), and click 'Send' again.", Category.CODE_ERROR, 76);
+
 
         private final String message;
 

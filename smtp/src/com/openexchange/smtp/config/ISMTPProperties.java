@@ -95,11 +95,4 @@ public interface ISMTPProperties extends ITransportProperties {
      */
     public int getSmtpConnectionTimeout();
 
-    /**
-     * Gets the smtpRateLimit
-     * 
-     * @return the smtpRateLimit
-     */
-    public int getSmtpRateLimit();
-
 }
