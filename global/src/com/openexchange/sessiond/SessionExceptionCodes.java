@@ -49,7 +49,22 @@
 
 package com.openexchange.sessiond;
 
-import static com.openexchange.sessiond.SessionExceptionMessages.*;
+import static com.openexchange.sessiond.SessionExceptionMessages.CONTEXT_LOCKED_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.DUPLICATE_AUTHID_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_EXCEPTION_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_PER_USER_EXCEPTION_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.MISSING_PROPERTY_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.PASSWORD_UPDATE_FAILED_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.SESSIOND_CONFIG_EXCEPTION_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.SESSIOND_EXCEPTION_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.SESSIONID_COLLISION_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_EXPIRED_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_PARAMETER_MISSING_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.UNKNOWN_EVENT_TOPIC_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_BY_RANDOM_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_CLIENT_IP_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_SESSION_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_SESSION_SECRET_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
@@ -61,40 +76,57 @@ import com.openexchange.sessiond.exception.SessionExceptionFactory;
  */
 public enum SessionExceptionCodes implements OXErrorMessage {
 
+    /**
+     * Sessiond Exception
+     */
     SESSIOND_EXCEPTION(SESSIOND_EXCEPTION_MSG, Category.CODE_ERROR, 1),
-
+    /**
+     * Max Session size reached
+     */
     MAX_SESSION_EXCEPTION(MAX_SESSION_EXCEPTION_MSG, Category.CODE_ERROR, 2),
-
+    /**
+     * Sessiond Config Exception
+     */
     SESSIOND_CONFIG_EXCEPTION(SESSIOND_CONFIG_EXCEPTION_MSG, Category.CODE_ERROR, 3),
-
+    /**
+     * Missing property '%s'
+     */
     MISSING_PROPERTY(MISSING_PROPERTY_MSG, Category.SETUP_ERROR, 4),
-
     /** Unknown event topic %s */
     UNKNOWN_EVENT_TOPIC(UNKNOWN_EVENT_TOPIC_MSG, Category.CODE_ERROR, 5),
-
     /** Password could not be changed */
     PASSWORD_UPDATE_FAILED(PASSWORD_UPDATE_FAILED_MSG, Category.CODE_ERROR, 6),
-
     /** Max. session size for user %1$s in context %2$s exceeded */
     MAX_SESSION_PER_USER_EXCEPTION(MAX_SESSION_PER_USER_EXCEPTION_MSG, Category.CODE_ERROR, 7),
-
     /** Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s. */
     DUPLICATE_AUTHID(DUPLICATE_AUTHID_MSG, Category.CODE_ERROR, 8),
     /** SessionD returned wrong session with identifier %1$s for given session identifier %2$s. */
     WRONG_SESSION(WRONG_SESSION_MSG, Category.CODE_ERROR, 9),
-    /** Got a collision while adding a new session to the session container. Colliding session has login %1$s and new session has login %2$s. */
+    /**
+     * Got a collision while adding a new session to the session container. Colliding session has login %1$s and new session has login %2$s.
+     */
     SESSIONID_COLLISION(SESSIONID_COLLISION_MSG, Category.CODE_ERROR, 10),
     /** Received wrong session %1$s having random %2$s when looking for random %3$s and session %4$s. */
     WRONG_BY_RANDOM(WRONG_BY_RANDOM_MSG, Category.CODE_ERROR, 11),
-
+    /**
+     * The session parameter is missing.
+     */
     SESSION_PARAMETER_MISSING(SESSION_PARAMETER_MISSING_MSG, Category.CODE_ERROR, 201, "Every AJAX request must contain a parameter named \"session\" that value contains the identifier of the session cookie."),
-
+    /**
+     * Your session %s expired. Please start a new browser session.
+     */
     SESSION_EXPIRED(SESSION_EXPIRED_MSG, Category.TRY_AGAIN, 203, "A session with the given identifier can not be found."),
-
+    /**
+     * Context is locked.
+     */
     CONTEXT_LOCKED(CONTEXT_LOCKED_MSG, Category.TRY_AGAIN, 204),
-
+    /**
+     * Request to server was refused. Original client IP address changed. Please try again.
+     */
     WRONG_CLIENT_IP(WRONG_CLIENT_IP_MSG, Category.PERMISSION, 205, "The client IP address of all session requests are checked to see whether they match the IP address when the session was created."),
-
+    /**
+     * Session secret is different. Given %1$s differs from %2$s in session.
+     */
     WRONG_SESSION_SECRET(WRONG_SESSION_SECRET_MSG, Category.TRY_AGAIN, 206);
 
     private final String message;
