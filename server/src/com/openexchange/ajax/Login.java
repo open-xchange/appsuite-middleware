@@ -309,7 +309,7 @@ public class Login extends AJAXServlet {
                             if (!newIP.equals(oldIP)) { // IPs differ
                                 final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                                 if (configurationService == null) {
-                                    LOG.fatal("No configuration service available, can not read whitelist");
+                                    LOG.fatal("No configuration service available, can neither read IP check configuration nor whitelist");
                                     LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + " old ip: " + oldIP + " new ip: " + newIP);
                                     session.setLocalIp(newIP);
                                 } else {
