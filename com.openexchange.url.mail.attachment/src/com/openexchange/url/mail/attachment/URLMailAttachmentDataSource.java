@@ -164,7 +164,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                     final String tmp = contentType.getCharsetParameter();
                     charset = null == tmp ? MailProperties.getInstance().getDefaultMimeCharset() : tmp;
                 } else {
-                    charset = sCharset;
+                    charset = sCharset.trim();
                 }
             }
             properties.put(DataProperties.PROPERTY_CHARSET, charset);
@@ -174,7 +174,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
             final String size;
             {
                 final String sSize = dataArguments.get("size");
-                size = null == sSize ? String.valueOf(urlCon.getContentLength()) : sSize;
+                size = null == sSize ? String.valueOf(urlCon.getContentLength()) : sSize.trim();
             }
             properties.put(DataProperties.PROPERTY_SIZE, size);
             /*
@@ -191,8 +191,8 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 } else {
                     contentDisposition = new ContentDisposition(cds);
                 }
-                disposition = null == sDisp ? contentDisposition.getDisposition() : sDisp;
-                fileName = null == sFileName ? contentDisposition.getFilenameParameter() : sFileName;
+                disposition = null == sDisp ? contentDisposition.getDisposition() : sDisp.trim();
+                fileName = null == sFileName ? contentDisposition.getFilenameParameter() : sFileName.trim();
             }
             properties.put(DataProperties.PROPERTY_NAME, fileName);
             properties.put(DataProperties.PROPERTY_DISPOSITION, disposition);
