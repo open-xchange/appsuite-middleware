@@ -120,15 +120,15 @@ public abstract class SessionServlet extends AJAXServlet {
         checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
 
         if (checkIP) {
-            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             if (configurationService == null) {
                 LOG.fatal("No configuration service available, can not read whitelist");
             } else {
-                String text = configurationService.getText(SESSION_WHITELIST_FILE);
+                final String text = configurationService.getText(SESSION_WHITELIST_FILE);
                 if (text == null) {
                     LOG.info("No exceptions from IP Check have been defined.");
                 } else {
-                    String[] lines = text.split("\n");
+                    final String[] lines = text.split("\n");
                     for (String line : lines) {
                         line = line.replaceAll("\\s", "");
                         if (!line.equals("") && !line.startsWith("#")) {
@@ -141,7 +141,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     }
 
-    protected void initializeSession(HttpServletRequest req) throws SessiondException, AbstractOXException {
+    protected void initializeSession(final HttpServletRequest req) throws SessiondException, AbstractOXException {
         if(null != getSessionObject(req)) {
             return ;
         }
@@ -153,7 +153,7 @@ public abstract class SessionServlet extends AJAXServlet {
             throw new SessiondException(
                 new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
         }
-        String sessionId = getSessionId(req);
+        final String sessionId = getSessionId(req);
         final ServerSession session = getSession(req, sessionId, sessiondService);
         if (!sessionId.equals(session.getSessionID())) {
             throw SessionExceptionCodes.WRONG_SESSION.create();
@@ -276,7 +276,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private static boolean isWhitelistedFromIPCheck(String actual, List<IPRange> ranges) {
+    private static boolean isWhitelistedFromIPCheck(final String actual, final List<IPRange> ranges) {
         for (final IPRange range : ranges) {
             if (range.contains(actual)) {
                 return true;
@@ -329,7 +329,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (null == session) {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
-        String secret = extractSecret(session.getHash(), req.getCookies());
+        final String secret = extractSecret(session.getHash(), req.getCookies());
 
         if (secret == null || !session.getSecret().equals(secret)) {
             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
@@ -342,17 +342,24 @@ public abstract class SessionServlet extends AJAXServlet {
             if (!user.isMailEnabled()) {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
-        } catch (UndeclaredThrowableException e) {
+        } catch (final UndeclaredThrowableException e) {
             throw new UserException(UserException.Code.USER_NOT_FOUND, e, I(session.getUserId()), I(session.getContextId()));
         }
         return new ServerSessionAdapter(session, context, user);
     }
 
-    public static String extractSecret(String hash, Cookie[] cookies) {
+    /**
+     * Extracts the secret string from specified cookies using given hash string.
+     * 
+     * @param hash The hash string identifying appropriate cookie
+     * @param cookies The cookies
+     * @return The secret string or <code>null</code>
+     */
+    public static String extractSecret(final String hash, final Cookie[] cookies) {
         if (null != cookies) {
-            String cookieName = Login.SECRET_PREFIX + hash;
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(cookieName)) {
+            final String cookieName = Login.SECRET_PREFIX + hash;
+            for (final Cookie cookie : cookies) {
+                if (cookieName.equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

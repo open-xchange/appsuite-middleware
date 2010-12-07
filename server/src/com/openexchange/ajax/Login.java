@@ -453,7 +453,7 @@ public class Login extends AJAXServlet {
         final String oldIP = session.getLocalIp();
         if (null != newIP && !newIP.equals(oldIP)) { // IPs differ
             LOG.info(new StringBuilder("Updating sessions IP address. authID: ").append(session.getAuthId()).append(", sessionID: ").append(
-                session.getSessionID()).append(" old ip: ").append(oldIP).append(" new ip: ").append(newIP).toString());
+                session.getSessionID()).append(", old ip: ").append(oldIP).append(", new ip: ").append(newIP).toString());
             session.setLocalIp(newIP);
         }
     }
