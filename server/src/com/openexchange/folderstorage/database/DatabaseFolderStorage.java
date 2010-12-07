@@ -758,6 +758,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
+            final UserConfiguration userConfiguration;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                } else {
+                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+                }
+            }
 
             final int iType = getTypeByFolderTypeWithShared(type);
             final int iModule = getModuleByContentType(contentType);
@@ -765,7 +774,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
                     userId,
                     user.getGroups(),
-                    new int[] { iModule },
+                    userConfiguration.getAccessibleModules(),
                     iType,
                     new int[] { iModule },
                     ctx, con)).asList();
@@ -785,15 +794,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                      * Add global address book manually
                      */
                     final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
-                    final UserConfiguration userConfiguration;
-                    {
-                        final Session s = storageParameters.getSession();
-                        if (s instanceof ServerSession) {
-                            userConfiguration = ((ServerSession) s).getUserConfiguration();
-                        } else {
-                            userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
-                        }
-                    }
                     if (gab.isVisible(userId, userConfiguration)) {
                         gab.setFolderName(new StringHelper(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                         list.add(gab);
