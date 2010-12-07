@@ -359,7 +359,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (null != cookies) {
             final String cookieName = Login.SECRET_PREFIX + hash;
             for (final Cookie cookie : cookies) {
-                if (cookie.getName().equals(cookieName)) {
+                if (cookieName.equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
@@ -377,6 +377,13 @@ public abstract class SessionServlet extends AJAXServlet {
         req.setAttribute(SESSION_KEY, session);
     }
 
+    /**
+     * Removes the Open-Xchange cookies belonging to specified hash string.
+     * 
+     * @param hash The hash string identifying appropriate cookie
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     */
     public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
