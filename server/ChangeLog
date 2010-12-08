@@ -1,3 +1,7 @@
+* 2010-12-08 - martin.herfurth@open-xchange.com
+
+ - Bugfix #17662: Changing recurrence type.
+
 * 2010-12-08 - thorben.betten@open-xchange.com
 
  - Bugfix #17758: Fixed NPE

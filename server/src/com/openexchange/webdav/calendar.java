@@ -72,6 +72,7 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -189,7 +190,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
             appointmentobject.setAlarm(-1);
         }
         // For updates to series when switching from a limited series with until and occurrences to an unlimited series, we have to set "until" to null.
-        if (appointmentobject.containsRecurrenceType() && ! isLimitedSeries(appointmentobject)) {
+        if (appointmentobject.containsRecurrenceType() && appointmentobject.getRecurrenceType() != CalendarObject.NO_RECURRENCE && ! isLimitedSeries(appointmentobject)) {
             appointmentobject.setUntil(null);
         }
         // For removing the sequence information we need to tell the server that the appointment no longer has a recurrence type.
