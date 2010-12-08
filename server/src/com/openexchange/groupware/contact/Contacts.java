@@ -70,10 +70,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import org.apache.commons.logging.Log;
@@ -486,6 +486,8 @@ public final class Contacts {
                 }
             }
         }
+
+        USER_CACHE.remove(Integer.valueOf(so.getContextId()));
     }
 
     public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXPermissionException {
@@ -847,6 +849,8 @@ public final class Contacts {
                 }
             }
         }
+
+        USER_CACHE.remove(Integer.valueOf(ctx.getContextId()));
     }
 
     public static void performUserContactStorageUpdate(Contact contact, java.util.Date lastModified, int userId, int[] groups, Context ctx, UserConfiguration userConfig) throws ContactException, OXPermissionException, OXObjectNotFoundException, OXConflictException, OXConcurrentModificationException {
@@ -1087,6 +1091,8 @@ public final class Contacts {
                 }
             }
         }
+
+        USER_CACHE.remove(Integer.valueOf(ctx.getContextId()));
     }
 
     public static Contact getUserById(final int userId, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
@@ -1109,26 +1115,65 @@ public final class Contacts {
 
     private static final int LIMIT = 1000;
 
+    private static final class UserCacheEntry {
+        
+        public final TIntObjectHashMap<Contact> contacts;
+        
+        public final long timestamp;
+
+        public UserCacheEntry(TIntObjectHashMap<Contact> contacts, long timestamp) {
+            super();
+            this.contacts = contacts;
+            this.timestamp = timestamp;
+        }
+        
+    } // End of UserCacheEntry
+
+    private static final ConcurrentMap<Integer, UserCacheEntry> USER_CACHE = new ConcurrentHashMap<Integer, UserCacheEntry>();
+
+    private static final int TIMEOUT = 300000;
+
     public static Contact[] getUsersById(int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
-        final ContactSql contactSQL = new ContactMySql(ctx, user);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 650; i++) {
-            if (mapping[i] != null) {
-                sb.append(',');
-                sb.append("co.");
-                sb.append(mapping[i].getDBFieldName());
+        final Integer key = Integer.valueOf(ctx.getContextId());
+        UserCacheEntry entry = USER_CACHE.get(key);
+        if (entry != null && (System.currentTimeMillis() - entry.timestamp) > TIMEOUT) {
+            USER_CACHE.remove(key);
+            entry = null;
+        }
+        final TIntObjectHashMap<Contact> contacts;
+        if (entry == null) {
+            final ContactSql contactSQL = new ContactMySql(ctx, user);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 650; i++) {
+                if (mapping[i] != null) {
+                    sb.append(',');
+                    sb.append("co.");
+                    sb.append(mapping[i].getDBFieldName());
+                }
             }
+            sb.deleteCharAt(0);
+            sb = contactSQL.iFgetContactById(sb.toString());
+            contactSQL.setSelect(sb.toString());
+            if (userIds.length <= LIMIT) {
+                /*
+                 * Load only relevant contacts; otherwise filtering is implicitly done by fetching only relevant user IDs from returned map.
+                 */
+                contactSQL.setInternalUsers(userIds);
+                contacts = fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon);
+            } else {
+                /*
+                 * We're going to load all contacts for specified context
+                 */
+                final UserCacheEntry newentry = new UserCacheEntry(fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon), System.currentTimeMillis());
+                entry = USER_CACHE.putIfAbsent(key, newentry);
+                if (null == entry) {
+                    entry = newentry;
+                }
+                contacts = entry.contacts;
+            }
+        } else {
+            contacts = entry.contacts;
         }
-        sb.deleteCharAt(0);
-        sb = contactSQL.iFgetContactById(sb.toString());
-        contactSQL.setSelect(sb.toString());
-        if (userIds.length <= LIMIT) {
-            /*
-             * Load only relevant contacts; otherwise filtering is implicitly done by fetching only relevant user IDs from returned map.
-             */
-            contactSQL.setInternalUsers(userIds);
-        }
-        final TIntObjectHashMap<Contact> contacts = fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon);
         final Contact[] retval = new Contact[userIds.length];
         for (int i = 0; i < userIds.length; i++) {
             final Contact contact = contacts.get(userIds[i]);
@@ -1247,6 +1292,8 @@ public final class Contacts {
             } else {
                 cs.iFdeleteContact(id, cid, del);
             }
+
+            USER_CACHE.remove(Integer.valueOf(cid));
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
@@ -1666,6 +1713,8 @@ public final class Contacts {
                 }
                 ps.execute();
             }
+
+            USER_CACHE.remove(Integer.valueOf(cid));
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
@@ -1726,6 +1775,8 @@ public final class Contacts {
 
         deleteLinkEntriesByIds(id, deletecut, cid, writecon);
         writeContactLinkArrayInsert(insertcut, id, cid, writecon);
+
+        USER_CACHE.remove(Integer.valueOf(cid));
     }
 
     public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws ContactException {
@@ -1752,6 +1803,8 @@ public final class Contacts {
             } finally {
                 closeSQLStuff(ps);
             }
+
+            USER_CACHE.remove(Integer.valueOf(cid));
         }
     }
 
@@ -1838,6 +1891,8 @@ public final class Contacts {
                 LOG.debug(new StringBuilder("INSERT IMAGE ").append(ps.toString()));
             }
             ps.execute();
+
+            USER_CACHE.remove(Integer.valueOf(cid));
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
@@ -1865,6 +1920,8 @@ public final class Contacts {
                 LOG.debug(new StringBuilder("UPDATE IMAGE ").append(ps.toString()));
             }
             ps.execute();
+
+            USER_CACHE.remove(Integer.valueOf(cid));
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
@@ -2274,6 +2331,8 @@ public final class Contacts {
                 LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
             }
             del.execute(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
+
+            USER_CACHE.remove(Integer.valueOf(so.getContextId()));
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final EventException e) {
@@ -2315,6 +2374,8 @@ public final class Contacts {
         try {
             final ContactSql cs = new ContactMySql(null);
             cs.iFtrashLinks(delete, stmt, id, cid);
+
+            USER_CACHE.remove(Integer.valueOf(cid));
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException sxe) {
@@ -2333,6 +2394,8 @@ public final class Contacts {
         try {
             final ContactSql cs = new ContactMySql(null);
             cs.iFtrashImage(delete, stmt, id, cid);
+
+            USER_CACHE.remove(Integer.valueOf(cid));
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException sxe) {
@@ -2443,6 +2506,8 @@ public final class Contacts {
             } else {
                 cs.iFtrashAllUserContactsDeletedEntries(del, so.getContextId(), uid, ct);
             }
+
+            USER_CACHE.remove(Integer.valueOf(so.getContextId()));
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
