@@ -6,6 +6,7 @@
 
  - Bugfix #17758: Fixed NPE
  - Bugfix #17722: Fixed renaming of folders created in POP3 account
+ - Bugfix #17762: Allowing "editpassword" module access for all module access combinations (webmail, pim, etc.)
 
 * 2010-12-07 - thorben.betten@open-xchange.com
 
