@@ -218,23 +218,27 @@ public final class MailFolderImpl extends AbstractFolder {
                     mailFolderType = MailFolderType.NONE;
                 }
             } else if (null != fullname) {
-                try {
-                    if (fullname.equals(fullnameProvider.getDraftsFolder())) {
-                        mailFolderType = MailFolderType.DRAFTS;
-                    } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
-                        mailFolderType = MailFolderType.INBOX;
-                    } else if (fullname.equals(fullnameProvider.getSentFolder())) {
-                        mailFolderType = MailFolderType.SENT;
-                    } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
-                        mailFolderType = MailFolderType.SPAM;
-                    } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
-                        mailFolderType = MailFolderType.TRASH;
-                    } else {
+                if (null == fullnameProvider) {
+                    mailFolderType = MailFolderType.ROOT;
+                } else {
+                    try {
+                        if (fullname.equals(fullnameProvider.getDraftsFolder())) {
+                            mailFolderType = MailFolderType.DRAFTS;
+                        } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
+                            mailFolderType = MailFolderType.INBOX;
+                        } else if (fullname.equals(fullnameProvider.getSentFolder())) {
+                            mailFolderType = MailFolderType.SENT;
+                        } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
+                            mailFolderType = MailFolderType.SPAM;
+                        } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
+                            mailFolderType = MailFolderType.TRASH;
+                        } else {
+                            mailFolderType = MailFolderType.NONE;
+                        }
+                    } catch (final MailException e) {
+                        org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class).error(e.getMessage(), e);
                         mailFolderType = MailFolderType.NONE;
                     }
-                } catch (final MailException e) {
-                    org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class).error(e.getMessage(), e);
-                    mailFolderType = MailFolderType.NONE;
                 }
             } else {
                 mailFolderType = MailFolderType.NONE;

@@ -1,3 +1,7 @@
+* 2010-12-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #17758: Fixed NPE
+
 * 2010-12-07 - thorben.betten@open-xchange.com
 
  - Bugfix #17689: Introduced batch-loading of folders, users, and user configurations
