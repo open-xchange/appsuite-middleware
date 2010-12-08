@@ -156,6 +156,25 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-532
+   # -----------------------------------------------------------------------
+   smtpc=/opt/open-xchange/etc/groupware/smtp.properties
+   mailc=/opt/open-xchange/etc/groupware/mail.properties
+   oval=0
+   if ox_exists_property com.openexchange.smtp.smtpRateLimit $smtpc; then
+      local oval=$(ox_read_property com.openexchange.smtp.smtpRateLimit $smtpc)
+      ox_remove_property com.openexchange.smtp.smtpRateLimit $smtpc
+   fi
+   if ! ox_exists_property com.openexchange.mail.rateLimit $mailc; then
+      ox_set_property com.openexchange.mail.rateLimit $oval $mailc
+   fi
+   if ! ox_exists_property com.openexchange.mail.rateLimitPrimaryOnly $mailc; then
+      ox_set_property com.openexchange.mail.rateLimitPrimaryOnly true $mailc
+   fi
+   if ! ox_exists_property com.openexchange.mail.maxToCcBcc $mailc; then
+      ox_set_property com.openexchange.mail.maxToCcBcc 0 $mailc
+   fi
+
    # SoftwareChange_Request-519
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/file-logging.properties
