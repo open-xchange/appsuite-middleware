@@ -45,16 +45,20 @@
 
 
 OXFUNCTIONS=/opt/open-xchange/etc/oxfunctions.sh
-if [ ! -f $OXFUNCTIONS ]; then
-	echo "$OXFUNCTIONS missing, exiting"
-	if [ "$1" = "stop" ]; then
-	    exit 0
-	else
-	    exit 5
+OXCONFIG=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
+for f in $OXFUNCTIONS $OXCONFIG; do
+	if [ ! -f $f ]; then
+		echo "$f missing, exiting"
+		if [ "$1" = "stop" ]; then
+		    exit 0
+		else
+		    exit 5
+		fi
 	fi
-fi
+	. $f
+done
 
-. $OXFUNCTIONS
+
 
 # Check for missing binaries (stale symlinks should not happen)
 # Note: Special treatment of stop for LSB conformance
@@ -189,6 +193,8 @@ rc_reset
 # or restarting a not-running service as well as the restart
 # with force-reload (in case signaling is not supported) are
 # considered a success.
+
+ulimit -n $NRFILES
 
 case "$1" in
     start)
