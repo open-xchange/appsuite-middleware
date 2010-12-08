@@ -1133,7 +1133,7 @@ public final class Contacts {
 
     private static final int TIMEOUT = 300000;
 
-    public static Contact[] getUsersById(int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
+    public static Contact[] getUsersById(final int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
         final Integer key = Integer.valueOf(ctx.getContextId());
         UserCacheEntry entry = USER_CACHE.get(key);
         if (entry != null && (System.currentTimeMillis() - entry.timestamp) > TIMEOUT) {
