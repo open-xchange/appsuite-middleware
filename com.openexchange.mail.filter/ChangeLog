@@ -1,3 +1,8 @@
+* 2010-12-08 - dennis.sieben@open-xchange.com
+
+  - Bugfix #17776: "not" tests are not written back correctly
+    - Added special case for "not" in RuleConverter
+
 * 2010-09-21 - steffen.templin@open-xchange.com
 
  - Bugfix #16747: After removal of the admin mode oxadmin is able to manage 
