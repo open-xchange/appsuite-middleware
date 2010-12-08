@@ -389,7 +389,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
          * 
          * Append HttpOnly flag
          */
-        if (httpOnly) {
+        if (httpOnly /*&& maxAge > 0*/) {
             composer.append("; HttpOnly");
         }
         return composer.toString();
