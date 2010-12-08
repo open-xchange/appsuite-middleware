@@ -62,7 +62,9 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.FileMetadata;
+import com.openexchange.groupware.dataRetrieval.config.Configuration;
 import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
+import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.groupware.dataRetrieval.servlets.Paths;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.tools.servlet.AjaxException;
@@ -125,7 +127,8 @@ public class RetrievalActions implements AJAXActionServiceFactory {
         }
 
         private String getURI(String token, AJAXRequestData request) {
-            return request.constructURL(null, Paths.FILE_DELIVERY_PATH, true, "token=" + token).toString();
+            Configuration configuration = Services.getConfiguration();
+            return request.constructURL(configuration.getForcedProtocol() , Paths.FILE_DELIVERY_PATH, true, "token=" + token).toString();
         }
 
         private JSONObject toJSON(final FileMetadata metadata, String uri) throws AjaxException {

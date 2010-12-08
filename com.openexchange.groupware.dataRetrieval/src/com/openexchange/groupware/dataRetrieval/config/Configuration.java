@@ -61,9 +61,12 @@ import com.openexchange.config.ConfigurationService;
 public class Configuration {
     public static final String LIFETIME_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.lifetime";
     public static final String ISONETIME_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.onetime";
+    private static final String FORCE_PROTOCOL_NAME = "com.openexchange.groupware.dataRetrieval.forceProtocol";
     
     private long lifetime;
     private boolean expireAfterAccess;
+    private String forceProtocol = null;
+    
     
     public Configuration(ConfigurationService service) {
         String lifetime = service.getProperty(LIFETIME_OPTIONS_NAME);
@@ -79,6 +82,8 @@ public class Configuration {
         } else {
             expireAfterAccess = Boolean.parseBoolean(onetime.trim());
         }
+        
+        forceProtocol = service.getProperty(FORCE_PROTOCOL_NAME);
     }
     
     public Configuration(int lifetime, boolean expireAfterAccess) {
@@ -108,6 +113,11 @@ public class Configuration {
             return false;
         }
         return created + lifetime < System.currentTimeMillis();
+    }
+    
+    
+    public String getForcedProtocol() {
+        return forceProtocol;
     }
     
     

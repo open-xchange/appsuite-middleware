@@ -134,7 +134,7 @@ public class FileDeliveryServlet extends HttpServlet {
     }
 
     private InputStream setHeaders(InputStream stream, FileMetadata metadata, HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException, IOException {
-        InputStream in = new BufferedInputStream(stream);
+        InputStream in = new BufferedInputStream(stream); // FIXME: How come backends don't supply correct size? This has memory implications that are not so nice.
         ByteArrayOutputStream out = new ByteArrayOutputStream((int) metadata.getSize());
         int count = 0;
         int value = 0;
