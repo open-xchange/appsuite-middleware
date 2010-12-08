@@ -5,6 +5,7 @@
 * 2010-12-08 - thorben.betten@open-xchange.com
 
  - Bugfix #17758: Fixed NPE
+ - Bugfix #17722: Fixed renaming of folders created in POP3 account
 
 * 2010-12-07 - thorben.betten@open-xchange.com
 

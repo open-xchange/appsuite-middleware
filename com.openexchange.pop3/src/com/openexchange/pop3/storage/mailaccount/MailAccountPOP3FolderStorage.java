@@ -584,9 +584,15 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     public String renameFolder(final String fullname, final String newName) throws MailException {
         final MailFolder realMailFolder = delegatee.getFolder(getRealFullname(fullname));
-        final String newFullname =
-            new StringBuilder(stripPathFromFullname(path, realMailFolder.getParentFullname())).append(storage.getSeparator()).append(
-                realMailFolder.getName()).toString();
+        final String newFullname;
+        {
+            final String parent = stripPathFromFullname(path, realMailFolder.getParentFullname());
+            if (MailFolder.DEFAULT_FOLDER_ID.equals(parent)) {
+                newFullname = newName;
+            } else {
+                newFullname = new StringBuilder(parent).append(storage.getSeparator()).append(newName).toString();
+            }
+        }
         return moveFolder(fullname, newFullname);
     }
 
@@ -628,7 +634,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     private String[] getParentAndName(final String fullname, final char separator) {
         final int pos = fullname.lastIndexOf(separator);
         if (-1 == pos) {
-            return new String[] { null, MailFolder.DEFAULT_FOLDER_ID };
+            return new String[] { MailFolder.DEFAULT_FOLDER_ID, fullname };
         }
         return new String[] { fullname.substring(0, pos), fullname.substring(pos + 1) };
     }
