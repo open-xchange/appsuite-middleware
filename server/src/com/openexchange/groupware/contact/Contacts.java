@@ -72,8 +72,12 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import org.apache.commons.logging.Log;
@@ -1129,13 +1133,23 @@ public final class Contacts {
         
     } // End of UserCacheEntry
 
-    private static final ConcurrentMap<Integer, UserCacheEntry> USER_CACHE = new ConcurrentHashMap<Integer, UserCacheEntry>();
+    private static final ConcurrentMap<Integer, Future<UserCacheEntry>> USER_CACHE = new ConcurrentHashMap<Integer, Future<UserCacheEntry>>();
 
     private static final int TIMEOUT = 300000;
 
     public static Contact[] getUsersById(final int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
         final Integer key = Integer.valueOf(ctx.getContextId());
-        UserCacheEntry entry = USER_CACHE.get(key);
+        UserCacheEntry entry;
+        {
+            final Future<UserCacheEntry> f = USER_CACHE.get(key);
+            try {
+                entry = null == f ? null : f.get();
+            } catch (final InterruptedException e) {
+                entry = null;
+            } catch (final ExecutionException e) {
+                entry = null;
+            }
+        }
         if (entry != null && (System.currentTimeMillis() - entry.timestamp) > TIMEOUT) {
             USER_CACHE.remove(key);
             entry = null;
@@ -1164,12 +1178,27 @@ public final class Contacts {
                 /*
                  * We're going to load all contacts for specified context
                  */
-                final UserCacheEntry newentry = new UserCacheEntry(fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon), System.currentTimeMillis());
-                entry = USER_CACHE.putIfAbsent(key, newentry);
-                if (null == entry) {
-                    entry = newentry;
+                Future<UserCacheEntry> f = USER_CACHE.get(key);
+                if (null == f) {
+                    final FutureTask<UserCacheEntry> ft = new FutureTask<UserCacheEntry>(new Callable<UserCacheEntry>() {
+
+                        public UserCacheEntry call() throws Exception {
+                            return new UserCacheEntry(fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon), System.currentTimeMillis());
+                        }
+                    });
+                    f = USER_CACHE.putIfAbsent(key, ft);
+                    if (null == f) {
+                        f = ft;
+                        ft.run();
+                    }
                 }
-                contacts = entry.contacts;
+                try {
+                    contacts = f.get().contacts;
+                } catch (final InterruptedException e) {
+                    throw ContactExceptionCodes.LOAD_OBJECT_FAILED.create(e, I(ctx.getContextId()), I(user));
+                } catch (final ExecutionException e) {
+                    throw ContactExceptionCodes.LOAD_OBJECT_FAILED.create(e.getCause(), I(ctx.getContextId()), I(user));
+                }
             }
         } else {
             contacts = entry.contacts;
@@ -1247,7 +1276,7 @@ public final class Contacts {
         return co;
     }
 
-    private static TIntObjectHashMap<Contact> fillContactObject(ContactSql contactSQL, int user, int[] group, Context ctx, UserConfiguration uc, Connection con) throws ContactException {
+    static TIntObjectHashMap<Contact> fillContactObject(ContactSql contactSQL, int user, int[] group, Context ctx, UserConfiguration uc, Connection con) throws ContactException {
         final TIntObjectHashMap<Contact> contacts = new TIntObjectHashMap<Contact>();
         PreparedStatement stmt = null;
         ResultSet result = null;
