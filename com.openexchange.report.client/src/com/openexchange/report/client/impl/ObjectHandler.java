@@ -52,6 +52,7 @@ package com.openexchange.report.client.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +68,7 @@ import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularDataSupport;
 
+import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
 import com.openexchange.report.client.container.Total;
@@ -88,7 +90,34 @@ public class ObjectHandler {
     	
     	return (retval);
     }
-    
+ 
+	public static ClientLoginCount getClientLoginCount(MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException {
+		
+		ClientLoginCount retval = new ClientLoginCount();
+		
+		Object[] params    = new Object[3];
+		String[] signature = new String[3];
+		
+		Calendar c = Calendar.getInstance();
+		params[1] = c.getTime();  // endDate
+		c.add(Calendar.DATE, -30);
+		params[0] = c.getTime();  // startDate
+		
+		signature[0] = "java.util.Date";
+		signature[1] = "java.util.Date";
+		signature[2] = "java.lang.String";
+		
+		params[3] = "USM-EAS";
+		int usmeas = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "LoginCount"), "getNumberOfLogins", params, signature);
+        retval.setUsmeas(Integer.toString(usmeas));
+        
+		params[3] = "USM-JSON";
+		int usmjson = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "LoginCount"), "getNumberOfLogins", params, signature);
+	    retval.setUsmjson(Integer.toString(usmjson));
+	    
+		return retval;
+	}
+	
     protected static List<ContextDetail> getDetailObjects(MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
     	TabularDataSupport data = (TabularDataSupport) mbsc.getAttribute(
     			new ObjectName("com.openexchange.reporting", "name", "Reporting"), "Detail");
@@ -186,5 +215,6 @@ public class ObjectHandler {
     	retval.add(Arrays.asList((Object)"groupware", versions[0]));
     	return retval;
     }
+
 	
 }

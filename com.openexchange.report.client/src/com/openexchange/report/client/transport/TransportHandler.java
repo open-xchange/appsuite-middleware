@@ -62,6 +62,7 @@ import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.report.client.configuration.ReportConfiguration;
+import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
 import com.openexchange.report.client.container.Total;
@@ -83,8 +84,8 @@ public class TransportHandler {
 	
 	public TransportHandler() {	}
 	
-    public void sendReport(List<Total> totals, List<ContextDetail> contextDetails, String[] versions) throws IOException, JSONException {
-    	JSONObject metadata = buildJSONObject(totals, contextDetails, versions);
+    public void sendReport(List<Total> totals, List<ContextDetail> contextDetails, String[] versions, ClientLoginCount clc) throws IOException, JSONException {
+    	JSONObject metadata = buildJSONObject(totals, contextDetails, versions, clc);
     	
     	ReportConfiguration reportConfiguration = new ReportConfiguration();
     	
@@ -145,12 +146,13 @@ public class TransportHandler {
     }
 
     
-    private JSONObject buildJSONObject(List<Total> totals, List<ContextDetail> contextDetails, String[] versions) throws JSONException {
+    private JSONObject buildJSONObject(List<Total> totals, List<ContextDetail> contextDetails, String[] versions, ClientLoginCount clc) throws JSONException {
     	JSONObject retval = new JSONObject();
 
     	JSONObject total = new JSONObject();
     	JSONObject detail = new JSONObject();
     	JSONObject version = new JSONObject();
+    	JSONObject clientlogincount = new JSONObject();
 
     	for (Total tmp : totals) {
     		total.put("contexts", tmp.getContexts());
@@ -178,10 +180,16 @@ public class TransportHandler {
     	
     	version.put("admin", versions[0]);
     	version.put("groupware", versions[1]);
+    	
+    	clientlogincount.put("usm-eas", clc.getUsmeas());
+    	clientlogincount.put("usm-json", clc.getUsmjson());
     	    	
     	retval.put("total", total);
     	retval.put("detail", detail);
     	retval.put("version", version);
+    	retval.put("clientlogincount", clientlogincount);
+    	
+    	
 
     	return retval;
     }

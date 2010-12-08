@@ -65,6 +65,7 @@ import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.Total;
 import com.openexchange.report.client.transport.TransportHandler;
@@ -108,16 +109,17 @@ public class ReportClient extends AbstractJMXTools {
         	List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
         	List<ContextDetail> contextDetails = ObjectHandler.getDetailObjects(initConnection);
         	String[] versions = VersionHandler.getServerVersion();
+        	ClientLoginCount clc = ObjectHandler.getClientLoginCount(initConnection);
 
         	if ((null != parser.getOptionValue(this.sendonly) &&
         			(null != parser.getOptionValue(this.displayonly)))) {
                 System.err.println("More than one of the stat options given. Using the default one one only (display and send)");
-                new TransportHandler().sendReport(totals, contextDetails, versions);
+                new TransportHandler().sendReport(totals, contextDetails, versions, clc);
                 print(totals, contextDetails, versions, parser);
             } else {
                 int count = 0;
                 if (null != parser.getOptionValue(this.sendonly)) {
-                	new TransportHandler().sendReport(totals, contextDetails, versions);
+                	new TransportHandler().sendReport(totals, contextDetails, versions, clc);
                 	count++;
                 }
                 if (null != parser.getOptionValue(this.displayonly)) {
@@ -128,7 +130,7 @@ public class ReportClient extends AbstractJMXTools {
                 }
                 if (0 == count) {
                     System.err.println("No option selected. Using the default one one (display and send)");
-                    new TransportHandler().sendReport(totals, contextDetails, versions);
+                    new TransportHandler().sendReport(totals, contextDetails, versions, clc);
                     print(totals, contextDetails, versions, parser);
                 }
             }
