@@ -11,6 +11,7 @@
  - Bugfix #17758: Fixed NPE
  - Bugfix #17722: Fixed renaming of folders created in POP3 account
  - Bugfix #17762: Allowing "editpassword" module access for all module access combinations (webmail, pim, etc.)
+ - Bugfix #17723: Updated to new twitter OAuth authorization URL
 
 * 2010-12-07 - thorben.betten@open-xchange.com
 

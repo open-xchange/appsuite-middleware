@@ -147,8 +147,17 @@ public final class TwitterServiceImpl implements TwitterService {
             /*
              * Obtain & return OAuth access token
              */
-            return new TwitterAccessTokenImpl(
-                pin.length() > 0 ? twitter.getOAuthAccessToken(requestToken, pin) : twitter.getOAuthAccessToken(requestToken));
+            if (0 == pin.length()) {
+                /*
+                 * PIN could not be crawled
+                 */
+                LOG.warn("PIN could no be read from authorization URL: " + requestToken.getAuthenticationURL());
+                return new TwitterAccessTokenImpl(twitter.getOAuthAccessToken(requestToken));
+            }
+            /*
+             * PIN available
+             */
+            return new TwitterAccessTokenImpl(twitter.getOAuthAccessToken(requestToken, pin));
         } catch (final twitter4j.TwitterException e) {
             throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -180,7 +189,8 @@ public final class TwitterServiceImpl implements TwitterService {
             /*
              * Some constants
              */
-            final String actionOfLoginForm = "http://twitter.com/oauth/authorize";
+            final String actionOfLoginForm = "https://twitter.com/oauth/authorize";
+            final String idOfLoginForm = "login_form";
             final String nameOfUserField = "session[username_or_email]";
             final String nameOfPasswordField = "session[password]";
             /*
@@ -202,7 +212,7 @@ public final class TwitterServiceImpl implements TwitterService {
                             " / ").append(i).append(", should be ").append(actionOfLoginForm).append(" / ").append(formIndex).toString());
                     }
                     if (formIndex == i) {
-                        if (actionOfLoginForm.equalsIgnoreCase(form.getActionAttribute()) && form.getInputsByName(nameOfUserField) != null) {
+                        if ((actionOfLoginForm.equals(form.getActionAttribute()) || idOfLoginForm.equals(form.getId())) && form.getInputsByName(nameOfUserField) != null) {
                             loginForm = form;
                         }
                     }
