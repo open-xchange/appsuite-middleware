@@ -158,11 +158,11 @@ public abstract class BasicCommandlineOptions {
     private static final String[] ENV_OPTIONS = new String[] {
         "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT", "ADMIN_PASSWORD", "NEW_USER_PASSWORD" };
 
-    protected String RMI_HOSTNAME           = "rmi://localhost:1099/";
-    protected String COMMANDLINE_TIMEZONE   = "GMT";
-    protected String COMMANDLINE_DATEFORMAT = "yyyy-MM-dd";
-    protected String ADMIN_PASSWORD         = null;
-    protected String NEW_USER_PASSWORD      = null;
+    protected static String RMI_HOSTNAME           = "rmi://localhost:1099/";
+    protected static String COMMANDLINE_TIMEZONE   = "GMT";
+    protected static String COMMANDLINE_DATEFORMAT = "yyyy-MM-dd";
+    protected static String ADMIN_PASSWORD         = null;
+    protected static String NEW_USER_PASSWORD      = null;
 
     protected CLIOption contextOption = null;
     protected CLIOption contextNameOption = null;
