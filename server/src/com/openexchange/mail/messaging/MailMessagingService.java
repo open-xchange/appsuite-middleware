@@ -129,4 +129,9 @@ public final class MailMessagingService implements MessagingService {
         return null;
     }
 
+    public int[] getStaticRootPermissions() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

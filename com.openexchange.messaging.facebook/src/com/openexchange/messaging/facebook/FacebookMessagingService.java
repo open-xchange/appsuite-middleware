@@ -156,11 +156,15 @@ public final class FacebookMessagingService implements MessagingService {
         return ACTIONS;
     }
 
-    public int[] getStaticRootPermissions() {
+    public static int[] getStaticRootPerms() {
         return new int[] {MessagingPermission.READ_FOLDER,
             MessagingPermission.READ_ALL_OBJECTS,
             MessagingPermission.NO_PERMISSIONS,
             MessagingPermission.NO_PERMISSIONS};
+    }
+
+    public int[] getStaticRootPermissions() {
+        return getStaticRootPerms();
     }
 
 }

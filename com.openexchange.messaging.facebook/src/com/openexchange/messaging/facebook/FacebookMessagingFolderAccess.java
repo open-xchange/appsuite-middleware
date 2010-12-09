@@ -317,11 +317,8 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
 
         final DefaultMessagingPermission perm = DefaultMessagingPermission.newInstance();
         perm.setAdmin(false);
-        perm.setAllPermissions(
-            MessagingPermission.READ_FOLDER,
-            MessagingPermission.READ_ALL_OBJECTS,
-            MessagingPermission.NO_PERMISSIONS,
-            MessagingPermission.NO_PERMISSIONS);
+        final int[] arr = FacebookMessagingService.getStaticRootPerms();
+        perm.setAllPermissions(arr[0], arr[1], arr[2], arr[3]);
         perm.setEntity(user);
         perm.setGroup(false);
 

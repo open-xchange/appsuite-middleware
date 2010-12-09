@@ -254,4 +254,9 @@ public final class MailMessageService implements MessagingService {
     public List<MessagingAction> getMessageActions() {
         return ACTIONS;
     }
+
+    public int[] getStaticRootPermissions() {
+        return null;
+    }
+
 }

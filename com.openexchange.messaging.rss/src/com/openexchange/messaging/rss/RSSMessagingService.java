@@ -124,7 +124,7 @@ public class RSSMessagingService implements MessagingService {
         return new int[] {MessagingPermission.READ_FOLDER,
             MessagingPermission.READ_ALL_OBJECTS,
             MessagingPermission.NO_PERMISSIONS,
-            MessagingPermission.NO_PERMISSIONS};
+            MessagingPermission.DELETE_OWN_OBJECTS};
     }
 
     public int[] getStaticRootPermissions() {

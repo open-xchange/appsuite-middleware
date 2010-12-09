@@ -89,11 +89,4 @@ public interface MessagingAccount extends Serializable {
      */
     public MessagingService getMessagingService();
 
-    /**
-     * Gets the static root folder permissions.
-     * 
-     * @return The static root folder permissions or <code>null</code>
-     */
-    public int[] getStaticRootPermissions();
-
 }

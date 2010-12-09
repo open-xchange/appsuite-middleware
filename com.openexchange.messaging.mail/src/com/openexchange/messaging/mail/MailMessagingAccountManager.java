@@ -590,10 +590,6 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             map.put(name, value);
         }
 
-        public int[] getStaticRootPermissions() {
-            return null;
-        }
-
         public Map<String, Object> getConfiguration() {
             return Collections.unmodifiableMap(map);
         }

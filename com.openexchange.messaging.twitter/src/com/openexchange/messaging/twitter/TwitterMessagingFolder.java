@@ -85,11 +85,8 @@ public final class TwitterMessagingFolder implements MessagingFolder {
     private TwitterMessagingFolder(final int user) {
         super();
         final MessagingPermission mp = DefaultMessagingPermission.newInstance();
-        mp.setAllPermissions(
-            MessagingPermission.READ_FOLDER,
-            MessagingPermission.READ_ALL_OBJECTS,
-            MessagingPermission.NO_PERMISSIONS,
-            MessagingPermission.DELETE_OWN_OBJECTS);
+        final int[] arr = TwitterMessagingService.getStaticRootPerms();
+        mp.setAllPermissions(arr[0], arr[1], arr[2], arr[3]);
         mp.setAdmin(false);
         mp.setEntity(user);
         mp.setGroup(false);

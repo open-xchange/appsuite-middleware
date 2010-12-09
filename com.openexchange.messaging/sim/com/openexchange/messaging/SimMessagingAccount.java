@@ -63,7 +63,6 @@ public class SimMessagingAccount implements MessagingAccount{
     private int id;
     private String displayName;
     private Map<String, Object> configuration;
-    private int[] staticRootPermissions;
 
     public Map<String, Object> getConfiguration() {
         return configuration;
@@ -99,31 +98,6 @@ public class SimMessagingAccount implements MessagingAccount{
     
     public void setConfiguration(final Map<String, Object> configuration) {
         this.configuration = configuration;
-    }
-
-    public int[] getStaticRootPermissions() {
-        if (null == staticRootPermissions) {
-            return null;
-        }
-        final int[] ret = new int[staticRootPermissions.length];
-        System.arraycopy(staticRootPermissions, 0, ret, 0, ret.length);
-        return ret;
-    }
-
-    
-    /**
-     * Sets the static root folder permissions.
-     * 
-     * @param staticRootPermissions The static root folder permissions
-     */
-    public void setStaticRootPermissions(int[] staticRootPermissions) {
-        if (null == staticRootPermissions) {
-            this.staticRootPermissions = null;
-        } else {
-            final int[] tmp = new int[staticRootPermissions.length];
-            System.arraycopy(staticRootPermissions, 0, tmp, 0, tmp.length);
-            this.staticRootPermissions = tmp;
-        }
     }
 
 }
