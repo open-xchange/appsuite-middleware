@@ -541,6 +541,10 @@ public final class MessagingFolderStorage implements FolderStorage {
                 } else if ("com.openexchange.messaging.facebook".equals(serviceId)) {
                     retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session);
                     hasSubfolders = true;
+                } else if ("com.openexchange.messaging.twitter".equals(serviceId)) {
+                    final int[] p = new int[] {Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.DELETE_OWN_OBJECTS};
+                    retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session, p);
+                    hasSubfolders = false;
                 } else {
                     final MessagingAccountAccess accountAccess =
                         getMessagingAccessForAccount(serviceId, accountId, session, accesses);

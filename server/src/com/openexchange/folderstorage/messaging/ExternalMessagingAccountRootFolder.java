@@ -81,6 +81,19 @@ public final class ExternalMessagingAccountRootFolder extends AbstractFolder {
      * @param session The session
      */
     public ExternalMessagingAccountRootFolder(final MessagingAccount msgAccount, final String serviceId, final Session session) {
+        this(msgAccount, serviceId, session, null);
+    }
+
+    /**
+     * Initializes a new {@link ExternalMessagingAccountRootFolder} from given mail account.
+     * <p>
+     * Subfolder identifiers and tree identifier are not set within this constructor.
+     * 
+     * @param msgAccount The underlying messaging account
+     * @param serviceId The service identifier
+     * @param session The session
+     */
+    public ExternalMessagingAccountRootFolder(final MessagingAccount msgAccount, final String serviceId, final Session session, final int[] rootPerms) {
         super();
         final String fullname = MessagingFolder.ROOT_FULLNAME;
         id = MessagingFolderIdentifier.getFQN(serviceId, msgAccount.getId(), fullname);
@@ -91,7 +104,11 @@ public final class ExternalMessagingAccountRootFolder extends AbstractFolder {
         name = msgAccount.getDisplayName();
         final MessagingPermissionImpl mp = new MessagingPermissionImpl();
         mp.setEntity(session.getUserId());
-        mp.setAllPermissions(Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        if (null == rootPerms) {
+            mp.setAllPermissions(Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        } else {
+            mp.setAllPermissions(rootPerms[0], rootPerms[1], rootPerms[2], rootPerms[3]); 
+        }
         mp.setAdmin(false);
         permissions = new Permission[] { mp };
         type = SystemType.getInstance();
