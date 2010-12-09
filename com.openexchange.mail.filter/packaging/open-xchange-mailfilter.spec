@@ -41,7 +41,7 @@ BuildRequires:  java-devel-icedtea saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -134,6 +134,9 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/mailfilter.properties
 %changelog
+* Wed Dec 08 2010 - dennis.sieben@open-xchange.com
+  - Bugfix #17776: "not" tests are not written back correctly
+    - Added special case for "not" in RuleConverter
 * Tue Sep 21 2010 - steffen.templin@open-xchange.com
  - Bugfix #16747: After removal of the admin mode oxadmin is able to manage 
  				  the users sieve scripts again within a normal groupware session.

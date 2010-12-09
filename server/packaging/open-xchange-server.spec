@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -711,6 +711,20 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Dec 08 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17758: Fixed NPE
+ - Bugfix #17722: Fixed renaming of folders created in POP3 account
+ - Bugfix #17762: Allowing "editpassword" module access for all module access combinations (webmail, pim, etc.)
+ - Bugfix #17723: Updated to new twitter OAuth authorization URL
+* Wed Dec 08 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17662: Changing recurrence type.
+* Wed Dec 08 2010 - choeger@open-xchange.com
+ - Bugfix #17735: [L3] max open files not set for gw process on rhel and sles
+* Tue Dec 07 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17191: NullPointer during TimeZone evaluation.
+* Tue Dec 07 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17689: Introduced batch-loading of folders, users, and user configurations
+ - Bugfix #17714: Throwing a more generic error message to not confuse the user with cryptic database problems
 * Mon Dec 06 2010 - thorben.betten@open-xchange.com
  - Bugfix #17684: Fixed checking duplicate name on folder creation/rename
 * Thu Dec 02 2010 - thorben.betten@open-xchange.com
