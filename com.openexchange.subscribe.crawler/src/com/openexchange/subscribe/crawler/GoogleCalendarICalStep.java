@@ -95,11 +95,9 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
     public void execute(WebClient webClient) {
         ArrayList<CalendarDataObject> tempEvents = new ArrayList<CalendarDataObject>();
         ArrayList<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
-
         try {
             Page page = webClient.getPage(url);
             byte[] bytes = page.getWebResponse().getContentAsBytes();
-
             // Unzip
             int BUFFER = 1024;
             // BufferedOutputStream dest = null;

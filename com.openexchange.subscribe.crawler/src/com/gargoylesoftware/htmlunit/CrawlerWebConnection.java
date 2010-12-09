@@ -438,8 +438,8 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * @return the <tt>HttpClient</tt> that will be used by this WebConnection
      */
     protected HttpClient createHttpClient() {
-        final MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
-        return new HttpClient(connectionManager);
+        //final MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        return new HttpClient(/*connectionManager*/); // Seems we're leaking connections somewhere. Use the default connection manager here. 
     }
 
 
