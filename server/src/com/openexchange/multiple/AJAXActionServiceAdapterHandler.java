@@ -108,6 +108,8 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
         }
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
+        request.setHostname(jsonObject.getString(HOSTNAME));
+        request.setRoute(jsonObject.getString(ROUTE));
         for (final Entry<String, Object> entry : jsonObject.entrySet()) {
             final String key = entry.getKey();
             if (DATA.equals(key)) {
