@@ -46,6 +46,7 @@ msgstr "Teilnehmer"
 msgid "Comments"
 msgstr "Kommentare"
 
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:61
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:61
@@ -54,6 +55,7 @@ msgstr "Kommentare"
 msgid "Login"
 msgstr "Login"
 
+#: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:63
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:63
@@ -393,8 +395,10 @@ msgstr "[Kein Betreff]"
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:101
-msgid "The available attachments for this E-Mail can be accessed via the links:"
-msgstr "Die für diese E-Mail verfügbaren Anhänge sind über diese Links verfügbar:"
+msgid ""
+"The available attachments for this E-Mail can be accessed via the links:"
+msgstr ""
+"Die für diese E-Mail verfügbaren Anhänge sind über diese Links verfügbar:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
@@ -3765,4 +3769,3 @@ msgstr "UTC"
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/tmp/TimeZones.java:506
 msgid "Zulu"
 msgstr "Zulu"
-

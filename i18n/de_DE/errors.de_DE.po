@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-11-26 15:38+0100\n"
+"PO-Revision-Date: 2010-12-09 10:57+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1530,6 +1530,11 @@ msgstr "Teilnehmer %d für Aufgabe %d nicht gefunden"
 msgid "Percent is %d but must be between 0 and 100."
 msgstr "Prozentangabe ist %d, muss jedoch zwischen 0 und 100 liegen"
 
+msgid ""
+"Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
+"'Send' again."
+msgstr "Beschränken Sie Ihre Empfänger auf %1$s  (inklusive An/Cc/Bcc) und klicken Sie erneut auf 'Senden'."
+
 msgid "Port %1$s was unreachable on remote server"
 msgstr "Keine Verbindung zu Port %1$s auf entferntem Server"
 
@@ -1688,7 +1693,7 @@ msgstr "SearchIterator NULL"
 msgid "SecurityException while loading servlet class \"%s\""
 msgstr "SecurityException beim Laden der Servlet-Klasse \"%s\""
 
-msgid "Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds."
+msgid "Sent quota exceeded, you are only allowed to send 1 mail in %1$s seconds."
 msgstr ""
 "Die Sende-Quota wurde überschritten. Sie dürfen nur 1 E-Mail in %1$s "
 "Sekunden senden."
@@ -2015,8 +2020,8 @@ msgstr ""
 msgid "Unexpected error: %1$s"
 msgstr "Unerwarteter Fehler: %1$s"
 
-msgid "Unexpected exception %d! (id: %d)"
-msgstr "Unbekannter Fehler %d! (id: %d)"
+msgid "Unexpected exception %d!"
+msgstr "Unbekannter Fehler %d!"
 
 msgid ""
 "Unexpected state for deleting a virtual appointment (exception). uid:oid:"
@@ -2674,7 +2679,6 @@ msgid "Invalid URL \"%1$s\". Error: %2$s."
 msgstr "Ungültige URL \"%1$s\": Fehler: %2$s."
 
 #. Could not find data provider for id: %1$s
-
 msgid "Could not find data provider for id: %1$s"
 msgstr "Daten-Provider für ID: %1$s nicht gefunden"
 
@@ -3202,6 +3206,16 @@ msgstr "Bitte prüfen Sie, ob die Datei korrekt formatiert ist."
 
 msgid "Please make sure the file is readable by the groupware."
 msgstr "Bitte stellen Sie sicher, dass die Datei für die Groupware lesbar ist."
+
+#, fuzzy
+msgid "User is disabled"
+msgstr "Benutzer ist nicht aktiviert."
+
+msgid "Password expired"
+msgstr "Passwort ist abgelaufen"
+
+msgid "Unknown error"
+msgstr "Unbekannter Fehler"
 
 msgid "Error communicating with mbean in server: %s"
 msgstr "Fehler bei der Kommunikation mit mbean auf Server: %s"
