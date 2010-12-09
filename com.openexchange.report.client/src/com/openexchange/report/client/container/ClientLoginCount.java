@@ -53,7 +53,7 @@ public class ClientLoginCount {
 	
 	private String usmeas;
 	
-	private String usmjson;
+	private String olox2;
 
 	public String getUsmeas() {
 		return usmeas;
@@ -63,16 +63,16 @@ public class ClientLoginCount {
 		this.usmeas = usmeas;
 	}
 
-	public String getUsmjson() {
-		return usmjson;
+	public String getOlox2() {
+		return olox2;
 	}
 
-	public void setUsmjson(String usmjson) {
-		this.usmjson = usmjson;
+	public void setOlox2(String usmjson) {
+		this.olox2 = usmjson;
 	}
 	
 	@Override
 	public String toString() {
-		return "ClientLoginCountObject [usm-eas=" + usmeas + ", usm-json=" + usmjson + "]";
+		return "ClientLoginCountObject [usm-eas=" + usmeas + ", olox2=" + olox2 + "]";
 	}
 }

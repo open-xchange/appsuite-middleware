@@ -182,7 +182,7 @@ public class TransportHandler {
     	version.put("groupware", versions[1]);
     	
     	clientlogincount.put("usm-eas", clc.getUsmeas());
-    	clientlogincount.put("usm-json", clc.getUsmjson());
+    	clientlogincount.put("olox2", clc.getOlox2());
     	    	
     	retval.put("total", total);
     	retval.put("detail", detail);

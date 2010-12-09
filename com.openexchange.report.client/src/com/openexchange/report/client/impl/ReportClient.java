@@ -56,6 +56,7 @@ import java.util.List;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
+import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -115,7 +116,7 @@ public class ReportClient extends AbstractJMXTools {
         			(null != parser.getOptionValue(this.displayonly)))) {
                 System.err.println("More than one of the stat options given. Using the default one one only (display and send)");
                 new TransportHandler().sendReport(totals, contextDetails, versions, clc);
-                print(totals, contextDetails, versions, parser);
+                print(totals, contextDetails, versions, parser, clc);
             } else {
                 int count = 0;
                 if (null != parser.getOptionValue(this.sendonly)) {
@@ -124,14 +125,14 @@ public class ReportClient extends AbstractJMXTools {
                 }
                 if (null != parser.getOptionValue(this.displayonly)) {
                     if (0 == count) {
-                    	print(totals, contextDetails, versions, parser);
+                    	print(totals, contextDetails, versions, parser, clc);
                     }
                     count++;
                 }
                 if (0 == count) {
                     System.err.println("No option selected. Using the default one one (display and send)");
                     new TransportHandler().sendReport(totals, contextDetails, versions, clc);
-                    print(totals, contextDetails, versions, parser);
+                    print(totals, contextDetails, versions, parser, clc);
                 }
             }
 		} catch (MalformedObjectNameException e) {
@@ -141,6 +142,9 @@ public class ReportClient extends AbstractJMXTools {
             printServerException(e, parser);
             sysexit(1);
 		} catch (JSONException e) {
+            printServerException(e, parser);
+            sysexit(1);
+		} catch (InvalidAttributeValueException e) {
             printServerException(e, parser);
             sysexit(1);
 		}
@@ -166,7 +170,7 @@ public class ReportClient extends AbstractJMXTools {
         		NeededQuadState.notneeded);
     }
     	
-    private void print(List<Total> totals, List<ContextDetail> contextDetails, String[] versions, final AdminParser parser) {
+    private void print(List<Total> totals, List<ContextDetail> contextDetails, String[] versions, final AdminParser parser, ClientLoginCount clc) {
     	System.out.println("");
     	
     	if (null != parser.getOptionValue(this.csv)) {

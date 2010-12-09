@@ -58,8 +58,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
+import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
+import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -91,29 +93,29 @@ public class ObjectHandler {
     	return (retval);
     }
  
-	public static ClientLoginCount getClientLoginCount(MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException {
+	public static ClientLoginCount getClientLoginCount(MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException {
 		
 		ClientLoginCount retval = new ClientLoginCount();
 		
-		Object[] params    = new Object[3];
-		String[] signature = new String[3];
+		// method parameters for LoginCounterMBean.getNumberOfLogins()
+		Object[] gnl_params    = new Object[2];
+		String[] gnl_signature = new String[2];
+	
+		gnl_signature[0] = "java.util.Date";
+		gnl_signature[1] = "java.util.Date";
 		
 		Calendar c = Calendar.getInstance();
-		params[1] = c.getTime();  // endDate
+		gnl_params[1] = c.getTime();  // endDate
 		c.add(Calendar.DATE, -30);
-		params[0] = c.getTime();  // startDate
+		gnl_params[0] = c.getTime();  // startDate
 		
-		signature[0] = "java.util.Date";
-		signature[1] = "java.util.Date";
-		signature[2] = "java.lang.String";
-		
-		params[3] = "USM-EAS";
-		int usmeas = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "LoginCount"), "getNumberOfLogins", params, signature);
+		mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceRegex", "USM-EAS"));
+		int usmeas = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
         retval.setUsmeas(Integer.toString(usmeas));
-        
-		params[3] = "USM-JSON";
-		int usmjson = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "LoginCount"), "getNumberOfLogins", params, signature);
-	    retval.setUsmjson(Integer.toString(usmjson));
+  
+        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceRegex", "OpenXchange\\.HTTPClient\\.OXAddIn"));
+		int olox2 = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
+	    retval.setOlox2(Integer.toString(olox2));
 	    
 		return retval;
 	}
