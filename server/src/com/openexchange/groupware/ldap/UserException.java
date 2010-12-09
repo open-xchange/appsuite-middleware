@@ -212,11 +212,11 @@ public class UserException extends AbstractOXException {
          /**
           * Attributes of user %1$d in context %2$d have been erased.
           */
-        ERASED_ATTRIBUTES("Attributes of user %1$d in context %2$d have been erased.", Category.WARNING, Detail.ERROR, 16),
-        /**
-         * Could not load user: %1$s  // Added Missing, overwrite with correct version on next checkin, please. 
-         */
-        LOAD_FAILED("Could not load user: %1$s", Category.INTERNAL_ERROR, Detail.ERROR, 17);
+         ERASED_ATTRIBUTES("Attributes of user %1$d in context %2$d have been erased.", Category.WARNING, Detail.ERROR, 16),
+         /**
+          * Loading one or more users failed.
+          */
+         LOAD_FAILED("Loading one or more users failed.", Category.CODE_ERROR, Detail.ERROR, 17);
 
         /**
          * Message of the exception.
