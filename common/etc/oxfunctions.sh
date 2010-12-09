@@ -339,6 +339,9 @@ while(<FILE>) {
     chomp;
     my $len=length($search);
     if( substr($_,0,$len) eq $search ) {
+	if( substr($_,$len,$len+1) !~ /^[\s=:]/ ) {
+	   next;
+	}
         foreach my $dl ( "=", ":" ) {
            my $idx=index($_,$dl);
            if( $idx >= $len ) {
