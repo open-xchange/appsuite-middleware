@@ -1,3 +1,7 @@
+* 2010-12-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #17766: Made fields static to be accessible in a static method
+
 * 2010-12-08 - thorben.betten@open-xchange.com
 
  - Bugfix #17762: Allowing "editpassword" module access for all module access combinations (webmail, pim, etc.)
