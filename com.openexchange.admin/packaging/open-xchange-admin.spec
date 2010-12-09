@@ -174,7 +174,7 @@ if [ ${1:-0} -eq 2 ]; then
       done
    fi
 
-   # SoftwareChange_Request-282
+   # SoftwareChange_Request-282, SoftwareChange_Request-533
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
    ox_system_type
