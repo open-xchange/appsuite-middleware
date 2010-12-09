@@ -59,6 +59,7 @@ import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAction;
+import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
 import com.openexchange.session.Session;
@@ -117,6 +118,17 @@ public class RSSMessagingService implements MessagingService {
 
     public List<MessagingAction> getMessageActions() {
         return Collections.emptyList();
+    }
+
+    public static int[] getStaticRootPerms() {
+        return new int[] {MessagingPermission.READ_FOLDER,
+            MessagingPermission.READ_ALL_OBJECTS,
+            MessagingPermission.NO_PERMISSIONS,
+            MessagingPermission.NO_PERMISSIONS};
+    }
+
+    public int[] getStaticRootPermissions() {
+        return getStaticRootPerms();
     }
 
     public static String buildFolderId(final int accountId, final String folder) {

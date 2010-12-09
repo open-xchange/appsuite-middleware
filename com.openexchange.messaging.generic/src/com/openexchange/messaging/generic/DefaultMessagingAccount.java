@@ -69,6 +69,8 @@ public class DefaultMessagingAccount implements MessagingAccount {
 
     private int id;
 
+    private int[] staticRootPermissions;
+
     private transient MessagingService messagingService;
 
     /**
@@ -92,6 +94,31 @@ public class DefaultMessagingAccount implements MessagingAccount {
 
     public MessagingService getMessagingService() {
         return messagingService;
+    }
+
+    public int[] getStaticRootPermissions() {
+        if (null == staticRootPermissions) {
+            return null;
+        }
+        final int[] ret = new int[staticRootPermissions.length];
+        System.arraycopy(staticRootPermissions, 0, ret, 0, ret.length);
+        return ret;
+    }
+
+    
+    /**
+     * Sets the static root folder permissions.
+     * 
+     * @param staticRootPermissions The static root folder permissions
+     */
+    public void setStaticRootPermissions(int[] staticRootPermissions) {
+        if (null == staticRootPermissions) {
+            this.staticRootPermissions = null;
+        } else {
+            final int[] tmp = new int[staticRootPermissions.length];
+            System.arraycopy(staticRootPermissions, 0, tmp, 0, tmp.length);
+            this.staticRootPermissions = tmp;
+        }
     }
 
     /**

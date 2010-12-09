@@ -126,4 +126,9 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
         return delegate.getMessagingService();
     }
 
+    public int[] getStaticRootPermissions() {
+        updateDelegate();
+        return delegate.getStaticRootPermissions();
+    }
+
 }
