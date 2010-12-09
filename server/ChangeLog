@@ -1,3 +1,7 @@
+* 2010-12-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #17721: Throwing a more meaningful error on IMAP protocol error
+
 * 2010-12-08 - choeger@open-xchange.com
 
  - Bugfix #17735: [L3] max open files not set for gw process on rhel and sles

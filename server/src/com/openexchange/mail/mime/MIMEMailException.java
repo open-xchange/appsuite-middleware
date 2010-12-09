@@ -280,7 +280,15 @@ public class MIMEMailException extends MailException {
         /**
          * Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s
          */
-        TRANSPORT_INVALID_CREDENTIALS_EXT("Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s", Category.PERMISSION, TRANSPORT_INVALID_CREDENTIALS.detailNumber);
+        TRANSPORT_INVALID_CREDENTIALS_EXT("Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s", Category.PERMISSION, TRANSPORT_INVALID_CREDENTIALS.detailNumber),
+        /**
+         * Error processing mail server response. The administrator has been informed.
+         */
+        PROCESSING_ERROR("Error processing mail server response. The administrator has been informed.", Category.CODE_ERROR, 1031),
+        /**
+         * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
+         */
+        PROCESSING_ERROR_EXT("Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.", Category.CODE_ERROR, PROCESSING_ERROR.detailNumber);
         
         private final String message;
 
@@ -556,7 +564,7 @@ public class MIMEMailException extends MailException {
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
-                        Code.COMMAND_FAILED_EXT,
+                        Code.PROCESSING_ERROR_EXT,
                         e,
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
@@ -564,11 +572,11 @@ public class MIMEMailException extends MailException {
                         Integer.valueOf(session.getContextId()),
                         nextException.getMessage());
                 }
-                return new MIMEMailException(Code.COMMAND_FAILED, e, nextException.getMessage());
+                return new MIMEMailException(Code.PROCESSING_ERROR, e, nextException.getMessage());
             } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
-                        Code.BAD_COMMAND_EXT,
+                        Code.PROCESSING_ERROR_EXT,
                         e,
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
@@ -576,11 +584,11 @@ public class MIMEMailException extends MailException {
                         Integer.valueOf(session.getContextId()),
                         nextException.getMessage());
                 }
-                return new MIMEMailException(Code.BAD_COMMAND, e, nextException.getMessage());
+                return new MIMEMailException(Code.PROCESSING_ERROR, e, nextException.getMessage());
             } else if (nextException instanceof com.sun.mail.iap.ProtocolException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
-                        Code.PROTOCOL_ERROR_EXT,
+                        Code.PROCESSING_ERROR_EXT,
                         e,
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
@@ -588,7 +596,7 @@ public class MIMEMailException extends MailException {
                         Integer.valueOf(session.getContextId()),
                         nextException.getMessage());
                 }
-                return new MIMEMailException(Code.PROTOCOL_ERROR, e, nextException.getMessage());
+                return new MIMEMailException(Code.PROCESSING_ERROR, e, nextException.getMessage());
             } else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
                 return new MIMEMailException(Code.QUOTA_EXCEEDED, e, EMPTY_ARGS);
             }
