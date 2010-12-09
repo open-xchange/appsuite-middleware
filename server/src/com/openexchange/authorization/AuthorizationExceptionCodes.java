@@ -61,7 +61,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  */
 public enum AuthorizationExceptionCodes implements OXErrorMessage {
 
-    /** User is disabled */
+    /** User is deactivated */
     USER_DISABLED(USER_DISABLED_MSG, Category.USER_CONFIGURATION, 1),
     /** Unknown error */
     UNKNOWN(UNKNOWN_MSG, Category.CODE_ERROR, 2),
