@@ -82,6 +82,8 @@ public class SimMessagingService implements MessagingService {
 
     private List<MessagingAction> capabilities;
 
+    private int[] staticRootPermissions;
+    
     public SimMessagingService() {
         super();
         accountAccessMap = new HashMap<Integer, MessagingAccountAccess>();
@@ -171,6 +173,31 @@ public class SimMessagingService implements MessagingService {
 
     public void setAccountTransport(final int accountId, final MessagingAccountTransport accountTransport) {
         accountTransportMap.put(Integer.valueOf(accountId), accountTransport);
+    }
+
+    public int[] getStaticRootPermissions() {
+        if (null == staticRootPermissions) {
+            return null;
+        }
+        final int[] ret = new int[staticRootPermissions.length];
+        System.arraycopy(staticRootPermissions, 0, ret, 0, ret.length);
+        return ret;
+    }
+
+    
+    /**
+     * Sets the static root folder permissions.
+     * 
+     * @param staticRootPermissions The static root folder permissions
+     */
+    public void setStaticRootPermissions(int[] staticRootPermissions) {
+        if (null == staticRootPermissions) {
+            this.staticRootPermissions = null;
+        } else {
+            final int[] tmp = new int[staticRootPermissions.length];
+            System.arraycopy(staticRootPermissions, 0, tmp, 0, tmp.length);
+            this.staticRootPermissions = tmp;
+        }
     }
 
 }

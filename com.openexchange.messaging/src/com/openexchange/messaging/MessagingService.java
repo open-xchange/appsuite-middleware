@@ -99,6 +99,13 @@ public interface MessagingService {
     public Set<String> getSecretProperties();
 
     /**
+     * Gets the static root folder permissions.
+     * 
+     * @return The static root folder permissions or <code>null</code>
+     */
+    public int[] getStaticRootPermissions();
+
+    /**
      * Gets the account manager for this messaging service.
      * 
      * @return The account manager
