@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -385,6 +385,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Dec 08 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17762: Allowing "editpassword" module access for all module access combinations (webmail, pim, etc.)
 * Mon Dec 06 2010 - francisco.laguna@open-xchange.com
  - Bugfix #17727: Make user attributes removable in CLT.
 * Sat Oct 23 2010 - francisco.laguna@open-xchange.com
