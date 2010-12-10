@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -194,7 +195,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      */
     public HttpServletResponseWrapper(final HttpServletRequestWrapper request) {
         super();
-        cookies = new HashSet<Cookie>();
+        cookies = new LinkedHashSet<Cookie>(); 
         status = HttpServletResponse.SC_OK;
         this.request = request;
         final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
