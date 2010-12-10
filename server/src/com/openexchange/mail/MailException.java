@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -356,7 +356,50 @@ public class MailException extends AbstractOXException {
         /**
          * Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.
          */
-        REFERENCED_MAIL_NOT_FOUND("Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.", Category.CODE_ERROR, 67);
+        REFERENCED_MAIL_NOT_FOUND("Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.", Category.CODE_ERROR, 67),
+        /**
+         * In order to accomplish the search, %1$d or more characters are required.
+         */
+        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.USER_INPUT, 68),
+        /**
+         * Mail folder must not be deleted: %1$s.
+         */
+        FOLDER_DELETION_DENIED("Mail folder must not be deleted: %1$s.", Category.CODE_ERROR, 69),
+        /**
+         * No delete access on mail folder: %1$s.
+         */
+        NO_DELETE_ACCESS("No delete access on mail folder: %1$s.", Category.PERMISSION, 70),
+        /**
+         * Mail folder must not be moved: %1$s.
+         */
+        FOLDER_MOVE_DENIED("Mail folder must not be moved: %1$s.", Category.CODE_ERROR, 71),
+        /**
+         * Mail folder must not be updated: %1$s.
+         */
+        FOLDER_UPDATE_DENIED("Mail folder must not be updated: %1$s.", Category.CODE_ERROR, 72),
+        /**
+         * No write access on mail folder: %1$s.
+         */
+        NO_WRITE_ACCESS("No write access on mail folder: %1$s.", Category.PERMISSION, 73),
+        /**
+         * No connection available to access mailbox
+         */
+        NOT_CONNECTED("No connection available to access mailbox", Category.CODE_ERROR, 74),
+        /**
+         * Mail could not be found in folder %1$s for Message-Id: %2$s
+         */
+        MAIL_NOT_FOUN_BY_MESSAGE_ID("Mail could not be found in folder %1$s for Message-Id: %2$s", Category.CODE_ERROR, 32),
+        
+        /**
+         * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
+         */
+        SENT_QUOTA_EXCEEDED("Sent quota exceeded, you are only allowed to send 1 mail in %1$s seconds.", Category.CODE_ERROR, 75),
+
+        /**
+         * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
+         */
+        RECIPIENTS_EXCEEDED("Please limit your recipients to %1$s  (including To/Cc/Bcc), and click 'Send' again.", Category.CODE_ERROR, 76);
+
 
         private final String message;
 

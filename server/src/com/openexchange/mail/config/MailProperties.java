@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -171,6 +171,13 @@ public final class MailProperties implements IMailProperties {
 
     private int mailAccessCacheIdleSeconds;
 
+    private boolean rateLimitPrimaryOnly;
+
+    private int rateLimit;
+
+    private int maxToCcBcc;
+
+
     /**
      * Initializes a new {@link MailProperties}
      */
@@ -254,6 +261,10 @@ public final class MailProperties implements IMailProperties {
         adminMailLoginEnabled = false;
         mailAccessCacheShrinkerSeconds = 0;
         mailAccessCacheIdleSeconds = 0;
+        rateLimitPrimaryOnly = true;
+        rateLimit = 0;
+        maxToCcBcc = 0;
+
     }
 
     private void loadProperties0() throws MailConfigException {
@@ -548,10 +559,42 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
+            final String rateLimitPrimaryOnlyStr = configuration.getProperty("com.openexchange.mail.rateLimitPrimaryOnly", "true").trim();
+            rateLimitPrimaryOnly = Boolean.parseBoolean(rateLimitPrimaryOnlyStr);
+            logBuilder.append("\tRate limit primary only: ").append(rateLimitPrimaryOnly).append('\n');
+        }
+        
+        {
+            final String rateLimitStr = configuration.getProperty("com.openexchange.mail.rateLimit", "0").trim();
+            try {
+                rateLimit = Integer.parseInt(rateLimitStr);
+                logBuilder.append("\tSent Rate limit: ").append(rateLimit).append('\n');
+            } catch (final NumberFormatException e) {
+                rateLimit = 0;
+                logBuilder.append("\tSent Rate limit: Invalid value \"").append(rateLimitStr).append("\". Setting to fallback ").append(
+                    rateLimit).append('\n');
+                
+            }
+        }
+
+        {
+            final String maxToCcBccStr = configuration.getProperty("com.openexchange.mail.maxToCcBcc", "0").trim();
+            try {
+                maxToCcBcc = Integer.parseInt(maxToCcBccStr);
+                logBuilder.append("\tmaxToCcBcc: ").append(maxToCcBcc).append('\n');
+            } catch (final NumberFormatException e) {
+                maxToCcBcc = 0;
+                logBuilder.append("\tmaxToCcBcc: Invalid value \"").append(maxToCcBccStr).append("\". Setting to fallback ").append(
+                    maxToCcBcc).append('\n');
+                
+            }
+        }
+        
+        {
             String javaMailPropertiesStr = configuration.getProperty("com.openexchange.mail.JavaMailProperties");
             if (null != javaMailPropertiesStr) {
                 javaMailPropertiesStr = javaMailPropertiesStr.trim();
-                if (javaMailPropertiesStr.indexOf("@oxgroupwaresysconfdir@") != -1) {
+                if (javaMailPropertiesStr.indexOf("@oxgroupwaresysconfdir@") >= 0) {
                     final String configPath = configuration.getProperty("CONFIGPATH");
                     if (null == configPath) {
                         throw new MailConfigException("Missing property \"CONFIGPATH\" in system.properties");
@@ -725,6 +768,15 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
+     * Gets the sent mail rate limit (how many mails can be sent in 
+     * 
+     * @return
+     */
+    public int getMaxToCcBcc() {
+        return maxToCcBcc;
+    }
+
+    /**
      * Gets the quote line colors.
      * 
      * @return The quote line colors
@@ -733,6 +785,25 @@ public final class MailProperties implements IMailProperties {
         return quoteLineColors;
     }
 
+    /**
+     * Gets the sent mail rate limit (how many mails can be sent in 
+     * 
+     * @return
+     */
+    public int getRateLimit() {
+        return rateLimit;
+    }
+
+    /**
+     * Gets the setting if the rate limit should only affect the primary
+     * account or all accounts 
+     * 
+     * @return
+     */
+    public boolean getRateLimitPrimaryOnly() {
+        return rateLimitPrimaryOnly;
+    }
+    
     /**
      * Gets the global transport server
      * 
