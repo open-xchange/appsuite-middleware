@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 19
+%define		ox_release 20
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -577,6 +577,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Dec 08 2010 - thorben.betten@open-xchange.com
+ - Bugfix #17557: Escaped curly brace in pattern notation
+* Tue Dec 07 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #17191: NullPointer during TimeZone evaluation.
 * Fri Nov 26 2010 - thorben.betten@open-xchange.com
  - Bugfix #17647: Dropping cookies on failed IP check
 * Wed Nov 24 2010 - thorben.betten@open-xchange.com
