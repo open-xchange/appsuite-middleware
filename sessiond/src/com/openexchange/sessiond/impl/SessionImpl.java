@@ -53,8 +53,13 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.objects.CachedSession;
+import com.openexchange.crypto.CryptoException;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.services.SessiondServiceRegistry;
 
 /**
  * {@link SessionImpl} - Implements interface {@link Session}
@@ -63,6 +68,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionImpl implements Session {
+
+    // A random-enough key for encrypting and decrypting passwords on their way through the caching system.
+    private static final String OBFUSCATION_KEY = "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn";
 
     private final String loginName;
 
@@ -87,6 +95,8 @@ public final class SessionImpl implements Session {
     private String hash;
     
     private final Map<String, Object> parameters;
+    
+    private static final Log LOG = LogFactory.getLog(SessionImpl.class);
 
     /**
      * Initializes a new {@link SessionImpl}
@@ -125,7 +135,7 @@ public final class SessionImpl implements Session {
         userId = cachedSession.getUserId();
         contextId = cachedSession.getContextId();
         loginName = cachedSession.getLoginName();
-        password = cachedSession.getPassword();
+        password = unobfuscate( cachedSession.getPassword() );
         sessionId = cachedSession.getSessionId();
         secret = cachedSession.getSecret();
         randomToken = cachedSession.getRandomToken();
@@ -146,7 +156,25 @@ public final class SessionImpl implements Session {
      * @return An appropriate instance of {@link CachedSession}
      */
     public CachedSession createCachedSession() {
-        return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp, login, authId, hash, parameters);
+        return new CachedSession(userId, loginName, obfuscate( password ), contextId, sessionId, secret, randomToken, localIp, login, authId, hash, parameters);
+    }
+
+    private String obfuscate(String string) {
+        try {
+            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, OBFUSCATION_KEY);
+        } catch (CryptoException e) {
+            LOG.error("Could not obfuscate a string before migration", e);
+            return string;
+        }
+    }
+    
+    private String unobfuscate(String string) {
+        try {
+            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).decrypt(string, OBFUSCATION_KEY);
+        } catch (CryptoException e) {
+            LOG.error("Could not decode string after migration", e);
+            return string;
+        }
     }
 
     public int getContextId() {

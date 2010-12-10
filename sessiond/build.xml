@@ -33,6 +33,8 @@
     <property name="cachejar" value="com.openexchange.caching.jar"/>
     <property name="managementjar" value="com.openexchange.management.jar"/>
     <property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
+	<property name="cryptojar" value="com.openexchange.crypto.jar"/>
+		
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -45,6 +47,7 @@
         <pathelement location="${bundlesdir}/${cachingBundle}/${cachejar}"/>
         <pathelement location="${bundlesdir}/${managementjar}"/>
         <pathelement location="${bundlesdir}/${threadpooljar}"/>
+        <pathelement location="${bundlesdir}/${cryptojar}"/>
     </path>
 
     <!-- Compile -->

@@ -49,7 +49,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Session Daemon
-Requires:       open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-management >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@
+Requires:       open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-management >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-crypto >= @OXVERSION@
 #
 
 %description

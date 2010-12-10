@@ -60,6 +60,7 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.ServiceException;
@@ -102,7 +103,7 @@ public final class SessiondActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class };
+        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class, CryptoService.class };
     }
 
     @Override
