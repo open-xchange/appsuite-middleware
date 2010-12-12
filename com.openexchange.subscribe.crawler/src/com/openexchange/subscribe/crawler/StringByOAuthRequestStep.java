@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,6 +61,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.HttpParams;
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
@@ -68,6 +74,7 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.client.OAuthClient;
 import net.oauth.client.httpclient4.HttpClient4;
+import net.oauth.client.httpclient4.HttpClientPool;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -94,7 +101,9 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     private static final Log LOG = LogFactory.getLog(StringByOAuthRequestStep.class);
     
     private Page loginPage;
-
+    
+    private SingleConnectionPool connectionPool = new SingleConnectionPool();
+    
     public StringByOAuthRequestStep() {
     }
 
@@ -119,102 +128,106 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     @Override
     public void execute(WebClient webClient) throws SubscriptionException {
         
-        // Request the OAuth token
-        OAuthClient client = new OAuthClient(new HttpClient4());
         try {
-            oAuthAccessor = createOAuthAccessor();
-            client.getRequestToken(oAuthAccessor);
-            requestToken = oAuthAccessor.requestToken;
-            tokenSecret = oAuthAccessor.tokenSecret;
+            // Request the OAuth token
+            OAuthClient client = new OAuthClient(new HttpClient4(connectionPool));
+            try {
+                oAuthAccessor = createOAuthAccessor();
+                client.getRequestToken(oAuthAccessor);
+                requestToken = oAuthAccessor.requestToken;
+                tokenSecret = oAuthAccessor.tokenSecret;
 
-            LOG.info("Successfully requested OAuth token");
-        } catch (IOException e) {
-            LOG.error(e);
-        } catch (OAuthException e) {
-            LOG.error(e);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-        } catch (NullPointerException e) {
-            LOG.error(e);
-        }
-
-        // Authorize the request 
-        String verifier = "";
-        try {
-            oAuthAccessor = createOAuthAccessor();
-            Properties paramProps = new Properties();
-            paramProps.setProperty("application_name", "Open-Xchange Contact Aggregator");
-            paramProps.setProperty("oauth_token", requestToken);
-            OAuthMessage response = sendRequest(paramProps, oAuthAccessor.consumer.serviceProvider.userAuthorizationURL);
-            LOG.info("Successfully requested authorization-url: "+response.URL);   
-            
-            // Fill out form / confirm the access otherwise
-            LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
-            authorizeStep.execute(webClient);
-            loginPage = authorizeStep.getLoginPage();
-            HtmlPage pageWithVerifier = authorizeStep.getOutput();
-            String pageString2 = pageWithVerifier.getWebResponse().getContentAsString();
-            LOG.debug("Page contains the verifier : " + pageString2.contains("access-code")); 
-            LOG.debug("Cookie-Problem : " + pageString2.contains("Please make sure you have cookies"));
-            
-            // get the verifier
-            Pattern pattern = Pattern.compile("access-code\">([0-9]*)<");
-            Matcher matcher = pattern.matcher(pageString2);
-            if (matcher.find() && matcher.groupCount() == 1){
-                verifier = matcher.group(1);
-                LOG.info("Request authorized, verifier found.");
-            } else {
-                LOG.error("Verifier not found");
+                LOG.info("Successfully requested OAuth token");
+            } catch (IOException e) {
+                LOG.error(e);
+            } catch (OAuthException e) {
+                LOG.error(e);
+            } catch (URISyntaxException e) {
+                LOG.error(e);
+            } catch (NullPointerException e) {
+                LOG.error(e);
             }
-            LOG.debug("This is the verifier : " + verifier);
-            //openPageInBrowser(pageWithVerifier);
-        } catch (IOException e) {
-            LOG.error(e);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-        } catch (OAuthException e) {
-            LOG.error(e);
-        }
 
-        
-        // Access and confirm using the verifier
-        try {
-            Properties paramProps = new Properties();
-            paramProps.setProperty("oauth_token", requestToken);
-            //not in OAuth-Spec and maybe specific to linkedin
-            paramProps.setProperty("oauth_verifier", verifier);
-            OAuthMessage response = sendRequest(paramProps, accessUrl);
-            accessToken = response.getParameter("oauth_token");
-            tokenSecret = response.getParameter("oauth_token_secret");
-            LOG.info("Accessed and conformed using the verifier");
-        } catch (IOException e) {
-            LOG.error(e);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-        } catch (OAuthException e) {
-            LOG.error(e);
-        }
-        
-        // Execute an API-Request (fully logged in now)        
-        try {
-            Properties paramProps = new Properties();
-            paramProps.setProperty("oauth_token", accessToken);
+            // Authorize the request 
+            String verifier = "";
+            try {
+                oAuthAccessor = createOAuthAccessor();
+                Properties paramProps = new Properties();
+                paramProps.setProperty("application_name", "Open-Xchange Contact Aggregator");
+                paramProps.setProperty("oauth_token", requestToken);
+                OAuthMessage response = sendRequest(paramProps, oAuthAccessor.consumer.serviceProvider.userAuthorizationURL);
+                LOG.info("Successfully requested authorization-url: "+response.URL);   
 
-            OAuthMessage response = sendRequest(paramProps, apiRequest);
-            String result = response.readBodyAsString();
-            LOG.info("Successfully executed an API-Request");
-            executedSuccessfully = true;
-            LOG.debug("This is the result of the whole operation : " + result);
-            output = result;
-        } catch (IOException e) {
-            LOG.error(e);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-        } catch (OAuthException e) {
-            LOG.error(e);
-        }
+                // Fill out form / confirm the access otherwise
+                LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
+                authorizeStep.execute(webClient);
+                loginPage = authorizeStep.getLoginPage();
+                HtmlPage pageWithVerifier = authorizeStep.getOutput();
+                String pageString2 = pageWithVerifier.getWebResponse().getContentAsString();
+                LOG.debug("Page contains the verifier : " + pageString2.contains("access-code")); 
+                LOG.debug("Cookie-Problem : " + pageString2.contains("Please make sure you have cookies"));
+                
+                // get the verifier
+                Pattern pattern = Pattern.compile("access-code\">([0-9]*)<");
+                Matcher matcher = pattern.matcher(pageString2);
+                if (matcher.find() && matcher.groupCount() == 1){
+                    verifier = matcher.group(1);
+                    LOG.info("Request authorized, verifier found.");
+                } else {
+                    LOG.error("Verifier not found");
+                }
+                LOG.debug("This is the verifier : " + verifier);
+                //openPageInBrowser(pageWithVerifier);
+            } catch (IOException e) {
+                LOG.error(e);
+            } catch (URISyntaxException e) {
+                LOG.error(e);
+            } catch (OAuthException e) {
+                LOG.error(e);
+            }
 
-        
+            
+            // Access and confirm using the verifier
+            try {
+                Properties paramProps = new Properties();
+                paramProps.setProperty("oauth_token", requestToken);
+                //not in OAuth-Spec and maybe specific to linkedin
+                paramProps.setProperty("oauth_verifier", verifier);
+                OAuthMessage response = sendRequest(paramProps, accessUrl);
+                accessToken = response.getParameter("oauth_token");
+                tokenSecret = response.getParameter("oauth_token_secret");
+                LOG.info("Accessed and conformed using the verifier");
+            } catch (IOException e) {
+                LOG.error(e);
+            } catch (URISyntaxException e) {
+                LOG.error(e);
+            } catch (OAuthException e) {
+                LOG.error(e);
+            }
+            
+            // Execute an API-Request (fully logged in now)        
+            try {
+                Properties paramProps = new Properties();
+                paramProps.setProperty("oauth_token", accessToken);
+
+                OAuthMessage response = sendRequest(paramProps, apiRequest);
+                String result = response.readBodyAsString();
+                LOG.info("Successfully executed an API-Request");
+                executedSuccessfully = true;
+                LOG.debug("This is the result of the whole operation : " + result);
+                output = result;
+            } catch (IOException e) {
+                LOG.error(e);
+            } catch (URISyntaxException e) {
+                LOG.error(e);
+            } catch (OAuthException e) {
+                LOG.error(e);
+            }
+            
+        } finally {
+            // Ensure connections are closed
+            connectionPool.shutdown();
+        }
     }
 
     /*
@@ -256,7 +269,8 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         }
         OAuthAccessor accessor = createOAuthAccessor();
         accessor.tokenSecret = tokenSecret;
-        OAuthClient client = new OAuthClient(new HttpClient4());
+
+        OAuthClient client = new OAuthClient(new HttpClient4(connectionPool));
         return client.invoke(accessor, "GET", url, params);
     }
 
@@ -366,5 +380,30 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     public Page getLoginPage() {
         return loginPage;
     }
+    
+    private static class SingleConnectionPool implements HttpClientPool {
+
+        private DefaultHttpClient client;
+
+        public HttpClient getHttpClient(URL server) {
+            if(client != null) {
+                return client;
+            }
+            client = new DefaultHttpClient();
+            ClientConnectionManager mgr = client.getConnectionManager();
+            if (!(mgr instanceof ThreadSafeClientConnManager)) {
+                HttpParams params = client.getParams();
+                client = new DefaultHttpClient(new ThreadSafeClientConnManager(params, mgr.getSchemeRegistry()), params);
+            }
+            
+            return client;
+        }
+        
+        public void shutdown() {
+            client.getConnectionManager().shutdown();
+        }
+        
+    }
+
     
 }

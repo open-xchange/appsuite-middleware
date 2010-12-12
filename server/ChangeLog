@@ -1,3 +1,7 @@
+* 2010-12-12 - francisco.laguna@open-xchange.com
+
+ - Bugfix #17756: Ensure closing of HTTP connections. Don't use a single client and avoid locks.
+
 * 2010-12-09 - thorben.betten@open-xchange.com
 
  - Bugfix #17721: Throwing a more meaningful error on IMAP protocol error
