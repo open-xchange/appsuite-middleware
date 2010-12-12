@@ -191,6 +191,8 @@ public class Login extends AJAXServlet {
                 if(session != null) {
                     // Drop relevant cookies
                     SessionServlet.removeOXCookies(session.getHash(), req, resp);
+                    SessionServlet.removeJSESSIONID(req, resp);
+                    
                 }
             } catch (final LoginException e) {
                 LOG.error("Logout failed", e);
@@ -383,6 +385,7 @@ public class Login extends AJAXServlet {
                 }
                 if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
                     SessionServlet.removeOXCookies(hash, req, resp);
+                    SessionServlet.removeJSESSIONID(req, resp);
                     throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
                 }
             } catch (final SessiondException e) {
@@ -394,6 +397,7 @@ public class Login extends AJAXServlet {
                          */
                         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                         SessionServlet.removeOXCookies(session.getHash(), req, resp);
+                        SessionServlet.removeJSESSIONID(req, resp);
                         sessiondService.removeSession(session.getSessionID());
                     } catch (final Exception e2) {
                         LOG.error("Cookies could not be removed.", e2);

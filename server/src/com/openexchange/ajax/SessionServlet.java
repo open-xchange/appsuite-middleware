@@ -236,6 +236,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 final String sessionId = getSessionId(req);
                 final ServerSession session = getSession(req, sessionId, sessiondService);
                 removeOXCookies(session.getHash(), req, resp);
+                removeJSESSIONID(req, resp);
                 sessiondService.removeSession(sessionId);
             } catch (final Exception e2) {
                 LOG.error("Cookies could not be removed.", e2);
@@ -396,6 +397,25 @@ public abstract class SessionServlet extends AJAXServlet {
             return;
         }
         final List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
+        for (final Cookie cookie : cookies) {
+            final String name = cookie.getName();
+
+            for (final String string : cookieNames) {
+                if (name.startsWith(string)) {
+                    final Cookie respCookie = new Cookie(name, cookie.getValue());
+                    respCookie.setPath("/");
+                    respCookie.setMaxAge(0); // delete
+                    resp.addCookie(respCookie);
+                }
+            }
+        }
+    }
+    
+    public static void removeJSESSIONID(HttpServletRequest req, HttpServletResponse resp) {
+        final Cookie[] cookies = req.getCookies();
+        if (cookies == null) {
+            return;
+        }
         final String jsessionidCookie = AJPv13RequestHandler.JSESSIONID_COOKIE;
         for (final Cookie cookie : cookies) {
             final String name = cookie.getName();
@@ -404,16 +424,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 respCookie.setPath("/");
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
-            } else {
-                for (final String string : cookieNames) {
-                    if (name.startsWith(string)) {
-                        final Cookie respCookie = new Cookie(name, cookie.getValue());
-                        respCookie.setPath("/");
-                        respCookie.setMaxAge(0); // delete
-                        resp.addCookie(respCookie);
-                    }
-                }
-            }
+            } 
         }
     }
 
@@ -426,4 +437,5 @@ public abstract class SessionServlet extends AJAXServlet {
     protected static ServerSession getSessionObject(final ServletRequest req) {
         return (ServerSession) req.getAttribute(SESSION_KEY);
     }
+
 }
