@@ -56,6 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.objects.CachedSession;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.session.Session;
@@ -70,7 +71,7 @@ import com.openexchange.sessiond.services.SessiondServiceRegistry;
 public final class SessionImpl implements Session {
 
     // A random-enough key for encrypting and decrypting passwords on their way through the caching system.
-    private static final String OBFUSCATION_KEY = "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn";
+    private static final String OBFUSCATION_KEY_PROPERTY = "com.openexchange.sessiond.encryptionKey";
 
     private final String loginName;
 
@@ -161,16 +162,22 @@ public final class SessionImpl implements Session {
 
     private String obfuscate(String string) {
         try {
-            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, OBFUSCATION_KEY);
+            String key = getObfuscationKey();
+            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, key);
         } catch (CryptoException e) {
             LOG.error("Could not obfuscate a string before migration", e);
             return string;
         }
     }
     
+    private String getObfuscationKey() {
+        return SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class).getProperty(OBFUSCATION_KEY_PROPERTY);
+    }
+
     private String unobfuscate(String string) {
         try {
-            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).decrypt(string, OBFUSCATION_KEY);
+            String key = getObfuscationKey();
+            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).decrypt(string, key);
         } catch (CryptoException e) {
             LOG.error("Could not decode string after migration", e);
             return string;

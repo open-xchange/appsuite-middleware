@@ -1,6 +1,7 @@
 * 2010-12-12 - francisco.laguna@open-xchange.com
 
  - Bugfix #17756: Ensure closing of HTTP connections. Don't use a single client and avoid locks.
+ - Bugfix #17782: Take encryption password from a property.
 
 * 2010-12-09 - thorben.betten@open-xchange.com
 
