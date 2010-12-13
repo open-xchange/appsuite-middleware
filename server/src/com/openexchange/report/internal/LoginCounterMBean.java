@@ -53,15 +53,35 @@ import java.util.Date;
 import javax.management.MBeanException;
 
 /**
- * 
+ * {@link LoginCounterMBean}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface LoginCounterMBean {
-    
+
+    /**
+     * Gets the number of logins happened in specified range.
+     * 
+     * @param startDate The start time
+     * @param endDate The end time
+     * @return The number of logins happened in specified range
+     * @throws MBeanException If an error occurs while counting
+     */
     public int getNumberOfLogins(Date startDate, Date endDate) throws MBeanException;
-    
-    public void setDeviceRegex(String regex);
-    
-    public String getDeviceRegex();
-    
+
+    /**
+     * Sets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>
+     * 
+     * @param wildcard The device wildcard
+     */
+    public void setDeviceWildcard(String wildcard);
+
+    /**
+     * Gets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>
+     * 
+     * @return The device wildcard or <code>null</code>
+     */
+    public String getDeviceWildcard();
+
 }
