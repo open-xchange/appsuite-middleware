@@ -113,7 +113,7 @@ public class Bug16211Test extends AbstractAJAXSession {
         tz = client.getValues().getTimeZone();
         calendar = TimeTools.createCalendar(tz);
 
-        sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211ShareFolder", FolderObject.CALENDAR);
+        sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211PublicFolder", FolderObject.CALENDAR);
         FolderTools.shareFolder(
             client2,
             API.OX_NEW,
@@ -144,8 +144,16 @@ public class Bug16211Test extends AbstractAJAXSession {
     public void testMoveToPersonalFolder() throws Exception {
         // Use this to test if reminder of the moving user also has been updated. See Bug 16358
         // -------------
-        appointment.setAlarm(15);
-        final UpdateRequest reminderAppointmentReq = new UpdateRequest(appointment, tz, false);
+        Appointment uApp = new Appointment();
+        uApp.setParentFolderID(sharedAppointmentFolder.getObjectID());
+        uApp.setObjectID(appointment.getObjectID());
+        uApp.setAlarm(15);
+        uApp.setIgnoreConflicts(true);
+        uApp.setTitle(appointment.getTitle());
+        uApp.setStartDate(appointment.getStartDate());
+        uApp.setEndDate(appointment.getEndDate());
+        uApp.setLastModified(appointment.getLastModified());
+        final UpdateRequest reminderAppointmentReq = new UpdateRequest(uApp, tz, false);
         final UpdateResponse reminderAppointmentResp = client3.execute(reminderAppointmentReq);
         reminderAppointmentResp.fillObject(appointment);
         // -------------
