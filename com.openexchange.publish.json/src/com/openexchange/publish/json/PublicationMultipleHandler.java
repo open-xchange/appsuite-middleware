@@ -69,6 +69,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.multiple.MultipleHandler;
@@ -88,13 +89,19 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PublicationMultipleHandler implements MultipleHandler {
 
+    private static final String PROPERTY_USE_OTHER_DOMAIN = "com.openexchange.publish.domain";
+    private static final String PROPERTY_USE_OTHER_SUBDOMAIN = "com.openexchange.publish.subdomain";
+
     private final PublicationTargetDiscoveryService discovery;
 
     private final Map<String, EntityType> entities;
-
-    public PublicationMultipleHandler(final PublicationTargetDiscoveryService discovery, final Map<String, EntityType> entities) {
+    
+    private ConfigurationService config;
+    
+    public PublicationMultipleHandler(final PublicationTargetDiscoveryService discovery, final Map<String, EntityType> entities, ConfigurationService config) {
         this.discovery = discovery;
         this.entities = entities;
+        this.config = config;
     }
 
     public void close() {
@@ -303,12 +310,28 @@ public class PublicationMultipleHandler implements MultipleHandler {
     private String getURLPrefix(JSONObject request, Publication publication) {
         String hostname = Hostname.getInstance().getHostname(publication);
         String serverURL = request.optString("__serverURL");
+        String protocol = "https://";
         if(hostname != null) {
             if(serverURL == null || serverURL.startsWith("https")) {
-                return "https://"+hostname;
+                protocol = "https://";
             }
-            return "http://"+hostname;
+            protocol = "http://"+hostname;
+        } else if (serverURL != null ){
+            hostname = serverURL.substring(serverURL.indexOf("://")+3);
         }
+        
+        
+        String otherDomain = config.getProperty(PROPERTY_USE_OTHER_DOMAIN);
+        String separateSubdomain = config.getProperty(PROPERTY_USE_OTHER_SUBDOMAIN);
+        
+        if(otherDomain != null){
+            return protocol + otherDomain;
+        }
+        
+        if(separateSubdomain != null){
+            return protocol + separateSubdomain + "." + hostname;
+        }
+        
         return serverURL;
     }
 

@@ -50,6 +50,7 @@
 package com.openexchange.publish.json;
 
 import java.util.Map;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -64,15 +65,17 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
 public class PublicationMultipleHandlerFactory implements MultipleHandlerFactoryService {
 
     private PublicationTargetDiscoveryService discoverer;
+    private ConfigurationService config;
     private Map<String, EntityType> entityMap;
     
-    public PublicationMultipleHandlerFactory(PublicationTargetDiscoveryService discoverer, Map<String, EntityType> entityMap) {
+    public PublicationMultipleHandlerFactory(PublicationTargetDiscoveryService discoverer, Map<String, EntityType> entityMap, ConfigurationService config) {
         this.discoverer = discoverer;
         this.entityMap = entityMap;
+        this.config = config;
     }
 
     public MultipleHandler createMultipleHandler() {
-        return new PublicationMultipleHandler(discoverer, entityMap);
+        return new PublicationMultipleHandler(discoverer, entityMap, config);
     }
 
     public String getSupportedModule() {

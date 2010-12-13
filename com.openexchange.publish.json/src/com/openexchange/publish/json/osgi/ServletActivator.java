@@ -106,15 +106,13 @@ public class ServletActivator extends DeferredActivator {
         	return;
         }
         
-        PublicationMultipleHandlerFactory publicationHandlerFactory = new PublicationMultipleHandlerFactory(discovery, new EntityMap());
+        PublicationMultipleHandlerFactory publicationHandlerFactory = new PublicationMultipleHandlerFactory(discovery, new EntityMap(), config);
         PublicationTargetMultipleHandlerFactory publicationTargetHandlerFactory = new PublicationTargetMultipleHandlerFactory(discovery);
         
         serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationHandlerFactory, null));
         serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationTargetHandlerFactory, null));
         
-        
         PublicationServlet.setFactory(publicationHandlerFactory);
-        PublicationServlet.setConfigurationService(config);
         PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
         
         final HttpService httpService = getService(HttpService.class);

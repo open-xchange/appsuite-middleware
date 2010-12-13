@@ -1,3 +1,7 @@
+* 2010-12-13 - francisco.laguna@open-xchange.com
+
+ - Bugfix #17787: Moved domain name generation for publication specific domain to a more centralized location (so they also work in multiple requests).
+
 * 2010-12-13 - thorben.betten@open-xchange.com
 
  - Bugfix #17753: Ensured proper parent for shared database folders
