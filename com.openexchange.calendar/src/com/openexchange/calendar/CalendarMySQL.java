@@ -127,7 +127,6 @@ import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -2079,15 +2078,16 @@ public class CalendarMySQL implements CalendarSqlImp {
                 if (!rs.wasNull()) {
                     up.setConfirmMessage(temp);
                 }
+                
+                final int alarm = rs.getInt(5);
+                if (!rs.wasNull()) {
+                    up.setAlarmMinutes(alarm);
+                }
+                
                 final int pfid = rs.getInt(4);
                 if (!rs.wasNull()) {
                     if (pfid < 1) {
                         LOG.error(StringCollection.convertArraytoString(new Object[] { "ERROR: getUserParticipants oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(cdao.getObjectID()) }));
-                    }
-                    
-                    final int alarm = rs.getInt(5);
-                    if (!rs.wasNull()) {
-                        up.setAlarmMinutes(alarm);
                     }
                     
                     if (cdao.getFolderType() == FolderObject.PRIVATE) {
@@ -3247,7 +3247,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
                     } else {
                         pu.setNull(4, java.sql.Types.INTEGER);
-                        deleteReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), cdao.getContext());
+                        deleteReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), cdao.getContext(), writecon);
                         //changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), -1, cdao.getContext(), cdao.isSequence(true), null, null, CalendarOperation.DELETE, false);
                     }
 

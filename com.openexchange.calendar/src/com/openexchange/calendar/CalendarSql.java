@@ -55,9 +55,9 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -554,23 +554,22 @@ public class CalendarSql implements AppointmentSQLInterface {
                 // Check user participants completeness
                 if (cdao.containsUserParticipants()) {
                     final UserParticipant[] edaoUsers = edao.getUsers();
-                    final Map<UserParticipant, UserParticipant> m = new HashMap<UserParticipant, UserParticipant>(
-                            edaoUsers.length);
-                    for (int i = 0; i < edaoUsers.length; i++) {
-                        m.put(edaoUsers[i], edaoUsers[i]);
-                    }
+                    final List<UserParticipant> origUsers = Arrays.asList(edaoUsers);
+
                     for (final UserParticipant cur : cdao.getUsers()) {
                         if (cur.containsAlarm() && cur.containsConfirm()) {
                             continue;
                         }
+                        
                         // Get corresponding user from edao
-                        final UserParticipant ecur = m.get(cur);
-                        if (null != ecur) {
+                        final int index = origUsers.indexOf(cur);
+                        if (index != -1) {
+                            final UserParticipant origUser = origUsers.get(index);
                             if (!cur.containsConfirm()) {
-                                cur.setConfirm(ecur.getConfirm());
+                                cur.setConfirm(origUser.getConfirm());
                             }
                             if (!cur.containsAlarm()) {
-                                cur.setAlarmMinutes(ecur.getAlarmMinutes());
+                                cur.setAlarmMinutes(origUser.getAlarmMinutes());
                             }
                         }
                     }
