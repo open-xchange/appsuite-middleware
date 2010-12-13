@@ -170,6 +170,12 @@ CREATE TABLE del_contacts (
     INDEX (changing_date),
     INDEX (userid),
     INDEX (cid, fid),
+    INDEX `givenname` (`cid`,`field03`),
+    INDEX `surname` (`cid`,`field02`),
+    INDEX `displayname` (`cid`,`field01`(255)),
+    INDEX `email1` (`cid`,`field65`(255)),
+    INDEX `email2` (`cid`,`field66`(255)),
+    INDEX `email3` (`cid`,`field67`(255),
     PRIMARY KEY (cid, intfield01)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -287,5 +293,11 @@ CREATE TABLE prg_contacts (
     INDEX (changing_date),
     INDEX (userid),
     INDEX (cid, fid),
+    INDEX `givenname` (`cid`,`field03`),
+    INDEX `surname` (`cid`,`field02`),
+    INDEX `displayname` (`cid`,`field01`(255)),
+    INDEX `email1` (`cid`,`field65`(255)),
+    INDEX `email2` (`cid`,`field66`(255)),
+    INDEX `email3` (`cid`,`field67`(255),
     PRIMARY KEY (cid, intfield01)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
