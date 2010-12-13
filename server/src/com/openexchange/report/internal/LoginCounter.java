@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.management.MBeanException;
@@ -64,140 +65,154 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
+ * {@link LoginCounter}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class LoginCounter implements LoginCounterMBean {
-    
-    private static final Log LOG = LogFactory.getLog(ReportingMBean.class);
-    
-    private String regex = null;
-    
 
-    public int getNumberOfLogins(Date startDate, Date endDate) throws MBeanException { 
-        final String SELECT_SCHEMAS = "SELECT read_db_pool_id, db_schema FROM context_server2db_pool GROUP BY db_schema";
-        final String SELECT_SQL = "SELECT name, value FROM user_attribute";
-        
-        Pattern pattern = null;            
-        if (regex != null)  {
+    private final Log logger;
+
+    private String wildcard;
+
+    /**
+     * Initializes a new {@link LoginCounter}.
+     */
+    public LoginCounter() {
+        super();
+        logger = LogFactory.getLog(ReportingMBean.class);
+    }
+
+    public int getNumberOfLogins(final Date startDate, final Date endDate) throws MBeanException {
+        /*
+         * Compile pattern
+         */
+        final Pattern pattern;
+        if (wildcard != null) {
             try {
-                pattern = Pattern.compile("client:" + regex);
-            } catch (PatternSyntaxException e) {
-                LOG.error(e.getMessage(), e);
+                pattern = Pattern.compile(wildcardToRegex("client:" + wildcard));
+            } catch (final PatternSyntaxException e) {
+                logger.error(e.getMessage(), e);
                 throw new MBeanException(e, "Couldn't compile regex pattern.");
-            }                
+            }
+        } else {
+            pattern = null;
         }
-        
+        /*
+         * Counter
+         */
         int counter = 0;
-        
-        
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class); 
-        Connection readcon = null;        
-        try {
-            readcon = dbService.getReadOnly();            
-        } catch (DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
-            throw new MBeanException(e, "Couldn't get connection to configdb.");
-        }
-        
-        
-        // Get all schemas and put them into a map.
-        Statement statement = null;
-        ResultSet executeQuery;
-        HashMap<String, Integer> schemaMap = new HashMap<String, Integer>(50);
-        try {
-            statement = readcon.createStatement();
-            executeQuery = statement.executeQuery(SELECT_SCHEMAS); 
-            
-            while (executeQuery.next()) {
-                int readPool = executeQuery.getInt("read_db_pool_id");
-                String schema = executeQuery.getString("db_schema");
-                schemaMap.put(schema, readPool);
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        final Map<String, Integer> schemaMap = new HashMap<String, Integer>(50);
+        {
+            final Connection readcon;
+            try {
+                readcon = dbService.getReadOnly();
+            } catch (final DBPoolingException e) {
+                logger.error(e.getMessage(), e);
+                throw new MBeanException(e, "Couldn't get connection to configdb.");
             }
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw new MBeanException(e, e.getMessage());
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    LOG.error(e.getMessage(), e);
+            /*
+             * Get all schemas and put them into a map.
+             */
+            Statement statement = null;
+            ResultSet executeQuery = null;
+            try {
+                statement = readcon.createStatement();
+                executeQuery = statement.executeQuery("SELECT read_db_pool_id, db_schema FROM context_server2db_pool GROUP BY db_schema");
+
+                while (executeQuery.next()) {
+                    final int readPool = executeQuery.getInt("read_db_pool_id");
+                    final String schema = executeQuery.getString("db_schema");
+                    schemaMap.put(schema, Integer.valueOf(readPool));
                 }
-            }
-            
-            if (readcon != null) {
+            } catch (final SQLException e) {
+                logger.error(e.getMessage(), e);
+                throw new MBeanException(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(executeQuery, statement);
                 dbService.backReadOnly(readcon);
             }
         }
-        
-
-        // Get all logins in every schema
-        for (String schema : schemaMap.keySet()) {
-            int readPool = schemaMap.get(schema);
-            
-            Connection connection = null;
+        /*
+         * Get all logins in every schema
+         */
+        for (final String schema : schemaMap.keySet()) {
+            final int readPool = schemaMap.get(schema).intValue();
+            final Connection connection;
             try {
-                connection = dbService.get(readPool, schema);                
-            } catch (DBPoolingException e) {
-                LOG.error(e.getMessage(), e);
+                connection = dbService.get(readPool, schema);
+            } catch (final DBPoolingException e) {
+                logger.error(e.getMessage(), e);
                 throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
             }
-            
             PreparedStatement stmt = null;
-            ResultSet rs;
+            ResultSet rs = null;
             try {
-                stmt = connection.prepareStatement(SELECT_SQL);
+                stmt = connection.prepareStatement("SELECT name, value FROM user_attribute WHERE name LIKE ?");
+                stmt.setString(1, StringCollection.prepareForSearch("client:*", false, true));
                 rs = stmt.executeQuery();
-                
+
+                final Date lastLogin = new Date();
                 while (rs.next()) {
-                    String name = rs.getString("name");
-                    if (regex == null || (regex != null && pattern.matcher(name).matches())) {
-                        boolean isDate = true;
-                        String value = rs.getString("value");
-                        Date lastLogin = null;
+                    final String name = rs.getString(1);
+                    if (pattern == null || (pattern.matcher(name).matches())) {
                         try {
-                            long lastLoginLong = Long.parseLong(value);
-                            lastLogin = new Date(lastLoginLong);
-                        } catch (NumberFormatException e) {
-                            isDate = false;
-                        }
-                        if (isDate) {
+                            lastLogin.setTime(Long.parseLong(rs.getString(2)));
                             if (lastLogin.after(startDate) && lastLogin.before(endDate)) {
                                 counter++;
                             }
+                        } catch (final NumberFormatException e) {
+                            logger.warn("Client value is not a number.", e);
                         }
-                    }                   
-                }
-            } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
-                throw new MBeanException(e, e.getMessage());
-            } finally {
-                if (stmt != null) {
-                    try {
-                        stmt.close();
-                    } catch (SQLException e) {
-                        LOG.error(e.getMessage(), e);
                     }
                 }
-                
-                if (connection != null) {
-                    dbService.back(readPool, connection);
-                }
+            } catch (final SQLException e) {
+                logger.error(e.getMessage(), e);
+                throw new MBeanException(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+                dbService.back(readPool, connection);
             }
         }
-        
         return counter;
     }
 
-    public void setDeviceRegex(String regex) {
-        this.regex = regex;        
+    public void setDeviceWildcard(final String wildcard) {
+        this.wildcard = wildcard;
     }
 
-    public String getDeviceRegex() {
-        return regex;
+    public String getDeviceWildcard() {
+        return wildcard;
+    }
+
+    /**
+     * Converts specified wildcard string to a regular expression
+     * 
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    private static String wildcardToRegex(final String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
 }
