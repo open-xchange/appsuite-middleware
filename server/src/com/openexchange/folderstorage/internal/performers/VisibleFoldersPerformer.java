@@ -76,6 +76,8 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
@@ -320,6 +322,24 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
              */
             ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
             final UserizedFolder[] ret = trimArray(subfolders);
+            /*
+             * 2nd check for proper parent
+             */
+            if (SharedType.getInstance().equals(type)) {
+                final int userId = storageParameters.getUserId();
+                final int len = FolderObject.SHARED_PREFIX.length();
+                StringBuilder sb = new StringBuilder(FolderObject.SHARED_PREFIX);
+                for (final UserizedFolder userizedFolder : ret) {
+                    final int createdBy = userizedFolder.getCreatedBy();
+                    if (createdBy > 0 && createdBy != userId) {
+                        sb.setLength(len);
+                        userizedFolder.setParentID(sb.append(createdBy).toString());
+                    }
+                }
+            }
+            /*
+             * Commit
+             */
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
