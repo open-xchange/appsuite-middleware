@@ -218,7 +218,7 @@ public final class DatabaseFolderConverter {
                 retval.setSubfolderIDs(new String[0]);
                 retval.setSubscribedSubfolders(false);
                 retval.setCacheable(false);
-                retval.setParentID(new StringBuilder(16).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
+                retval.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
             } else {
                 /*
                  * Set subfolders for non-private folder. For private folder FolderStorage.getSubfolders() is supposed to be used.
