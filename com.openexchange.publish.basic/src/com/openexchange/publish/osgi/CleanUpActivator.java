@@ -89,7 +89,12 @@ public class CleanUpActivator implements BundleActivator {
             context,
             new FolderCleanUpEventHandler(entityCleanUp, "contacts", FolderObject.CONTACT, contexts),
             "com/openexchange/groupware/folder/delete");
-
+        
+        registerHandler(
+            context,
+            new FolderCleanUpEventHandler(entityCleanUp, "infostore", FolderObject.INFOSTORE, contexts),
+            "com/openexchange/groupware/folder/delete");
+        
         registerHandler(context, new InfostoreCleanUpEventHandler(entityCleanUp, contexts), "com/openexchange/groupware/infostore/delete");
 
     }

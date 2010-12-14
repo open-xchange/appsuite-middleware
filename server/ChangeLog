@@ -1,3 +1,7 @@
+* 2010-12-14 - francisco.laguna@open-xchange.com
+
+ - Bugfix #17751: Set up cleanup Handler for infostore folder publications.
+
 * 2010-12-14 - thorben.betten@open-xchange.com
 
  - Bugfix #17790: Disabled hard-coded setting of log levels for LoginPerformer and SessionHandler classes
