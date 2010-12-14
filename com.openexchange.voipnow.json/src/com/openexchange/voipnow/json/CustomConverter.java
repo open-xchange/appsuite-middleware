@@ -55,20 +55,25 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.apache.axis2.databinding.utils.ConverterUtil;
 
+/**
+ * {@link CustomConverter}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
 public final class CustomConverter {
 
 	private static ThreadLocal<Boolean> enabled = new ThreadLocal<Boolean>() {
 		@Override
 		protected Boolean initialValue() {
-			return false;
+			return Boolean.FALSE;
 		}
 	};
 
-	/*
-	 * Sneak CustomConverter into
-	 * org.apache.axis2.databinding.utils.ConverterUtil
-	 */
 	static {
+	    /*
+	     * Sneak CustomConverter into
+	     * org.apache.axis2.databinding.utils.ConverterUtil
+	     */
 		try {
 			final Field customClass = ConverterUtil.class
 					.getDeclaredField("customClass");
@@ -77,8 +82,9 @@ public final class CustomConverter {
 			final Field isCustomClassPresent = ConverterUtil.class
 					.getDeclaredField("isCustomClassPresent");
 			isCustomClassPresent.setAccessible(true);
-			isCustomClassPresent.set(null, true);
+			isCustomClassPresent.set(null, Boolean.TRUE);
 		} catch (final Exception e) {
+		    // Swallow...
 		}
 	}
 
@@ -98,30 +104,31 @@ public final class CustomConverter {
 	}
 
 	public static String convertToString(final Date value) {
-		if (enabled.get()) {
+		if (enabled.get().booleanValue()) {
 			final StringBuffer s = new StringBuffer(11);
 			final Calendar calendar = Calendar.getInstance();
 			calendar.clear();
 			calendar.setTime(value);
 			ConverterUtil.appendDate(s, calendar);
 			return s.toString();
-		} else {
-			// lexical form of the date is '-'? yyyy '-' mm '-' dd zzzzzz?
-			final Calendar calendar = Calendar.getInstance();
-			calendar.clear();
-			calendar.setTime(value);
-			if (!calendar.isSet(Calendar.ZONE_OFFSET)) {
-				calendar.setTimeZone(TimeZone.getDefault());
-			}
-			final StringBuffer dateString = new StringBuffer(16);
-			ConverterUtil.appendDate(dateString, calendar);
-			ConverterUtil.appendTimeZone(calendar, dateString);
-			return dateString.toString();
 		}
+        /*
+         * Lexical form of the date is '-'? yyyy '-' mm '-' dd zzzzzz?
+         */
+        final Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        calendar.setTime(value);
+        if (!calendar.isSet(Calendar.ZONE_OFFSET)) {
+        	calendar.setTimeZone(TimeZone.getDefault());
+        }
+        final StringBuffer dateString = new StringBuffer(16);
+        ConverterUtil.appendDate(dateString, calendar);
+        ConverterUtil.appendTimeZone(calendar, dateString);
+        return dateString.toString();
 	}
 
 	public static void setEnabled(final boolean enabled) {
-		CustomConverter.enabled.set(enabled);
+		CustomConverter.enabled.set(Boolean.valueOf(enabled));
 	}
 
 }
