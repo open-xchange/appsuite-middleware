@@ -5,9 +5,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.fr_FR\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-11-22 20:04+0100\n"
+"PO-Revision-Date: 2010-12-11 04:54+0100\n"
 "Last-Translator: Joëlle Cornavin <jcornavin@laposte.net>\n"
-"Language-Team: French <>\n"
+"Language-Team: French <kde-francophone@kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1606,6 +1606,13 @@ msgstr "Le participant %d de la tâche %d n'a pas été trouvé."
 msgid "Percent is %d but must be between 0 and 100."
 msgstr "Le pourcentage est %d mais il devrait être entre 0 et 100."
 
+msgid ""
+"Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
+"'Send' again."
+msgstr ""
+"Veuillez limiter vos destinataires à %1$s  (y compris À/CC/BCC) et cliquez "
+"sur « Envoyer » à nouveau."
+
 msgid "Port %1$s was unreachable on remote server"
 msgstr "Le port %1$s n'a pas pu être contacté sur le serveur distant"
 
@@ -1766,10 +1773,10 @@ msgstr "Le SearchIterator vaut NULL"
 msgid "SecurityException while loading servlet class \"%s\""
 msgstr "Exception de sécurité en chargeant la classe de servlet « %s »"
 
-msgid "Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds."
+msgid "Sent quota exceeded, you are only allowed to send 1 mail in %1$s seconds."
 msgstr ""
 "Le quota d'envoi est dépassé, vous êtes autorisé à envoyer seulement "
-"1 courrier en %1$s secondes."
+"1 courriel en %1$s secondes."
 
 msgid "Series end is before start date."
 msgstr "La série se termine avant la date de début."
@@ -2097,8 +2104,8 @@ msgstr ""
 msgid "Unexpected error: %1$s"
 msgstr "Erreur inattendue : %1$s"
 
-msgid "Unexpected exception %d! (id: %d)"
-msgstr "Exception %d inattendue ! (id : %d)"
+msgid "Unexpected exception %d!"
+msgstr "Exception %d inattendue !"
 
 msgid ""
 "Unexpected state for deleting a virtual appointment (exception). uid:oid:"
@@ -2779,8 +2786,8 @@ msgid "Invalid URL \"%1$s\". Error: %2$s."
 msgstr "URL « %1$s » invalide. Erreur : %2$s."
 
 #. Could not find data provider for id: %1$s
-msgid "Could not fine data provider for id: %1$s"
-msgstr "Impossible d'affiner le fournisseur de données pour l'identifiant : %1$s"
+msgid "Could not find data provider for id: %1$s"
+msgstr "Impossible de trouver le fournisseur de données pour l'identifiant : %1$s"
 
 #. Missing parameter: %1$2
 msgid "Missing parameter: %1$2"
@@ -2913,6 +2920,70 @@ msgstr "Propriété manquante : %1$s"
 #. Invalid property value in property "%1$s": %2$s
 msgid "Invalid property value in property \"%1$s\": %2$s"
 msgstr "Valeur de propriété invalide dans la propriété « %1$s » : %2$s"
+
+#. Response is not of type: %1$s
+msgid "Response is not of type: %1$s"
+msgstr "La réponse n'est pas du type : %1$s."
+
+#. General error: %1$s
+msgid "General error: %1$s"
+msgstr "Erreur générale : %1$s"
+
+#. Not found: %1$s
+msgid "Not found: %1$s"
+msgstr "Non trouvé : %1$s"
+
+#. The source and destination URIs are equal: %1$s.
+msgid "The source and destination URIs are equal: %1$s."
+msgstr "Les URI source et destination sont équivalents : %1$s."
+
+msgid ""
+"Conflict. The resource cannot be created until one or more parental "
+"directories have been created: %1$s."
+msgstr ""
+"Conflit. Il est impossible de créer la ressource jusqu'à ce qu'un répertoire "
+"parental ou plus aient été créés : %1$s."
+
+#. Such a resource already exists: %1$s.
+msgid "Such a resource already exists: %1$s."
+msgstr "Une ressource de ce type existe déjà : %1$s."
+
+#. Resource limit exceeded.
+msgid "Resource limit exceeded."
+msgstr "Limite de ressource dépassée."
+
+#. Unexpected status %1$s (%2$s)
+msgid "Unexpected status %1$s (%2$s)"
+msgstr "État inattendu %1$s (%2$s)"
+
+#. Name contains illegal characters or parent is read-only: %1$s.
+msgid "Name contains illegal characters or parent is read-only: %1$s."
+msgstr ""
+"Le nom contient des caractères illégaux ou le parent est en lecture seule : %"
+"1$s"
+
+#. Invalid URL: %1$s
+msgid "Invalid URL: %1$s"
+msgstr "URL invalide : %1$s"
+
+#. Unsupported protocol for SmartDrive server access: %1$s
+msgid "Unsupported protocol for SmartDrive server access: %1$s"
+msgstr "Protocole pour l'accès au serveur SmartDrive non pris en charge : %1$s"
+
+msgid ""
+"SmartDrive user \"%1$s\" is not authenticated for stateful access to "
+"SmarTDrive server \"%2$s\"."
+msgstr ""
+"L'utilisateur SmartDrive « %1$s » n'est pas authentifié pour un accès à état "
+"au serveur SmarTDrive « %2$s »."
+
+#. This resource is not a file
+msgid "This resource is not a file"
+msgstr "Cette ressource n'est pas un fichier"
+
+#. This resource is not a directory
+msgid "This resource is not a directory"
+msgstr "Cette ressource n'est pas un répertoire"
 
 #. A parsing error occurred: %1$s.
 msgid "A parsing error occurred: %1$s."
@@ -3059,70 +3130,6 @@ msgstr ""
 
 msgid "Cannot finish transaction"
 msgstr "Impossible de terminer la transaction"
-
-#. Response is not of type: %1$s
-msgid "Response is not of type: %1$s"
-msgstr "La réponse n'est pas du type : %1$s."
-
-#. General error: %1$s
-msgid "General error: %1$s"
-msgstr "Erreur générale : %1$s"
-
-#. Not found: %1$s
-msgid "Not found: %1$s"
-msgstr "Non trouvé : %1$s"
-
-#. The source and destination URIs are equal: %1$s.
-msgid "The source and destination URIs are equal: %1$s."
-msgstr "Les URI source et destination sont équivalents : %1$s."
-
-msgid ""
-"Conflict. The resource cannot be created until one or more parental "
-"directories have been created: %1$s."
-msgstr ""
-"Conflit. Il est impossible de créer la ressource jusqu'à ce qu'un répertoire "
-"parental ou plus aient été créés : %1$s."
-
-#. Such a resource already exists: %1$s.
-msgid "Such a resource already exists: %1$s."
-msgstr "Une ressource de ce type existe déjà : %1$s."
-
-#. Resource limit exceeded.
-msgid "Resource limit exceeded."
-msgstr "Limite de ressource dépassée."
-
-#. Unexpected status %1$s (%2$s)
-msgid "Unexpected status %1$s (%2$s)"
-msgstr "État inattendu %1$s (%2$s)"
-
-#. Name contains illegal characters or parent is read-only: %1$s.
-msgid "Name contains illegal characters or parent is read-only: %1$s."
-msgstr ""
-"Le nom contient des caractères illégaux ou le parent est en lecture seule : %"
-"1$s"
-
-#. Invalid URL: %1$s
-msgid "Invalid URL: %1$s"
-msgstr "URL invalide : %1$s"
-
-#. Unsupported protocol for SmartDrive server access: %1$s
-msgid "Unsupported protocol for SmartDrive server access: %1$s"
-msgstr "Protocole pour l'accès au serveur SmartDrive non pris en charge : %1$s"
-
-msgid ""
-"SmartDrive user \"%1$s\" is not authenticated for stateful access to "
-"SmarTDrive server \"%2$s\"."
-msgstr ""
-"L'utilisateur SmartDrive « %1$s » n'est pas authentifié pour un accès à état "
-"au serveur SmarTDrive « %2$s »."
-
-#. This resource is not a file
-msgid "This resource is not a file"
-msgstr "Cette ressource n'est pas un fichier"
-
-#. This resource is not a directory
-msgid "This resource is not a directory"
-msgstr "Cette ressource n'est pas un répertoire"
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 msgid "Missing main extension attribute for user %1$s in context %2$s."
@@ -3321,6 +3328,15 @@ msgid "Please make sure the file is readable by the groupware."
 msgstr ""
 "Veuillez vous assurer que le fichier peut être lu par le logiciel de travail "
 "de collaboratif."
+
+msgid "User is disabled"
+msgstr "L'utilisateur est désactivé"
+
+msgid "Password expired"
+msgstr "Mot de passe expiré."
+
+msgid "Unknown error"
+msgstr "Erreur inconnue"
 
 msgid "Error communicating with mbean in server: %s"
 msgstr "Erreur de communication avec le MBean dans le serveur : %s"
@@ -3656,9 +3672,8 @@ msgid ""
 "Found a user contact outside global address book in folder %1$d in context %2"
 "$d."
 msgstr ""
-"Un contact utilisateur en dehors du carnet d'adresses global du dossier %1$d a "
-"été trouvé dans le "
-"contexte %2$d."
+"Un contact utilisateur en dehors du carnet d'adresses global du dossier %1$d "
+"a été trouvé dans le contexte %2$d."
 
 msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
 msgstr ""
